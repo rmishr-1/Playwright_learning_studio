@@ -1,0 +1,112 @@
+{
+  "hash": "b95d730a",
+  "configHash": "c66eda1f",
+  "lockfileHash": "e6f60bae",
+  "browserHash": "a1a8873a",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "bfb52e89",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "82fbae84",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../../node_modules/react-router-dom/dist/index.js",
+      "file": "react-router-dom.js",
+      "fileHash": "721bba02",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "c43ae0b2",
+      "needsInterop": true
+    },
+    "@uiw/react-codemirror": {
+      "src": "../../../node_modules/@uiw/react-codemirror/esm/index.js",
+      "file": "@uiw_react-codemirror.js",
+      "fileHash": "84c7e9bb",
+      "needsInterop": false
+    },
+    "@codemirror/lang-javascript": {
+      "src": "../../../node_modules/@codemirror/lang-javascript/dist/index.js",
+      "file": "@codemirror_lang-javascript.js",
+      "fileHash": "aeadbd4b",
+      "needsInterop": false
+    },
+    "@codemirror/theme-one-dark": {
+      "src": "../../../node_modules/@codemirror/theme-one-dark/dist/index.js",
+      "file": "@codemirror_theme-one-dark.js",
+      "fileHash": "aa84a904",
+      "needsInterop": false
+    },
+    "marked": {
+      "src": "../../../node_modules/marked/lib/marked.esm.js",
+      "file": "marked.js",
+      "fileHash": "24ed8a52",
+      "needsInterop": false
+    },
+    "highlight.js/lib/core": {
+      "src": "../../../node_modules/highlight.js/es/core.js",
+      "file": "highlight__js_lib_core.js",
+      "fileHash": "d438db63",
+      "needsInterop": false
+    },
+    "highlight.js/lib/languages/javascript": {
+      "src": "../../../node_modules/highlight.js/es/languages/javascript.js",
+      "file": "highlight__js_lib_languages_javascript.js",
+      "fileHash": "660736f9",
+      "needsInterop": false
+    },
+    "highlight.js/lib/languages/typescript": {
+      "src": "../../../node_modules/highlight.js/es/languages/typescript.js",
+      "file": "highlight__js_lib_languages_typescript.js",
+      "fileHash": "993ee65a",
+      "needsInterop": false
+    },
+    "highlight.js/lib/languages/xml": {
+      "src": "../../../node_modules/highlight.js/es/languages/xml.js",
+      "file": "highlight__js_lib_languages_xml.js",
+      "fileHash": "cc107ba4",
+      "needsInterop": false
+    },
+    "highlight.js/lib/languages/bash": {
+      "src": "../../../node_modules/highlight.js/es/languages/bash.js",
+      "file": "highlight__js_lib_languages_bash.js",
+      "fileHash": "d9fe8d3e",
+      "needsInterop": false
+    },
+    "highlight.js/lib/languages/json": {
+      "src": "../../../node_modules/highlight.js/es/languages/json.js",
+      "file": "highlight__js_lib_languages_json.js",
+      "fileHash": "279aacbf",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-T5VJYHFH": {
+      "file": "chunk-T5VJYHFH.js"
+    },
+    "chunk-URVJV3K3": {
+      "file": "chunk-URVJV3K3.js"
+    },
+    "chunk-B3TDOLCD": {
+      "file": "chunk-B3TDOLCD.js"
+    },
+    "chunk-BMY3PSDV": {
+      "file": "chunk-BMY3PSDV.js"
+    },
+    "chunk-LZUNJ7K5": {
+      "file": "chunk-LZUNJ7K5.js"
+    },
+    "chunk-EQCVQC35": {
+      "file": "chunk-EQCVQC35.js"
+    }
+  }
+}
