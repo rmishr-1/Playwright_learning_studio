@@ -1,0 +1,46 @@
+{
+    "_comment": "POST /api/run request and response. The learner's TypeScript is executed on the server against a real Chromium. The live browser view does NOT travel in this response - it streams separately over the WebSocket at /api/run/:run_id/stream as screencast frames. This response is the terminal result.",
+    "schema": {
+        "value": "run/v1"
+    },
+    "request": {
+        "learner_id": { "value": "ada-lovelace" },
+        "week": { "value": 2 },
+        "day": { "value": 1 },
+        "part": { "value": 2 },
+        "problem_number": {
+            "_comment": "Set when the run is an attempt at a practice problem, so it can be recorded against progress. null otherwise.",
+            "value": null
+        },
+        "code": {
+            "_comment": "TypeScript as typed in the editor. The runner rewrites the course's deno-helpers import and injects launch/show/login/USERS/BASE_URL as ambient bindings.",
+            "value": ""
+        }
+    },
+    "response": {
+        "run_id": {
+            "_comment": "Also the WebSocket stream key. Available before execution starts so the client can attach first.",
+            "value": ""
+        },
+        "status": {
+            "options": ["ok", "error", "timeout", "blocked", "queued_out"],
+            "value": "ok"
+        },
+        "stdout": { "value": "" },
+        "stderr": { "value": "" },
+        "error": {
+            "_comment": "Populated when status is error: the thrown message and stack, with the runner's own frames stripped so the learner sees their own line numbers.",
+            "message": { "value": "" },
+            "stack": { "value": "" }
+        },
+        "screenshot": {
+            "_comment": "base64 PNG from the course's show() helper, or the final frame when screencast was unavailable. null when the code never opened a page.",
+            "value": null
+        },
+        "duration_ms": { "value": 0 },
+        "blocked_url": {
+            "_comment": "Set when status is blocked: the navigation the allowlist refused.",
+            "value": null
+        }
+    }
+}

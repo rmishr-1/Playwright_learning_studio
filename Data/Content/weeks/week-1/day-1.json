@@ -1,0 +1,140 @@
+{
+  "schema": "course-day/v1",
+  "week": 1,
+  "day": 1,
+  "title": "Why automation, why Playwright",
+  "locked": false,
+  "parts": [
+    {
+      "part": 1,
+      "kind": "generated-prerequisite",
+      "title": "TypeScript check-in: nothing new today",
+      "tab_label": "TypeScript",
+      "source_notebook": null,
+      "has_runnable_code": false,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 1, Day 1.1 — TypeScript check-in: nothing new today\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Why automation, why Playwright",
+      "tab_label": "Why automation, why Playwright",
+      "source_notebook": "week1/day1_2.ipynb",
+      "has_runnable_code": false,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 1, Day 1.2 — Why automation, why Playwright\n\nBy the end of this lesson you will know what automation can and can't do, what makes\nPlaywright different from Selenium, and you will have opened playwright.dev yourself and\nlooked around.\n\n> **No code today.** This is an orientation day — theory and one \"go look at this\" step.\n> Cells start appearing from [Day 2](/learn/w1/d2/p2) onward, once there's an environment to\n> run them in."
+        },
+        {
+          "type": "markdown",
+          "text": "## Manual testing vs. automation\n\nA human runs a test once and *judges* the result. A script runs the same steps and only\n*reports* pass or fail — it never decides whether a failure is actually a bug.\n\n| | Manual testing | Automated testing |\n|---|---|---|\n| Who judges the result | A person, every time | Nobody — it only compares against what you told it to expect |\n| Finds a defect? | Yes — a human can notice something is *wrong* even if nobody wrote a check for it | **No.** It can only report pass/fail against a check a human already wrote |\n| Good at | Exploring, first-time coverage, \"does this feel right\" | Repetition, regression, running the same 500 checks every night |\n| Cost per run | High (a person's time) | Near zero once written |\n\n**The one sentence to remember:** automation never finds a defect — it reports pass or fail,\nand a human interprets a failure as a defect (or not)."
+        },
+        {
+          "type": "markdown",
+          "text": "## The thumb rule of automation\n\nBefore you automate anything, you need two things:\n\n1. A **known expected result** — you must already know what \"correct\" looks like.\n2. The ability to **identify the object** — find the element on the page reliably enough to\n   act on it or read from it.\n\nNo expected result → you can't write an assertion. Can't identify the object → you can't\nwrite the step at all. Both are non-negotiable, and both are why \"just automate everything\"\nruns into trouble fast — plenty of testing (pure exploration, \"does this feel right\",\none-off checks) fails the second test the moment there's nothing stable to grab onto."
+        },
+        {
+          "type": "markdown",
+          "text": "## Why Playwright over Selenium\n\n| | Selenium | Playwright |\n|---|---|---|\n| Architecture | Talks to the browser over WebDriver (an extra hop, extra process) | Talks to the browser directly over its own protocol |\n| Lines of code for a typical flow | More — waits, driver setup, and assertions are usually separate libraries | Fewer — auto-waiting and assertions are built in |\n| Waiting for elements | You write explicit/implicit waits yourself | Auto-waits before every action |\n| Assertions | Needs a separate library (e.g. Chai, JUnit assertions) | Built in (`expect`) |\n| Test runner | Needs a separate one (JUnit, TestNG, Mocha…) | Built in |\n| Reporting, tracing, video | Bolted on from other tools | Built in |\n\nNone of this means Selenium is bad — it's older and still widely used. Playwright was built\nlater, learned from where Selenium needed extra tooling, and folded that tooling in."
+        },
+        {
+          "type": "markdown",
+          "text": "## Playwright isn't the only automation tool — know the neighbourhood\n\nDifferent testing verticals reach for different tools. Picking the right one for the job\nmatters more than picking your favourite one.\n\n| Vertical | What it tests | Example tools |\n|---|---|---|\n| UI / E2E | The app through a real browser, like a user | **Playwright**, Selenium, Cypress |\n| API | Requests and responses, no browser at all | Postman, RestAssured, Playwright's `request` fixture |\n| Performance / load | How the app behaves under many simultaneous users | JMeter, k6, Gatling |\n| Mobile | Native and mobile-web apps on real or emulated devices | Appium, Playwright (mobile *emulation*, not native apps) |\n| BDD | Business-readable scenarios wrapped around any of the above | Cucumber, SpecFlow |\n\nPlaywright's mobile support is **emulation** (a desktop browser pretending to be a phone\nviewport/UA) — for a real native app you'd reach for Appium instead."
+        },
+        {
+          "type": "markdown",
+          "text": "## The SDET role\n\nA **Software Development Engineer in Test** is expected to be an all-rounder: comfortable\nreading application code, writing real code (not just recording scripts), and reasoning about\narchitecture — not only clicking through a UI. Playwright leans into this; it expects you to\nwrite TypeScript/JavaScript, not just point-and-click."
+        },
+        {
+          "type": "markdown",
+          "text": "## Where Playwright fits in the testing pyramid\n\nPlaywright is an **end-to-end (E2E) tool** — it drives the app the way a real user would,\nwhich means it can exercise every layer underneath, not just one.\n\n| Level | What's being checked | Can Playwright reach it? |\n|---|---|---|\n| Unit | One function/component in isolation | Not really its job — that's a unit-test framework |\n| Integration | Multiple components/services working together | Yes, indirectly — an E2E flow touches integrated pieces |\n| System | The whole application, end to end | **Yes — this is Playwright's home turf** |\n| UAT (User Acceptance) | Does the finished feature do what the business asked for | Yes — the same E2E flows double as acceptance checks |\n\nThe higher up you go, the more a single test proves — and the more it costs to run and to\ndiagnose when it fails. Week 7 covers the testing pyramid and its cost trade-offs properly;\ntoday's takeaway is just: Playwright's natural home is system-level, end-to-end testing."
+        },
+        {
+          "type": "markdown",
+          "text": "## What Playwright actually ships with\n\n| Feature | What it means for you |\n|---|---|\n| Cross-browser | Chromium, Firefox, WebKit — one API for all three |\n| Cross-language | TypeScript/JavaScript, Python, Java, .NET |\n| Cross-platform | Windows, macOS, Linux, and CI runners |\n| Mobile emulation | Real device viewports and user agents, in a desktop browser |\n| Auto-wait | Actions wait for the element to be actionable before running |\n| Built-in assertions | `expect()`, with auto-retry |\n| Built-in test runner | `@playwright/test` — no separate JUnit/Mocha needed |\n| Tracing, video, screenshots | Captured automatically on failure, replayable after the fact |\n| Codegen | Records your clicks and generates locator code |\n| Inspector | Step through a test live, pick locators interactively |\n\nYou'll meet Codegen and the Inspector for real in [Day 4](/learn/w1/d4/p2), and traces/video in\nweek4."
+        },
+        {
+          "type": "markdown",
+          "text": "## \"Looks right\" is also a bug category\n\nNot every defect is a wrong value or a broken click. A button rendered 4 pixels off, a font\nthat didn't load, a layout that breaks at a certain screen width — none of these throw an\nerror, but they're still bugs. This is **visual / \"look and feel\" testing**, and it needs its\nown approach (screenshot comparison) because a normal assertion can't see it. Week 4 covers\nthis with `toHaveScreenshot()`."
+        },
+        {
+          "type": "markdown",
+          "text": "## Where automation effort actually goes\n\nRoughly, on a real project:\n\n| Share of effort | Goes to |\n|---|---|\n| ~50% | Learning the **application** itself — its flows, its data, what \"correct\" means for this specific app |\n| ~50%, split further into: | |\n| — Language | Being comfortable enough in TypeScript to express what you mean |\n| — Object identification | Finding stable locators |\n| — Logic | Structuring the test itself — assertions, flow, reuse |\n\nThe takeaway: automation skill alone doesn't make you productive on a new project. Knowing\nthe app matters as much as knowing the tool."
+        },
+        {
+          "type": "markdown",
+          "text": "## Two things you'll hear a lot, coming up\n\n- JavaScript runs **asynchronously** — a script doesn't necessarily execute top to bottom\n  and wait for each line, the way Java/Selenium code does. That's *why* Playwright code is\n  full of `await`. Day 5 of this week is a full primer — nothing more to do with it today.\n- **TypeScript is a superset of JavaScript** — every valid JavaScript file is also valid\n  TypeScript, plus TypeScript adds optional type checking on top. The full JavaScript-vs-\n  TypeScript \"language day\" lives later in the course, at week7/day1_1 — for now just\n  recognize the name."
+        },
+        {
+          "type": "markdown",
+          "text": "## Hands-on: go look at the tool\n\nNo code cell for this one — open a real browser tab and look around.\n\n1. Open **https://playwright.dev**\n2. Read the homepage tagline and the three feature callouts.\n3. Open **Docs → Writing tests** and skim it — you'll recognize the shape (`test(...)`,\n   `expect(...)`) once you write your own on Day 5.\n4. Note one thing on the site that wasn't mentioned in this lesson — you'll need it for\n   Day 1.4."
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\nNo Day 1.3 — there's no code yet to reorganize into a framework shape. Straight to\n[Day 1.4 — Practice](/learn/w1/d1/p4) for some reflection problems, then [Day 2](/learn/w1/d2/p2)\ngets your environment running."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice: Why automation, why Playwright",
+      "tab_label": "Practice",
+      "source_notebook": "week1/day1_4.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 1, Day 1.4 — Practice: Why automation, why Playwright\n\nNo code today, and no app to test against yet — so these are reflection and research\nproblems instead of programming ones. Same three tiers as every practice day, adapted to\nwhat you actually have available right now.\n\nWrite your answers as comments in the cells below (or `console.log` them if you want to see\nthem printed — the runner is happy with either)."
+        },
+        {
+          "type": "problem-ref",
+          "text": "1"
+        },
+        {
+          "type": "problem-ref",
+          "text": "2"
+        },
+        {
+          "type": "problem-ref",
+          "text": "3"
+        },
+        {
+          "type": "markdown",
+          "text": "## When you're done\n\nYou've now got the \"why\" — why teams automate, why Playwright specifically, and where the\neffort really goes. [Day 2](/learn/w1/d2/p2) starts turning that into a working environment\non your machine."
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": "Beginner",
+          "statement": "**What to do.** Pick one manual test you've personally run by hand (in any app, past job, or\nthis course's banking app if you've poked at it already). Write two sentences: could\nPlaywright automate it, and what *object* would you need to identify on the page to do so?\n\n**How you'll know it worked.** You named a concrete object (a button, a field, a label) —\nnot just \"the login page\" in the abstract. If you can't name one, that's worth noticing: it\nmight mean the test isn't automatable yet, per today's thumb rule.",
+          "stub": "// Your turn — jot your answer here as a comment, or a console.log if you want\n// to see it printed. There's no code to run today, only thinking to do.",
+          "solution": "**A model answer — yours will name a different test, and that is the point.**\n\n> *Manual test:* logging in to the banking app with a valid email and password and checking the dashboard appears.\n>\n> *Could Playwright automate it?* Yes. It has a known expected result (the dashboard loads and shows my name) and every step acts on something identifiable on the page.\n>\n> *The object I would need to identify:* the **Login button** — specifically `getByRole('button', { name: 'Login' })`. I would also need the two placeholder-labelled inputs, `Enter Email` and `Enter Password`.\n\n**What makes an answer good here** is naming a concrete control — a button, a field, a label — rather than \"the login page\". If you could not name one, that is the honest signal this lesson was pointing at: a step no human can describe as *\"click this specific thing\"* is a step automation cannot perform either.\n\nA weak answer says \"automate the login page\". A strong one says \"click the button whose accessible name is Login\"."
+        },
+        {
+          "number": 2,
+          "difficulty": "Intermediate",
+          "statement": "**What to do.** Open https://playwright.dev again and find **three features** it mentions\nthat this lesson didn't cover. For each one, write one sentence on what it's for.\n\n**How you'll know it worked.** Three genuinely different features (not three rewordings of\n\"auto-wait\"), each with a one-line explanation in your own words.\n\n> **Hint** — check the homepage feature grid, the sidebar under \"Guides\", and the \"Tools\"\n> section if the site has one. Codegen and the Inspector don't count — those are already in\n> today's lesson.",
+          "stub": "// Your turn — jot your answer here as a comment, or a console.log if you want\n// to see it printed. There's no code to run today, only thinking to do.",
+          "solution": "**A model answer.** Three features the lesson did not cover, taken from the feature grid, the Guides sidebar, and the Tools menu on [playwright.dev](https://playwright.dev):\n\n1. **Trace Viewer** — records a run as a time-travelling trace: DOM snapshot, network, console and the action log for every step. It is how you debug a failure that only happens in CI, after the fact.\n2. **Test Retries** — re-runs a failed test a configured number of times before reporting it failed, so a genuinely flaky test is visible as flaky rather than as a hard failure. You meet this properly in Week 3.\n3. **API Testing** — Playwright can send HTTP requests directly through `request`, with no browser at all, which is how you set up state quickly instead of clicking through the UI to reach it.\n\nOther good picks: **Component testing**, **Visual comparisons**, **Mobile emulation**, **Codegen**, **UI Mode**, **Parallelism and sharding**.\n\n**What makes an answer good** is that the three are genuinely different capabilities, each in your own words. Three rewordings of auto-waiting is one feature, not three."
+        },
+        {
+          "number": 3,
+          "difficulty": "Advanced",
+          "statement": "**What to do.** Pick one testing vertical from today's table that *isn't* UI (API,\nperformance, or mobile). Imagine a single scenario in that vertical — e.g. \"load-test the\nlogin endpoint with 100 concurrent users\", or \"check the checkout API returns a 200 with a\nvalid order id\". Using today's effort table, write down roughly where the automation effort\nwould go for that scenario: how much is application knowledge, how much is language, how\nmuch is object identification (or its equivalent — e.g. \"the right endpoint and payload\"),\nand how much is logic.\n\n**How you'll know it worked.** You've named a specific tool from today's vertical table for\nthat scenario, and your effort breakdown is specific to *that* scenario rather than a\nrestatement of the general table.",
+          "stub": "// Your turn — jot your answer here as a comment, or a console.log if you want\n// to see it printed. There's no code to run today, only thinking to do.",
+          "solution": "**A model answer.** Taking *\"check the checkout API returns a 200 with a valid order id\"*:\n\n> **Application knowledge — the majority of the effort.** Which endpoint is actually called at checkout, what a valid request body looks like, which fields are mandatory, what authentication it needs, what \"a valid order id\" means (format? persisted where?), and what the API does on a *failed* payment. None of this is in any tool's documentation. You get it from the team, the spec, and from watching the real thing.\n>\n> **Tooling and language — a small slice.** `request.post(url, { data })`, read `response.status()`, parse the JSON, assert on the id. An afternoon with the docs.\n>\n> **Environment and data — the part that is always underestimated.** A test account that can actually check out, a product that is in stock, a payment method that works in the test environment, and a way to avoid leaving real orders behind on every run.\n\n**The point of the exercise** is the shape of the split: the tool is the small part. This is exactly the thumb rule from the lesson — your core business is the application, not the library. A scenario you cannot describe precisely in English is not one you can automate in any language."
+        }
+      ]
+    }
+  ]
+}

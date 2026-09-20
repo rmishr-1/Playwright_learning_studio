@@ -1,0 +1,30 @@
+{
+    "name": "playwright-learning-studio",
+    "private": true,
+    "version": "0.1.0",
+    "description": "Playwright Learning Studio - renders the 8-week Playwright+TypeScript notebook course as a web platform. SPA + backend + shared contracts over the repo Data/ folder.",
+    "workspaces": [
+        "backend",
+        "frontend"
+    ],
+    "scripts": {
+        "dev:backend": "npm run dev --workspace backend",
+        "dev:frontend": "npm run dev --workspace frontend",
+        "import": "tsx scripts/import-notebooks.ts",
+        "typecheck": "npm run typecheck --workspaces --if-present",
+        "verify": "tsx backend/test/import-proof.ts",
+        "verify:auth": "tsx backend/test/auth-proof.ts",
+        "verify:certificate": "tsx backend/test/certificate-proof.ts",
+        "verify:reset": "tsx backend/test/reset-proof.ts"
+    },
+    "devDependencies": {
+        "@types/node": "^20.14.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.5.4",
+        "zod": "^3.24.1"
+    },
+    "allowScripts": {
+        "esbuild@0.28.2": true,
+        "esbuild@0.21.5": true
+    }
+}

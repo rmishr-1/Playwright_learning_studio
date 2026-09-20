@@ -1,0 +1,235 @@
+{
+  "schema": "course-day/v1",
+  "week": 2,
+  "day": 2,
+  "title": "XPath, CSS, and your first real assertions",
+  "locked": false,
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "`const`, and how TypeScript decides a variable's type",
+      "tab_label": "TypeScript",
+      "source_notebook": "week2/day2_1.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 2, Day 2.1 — `const`, and how TypeScript decides a variable's type\n\nEvery locator from here on gets assigned to a `const`. This is a full primer on why, and\non the type-inference rule that means you never write `: Locator` by hand.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs."
+        },
+        {
+          "type": "markdown",
+          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | `const` | every `page.locator()` call gets assigned to one |\n| 2 | Dynamic vs static typing, and inference | why `const box = page.locator(...)` needs no type annotation |"
+        },
+        {
+          "type": "markdown",
+          "text": "## 1. `const`\n\n`const` declares a variable that **cannot be reassigned** — you can't point it at a\ndifferent value later. It says nothing about whether the *thing itself* can change."
+        },
+        {
+          "type": "example",
+          "text": "const box = \"a value\";\n// box = \"something else\";   // <- uncomment: TypeScript refuses, \"Cannot assign to 'box'\"\n\nconst numbers: number[] = [1, 2, 3];\nnumbers.push(4);              // fine — the array's contents changed; `numbers` still points at the same array\nconsole.log(numbers);"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** `[ 1, 2, 3, 4 ]`.\n\n`push()` mutated the array in place — `numbers` was never reassigned, so `const` never\nobjected. This is exactly the shape of a locator: the `const` itself never changes, but\nthe element it points at (checked, filled, removed from the DOM) does."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Where this shows up: `page.locator()`\n\n```ts\nconst emailBox = page.locator(\"input[type='email']\");\n```\n\n`emailBox` is a **reference** to \"whatever matches this selector right now\" — not a\nsnapshot of one element. `const` fits because you never point `emailBox` at a different\nlocator; you just call methods on it (`.fill()`, `.check()`) that act on the live page.\nThe TypeScript-only stand-in below shows the same idea without a browser."
+        },
+        {
+          "type": "example",
+          "text": "// A stand-in for a Locator: an object whose contents change without the const\n// that points at it ever being reassigned.\nconst pretendLocator = { selector: \"input[type='email']\", timesClicked: 0 };\n\nfunction pretendClick(loc: typeof pretendLocator) {\n  loc.timesClicked++; // mutates the object; no reassignment\n}\n\npretendClick(pretendLocator);\npretendClick(pretendLocator);\nconsole.log(pretendLocator); // same const, changed contents"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** `{ selector: \"input[type='email']\", timesClicked: 2 }`."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## 2. Dynamic vs static typing — why no `: Locator` was written\n\nTypeScript is **statically typed**: every variable's type is fixed at compile time, and\n`tsc` checks it before your code ever runs. You almost never *write* the type, though —\nTypeScript **infers** it from whatever you assign.\n\n| | Static typing (TypeScript) | Dynamic typing (plain JavaScript) |\n|---|---|---|\n| When the type is decided | at compile time, and fixed | at run time, and can change |\n| Who catches a type mistake | `tsc`, before you run anything | nobody — you find out when it crashes |\n| `const x = \"hi\"; x = 5;` | compile error | runs; `x` is now a number |\n\nOne line for context: this differs from a language like Java, where you write the type\nyourself every time — `String x = \"hi\";`."
+        },
+        {
+          "type": "example",
+          "text": "const name = \"Ada\"; // inferred as string — hover it in your editor to see \"const name: string\"\nconst count = 3; // inferred as number\n// name = count;    // <- uncomment: TS2322, \"Type 'number' is not assignable to type 'string'\"\n\nlet anything: any = \"start as a string\";\nanything = 42; // `any` opts out of static checking — legal, but defeats the point\nconsole.log(typeof name, typeof count, typeof anything);"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** `string number number`.\n\n`name` and `count` got their types from the value to the right of `=` — that's inference.\n`anything: any` is how you'd *turn off* static typing for one variable; later days show\nwhy that's usually a bad idea. `page.locator(...)` is inferred as `Locator` the exact\nsame way `\"Ada\"` was inferred as `string` — TypeScript looks up what `.locator()` returns\nand assigns that type to your `const`, with zero annotation from you."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `const` | can't reassign the variable; the value it points at can still mutate |\n| Static typing | `tsc` fixes and checks every type before your code runs |\n| Inference | TypeScript reads the type off the assigned value — you rarely annotate |\n\n**Next:** [Day 2.2 — XPath, CSS, and your first real assertions](/learn/w2/d2/p2)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "XPath, CSS, and your first real assertions",
+      "tab_label": "XPath, CSS, and your first re…",
+      "source_notebook": "week2/day2_2.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 2, Day 2.2 — XPath, CSS, and your first real assertions\n\nBy the end of this lesson you will have located an element with both XPath and CSS,\nassigned it to a `const` locator, and written your first real `expect()` assertions\nagainst a real page."
+        },
+        {
+          "type": "markdown",
+          "text": "> **Mode: mixed.** Locator syntax is explored live (Deno). Real `expect()` assertions —\n> `toContainText`, `toHaveValue`, `toHaveURL` — only retry inside the test runner, so\n> those get written to a spec, same as every day so far."
+        },
+        {
+          "type": "markdown",
+          "text": "## XPath: absolute vs relative\n\n| | Absolute | Relative |\n|---|---|---|\n| Starts with | `/html/body/div[1]/...` | `//tag[@attribute='value']` |\n| Fragile? | yes — one inserted `<div>` breaks it | no — matches anywhere in the document |\n| Use it | never | when nothing else identifies the element cleanly |\n\nAlways write relative XPath (`//...`). Absolute XPath is shown here only so you recognize\nit and know to avoid it.\n\n## CSS locator syntax, for contrast\n\n| | XPath | CSS |\n|---|---|---|\n| Syntax | `//tag[@attribute='value']` | `tag[attribute='value']` |\n| Prefix | `//` and `@` | neither |\n| Can it go **up** the DOM (parent, ancestor) | yes | no |\n| Can it go **sideways** (sibling) | yes | only \"next sibling\" (`+`) |\n\nPlaywright reaches for `getByRole`/`getByLabel`/`getByPlaceholder` before either of these\n— [Week 1, Day 4.2](/learn/w1/d4/p2) covered why. XPath and CSS are for when\nnothing on the element identifies it cleanly, which is common on older apps like today's."
+        },
+        {
+          "type": "example",
+          "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Same element, two syntaxes.\nconst xpathCountry = page.locator(\"xpath=//select[@id='country']\");\nconst cssCountry = page.locator(\"select[id='country']\");\n\nconsole.log(\"XPath match count:\", await xpathCountry.count());\nconsole.log(\"CSS match count:\", await cssCountry.count());\n\nawait browser.close();"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** both print `1` — same element, two syntaxes. The only differences: XPath\nneeds the `xpath=` prefix and an `@` before the attribute name; CSS needs neither."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Assigning a locator to `const`\n\n[Day 2.1](/learn/w2/d2/p1) is the full primer — the one-line version: the locator reference\nis never reassigned, so it's always `const`."
+        },
+        {
+          "type": "example",
+          "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst heading = page.locator(\"h1\"); // type Locator is inferred — no annotation needed\nconsole.log(\"text:\", JSON.stringify(await heading.textContent()));\n\nawait browser.close();"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** `\"Automation Demo Site \"` — note the trailing space baked into the real\nmarkup. [Day 3](/learn/w2/d3/p2) comes back to exactly this."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Your first real assertions\n\n`expect()` **retries** against a locator until it matches or times out (5s default) —\nunlike a plain `if`, which checks once. It only works inside the test runner, so from\nhere every assertion gets written into a spec.\n\n| Matcher | Checks | Use it for |\n|---|---|---|\n| `toContainText(text)` | locator's text includes `text` | partial match |\n| `toHaveValue(text)` | a form control's current value | exactly what you just filled |\n| `toHaveURL(pattern)` | the page's current URL | confirming navigation happened — or didn't |"
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day2-first-assertions.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"filled fields keep their values, and Submit does not navigate away\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  const email = page.locator(\"input[type='email']\");\n  await email.fill(\"ada.lovelace@example.com\");\n  await expect(email).toHaveValue(\"ada.lovelace@example.com\");\n\n  const heading = page.locator(\"h1\");\n  await expect(heading).toContainText(\"Automation Demo Site\"); // no trailing space needed — see below\n\n  await page.locator(\"#submitbtn\").click();\n  await expect(page).toHaveURL(/Register\\\\.html/); // verified: Submit stays on the same page\n});\n`.trim());\n\nawait runSpec(specPath);"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected result:** `1 passed`.\n\nTwo things worth noticing:\n\n- `toContainText(\"Automation Demo Site\")` passes even though the real heading has a\n  trailing space — Playwright's text matchers **normalize whitespace** before comparing.\n  [Day 3](/learn/w2/d3/p2) shows where that normalization does *not* happen (raw XPath).\n- `toHaveURL(/Register\\.html/)` after clicking Submit is the honest assertion for this\n  app. It was verified there is no confirmation page, no modal, and no navigation on\n  submit — so the lesson asserts what's actually true instead of an invented \"thank\n  you\" page."
+        },
+        {
+          "type": "markdown",
+          "text": "## Best practices\n\n- Prefer relative XPath and role/label locators over absolute XPath — never ship absolute XPath.\n- Use `toHaveText` only when you know the *exact* string; default to `toContainText`.\n- Assert something observable — a value, a URL, a text fragment — not just \"didn't throw.\"\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Absolute XPath (`/html/body/div[1]/...`) | passes today, breaks on the next markup tweak | write `//tag[@attr='value']` instead |\n| Assuming Submit navigates | a `toHaveURL` assertion for a \"thank you\" page times out | verified: this app's Submit stays put — assert on filled values instead |\n| Calling `expect()` in a lesson cell | throws — no test runner behind it | write it to a `.spec.ts`, as above |"
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 2.3](/learn/w2/d2/p3) wraps these assertions in a reusable function, the way Day 1.3 did for actions."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "The same assertions, wrapped for reuse",
+      "tab_label": "Reuse",
+      "source_notebook": "week2/day2_3.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 2, Day 2.3 — The same assertions, wrapped for reuse\n\nBy the end of this lesson you will have wrapped yesterday's `expect()` calls in one\nfunction two different tests both call, extending [Day 1.3](/learn/w2/d1/p3)'s helper file.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 2.2](/learn/w2/d2/p2)."
+        },
+        {
+          "type": "markdown",
+          "text": "## The problem with what we wrote yesterday\n\nIf three tests each need to confirm the form accepted its data, that's the same three\n`expect()` calls copy-pasted three times — and a renamed field means fixing it in three places.\n\n## Same code, with structure around it\n\n| In Day 2.2 you wrote | Here it becomes | Why |\n|---|---|---|\n| three separate `expect(...)` calls inline in the test | one call: `await expectFormFilledCorrectly(page, email)` | the checks live in one place, reusable by every test that fills this form |\n\n**This is still a function, not a page object.** A real page object (week 3) is a\n`class` that **never** asserts — actions and checks stay separate. The helper below is a\ndifferent, equally common pattern: a **shared assertion helper**, and it's allowed to\nassert because that is its entire job."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// Extends Day 1.3's file with an assertion helper alongside the action helper.\nawait writeProjectFile(\"week2/generated/registration-helpers.ts\", `// Week 2 — shared actions and checks for the Register.html form.\nimport type { Page } from \"@playwright/test\";\nimport { expect } from \"@playwright/test\";\n\nexport async function fillRegistrationForm(page: Page, email: string) {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  await page.getByPlaceholder(\"First Name\").fill(\"Ada\");\n  await page.getByPlaceholder(\"Last Name\").fill(\"Lovelace\");\n  await page.locator(\"textarea\").fill(\"123 Analytical Engine Way\");\n  await page.locator(\"input[type='email']\").fill(email);\n  await page.locator(\"input[type='tel']\").fill(\"5551234567\");\n\n  await page.locator(\"input[value='FeMale']\").check();\n  await page.locator(\"#checkbox1\").check();\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n}\n\n// A shared assertion helper — unlike a page object, this one is meant to assert.\nexport async function expectFormFilledCorrectly(page: Page, email: string) {\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await expect(page.getByPlaceholder(\"First Name\")).toHaveValue(\"Ada\");\n  await expect(page).toHaveURL(/Register\\\\.html/);\n}\n`.trim());"
+        },
+        {
+          "type": "example",
+          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\"; // writeProjectFile already imported above\n\nconst specPath = \"week2/generated/day2-reuse.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test } from \"@playwright/test\";\nimport { fillRegistrationForm, expectFormFilledCorrectly } from \"./registration-helpers\";\n\ntest(\"learner one's data is accepted\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.one@example.com\");\n  await expectFormFilledCorrectly(page, \"learner.one@example.com\");\n});\n\ntest(\"learner two's data is accepted\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.two@example.com\");\n  await expectFormFilledCorrectly(page, \"learner.two@example.com\");\n});\n`.trim());\n\nawait runSpec(specPath);"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected result:** `2 passed`. Both tests share the same three checks; a fourth test\nthat needs them gets them for free.\n\n## What a reviewer would look for\n\n- The repeated `expect()` calls live in one function, not copy-pasted across tests.\n- It's clearly named as a checker (`expectFormFilledCorrectly`), not an action.\n- It's kept separate from `fillRegistrationForm` — actions and checks are two different functions, not one that does both.\n\n## What's next\n\n[Day 2.4](/learn/w2/d2/p4) — your turn, with no worked examples to lean on."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice: XPath, CSS, and assertions",
+      "tab_label": "Practice",
+      "source_notebook": "week2/day2_4.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 2, Day 2.4 — Practice: XPath, CSS, and assertions\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 2.1](/learn/w2/d2/p1) or [Day 2.2](/learn/w2/d2/p2). Go back, re-read, come here again."
+        },
+        {
+          "type": "problem-ref",
+          "text": "1"
+        },
+        {
+          "type": "problem-ref",
+          "text": "2"
+        },
+        {
+          "type": "problem-ref",
+          "text": "3"
+        },
+        {
+          "type": "markdown",
+          "text": "## When you are done\n\nLook back at your Problem 3 helper and Day 1.3's action helper side by side: two\nfunctions, two jobs, one file. That separation is most of what week 3 formalizes into a\nclass."
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": "Beginner",
+          "statement": "**What to build.** Locate the Refresh button with a relative XPath expression (not CSS,\nnot `getByRole`), assign it to a `const`, and assert its visible text with `toContainText`.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** `npx playwright test` reports `1 passed`.\n\n> **Hint** — the button's own `id` from Day 1.2's probing was `Button1`.",
+          "stub": "// Problem 1 — your code here.",
+          "solution": "`week2/generated/day2-practice-refresh.spec.ts`:\n\n```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"the Refresh button says what it should\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  // Relative XPath: starts //, anchors on the attribute, not on the tree shape.\n  const refresh = page.locator(\"xpath=//button[@id='Button1']\");\n\n  await expect(refresh).toContainText(\"Refresh\");\n});\n```\n\n```bash\nnpx playwright test week2/generated/day2-practice-refresh.spec.ts\n```\n→ `1 passed`.\n\n**Relative, not absolute.** `//button[@id='Button1']` says *\"a button anywhere with this id\"*. The absolute form — `/html/body/div[2]/div/form/div[13]/div/button` — describes a route through the tree, and one wrapper `<div>` added by a redesign sends it somewhere else. Both find the control today; only one survives a layout change.\n\n**Why `toContainText` rather than `toHaveText`.** `toContainText` is a substring check, so it does not care about surrounding whitespace. This page has a real trailing-space problem — Day 3.2 proves it on the `<h1>` — and `toHaveText` would make you match it exactly.\n\n**And the honest note the hint is pointing at:** XPath here is an *exercise*, not a recommendation. `getByRole('button', { name: 'Refresh' })` is the locator you would actually ship. XPath is the fallback for when nothing better exists — which is exactly the situation on Day 4.2."
+        },
+        {
+          "number": 2,
+          "difficulty": "Intermediate",
+          "statement": "**What to build.** Fill out the whole registration form (reuse [Day 1.3](/learn/w2/d1/p3)'s\nhelper or write your own), then assert on at least three different field values with\n`toHaveValue`, plus one `toHaveURL` assertion confirming Submit didn't navigate away.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** All assertions pass on the first run — if one is flaky, you likely asserted on something this app doesn't actually guarantee.",
+          "stub": "// Problem 2 — your code here.",
+          "solution": "```ts\nimport { test, expect } from \"@playwright/test\";\nimport { fillRegistrationForm } from \"./registration-helpers\";\n\ntest(\"the form keeps what it was given, and Submit stays on the page\", async ({ page }) => {\n  const email = \"learner.three@example.com\";\n  await fillRegistrationForm(page, email);\n\n  // Three different fields, three different values.\n  await expect(page.getByPlaceholder(\"First Name\")).toHaveValue(\"Ada\");\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await expect(page.locator(\"textarea\")).toHaveValue(\"123 Analytical Engine Way\");\n\n  await page.locator(\"#submitbtn\").click();\n\n  // This form posts to itself - there is no confirmation page to assert on.\n  await expect(page).toHaveURL(/Register\\.html/);\n});\n```\n\n**`toHaveValue`, not `toHaveText`.** An `<input>` has no text content — its content is the `value` *property*. `toHaveText` on a filled input matches the empty string and the assertion fails in a way that reads like the fill did not happen.\n\n**Why the `toHaveURL` assertion is the interesting one.** The instinct after clicking Submit is to assert on a confirmation message. This app does not produce one: it posts back to `Register.html` and the fields reset. So the honest thing to assert is what actually happens — you are still on the same page. Asserting on a success banner that does not exist gives you a test that fails for the right reason and the wrong cause, and you lose an afternoon to it.\n\nWriting tests against the app you have, rather than the app you assumed, is most of this day."
+        },
+        {
+          "number": 3,
+          "difficulty": "Advanced",
+          "statement": "**What to build.** Add a second assertion helper function to\n`week2/generated/registration-helpers.ts` — for example one that checks a chosen skill\nand country were actually selected — then a spec that imports and calls it.\n\n**Where.** `week2/generated/registration-helpers.ts`, plus a spec in `week2/generated/`.\n\n**How you will know it worked.** The new function contains only `expect()` calls, no\n`.fill()`/`.check()`/`.selectOption()` — keep actions and checks in separate functions.",
+          "stub": "// Problem 3 — your code here.",
+          "solution": "Add the checker beside the filler in `week2/generated/registration-helpers.ts`:\n\n```ts\nimport type { Page } from \"@playwright/test\";\nimport { expect } from \"@playwright/test\";\n\nexport async function fillRegistrationForm(page: Page, email: string) {\n  /* ... as before ... */\n}\n\nexport async function expectSkillAndCountrySelected(\n  page: Page,\n  skill: string,\n  country: string,\n) {\n  await expect(page.locator(\"#Skills\")).toHaveValue(skill);\n  await expect(page.locator(\"#country\")).toHaveValue(country);\n}\n```\n\nAnd a spec that uses both:\n\n```ts\nimport { test } from \"@playwright/test\";\nimport { fillRegistrationForm, expectSkillAndCountrySelected } from \"./registration-helpers\";\n\ntest(\"the chosen skill and country actually stick\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.four@example.com\");\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n\n  await expectSkillAndCountrySelected(page, \"Java\", \"India\");\n});\n```\n\n**Note where the `expect` lives.** In Week 1 Day 5.3 the rule was that page objects never assert. This helper does — and that is not a contradiction, because it is a different kind of helper. Its *name* says it asserts (`expect...`), so a caller reading the spec knows exactly what it does. The rule that matters is not \"never assert in a helper\"; it is **never hide an assertion inside something that reads like an action**. `fillRegistrationForm` must not assert. `expectSkillAndCountrySelected` must.\n\n> `#country` takes the option **value**, which happens to equal the label here. Where a select's value and label differ, `selectOption({ label: '...' })` is the unambiguous form."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "schema": "course-day/v1",
+  "week": 5,
+  "day": 4,
+  "title": "Composing page objects",
+  "locked": true,
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "Prerequisites check",
+      "tab_label": "TypeScript",
+      "source_notebook": "week5/day4_1.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 5, Day 4.1 - Prerequisites check\n\nToday every page class becomes a fixture. That needs one type-level tool you have not used yet.\n\n| Concept | Taught in |\n|---|---|\n| `test.extend` with fixtures | [week3/day3_3](/learn/w3/d3/p3) |\n| Classes, `extends` | [day3_1](/learn/w5/d3/p1) |\n| A `type` alias for an object | new - below |\n| Re-exporting (`export { x }`) | new - below |\n| Dynamic `import()` | new - below |\n\n**Next:** [Day 4.2 - Composing page objects](/learn/w5/d4/p2)"
+        },
+        {
+          "type": "markdown",
+          "text": "## Concept 1 - a type whose values are classes\n\n`test.extend<Pages>` needs a type describing what each fixture *hands you*. For page objects\nthat is an instance of the class:\n\n```ts\ntype Pages = {\n  loginPage: LoginPage;          // an instance\n  dashboardPage: DashboardPage;\n};\n```\n\n`LoginPage` used as a **type** means \"an instance of LoginPage\". The same name used as a\n**value** - `new LoginPage(page)` - means the class itself. TypeScript keeps the two namespaces\nseparate, which is why one identifier can do both jobs."
+        },
+        {
+          "type": "example",
+          "text": "class Cart {\n  items: string[] = [];\n}\n\n// `Cart` as a type on the left, `Cart` as a value on the right.\nconst myCart: Cart = new Cart();\nmyCart.items.push(\"apple\");\n\nconsole.log(myCart.items, myCart instanceof Cart);"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Concept 2 - re-exporting\n\nA spec should need one import line, not two. A fixtures module can pass `expect` straight\nthrough:\n\n```ts\nimport { test as base, expect } from \"@playwright/test\";\nexport const test = base.extend<Pages>({ ... });\nexport { expect };                       // <- re-export, unchanged\n```\n\nNow `import { test, expect } from \"./pages/test\";` is the whole import block."
+        },
+        {
+          "type": "example",
+          "text": "// Re-exporting is just handing the same value on under your own module's name.\nconst upstream = { expect: (v: unknown) => ({ toBe: (w: unknown) => v === w }) };\nconst mine = { expect: upstream.expect };      // same function, new home\n\nconsole.log(mine.expect(2).toBe(2));\nconsole.log(mine.expect === upstream.expect);  // true - not a copy"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Concept 3 - dynamic `import()`\n\nA normal `import` sits at the top of a file. `await import(...)` fetches a module *where you\nstand*, and returns a promise for its exports.\n\n| Form | Runs | Use for |\n|---|---|---|\n| `import { x } from \"m\"` | at load | almost always |\n| `const { x } = await import(\"m\")` | when reached | something needed by one test only |"
+        },
+        {
+          "type": "example",
+          "text": "// The shape it returns: an object of the module's exports.\nconst mod = await import(\"node:path\");\n\nconsole.log(typeof mod.join, mod.join(\"a\", \"b\"));"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "**Next:** [Day 4.2 - Composing page objects](/learn/w5/d4/p2)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Composing page objects",
+      "tab_label": "Composing page objects",
+      "source_notebook": "week5/day4_2.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 5, Day 4.2 - Composing page objects\n\nDay 3's spec opened with three lines of `new`:\n\n```ts\nconst loginPage = new LoginPage(page);\nconst dashboardPage = new DashboardPage(page);\nconst transferPage = new TransferPage(page);\n```\n\nEvery test. Add a fourth page and you edit every test again. Today those disappear.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 1 - a third page class\n\n`TransferPage` covers the screen behind the Add Payee tile."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/pages/TransferPage.ts\", `// Week 5, Days 3-4 — the fund-transfer screen, reached from the Add Payee tile.\nimport { type Locator, type Page } from \"@playwright/test\";\nimport { BasePage } from \"./BasePage\";\n\nexport class TransferPage extends BasePage {\n  readonly addPayeeButton: Locator;\n  readonly amountBox: Locator;\n  readonly sendButton: Locator;\n\n  constructor(page: Page) {\n    super(page);\n    this.addPayeeButton = page.getByRole(\"button\", { name: \"ADD PAYEE\" });\n    this.amountBox = page.getByPlaceholder(\"Enter Amount\");\n    this.sendButton = page.getByRole(\"button\", { name: \"SEND\" });\n  }\n\n  async openAddPayeeForm(): Promise<void> {\n    await this.addPayeeButton.click();\n  }\n}\n`);"
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 2 - each page becomes a fixture\n\nOne module, one job: hand out page objects on request."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// The one import every spec will use.\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/pages/test.ts\", `// Week 5, Day 4 — the single import every spec uses.\n//\n// Each page object becomes a fixture, so a test asks for the pages it needs by\n// name and never writes \\`new LoginPage(page)\\`. A test that doesn't ask for a page\n// never pays to construct it.\nimport { test as base, expect } from \"@playwright/test\";\nimport { LoginPage } from \"./LoginPage\";\nimport { DashboardPage } from \"./DashboardPage\";\nimport { TransferPage } from \"./TransferPage\";\n\ntype Pages = {\n  loginPage: LoginPage;\n  dashboardPage: DashboardPage;\n  transferPage: TransferPage;\n};\n\nexport const test = base.extend<Pages>({\n  loginPage: async ({ page }, use) => {\n    await use(new LoginPage(page));\n  },\n  dashboardPage: async ({ page }, use) => {\n    await use(new DashboardPage(page));\n  },\n  transferPage: async ({ page }, use) => {\n    await use(new TransferPage(page));\n  },\n});\n\n// Re-exported so a spec needs exactly one import line.\nexport { expect };\n`);"
+        },
+        {
+          "type": "markdown",
+          "text": "Three things happening there:\n\n| Line | Does |\n|---|---|\n| `type Pages = { loginPage: LoginPage; ... }` | names what each fixture hands you |\n| `base.extend<Pages>({ ... })` | adds them to the `test` function |\n| `export { expect }` | so a spec needs one import line, not two |\n\nAnd the property that makes it worth doing: **a test that does not ask for `transferPage` never\nconstructs one.** Fixtures are lazy - Playwright runs the function only when a test names it in\nits parameter list."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 3 - the spec\n\nNote the import: `from \"./pages/test\"`, not from `@playwright/test`. That is the only change a\nspec file needs."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day4-pom.spec.ts\", `// Week 5, Day 4 — the Page Object Model, composed.\n//\n// Count the DOM details in this file: none. No placeholders, no button names, no\n// CSS, no URLs. Every line describes what a person did or what should be true.\n//\n// Written by a cell in week5/day4_2.ipynb. Run it yourself:\n//   npx playwright test week5/generated/day4-pom.spec.ts\nimport { test, expect } from \"./pages/test\";\n\ntest.describe(\"Page Object Model\", () => {\n  test(\"Step 1 — signing in lands on the dashboard\", async ({ loginPage, dashboardPage }) => {\n    await loginPage.goto(\"/\");\n    await loginPage.signIn();\n\n    // The class got us here; the test decides what that means.\n    await expect(dashboardPage.userName).toBeVisible();\n    await expect(dashboardPage.accountBalance).toBeVisible();\n  });\n\n  test(\"Step 2 — the dashboard has twelve tiles\", async ({ loginPage, dashboardPage }) => {\n    await loginPage.goto(\"/\");\n    await loginPage.signIn();\n\n    await expect(dashboardPage.tiles).toHaveCount(12);\n  });\n\n  test(\"Step 3 — a tile opens its own screen\", async ({ loginPage, dashboardPage, page }) => {\n    await loginPage.goto(\"/\");\n    await loginPage.signIn();\n    await dashboardPage.openTile(\"Pay Bills\");\n\n    await expect(page).toHaveURL(/paymentDashboard/);\n  });\n\n  test(\"Step 4 — three pages in one journey\", async ({ loginPage, dashboardPage, transferPage }) => {\n    await loginPage.goto(\"/\");\n    await loginPage.signIn();\n    await dashboardPage.openTile(\"Add Payee\");\n\n    // TransferPage takes over from here — the test never learns the URL changed.\n    await expect(transferPage.addPayeeButton).toBeVisible();\n    expect(transferPage.section()).toBe(\"transferDashboard\");\n  });\n\n  test(\"Step 5 — a different user, through the same classes\", async ({ loginPage, dashboardPage, page }) => {\n    const { USERS } = await import(\"../../_shared/test-helpers\");\n\n    await loginPage.goto(\"/\");\n    await loginPage.signIn(USERS[1]);\n    await expect(page).toHaveURL(/dashboard/);\n    await expect(dashboardPage.logoutButton).toBeVisible();\n  });\n\n  test(\"Step 6 — a refused login, using the same class\", async ({ loginPage, dashboardPage, page }) => {\n    await loginPage.goto(\"/\");\n    await loginPage.signInExpectingRefusal(\"leela@gmail.com\", \"WrongPass1\");\n\n    // One class serves both outcomes because it asserts neither.\n    await expect(page).not.toHaveURL(/dashboard/);\n    await expect(dashboardPage.userName).toHaveCount(0);\n  });\n});\n`);\n\n// Expected: 6 passed.\nawait runSpec(\"week5/generated/day4-pom.spec.ts\");"
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 4 - count the DOM details in that file\n\nZero. No placeholders, no button names, no CSS, no URLs except in `expect(page).toHaveURL(...)` -\nand that is an assertion about *behaviour*, which belongs in the test.\n\nEvery line says what a person did or what should be true. That is the finish line for this\npattern."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 5 - three pages in one journey\n\nStep 4 of the spec signs in, opens a tile, and asserts on the transfer screen. The test never\nlearns that the URL changed:\n\n```ts\nawait loginPage.goto(\"/\");\nawait loginPage.signIn();\nawait dashboardPage.openTile(\"Add Payee\");\nawait expect(transferPage.addPayeeButton).toBeVisible();\nexpect(transferPage.section()).toBe(\"transferDashboard\");\n```\n\n`section()` comes from `BasePage`, so all three classes have it for free."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 6 - a fixture that signs you in\n\nThe next step most teams take: a fixture that *does* something, not just constructs.\n\n```ts\nsignedIn: async ({ loginPage, dashboardPage }, use) => {\n  await loginPage.goto(\"/\");\n  await loginPage.signIn();\n  await use(dashboardPage);       // hand the test a dashboard, already signed in\n},\n```\n\nA fixture can depend on other fixtures. Everything before `use()` is setup, everything after is\nteardown - and a test that asks for `signedIn` gets the sign-in without writing it.\n\n| Compared with | Difference |\n|---|---|\n| `beforeEach` | a fixture is opt-in per test; a hook applies to every test in the block |\n| `storageState` ([day2_2](/learn/w5/d2/p2)) | still a real UI sign-in, so it is slower but tests the form |"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "**Next:** [Day 4.3 - How a real repo scales it](/learn/w5/d4/p3)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "How a real repo scales it",
+      "tab_label": "How a real repo scales it",
+      "source_notebook": "week5/day4_3.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 5, Day 4.3 - How a real repo scales it\n\nSame `test.extend`, same page classes - at 300 tests.\n\n## The fixtures file is a bottleneck\n\nEvery spec imports it, so every page class it names gets loaded - even for a test that uses one.\nTwo ways teams handle it:\n\n| Approach | Trade |\n|---|---|\n| One `fixtures/test.ts` with every page | simplest; slowest to load, and one merge-conflict hotspot |\n| One fixtures file per area, all extending a shared base | more files, no hotspot |\n\nSplitting by area:\n\n```ts\n// fixtures/base.ts        - things every area needs\nexport const test = base.extend<Core>({ ... });\n\n// fixtures/payments.ts    - extends it again\nimport { test as coreTest } from \"./base\";\nexport const test = coreTest.extend<PaymentPages>({ ... });\n```\n\n`extend` returns a new `test`, so chaining is the intended use."
+        },
+        {
+          "type": "markdown",
+          "text": "## Worker fixtures, for things that are expensive once\n\nA normal fixture runs per test. A **worker** fixture runs once per worker process:\n\n```ts\nexport const test = base.extend<{}, { apiToken: string }>({\n  apiToken: [async ({}, use) => {\n    const token = await fetchToken();     // once per worker, not per test\n    await use(token);\n  }, { scope: \"worker\" }],\n});\n```\n\nTwo type parameters: test-scoped fixtures first, worker-scoped second.\n\n| Scope | Runs | Good for |\n|---|---|---|\n| `test` (default) | once per test | page objects, per-test data |\n| `worker` | once per worker process | an auth token, a seeded database |\n\nThe catch: worker fixtures are **shared** between the tests in that worker. Anything mutable in\nthere is a channel for tests to interfere with each other - which is the same trap as the shared\naccount in [day2_2](/learn/w5/d2/p2)."
+        },
+        {
+          "type": "example",
+          "text": "// Why worker scope is not free. Two counters, same idea as Playwright's two scopes.\nlet workerBuilds = 0;\nlet testBuilds = 0;\n\nconst workerScoped = { token: \"T-\" + ++workerBuilds };   // built once, reused\n\nfunction testScopedFixture() {\n  testBuilds++;\n  return { cart: [] as string[] };                        // fresh per test\n}\n\nconst testA = testScopedFixture();\nconst testB = testScopedFixture();\ntestA.cart.push(\"item from test A\");\n\nconsole.log(\"worker fixture built:\", workerBuilds, \"time(s), token:\", workerScoped.token);\nconsole.log(\"test fixture built:  \", testBuilds, \"time(s)\");\nconsole.log(\"test B's cart:\", testB.cart, \"<- unaffected by test A\");\nconsole.log(\"both tests share:\", workerScoped.token, \"<- mutate this and they interfere\");"
+        },
+        {
+          "type": "markdown",
+          "text": "`testB.cart` is empty because a test-scoped fixture is rebuilt each time. The token is not - and\nanything mutable held at worker scope is a channel between tests, which is the same trap as the\nshared account in [day2_2](/learn/w5/d2/p2)."
+        },
+        {
+          "type": "markdown",
+          "text": "## Automatic fixtures\n\n`{ auto: true }` runs a fixture even when no test asks for it. Useful for cross-cutting setup\n(attaching a logger, failing a test on a console error) and dangerous everywhere else, because it\nis invisible at the call site:\n\n```ts\nfailOnConsoleError: [async ({ page }, use) => {\n  const errors: string[] = [];\n  page.on(\"console\", m => { if (m.type() === \"error\") errors.push(m.text()); });\n  await use();\n  expect(errors, \"console errors\").toEqual([]);\n}, { auto: true }],\n```"
+        },
+        {
+          "type": "markdown",
+          "text": "## What actually keeps a big POM suite alive\n\n| Practice | Why |\n|---|---|\n| One class per page, one file per class | you can find things by name |\n| Inheritance one level deep; compose the rest | see [day3_3](/learn/w5/d3/p3) |\n| No `expect` in `pages/` | rule 3 |\n| Fixtures for construction, not for logic | a fixture doing five things is a hidden `beforeEach` |\n| A lint rule banning raw selectors in `specs/` | catches the hole before review does |\n\n**Next:** [Day 4.4 - Practice](/learn/w5/d4/p4)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice",
+      "tab_label": "Practice",
+      "source_notebook": "week5/day4_4.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 5, Day 4.4 - Practice\n\nWork in `week5/generated/`. Copy `pages/test.ts` to `pages/mytest.ts` and extend that, so the\nDay 4.2 cells keep running."
+        },
+        {
+          "type": "problem-ref",
+          "text": "1"
+        },
+        {
+          "type": "problem-ref",
+          "text": "2"
+        },
+        {
+          "type": "problem-ref",
+          "text": "3"
+        },
+        {
+          "type": "problem-ref",
+          "text": "4"
+        },
+        {
+          "type": "problem-ref",
+          "text": "5"
+        },
+        {
+          "type": "problem-ref",
+          "text": "6"
+        },
+        {
+          "type": "problem-ref",
+          "text": "7"
+        },
+        {
+          "type": "markdown",
+          "text": "**Next:** [Day 5.1 - Prerequisites](/learn/w5/d5/p1)"
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": null,
+          "statement": "**Add a fixture**\nAdd your `PayBillsPage` from Day 3.4 to a copy of the fixtures module, and use it in a spec.\n\n**Right when:** the spec never writes `new`, and passes.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 2,
+          "difficulty": null,
+          "statement": "**Prove fixtures are lazy**\nAdd `console.log(\"constructing TransferPage\")` to that fixture. Run a test that does *not* ask\nfor it.\n\n**Right when:** the line does not appear - and appears as soon as a test names the fixture.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 3,
+          "difficulty": null,
+          "statement": "**A signedIn fixture**\nWrite the `signedIn` fixture from Day 4.2 Step 6. Use it to rewrite two tests.\n\n**Right when:** both pass and neither mentions `signIn()`.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 4,
+          "difficulty": null,
+          "statement": "**Fixture versus beforeEach**\nKeep two versions of the same two tests: one using `signedIn`, one using a `beforeEach`.\n\n**Right when:** you can state one thing the fixture gives you that the hook cannot. (Hint: add a\nthird test that must run signed *out*.)",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 5,
+          "difficulty": null,
+          "statement": "**A worker fixture**\nWrite a worker-scoped fixture that logs a random number once, and four tests that print it.\n\n**Right when:** with `--workers=1` all four print the same number; with `--workers=4` you can\nexplain the pattern you see.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 6,
+          "difficulty": null,
+          "statement": "**An auto fixture that fails the run**\nWrite the `failOnConsoleError` fixture from Day 4.3. Then add a test that triggers a console\nerror with `page.evaluate(() => console.error(\"boom\"))`.\n\n**Right when:** that test fails, no other test does, and no test file mentions the fixture.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 7,
+          "difficulty": null,
+          "statement": "**Find the leak**\nWrite a worker fixture holding a mutable array. Have test A push to it and test B assert it is\nempty. Run with `--workers=1`, then `--workers=2`.\n\n**Right when:** the result changes with the worker count, and you can explain why this is the\nsame bug as the shared account in [day2_2](/learn/w5/d2/p2).",
+          "stub": "// Your work here.",
+          "solution": null
+        }
+      ]
+    }
+  ]
+}

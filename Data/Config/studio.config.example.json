@@ -1,0 +1,33 @@
+{
+  "port": 3010,
+  "admins": [
+    "rishant-mishra"
+  ],
+  "run": {
+    "timeout_ms": 30000,
+    "max_concurrent": 3,
+    "allowed_origins": [
+      "https://test-automation-banking.vercel.app",
+      "https://demo.automationtesting.in",
+      "https://opensource-demo.orangehrmlive.com",
+      "https://playwright.dev",
+      "http://localhost",
+      "http://127.0.0.1"
+    ]
+  },
+  "assistant": {
+    "enabled": true,
+    "model": "claude-opus-5"
+  },
+  "mail": {
+    "host": "",
+    "port": 587,
+    "secure": false,
+    "user": "",
+    "from": "Playwright Studio <no-reply@evoketechnologies.com>"
+  },
+  "reset": {
+    "code_ttl_minutes": 10,
+    "max_attempts": 5
+  }
+}

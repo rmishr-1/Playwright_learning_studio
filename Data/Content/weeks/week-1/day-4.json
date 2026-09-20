@@ -1,0 +1,195 @@
+{
+  "schema": "course-day/v1",
+  "week": 1,
+  "day": 4,
+  "title": "Codegen and finding your way around locators",
+  "locked": false,
+  "parts": [
+    {
+      "part": 1,
+      "kind": "generated-prerequisite",
+      "title": "TypeScript check-in: nothing new today",
+      "tab_label": "TypeScript",
+      "source_notebook": null,
+      "has_runnable_code": false,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 1, Day 4.1 — TypeScript check-in: nothing new today\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Codegen and finding your way around locators",
+      "tab_label": "Codegen and finding your way…",
+      "source_notebook": "week1/day4_2.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 1, Day 4.2 — Codegen and finding your way around locators\n\nBy the end of this lesson you will know what Codegen and the Inspector actually do, why\nthey reach for `getByRole`/`getByPlaceholder` over old id/xpath/css locators, and why a spec\nfile's name isn't just cosmetic.\n\n> **No new TypeScript today** — locator strings and file naming aren't new language syntax,\n> so there's no Day 4.1. [Day 2](/learn/w1/d2/p2) and [Day 3](/learn/w1/d3/p2) got you set up\n> and running; today is about *finding* what to put inside a test.\n\n> **Mode: explore**, plus one run-it-yourself step. "
+        },
+        {
+          "type": "markdown",
+          "text": "## Codegen — run this yourself, in a real terminal\n\n```bash\nnpx playwright codegen https://test-automation-banking.vercel.app/\n```\n\nThis opens **two windows**: a real browser you click around in, and the **Inspector**, which\nturns every click/type/navigate into generated TypeScript locator code live, as you do it.\n\n**This is genuinely run-it-yourself, like `page.pause()` elsewhere in this course** — there's\nno way to fake a transcript of \"what Codegen would produce\" in a lesson cell and have it\nmean anything. Open a terminal, run the command above, log in as Leela\n(`leela@gmail.com` / `Leela@123`), and watch the panel on the right fill in. Close both\nwindows when you're done; it doesn't save anything until you copy code out of it yourself."
+        },
+        {
+          "type": "markdown",
+          "text": "## What Codegen reaches for, and why\n\nCodegen doesn't just grab *any* selector that happens to work — it's built to prefer\nlocators a redesign is less likely to break.\n\n| Strategy | Example | Survives a redesign? |\n|---|---|---|\n| `id` / `class` from generated CSS | `#ng-x7f2q3` | Often not — build tools regenerate these |\n| Raw XPath | `//div[3]/button[1]` | No — breaks the moment the layout shifts |\n| `getByRole` | `page.getByRole(\"button\", { name: \"Login\" })` | Yes — tied to what the element *is* and its accessible name |\n| `getByPlaceholder` | `page.getByPlaceholder(\"Enter Email\")` | Yes — tied to user-facing text, not markup structure |\n\n`getByRole`/`getByLabel`/`getByPlaceholder`/`getByText` are all built around what a screen\nreader (or a human) would use to find the element — which is far more stable than internal\nmarkup, and is exactly why Codegen defaults to them."
+        },
+        {
+          "type": "markdown",
+          "text": "## Example — the locators Codegen would hand you for this login form\n\n**Objective:** use the same kind of role/placeholder-based locators Codegen produces, against\nthe real login form."
+        },
+        {
+          "type": "example",
+          "text": "import { launch, show } from \"../_shared/deno-helpers.ts\";\nimport { BASE_URL, USERS } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(BASE_URL);\n\n// These are exactly the locators Codegen would generate if you typed into these\n// fields and clicked Login yourself — proven against the live app already.\nconst email = page.getByPlaceholder(\"Enter Email\");\nconst password = page.getByPlaceholder(\"Enter Password\");\nconst loginButton = page.getByRole(\"button\", { name: \"Login\" });\n\nawait email.fill(USERS[0].email);\nawait password.fill(USERS[0].password);\nawait loginButton.click();\nawait page.waitForURL(\"**/dashboard\");\n\nawait show(page);\nawait browser.close();"
+        },
+        {
+          "type": "markdown",
+          "text": "Line by line:\n\n| Line | What it does |\n|---|---|\n| `page.getByPlaceholder(\"Enter Email\")` | Finds the field by its placeholder text — same as Codegen would generate for it |\n| `page.getByRole(\"button\", { name: \"Login\" })` | Finds the button by its accessible role + visible label |\n| `page.waitForURL(\"**/dashboard\")` | Waits for the post-login redirect, proving the click actually worked |\n\n**Expected result:** a screenshot of the dashboard, signed in as Leela.\n\n**Challenge:** swap in Katy's credentials from `USERS[1]` and confirm it still works — same\nlocators, different data."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Why the `.spec.ts` suffix isn't cosmetic\n\nPlaywright's `testMatch` (which you read in this repo's config on Day 2.2) only picks up\nfiles ending in `.spec.ts` (or `.test.ts`). A file named `login.ts` sitting right next to\n`login.spec.ts` is **invisible** to the test runner — not broken, not skipped, just never\nlooked at. [Day 4.3](/learn/w1/d4/p3) proves this for real rather than asking you to trust it."
+        },
+        {
+          "type": "markdown",
+          "text": "## Folder organization\n\nDay 2.3 introduced splitting test folders by type (`UI_test`/`API_test`) instead of one flat\n`tests/` folder. The same principle applies to `testDir`: whatever convention you pick, the\ntest runner only needs `testMatch` to find the `.spec.ts` files inside it — organize\nsub-folders however makes sense for your team (by feature, by test type, by app area)."
+        },
+        {
+          "type": "markdown",
+          "text": "## Best practices\n\n- Prefer `getByRole`/`getByLabel`/`getByPlaceholder`/`getByText` over `id`/class/xpath — let\n  Codegen's defaults be your defaults too.\n- Use Codegen to get a **first draft**, then clean it up — it records everything you clicked,\n  including accidental clicks.\n- Always name generated specs `*.spec.ts` — a missing suffix is a silent, not a loud, failure.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Wrote a spec file without the `.spec.ts` suffix | `npx playwright test` runs, reports 0 tests changed — the file is just silently absent | Rename it to end in `.spec.ts` |\n| Copied Codegen's raw output verbatim into the suite | Works, but full of one-off clicks and no structure | Treat it as a draft — extract the locators, drop the noise |\n| Reached for `getByRole(\"link\", ...)` on this app's dashboard | Finds nothing | This app's dashboard tiles are `<p>` elements, not `<a>` — noted in `_shared/CONCEPTS.md` |\n\n## What's next\n\n[Day 4.3](/learn/w1/d4/p3) proves the naming-convention rule above for real, by writing a file\nwithout the suffix and watching Playwright ignore it."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "Proving the `.spec.ts` naming convention",
+      "tab_label": "Proving the .spec.ts naming c…",
+      "source_notebook": "week1/day4_3.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 1, Day 4.3 — Proving the `.spec.ts` naming convention\n\nBy the end of this lesson you will have watched Playwright genuinely ignore a test file\nbecause of its name, then watched the same file get picked up the moment you rename it.\n\n> **No new API here either** — this slot is normally \"the same API, inside a framework\", but\n> there's no framework yet. Today it's the same locators from Day 4.2, used to prove a rule\n> about *discovery* rather than to teach a new call."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 1 — a test file that is deliberately not a spec\n\nThe file below is valid Playwright code with a real `test(...)` in it. It just doesn't end in\n`.spec.ts`."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile, REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst notASpecPath = \"week1/generated/day4-not-a-spec.ts\";\n\nawait writeProjectFile(notASpecPath, `\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"this file has no .spec.ts suffix\", async ({ page }) => {\n  await page.goto(\"/\");\n  await expect(page.getByPlaceholder(\"Enter Email\")).toBeVisible();\n});\n`.trim());\n\nconsole.log(\"wrote\", notASpecPath);"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected result:** just a confirmation the file was written — nothing surprising yet."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 2 — ask Playwright to list everything in `week1/generated/`"
+        },
+        {
+          "type": "example",
+          "text": "const NPX = Deno.build.os === \"windows\" ? \"npx.cmd\" : \"npx\";\nconst cmd = new Deno.Command(NPX, {\n  args: [\"playwright\", \"test\", \"week1/generated\", \"--list\"],\n  cwd: REPO_ROOT,\n  stdout: \"piped\",\n  stderr: \"piped\",\n});\nconst { stdout, stderr } = await cmd.output();\nconsole.log(new TextDecoder().decode(stdout) + new TextDecoder().decode(stderr));"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected result:** the listing shows `day3-smoke.spec.ts`'s two tests and **nothing from\n`day4-not-a-spec.ts`** — `Total: 2 tests in 1 file`. The file exists on disk, has valid\nPlaywright code in it, and is completely invisible to the runner. No error, no warning — this\nis the \"silent, not loud\" failure mode worth remembering."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 3 — rename it, and watch it appear"
+        },
+        {
+          "type": "example",
+          "text": "// REPO_ROOT and NPX are already imported/declared in the cells above — reused here.\nconst from = REPO_ROOT + \"week1/generated/day4-not-a-spec.ts\";\nconst to = REPO_ROOT + \"week1/generated/day4-renamed.spec.ts\";\nawait Deno.rename(from, to);\n\nconst cmd2 = new Deno.Command(NPX, {\n  args: [\"playwright\", \"test\", \"week1/generated\", \"--list\"],\n  cwd: REPO_ROOT,\n  stdout: \"piped\",\n  stderr: \"piped\",\n});\nconst { stdout: out2 } = await cmd2.output();\nconsole.log(new TextDecoder().decode(out2));"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected result:** now `Total: 3 tests in 2 files` — the exact same code, now discovered,\npurely because of the `.spec.ts` suffix.\n\n**Challenge:** delete `week1/generated/day4-renamed.spec.ts` and re-run the listing to confirm\nit drops back to 2 tests, 1 file."
+        },
+        {
+          "type": "example",
+          "text": "// REPO_ROOT is already imported above — reused here.\nawait Deno.remove(REPO_ROOT + \"week1/generated/day4-renamed.spec.ts\");\nconsole.log(\"cleaned up\");"
+        },
+        {
+          "type": "markdown",
+          "text": "## What a reviewer would look for\n\n- A generated spec file that always ends in `.spec.ts` — never `.ts`, never `.test.js`.\n- No silent assumption that \"the file is there so it must be running\" — when in doubt,\n  `--list` and count.\n\n## What's next\n\n[Day 4.4](/learn/w1/d4/p4) — your turn with Codegen and the naming rule.\n[Day 5](/learn/w1/d5/p1) — your first real test, written by hand, and why an assertion\nmatters."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice: Codegen and locators",
+      "tab_label": "Practice",
+      "source_notebook": "week1/day4_4.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 1, Day 4.4 — Practice: Codegen and locators\n\nThree problems. The first is genuinely run-it-yourself, like Codegen itself."
+        },
+        {
+          "type": "problem-ref",
+          "text": "1"
+        },
+        {
+          "type": "problem-ref",
+          "text": "2"
+        },
+        {
+          "type": "problem-ref",
+          "text": "3"
+        },
+        {
+          "type": "markdown",
+          "text": "## When you're done\n\nYou can now find good locators and understand why Playwright discovers (or ignores) a file.\n[Day 5](/learn/w1/d5/p1) is the week's capstone — your first real test, and the lesson about\nassertions that makes the rest of this course make sense."
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": "Beginner",
+          "statement": "**What to build.** Run `npx playwright codegen https://test-automation-banking.vercel.app/`\nyourself. After logging in, click through to the **Payments** tile. Copy the locator(s)\nCodegen generated for that click into a comment in the cell below.\n\n**Where.** Your terminal for Codegen itself; a cell here for the locator you copied.\n\n**How you'll know it worked.** You have a real `getByRole` or `getByText` line copied out of\nthe Inspector panel, not one you guessed.",
+          "stub": "// Problem 1 — paste the locator Codegen generated here, as a comment.",
+          "solution": "**Run Codegen from your own terminal** — it opens a real browser window alongside the Inspector, which the studio's Run button cannot do.\n\n```bash\nnpx playwright codegen https://test-automation-banking.vercel.app/\n```\n\nLog in, then click the **Payments** tile. Codegen writes something close to:\n\n```ts\nawait page.getByPlaceholder('Enter Email').fill('leela@gmail.com');\nawait page.getByPlaceholder('Enter Password').fill('Leela@123');\nawait page.getByRole('button', { name: 'Login' }).click();\nawait page.getByText('Payments').click();\n```\n\n**Two things worth noticing in what it produced.**\n\nIt reached for `getByPlaceholder` and `getByRole` before anything else — Codegen prefers locators a human can read, and falls back to CSS only when nothing better exists. And **it recorded no assertion.** Every line is an action. Codegen watches what you *do*; it has no way to know what you *expect*, which is the gap Day 5.2 makes painfully concrete.\n\n> Treat Codegen output as a first draft. It is excellent at telling you what a control is called and poor at deciding what matters."
+        },
+        {
+          "number": 2,
+          "difficulty": "Intermediate",
+          "statement": "**What to build.** Day 4.2 contrasted `getByRole`/`getByPlaceholder` with old id/xpath/css\nlocators. Write two or three sentences explaining *why* the role/placeholder version is more\nlikely to survive a redesign — be specific about what changes in a typical redesign (CSS\nclasses, DOM nesting, generated ids) and why each locator style is or isn't affected by that\nchange.\n\n**Where.** A cell here, as a comment.\n\n**How you'll know it worked.** Your explanation names a concrete kind of change (e.g. \"a\nbuild tool regenerates class names on every deploy\") rather than staying abstract.",
+          "stub": "// Problem 2 — your explanation here.",
+          "solution": "**A model answer.**\n\n> A redesign usually changes three things: the CSS classes (a new design system, or a utility-class refactor), the DOM nesting (a wrapper `<div>` added for layout, a component split in two), and any generated ids (`ctl00_MainContent_btn3` becomes `ctl00_MainContent_btn7` because a control was inserted above it).\n>\n> **A CSS-class locator** breaks on the first of those. `.btn-primary-lg` is a *styling* decision, and styling is exactly what a redesign exists to change.\n>\n> **An XPath path** breaks on the second. `//div[2]/form/div[3]/input` encodes the shape of the tree; one wrapper div and it points somewhere else — or worse, at a different control that happens to sit in that position now.\n>\n> **A generated id** breaks on the third, and breaks silently.\n>\n> **`getByRole('button', { name: 'Login' })`** survives all three, because none of them change what the control *is* or what it *says*. The button is still a button and still reads \"Login\" — that is the contract with the user, and a redesign that breaks it has changed the product, not the markup.\n\n**The underlying rule:** anchor on what the user perceives — role, label, placeholder, visible text — not on how the page is built. The exception is a genuinely stable, purpose-built hook such as `data-testid`, which the team agrees not to change."
+        },
+        {
+          "number": 3,
+          "difficulty": "Advanced",
+          "statement": "**What to build.** Write a spec file into `week1/generated/` named\n`day4-practice-broken.ts` (no `.spec.ts` suffix) containing one real test against the login\npage. Run `npx playwright test week1/generated --list` and confirm it's absent from the\nlisting. Then rename it to end in `.spec.ts` and confirm it appears. Clean up the file when\nyou're done.\n\n**Where.** A cell in this lesson (mirrors Day 4.3's steps, but written from scratch).\n\n**How you'll know it worked.** You saw the test count change between the two `--list` runs,\nwith your own eyes, not from memory of Day 4.3.",
+          "stub": "// Problem 3 — your code here.",
+          "solution": "**The point of this one is the rename, so run it for real** — the studio's Run button drives the library, not the runner, so the `--list` step needs your own terminal.\n\nCreate `week1/generated/day4-practice-broken.ts` (deliberately **no** `.spec.ts`):\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('login reaches the dashboard', async ({ page }) => {\n  await page.goto('https://test-automation-banking.vercel.app/');\n  await page.getByPlaceholder('Enter Email').fill('leela@gmail.com');\n  await page.getByPlaceholder('Enter Password').fill('Leela@123');\n  await page.getByRole('button', { name: 'Login' }).click();\n  await expect(page).toHaveURL(/dashboard/);\n});\n```\n\nThen:\n\n```bash\nnpx playwright test week1/generated --list\n```\n\n**What you should see.** The file is **absent** from the listing. Not skipped, not failing — invisible. The runner never opened it, so a genuine test sat there proving nothing.\n\nRename it to `day4-practice-broken.spec.ts` and re-run `--list`: now it appears, and the count goes up by one. Delete the file when you are done.\n\n**Why this is the day's real lesson.** Every other mistake in this course announces itself with a red failure. This one announces nothing at all — the suite stays green *because the test is not running*. `--list` is the cheap habit that catches it: it answers \"what will actually run?\" before you trust a green tick."
+        }
+      ]
+    }
+  ]
+}

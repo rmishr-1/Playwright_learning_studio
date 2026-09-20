@@ -1,0 +1,32 @@
+{
+    "_comment": "POST /api/assistant - the in-page learning assistant. Streams back over SSE. The assistant is EXPLAIN-ONLY: it never writes to the editor, never runs code, and never sees run output. On practice problems it gives hints and refuses to produce the solution - the reveal button is the only route to an answer.",
+    "schema": {
+        "value": "assistant/v1"
+    },
+    "request": {
+        "learner_id": { "value": "ada-lovelace" },
+        "week": { "value": 2 },
+        "day": { "value": 1 },
+        "part": { "value": 2 },
+        "history": {
+            "_comment": "Prior turns in this conversation. Reset when the learner moves to another day.",
+            "_itemTemplate": {
+                "role": {
+                    "options": ["user", "assistant"],
+                    "value": "user"
+                },
+                "text": { "value": "" }
+            },
+            "value": []
+        },
+        "question": { "value": "" }
+    },
+    "response": {
+        "_comment": "SSE events, not a JSON body. `delta` carries text chunks; `done` closes the turn; `error` reports a failure the client should surface rather than retry silently.",
+        "event": {
+            "options": ["delta", "done", "error"],
+            "value": "delta"
+        },
+        "text": { "value": "" }
+    }
+}

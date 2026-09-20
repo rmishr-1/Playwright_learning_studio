@@ -1,0 +1,179 @@
+{
+  "schema": "course-day/v1",
+  "week": 2,
+  "day": 5,
+  "title": "Splitting one long test, and the problem it creates",
+  "locked": false,
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "TypeScript check-in: nothing new today",
+      "tab_label": "TypeScript",
+      "source_notebook": "week2/day5_1.ipynb",
+      "has_runnable_code": false,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 2, Day 5.1 — TypeScript check-in: nothing new today\n\nDay 5.2 splits one test into several and watches the second one fail. Nothing about that\nneeds new TypeScript — it's the same `test()`/`async ({ page })` shape you've written all\nweek. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 5.2](/learn/w2/d5/p2)."
+        },
+        {
+          "type": "markdown",
+          "text": "## What today's code leans on\n\n| Concept | Status | Where it was taught |\n|---|---|---|\n| `async ({ page }) => {}`, destructuring a fixture | already covered | [Week 1, Day 5.1](/learn/w1/d5/p1) |\n| `test()`, `expect()`, the assertions gap | already covered | [Week 1, Day 5.2](/learn/w1/d5/p2) |\n| `test.describe(...)` grouping | new **name** today, no new syntax — it's a function call around `test()`s you already know how to write | — |\n\nThe only thing Day 5.2 adds is a fact about how Playwright runs your tests, not a\nlanguage feature: **every `test()` gets its own fresh `page`.** That's the whole lesson."
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 5.2 — Splitting one long test](/learn/w2/d5/p2) shows why that fact matters the moment\nyou split a test for readability."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Splitting one long test, and the problem it creates",
+      "tab_label": "Splitting one long test, and…",
+      "source_notebook": "week2/day5_2.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 2, Day 5.2 — Splitting one long test, and the problem it creates\n\nBy the end of this lesson you will have run one long test, split it into five small\nones, and watched a real failure appear that has nothing to do with a typo — it's\nPlaywright's central design decision showing up for the first time."
+        },
+        {
+          "type": "markdown",
+          "text": "> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.\n\n## One test, five things\n\nA test that logs in, views transaction history, pays a bill, checks billing history, and\nlogs out reads fine — until it fails. When it does, the failure just says \"this test\nfailed\"; you're left guessing which of the five steps broke.\n\nThere's also a harder ceiling: **every Playwright test has a default budget of 30\nseconds.** Each extra real step — a navigation, a slow render — eats into that budget,\nand a test doing five things is five times more likely to bump into it than a test doing\none."
+        },
+        {
+          "type": "markdown",
+          "text": "## Example 1 — the one long test, run for real\n\n**Objective:** see the actual duration of a single test doing five real things."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day5-one-long-test.spec.ts\";\n\nawait writeProjectFile(specPath, `// Week 2, Day 5 — one test doing five things: login, view history, pay\n// bills, check billing history, log out. The waitForTimeout()s stand in for\n// realistic per-step latency (a slower network, a heavier page) — they are\n// not needed for correctness, only to make the accumulating cost visible.\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest(\"one long journey: login, view history, pay bills, check billing history, log out\", async ({ page }) => {\n  await loginAs(page);\n  await expect(page.getByText(\"Leela\")).toBeVisible();\n\n  await page.getByText(\"Transaction History\", { exact: true }).click();\n  await page.waitForURL(\"**/accountDashboard\");\n  await page.waitForTimeout(6000);\n\n  await page.goto(\"/dashboard\");\n  await page.getByText(\"Pay Bills\", { exact: true }).click();\n  await page.waitForURL(\"**/paymentDashboard\");\n  await page.waitForTimeout(6000);\n\n  await page.goto(\"/dashboard\");\n  await page.getByText(\"Billing History\", { exact: true }).click();\n  await page.waitForTimeout(6000);\n\n  await page.goto(\"/dashboard\");\n  await page.getByRole(\"button\", { name: \"LogOut\" }).click();\n  await page.waitForURL(\"**/login\");\n});\n`.trim());\n\nawait runSpec(specPath);"
+        },
+        {
+          "type": "markdown",
+          "text": "> ▶ **Run it yourself too:** `npx playwright test week2/generated/day5-one-long-test.spec.ts`\n\n**Expected result:** `1 passed`, in roughly 25–30 seconds — measured against the live\nbanking app while writing this lesson. That's already within a few seconds of the\ndefault 30-second test timeout, for a journey that does nothing unusual.\n\nPlaywright's own reporter has a name for this: a **slow test file** warning appears when\na file's tests take a long time in total, suggesting you split them so they can run in\nparallel. You've just watched a smaller version of that same pressure build inside a\nsingle test."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Example 2 — split it, the obvious way\n\n**Objective:** break the journey into small `test()`s — one per concern, the same\nresponse to \"each failure should name one thing\" that [Day 1](/learn/w1/d5/p2)\nalready taught you to want from an assertion."
+        },
+        {
+          "type": "example",
+          "text": "// writeProjectFile and runSpec are already in scope from Example 1's cell —\n// Deno's kernel shares one module scope across every cell in this notebook,\n// so importing them again here would throw \"already declared\".\nconst specPath2 = \"week2/generated/day5-split-isolation.spec.ts\";\n\nawait writeProjectFile(specPath2, `// Week 2, Day 5 — the same journey, split by concern the way \"one long test\"\n// invites. test 2 assumes test 1 already logged in. It hasn't — every test\n// gets its own fresh page — so this is expected to fail. Run it and read the\n// real error; that failure IS the lesson.\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Dashboard journey, split into small tests\", () => {\n  test(\"test 1: log in\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n\n  test(\"test 2: read the signed-in user's name\", async ({ page }) => {\n    // No loginAs() here — this test assumes test 1 already signed in.\n    await page.goto(\"/dashboard\");\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n});\n`.trim());\n\nawait runSpec(specPath2);"
+        },
+        {
+          "type": "markdown",
+          "text": "> ▶ **Run it yourself too:** `npx playwright test week2/generated/day5-split-isolation.spec.ts`\n\n**Expected result (verified live, reproduced twice while writing this):** `1 failed, 1\npassed`.\n\n```\nError: expect(locator).toBeVisible() failed\nLocator: getByText('Leela')\nExpected: visible\nError: element(s) not found\n```\n\nRead `test 2` again — there's no bug in it. It goes to `/dashboard` and looks for the\nname. The name just isn't there, because **`test 2` never logged in.** `test 1` did, but\nthat session didn't carry over."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Why: every test gets a fresh `page`\n\nThis isn't a quirk of this app — it's Playwright's central design decision. Each `test()`\nreceives its own `page`: a blank tab, no cookies, no storage, nothing carried over from\nany other test. That's what makes tests safe to run in any order, in parallel, and\nwithout one test's failure corrupting the next one's starting state.\n\nThe cost is the flip side of the benefit: state you *want* to keep — like being logged\nin — has to be shared on purpose. Splitting a test for readability is exactly the moment\nthis becomes visible, because now you have two tests where you used to have a single\ncontinuous story.\n\n**What's next fixes this for real.** [Day 5.3](/learn/w2/d5/p3) previews the shape of the\nfix; [Week 3, Day 2.1](/learn/w3/d2/p1) and\n[Week 3, Day 2.2](/learn/w3/d2/p2) build it properly, with hooks named and\nexplained."
+        },
+        {
+          "type": "markdown",
+          "text": "## Best practices\n\n- Split a long test by concern — the readability win is real.\n- Before you split, ask what state the later pieces need that only the earlier ones set\n  up. Login is the most common one.\n- Don't \"fix\" this by copy-pasting the login steps into every test — [Day 5.3](/learn/w2/d5/p3)\n  shows why sharing beats repeating once you have more than two or three tests.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Splitting a long test without checking what state carries over | one or more of the new tests fail immediately | identify the shared setup, then read Day 5.3 |\n| Assuming `toHaveURL(/dashboard/)` proves you're logged in | it doesn't — this app has no route guard, so a logged-out page still loads at that URL | assert on user-specific content instead (the name, an account number) |\n| Re-running the whole login in every split test \"just in case\" | works, but every test pays the login cost again | fine for a couple of tests; Day 5.3 previews the alternative once it doesn't scale |\n\n## What's next\n\n[Day 5.3](/learn/w2/d5/p3) previews the fix — not the full lesson, that's week3's job."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "Preview: the shape of the fix",
+      "tab_label": "Reuse",
+      "source_notebook": "week2/day5_3.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 2, Day 5.3 — Preview: the shape of the fix\n\n**This lesson does not teach hooks.** It shows the fix from Day 5.2 running for real,\nnames the pieces, and points you at where each one is actually explained.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout."
+        },
+        {
+          "type": "markdown",
+          "text": "## The shape, named but not explained\n\n| Piece | What it's for |\n|---|---|\n| `browser.newContext()` | a fresh, isolated environment you create yourself — instead of one being created per test automatically |\n| `test.beforeAll(...)` | runs once, before the first test in a group — where you'd create that shared context and log in |\n| `test.afterAll(...)` | runs once, after the last test — where you'd close it |\n| `test.describe(...)` | groups the tests that share that context |\n| `test.describe.configure({ mode: \"serial\" })` | tells Playwright these tests depend on each other and must not run at the same time |\n\nAll five names come from [Week 3, Day 2.1](/learn/w3/d2/p1) (the TypeScript\nunderneath them — arrow functions passed as hook bodies) and\n[Week 3, Day 2.2](/learn/w3/d2/p2) (what each one actually does, and why). This\nlesson only proves the shape works."
+        },
+        {
+          "type": "markdown",
+          "text": "## Watching it work\n\n**Objective:** the exact two tests from Day 5.2 — Example 2 — passing this time, because\nthey share one login instead of each getting a blank page."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day5-shared-context-preview.spec.ts\";\n\nawait writeProjectFile(specPath, `// Week 2, Day 5 — PREVIEW ONLY. This is the shape of the fix (a context\n// shared across dependent tests via beforeAll/afterAll), shown running for\n// real so you know it genuinely works — not fully explained here. The real\n// treatment of hooks, page vs browser scope, and test.describe is\n// week3/day2_1.ipynb and week3/day2_2.ipynb.\nimport { test, expect, type Browser, type BrowserContext, type Page } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Dashboard journey, sharing one login via a shared context\", () => {\n  test.describe.configure({ mode: \"serial\" });\n\n  let context: BrowserContext;\n  let page: Page;\n\n  test.beforeAll(async ({ browser }: { browser: Browser }) => {\n    context = await browser.newContext();\n    page = await context.newPage();\n    await loginAs(page);\n  });\n\n  test.afterAll(async () => {\n    await context.close();\n  });\n\n  test(\"test 1: log in\", async () => {\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n\n  test(\"test 2: read the signed-in user's name\", async () => {\n    // Same page object as test 1 — still sitting on /dashboard, still signed in.\n    // No page.goto() here: this app keeps its session in memory only, so a full\n    // navigation would reload the page and wipe it, context or no context.\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n});\n`.trim());\n\nawait runSpec(specPath);"
+        },
+        {
+          "type": "markdown",
+          "text": "> ▶ **Run it yourself too:** `npx playwright test week2/generated/day5-shared-context-preview.spec.ts`\n\n**Expected result:** `2 passed` — verified live while writing this lesson.\n\nOne measured detail worth keeping, even at preview depth: `test 2` doesn't call\n`page.goto()` again. This app keeps its session **in memory only** (no cookies, no\n`localStorage`) — a full navigation reloads the page and wipes it, whether or not the\ncontext is shared. Sharing the context gets you the same tab still sitting where test 1\nleft it; it doesn't survive a fresh `goto()` any more than an isolated one would."
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Week 3, Day 2.1](/learn/w3/d2/p1) and [Week 3, Day 2.2](/learn/w3/d2/p2)\nbuild this properly: why `page` and `browser` have different scope, all four hooks\nexplained, `test.describe` grouping, and when to reach for `mode: \"serial\"`. This preview\nstops here on purpose — that's next week's first lesson, not this lesson's."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice: splitting tests, and the isolation problem",
+      "tab_label": "Practice",
+      "source_notebook": "week2/day5_4.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 2, Day 5.4 — Practice: splitting tests, and the isolation problem\n\nThree problems. The third one has no code to write — it's a question, because the real\nhook lesson is week3's job, not this lesson's.\n\nStart in a fresh cell in this lesson. When a problem asks for a spec file, write it\ninto `week2/generated/` and run it with `npx playwright test`."
+        },
+        {
+          "type": "problem-ref",
+          "text": "1"
+        },
+        {
+          "type": "problem-ref",
+          "text": "2"
+        },
+        {
+          "type": "problem-ref",
+          "text": "3"
+        },
+        {
+          "type": "markdown",
+          "text": "## End of week 2\n\nLocators (role, placeholder, XPath, CSS, the sibling axis), real assertions, unique test\ndata, and the isolation problem a split test creates are all in hand now. week3 starts\nimmediately with the fix — hooks — and then configuration."
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": "Beginner",
+          "statement": "**What to build.** Pick a different two-step scenario on the banking app (for example:\ntest 1 navigates to Pay Bills and reads a value; test 2 tries to read something from\nBilling History that assumes test 1 already put you there) and reproduce the isolation\nfailure yourself — two `test()`s in one `describe`, the second assuming state from the\nfirst.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** The second test fails with a real Playwright error, not\na typo of yours — and you can explain in one sentence why it's failing.\n\n> **Hint** — Day 5.2, Example 2 is the template. Change *what* state test 2 assumes, not\n> the shape.",
+          "stub": "// Problem 1 — your code here.",
+          "solution": "`week2/generated/day5-practice-isolation.spec.ts` — the point is to make it **fail**:\n\n```ts\nimport { test, expect } from \"@playwright/test\";\n\nconst BANK = \"https://test-automation-banking.vercel.app/\";\n\ntest.describe(\"Pay Bills, split in two\", () => {\n  test(\"1 - navigate to Pay Bills\", async ({ page }) => {\n    await page.goto(BANK);\n    await page.getByPlaceholder(\"Enter Email\").fill(\"leela@gmail.com\");\n    await page.getByPlaceholder(\"Enter Password\").fill(\"Leela@123\");\n    await page.getByRole(\"button\", { name: \"Login\" }).click();\n    await page.waitForURL(\"**/dashboard\");\n\n    await page.getByText(\"Pay Bills\").click();\n    await expect(page.getByText(\"Pay Bills\")).toBeVisible();\n  });\n\n  test(\"2 - read Billing History, assuming test 1 got us there\", async ({ page }) => {\n    // No goto, no login. This test assumes it inherits test 1's browser.\n    await page.getByText(\"Billing History\").click();\n    await expect(page.getByText(\"Billing History\")).toBeVisible();\n  });\n});\n```\n\n```bash\nnpx playwright test week2/generated/day5-practice-isolation.spec.ts\n```\n→ **`1 failed, 1 passed`**.\n\n**Read the failure carefully, because it is the lesson.** Test 2 fails waiting for a locator that is not there — and the trace shows why: it is sitting on `about:blank`. Not on the login page, not logged out. A completely fresh browser context that has never visited the app.\n\n**The thing that surprises people:** `test.describe` groups tests for *reporting*. It does not share a browser between them. Every `test()` gets its own context and its own `page` — that is the isolation guarantee, and it is on by default precisely so one test's mess cannot explain another test's result.\n\nSplitting a long test into two is the right instinct. Assuming the second inherits the first's state is the trap that comes with it."
+        },
+        {
+          "number": 2,
+          "difficulty": "Intermediate",
+          "statement": "**What to build.** Fix the spec you just wrote using `browser.newContext()` — the same\nshape from [Day 5.3](/learn/w2/d5/p3) — and confirm both tests now pass.\n\n**Where.** The same spec file, or a new one in `week2/generated/`.\n\n**How you will know it worked.** `2 passed`, where a moment ago it was `1 failed, 1\npassed`.",
+          "stub": "// Problem 2 — your code here.",
+          "solution": "The fix is one shared context, built once, with the tests running in order.\n\n```ts\nimport { test, expect, type Page, type BrowserContext } from \"@playwright/test\";\n\nconst BANK = \"https://test-automation-banking.vercel.app/\";\n\ntest.describe.configure({ mode: \"serial\" });\n\ntest.describe(\"Pay Bills, sharing one context\", () => {\n  let context: BrowserContext;\n  let page: Page;\n\n  test.beforeAll(async ({ browser }) => {\n    context = await browser.newContext();\n    page = await context.newPage();\n\n    await page.goto(BANK);\n    await page.getByPlaceholder(\"Enter Email\").fill(\"leela@gmail.com\");\n    await page.getByPlaceholder(\"Enter Password\").fill(\"Leela@123\");\n    await page.getByRole(\"button\", { name: \"Login\" }).click();\n    await page.waitForURL(\"**/dashboard\");\n  });\n\n  test.afterAll(async () => {\n    await context.close();\n  });\n\n  test(\"1 - navigate to Pay Bills\", async () => {\n    await page.getByText(\"Pay Bills\").click();\n    await expect(page.getByText(\"Pay Bills\")).toBeVisible();\n  });\n\n  test(\"2 - read Billing History\", async () => {\n    await page.getByText(\"Billing History\").click();\n    await expect(page.getByText(\"Billing History\")).toBeVisible();\n  });\n});\n```\n\n→ **`2 passed`**.\n\n**Four things changed, and all four are load-bearing.**\n\n`browser.newContext()` creates one browser session the tests share. `beforeAll` builds it **once** for the file, not per test. `afterAll` closes it — without that the context leaks for the whole run. And `mode: \"serial\"` stops the two tests running in parallel, which would otherwise have them fighting over one page.\n\n**Note what the tests no longer take.** No `{ page }` argument — they close over the shared `page` instead. Accept the fixture and you get a fresh isolated page again, which is the default you were working around.\n\n**And the cost, which the lesson is honest about.** You have given up isolation deliberately. Test 2 now depends on test 1, so a failure in 1 cascades, and you cannot run 2 alone. That is an acceptable trade for a genuinely sequential journey and a bad habit everywhere else. Week 3 shows the version you reach for far more often: `storageState`, which gives every test a logged-in session *without* giving up isolation."
+        },
+        {
+          "number": 3,
+          "difficulty": "Reflection",
+          "statement": "Day 5.3 named five pieces: `browser.newContext()`, `test.beforeAll`, `test.afterAll`,\n`test.describe`, and `mode: \"serial\"`.\n\n**Question:** if you wanted that shared context built exactly **once** for every test in\na whole spec file — not re-created per test — which single hook name from that list is\nthe one doing that job, and why does it have to be the one that runs *before the first\ntest*, rather than one that runs before *each* test?\n\nWrite your answer as a comment in a cell below. There's no code to run here — check\nyour reasoning against [Week 3, Day 2.2](/learn/w3/d2/p2) once you get there.",
+          "stub": "// Problem 3 — your reasoning here, as a comment. No code to run.",
+          "solution": "**The answer: `test.beforeAll`.**\n\n> `test.beforeAll` runs **once per file**, before any test in it. So a context created inside it is built exactly once and every test in the file shares it. `test.beforeEach` would run before *each* test and rebuild the context every time — which is the per-test isolation you already get for free, at the cost of a login on every test.\n\n**Where the other four sit:**\n\n| Piece | What it does |\n|---|---|\n| `browser.newContext()` | Creates the shared session. It is *what* is shared. |\n| **`test.beforeAll`** | Runs it **once**. It is *why* it is shared rather than rebuilt. |\n| `test.afterAll` | Closes it once, at the end. Without this the context leaks. |\n| `test.describe` | Groups the tests so \"once per file\" has a scope, and gives the block a name in the report. |\n| `mode: \"serial\"` | Stops them running in parallel and fighting over the one page. |\n\n**The distinction worth holding on to.** `beforeAll` is about *how often setup runs*; `mode: \"serial\"` is about *whether tests may overlap*. They are easy to conflate because a shared context needs both, but they answer different questions — and in Week 3, when you meet hooks properly, you will use each of them without the other.\n\n> `afterAll` is the one people leave out. It costs nothing on a two-test file and quietly exhausts a CI runner on a large suite."
+        }
+      ]
+    }
+  ]
+}

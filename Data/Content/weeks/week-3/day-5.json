@@ -1,0 +1,235 @@
+{
+  "schema": "course-day/v1",
+  "week": 3,
+  "day": 5,
+  "title": "Running the suite",
+  "locked": true,
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "TypeScript for the projects array",
+      "tab_label": "TypeScript",
+      "source_notebook": "week3/day5_1.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 3, Day 5.1 — TypeScript for the projects array\n\nOne concept, and you have most of it already. Today's config holds a **list** of browsers.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs."
+        },
+        {
+          "type": "markdown",
+          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | Arrays of objects, and spread inside one | `projects: [ { … }, { … } ]` |\n\nAlready covered — links only: objects in [Day 1.1](/learn/w3/d1/p1); `===` in\n[Day 4.1](/learn/w3/d4/p1); `process.env` and ternaries appear again today."
+        },
+        {
+          "type": "markdown",
+          "text": "## Arrays of objects\n\nSquare brackets hold a list; each item here is an object. The `projects` setting is exactly this\nshape, and its **length decides how many times every test runs**."
+        },
+        {
+          "type": "example",
+          "text": "const projects = [\n  { name: \"chromium\", use: { channel: \"chrome\" } },\n  { name: \"firefox\",  use: {} },\n  { name: \"webkit\",   use: {} },\n];\n\nconsole.log(\"how many browsers:\", projects.length);\nconsole.log(\"names:\", projects.map((p) => p.name));\n\nconst tests = 5;\nconsole.log(`${tests} tests x ${projects.length} projects = ${tests * projects.length} runs`);"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** `3`, `[ \"chromium\", \"firefox\", \"webkit\" ]`, then `5 tests x 3 projects = 15 runs`.\n\nThat multiplication is the thing to internalise. Adding a browser doesn't add a few tests — it\nmultiplies the whole suite."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Spread inside a project\n\nPlaywright ships ready-made device descriptors. `...devices[\"Desktop Firefox\"]` copies all of its\nsettings in, and anything written **after** the spread overrides it."
+        },
+        {
+          "type": "example",
+          "text": "const desktopFirefox = { browserName: \"firefox\", viewport: { width: 1280, height: 720 } };\n\nconst myFirefox = { ...desktopFirefox, viewport: { width: 1920, height: 1080 } };\n\nconsole.log(\"preset: \", JSON.stringify(desktopFirefox));\nconsole.log(\"mine:   \", JSON.stringify(myFirefox));\n\n// Override BEFORE the spread and the preset wins — almost never what you want.\nconst broken = { viewport: { width: 1920, height: 1080 }, ...desktopFirefox };\nconsole.log(\"broken: \", JSON.stringify(broken.viewport));"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** the preset at 1280×720, `mine` at 1920×1080, and `broken` back at **1280×720**.\n\nThat third line is a real config bug: your override silently does nothing. The spread goes **first**.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `projects: [ … ]` | Length multiplies your whole suite. |\n| `{ ...preset, override }` | Spread first, overrides after. |\n\n**Next:** [Day 5.2 — Running the suite](/learn/w3/d5/p2)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Running the suite",
+      "tab_label": "Running the suite",
+      "source_notebook": "week3/day5_2.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 3, Day 5.2 — Running the suite\n\nYour users don't all use Chrome, CI is noisier than your laptop, and your colleagues don't want\nyour settings. By the end of this lesson the same tests run on three browsers, retry when the\nnetwork hiccups, and take their orders from the command line rather than the shared config.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout."
+        },
+        {
+          "type": "markdown",
+          "text": "## Projects: write once, run everywhere\n\nA **project** is a named set of settings to run the whole suite under. Add three browsers and every\ntest runs three times, with no change to any test.\n\n```ts\nprojects: [\n  { name: \"chromium\", use: { ...devices[\"Desktop Chrome\"] } },\n  { name: \"firefox\",  use: { ...devices[\"Desktop Firefox\"] } },\n  { name: \"webkit\",   use: { ...devices[\"Desktop Safari\"] } },\n],\n```\n\nYou can't tell a customer to use Edge — so you test what they'll actually use. Browser-specific\ndefects are real, which is exactly why [Day 4](/learn/w3/d4/p2)'s conditional skip exists.\n\n> The root config here enables **Chromium only**, on purpose — it's shared by every week. Days 4\n> and 5 bring their own configs instead of editing it."
+        },
+        {
+          "type": "markdown",
+          "text": "## Example 1 — three tests, nine runs"
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week3/generated/day4-browsers.config.ts\", `// Week 3, Days 4-5 — a config with more than one browser.\n//\n// The root playwright.config.ts deliberately enables Chromium only. Conditional\n// skipping needs several browsers to be worth anything, so this file adds them\n// without touching the shared config every other week depends on.\n//\n// Run with:  npx playwright test -c week3/generated/day4-browsers.config.ts\nimport { defineConfig, devices } from \"@playwright/test\";\n\nexport default defineConfig({\n  testDir: \".\",\n  testMatch: [\"day4-*.spec.ts\", \"day5-*.spec.ts\"],\n  fullyParallel: true,\n  // 3 projects x a handful of tests: parallelism is what keeps this quick.\n  workers: 3,\n  reporter: [[\"list\"]],\n  use: {\n    baseURL: \"https://test-automation-banking.vercel.app\",\n    trace: \"retain-on-failure\",\n  },\n  projects: [\n    { name: \"chromium\", use: { ...devices[\"Desktop Chrome\"] } },\n    { name: \"firefox\", use: { ...devices[\"Desktop Firefox\"] } },\n    { name: \"webkit\", use: { ...devices[\"Desktop Safari\"] } },\n  ],\n});\n`);\n\nawait writeProjectFile(\"week3/generated/day5-crossbrowser.spec.ts\", `// Week 3, Day 5 — the same tests, once per browser.\n//\n// Nothing here is browser-specific. That is the point: you write the test once and\n// the \\`projects\\` array decides how many times it runs.\n//\n//   npx playwright test -c week3/generated/day4-browsers.config.ts\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Cross-browser\", () => {\n  test(\"signing in works on every engine\", async ({ page, browserName }) => {\n    await loginAs(page);\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n\n    // \\`browserName\\` is a built-in fixture: \"chromium\" | \"firefox\" | \"webkit\".\n    expect([\"chromium\", \"firefox\", \"webkit\"]).toContain(browserName);\n  });\n\n  test(\"the dashboard tiles navigate on every engine\", async ({ page }) => {\n    await loginAs(page);\n    await page.getByText(\"Transaction History\", { exact: true }).click();\n    await expect(page).toHaveURL(/accountDashboard/);\n  });\n\n  test(\"logging out works on every engine\", async ({ page }) => {\n    await loginAs(page);\n    await page.getByRole(\"button\", { name: \"LogOut\" }).click();\n    await expect(page.getByPlaceholder(\"Enter Email\")).toBeVisible();\n  });\n});\n`);\n\nawait runSpec(\"week3/generated/day5-crossbrowser.spec.ts\", { extraArgs: [\"-c\", \"week3/generated/day4-browsers.config.ts\"] });"
+        },
+        {
+          "type": "markdown",
+          "text": "> ▶ **Run it yourself:** `npx playwright test -c week3/generated/day4-browsers.config.ts`\n\n**Expected:** `9 passed` — three tests × three browsers.\n\nNothing in that spec is browser-specific. `browserName` is a built-in fixture telling a test which\nengine it's on, and the only place it appears is one assertion proving the value is one of the\nthree.\n\n**All nine passed** — this app behaves identically on all three engines. That's the good case; Day 4\nprepared you for the other one."
+        },
+        {
+          "type": "markdown",
+          "text": "## Workers: how nine runs finish quickly\n\nPlaywright runs tests in parallel across **workers** — separate processes, each with its own\nbrowser.\n\n| Setting | Meaning |\n|---|---|\n| `workers: 3` | three tests at a time |\n| `workers: 1` | one at a time — required for dependent tests ([Day 2.2](/learn/w3/d2/p2)) |\n| `workers: undefined` | about half your CPU cores |\n| `fullyParallel: true` | tests **within** a file may run in parallel too |\n\nCross-browser tests are ideal for parallelism — nothing is shared, so nothing can interfere.\nContrast Day 2's dependent chain, which had to be `serial`."
+        },
+        {
+          "type": "example",
+          "text": "const tests = 9;\nconst perTest = 3.5;              // seconds, roughly, from the run above\n\nfor (const workers of [1, 3, 9]) {\n  const wall = Math.ceil(tests / workers) * perTest;\n  console.log(`workers=${String(workers).padEnd(2)} -> about ${wall.toFixed(1)}s wall clock`);\n}\nconsole.log(\"\\n(diminishing returns past your core count — processes start competing)\");"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** roughly `31.5s`, `10.5s`, `3.5s`.\n\nReal numbers won't match exactly — each worker starts its own browser. Past your core count it gets\n*slower*, because processes fight for CPU.\n\n### Headless and headed\n\n`headless: true` (the default) runs with no window: faster, and the only sensible choice in CI.\n\n| Where | How |\n|---|---|\n| One run | `npx playwright test --headed` |\n| Every run | `use: { headless: false }` in config |\n| Slowed down | `use: { launchOptions: { slowMo: 500 } }` |\n\n**Prefer the CLI flag.** Committing `headless: false` means CI tries to open windows on a machine\nwith no display, and every colleague inherits your debugging session."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Retries: a third possible result\n\nA test fails because the server was slow for two seconds. Nothing is broken, but your suite is red.\nTurn retries on and the report gains a category:\n\n| Result | Means |\n|---|---|\n| **passed** | worked first time |\n| **flaky** | failed, then **passed** on a retry |\n| **failed** | failed every attempt |\n\nThat middle row is the value. Without retries a flake is indistinguishable from a real break, and\nyou spend the morning investigating a network blip.\n\n```ts\nretries: process.env.CI ? 2 : 0,\n```\n\nThis repo's root config already does that — **2 in CI, none locally** — which looks backwards until\nyou see the reasoning:\n\n| | Retries | Why |\n|---|---|---|\n| Your laptop | **0** | see the failure at once; re-run by hand if needed |\n| CI | **2** | a shared machine has load and network noise nobody can reproduce later |"
+        },
+        {
+          "type": "markdown",
+          "text": "## Example 2 — a genuinely flaky test\n\n`test.info().retry` is `0` on the first attempt and `1` on the first retry. A test asserting\n`retry > 0` therefore **must** fail once and then succeed — flakiness on demand."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week3/generated/day5-retries.config.ts\", `// Week 3, Day 5 — a config with retries switched on.\n//\n// The root config sets \\`retries: process.env.CI ? 2 : 0\\`, so locally there are no\n// retries and a flaky-by-design demo would simply fail. This config turns them on\n// for one file, without changing what anyone else runs.\n//\n// The demo file is deliberately NOT named *.spec.ts, so the root config's\n// testMatch (\"week*/**/*.spec.ts\") never collects it and the default suite stays\n// green.\n//\n// Run with:  npx playwright test -c week3/generated/day5-retries.config.ts\nimport { defineConfig } from \"@playwright/test\";\n\nexport default defineConfig({\n  testDir: \".\",\n  testMatch: [\"day5-retries.retrydemo.ts\"],\n  retries: 2,\n  reporter: [[\"list\"]],\n});\n`);\n\nawait writeProjectFile(\"week3/generated/day5-retries.retrydemo.ts\", `// Week 3, Day 5 — what a retry actually does.\n//\n// Filename note: this is \\`.retrydemo.ts\\`, not \\`.spec.ts\\`, on purpose. The root\n// config collects every week*/**/*.spec.ts, and a file that fails on its first\n// attempt would turn the default suite red. Its own config picks it up instead.\n//\n//   npx playwright test -c week3/generated/day5-retries.config.ts\nimport { test, expect } from \"@playwright/test\";\n\ntest.describe(\"Retries\", () => {\n  test(\"a test that only passes on the second attempt\", async () => {\n    // test.info().retry is 0 on the first run, 1 on the first retry, and so on.\n    const attempt = test.info().retry;\n\n    // Fails on attempt 0, passes on attempt 1. This is what a genuinely flaky\n    // test looks like from the runner's point of view.\n    expect(attempt).toBeGreaterThan(0);\n  });\n\n  test(\"a test that passes first time is never retried\", async () => {\n    expect(test.info().retry).toBe(0);\n  });\n\n  test(\"retries do not reset state you left outside the test\", async () => {\n    // Each retry is a FRESH test with fresh fixtures — but module-level state\n    // survives, which is a common source of confusing retry behaviour.\n    expect(test.info().retry).toBeGreaterThanOrEqual(0);\n  });\n});\n`);\n\nawait runSpec(\"week3/generated/day5-retries.retrydemo.ts\", { extraArgs: [\"-c\", \"week3/generated/day5-retries.config.ts\"] });"
+        },
+        {
+          "type": "markdown",
+          "text": "> ▶ **Run it yourself:** `npx playwright test -c week3/generated/day5-retries.config.ts`\n\n**Expected:** `1 flaky`, `2 passed` — and **exit code 0**. The run is green.\n\nTwo deliberate choices in those files worth copying:\n\n**Its own config**, because the root config sets `retries: 0` locally, so a flaky-by-design test\nwould simply fail there.\n\n**Named `.retrydemo.ts`, not `.spec.ts`.** The root config collects `week*/**/*.spec.ts`, so a\n`.spec.ts` that fails its first attempt would turn the whole default suite red on a clean checkout.\nNaming it out of range keeps the main suite honest — verified: the root suite collects **0** tests\nfrom it."
+        },
+        {
+          "type": "markdown",
+          "text": "## The command line beats the config\n\nEverything above can be overridden for a single run:\n\n```bash\nnpx playwright test --project=webkit\nnpx playwright test --workers=1 --headed\nnpx playwright test --retries=2\nnpx playwright test --repeat-each=10\n```\n\n**Precedence: command line > config file.** Give nothing on the command line and the config wins.\n\nThat order exists for a reason. Your config is shared. If the team default is three browsers and you\nwant one run on WebKit, commenting out two projects changes *everyone's* next run — and you will\nforget to put it back. `--project=webkit` changes only your run, with nothing to undo."
+        },
+        {
+          "type": "example",
+          "text": "const overrides = [\n  { flag: \"--project=webkit\",  replaces: \"which projects run\" },\n  { flag: \"--workers=1\",       replaces: \"workers\" },\n  { flag: \"--retries=2\",       replaces: \"retries\" },\n  { flag: \"--headed\",          replaces: \"use.headless\" },\n  { flag: \"--debug\",           replaces: \"page.pause() in the script\" },\n  { flag: \"--repeat-each=10\",  replaces: \"nothing — it re-runs, to prove a flake\" },\n];\n\nfor (const o of overrides) console.log(`${o.flag.padEnd(18)} -> ${o.replaces}`);"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** six lines.\n\nThe last one isn't an override — it's how you *prove* a test is flaky rather than guessing.\n\n### One flag that gets refused\n\n```bash\nnpx playwright test --browser=webkit\n# Error: Cannot use --browser option when configuration file defines projects.\n```\n\nOnce your config defines `projects`, the browser is a property of a project, so `--project=webkit`\nis the flag you want. Worth knowing, because the error reads like \"WebKit isn't installed\"."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Best practices\n\n- **Add browsers when you have users on them.** Each one multiplies runtime.\n- **Match workers to cores**, not to ambition.\n- **Retries in CI, not locally.** Two is plenty; three means it's broken.\n- **Read the flaky count every run.** Green with six flaky tests is a warning.\n- **`--project` and `--headed` on the command line**, never committed.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Executable doesn't exist` | that engine isn't installed | `npx playwright install firefox webkit` |\n| Suite 3× slower after adding browsers | that's the multiplication | raise workers, or cut projects |\n| Dependent tests fail with several workers | they need ordering | `mode: \"serial\"` on the group |\n| CI hangs with no output | `headless: false` committed | remove it; use `--headed` |\n| \"flaky\" treated as \"passed\" | it *is* green — but it failed once | investigate; don't ignore it |\n| `Cannot use --browser` | your config defines `projects` | use `--project=<name>` |\n| Viewport override ignored | it came before the spread | spread first ([Day 5.1](/learn/w3/d5/p1)) |\n\n**Next:** [Day 5.3](/learn/w3/d5/p3) — a matrix and a retry policy you can afford."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "A matrix and a policy you can afford",
+      "tab_label": "A matrix and a policy you can…",
+      "source_notebook": "week3/day5_3.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 3, Day 5.3 — A matrix and a policy you can afford\n\nSame settings as [Day 5.2](/learn/w3/d5/p2). No new API. Two decisions: **which browsers, when** — and\n**what retries do to a team over months.**"
+        },
+        {
+          "type": "markdown",
+          "text": "## The browser cost is multiplicative\n\n400 tests at 20 seconds is about 2¼ hours on one browser with one worker. Three browsers is nearly\n7. Nobody waits 7 hours for a pull request.\n\n| Strategy | Per PR | Nightly |\n|---|---|---|\n| Everything everywhere | 3 browsers × all tests | same |\n| **Tiered** | Chromium × all tests | 3 browsers × all tests |\n| Tagged | Chromium × all + 3 browsers × smoke | 3 browsers × all |\n\nTiered is what most teams land on: **fast feedback on one engine, full coverage overnight.** A\nFirefox-only bug is worth finding in twelve hours; it isn't worth twenty minutes on every push."
+        },
+        {
+          "type": "example",
+          "text": "const TESTS = 400, SECONDS = 20, WORKERS = 8;\nconst wall = (tests: number, projects: number) =>\n  ((tests * projects * SECONDS) / WORKERS / 60).toFixed(0);\n\nconsole.log(`everything everywhere : ${wall(TESTS, 3).padStart(4)} min per PR`);\nconsole.log(`tiered (PR)           : ${wall(TESTS, 1).padStart(4)} min per PR`);\nconsole.log(`tiered (nightly)      : ${wall(TESTS, 3).padStart(4)} min overnight`);\nconsole.log(`smoke on 3 + full on 1: ${wall(TESTS, 1)} + ${wall(40, 3)} min per PR`);"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** about `50`, `17`, `50`, and `17 + 5` minutes — with 8 workers, which is why they're far\nbelow the single-worker figures above.\n\nRead line two against line one: same coverage per day, **a third of the wait per push**."
+        },
+        {
+          "type": "markdown",
+          "text": "## Retries buy time and hide problems\n\n| Retries help | Retries hurt |\n|---|---|\n| a network blip stops blocking a merge | a genuine race condition looks solved |\n| CI noise stops training people to ignore red | the flaky count becomes wallpaper |\n| a failure is reproduced twice before you're paged | a 1-in-3 test passes and the bug ships |\n\nBoth columns are true at once, which is why retries need a policy rather than a value. The rule that\nworks: **retries make a flake visible; they do not make it acceptable.**"
+        },
+        {
+          "type": "example",
+          "text": "const failRate = [0.5, 0.3, 0.1, 0.02];\n\nconsole.log(\"per-run fail rate -> chance the SUITE still goes red, by retries\");\nfor (const p of failRate) {\n  const cells = [1, 2, 3].map((r) => (p ** (r + 1) * 100).toFixed(2).padStart(6) + \"%\");\n  console.log(`  ${(p * 100).toFixed(0).padStart(3)}%  ->  ${cells.join(\"  \")}`);\n}\nconsole.log(\"                        retries=1  retries=2  retries=3\");"
+        },
+        {
+          "type": "markdown",
+          "text": "**Expected:** a small table.\n\nRead the 10% row: with two retries a test that fails one run in ten reports green **99.9%** of the\ntime. It is still broken one run in ten for your users — you have simply stopped being told.\n\nThat's the argument for reading the flaky count. Retries convert a loud failure into a quiet\nstatistic, and a statistic nobody reads is worse than a red build."
+        },
+        {
+          "type": "markdown",
+          "text": "## Expressing all of it in config\n\nProjects and retries are just data, so the whole shape can depend on the environment:\n\n```ts\nconst isCI = !!process.env.CI;\nconst isNightly = process.env.SUITE === \"nightly\";\n\nexport default defineConfig({\n  workers: isCI ? 4 : undefined,\n  retries: isCI ? 2 : 0,\n  projects: isCI && !isNightly ? [chromium] : [chromium, firefox, webkit],\n});\n```\n\nOne expression per decision, three situations, nobody editing config before a push. This repo's root\nconfig already does the smaller version for `retries` and `forbidOnly`.\n\n### What else a project can vary\n\nBrowsers are the obvious use, not the only one — a project sets **any** `use` option:\n\n| Varies | Example |\n|---|---|\n| viewport | desktop vs `devices[\"iPhone 13\"]` |\n| locale | `use: { locale: \"de-DE\" }` |\n| environment | `use: { baseURL: stagingUrl }` |\n| auth state | signed-in vs anonymous |\n\n## What a reviewer checks\n\n- **Is the PR matrix affordable?** If people skip CI because it's slow, coverage is zero.\n- **Does the nightly matrix run, and does anyone read it?**\n- **Retries guarded by `CI`**, and ≤ 2.\n- **Someone owns the flaky count.**\n- **`headless: false` not committed**; no commented-out projects in a diff.\n\n**Next:** [Day 5.4](/learn/w3/d5/p4) — your turn."
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice",
+      "tab_label": "Practice",
+      "source_notebook": "week3/day5_4.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 3, Day 5.4 — Practice\n\nThree problems. No answer key.\n\nConfigs to copy: `week3/generated/day4-browsers.config.ts` (three engines) and\n`day5-retries.config.ts` (retries on). All three browsers are installed and verified — chromium 151,\nfirefox 153, webkit 26.\n\n**Do not edit the root `playwright.config.ts`** in any of these.\n\n> Stuck past twenty minutes? Back to [Day 5.2](/learn/w3/d5/p2)."
+        },
+        {
+          "type": "problem-ref",
+          "text": "1"
+        },
+        {
+          "type": "problem-ref",
+          "text": "2"
+        },
+        {
+          "type": "problem-ref",
+          "text": "3"
+        },
+        {
+          "type": "markdown",
+          "text": "## When you're done\n\n**The `git status` check in Part B is the real lesson.** Every setting you can pass on the command\nline is one you never have to remember to revert — and never accidentally impose on a colleague.\n\n**And your Tuesday answer:** if it's honestly \"Wednesday morning\", that's a defensible trade — fast\npushes for a half-day delay on browser-specific bugs. If it's \"never, because nobody reads the\nnightly\", the config isn't the problem.\n\n## Where week 3 landed\n\n| Day | Built |\n|---|---|\n| [Day 1](/learn/w3/d1/p1) | timeouts, the two deadlines, where settings belong |\n| [Day 2](/learn/w3/d2/p1) | isolation, hooks, `page` vs `browser`, dependent tests |\n| [Day 3](/learn/w3/d3/p1) | one shared class, the road to a Page Object Model |\n| [Day 4](/learn/w3/d4/p1) | skip, fixme, only, conditional skipping |\n| Day 5 | projects, workers, retries, and the command line |\n\n**Next:** [Week 4 Day 1](/learn/w4/d1/p1) — debugging a failure you can't reproduce by reading it."
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": "Beginner",
+          "statement": "**Build.** Prove the multiplication and the retry categories with your own numbers.\n\n1. Two simple tests against the dashboard; run under the root config — record count and time\n2. Run the same two under the three-browser config — record both again\n3. Now write a test that fails on its first attempt and passes on the second, under a config with\n   `retries: 1`; record the tally **and the exit code**\n\n**Check yourself.** The count in step 2 is exactly 3×, the time is **less** than 3×. Step 3 says\n`flaky` and exits **0**. Explain the timing gap in one sentence.\n\n> **Hint** — `test.info().retry` is the attempt number. Name that file so the root config can't\n> collect it.",
+          "stub": "// Problem 1 — your code here.",
+          "solution": null
+        },
+        {
+          "number": 2,
+          "difficulty": "Intermediate",
+          "statement": "**Build.** Measure a real flake rate instead of guessing.\n\n1. Write a test that fails roughly half the time — e.g. assert on something with a deadline just\n   barely too short\n2. Run with `--repeat-each=20` and **no** retries; count the failures\n3. Run again with `--retries=2`; record the tally\n4. State the measured fail rate, and what retries did to the *reported* result\n\n**Check yourself.** Your two numbers disagree and you can say why in one sentence. That gap is the\nwhole argument of [Day 5.3](/learn/w3/d5/p3).\n\n> **Hint** — don't use randomness; make it timing-based so the flake is real.",
+          "stub": "// Problem 2 — your code here.",
+          "solution": null
+        },
+        {
+          "number": 3,
+          "difficulty": "Advanced",
+          "statement": "**Build.** A tiered config, plus four command-line invocations with no file edits.\n\n**Part A — the config.** Three shapes from one file:\n\n1. default (a laptop): Chromium only, workers left to Playwright, `retries: 0`\n2. `CI=1`: Chromium only, `workers: 2`, `retries: 2`\n3. `CI=1 SUITE=nightly`: all three browsers, `retries: 2`\n\n**Part B — the command line.** Take any week3 spec and run it four ways using **only** flags: default;\none browser; headed with a single worker; one test filtered with retries off. Record each command and\ntally.\n\n**Where.** A config plus a short notes file in `week3/generated/`.\n\n**Constraints — these are the exercise:**\n\n- **No edit to the root config**, and no `headless: false` committed anywhere\n- Every environment decision is **one expression**, not a commented-out block\n- Part B changes **no files at all**\n\nThen answer in a comment: *a Firefox-only bug appears on Tuesday morning. Under your config, when is\nit caught — and is that acceptable?*\n\n**Check yourself.** Three different project counts from three invocations. For Part B, `git status`\nshows **nothing modified**. One of the four flags gets *refused* — find which and read the error\nproperly.\n\n> **Hint** — `process.env.CI` is a string or `undefined`; `!!` makes it the boolean a ternary wants.\n> The Tuesday question has an answer in hours.",
+          "stub": "// Problem 3 — notes, commands, and code.",
+          "solution": null
+        }
+      ]
+    }
+  ]
+}

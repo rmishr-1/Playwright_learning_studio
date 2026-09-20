@@ -1,0 +1,235 @@
+{
+  "schema": "course-day/v1",
+  "week": 6,
+  "day": 4,
+  "title": "Jenkins",
+  "locked": true,
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "Prerequisites check",
+      "tab_label": "TypeScript",
+      "source_notebook": "week6/day4_1.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 6, Day 4.1 - Prerequisites check\n\n**No new TypeScript today.** Jenkins runs commands; it does not care what language wrote them.\n\n| In play | Taught in |\n|---|---|\n| `Deno.Command`, exit codes | [day3_1](/learn/w6/d3/p1) |\n| Objects as config | [week3/day1_1](/learn/w3/d1/p1) |\n| `package.json` scripts | [week5/day1_3](/learn/w5/d1/p3) |\n\nThe one idea worth five minutes is not syntax - it is that **`package.json` is an interface**.\n\n**Next:** [Day 4.2 - Jenkins](/learn/w6/d4/p2)"
+        },
+        {
+          "type": "markdown",
+          "text": "## `package.json` scripts as the contract\n\nA `scripts` entry gives a long command a short name:\n\n```json\n\"scripts\": {\n  \"test:smoke\": \"playwright test -c week5/generated/day1-smoke.config.ts\"\n}\n```\n\n`npm run test:smoke` now runs it. The reason this matters for CI:\n\n| CI knows | CI does not need to know |\n|---|---|\n| `npm run test:smoke` | which config, which folder, which grep, which browser |\n\nChange the config and CI keeps working. Encode the config **in** the CI job and every change is\na change in two places - one of which needs a Jenkins login."
+        },
+        {
+          "type": "example",
+          "text": "// This repo's scripts, read from package.json rather than remembered.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst pkg = JSON.parse(await Deno.readTextFile(`${REPO_ROOT}/package.json`));\n\nfor (const [name, cmd] of Object.entries(pkg.scripts)) {\n  console.log(`npm run ${name.padEnd(16)} -> ${cmd}`);\n}"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "The last three were added for this week. `test:smoke` and `test:regression` point at the two\nconfigs from [week5/day1_2](/learn/w5/d1/p2) - so the suites you built there are now\ncallable by name, which is exactly what a CI job needs.\n\n**Next:** [Day 4.2 - Jenkins](/learn/w6/d4/p2)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Jenkins",
+      "tab_label": "Jenkins",
+      "source_notebook": "week6/day4_2.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 6, Day 4.2 - Jenkins\n\nSo far every test run has started with you typing a command. That does not survive contact with a\nteam: someone is on holiday, someone deploys at 11pm, someone forgets.\n\nJenkins is a server that runs your command instead.\n\n> **Mode: read-and-do.** Jenkins is a web UI, so unlike everything else in this course **these\n> steps are not executed by a cell.** The *commands* Jenkins runs are - at the bottom of this\n> lesson."
+        },
+        {
+          "type": "markdown",
+          "text": "## Where it fits\n\n| Tool | Job |\n|---|---|\n| **GitHub** | stores the code - [day3_2](/learn/w6/d3/p2) |\n| **Jenkins** | fetches it and runs it |\n\nAnd the term: **CI/CD** - continuous integration, continuous deployment. Developers integrate and\ndeploy; your tests are what makes that safe. Which is why a tester ends up in the Jenkins UI."
+        },
+        {
+          "type": "markdown",
+          "text": "## Setup, once\n\n| Step | Detail |\n|---|---|\n| Install | `jenkins.io/download` - the Windows installer is fine |\n| Needs **Java** | Jenkins runs on the JVM. Java **17 or 21** (LTS) |\n| Opens at | `http://localhost:8080` |\n| First screen asks for | an admin password, in a file whose path it prints |\n| Then | \"Install suggested plugins\", and create your own username |\n\n> Java version bites people. Check with `java -version`. A very new JDK is **not** safer here -\n> Jenkins supports specific LTS releases, and this machine's Java 26 is outside that list."
+        },
+        {
+          "type": "example",
+          "text": "// Before installing anything: does this machine meet Jenkins' requirements?\nasync function probe(cmd: string, args: string[]): Promise<string> {\n  try {\n    const c = new Deno.Command(cmd, { args, stdout: \"piped\", stderr: \"piped\" });\n    const o = await c.output();\n    const t = new TextDecoder().decode(o.stdout) + new TextDecoder().decode(o.stderr);\n    return t.trim().split(\"|\")[0].split(String.fromCharCode(10))[0];\n  } catch {\n    return \"(not installed)\";\n  }\n}\n\nconsole.log(\"java :\", await probe(\"java\", [\"-version\"]));\nconsole.log(\"node :\", await probe(\"node\", [\"--version\"]));\n\n// Is Jenkins already answering on its default port?\ntry {\n  const res = await fetch(\"http://localhost:8080\", {\n    signal: AbortSignal.timeout(3000),\n  });\n  console.log(\"jenkins on :8080 -> HTTP\", res.status);\n} catch {\n  console.log(\"jenkins on :8080 -> not running (expected, if you have not installed it)\");\n}"
+        },
+        {
+          "type": "markdown",
+          "text": "Check the Java line against Jenkins' supported releases (**17** or **21**) before you install.\nA newer JDK is not safer here - it is simply untested, and this machine reports one that is\noutside the supported list."
+        },
+        {
+          "type": "markdown",
+          "text": "## Job 1 - run the tests already on this machine\n\n**New Item → name it `playwright_local_test` → Freestyle project → OK.**\n\n| Section | What to set |\n|---|---|\n| Source Code Management | **None** - the code is already here |\n| General → Advanced → **Use custom workspace** | the folder holding your `package.json` |\n| Build Steps → Add → **Execute Windows batch command** | `npm run test:smoke` |\n\nThen **Build Now**, and open **Console Output** to watch it.\n\nThe custom workspace is the part that confuses everyone: without it Jenkins runs in **its own**\nempty folder, finds no `package.json`, and the command fails for a reason that looks nothing like\nthe real one."
+        },
+        {
+          "type": "markdown",
+          "text": "## The first build fails. Twice.\n\nBoth failures are expected on a fresh agent, and both are one-time fixes.\n\n| Console says | Cause | Fix |\n|---|---|---|\n| `'playwright' is not recognized...` | no packages installed | add `npm ci` above your command |\n| `Executable doesn't exist at ...` / browser missing | no browser binaries | add `npx playwright install --with-deps` |\n\nRun each once, then **delete it from the build step** - they are setup, not part of every run.\n\n| Command | Why not `npm install` |\n|---|---|\n| `npm ci` | installs the **exact** locked versions and fails if the lockfile disagrees. Repeatable, which is the whole point of CI |"
+        },
+        {
+          "type": "markdown",
+          "text": "## Job 2 - one script instead of the suite\n\nSame job, different batch command - anything you can type locally:\n\n```\nnpx playwright test week6/generated/day1-pom-structure.spec.ts\n```\n\n## Job 3 - fetch the code from GitHub\n\nThis is the one that matters, because it stops depending on your laptop.\n\n| Section | What to set |\n|---|---|\n| Source Code Management | **Git** |\n| Repository URL | your repo's HTTPS clone URL |\n| Credentials | none for a public repo; required for a private one |\n| Branches to build | `*/master` - **or `*/main`.** See [day3_2](/learn/w6/d3/p2) |\n| Build Steps | `npm run test:smoke`, as before |\n\nNo custom workspace now: Jenkins clones into a workspace it owns. That is the difference between\nthe two jobs - *where the code comes from*, nothing else."
+        },
+        {
+          "type": "markdown",
+          "text": "## The part that IS verifiable\n\nEverything above is clicking. The batch command is where builds actually fail, so run the\nsequence here."
+        },
+        {
+          "type": "example",
+          "text": "import { writeProjectFile, REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\n// The same commands a Jenkins build step runs - minus npm ci.\n\n// Backslashes before ` and ${ because the file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/day4-ci-commands.ts\", `// Week 6, Day 4 — the commands a Jenkins job actually runs, run here.\n//\n// Jenkins itself is a web UI you click; that part cannot be verified by a script.\n// What CAN be verified is the batch command you paste into it, and that is the part\n// that fails for real people. So this runs the sequence locally.\n//\n//   deno run -A week6/generated/day4-ci-commands.ts\n//\n// Written by a cell in week6/day4_2.ipynb.\n\nconst NPX = Deno.build.os === \"windows\" ? \"npx.cmd\" : \"npx\";\nconst NPM = Deno.build.os === \"windows\" ? \"npm.cmd\" : \"npm\";\n\nasync function step(label: string, cmd: string, args: string[]): Promise<boolean> {\n  console.log(\\`\\\\n--- \\${label} ---\\`);\n  console.log(\\`$ \\${cmd === NPX ? \"npx\" : \"npm\"} \\${args.join(\" \")}\\`);\n  const t0 = performance.now();\n  const p = new Deno.Command(cmd, { args, stdout: \"piped\", stderr: \"piped\" });\n  const { code, stdout, stderr } = await p.output();\n  const out = new TextDecoder().decode(stdout) + new TextDecoder().decode(stderr);\n  const ms = Math.round(performance.now() - t0);\n  const tail = out.trim().split(\"\\\\n\").slice(-3).map((l) => \"  \" + l.trim()).join(\"\\\\n\");\n  console.log(tail);\n  console.log(\\`  -> exit \\${code} in \\${ms} ms\\`);\n  return code === 0;\n}\n\nconsole.log(\"A Jenkins build step is just these lines, in order.\\\\n\");\n\nconsole.log(\"=== 1. npm ci — SKIPPED, deliberately ===\");\nconsole.log(\"  npm ci DELETES node_modules and rebuilds it from package-lock.json.\");\nconsole.log(\"  That is right for a fresh CI agent and wrong for your working copy,\");\nconsole.log(\"  so this script does not run it. On a Jenkins agent it is step one.\");\nconsole.log(\"  Why \\`npm ci\\` and not \\`npm install\\`: ci installs the EXACT locked\");\nconsole.log(\"  versions and fails if the lockfile disagrees with package.json.\");\n\nconsole.log(\"\\\\n=== 2. npx playwright install --with-deps ===\");\nconsole.log(\"  Downloads the browser binaries. A fresh agent has none, which is the\");\nconsole.log(\"  real cause of 'Executable doesn't exist' on a first Jenkins build.\");\nconsole.log(\"  Already present here, so we only prove the CLI answers:\");\nawait step(\"playwright version\", NPX, [\"playwright\", \"--version\"]);\n\nconsole.log(\"\\\\n=== 3. npm run <suite> — the actual test run ===\");\nconst ok = await step(\"smoke suite\", NPM, [\"run\", \"test:smoke\", \"--silent\"]);\n\nconsole.log(\"\\\\n=== What Jenkins does with that exit code ===\");\nconsole.log(\\`  smoke suite exit 0? \\${ok}\\`);\nconsole.log(\"  Exit 0 -> build goes green. Non-zero -> red. That is the entire\");\nconsole.log(\"  contract between your tests and any CI tool: the exit code.\");\n`);\n\n// Run it the way you would from a terminal.\nconst proc = new Deno.Command(\"deno\", {\n  args: [\"run\", \"-A\", \"week6/generated/day4-ci-commands.ts\"],\n  cwd: REPO_ROOT,\n  stdout: \"piped\",\n  stderr: \"piped\",\n});\nconst { stdout, stderr } = await proc.output();\nconsole.log(new TextDecoder().decode(stdout) + new TextDecoder().decode(stderr));"
+        },
+        {
+          "type": "markdown",
+          "text": "| Line | Meaning |\n|---|---|\n| `npm ci` skipped | it deletes `node_modules` and rebuilds; right on a CI agent, wrong in your working copy |\n| `playwright --version` answers | the CLI resolves - what the first Jenkins failure was really about |\n| smoke suite `exit 0` | **green build.** Non-zero is red. That is the entire contract |"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## A faster loop than either\n\nBefore reaching for CI to run one test: the **Playwright VS Code extension** puts a green arrow\nin the gutter next to every `test()` and `describe()`. Click it and that test runs.\n\n| Want to run | Use |\n|---|---|\n| One test, while writing it | the gutter arrow |\n| The suite, before pushing | `npm run test:smoke` |\n| The suite, on every push, without being asked | Jenkins - or [day5_2](/learn/w6/d5/p2) |\n\n## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| No custom workspace on a local job | `package.json` not found |\n| `npm ci` left in the build step forever | every build reinstalls; minutes wasted |\n| `headless: false` in the config | CI has no display; the run hangs or crashes |\n| `*/master` when the branch is `main` | Jenkins clones, finds nothing to build |\n| Encoding the config in the Jenkins job | the next config change needs a Jenkins login |\n\n**Next:** [Day 4.3 - Naming your suites](/learn/w6/d4/p3)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "Naming your suites",
+      "tab_label": "Naming your suites",
+      "source_notebook": "week6/day4_3.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 6, Day 4.3 - Naming your suites\n\nSame `npm run`, arranged so the CI job never changes again.\n\n## The payoff from week 5\n\n[Week 5 Day 1](/learn/w5/d1/p2) built two configs over one spec and asked you to trust that\nit mattered. This is why:\n\n```json\n\"test:smoke\":      \"playwright test -c week5/generated/day1-smoke.config.ts\",\n\"test:regression\": \"playwright test -c week5/generated/day1-regression.config.ts\"\n```\n\n| Jenkins job | Batch command | Runs |\n|---|---|---|\n| `playwright_smoke` | `npm run test:smoke` | **2** tests |\n| `playwright_regression` | `npm run test:regression` | **4** tests |\n\nTwo jobs, two one-word commands, and neither knows what a config is."
+        },
+        {
+          "type": "example",
+          "text": "// Prove the two names really select different suites.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst results: Record<string, string> = {};\n\nfor (const script of [\"test:smoke\", \"test:regression\"]) {\n  const proc = new Deno.Command(Deno.build.os === \"windows\" ? \"npm.cmd\" : \"npm\", {\n    args: [\"run\", script, \"--silent\"],\n    cwd: REPO_ROOT,\n    stdout: \"piped\",\n    stderr: \"piped\",\n  });\n  const { stdout, stderr } = await proc.output();\n  const text = new TextDecoder().decode(stdout) + new TextDecoder().decode(stderr);\n  results[script] = text.split(\"\\n\").filter((l) => /passed|failed/.test(l)).pop()?.trim() ?? \"?\";\n}\n\nfor (const [k, v] of Object.entries(results)) console.log(`npm run ${k.padEnd(16)} -> ${v}`);"
+        },
+        {
+          "type": "markdown",
+          "text": "Two versus four, selected by a name. A CI job that says `npm run test:smoke` keeps working when\nyou change the tag, the browser, or the worker count."
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## The naming a team actually uses\n\n| Script | Runs when | Budget |\n|---|---|---|\n| `test:smoke` | every push | ~2 minutes |\n| `test:sanity` | after a deploy | ~10 minutes |\n| `test:regression` | nightly | as long as it takes |\n\nThe session's advice, and it holds: name them after **when they run**, not after what they touch.\n\"When do I run this?\" is the question a CI job is answering."
+        },
+        {
+          "type": "markdown",
+          "text": "## Jenkins on your laptop is not CI\n\nThe session is candid about this, and it is worth being blunt:\n\n| | Jenkins on your machine | A hosted runner |\n|---|---|---|\n| Who can reach it | you | the team |\n| Runs when your laptop is shut | no | yes |\n| Parallel machines | one | as many as you pay for |\n| Who patches it | **you** | them |\n\nA local Jenkins is a **rehearsal**. It teaches the model - job, workspace, build step, console\noutput, exit code - and that model transfers unchanged to [day5_2](/learn/w6/d5/p2).\n\n## Headless, always\n\nJenkins has no screen. `headless: false` committed to a config is the classic way to make a suite\nthat passes locally and hangs in CI - see [week3/day5_2](/learn/w3/d5/p2).\n\n**Next:** [Day 4.4 - Practice](/learn/w6/d4/p4)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice",
+      "tab_label": "Practice",
+      "source_notebook": "week6/day4_4.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 6, Day 4.4 - Practice\n\nProblems 1-5 need Jenkins installed. If you have not got it yet, 6 and 7 do not."
+        },
+        {
+          "type": "problem-ref",
+          "text": "1"
+        },
+        {
+          "type": "problem-ref",
+          "text": "2"
+        },
+        {
+          "type": "problem-ref",
+          "text": "3"
+        },
+        {
+          "type": "problem-ref",
+          "text": "4"
+        },
+        {
+          "type": "problem-ref",
+          "text": "5"
+        },
+        {
+          "type": "problem-ref",
+          "text": "6"
+        },
+        {
+          "type": "problem-ref",
+          "text": "7"
+        },
+        {
+          "type": "markdown",
+          "text": "**Next:** [Day 5.1 - Prerequisites](/learn/w6/d5/p1)"
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": null,
+          "statement": "**Get to a green build**\nInstall Jenkins, create `playwright_local_test`, point it at this folder, run `npm run test:smoke`.\n\n**Right when:** Console Output ends with `2 passed` and the build is blue/green - and you hit both\nfirst-build failures on the way and can say what each meant.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 2,
+          "difficulty": null,
+          "statement": "**Break the workspace on purpose**\nClear the custom workspace and build again.\n\n**Right when:** you can quote the error and explain it in terms of *which folder* Jenkins was in.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 3,
+          "difficulty": null,
+          "statement": "**Two jobs, one repo**\nCreate `playwright_smoke` and `playwright_regression` as separate jobs.\n\n**Right when:** they report **2** and **4** tests, and neither job mentions a config file.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 4,
+          "difficulty": null,
+          "statement": "**Build from GitHub**\nPush your work ([day3_2](/learn/w6/d3/p2)), then make a job with SCM = Git against your own URL.\n\n**Right when:** it passes with **no** custom workspace set - and you can say where the code came\nfrom and which branch name you used.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 5,
+          "difficulty": null,
+          "statement": "**Make it red**\nChange one assertion so it fails, push, and rebuild.\n\n**Right when:** the build goes red, and you can point at the exit code as the reason - not at the\ntest name.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 6,
+          "difficulty": null,
+          "statement": "**A suite of your own**\nAdd `test:week6` variants to `package.json`: one for Day 1's spec, one for Day 2's.\n\n**Right when:** each runs the count you predicted, and you wrote the prediction down first.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 7,
+          "difficulty": null,
+          "statement": "**Find the headless trap**\nSet `headless: false` in a copy of a config, then run it through `day4-ci-commands.ts`.\n\n**Right when:** you can describe what a CI agent with no display would do with that run, and say\nwhich file should never carry that setting.",
+          "stub": "// Your work here.",
+          "solution": null
+        }
+      ]
+    }
+  ]
+}

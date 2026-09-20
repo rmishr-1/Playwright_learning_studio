@@ -1,0 +1,331 @@
+{
+  "schema": "course-day/v1",
+  "week": 7,
+  "day": 1,
+  "title": "The same code, in TypeScript",
+  "locked": true,
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "What JavaScript gives you",
+      "tab_label": "TypeScript",
+      "source_notebook": "week7/day1_1.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 7, Day 1.1 - What JavaScript gives you\n\nEvery file you have written this course is TypeScript. Today you find out what that actually\nmeans - starting with the language underneath it.\n\n| Already taught | Where |\n|---|---|\n| `let` / `const` / `var`, block scope | [week3/day2_1](/learn/w3/d2/p1) |\n| Arrow functions, `async` | [week1/day5_1](/learn/w1/d5/p1) |\n| `const` and dynamic vs static typing (the idea) | [week2/day2_1](/learn/w2/d2/p1) |\n| Objects, arrays of objects | see the week3/week4 links in `_shared/CONCEPTS.md` |"
+        },
+        {
+          "type": "markdown",
+          "text": "## The eight data types\n\nSeven **primitive**, one not. The eighth - `object` - is the one that holds the others.\n\n| Type | Example |\n|---|---|\n| `string` | `\"Leela\"` |\n| `number` | `42`, `3.14` - one type for both |\n| `boolean` | `true` |\n| `undefined` | declared, never assigned |\n| `null` | deliberately empty |\n| `bigint` | `9007199254740993n` |\n| `symbol` | a guaranteed-unique key |\n| **`object`** | `{}`, `[]`, functions, class instances |\n\n`typeof` tells you which - at run time, because that is the only time JavaScript knows."
+        },
+        {
+          "type": "example",
+          "text": "const samples = [\"Leela\", 42, true, undefined, null, 10n, Symbol(\"id\"), {}, [], () => 1];\n\nfor (const value of samples) {\n  console.log(String(typeof value).padEnd(10), \"<-\", String(value === null ? \"null\" : value).slice(0, 24));\n}"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "Two answers in that output are famous mistakes and worth knowing before they bite:\n\n| Expression | Says | Why it is odd |\n|---|---|---|\n| `typeof null` | `\"object\"` | a bug from 1995, kept for compatibility |\n| `typeof []` | `\"object\"` | an array *is* an object; use `Array.isArray()` |"
+        },
+        {
+          "type": "example",
+          "text": "console.log(\"typeof null      :\", typeof null, \" <- use `value === null`\");\nconsole.log(\"typeof []        :\", typeof []);\nconsole.log(\"Array.isArray([]):\", Array.isArray([]), \"<- the reliable check\");\nconsole.log(\"Array.isArray({}):\", Array.isArray({}));"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Dynamically typed - the variable does not care\n\nYou already met this in [week2/day2_1](/learn/w2/d2/p1): a variable is a label, not a\ncontainer of a fixed shape, so the type comes from whatever value it currently holds. The\nexample there used `const`; the cell below shows the same freedom with `let`, since today's\npoint is what JavaScript allows, not which keyword to prefer."
+        },
+        {
+          "type": "markdown",
+          "text": "## Where that freedom costs you\n\nA typo does not fail. It produces `undefined`, and `undefined` keeps travelling until something\ntries to use it - usually several lines away from the mistake."
+        },
+        {
+          "type": "example",
+          "text": "const booking = { firstname: \"Leela\", totalprice: 120 };\n\n// The typo. No error, no warning.\nconst price = (booking as Record<string, unknown>)[\"totalPrice\"];\nconsole.log(\"booking.totalPrice ->\", price);\n\n// It only breaks HERE, three steps later, blaming the wrong line.\nconst withTax = (price as number) * 1.2;\nconsole.log(\"price * 1.2        ->\", withTax, \"<- NaN, and the typo is nowhere in sight\");"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "`NaN` instead of a number, and the stack trace points at the multiplication rather than at the\ncapital `P`. That is the single problem TypeScript was built to solve.\n\n**Next:** [Day 1.2 - The same code, in TypeScript](/learn/w7/d1/p2)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "The same code, in TypeScript",
+      "tab_label": "The same code, in TypeScript",
+      "source_notebook": "week7/day1_2.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 7, Day 1.2 - The same code, in TypeScript\n\nTypeScript is JavaScript plus a type checker. **Every JavaScript file is already valid\nTypeScript** - which is why switching a project over is mostly renaming `.js` to `.ts`.\n\nBy the end of this lesson you will have annotated variables, arrays, functions and a class,\nand watched the compiler reject something the kernel happily runs.\n\n> **Mode: Deno.** These cells run TypeScript directly. One catch, stated up front and repeated\n> where it matters: **the kernel strips types and does not check them.** `npx tsc --noEmit` is the\n> tool that checks. That split is the whole point of Step 6."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 1 - an annotation is a colon\n\n| JavaScript | TypeScript |\n|---|---|\n| `let name = \"Leela\"` | `let name: string = \"Leela\"` |\n| `let count = 0` | `let count: number = 0` |\n| `let ready = true` | `let ready: boolean = true` |\n\nAnd most of the time you write neither, because TypeScript **infers** it."
+        },
+        {
+          "type": "example",
+          "text": "let userName: string = \"Leela\";      // explicit\nlet visitCount = 0;                  // inferred as number - hover it in an editor\n\nconsole.log(userName, visitCount);\n\n// Inference is not weaker than an annotation. Both of these are `number`,\n// and both refuse a string later.\nlet explicitAge: number = 30;\nlet inferredAge = 30;\nconsole.log(typeof explicitAge, typeof inferredAge);"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "**Annotate what crosses a boundary** - function parameters, return types, exported values.\nLet inference handle the rest; `const x: number = 1` is noise."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 2 - typed arrays\n\n| Written | Means |\n|---|---|\n| `string[]` | every item is a string |\n| `number[]` | every item is a number |\n| `(string \\| number)[]` | each item is one or the other |\n| `any[]` | no checking at all |"
+        },
+        {
+          "type": "example",
+          "text": "const months: string[] = [\"Jan\", \"Feb\", \"Mar\"];\nconst years: number[] = [2024, 2025];\nconst mixed: (string | number)[] = [\"Jan\", 2024];\n\nconsole.log(months.length, years.length, mixed);\n\n// Because TypeScript knows these are strings, it knows what methods exist.\nconsole.log(months.map((m) => m.toUpperCase()));\n\n// years.map((y) => y.toUpperCase());   // uncomment -> tsc: toUpperCase does not\n                                        // exist on type 'number'"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 3 - functions: parameters and the return type\n\nThe return type goes after the parameter list. It is the annotation that catches the most bugs,\nbecause it checks every `return` in the body at once."
+        },
+        {
+          "type": "example",
+          "text": "function add(a: number, b: number): number {\n  return a + b;\n}\n\n// async functions return a Promise, so the annotation says so - the shape you\n// have been reading since week 1.\nasync function fetchName(id: number): Promise<string> {\n  return `user-${id}`;\n}\n\nconsole.log(add(2, 3));\nconsole.log(await fetchName(7));\n\n// add(\"2\", \"3\");    // uncomment -> tsc: Argument of type 'string' is not\n                     // assignable to parameter of type 'number'"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 4 - classes gain types, and nothing else\n\nYou have written these since week 3. TypeScript adds annotations on the fields and the\nconstructor - plus `private` / `protected` / `readonly`, which JavaScript has no equivalent for."
+        },
+        {
+          "type": "example",
+          "text": "class Student {\n  readonly name: string;\n  private score: number;\n\n  constructor(name: string, score: number) {\n    this.name = name;\n    this.score = score;\n  }\n\n  passed(): boolean {\n    return this.score >= 40;\n  }\n}\n\nconst learner = new Student(\"Leela\", 72);\nconsole.log(learner.name, \"passed?\", learner.passed());\n\n// learner.score;        // uncomment -> tsc: 'score' is private\n// learner.name = \"Bob\"; // uncomment -> tsc: 'name' is read-only"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 5 - `enum`, which JavaScript does not have\n\nA fixed set of named values. JavaScript has no such thing, so TypeScript **generates real\nJavaScript** for it - unlike an annotation, which vanishes."
+        },
+        {
+          "type": "example",
+          "text": "enum StatusFamily {\n  Success = 200,\n  Redirect = 300,\n  ClientError = 400,\n  ServerError = 500,\n}\n\nconsole.log(StatusFamily.ClientError);              // 400\nconsole.log(StatusFamily[400]);                     // \"ClientError\" - both directions\n\nfunction familyOf(code: number): string {\n  const base = Math.floor(code / 100) * 100;\n  return StatusFamily[base] ?? \"unknown\";\n}\n\nfor (const code of [201, 302, 404, 500, 999]) {\n  console.log(code, \"->\", familyOf(code));\n}"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "You will meet those four families for real in [day2_2](/learn/w7/d2/p2).\n\n> A union of string literals ([week6/day1_1](/learn/w6/d1/p1)) does a similar job and\n> compiles to nothing. Prefer it unless you need the value at run time, as above."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 6 - the difference that actually matters\n\nTypeScript reports mistakes at **compile time**. JavaScript reports them at **run time**, if at\nall - which for a test suite means \"when the test runs\", and possibly not even then."
+        },
+        {
+          "type": "example",
+          "text": "// Write a deliberate type error to a scratch file, then run the compiler on it.\nconst bad = `const total: number = \"not a number\";\nexport {};\n`;\nawait Deno.writeTextFile(\"scratch-type-error.ts\", bad);\n\nconst check = new Deno.Command(\"npx\", {\n  args: [\"tsc\", \"--noEmit\", \"--strict\", \"scratch-type-error.ts\"],\n  cwd: \"..\",\n  stdout: \"piped\",\n  stderr: \"piped\",\n});\nconst out = await check.output();\nconsole.log(new TextDecoder().decode(out.stdout).trim() || \"(no output)\");\nconsole.log(\"exit code:\", out.code, out.code === 0 ? \"\" : \"<- the build would fail here\");\n\nawait Deno.remove(\"scratch-type-error.ts\");"
+        },
+        {
+          "type": "markdown",
+          "text": "`error TS2322: Type 'string' is not assignable to type 'number'` - before anything ran.\n\n| | JavaScript | TypeScript |\n|---|---|---|\n| Typo in a property name | `undefined`, discovered later | **compile error** |\n| Wrong argument type | maybe works, maybe `NaN` | **compile error** |\n| Needs a compile step | no | yes - but `npx playwright test` does it for you |\n| Runs in a browser directly | yes | no, it is transpiled to JS first |"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 7 - `any` turns it all off\n\n`any` means \"stop checking this\". It is occasionally right, usually a leak, and always worth a\nsecond look in review - the same lesson as [week5/day5_1](/learn/w5/d5/p1)."
+        },
+        {
+          "type": "example",
+          "text": "const parsed: any = JSON.parse('{\"firstname\":\"Leela\"}');\n\n// Both compile. One is a typo. `any` cannot tell you which.\nconsole.log(\"correct:\", parsed.firstname);\nconsole.log(\"typo   :\", parsed.firstName, \"<- undefined, and tsc said nothing\");\n\n// The fix is to describe the shape you expect.\ntype Booking = { firstname: string };\nconst typed = JSON.parse('{\"firstname\":\"Leela\"}') as Booking;\nconsole.log(\"typed  :\", typed.firstname);\n// typed.firstName;   // uncomment -> tsc catches it"
+        },
+        {
+          "type": "your-turn",
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 8 - `import`, not `require`\n\n| Style | Written | Where you see it |\n|---|---|---|\n| CommonJS | `const { test } = require(\"@playwright/test\")` | older Node code |\n| **ES module** | `import { test } from \"@playwright/test\"` | every file in this repo |\n\nThe `import` form is the one TypeScript expects, it is checkable, and it is what the\n`playwright.config.ts` in this repo uses."
+        },
+        {
+          "type": "markdown",
+          "text": "## Common mistakes\n\n| Mistake | What happens |\n|---|---|\n| Annotating everything | noise; inference was already correct |\n| Reaching for `any` to silence an error | the error was the useful part |\n| Expecting the lesson to catch type errors | it strips types - run `npx tsc --noEmit` |\n| `enum` where a string union would do | ships extra JavaScript for nothing |\n| Assuming `.ts` runs in a browser | it is transpiled first |\n\n**Next:** [Day 1.3 - How this repo actually uses it](/learn/w7/d1/p3)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "How this repo actually uses it",
+      "tab_label": "How this repo actually uses it",
+      "source_notebook": "week7/day1_3.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 7, Day 1.3 - How this repo actually uses it\n\nSame annotations, in the files you have been running for six weeks.\n\n## Where the compiler is configured\n\n`tsconfig.json` decides how strict TypeScript is. The two lines that matter most:\n\n| Setting | Effect |\n|---|---|\n| `\"strict\": true` | no implicit `any`, null checks on - **on in this repo** |\n| `\"types\": [\"node\", \"@playwright/test\"]` | which global type packages are in scope |"
+        },
+        {
+          "type": "example",
+          "text": "// This repo's actual compiler settings.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst tsconfig = await Deno.readTextFile(`${REPO_ROOT}/tsconfig.json`);\nconsole.log(tsconfig);"
+        },
+        {
+          "type": "markdown",
+          "text": "`\"exclude\"` names files that can never satisfy this config - the Deno-targeted scripts, which use\n`Deno.*` and top-level `await`. A file in the wrong runtime is not a type error to fix; it is a\nfile to exclude."
+        },
+        {
+          "type": "markdown",
+          "text": "## Types on the boundaries, inference inside\n\nLook at a real helper from this week. Every **parameter** and **return** is annotated; almost\nnothing inside is."
+        },
+        {
+          "type": "example",
+          "text": "import { REPO_ROOT as ROOT_B } from \"../_shared/deno-helpers.ts\";\n\nconst helper = await Deno.readTextFile(`${ROOT_B}/week7/generated/api-helpers.ts`);\n// Just the signatures, to make the pattern obvious.\nfor (const line of helper.split(String.fromCharCode(10))) {\n  if (/^(export (async )?function|export type|export const|\\s+\\w+: )/.test(line)) {\n    console.log(line);\n  }\n}"
+        },
+        {
+          "type": "markdown",
+          "text": "| Line | Why it is annotated |\n|---|---|\n| `request: APIRequestContext` | it comes from outside; nothing else could infer it |\n| `prefix = \"w7\"` | inferred `string` from the default - no annotation needed |\n| `Promise<Account>` | checks every `return` in the body at once |\n| `export type Account = {...}` | one name for a shape used in three files |\n\nThat is the habit: **annotate what crosses a file boundary.**"
+        },
+        {
+          "type": "markdown",
+          "text": "## `type` versus `interface`\n\nBoth name a shape. You will see both in real code.\n\n| | `type` | `interface` |\n|---|---|---|\n| Objects | yes | yes |\n| Unions (`\"a\" \\| \"b\"`) | **yes** | no |\n| Re-opened later to add fields | no | yes |\n| What this repo uses | **`type`** | - |\n\nPick one per project. `type` does everything this course needs, and a union is not optional."
+        },
+        {
+          "type": "markdown",
+          "text": "## Type-only imports\n\n```ts\nimport { expect, type APIRequestContext } from \"@playwright/test\";\n```\n\n`type` in front says *this name is only a type* - so it is erased entirely and never becomes a\nrun-time import. It matters when importing from a file with side effects, and it documents intent\neither way. Same idea you met in [week3/day3_1](/learn/w3/d3/p1)."
+        },
+        {
+          "type": "markdown",
+          "text": "## Migrating a JavaScript project\n\nThe session's claim - \"rename the files and you are 99% done\" - is broadly right, in this order:\n\n| Step | Detail |\n|---|---|\n| 1 | rename `.js` to `.ts` |\n| 2 | add a `tsconfig.json`, **`strict: false`** at first |\n| 3 | run `npx tsc --noEmit` and fix what it finds |\n| 4 | turn `strict` on and fix the next wave |\n| 5 | replace each `any` as you touch that code |\n\nTurning `strict` on at step 2 buries you in errors on day one, which is how migrations get\nabandoned.\n\n**Next:** [Day 1.4 - Practice](/learn/w7/d1/p4)"
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice",
+      "tab_label": "Practice",
+      "source_notebook": "week7/day1_4.ipynb",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Week 7, Day 1.4 - Practice\n\nMost of these use `npx tsc --noEmit`, because the lesson kernel cannot see a type error."
+        },
+        {
+          "type": "problem-ref",
+          "text": "1"
+        },
+        {
+          "type": "problem-ref",
+          "text": "2"
+        },
+        {
+          "type": "problem-ref",
+          "text": "3"
+        },
+        {
+          "type": "problem-ref",
+          "text": "4"
+        },
+        {
+          "type": "problem-ref",
+          "text": "5"
+        },
+        {
+          "type": "problem-ref",
+          "text": "6"
+        },
+        {
+          "type": "problem-ref",
+          "text": "7"
+        },
+        {
+          "type": "markdown",
+          "text": "**Next:** [Day 2.1 - Prerequisites](/learn/w7/d2/p1)"
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": null,
+          "statement": "**Make the compiler talk**\nWrite a scratch `.ts` file with four deliberate errors: wrong argument type, a typo on an object\nproperty, calling a string method on a number, and assigning to a `readonly` field.\n\n**Right when:** `npx tsc --noEmit` reports four errors and you can name each one from its code.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 2,
+          "difficulty": null,
+          "statement": "**Find the NaN**\nReproduce [day1_1](/learn/w7/d1/p1)'s typo bug, then fix it by giving the object a `type`.\n\n**Right when:** the broken version prints `NaN` and the typed version fails to compile instead.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 3,
+          "difficulty": null,
+          "statement": "**Type an array three ways**\nBuild one array as `string[]`, one as `(string | number)[]`, and one as `any[]`. Call\n`.toUpperCase()` on an item of each.\n\n**Right when:** you can say which lines the compiler stops, and which one it lets through and\nwhy that is worse.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 4,
+          "difficulty": null,
+          "statement": "**Annotate a return type, break the body**\nWrite a function declared `: number` that returns a string in one branch.\n\n**Right when:** the compiler catches it, and you can explain why the return annotation found a\nbug that the parameter annotations could not.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 5,
+          "difficulty": null,
+          "statement": "**enum versus union**\nWrite the four status families twice - once as an `enum`, once as a string union. Then compile\nboth and look at what each produces.\n\n**Right when:** you can say which one still exists at run time, and name a case where you would\nneed that.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 6,
+          "difficulty": null,
+          "statement": "**Audit `any` in this repo**\nSearch the week folders for `any`. For each hit, decide: necessary, or a leak?\n\n> Hint: `JSON.parse` returns `any`, so most hits will be near a parse.\n\n**Right when:** you have a count and a one-line verdict per hit.",
+          "stub": "// Your work here.",
+          "solution": null
+        },
+        {
+          "number": 7,
+          "difficulty": null,
+          "statement": "**Turn strict off, then on**\nCopy `tsconfig.json`, set `\"strict\": false`, and compile the repo. Then set it back.\n\n**Right when:** you can name at least one thing that only `strict` catches - and say whether you\nwould start a new project with it on.",
+          "stub": "// Your work here.",
+          "solution": null
+        }
+      ]
+    }
+  ]
+}
