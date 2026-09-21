@@ -4,10 +4,14 @@
  *   npm run import              # uses TRAINING_REPO, or the default path below
  *   TRAINING_REPO=... npm run import
  *
- * The notebooks are the master. Everything this writes under Data/Content/ is generated and
- * must never be hand-edited - EXCEPT Data/Content/solutions/, which holds the authored practice
- * solutions that do not exist in the notebooks. Those are merged in here, so a re-import never
- * erases them (the same reasoning that keeps the portal's bank-comments.json out of bank.json).
+ * The notebooks are the master. Everything this writes under Data/Content/ is generated and must
+ * never be hand-edited - EXCEPT the three authored side-cars, which hold what the notebooks do not
+ * have and are merged in here so a re-import never erases them (the same reasoning that keeps the
+ * portal's bank-comments.json out of bank.json):
+ *
+ *   solutions/   worked practice answers
+ *   variations/  your-turn prompts that replace the generic "retype from memory"
+ *   lessons/     the fixed section template - at-a-glance, checkpoints, recap
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -20,6 +24,7 @@ import {
   tabLabel,
   type RawNotebook,
 } from './notebook-parse';
+import { applyOverlay, applyVariations, loadOverlay, loadVariations } from './lesson-overlay';
 import type { CourseDay, CoursePart, PracticeProblem } from '../shared/contracts/course_day';
 import type { CourseIndex, IndexWeek } from '../shared/contracts/course_index';
 import type { PartNumber } from '../shared/contracts/common';
@@ -29,7 +34,6 @@ const TRAINING_REPO = path.resolve(process.env.TRAINING_REPO || DEFAULT_REPO);
 const ROOT = path.resolve(__dirname, '..');
 const CONTENT = path.join(ROOT, 'Data', 'Content');
 const SOLUTIONS = path.join(CONTENT, 'solutions');
-const VARIATIONS = path.join(CONTENT, 'variations');
 
 /** Weeks the learner can open. Everything else imports but stays locked in the UI. */
 const AVAILABLE_WEEKS = Number(process.env.AVAILABLE_WEEKS || 2);
@@ -70,7 +74,7 @@ function placeholderPart(week: number, day: number): CoursePart {
     tab_label: 'TypeScript',
     source_notebook: null,
     has_runnable_code: false,
-    blocks: [{ type: 'markdown', text: body, starter: null, variation: null }],
+    blocks: [{ type: 'markdown', text: body, starter: null, variation: null, checkpoint: null }],
     problems: [],
   };
 }
@@ -83,13 +87,6 @@ function readNotebook(file: string): RawNotebook | null {
 /** Authored solutions live outside the generated tree so a re-import cannot erase them. */
 function loadSolutions(week: number, day: number): Record<string, string> {
   const file = path.join(SOLUTIONS, 'w' + week + 'd' + day + '.json');
-  if (!fs.existsSync(file)) return {};
-  return JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, string>;
-}
-
-/** Authored your-turn variations, same treatment as solutions - outside the generated tree. */
-function loadVariations(week: number, day: number): Record<string, string> {
-  const file = path.join(VARIATIONS, 'w' + week + 'd' + day + '.json');
   if (!fs.existsSync(file)) return {};
   return JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, string>;
 }
@@ -112,18 +109,6 @@ function buildPart(
     for (const p of parsed.problems) {
       p.solution = authored[String(p.number)] ?? null;
     }
-  }
-
-  // your-turn blocks aren't numbered like practice problems, so they're addressed positionally:
-  // 'p<part>_yt<n>' is the Nth your-turn block in THIS part, in document order. Authoring a
-  // variation means writing that same key by hand in Data/Content/variations/.
-  const variations = loadVariations(week, day);
-  let yourTurnCount = 0;
-  for (const block of parsed.blocks) {
-    if (block.type !== 'your-turn') continue;
-    yourTurnCount++;
-    const prompt = variations['p' + part + '_yt' + yourTurnCount];
-    block.variation = prompt ? { prompt } : null;
   }
 
   const built: CoursePart = {
@@ -189,7 +174,7 @@ function importDay(week: number, day: number): CourseDay | null {
     }
   }
 
-  return {
+  const built: CourseDay = {
     schema: 'course-day/v1',
     week: week as CourseDay['week'],
     day: day as CourseDay['day'],
@@ -197,6 +182,12 @@ function importDay(week: number, day: number): CourseDay | null {
     locked: week > AVAILABLE_WEEKS,
     parts: parts as CourseDay['parts'],
   };
+
+  // The two authored side-cars that apply to a whole day, merged through the same functions
+  // `npm run overlay` uses - one implementation, so the two paths cannot drift.
+  const withVariations = applyVariations(built, loadVariations(CONTENT, week, day));
+  const overlay = loadOverlay(CONTENT, week, day);
+  return overlay ? applyOverlay(withVariations, overlay) : withVariations;
 }
 
 /**

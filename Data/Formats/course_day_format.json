@@ -45,14 +45,22 @@
                 "value": false
             },
             "blocks": {
-                "_comment": "Ordered content blocks, in DOCUMENT ORDER. Markdown blocks render as prose; example blocks get a 'Load into editor' button; your-turn blocks render as a 'Try it' callout; a problem-ref block marks where a practice problem sits, its text being the problem number. Rendering all prose before all problems put the closing note above Problem 1.",
+                "_comment": "Ordered content blocks, in DOCUMENT ORDER. Markdown blocks render as prose; example blocks get a 'Load into editor' button; your-turn blocks render as a 'Try it' callout; a problem-ref block marks where a practice problem sits, its text being the problem number. Rendering all prose before all problems put the closing note above Problem 1. The last three types are never parsed from a notebook - they are merged in from an authored lesson overlay (see lesson_overlay_format.json) and give every lesson the same shape: at-a-glance opens it, checkpoint and recap close it.",
                 "_itemTemplate": {
                     "type": {
-                        "options": ["markdown", "example", "your-turn", "problem-ref"],
+                        "options": [
+                            "markdown",
+                            "example",
+                            "your-turn",
+                            "problem-ref",
+                            "at-a-glance",
+                            "checkpoint",
+                            "recap"
+                        ],
                         "value": "markdown"
                     },
                     "text": {
-                        "_comment": "Markdown source for a markdown block; TypeScript source for example and your-turn blocks.",
+                        "_comment": "Markdown source for a markdown block; TypeScript source for example and your-turn blocks; the problem number as a string for problem-ref; markdown for at-a-glance and recap; the question itself for a checkpoint.",
                         "value": ""
                     },
                     "starter": {
@@ -62,6 +70,22 @@
                     "variation": {
                         "_comment": "your-turn ONLY: an authored same-concept, different-scenario prompt (Data/Content/variations/w<week>d<day>.json, keyed 'p<part>_yt<n>'), replacing the generic 'retype from memory' text once written. null = not yet authored, and the generic prompt renders instead - the reveal-solution pattern, not a broken callout.",
                         "prompt": { "value": "Do the same thing, but sign in as Katy instead of Leela." },
+                        "value": null
+                    },
+                    "checkpoint": {
+                        "_comment": "checkpoint ONLY: the options, the answer and why. Merged in from Data/Content/lessons/w<week>d<day>.json. Formative and never scored - nothing is written to progress, so a wrong answer costs only the reading. null for every other block type.",
+                        "options": {
+                            "_comment": "2-5 answers. Every one has to be defensible from the lesson's own text.",
+                            "value": ["", ""]
+                        },
+                        "answer": {
+                            "_comment": "0-based index into options.",
+                            "value": 0
+                        },
+                        "explanation": {
+                            "_comment": "Shown after answering, right or wrong - the reason, not just the verdict.",
+                            "value": ""
+                        },
                         "value": null
                     }
                 },

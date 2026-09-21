@@ -1,0 +1,48 @@
+{
+    "_comment": "Data/Content/lessons/w<week>d<day>.json - the AUTHORED half of a lesson. Hand-written, and outside the generated tree for the same reason solutions/ and variations/ are: the notebooks are the master for teaching content, so anything written here would be erased by the next `npm run import` if it lived under Data/Content/weeks/. An overlay is purely ADDITIVE - it supplies the three sections that give every lesson the same shape and has NO way to remove or rewrite a generated block, so a notebook stays the only place the course's teaching can change. Merged by applyOverlay() in scripts/lesson-overlay.ts, which runs both inside the importer and standalone via `npm run overlay`.",
+    "schema": {
+        "value": "lesson-overlay/v1"
+    },
+    "week": {
+        "value": 2
+    },
+    "day": {
+        "value": 1
+    },
+    "parts": {
+        "_comment": "Keyed by part number as a string, '1' to '4'. A part with no entry is left exactly as imported. STRICT: a mistyped key is an error rather than a silent no-op, because these files are hand-written and a quietly ignored key reads as 'the overlay did nothing' with nothing to explain why.",
+        "_itemTemplate": {
+            "at_a_glance": {
+                "_comment": "Markdown. Opens the lesson, inserted directly after its H1: what this part is for, what the learner will have done by the end, and what it assumes. Optional.",
+                "value": ""
+            },
+            "checkpoints": {
+                "_comment": "Retrieval practice, inserted before the recap and before any trailing 'What's next' section. Optional; 2-3 is the norm on a concept part, and a practice part usually has none because its problems already do the work.",
+                "_itemTemplate": {
+                    "question": {
+                        "_comment": "Markdown. One question, answerable from this lesson alone.",
+                        "value": ""
+                    },
+                    "options": {
+                        "_comment": "2-5 answers. A distractor has to be something a learner could plausibly believe after reading the lesson - not filler.",
+                        "value": ["", ""]
+                    },
+                    "answer": {
+                        "_comment": "0-based index into options. Validated against options.length by the contract, not just by eye.",
+                        "value": 0
+                    },
+                    "explanation": {
+                        "_comment": "Shown after answering, right or wrong. Says WHY, and points at the part of the lesson it came from.",
+                        "value": ""
+                    }
+                },
+                "value": []
+            },
+            "recap": {
+                "_comment": "Markdown. Closes the lesson, after the checkpoints: the few things worth carrying forward, scannable. Optional.",
+                "value": ""
+            }
+        },
+        "value": {}
+    }
+}

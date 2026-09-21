@@ -17,19 +17,51 @@
           "type": "markdown",
           "text": "# Week 2, Day 4.1 — TypeScript check-in: nothing new today\n\nDay 4.2's Playwright code — creating, finding, updating, and deleting an employee — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 4.2](/learn/w2/d4/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New syntax today** | none — this tab is a 60-second check that the week so far stuck |\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Day 4.2](/learn/w2/d4/p2) |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What today's code leans on\n\n| Concept | Status | Where it was taught |\n|---|---|---|\n| `const`, dynamic typing | already covered | [Week 2, Day 2.1](/learn/w2/d2/p1) |\n| `Math.random()` for a unique value | already covered | [Week 2, Day 3.1](/learn/w2/d3/p1) |\n| XPath vs CSS, first real assertions | already covered | [Week 2, Day 2.2](/learn/w2/d2/p2) |\n| `async` functions, arrow functions | already covered | [Week 1, Day 5.1](/learn/w1/d5/p1) |\n| \"structure around it\" = a function, not a class | already covered | [Week 2, Day 1.3](/learn/w2/d1/p3) |\n\nNothing below is new syntax — [Day 4.2](/learn/w2/d4/p2) spends its time on one new\n*locator* technique (the sibling axis), not the language. It just happens to run\nagainst a new app, because that technique needs a real multi-row table to show off —\nmore on that in Day 4.2's first cell.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Day 4 switches to OrangeHRM's demo HR system instead of the registration form used all week. Why?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because the registration form's locators had started to break",
+              "Because today's technique finds one row among many that look alike, and none of the earlier apps has a real multi-row table",
+              "Because the sibling axis only works on applications built with tables"
+            ],
+            "answer": 1,
+            "explanation": "The app changed to fit the technique, not the other way round. It is also a shared public sandbox, which is why every employee the lesson creates gets deleted before the lesson ends."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "No new TypeScript today — `const`, `Math.random()`, XPath and `async` all carry over unchanged. If any row in the table above was a surprise, follow its link before starting [Day 4.2](/learn/w2/d4/p2).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What's next\n\n[Day 4.2 — The sibling axis](/learn/w2/d4/p2) puts everything above to work finding a table\nrow by what it says, not where it sits.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -46,139 +78,236 @@
           "type": "markdown",
           "text": "# Week 2, Day 4.2 — The sibling axis: finding a row by what it says\n\nBy the end of this lesson you will have created a real employee on a live HR system,\nfound its row by the name you gave it (not by counting columns), updated it, verified\nthe change for real, and deleted it — cleaning up after yourself the whole way.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **You'll use** | `parent::` · `following-sibling::` · `[last()]` · `contains()` |\n| **On** | OrangeHRM's demo HR system — a **shared public sandbox**, so everything created here is deleted again |\n| **Assumes** | [XPath syntax](/learn/w2/d2/p2) · [Math.random() for unique data](/learn/w2/d3/p1) |\n| **The idea worth keeping** | anchor on text you know, then walk sideways — never count columns |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> **Mode: explore**, with one real spec at the end. ## A new app, on purpose\n\nEvery locator so far worked on a single form. Today's technique — finding one row among\nmany that all look alike — needs an actual table, which none of this course's apps so\nfar have. **OrangeHRM's demo HR system** does, and it's a real, public, shared QA-practice\napp (the same idea as `demoqa.com`, used from [week7](/learn/w7/d1/p1) onward).\n\n| | |\n|---|---|\n| App | `opensource-demo.orangehrmlive.com` |\n| Login | `Admin` / `admin123` |\n| Screens used | Add Employee, Employee List |\n\n**It's shared with everyone using this demo right now.** Every employee this lesson\ncreates gets deleted before the lesson ends — the same rule week7 follows for\n`demoqa.com`.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The problem: which column is \"Actions\"?\n\nA table row usually looks like this once rendered:\n\n```\n| Id | First Name | Last Name | Job Title | Status | Sub Unit | Supervisor | Actions |\n```\n\nYou could count to column 8 and write `.nth(7)` — until a column gets added, hidden per\nscreen size, or reordered, and every locator built that way breaks at once.\n\n| Approach | What it commits to |\n|---|---|\n| Guess the column index (`.nth(7)`) | Wherever \"Actions\" happens to sit today |\n| Anchor on text you already know (a name you just typed), then walk **sideways** to the last cell in that same row | The row itself — position never enters into it |\n\nThe second one is the **sibling axis**: find something you know for certain, then step to\nits neighbours rather than re-finding your way from the top of the page.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 1 — create an employee\n\n**Objective:** add a real employee with a name unique enough to find again later.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch, show } from \"../_shared/deno-helpers.ts\";\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\n\nconst { browser, page } = await launch();\n\nawait page.goto(`${ORANGE_HRM}/auth/login`);\nawait page.getByPlaceholder(\"Username\").fill(\"Admin\");\nawait page.getByPlaceholder(\"Password\").fill(\"admin123\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard/index\");\n\n// Math.random() for a name unique to this run — Day 3.1's technique, applied\n// to a second app.\nconst idPart = Math.floor(Math.random() * 100000).toString();\nconst lastName = \"Verify\" + idPart;\n\nawait page.goto(`${ORANGE_HRM}/pim/addEmployee`);\nawait page.getByPlaceholder(\"First Name\").fill(\"Verify\");\nawait page.getByPlaceholder(\"Last Name\").fill(lastName);\nawait page.getByRole(\"button\", { name: \"Save\" }).click();\nconsole.log(\"toast:\", await page.locator(\"p.oxd-text--toast-message\").first().textContent());\nawait page.waitForURL(\"**/pim/viewPersonalDetails/**\");\nconsole.log(\"created\", lastName, \"at\", page.url());\n\nawait show(page);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "Line by line:\n\n| Line | What it does |\n|---|---|\n| `Math.floor(Math.random() * 100000)` | Day 3.1's technique — a value unlikely to collide with anyone else on this shared demo |\n| `page.getByRole(\"button\", { name: \"Save\" })` | Same role-based locator you've used since Day 1 — new app, same idea |\n| `p.oxd-text--toast-message` | OrangeHRM's toast element — probed live before writing this, one clean match |\n\n**Expected result:** `toast: Successfully Saved`, then the URL ends in\n`viewPersonalDetails/empNumber/<some id>` — the app navigates you straight to the new\nemployee's record. **Keep `lastName` and `idPart` around — every cell below builds on\nthis same employee.**",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\n\nconst { browser, page } = await launch();\n\nawait page.goto(`${ORANGE_HRM}/auth/login`);",
-          "variation": null
+          "variation": {
+            "prompt": "Same steps, your own marker: use a different first name as well as the generated last name, and log the `empNumber` out of the URL the app redirects you to. Keep `lastName` and `idPart` in scope — every cell below needs them, and Example 4 is what deletes this employee again."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 2 — finding the row you just made\n\n**Objective:** search the employee list, then reach the row's Actions cell by anchoring on\nthe last name — not by guessing a column.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "await page.goto(`${ORANGE_HRM}/pim/viewEmployeeList`);\nawait page.getByPlaceholder(\"Type for hints...\").first().fill(lastName);\nawait page.getByRole(\"button\", { name: \"Search\" }).click();\nawait page.waitForLoadState(\"networkidle\");\nconsole.log(\"rows found:\", await page.locator(\"div.oxd-table-row--clickable\").count());\n\n// The sibling axis: find the cell whose text IS the last name, go up to its\n// parent (the actual table-cell div — the text node's own parent is just an\n// inner wrapper with no siblings), then step sideways to the last cell in\n// that row.\nconst actionsCell = page.locator(\n  `xpath=//div[text()='${lastName}']/parent::div/following-sibling::div[last()]`,\n);\nconsole.log(\"buttons in actions cell:\", await actionsCell.locator(\"button\").count());\n\nawait actionsCell.locator(\"button\").first().click(); // pencil = edit\nawait page.waitForURL(\"**/pim/viewPersonalDetails/**\");\nconsole.log(\"on personal details:\", page.url());",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| Piece of the XPath | Why it's there |\n|---|---|\n| `//div[text()='${lastName}']` | the cell holding exactly the name you typed |\n| `/parent::div` | **the gotcha** — the text sits in an inner wrapper div with no siblings of its own; the real table-cell divs are one level up |\n| `/following-sibling::div[last()]` | walk sideways to the **last** cell in that row, whatever column it's in — this is Actions, no matter how many cells sit in between |\n\n`[last()]` is the whole trick: it reaches the last cell in the row regardless of how many\ncells sit in between, so it never needs to know the exact count — the same idea as\nreaching for \"the last one\" instead of \"the fourth one\" whenever a list's length isn't\nfixed.\n\n**Expected result:** `rows found: 1`, `buttons in actions cell: 2`, then the URL changes\nto `viewPersonalDetails/...` — you clicked the pencil (edit) icon. **Verified live: the\npencil is always the first button in that cell, the trash the second** — `.first()` and\n`.last()` below aren't a guess.\n\n**Challenge:** what happens to the XPath if you search `contains(text(), ...)` instead of\nan exact match? (You'll need exactly this for Example 4.)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "await page.goto(`${ORANGE_HRM}/pim/viewEmployeeList`);",
-          "variation": null
+          "variation": {
+            "prompt": "Same row, one axis at a time: print the match count for each stage of the XPath separately — `//div[text()='...']` on its own, then with `/parent::div` appended, then with `/following-sibling::div[last()]`. Watching where the number changes is the `parent::div` gotcha made visible instead of taken on trust."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 3 — update it, and verify for real\n\n**Objective:** change the last name, and prove the change landed by reloading the record —\nnot by trusting the toast.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Measured against this live, shared demo: the \"Successfully Updated\" toast can\n// fire a beat before the save has actually landed. Reload and check; if it\n// hasn't landed, save again. This is real behaviour on a public sandbox, not a\n// bug in the locators above.\nconst updatedLastName = lastName + \"Updated\";\nlet savedValue = \"\";\nfor (let attempt = 1; attempt <= 3 && savedValue !== updatedLastName; attempt++) {\n  const box = page.getByPlaceholder(\"Last Name\").first();\n  await box.fill(\"\");\n  await box.fill(updatedLastName);\n  await box.blur();\n  // Two buttons on this page match the role name \"Save\" — .first() is the\n  // Personal Details form's own button, verified live before writing this.\n  await page.getByRole(\"button\", { name: \"Save\" }).first().click();\n  console.log(`attempt ${attempt} toast:`, await page.locator(\"p.oxd-text--toast-message\").first().textContent());\n\n  await page.reload();\n  await page.waitForLoadState(\"networkidle\");\n  savedValue = await page.getByPlaceholder(\"Last Name\").first().inputValue();\n}\nconsole.log(\"value after reload:\", savedValue);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** `value after reload: Verify<idPart>Updated`, usually on the first\nattempt. If you see a retry line above it, that's the demo being slow to save — not\nyour code; the loop exists precisely so this cell tells the truth either way.\n\n**Why reload, not re-search?** The Employee List's search index can lag a rename by more\nthan this app's own toast implies. Reloading the record itself reads the ground truth\ndirectly, the same \"assert the consequence, don't trust the response\" habit from\n[week7](/learn/w7/d4/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "await page.goto(`${ORANGE_HRM}/pim/viewEmployeeList`);",
-          "variation": null
+          "variation": {
+            "prompt": "Same verification, pointed the other way: once the reload has confirmed the new last name, go back to the Employee List and search for the OLD one. Print the row count. Whether you get 0 or 1 tells you how far behind the list's search index is right now — which is exactly why Example 4 anchors on the random id instead of either name."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 4 — delete it, and prove it's gone\n\n**Objective:** re-find the row and delete it — anchoring on `contains()`, not an exact\nmatch, because the list may still be showing the *old* last name.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// contains(), not an exact match on either name: the list might still show\n// the OLD last name at this point, or it might have caught up to the new\n// one. The random id is in there either way, so contains() finds the row\n// regardless of which one is currently rendered.\nawait page.goto(`${ORANGE_HRM}/pim/viewEmployeeList`);\nawait page.getByPlaceholder(\"Type for hints...\").first().fill(idPart);\nawait page.getByRole(\"button\", { name: \"Search\" }).click();\nawait page.waitForLoadState(\"networkidle\");\nconsole.log(\"rows found by idPart:\", await page.locator(\"div.oxd-table-row--clickable\").count());\n\nconst actionsCellForDelete = page.locator(\n  `xpath=//div[contains(text(), '${idPart}')]/parent::div/following-sibling::div[last()]`,\n);\nawait actionsCellForDelete.locator(\"button\").last().click(); // trash = delete\nawait page.getByText(\"Are you sure you want to continue?\").waitFor();\nawait page.getByRole(\"button\", { name: \"Yes, Delete\" }).click();\nconsole.log(\"delete toast:\", await page.locator(\"p.oxd-text--toast-message\").first().textContent());\n\nawait page.goto(`${ORANGE_HRM}/pim/viewEmployeeList`);\nawait page.getByPlaceholder(\"Type for hints...\").first().fill(idPart);\nawait page.getByRole(\"button\", { name: \"Search\" }).click();\nawait page.waitForLoadState(\"networkidle\");\nconsole.log(\"rows found after delete:\", await page.locator(\"div.oxd-table-row--clickable\").count());\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** `delete toast: Successfully Deleted`, then `rows found after\ndelete: 0` — a negative assertion, not just \"the toast said so\". The dialog text\n(`\"Are you sure you want to continue?\"`) and both its button names were confirmed live\nbefore writing this.\n\n**Challenge:** re-run Examples 1–4 back to back a second time. Nothing should be left\nbehind either time — that's the whole point of pairing every create with a delete.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "// contains(), not an exact match on either name: the list might still show\n// the OLD last name at this point, or it might have caught up to the new\n// one. The random id is in there either way, so contains() finds the row\n// regardless of which one is currently rendered.\nawait page.goto(`${ORANGE_HRM}/pim/viewEmployeeList`);",
-          "variation": null
+          "variation": {
+            "prompt": "Same cleanup, one more proof: after the delete, assert that the \"No Records Found\" message is actually visible, not only that the row count is 0. Two ways of saying the same thing — and an empty table with no message would quietly pass the first check while failing the second."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Doing it for real, in a spec file\n\nThe cell below writes everything above as one real test, hardened against the two\nmeasured quirks: a click that silently does nothing (an overlay steals it for a moment),\nand the update-toast timing.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day4-employee-crud.spec.ts\";\n\nawait writeProjectFile(specPath, `// Week 2, Day 4 — the sibling-axis locator, exercised end to end: create an\n// employee, find its row by last name (not by position), update it, verify\n// the change persisted, then delete it and prove the row is really gone.\n//\n// OrangeHRM's demo is a shared public sandbox, so this test cleans up after\n// itself — the same rule week7 follows for demoqa.com.\n//\n// Three measured quirks shape this file, all real behaviour on a public,\n// shared, occasionally-loaded demo — not bugs in the locators:\n//   1. A button click can silently do nothing (an overlay steals the click\n//      for a moment). clickAndExpectToast() retries the click itself.\n//   2. The \"Successfully Updated\" toast can fire before the save has\n//      actually landed — verified by reloading the record, retried too.\n//   3. After a rename, the Employee List can keep showing the OLD last name\n//      for a while. The row is re-found for deletion with contains() on the\n//      random id, which is true of the row whichever name is showing.\nimport { test, expect } from \"@playwright/test\";\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\n\ntest(\"create, update, and delete an employee found by the sibling axis\", async ({ page }) => {\n  test.setTimeout(120000);\n\n  async function clickAndExpectToast(buttonName: string, expectedText: string) {\n    for (let attempt = 1; attempt <= 3; attempt++) {\n      await page.getByRole(\"button\", { name: buttonName }).first().click();\n      try {\n        await expect(page.locator(\"p.oxd-text--toast-message\")).toHaveText(expectedText, {\n          timeout: 6000,\n        });\n        return;\n      } catch (err) {\n        if (attempt === 3) throw err;\n        console.log(\\`  \"\\${buttonName}\" click #\\${attempt} produced no toast, retrying\\`);\n      }\n    }\n  }\n\n  await page.goto(\\`\\${ORANGE_HRM}/auth/login\\`);\n  await page.getByPlaceholder(\"Username\").fill(\"Admin\");\n  await page.getByPlaceholder(\"Password\").fill(\"admin123\");\n  await page.getByRole(\"button\", { name: \"Login\" }).click();\n  await page.waitForURL(\"**/dashboard/index\");\n\n  const idPart = Math.floor(Math.random() * 100000).toString();\n  const lastName = \"Verify\" + idPart;\n  await page.goto(\\`\\${ORANGE_HRM}/pim/addEmployee\\`);\n  await page.getByPlaceholder(\"First Name\").fill(\"Verify\");\n  await page.getByPlaceholder(\"Last Name\").fill(lastName);\n  await clickAndExpectToast(\"Save\", \"Successfully Saved\");\n  await page.waitForURL(\"**/pim/viewPersonalDetails/**\");\n\n  await page.goto(\\`\\${ORANGE_HRM}/pim/viewEmployeeList\\`);\n  await page.getByPlaceholder(\"Type for hints...\").first().fill(lastName);\n  await page.getByRole(\"button\", { name: \"Search\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n  await expect(page.locator(\"div.oxd-table-row--clickable\")).toHaveCount(1, { timeout: 10000 });\n\n  const actionsCell = page.locator(\n    \\`xpath=//div[text()='\\${lastName}']/parent::div/following-sibling::div[last()]\\`,\n  );\n  await actionsCell.locator(\"button\").first().click();\n  await page.waitForURL(\"**/pim/viewPersonalDetails/**\");\n\n  const updatedLastName = lastName + \"Updated\";\n  let persisted = false;\n  for (let attempt = 1; attempt <= 3 && !persisted; attempt++) {\n    const lastNameBox = page.getByPlaceholder(\"Last Name\").first();\n    await lastNameBox.waitFor({ state: \"visible\" });\n    await lastNameBox.fill(\"\");\n    await lastNameBox.fill(updatedLastName);\n    await lastNameBox.blur();\n    await clickAndExpectToast(\"Save\", \"Successfully Updated\");\n    await page.reload();\n    await page.waitForLoadState(\"networkidle\");\n    const value = await page.getByPlaceholder(\"Last Name\").first().inputValue();\n    persisted = value === updatedLastName;\n    if (!persisted) console.log(\\`  update attempt \\${attempt}: got \"\\${value}\", retrying\\`);\n  }\n  expect(persisted).toBe(true);\n\n  await page.goto(\\`\\${ORANGE_HRM}/pim/viewEmployeeList\\`);\n  await page.getByPlaceholder(\"Type for hints...\").first().fill(idPart);\n  await page.getByRole(\"button\", { name: \"Search\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n  await expect(page.locator(\"div.oxd-table-row--clickable\")).toHaveCount(1, { timeout: 10000 });\n\n  const actionsCell2 = page.locator(\n    \\`xpath=//div[contains(text(), '\\${idPart}')]/parent::div/following-sibling::div[last()]\\`,\n  );\n  await actionsCell2.locator(\"button\").last().click();\n  await expect(page.getByText(\"Are you sure you want to continue?\")).toBeVisible();\n  await clickAndExpectToast(\"Yes, Delete\", \"Successfully Deleted\");\n\n  await page.goto(\\`\\${ORANGE_HRM}/pim/viewEmployeeList\\`);\n  await page.getByPlaceholder(\"Type for hints...\").first().fill(idPart);\n  await page.getByRole(\"button\", { name: \"Search\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n  await expect(page.locator(\"div.oxd-table-row--clickable\")).toHaveCount(0, { timeout: 10000 });\n  await expect(page.locator(\"span.oxd-text--span\", { hasText: \"No Records Found\" })).toBeVisible();\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> ▶ **Run it yourself too:** `npx playwright test week2/generated/day4-employee-crud.spec.ts`\n\n**Expected result:** `1 passed`, typically in 30–60 seconds — a real create, find,\nupdate-with-retry, and delete against a live public system. Verified green three runs in\na row while writing this lesson.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- Anchor on text you just created or already know — never a column position.\n- `parent::div` before `following-sibling` — the text's immediate parent is a wrapper,\n  not the cell.\n- Prefer `contains()` over an exact match once you can't be sure the visible text hasn't\n  changed underneath you.\n- Verify a write by reading the record back, not by trusting a success toast.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| `following-sibling::div[1]` (guessing an offset) | works today, breaks the moment a column is added | `[last()]` — Actions is always last, regardless of count |\n| Anchoring straight off the text node | 0 matches | go `parent::div` first |\n| Trusting \"Successfully Updated\" alone | the list search for the new name comes back empty | reload the record and read the field back |\n| Two \"Save\" buttons, wrong one clicked with a plain `getByRole` | `.first()` needed, or the search finds the correct one only sometimes | `.first()` and verify it's the form's own button |\n\n## What's next\n\n[Day 4.3](/learn/w2/d4/p3) takes this exact code and gives it a small amount of structure.",
+          "text": "## Best practices\n\n- Anchor on text you just created or already know — never a column position.\n- `parent::div` before `following-sibling` — the text's immediate parent is a wrapper,\n  not the cell.\n- Prefer `contains()` over an exact match once you can't be sure the visible text hasn't\n  changed underneath you.\n- Verify a write by reading the record back, not by trusting a success toast.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| `following-sibling::div[1]` (guessing an offset) | works today, breaks the moment a column is added | `[last()]` — Actions is always last, regardless of count |\n| Anchoring straight off the text node | 0 matches | go `parent::div` first |\n| Trusting \"Successfully Updated\" alone | the list search for the new name comes back empty | reload the record and read the field back |\n| Two \"Save\" buttons, wrong one clicked with a plain `getByRole` | `.first()` needed, or the search finds the correct one only sometimes | `.first()` and verify it's the form's own button |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "The Actions cell is currently the 8th column. Why is `following-sibling::div[last()]` better than `.nth(7)`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "It is faster, because XPath does not have to count the cells",
+              "It asks for the last cell in the row whatever the column count is, so adding or reordering a column cannot break it",
+              "`.nth()` does not work on table rows in Playwright"
+            ],
+            "answer": 1,
+            "explanation": "`.nth(7)` commits to wherever Actions happens to sit today — one added, hidden or reordered column and every locator built that way breaks at once. `[last()]` commits only to \"the last cell in this row\", which stays true. Same instinct as reaching for \"the last one\" instead of \"the fourth one\" whenever the length is not fixed."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "`//div[text()='Verify12345']/following-sibling::div[last()]` — without the `parent::div` step — returns how many matches?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "1 — it is the same row either way",
+              "0 — the text sits in an inner wrapper div that has no siblings; the real cells are one level up",
+              "2 — it matches the cell and the row"
+            ],
+            "answer": 1,
+            "explanation": "This is the gotcha the lesson calls out by name. The element holding the text is a wrapper inside the cell, and it has no siblings at all, so stepping sideways from it finds nothing. `/parent::div` first gets you to the real table cell, which does have siblings."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "The app shows \"Successfully Updated\". What does the lesson do before believing the rename landed?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Waits for the toast to disappear, then continues",
+              "Reloads the record and reads the field back, retrying the save if it does not match",
+              "Re-searches the Employee List for the new name"
+            ],
+            "answer": 1,
+            "explanation": "Measured on this live demo, the toast can fire a beat before the save actually lands. Reloading the record reads ground truth. Re-searching the list is worse than useless here — its search index can lag a rename by even longer, which is why Example 4 anchors on the random id instead of either name."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- **Anchor on text you know, then walk sideways.** Position is the one thing about a table you can rely on changing.\n- `/parent::div` before `following-sibling::` — the text's immediate parent is a wrapper, not the cell.\n- `[last()]` over a guessed offset: it survives a column being added.\n- `contains()` once you cannot be certain the visible text has not changed underneath you — and anchor on the part that cannot change, like the random id.\n- **Verify a write by reading the record back**, not by trusting a success toast.\n- On a shared sandbox, every create is paired with a delete. Prove the delete with a count of 0, not with the toast.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 4.3](/learn/w2/d4/p3) takes this exact code and gives it a small amount of structure.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -195,67 +324,131 @@
           "type": "markdown",
           "text": "# Week 2, Day 4.3 — The sibling axis, wrapped for reuse\n\nBy the end of this lesson you will have pulled Day 4.2's create/find/delete steps out\nof one long cell and into three functions any test can call.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 4.2](/learn/w2/d4/p2). The only new thing is the structure around it.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 4.2](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The problem with what we wrote yesterday\n\nEvery test that needs to create, find, or delete an employee has to repeat the same\nsibling-axis XPath and the same button clicks. Three uses today, thirty in a real suite —\nand if the app's markup shifts, that is thirty edits, not one.\n\n## Same code, with structure around it\n\n| In Day 4.2 you wrote | Here it becomes | Why |\n|---|---|---|\n| the create steps inline in a cell | `await addEmployee(page, lastName)` | one place to change if the Add Employee form changes |\n| the sibling-axis XPath rebuilt each time | `await findRow(page, term)` | the pattern lives in one place, not re-derived per test |\n| the trash-click-then-confirm steps inline | `await deleteEmployee(page, term)` | reusable cleanup, same as `findRow` underneath |\n\n**This is still a function, not a page object.** A real page object — a `class` that\nnever asserts — is [coming formally in week 3](/learn/w3/d3/p1), the same as Day\n1.3, Day 2.3, and Day 3.3 already told you. Today's version reaches for the same tool\nthose days did: three plain functions.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// No test() calls here, so the runner never collects this file — just a helper.\n// Not named *.spec.ts on purpose (week3/day3_2's rule: a helper file never\n// carries the spec suffix, or the runner tries to execute it as a test).\nawait writeProjectFile(\"week2/generated/employee-list-helpers.ts\", `// Week 2, Day 4 — shared actions for OrangeHRM's Add Employee / Employee List\n// screens. Same pattern as registration-helpers.ts from Days 1-3: plain\n// functions, not a class. A real page object (a \\`class\\` that never asserts)\n// is coming formally in week 3 — this reaches for the simplest tool that\n// already removes the repetition.\nimport type { Locator, Page } from \"@playwright/test\";\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\n\nexport async function addEmployee(page: Page, lastName: string): Promise<void> {\n  await page.goto(\\`\\${ORANGE_HRM}/pim/addEmployee\\`);\n  await page.getByPlaceholder(\"First Name\").fill(\"Verify\");\n  await page.getByPlaceholder(\"Last Name\").fill(lastName);\n  await page.getByRole(\"button\", { name: \"Save\" }).click();\n  await page.waitForURL(\"**/pim/viewPersonalDetails/**\", { timeout: 15000 });\n}\n\n// The sibling axis: search for the known text, then walk sideways from it to\n// the row's last cell — the one holding the edit/delete buttons. contains()\n// rather than an exact match, so this still finds the row if a rename hasn't\n// shown up in the list yet (see Day 4.2).\nexport async function findRow(page: Page, term: string): Promise<Locator> {\n  await page.goto(\\`\\${ORANGE_HRM}/pim/viewEmployeeList\\`);\n  await page.getByPlaceholder(\"Type for hints...\").first().fill(term);\n  await page.getByRole(\"button\", { name: \"Search\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n  return page.locator(\n    \\`xpath=//div[contains(text(), '\\${term}')]/parent::div/following-sibling::div[last()]\\`,\n  );\n}\n\nexport async function deleteEmployee(page: Page, term: string): Promise<void> {\n  const actionsCell = await findRow(page, term);\n  await actionsCell.locator(\"button\").last().click(); // trash icon\n  await page.getByText(\"Are you sure you want to continue?\").waitFor();\n  await page.getByRole(\"button\", { name: \"Yes, Delete\" }).click();\n}\n`.trim());",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "### Why it is shaped this way\n\n| Choice | Reason |\n|---|---|\n| `findRow` returns a `Locator`, doesn't click anything | the caller decides whether that's a pencil click, a trash click, or just a count — one function, several uses |\n| `term: string`, not `lastName: string`, in `findRow`/`deleteEmployee` | Day 4.2 showed the same anchor is sometimes the full name, sometimes just the id — the parameter name says so |\n| No `expect()` anywhere in this file | these functions act and locate; the *test* decides what should be true |\n| Update has no function of its own yet | it's still two field edits and a click in the test — a natural next problem, in [Day 4.4](/learn/w2/d4/p4) |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Using it\n\n**Objective:** create an employee, edit it via the row `findRow` returns, then delete it —\nusing only the three functions above.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch } from \"../_shared/deno-helpers.ts\";\nimport { addEmployee, findRow, deleteEmployee } from \"./generated/employee-list-helpers.ts\";\n\nconst { browser, page } = await launch();\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\nawait page.goto(`${ORANGE_HRM}/auth/login`);\nawait page.getByPlaceholder(\"Username\").fill(\"Admin\");\nawait page.getByPlaceholder(\"Password\").fill(\"admin123\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard/index\");\n\nconst idPart = Math.floor(Math.random() * 100000).toString();\nconst lastName = \"Verify\" + idPart;\n\nawait addEmployee(page, lastName);\nconsole.log(\"created:\", lastName);\n\n// The test decides what happens next — here, a pencil click to reach Update.\nconst actionsCell = await findRow(page, lastName);\nawait actionsCell.locator(\"button\").first().click();\nawait page.waitForURL(\"**/pim/viewPersonalDetails/**\");\n\nconst updatedLastName = lastName + \"Updated\";\nlet savedValue = \"\";\nfor (let attempt = 1; attempt <= 3 && savedValue !== updatedLastName; attempt++) {\n  const box = page.getByPlaceholder(\"Last Name\").first();\n  await box.fill(\"\");\n  await box.fill(updatedLastName);\n  await box.blur();\n  await page.getByRole(\"button\", { name: \"Save\" }).first().click();\n  await page.locator(\"p.oxd-text--toast-message\").first().waitFor();\n  await page.reload();\n  await page.waitForLoadState(\"networkidle\");\n  savedValue = await page.getByPlaceholder(\"Last Name\").first().inputValue();\n}\nconsole.log(\"updated to:\", savedValue);\n\nawait deleteEmployee(page, idPart);\nconsole.log(\"deleted\");\n\nconst rowAfter = await findRow(page, idPart);\nconsole.log(\"rows after delete:\", await rowAfter.count());\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** `created: Verify<idPart>`, `updated to: Verify<idPart>Updated`,\n`deleted`, then `rows after delete: 0`. Same outcome as Day 4.2 — the create, update, and\ndelete steps just moved into functions the test calls by name.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "import { addEmployee, findRow, deleteEmployee } from \"./generated/employee-list-helpers.ts\";\n\nconst { browser, page } = await launch();\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\nawait page.goto(`${ORANGE_HRM}/auth/login`);",
-          "variation": null
+          "variation": {
+            "prompt": "Same three helpers, a different caller: write a short flow that creates an employee, uses `findRow` only to COUNT the buttons in its actions cell, and then deletes it — never clicking the pencil at all. That is the whole reason `findRow` hands back a locator instead of doing the click for you."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Doing it for real, in a spec file\n\nSame helpers, imported from a real `.spec.ts` this time — `expect()` lives in the test,\nnever inside `employee-list-helpers.ts`.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// runSpec only — writeProjectFile is already in scope from the cell above.\n// Importing it a second time throws \"Identifier has already been declared\";\n// Deno's kernel shares one module scope across every cell in this notebook.\nimport { runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day4-reuse.spec.ts\";\n\nawait writeProjectFile(specPath, `// Week 2, Day 4 — the sibling-axis actions, reused via employee-list-helpers.ts.\n// The test decides what's true (asserts); the helpers only act and locate.\nimport { test, expect } from \"@playwright/test\";\nimport { addEmployee, findRow, deleteEmployee } from \"./employee-list-helpers\";\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\n\ntest(\"create then delete an employee, using only the helpers\", async ({ page }) => {\n  test.setTimeout(60000);\n\n  await page.goto(\\`\\${ORANGE_HRM}/auth/login\\`);\n  await page.getByPlaceholder(\"Username\").fill(\"Admin\");\n  await page.getByPlaceholder(\"Password\").fill(\"admin123\");\n  await page.getByRole(\"button\", { name: \"Login\" }).click();\n  await page.waitForURL(\"**/dashboard/index\");\n\n  const idPart = Math.floor(Math.random() * 100000).toString();\n  const lastName = \"Verify\" + idPart;\n\n  await addEmployee(page, lastName);\n\n  const actionsCell = await findRow(page, lastName);\n  await expect(actionsCell.locator(\"button\")).toHaveCount(2);\n\n  await deleteEmployee(page, lastName);\n  await expect(page.locator(\"p.oxd-text--toast-message\")).toHaveText(\"Successfully Deleted\");\n\n  const rowAfterDelete = await findRow(page, lastName);\n  await expect(rowAfterDelete).toHaveCount(0);\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself too:** `npx playwright test week2/generated/day4-reuse.spec.ts`\n\n**Expected result:** `1 passed`. Verified green twice while writing this lesson.\n\n## What a reviewer would look for\n\n- `findRow` returns a locator and clicks nothing — the caller decides what to do with it.\n- Nothing inside `employee-list-helpers.ts` calls `expect()`.\n- The random id, not a hardcoded name, is what makes this test safe to run twice in a row.\n\n## What's next\n\n[Day 4.4](/learn/w2/d4/p4) — your turn, with no worked examples to lean on.",
+          "text": "> ▶ **Run it yourself too:** `npx playwright test week2/generated/day4-reuse.spec.ts`\n\n**Expected result:** `1 passed`. Verified green twice while writing this lesson.\n\n## What a reviewer would look for\n\n- `findRow` returns a locator and clicks nothing — the caller decides what to do with it.\n- Nothing inside `employee-list-helpers.ts` calls `expect()`.\n- The random id, not a hardcoded name, is what makes this test safe to run twice in a row.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`findRow` returns a `Locator` and clicks nothing. What does that buy?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "One function serves every use — a pencil click, a trash click, or just counting the buttons",
+              "It makes the function synchronous, so callers need no `await`",
+              "It lets Playwright cache the row between tests"
+            ],
+            "answer": 0,
+            "explanation": "A `findRow` that clicked the pencil itself would need a sibling function for the trash, and a third for counting. Returning the locator keeps the sideways-walk in one place and leaves the decision to the caller — which is why `deleteEmployee` can be built on top of it."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "There is not one `expect()` in `employee-list-helpers.ts`. Why not?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because `expect()` cannot be called outside a `.spec.ts` file",
+              "Because these functions act and locate — the test is what decides what should be true",
+              "Because the helpers run before the test does, when no assertions are allowed yet"
+            ],
+            "answer": 1,
+            "explanation": "Same separation as [Day 2.3](/learn/w2/d2/p3), from the other side: there the assertion helper was allowed to assert because checking was its whole job. These functions act, so they do not. A helper that both acts and asserts leaves a caller unable to use it for either job alone."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Three uses today is thirty in a real suite — and a markup change is then thirty edits.\n- A locator function should hand back the locator, not decide what to do with it.\n- Name the parameter for what it really is: `term`, not `lastName`, because sometimes the anchor is just the id.\n- Helpers act and locate; tests assert. Keep the two on opposite sides of the file boundary.\n- The random id, not a fixed name, is what makes any of this safe to run twice in a row.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 4.4](/learn/w2/d4/p4) — your turn, with no worked examples to lean on.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -272,31 +465,43 @@
           "type": "markdown",
           "text": "# Week 2, Day 4.4 — Practice: the sibling axis\n\nThree problems, getting harder. There is no answer key — that is deliberate. Every\nemployee you create in these problems is on a real, shared, public system: **delete it\nbefore you move on**, using the same sibling-axis pattern from Day 4.2.\n\nStart in a fresh cell in this lesson. When a problem asks for a spec file, write it\ninto `week2/generated/` and run it with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 4.1](/learn/w2/d4/p1) or [Day 4.2](/learn/w2/d4/p2), not in your ability.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Three problems** | on a live, shared HR system |\n| **Pulls on** | [Day 4.2](/learn/w2/d4/p2) for the axes · [Day 4.3](/learn/w2/d4/p3) for the helper shape |\n| **Non-negotiable** | anything you create, you delete — someone else is using this demo right now |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## When you are done\n\nSearch the Employee List one more time for every name you used above. If anything still\nshows up, delete it now — this app is shared with everyone else using this course.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

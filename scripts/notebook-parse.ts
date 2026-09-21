@@ -256,7 +256,7 @@ export function parsePractice(
     });
     // Record WHERE the problem sat. Without this marker the renderer put every paragraph
     // before every problem, so the closing "When you are done" note landed above Problem 1.
-    blocks.push({ type: 'problem-ref', text: String(current.number), starter: null, variation: null });
+    blocks.push({ type: 'problem-ref', text: String(current.number), starter: null, variation: null, checkpoint: null });
     current = null;
   };
 
@@ -271,15 +271,15 @@ export function parsePractice(
       } else if (current) {
         current.statement.push(text);
       } else {
-        blocks.push({ type: 'markdown', text: rewriteLinks(text, week), starter: null, variation: null });
+        blocks.push({ type: 'markdown', text: rewriteLinks(text, week), starter: null, variation: null, checkpoint: null });
       }
     } else if (cell.cell_type === 'code') {
       if (current) {
         flush(text.trim());
       } else if (isYourTurn(text)) {
-        blocks.push({ type: 'your-turn', text, starter: nearestBoilerplate(examples), variation: null });
+        blocks.push({ type: 'your-turn', text, starter: nearestBoilerplate(examples), variation: null, checkpoint: null });
       } else {
-        blocks.push({ type: 'example', text, starter: null, variation: null });
+        blocks.push({ type: 'example', text, starter: null, variation: null, checkpoint: null });
         examples.push(text);
       }
     }
@@ -300,16 +300,16 @@ export function parseTeaching(
     if (c.cell_type !== 'markdown' && c.cell_type !== 'code') continue;
     const text = cellText(c);
     if (c.cell_type === 'markdown') {
-      blocks.push({ type: 'markdown', text: rewriteLinks(text, week), starter: null, variation: null });
+      blocks.push({ type: 'markdown', text: rewriteLinks(text, week), starter: null, variation: null, checkpoint: null });
       continue;
     }
     if (isYourTurn(text)) {
       // Usually echoes the example directly above it, but that one is sometimes a
       // writeProjectFile/CLI cell the harness cannot run - nearestBoilerplate() walks
       // backward past it to the nearest one that is.
-      blocks.push({ type: 'your-turn', text, starter: nearestBoilerplate(examples), variation: null });
+      blocks.push({ type: 'your-turn', text, starter: nearestBoilerplate(examples), variation: null, checkpoint: null });
     } else {
-      blocks.push({ type: 'example', text, starter: null, variation: null });
+      blocks.push({ type: 'example', text, starter: null, variation: null, checkpoint: null });
       examples.push(text);
     }
   }

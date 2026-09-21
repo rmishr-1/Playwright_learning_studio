@@ -331,6 +331,67 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   color: var(--warn); display: block; margin-bottom: 5px; font-weight: 600;
 }
 
+/* The fixed furniture of every lesson: an at-a-glance card opens it, a recap card closes it.
+   Both are authored in Data/Content/lessons/, never parsed from a notebook. Cards rather than
+   more prose so a learner scanning the page finds them without reading what is in between.
+   Roles follow the palette: blue orients (what this is for), green consolidates (what you keep). */
+.lesson-card {
+  margin: 18px 0; border-radius: 10px; padding: 14px 17px;
+  border: 1px solid var(--rule); border-left-width: 3px;
+}
+.lesson-card .label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  display: block; margin-bottom: 7px; font-weight: 600;
+}
+/* A card is a summary, so its own paragraphs sit tighter than body prose. */
+.lesson-card :is(p, ul, ol) { margin: 6px 0; }
+/* These cards use a two-column table with no meaningful header, but GFM requires the header
+   row to exist - it renders as an empty strip above the first real row. Hidden only when it
+   is genuinely empty, so a card that does want headers still gets them. */
+.lesson-card thead:not(:has(th:not(:empty))) { display: none; }
+.lesson-card > div > :first-child { margin-top: 0; }
+.lesson-card > div > :last-child { margin-bottom: 0; }
+.lesson-card.at-a-glance { background: var(--accent-wash); border-left-color: var(--accent); }
+.lesson-card.at-a-glance .label { color: var(--accent); }
+.lesson-card.recap { background: var(--good-wash); border-left-color: var(--good); }
+.lesson-card.recap .label { color: var(--good); }
+
+/* Retrieval check. Formative and never scored (registry invariant 10) - which is why it is a
+   plain card and not a graded widget: nothing here is recorded or gated on. */
+.checkpoint {
+  margin: 20px 0; border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 16px 18px; background: var(--paper); box-shadow: var(--shadow);
+}
+.checkpoint .label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 7px; font-weight: 600;
+}
+.checkpoint > div > :first-child { margin-top: 0; }
+.checkpoint .options { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.checkpoint .option {
+  display: flex; gap: 10px; align-items: baseline; width: 100%; text-align: left;
+  font: inherit; font-size: 14.5px; line-height: 1.5; color: var(--graphite);
+  background: var(--tint); border: 1px solid var(--rule); border-radius: 8px;
+  padding: 10px 13px; cursor: pointer;
+}
+.checkpoint .option:not(:disabled):hover { border-color: var(--accent); background: var(--accent-wash); }
+/* Answered: the options stop being controls, so they lose the affordance as well as the handler. */
+.checkpoint .option:disabled { cursor: default; }
+.checkpoint .option .marker { font-family: var(--mono); font-weight: 700; width: 11px; flex: none; }
+.checkpoint .option .opt-text { flex: 1; }
+.checkpoint .option.right { background: var(--good-wash); border-color: var(--good); color: var(--good); }
+.checkpoint .option.wrong { background: var(--bad-wash); border-color: var(--bad); color: var(--bad); }
+.checkpoint .option.dim { opacity: .55; }
+.checkpoint .verdict {
+  margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--rule);
+  font-size: 14px; line-height: 1.6;
+}
+/* The explanation is markdown, which renders a block - inlined so it reads as one sentence
+   continuing from the verdict rather than starting a new paragraph under it. */
+.checkpoint .verdict :is(div, p) { display: inline; margin: 0; }
+.checkpoint .verdict.right strong { color: var(--good); }
+.checkpoint .verdict.wrong strong { color: var(--bad); }
+
 .problem {
   border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px 20px;
   margin: 20px 0; background: var(--paper); box-shadow: var(--shadow);

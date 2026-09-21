@@ -17,91 +17,142 @@
           "type": "markdown",
           "text": "# Week 2, Day 2.1 — `const`, and how TypeScript decides a variable's type\n\nEvery locator from here on gets assigned to a `const`. This is a full primer on why, and\non the type-inference rule that means you never write `: Locator` by hand.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | `const` | every `page.locator()` call gets assigned to one |\n| 2 | Dynamic vs static typing, and inference | why `const box = page.locator(...)` needs no type annotation |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 1. `const`\n\n`const` declares a variable that **cannot be reassigned** — you can't point it at a\ndifferent value later. It says nothing about whether the *thing itself* can change.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const box = \"a value\";\n// box = \"something else\";   // <- uncomment: TypeScript refuses, \"Cannot assign to 'box'\"\n\nconst numbers: number[] = [1, 2, 3];\nnumbers.push(4);              // fine — the array's contents changed; `numbers` still points at the same array\nconsole.log(numbers);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `[ 1, 2, 3, 4 ]`.\n\n`push()` mutated the array in place — `numbers` was never reassigned, so `const` never\nobjected. This is exactly the shape of a locator: the `const` itself never changes, but\nthe element it points at (checked, filled, removed from the DOM) does.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": {
+            "prompt": "Same rule, a different container: declare a `const` object with two properties, change one of them, and print it — the object mutates and `const` says nothing. Then add a line that points the same `const` at a brand-new object and read the error TypeScript gives you."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Where this shows up: `page.locator()`\n\n```ts\nconst emailBox = page.locator(\"input[type='email']\");\n```\n\n`emailBox` is a **reference** to \"whatever matches this selector right now\" — not a\nsnapshot of one element. `const` fits because you never point `emailBox` at a different\nlocator; you just call methods on it (`.fill()`, `.check()`) that act on the live page.\nThe TypeScript-only stand-in below shows the same idea without a browser.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// A stand-in for a Locator: an object whose contents change without the const\n// that points at it ever being reassigned.\nconst pretendLocator = { selector: \"input[type='email']\", timesClicked: 0 };\n\nfunction pretendClick(loc: typeof pretendLocator) {\n  loc.timesClicked++; // mutates the object; no reassignment\n}\n\npretendClick(pretendLocator);\npretendClick(pretendLocator);\nconsole.log(pretendLocator); // same const, changed contents",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `{ selector: \"input[type='email']\", timesClicked: 2 }`.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": {
+            "prompt": "Same stand-in, one more method: add a `pretendFill(loc, value)` that stores the value on the object, call it once, and print the object. Two methods have now changed its contents and the `const` still has never been reassigned."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 2. Dynamic vs static typing — why no `: Locator` was written\n\nTypeScript is **statically typed**: every variable's type is fixed at compile time, and\n`tsc` checks it before your code ever runs. You almost never *write* the type, though —\nTypeScript **infers** it from whatever you assign.\n\n| | Static typing (TypeScript) | Dynamic typing (plain JavaScript) |\n|---|---|---|\n| When the type is decided | at compile time, and fixed | at run time, and can change |\n| Who catches a type mistake | `tsc`, before you run anything | nobody — you find out when it crashes |\n| `const x = \"hi\"; x = 5;` | compile error | runs; `x` is now a number |\n\nOne line for context: this differs from a language like Java, where you write the type\nyourself every time — `String x = \"hi\";`.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const name = \"Ada\"; // inferred as string — hover it in your editor to see \"const name: string\"\nconst count = 3; // inferred as number\n// name = count;    // <- uncomment: TS2322, \"Type 'number' is not assignable to type 'string'\"\n\nlet anything: any = \"start as a string\";\nanything = 42; // `any` opts out of static checking — legal, but defeats the point\nconsole.log(typeof name, typeof count, typeof anything);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `string number number`.\n\n`name` and `count` got their types from the value to the right of `=` — that's inference.\n`anything: any` is how you'd *turn off* static typing for one variable; later days show\nwhy that's usually a bad idea. `page.locator(...)` is inferred as `Locator` the exact\nsame way `\"Ada\"` was inferred as `string` — TypeScript looks up what `.locator()` returns\nand assigns that type to your `const`, with zero annotation from you.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": {
+            "prompt": "Same inference, different types: declare a `const` boolean and a `const` array of strings, neither annotated, and print `typeof` each — note that the array reports `object`, because `typeof` predates arrays having their own answer. Then try pushing a number into the string array and read which line `tsc` refuses."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `const` | can't reassign the variable; the value it points at can still mutate |\n| Static typing | `tsc` fixes and checks every type before your code runs |\n| Inference | TypeScript reads the type off the assigned value — you rarely annotate |\n\n**Next:** [Day 2.2 — XPath, CSS, and your first real assertions](/learn/w2/d2/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const numbers = [1, 2, 3];` followed by `numbers.push(4);` — does that compile?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "No — `const` makes the array read-only, so `push` is refused",
+              "Yes — `const` stops you pointing `numbers` at a different array; it does not freeze the array's contents",
+              "Yes, but only because the array was annotated `number[]`"
+            ],
+            "answer": 1,
+            "explanation": "`const` is about the binding, not the value. `push` mutates the array in place and `numbers` still points at the same array, so nothing is reassigned. This is exactly the shape of a locator: the `const` is fixed, the element it refers to is not."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why does `const emailBox = page.locator(\"input[type='email']\")` need no `: Locator` annotation?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because TypeScript infers the type from what `.locator()` returns",
+              "Because locators are exempt from type checking",
+              "Because `const` declarations are never type-checked, only `let` ones are"
+            ],
+            "answer": 0,
+            "explanation": "Inference: TypeScript reads the type off the right-hand side, exactly as it decided `const name = \"Ada\"` was a `string`. The type is still static and still checked — you just did not have to type it out."
+          }
         }
       ],
       "problems": []
@@ -118,91 +169,169 @@
           "type": "markdown",
           "text": "# Week 2, Day 2.2 — XPath, CSS, and your first real assertions\n\nBy the end of this lesson you will have located an element with both XPath and CSS,\nassigned it to a `const` locator, and written your first real `expect()` assertions\nagainst a real page.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **You'll use** | `xpath=//tag[@attr='v']` · `tag[attr='v']` · `expect().toContainText()` · `.toHaveValue()` · `.toHaveURL()` |\n| **Assumes** | [const and type inference](/learn/w2/d2/p1) · [locators](/learn/w1/d4/p2) |\n| **Mode** | mixed — locator syntax runs live, but `expect()` only retries inside the test runner, so assertions go into a spec |\n| **The shift** | [Day 1](/learn/w2/d1/p2) could only prove nothing threw. From here a test can fail for the right reason. |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> **Mode: mixed.** Locator syntax is explored live (Deno). Real `expect()` assertions —\n> `toContainText`, `toHaveValue`, `toHaveURL` — only retry inside the test runner, so\n> those get written to a spec, same as every day so far.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## XPath: absolute vs relative\n\n| | Absolute | Relative |\n|---|---|---|\n| Starts with | `/html/body/div[1]/...` | `//tag[@attribute='value']` |\n| Fragile? | yes — one inserted `<div>` breaks it | no — matches anywhere in the document |\n| Use it | never | when nothing else identifies the element cleanly |\n\nAlways write relative XPath (`//...`). Absolute XPath is shown here only so you recognize\nit and know to avoid it.\n\n## CSS locator syntax, for contrast\n\n| | XPath | CSS |\n|---|---|---|\n| Syntax | `//tag[@attribute='value']` | `tag[attribute='value']` |\n| Prefix | `//` and `@` | neither |\n| Can it go **up** the DOM (parent, ancestor) | yes | no |\n| Can it go **sideways** (sibling) | yes | only \"next sibling\" (`+`) |\n\nPlaywright reaches for `getByRole`/`getByLabel`/`getByPlaceholder` before either of these\n— [Week 1, Day 4.2](/learn/w1/d4/p2) covered why. XPath and CSS are for when\nnothing on the element identifies it cleanly, which is common on older apps like today's.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Same element, two syntaxes.\nconst xpathCountry = page.locator(\"xpath=//select[@id='country']\");\nconst cssCountry = page.locator(\"select[id='country']\");\n\nconsole.log(\"XPath match count:\", await xpathCountry.count());\nconsole.log(\"CSS match count:\", await cssCountry.count());\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** both print `1` — same element, two syntaxes. The only differences: XPath\nneeds the `xpath=` prefix and an `@` before the attribute name; CSS needs neither.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same two syntaxes, a different element: count the matches for the First Name field, once with a relative XPath on its `placeholder` attribute and once with the CSS equivalent. Both should print 1 — and the pair of expressions should look exactly as different as the table said they would."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Assigning a locator to `const`\n\n[Day 2.1](/learn/w2/d2/p1) is the full primer — the one-line version: the locator reference\nis never reassigned, so it's always `const`.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst heading = page.locator(\"h1\"); // type Locator is inferred — no annotation needed\nconsole.log(\"text:\", JSON.stringify(await heading.textContent()));\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `\"Automation Demo Site \"` — note the trailing space baked into the real\nmarkup. [Day 3](/learn/w2/d3/p2) comes back to exactly this.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same idea, a different element: assign the Refresh button (`#Button1`) to a `const` and print its `textContent()` wrapped in `JSON.stringify()`. Note the exact string, stray whitespace and all, before you ever write an assertion against it."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Your first real assertions\n\n`expect()` **retries** against a locator until it matches or times out (5s default) —\nunlike a plain `if`, which checks once. It only works inside the test runner, so from\nhere every assertion gets written into a spec.\n\n| Matcher | Checks | Use it for |\n|---|---|---|\n| `toContainText(text)` | locator's text includes `text` | partial match |\n| `toHaveValue(text)` | a form control's current value | exactly what you just filled |\n| `toHaveURL(pattern)` | the page's current URL | confirming navigation happened — or didn't |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day2-first-assertions.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"filled fields keep their values, and Submit does not navigate away\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  const email = page.locator(\"input[type='email']\");\n  await email.fill(\"ada.lovelace@example.com\");\n  await expect(email).toHaveValue(\"ada.lovelace@example.com\");\n\n  const heading = page.locator(\"h1\");\n  await expect(heading).toContainText(\"Automation Demo Site\"); // no trailing space needed — see below\n\n  await page.locator(\"#submitbtn\").click();\n  await expect(page).toHaveURL(/Register\\\\.html/); // verified: Submit stays on the same page\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** `1 passed`.\n\nTwo things worth noticing:\n\n- `toContainText(\"Automation Demo Site\")` passes even though the real heading has a\n  trailing space — Playwright's text matchers **normalize whitespace** before comparing.\n  [Day 3](/learn/w2/d3/p2) shows where that normalization does *not* happen (raw XPath).\n- `toHaveURL(/Register\\.html/)` after clicking Submit is the honest assertion for this\n  app. It was verified there is no confirmation page, no modal, and no navigation on\n  submit — so the lesson asserts what's actually true instead of an invented \"thank\n  you\" page.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Best practices\n\n- Prefer relative XPath and role/label locators over absolute XPath — never ship absolute XPath.\n- Use `toHaveText` only when you know the *exact* string; default to `toContainText`.\n- Assert something observable — a value, a URL, a text fragment — not just \"didn't throw.\"\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Absolute XPath (`/html/body/div[1]/...`) | passes today, breaks on the next markup tweak | write `//tag[@attr='value']` instead |\n| Assuming Submit navigates | a `toHaveURL` assertion for a \"thank you\" page times out | verified: this app's Submit stays put — assert on filled values instead |\n| Calling `expect()` in a lesson cell | throws — no test runner behind it | write it to a `.spec.ts`, as above |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which XPath belongs in code you intend to keep?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`/html/body/div[1]/div[2]/form/input[3]` — it is the most precise",
+              "`//input[@type='email']` — it matches anywhere in the document",
+              "Either; they are two spellings of the same thing"
+            ],
+            "answer": 1,
+            "explanation": "An absolute path encodes the whole document structure, so one inserted `<div>` anywhere above your element breaks it. A relative XPath matches on the element's own attributes and survives the markup moving. The lesson shows absolute XPath only so you recognise it and avoid it."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `expect(locator).toContainText(\"Demo\")` do that a plain `if (text.includes(\"Demo\"))` does not?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "It retries until the locator matches or it times out",
+              "It searches the whole page rather than one element",
+              "It is case-insensitive"
+            ],
+            "answer": 0,
+            "explanation": "Web assertions retry — 5 seconds by default — which is what makes them safe against a page that has not finished rendering. A plain `if` checks once, right now, and a page that needed another 200ms fails for no real reason. Retrying is also why `expect()` needs the test runner behind it."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "The real heading on the page is `\"Automation Demo Site \"` — with a trailing space. Why does `toContainText(\"Automation Demo Site\")` pass anyway?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because `toContainText` only checks that the text starts with the string",
+              "Because Playwright's text matchers normalise whitespace before comparing",
+              "Because the assertion retried until the space was removed"
+            ],
+            "answer": 1,
+            "explanation": "Text matchers normalise whitespace, so the trailing space never reaches the comparison. Worth knowing precisely because it is not universal — [Day 3](/learn/w2/d3/p2) shows where that normalisation does *not* happen, and the raw string bites."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Relative XPath (`//tag[@attr='v']`) always; absolute XPath never.\n- XPath can go up and sideways in the DOM; CSS can only go down and to the next sibling. That is the one real reason to reach for XPath.\n- `expect()` **retries**; a plain `if` checks once. That is the whole difference, and it only works inside the test runner.\n- `toContainText` for a fragment, `toHaveText` only when you know the exact string. Text matchers normalise whitespace.\n- Assert something observable. \"It didn't throw\" is not an assertion.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What's next\n\n[Day 2.3](/learn/w2/d2/p3) wraps these assertions in a reusable function, the way Day 1.3 did for actions.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -219,31 +348,87 @@
           "type": "markdown",
           "text": "# Week 2, Day 2.3 — The same assertions, wrapped for reuse\n\nBy the end of this lesson you will have wrapped yesterday's `expect()` calls in one\nfunction two different tests both call, extending [Day 1.3](/learn/w2/d1/p3)'s helper file.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 2.2](/learn/w2/d2/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 2.2](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1.3](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The problem with what we wrote yesterday\n\nIf three tests each need to confirm the form accepted its data, that's the same three\n`expect()` calls copy-pasted three times — and a renamed field means fixing it in three places.\n\n## Same code, with structure around it\n\n| In Day 2.2 you wrote | Here it becomes | Why |\n|---|---|---|\n| three separate `expect(...)` calls inline in the test | one call: `await expectFormFilledCorrectly(page, email)` | the checks live in one place, reusable by every test that fills this form |\n\n**This is still a function, not a page object.** A real page object (week 3) is a\n`class` that **never** asserts — actions and checks stay separate. The helper below is a\ndifferent, equally common pattern: a **shared assertion helper**, and it's allowed to\nassert because that is its entire job.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// Extends Day 1.3's file with an assertion helper alongside the action helper.\nawait writeProjectFile(\"week2/generated/registration-helpers.ts\", `// Week 2 — shared actions and checks for the Register.html form.\nimport type { Page } from \"@playwright/test\";\nimport { expect } from \"@playwright/test\";\n\nexport async function fillRegistrationForm(page: Page, email: string) {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  await page.getByPlaceholder(\"First Name\").fill(\"Ada\");\n  await page.getByPlaceholder(\"Last Name\").fill(\"Lovelace\");\n  await page.locator(\"textarea\").fill(\"123 Analytical Engine Way\");\n  await page.locator(\"input[type='email']\").fill(email);\n  await page.locator(\"input[type='tel']\").fill(\"5551234567\");\n\n  await page.locator(\"input[value='FeMale']\").check();\n  await page.locator(\"#checkbox1\").check();\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n}\n\n// A shared assertion helper — unlike a page object, this one is meant to assert.\nexport async function expectFormFilledCorrectly(page: Page, email: string) {\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await expect(page.getByPlaceholder(\"First Name\")).toHaveValue(\"Ada\");\n  await expect(page).toHaveURL(/Register\\\\.html/);\n}\n`.trim());",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { runSpec } from \"../_shared/deno-helpers.ts\"; // writeProjectFile already imported above\n\nconst specPath = \"week2/generated/day2-reuse.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test } from \"@playwright/test\";\nimport { fillRegistrationForm, expectFormFilledCorrectly } from \"./registration-helpers\";\n\ntest(\"learner one's data is accepted\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.one@example.com\");\n  await expectFormFilledCorrectly(page, \"learner.one@example.com\");\n});\n\ntest(\"learner two's data is accepted\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.two@example.com\");\n  await expectFormFilledCorrectly(page, \"learner.two@example.com\");\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected result:** `2 passed`. Both tests share the same three checks; a fourth test\nthat needs them gets them for free.\n\n## What a reviewer would look for\n\n- The repeated `expect()` calls live in one function, not copy-pasted across tests.\n- It's clearly named as a checker (`expectFormFilledCorrectly`), not an action.\n- It's kept separate from `fillRegistrationForm` — actions and checks are two different functions, not one that does both.\n\n## What's next\n\n[Day 2.4](/learn/w2/d2/p4) — your turn, with no worked examples to lean on.",
+          "text": "**Expected result:** `2 passed`. Both tests share the same three checks; a fourth test\nthat needs them gets them for free.\n\n## What a reviewer would look for\n\n- The repeated `expect()` calls live in one function, not copy-pasted across tests.\n- It's clearly named as a checker (`expectFormFilledCorrectly`), not an action.\n- It's kept separate from `fillRegistrationForm` — actions and checks are two different functions, not one that does both.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "A page object must never assert. So why is `expectFormFilledCorrectly` allowed to be nothing but `expect()` calls?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because it is a different pattern — a shared assertion helper, where asserting is the entire job",
+              "Because the no-assertions rule only applies once you are using classes in week 3",
+              "Because `toHaveValue` is exempt; only `toHaveURL` is banned from a page object"
+            ],
+            "answer": 0,
+            "explanation": "The rule is about keeping actions and checks in separate places, not about banning assertions from helpers. A page object holds the actions; a shared assertion helper holds the checks. What would be wrong is one function that fills the form *and* asserts on it."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Your suite has three tests that each fill this form and check it was accepted. The Email field is renamed. How many places should need editing?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Three — once per test",
+              "Two — the action helper and the assertion helper",
+              "Six — each test's fill and its assertion"
+            ],
+            "answer": 1,
+            "explanation": "That is the point of both of today's helpers: the locator appears once in `fillRegistrationForm` and once in `expectFormFilledCorrectly`, no matter how many tests call them. Inline, the same rename would be six edits and you would miss one."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Copy-pasted `expect()` calls are the same problem as copy-pasted actions, with the same fix: put them in one function.\n- Name a checker for what it checks (`expectFormFilledCorrectly`), so a reader can tell at the call site that nothing is being *done* to the page.\n- Keep actions and checks in separate functions. Week 3 formalises that split into a class; the discipline is identical today.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 2.4](/learn/w2/d2/p4) — your turn, with no worked examples to lean on.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -260,31 +445,43 @@
           "type": "markdown",
           "text": "# Week 2, Day 2.4 — Practice: XPath, CSS, and assertions\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 2.1](/learn/w2/d2/p1) or [Day 2.2](/learn/w2/d2/p2). Go back, re-read, come here again.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Three problems** | XPath by hand, then assertions, then a helper of your own |\n| **Pulls on** | [Day 2.1](/learn/w2/d2/p1) for `const` · [Day 2.2](/learn/w2/d2/p2) for matchers · [Day 2.3](/learn/w2/d2/p3) for the shape |\n| **Watch for** | an assertion that passes for the wrong reason — it is the failure mode this whole day exists to fix |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## When you are done\n\nLook back at your Problem 3 helper and Day 1.3's action helper side by side: two\nfunctions, two jobs, one file. That separation is most of what week 3 formalizes into a\nclass.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

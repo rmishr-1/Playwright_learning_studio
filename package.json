@@ -11,6 +11,7 @@
         "dev:backend": "npm run dev --workspace backend",
         "dev:frontend": "npm run dev --workspace frontend",
         "import": "tsx scripts/import-notebooks.ts",
+        "overlay": "tsx scripts/apply-overlay.ts",
         "typecheck": "npm run typecheck --workspaces --if-present",
         "verify": "tsx backend/test/import-proof.ts",
         "verify:runnable": "tsx backend/test/week1-runnable-proof.ts"

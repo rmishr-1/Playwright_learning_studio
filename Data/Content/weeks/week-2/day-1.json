@@ -17,19 +17,51 @@
           "type": "markdown",
           "text": "# Week 2, Day 1.1 — TypeScript check-in: nothing new today\n\nDay 1.2's Playwright code — filling fields, checking boxes, picking from dropdowns — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 1.2](/learn/w2/d1/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New syntax today** | none — this tab is a 60-second check that last week stuck |\n| **Leans on** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Then go to** | [Day 1.2](/learn/w2/d1/p2), which is all Playwright API |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What today's code leans on\n\n| Concept | Status | Where it was taught |\n|---|---|---|\n| `async` functions, arrow functions | already covered | [Week 1, Day 5.1](/learn/w1/d5/p1) |\n| `page` fixture, per-test isolation (preview) | already covered | [Week 1, Day 5.1](/learn/w1/d5/p1) |\n| Chaining a method onto a locator | already covered | [Week 1, Day 4.2](/learn/w1/d4/p2) |\n\nNothing below is new syntax — [Day 1.2](/learn/w2/d1/p2) spends its time on the Playwright\nAPI (`.fill()`, `.check()`, `.selectOption()`), not the language.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Every test today is written `async ({ page }) => { ... }`. What is that `page`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "A fresh browser tab, created for this test alone",
+              "One shared browser tab that every test in the file takes turns using",
+              "The page object for the site under test, which you define yourself"
+            ],
+            "answer": 0,
+            "explanation": "Each test gets its own `page` — a fresh tab, so nothing one test does leaks into the next. That per-test isolation was [Week 1, Day 5.1](/learn/w1/d5/p1), and Day 5 of this week is about what happens when you split a test and lose it."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "No new TypeScript today. If the table above had any surprises in it, follow the link before starting [Day 1.2](/learn/w2/d1/p2) — the Playwright will be easier to see if the language underneath it is not also new.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What's next\n\n[Day 1.2 — From recorder to real code](/learn/w2/d1/p2) puts these actions to work on a real form.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -46,115 +78,200 @@
           "type": "markdown",
           "text": "# Week 2, Day 1.2 — From recorder to real code: actions on a form\n\nBy the end of this lesson you will have hand-written the locators for a full\nregistration form — text fields, a radio button, checkboxes, a dropdown, and a country\npicker — and filled and submitted it without Codegen recording a single line.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **You'll use** | `.fill()` · `.pressSequentially()` · `.check()` · `.selectOption()` |\n| **On** | [the Register.html signup form](https://demo.automationtesting.in/Register.html) — every control type on one page |\n| **Assumes** | [locators](/learn/w1/d4/p2) · [async and the page fixture](/learn/w1/d5/p1) |\n| **Not yet** | assertions — nothing here checks the form *worked*. That is [Day 2](/learn/w2/d2/p2). |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Two things you already know\n\n- **Codegen only records actions.** [Week 1, Day 4.2](/learn/w1/d4/p2) used it to\n  generate locators — it never records an assertion, because it has no way to know what\n  you *expect* to happen. [Week 1, Day 5.2](/learn/w1/d5/p2) showed a recorded test\n  passing with a wrong password for exactly that reason. Today still has no assertions —\n  [Day 2](/learn/w2/d2/p2) adds them.\n- Every test is an `async` function, and `page` is a fresh browser tab per test — see\n  [Week 1, Day 5.1](/learn/w1/d5/p1) if that's fuzzy. Nothing new there today.\n\n## Today's app\n\n[demo.automationtesting.in/Register.html](https://demo.automationtesting.in/Register.html)\n— a real signup form with every control type on one page: text inputs, radios,\ncheckboxes, a dropdown, and a country picker. No login, no session — every example below\nstarts fresh on this page.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Filling text: `.fill()` vs `.type()`\n\n| | `.fill()` | `.type()` (alias `pressSequentially()`) |\n|---|---|---|\n| How | sets the value directly | simulates one keystroke at a time |\n| Speed | fast | slower — real per-key delay |\n| Default choice | **yes** | only when the page reacts to each keystroke (autocomplete, a keyup handler) |\n\nMeasured on this page, filling the same 24-character string: `.fill()` **68ms**,\n`.type()` **92ms**. The gap widens with longer text and more fields — use `.fill()` unless\nyou have a specific reason not to.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch, show } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nawait page.getByPlaceholder(\"First Name\").fill(\"Ada\");\nawait page.getByPlaceholder(\"Last Name\").fill(\"Lovelace\");\nawait page.locator(\"textarea\").fill(\"123 Analytical Engine Way\"); // no placeholder — it's the only textbox on the page\nawait page.locator(\"input[type='email']\").fill(\"ada.lovelace@example.com\");\nawait page.locator(\"input[type='tel']\").fill(\"5551234567\");\n\nawait show(page);\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| Line | What it does |\n|---|---|\n| `getByPlaceholder(\"First Name\")` / `(\"Last Name\")` | placeholder text is unique for each — verified, 1 match apiece |\n| `page.locator(\"textarea\")` | Address has no placeholder or label — it's the only `<textarea>` on the page, so the tag alone is enough |\n| `input[type='email']` / `input[type='tel']` | no label text on either field, so the `type` attribute is the next-best identifier |\n\n**Expected result:** the screenshot shows all five fields filled.\n\n**Challenge:** swap `.fill()` for `.pressSequentially()` on one field, with `{ delay: 50 }`, and watch it type letter by letter.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same five fields, different data: fill the form for a learner of your own invention. Then switch ONE of the five to `.pressSequentially()` with `{ delay: 50 }` and watch that field type itself out letter by letter while the other four snap in at once."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Radio buttons and checkboxes — `.check()`\n\nBoth use the same method. Playwright clicks whatever is needed to make the box or radio\nend up checked — you never compute whether it already is.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch, show } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// The second gender option's real label is spelled \"FeMale\" on this page — not a typo\n// to fix, a real gotcha to notice before you go looking for \"Female\" and find nothing.\nawait page.locator(\"input[value='FeMale']\").check();\n\nawait page.locator(\"#checkbox1\").check(); // Cricket\nawait page.locator(\"#checkbox2\").check(); // Movies\n\nawait show(page);\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| Line | What it does |\n|---|---|\n| `input[value='FeMale']` | no `id` on the radios, so matched by the `value` attribute — verified: 1 match |\n| `#checkbox1` / `#checkbox2` | verified ids; map to Cricket and Movies respectively |\n\n**Expected result:** the FeMale radio and both checkboxes show checked in the screenshot.\n\n**Challenge:** call `.check()` again on the same checkbox and confirm nothing breaks — `.check()` is idempotent.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same two methods, different controls: check the OTHER gender radio — read its `value` off the page rather than guessing what it is spelled — and add the Hockey checkbox alongside Cricket. The lesson only verified the ids for Cricket and Movies, so Hockey's is yours to find."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Dropdowns — `.selectOption()`\n\nPick by the **visible text** a user would read, or the underlying `value` where the two\nmatch — either way, verify the option actually exists first.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch, show } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// \"Select Skills\" looks like a multi-select (78 options) but carries no `multiple`\n// attribute — verified. It only ever keeps your last pick.\nawait page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n\n// Two selects both mention \"Country\" on this page. The one labelled \"Country*\"\n// (#countries) ships with a single placeholder option and nothing else — a dead field.\n// The real one is labelled \"Select Country :\" and has id #country.\nawait page.locator(\"#country\").selectOption(\"India\");\n\nawait show(page);\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| Line | What it does |\n|---|---|\n| `#Skills` `.selectOption({ label: \"Java\" })` | matches by visible text; verified 78 options, single-select despite the name |\n| `#country` `.selectOption(\"India\")` | matches by the option's `value`, which equals its text here; verified 11 real countries |\n\n**Expected result:** screenshot shows \"Java\" selected in Skills and \"India\" in the country picker.\n\n**Gotcha, verified:** `#country` carries `aria-hidden=\"true\"` and a Select2 CSS class\n(`select2-hidden-accessible`) — on many Select2 widgets that blocks `.selectOption()` and\nforces you to click a fake dropdown instead. On this app it does not block it; `.selectOption()`\nworks directly. Always verify a skinned `<select>` for real rather than assuming either way.\n\n**Challenge:** try `.selectOption(\"Select Country\")` on `#countries` and read the timeout — that select genuinely has no other option to find.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same method, different picks: select a skill other than Java by its label, and a country other than India. Then point `.selectOption()` at `#countries` — the dead `Country*` field — and read the timeout it gives you before it gives up."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Doing it for real, in a spec file\n\nSame actions, written to a real `.spec.ts` and run with `npx playwright test`. No\n`expect()` yet — that's the whole point. This test cannot currently tell you whether any\nof it actually worked, only that nothing threw. [Week 1, Day 5.2](/learn/w1/d5/p2)\nshowed the same gap with a wrong password; [Day 2](/learn/w2/d2/p2) closes it.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day1-register-form.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test } from \"@playwright/test\";\n\ntest(\"fills out the registration form\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  await page.getByPlaceholder(\"First Name\").fill(\"Ada\");\n  await page.getByPlaceholder(\"Last Name\").fill(\"Lovelace\");\n  await page.locator(\"textarea\").fill(\"123 Analytical Engine Way\");\n  await page.locator(\"input[type='email']\").fill(\"ada.lovelace@example.com\");\n  await page.locator(\"input[type='tel']\").fill(\"5551234567\");\n\n  await page.locator(\"input[value='FeMale']\").check();\n  await page.locator(\"#checkbox1\").check();\n  await page.locator(\"#checkbox2\").check();\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n\n  await page.locator(\"#submitbtn\").click();\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> ▶ **Run it yourself.** `npx playwright test week2/generated/day1-register-form.spec.ts`\n>\n> It passes — but \"passes\" here only means nothing threw. Nothing in the file checks that\n> the form actually accepted the data. Closing that gap is [Day 2](/learn/w2/d2/p2).\n\n## Best practices\n\n- Default to `.fill()`; reach for `.pressSequentially()` only when the page reacts per keystroke.\n- `.selectOption({ label })` when the visible text is what a tester would read; a plain string when value and label match.\n- Never assume a Select2-skinned `<select>` is off-limits to `.selectOption()` — verify it.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Selecting the \"Country*\" field (`#countries`) | timeout — it has one dead option | use `#country` instead |\n| Assuming \"Select Skills\" is multi-select | only the last `.selectOption()` call sticks | it's a single-select — verified, no `multiple` attribute |\n| Typing \"Female\" | 0 matches | the page really does spell it `FeMale` |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You are filling a search box that shows autocomplete suggestions as you type, and the suggestions are what you need to click. Which method fills it?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`.fill()` — it is the default, and faster",
+              "`.pressSequentially()`, because the page reacts to each keystroke",
+              "Either — they produce identical events, only at different speeds"
+            ],
+            "answer": 1,
+            "explanation": "`.fill()` sets the value directly, so a page listening for per-key events never hears them and the suggestions never appear. That is exactly the case the lesson reserves `.pressSequentially()` for — it costs you the speed (68ms vs 92ms measured here) and you spend it deliberately."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "On `#Skills` you call `.selectOption({ label: \"Java\" })`, then `.selectOption({ label: \"Python\" })`. What is selected at the end?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Both Java and Python — it has 78 options and takes multiple",
+              "Python only",
+              "Java only — the first pick wins and later calls are ignored",
+              "Neither — the second call throws, because the option is already taken"
+            ],
+            "answer": 1,
+            "explanation": "\"Select Skills\" reads like a multi-select and has 78 options, but it carries no `multiple` attribute — verified in the lesson. A single-select keeps only your last pick, so Python replaces Java silently. Nothing errors, which is what makes it worth knowing."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "The spec at the end of this lesson reports `1 passed`. What has it actually proved?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "That the form accepted the data and the registration succeeded",
+              "That every locator matched and no line threw — nothing more",
+              "That the page navigated away after Submit"
+            ],
+            "answer": 1,
+            "explanation": "There is not one `expect()` in that file, so \"passed\" means only that nothing threw on the way through. It is the same gap [Week 1, Day 5.2](/learn/w1/d5/p2) showed with a wrong password, and [Day 2](/learn/w2/d2/p2) is where you close it."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- `.fill()` by default. `.pressSequentially()` only when the page reacts to each keystroke.\n- `.check()` makes a control checked — it does not toggle it, so calling it twice is safe and you never compute the current state first.\n- `.selectOption({ label })` matches the visible text; a bare string matches the option's `value`.\n- Verify a skinned `<select>` rather than assuming. `#country` carries `aria-hidden` and a Select2 class and still takes `.selectOption()` — on another app it might not.\n- **A test with no `expect()` cannot fail for the right reason.** Everything today is actions; assertions start tomorrow.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What's next\n\n[Day 1.3](/learn/w2/d1/p3) takes this exact code and shows how a real project would organize it.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -171,43 +288,101 @@
           "type": "markdown",
           "text": "# Week 2, Day 1.3 — The same actions, the way a real project writes them\n\nBy the end of this lesson you will have pulled yesterday's fill/check/select steps out\nof one test and into a single reusable function two different tests both call.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 1.2](/learn/w2/d1/p2). The only new thing is the structure around it.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New API** | none — every line here is something you ran in [Day 1.2](/learn/w2/d1/p2) |\n| **What changes** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Not yet** | the Page Object Model. This is a plain function; the class version is week 3. |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The problem with what we wrote yesterday\n\nEvery test that needs a filled-out registration form has to repeat the same ten lines —\n`.fill()`, `.check()`, `.selectOption()`, one after another. Two tests means those ten\nlines exist twice; a real suite might need them in thirty places. If the form gets a new\nrequired field, that is thirty edits, not one.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Same code, with structure around it\n\n| In Day 1.2 you wrote | Here it becomes | Why |\n|---|---|---|\n| ten `.fill()`/`.check()`/`.selectOption()` lines inline in the test | one call: `await fillRegistrationForm(page, email)` | the steps live in one place — change the form once, not in every test |\n| a hardcoded email string | a parameter | the one thing tests actually need to vary is pulled out; everything else stays fixed |\n\n**This is a function, not a class.** Grouping locators and actions into a class — the\nPage Object Model — is coming formally in week 3. Today's version reaches for the\nsimplest tool that already solves the repetition: a function.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// No test() calls here, so the runner never collects this file — just a helper.\n// Deliberately not named *.spec.ts (see week3/day3_2's rule: a helper file never\n// carries the spec suffix, or the runner tries to execute it as a test).\n\nawait writeProjectFile(\"week2/generated/registration-helpers.ts\", `// Week 2 — shared actions for the Register.html form.\n//\n// One function, not copy-pasted lines. The email is a parameter because it's the one\n// value these examples actually vary; everything else stays fixed on purpose.\nimport type { Page } from \"@playwright/test\";\n\nexport async function fillRegistrationForm(page: Page, email: string) {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  await page.getByPlaceholder(\"First Name\").fill(\"Ada\");\n  await page.getByPlaceholder(\"Last Name\").fill(\"Lovelace\");\n  await page.locator(\"textarea\").fill(\"123 Analytical Engine Way\");\n  await page.locator(\"input[type='email']\").fill(email);\n  await page.locator(\"input[type='tel']\").fill(\"5551234567\");\n\n  await page.locator(\"input[value='FeMale']\").check();\n  await page.locator(\"#checkbox1\").check();\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n}\n`.trim());",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "### Why it is shaped this way\n\n| Choice | Reason |\n|---|---|\n| `page: Page`, `email: string` typed parameters | the function is explicit about what it needs and returns — same typing rules as any other function |\n| Exported into its own file, not the spec | reusable from every spec that needs this form, not just one |\n| No `expect()` inside it | this function performs actions — a preview of the \"no assertions in a page object\" rule week 3 names formally. Nothing to assert yet, since Day 1 doesn't check outcomes at all |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { runSpec } from \"../_shared/deno-helpers.ts\"; // writeProjectFile already imported above\n\nconst specPath = \"week2/generated/day1-reuse.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test } from \"@playwright/test\";\nimport { fillRegistrationForm } from \"./registration-helpers\";\n\ntest(\"registers learner one\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.one@example.com\");\n  await page.locator(\"#submitbtn\").click();\n});\n\ntest(\"registers learner two\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.two@example.com\");\n  await page.locator(\"#submitbtn\").click();\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected result:** `2 passed`. Both tests call the same function with a different email —\nthe ten-line form-filling sequence exists exactly once in the whole project.\n\n## What a reviewer would look for\n\n- The repeated steps live in one function, not copy-pasted across tests.\n- The function is named for what it does (`fillRegistrationForm`), not for the DOM calls inside it.\n- Nothing inside it asserts anything.\n\n## What's next\n\n[Day 1.4](/learn/w2/d1/p4) — your turn, with no worked examples to lean on.",
+          "text": "**Expected result:** `2 passed`. Both tests call the same function with a different email —\nthe ten-line form-filling sequence exists exactly once in the whole project.\n\n## What a reviewer would look for\n\n- The repeated steps live in one function, not copy-pasted across tests.\n- The function is named for what it does (`fillRegistrationForm`), not for the DOM calls inside it.\n- Nothing inside it asserts anything.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "The helper is saved as `registration-helpers.ts`, deliberately not `registration-helpers.spec.ts`. Why does the suffix matter?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "The runner collects every `*.spec.ts` file and would try to execute a file with no tests in it",
+              "TypeScript refuses to export a function from a `.spec.ts` file",
+              "It is only a naming convention — either name works identically"
+            ],
+            "answer": 0,
+            "explanation": "The spec suffix is what the runner globs for. A helper that carries it gets collected and executed as a test file, and a file with no `test()` calls in it is an error, not a pass. The rule gets named formally in week 3."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why does `fillRegistrationForm` take `email` as a parameter, but keep the first name, address and phone hardcoded?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because strings are the only type a helper can safely accept",
+              "Because the email is the one value these tests actually need to differ — parameterising the rest would add knobs nobody turns",
+              "Because Playwright requires every helper to take exactly one parameter beyond `page`"
+            ],
+            "answer": 1,
+            "explanation": "Two tests register two learners, and the only thing that has to differ between them is the email. Everything else is fixed on purpose. Problem 3 asks you to add the phone as a second parameter — because there the tests do need it to vary."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Repetition across tests is a structural problem, not a typing problem: ten lines in thirty specs is thirty edits when the form changes.\n- The fix is the simplest thing that works — a function. The Page Object Model is the same instinct with a class around it, and it arrives in week 3.\n- Name a helper for what it does (`fillRegistrationForm`), not for the calls inside it.\n- No `expect()` inside a helper that performs actions. That is a preview of the \"no assertions in a page object\" rule, and it holds for the same reason.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 1.4](/learn/w2/d1/p4) — your turn, with no worked examples to lean on.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -224,31 +399,43 @@
           "type": "markdown",
           "text": "# Week 2, Day 1.4 — Practice: actions on a form\n\nThree problems, getting harder. No answer key — you learn this by getting it wrong and\nreading the error message.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 1.2](/learn/w2/d1/p2) or [Day 1.3](/learn/w2/d1/p3), not in your ability. Go back, re-read, come here again.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Three problems** | Beginner → Advanced, no answer key on the first two |\n| **Pulls on** | [Day 1.2](/learn/w2/d1/p2) for the actions · [Day 1.3](/learn/w2/d1/p3) for the structure |\n| **If you stall** | more than ~20 minutes on one means the gap is in the lesson, not in you — go back and re-read |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## When you are done\n\nRe-read your Problem 3 function and ask what Day 1.3 was really about: if this form\ngrew a required \"State\" field tomorrow, how many files would you have to touch?",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [
