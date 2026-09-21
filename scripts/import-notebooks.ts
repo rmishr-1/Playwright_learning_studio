@@ -115,7 +115,7 @@ function buildPart(
     part,
     kind: isPractice ? 'practice' : part === 1 ? 'prerequisite' : 'concept',
     title,
-    tab_label: tabLabel(part, title),
+    tab_label: tabLabel(part),
     source_notebook: notebookPath,
     // A part with no example blocks and no problem stubs has nothing to run. Week 1 Day 1.2 is
     // 13 markdown cells and zero code; the "nothing new today" check-ins are the same shape.

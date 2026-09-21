@@ -147,7 +147,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Your first real test, and why assertions matter",
-      "tab_label": "Your first real test, and why…",
+      "tab_label": "Fundamentals",
       "source_notebook": "week1/day5_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -232,7 +232,7 @@
       "part": 3,
       "kind": "concept",
       "title": "The same login, with a little structure",
-      "tab_label": "The same login, with a little…",
+      "tab_label": "Implementation",
       "source_notebook": "week1/day5_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

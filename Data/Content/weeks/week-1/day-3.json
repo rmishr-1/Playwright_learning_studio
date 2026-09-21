@@ -27,7 +27,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Running tests from the CLI",
-      "tab_label": "Running tests from the CLI",
+      "tab_label": "Fundamentals",
       "source_notebook": "week1/day3_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -96,7 +96,7 @@
       "part": 3,
       "kind": "concept",
       "title": "A first look inside `playwright.config.ts`",
-      "tab_label": "A first look inside playwrigh…",
+      "tab_label": "Implementation",
       "source_notebook": "week1/day3_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

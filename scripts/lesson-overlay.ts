@@ -14,6 +14,7 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { tabLabel } from './notebook-parse';
 import { LessonOverlay, type OverlayPart } from '../shared/contracts/lesson_overlay';
 import type { ContentBlock, CourseDay, CoursePart } from '../shared/contracts/course_day';
 
@@ -121,6 +122,20 @@ export function applyVariations(day: CourseDay, variations: Record<string, strin
         }),
       };
     }) as CourseDay['parts'],
+  };
+}
+
+/**
+ * Re-derives the fields the importer COMPUTES rather than reads from a notebook - today just the
+ * tab label. Changing such a rule otherwise reaches only the days someone re-imports afterwards,
+ * and re-importing needs the 147-notebook training repo, so in practice the rule and the
+ * committed tree drift apart silently. Running this wherever `npm run overlay` runs keeps them
+ * converged from the one definition in tabLabel().
+ */
+export function applyDerivedLabels(day: CourseDay): CourseDay {
+  return {
+    ...day,
+    parts: day.parts.map((p) => ({ ...p, tab_label: tabLabel(p.part) })) as CourseDay['parts'],
   };
 }
 

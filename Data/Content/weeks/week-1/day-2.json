@@ -27,7 +27,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Environment setup & your first Playwright project",
-      "tab_label": "Environment setup & your firs…",
+      "tab_label": "Fundamentals",
       "source_notebook": "week1/day2_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -163,7 +163,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Organizing a real project's folders and config",
-      "tab_label": "Organizing a real project's f…",
+      "tab_label": "Implementation",
       "source_notebook": "week1/day2_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

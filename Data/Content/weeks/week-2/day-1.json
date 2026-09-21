@@ -70,7 +70,7 @@
       "part": 2,
       "kind": "concept",
       "title": "From recorder to real code: actions on a form",
-      "tab_label": "From recorder to real code",
+      "tab_label": "Fundamentals",
       "source_notebook": "week2/day1_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -280,7 +280,7 @@
       "part": 3,
       "kind": "concept",
       "title": "The same actions, the way a real project writes them",
-      "tab_label": "The same actions, the way a r…",
+      "tab_label": "Implementation",
       "source_notebook": "week2/day1_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

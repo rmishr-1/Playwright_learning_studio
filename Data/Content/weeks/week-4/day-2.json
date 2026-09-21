@@ -17,7 +17,8 @@
           "type": "markdown",
           "text": "# Week 4, Day 2.1 — Prerequisites check\n\n**No new TypeScript today.** Both of today's topics are locator work plus an options object.\n\n| You'll use | Taught in |\n|---|---|\n| Locators and chaining | [week3/day3_2](/learn/w3/d3/p2) |\n| Options objects (`{ button: \"right\" }`) | [week3/day1_1](/learn/w3/d1/p1) |\n| `async` / `await` | [week3/day3_1](/learn/w3/d3/p1) |\n| Reading an error message | [day1_2](/learn/w4/d1/p2) |\n\nThat last row matters more than usual: half of today is telling two error messages apart.\n\nOne new **shape** worth naming before you meet it — listening for a browser dialog:\n\n```ts\npage.once(\"dialog\", async (dialog) => { await dialog.accept(); });\n```\n\n`page.once` registers a callback that fires at most once. Set it up **before** the action that\ntriggers the dialog; by the time the dialog exists it's too late to start listening.\n\n**Next:** [Day 2.2 — Elements you can't reach](/learn/w4/d2/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -26,7 +27,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Elements you can't reach",
-      "tab_label": "Elements you can't reach",
+      "tab_label": "Fundamentals",
       "source_notebook": "week4/day2_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -34,211 +35,246 @@
           "type": "markdown",
           "text": "# Week 4, Day 2.2 — Elements you can't reach\n\nTwo different ways a correct locator fails you. Sometimes the element is behind a boundary your\nlocator can't cross. Sometimes it only exists while you're pointing at it.\n\nBy the end of this lesson you can handle both, and tell them apart in seconds.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Part 1 — Frames\n\nAn `<iframe>` is a whole second document embedded in the page. It has its own DOM, and the outer\npage's locators **cannot see into it**.\n\nThe mall analogy is a good one: the dress is behind glass. You can see it perfectly, point at it,\ndescribe it — and still can't pick it up until you open the case.\n\n| Tool | How you cross the boundary |\n|---|---|\n| Selenium | `driver.switchTo().frame(...)`, then switch back |\n| Playwright | `page.frameLocator(...)` — no switching, no state to restore |\n\nPlaywright's version has no \"current frame\" to forget about, which removes a whole class of bug\nwhere a later locator silently searches the wrong document.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 1 — the failure, on purpose",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { chromium } from \"npm:playwright\";\n\nconst browser = await chromium.launch();\nconst page = await browser.newPage();\nawait page.goto(\"https://the-internet.herokuapp.com/iframe\");\n\nconsole.log(\"iframes on the page: \", await page.locator(\"iframe\").count());\nconsole.log(\"#tinymce from page:  \", await page.locator(\"#tinymce\").count());\nconsole.log(\"iframe id attribute: \", await page.locator(\"iframe\").first().getAttribute(\"id\"));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:**\n\n```\niframes on the page:  1\n#tinymce from page:   0\niframe id attribute:  mce_0_ifr\n```\n\n**Zero.** The element is visible in a real browser, your selector is correct, and the page reports it\ndoes not exist. This is the wall students hit for twenty minutes.\n\nThe tell is that first line: **there is an iframe on the page.** Whenever a locator you trust returns\n0, check for frames before doubting the locator.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "import { chromium } from \"npm:playwright\";\n\nconst browser = await chromium.launch();\nconst page = await browser.newPage();\nawait page.goto(\"https://the-internet.herokuapp.com/iframe\");",
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 2 — crossing the boundary",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const editor = page.frameLocator(\"#mce_0_ifr\").locator(\"body\");\n\nconsole.log(\"count inside the frame:\", await editor.count());\nconsole.log(\"text inside the frame: \", JSON.stringify((await editor.innerText()).trim()));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `1`, then `\"Your content goes here.\"`\n\n`frameLocator(\"#mce_0_ifr\")` says *\"find that iframe, then look inside it\"*. Read it as a path:\n**page → frame → element.** Miss the middle step and you get zero.\n\n**Challenge:** try `page.frameLocator(\"#does-not-exist\").locator(\"body\").count()`. What happens, and\nhow long does it take?",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "import { chromium } from \"npm:playwright\";\n\nconst browser = await chromium.launch();\nconst page = await browser.newPage();\nawait page.goto(\"https://the-internet.herokuapp.com/iframe\");",
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 3 — two failures that look alike\n\nThe diagnostic skill that saves the twenty minutes.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const t0 = Date.now();\nlet outside = \"\";\ntry {\n  await page.locator(\"#tinymce\").click({ timeout: 2000 });\n} catch (err) {\n  outside = (err as Error).message.split(\"\\n\")[0];\n}\nconsole.log(`no frameLocator -> ${Date.now() - t0}ms | ${outside}`);\n\nconst t1 = Date.now();\nlet inside = \"\";\ntry {\n  await page.frameLocator(\"#mce_0_ifr\").locator(\"body\").fill(\"nope\", { timeout: 2000 });\n} catch (err) {\n  inside = (err as Error).message.split(\"\\n\")[0];\n}\nconsole.log(`with frameLocator -> ${Date.now() - t1}ms | ${inside}`);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** roughly\n\n```\nno frameLocator -> 2011ms | locator.click: Timeout 2000ms exceeded.\nwith frameLocator -> 46ms | locator.fill: Error: Element is not an <input>, <textarea>, ...\n```\n\nTwo things separate them, and both are diagnostic:\n\n| | Time | Message |\n|---|---|---|\n| Never found it | spends the **whole deadline** | `Timeout … exceeded` |\n| Found it, refused the action | fails **immediately** | describes the element |\n\n**A fast failure means Playwright found your element.** So the locator is fine and the problem is the\nelement — read-only here, or disabled, or covered. A slow failure means it never matched, and *that's*\nwhen to suspect a frame.\n\n(This editor happens to be read-only, which gives us the second failure mode for free.)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "import { chromium } from \"npm:playwright\";\n\nconst browser = await chromium.launch();\nconst page = await browser.newPage();\nawait page.goto(\"https://the-internet.herokuapp.com/iframe\");",
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 4 — frames inside frames",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "await page.goto(\"https://the-internet.herokuapp.com/nested_frames\");\n\nconst middle = page\n  .frameLocator(\"frame[name='frame-top']\")\n  .frameLocator(\"frame[name='frame-middle']\")\n  .locator(\"#content\");\nconsole.log(\"middle:\", JSON.stringify((await middle.innerText()).trim()));\n\n// frame-bottom is a SIBLING of frame-top, so it hangs off the page directly.\nconst bottom = page.frameLocator(\"frame[name='frame-bottom']\").locator(\"body\");\nconsole.log(\"bottom:\", JSON.stringify((await bottom.innerText()).trim()));\n\nconsole.log(\n  \"bottom via top:\",\n  await page.frameLocator(\"frame[name='frame-top']\").locator(\"frame[name='frame-bottom']\").count(),\n);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `\"MIDDLE\"`, `\"BOTTOM\"`, then `0`.\n\nThat last line is the point. `frame-bottom` is not inside `frame-top`, so chaining through it finds\nnothing — and you get a *timeout*, sending you after the wrong problem.\n\n**Match the chain to the nesting.** Open the DOM, find the frame that actually contains your element,\nand count the boundaries between it and the page.\n\n> **Finding the frame:** `Ctrl+F` the DOM for `frame`, click through the hits until the highlight\n> covers your element's region, then read its `name` or `id`. And `npx playwright codegen` records\n> frame boundaries for you automatically — the session deliberately told students *not* to record the\n> exercise, because recording would have solved it instantly and taught them nothing about the failure.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "await page.goto(\"https://the-internet.herokuapp.com/nested_frames\");",
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Part 2 — Gestures\n\nThe other way a correct locator isn't enough: the element only appears while the pointer is over it,\nor only reacts to a right-click.\n\nIn Selenium each of these needed an `Actions` builder and three lines. Playwright folded the family\ninto the locator:\n\n| Selenium `Actions` | Playwright |\n|---|---|\n| `moveToElement(e).perform()` | `locator.hover()` |\n| `contextClick(e).perform()` | `locator.click({ button: \"right\" })` |\n| `doubleClick(e).perform()` | `locator.dblclick()` |\n| `dragAndDrop(a, b).perform()` | `a.dragTo(b)` |\n\nSame capability, one line, and it auto-waits for the element to be ready.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 5 — hover",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "await page.goto(\"https://the-internet.herokuapp.com/hovers\");\n\nconst figure = page.locator(\".figure\").first();\nconst caption = figure.locator(\".figcaption\");\n\nconsole.log(\"figures on the page:\", await page.locator(\".figure\").count());\nconsole.log(\"caption visible before hover:\", await caption.isVisible());\n\nawait figure.hover();\n\nconsole.log(\"caption visible after hover: \", await caption.isVisible());\nconsole.log(\"caption text:\", JSON.stringify((await caption.innerText()).replace(/\\s+/g, \" \").trim()));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `3`, `false`, `true`, `\"name: user1 View profile\"`.\n\nOne call. No builder, no `.perform()`, and `hover()` waits for the element to be visible and stable\nfirst.\n\n**The trap:** the caption is in the DOM the whole time — only its CSS changes. So `toBeVisible()` is\nthe right assertion and `count()` is the wrong one. `count()` returns 1 either way, and a test built\non it passes **without hovering at all**.\n\nBoth forms work — `page.hover(sel)` and `page.locator(sel).hover()` — but prefer the locator form: it\ncomposes with `.first()`, `.nth()`, `.filter()`, and reads like the rest of your suite.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "await page.goto(\"https://the-internet.herokuapp.com/hovers\");",
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 6 — right-click, and the click options",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "await page.goto(\"https://the-internet.herokuapp.com/context_menu\");\n\n// Register the listener BEFORE the click. The dialog blocks the page, so waiting\n// until afterwards is already too late.\nlet dialogMessage = \"\";\npage.once(\"dialog\", async (dialog) => {\n  dialogMessage = dialog.message();\n  await dialog.accept();\n});\n\nawait page.locator(\"#hot-spot\").click({ button: \"right\" });\nawait page.waitForTimeout(500);      // explore cells only; the spec polls instead\nconsole.log(\"dialog said:\", JSON.stringify(dialogMessage));\n\n// The rest of the family lives in the same options object.\nconst hotSpot = page.locator(\"#hot-spot\");\nawait hotSpot.click({ button: \"left\" });\nawait hotSpot.dblclick();\nawait hotSpot.click({ delay: 150 });\nconsole.log(\"left, double and delayed clicks all completed\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `dialog said: \"You selected a context menu\"`, then the confirmation line.\n\n**`{ button: \"right\" }`, not a new method.** Same for `\"middle\"`.\n\n**The listener goes first.** A JS dialog blocks the page until something dismisses it. Attach the\nhandler after the click and the test hangs until it times out — a confusing failure, because the code\nlooks right.\n\n| Option | For |\n|---|---|\n| `button` | `\"left\"` / `\"right\"` / `\"middle\"` |\n| `clickCount` | 2 is a double-click; `dblclick()` says it better |\n| `delay` | widgets that measure how long you held the button |\n| `position` | canvases, image maps, sliders |\n| `force` | skips the actionability checks — **a warning sign**, not a tool |\n\n`force: true` turns \"this element isn't clickable\" into \"clicked something invisible and moved on\".\nIf you need it, the interesting question is why the element isn't ready.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "await page.goto(\"https://the-internet.herokuapp.com/context_menu\");",
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 7 — drag and drop",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "await page.goto(\"https://the-internet.herokuapp.com/drag_and_drop\");\n\nconst columnA = page.locator(\"#column-a\");\nconst columnB = page.locator(\"#column-b\");\n\nconsole.log(\"A header before:\", await columnA.locator(\"header\").innerText());\nawait columnA.dragTo(columnB);\nconsole.log(\"A header after: \", await columnA.locator(\"header\").innerText());\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `A` before, `B` after — the columns swap contents.\n\n`dragTo()` replaces the whole Selenium dance. When it doesn't work — some custom widgets listen for\nraw pointer events rather than HTML5 drag — the manual route is `hover()` → `mouse.down()` → hover the\ntarget → `mouse.up()`. Reach for that only after `dragTo` has failed.\n\n**Assert on the consequence, not the gesture.** The header text changing proves the drop registered.\n\"No error was thrown\" does not.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Both halves, as real specs",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 4 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week4/generated/day2-frames.spec.ts\", `// Week 4, Day 2 — reaching inside a frame.\n//\n// Uses the-internet.herokuapp.com because it has purpose-built single and nested\n// frames. The source session drove a real bank's netbanking login page, which is\n// not something course material should automate. Every selector below was probed.\n//\n// Written by a cell in week4/day2_2.ipynb. Run it yourself:\n//   npx playwright test week4/generated/day2-frames.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\nconst IFRAME = \"https://the-internet.herokuapp.com/iframe\";\nconst NESTED = \"https://the-internet.herokuapp.com/nested_frames\";\n\ntest.describe(\"Frames\", () => {\n  test(\"Step 1 — the element is visible but unreachable from the page\", async ({ page }) => {\n    await page.goto(IFRAME);\n\n    // You can see the editor. The page cannot see into it.\n    await expect(page.locator(\"iframe\")).toHaveCount(1);\n    await expect(page.locator(\"#tinymce\")).toHaveCount(0);\n\n    // This is the failure students spend twenty minutes on: the locator is\n    // correct, the element exists on screen, and the count is still zero.\n  });\n\n  test(\"Step 2 — frameLocator crosses the boundary\", async ({ page }) => {\n    await page.goto(IFRAME);\n\n    const editor = page.frameLocator(\"#mce_0_ifr\").locator(\"body\");\n\n    await expect(editor).toHaveCount(1);\n    await expect(editor).toContainText(\"Your content goes here.\");\n  });\n\n  test(\"Step 3 — two failures that look alike and are not\", async ({ page }) => {\n    await page.goto(IFRAME);\n\n    // (a) Correct locator, wrong side of the boundary. Nothing matches, so it\n    //     spends the whole deadline waiting: a TIMEOUT.\n    let outside = \"\";\n    try {\n      await page.locator(\"#tinymce\").click({ timeout: 2000 });\n    } catch (error) {\n      outside = (error as Error).message;\n    }\n    expect(outside).toContain(\"Timeout\");\n\n    // (b) Correct side of the boundary, but this editor is read-only. Playwright\n    //     found the element and refused the action: a DIFFERENT error, and it\n    //     arrives immediately rather than after a deadline.\n    let inside = \"\";\n    try {\n      await page.frameLocator(\"#mce_0_ifr\").locator(\"body\").fill(\"nope\", { timeout: 2000 });\n    } catch (error) {\n      inside = (error as Error).message;\n    }\n    expect(inside).toContain(\"not an <input>\");\n    expect(inside).not.toContain(\"Timeout\");\n\n    // Read the error before changing the locator. A timeout means \"I never found\n    // it\"; anything else means \"I found it and could not do that to it\".\n  });\n\n  test(\"Step 4 — nested frames need one hop each\", async ({ page }) => {\n    await page.goto(NESTED);\n\n    // frame-top holds three more frames. Each boundary is its own frameLocator.\n    const middle = page\n      .frameLocator(\"frame[name='frame-top']\")\n      .frameLocator(\"frame[name='frame-middle']\")\n      .locator(\"#content\");\n\n    await expect(middle).toHaveText(\"MIDDLE\");\n  });\n\n  test(\"Step 5 — a sibling frame is reached from the page, not from its neighbour\", async ({ page }) => {\n    await page.goto(NESTED);\n\n    // frame-bottom is a sibling of frame-top, so it hangs off the page directly.\n    const bottom = page.frameLocator(\"frame[name='frame-bottom']\").locator(\"body\");\n    await expect(bottom).toContainText(\"BOTTOM\");\n\n    // Chaining through frame-top would never find it — the hierarchy matters.\n    await expect(\n      page.frameLocator(\"frame[name='frame-top']\").locator(\"frame[name='frame-bottom']\")\n    ).toHaveCount(0);\n  });\n\n  test(\"Step 6 — frames auto-wait like any other locator\", async ({ page }) => {\n    await page.goto(IFRAME);\n\n    // No explicit wait for the frame to load. frameLocator resolves lazily, so\n    // the assertion retries until the frame and its contents exist.\n    await expect(page.frameLocator(\"#mce_0_ifr\").locator(\"body\")).toBeVisible();\n  });\n});\n`);\n\nawait runSpec(\"week4/generated/day2-frames.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 4 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week4/generated/day2-mouse-actions.spec.ts\", `// Week 4, Day 2 — mouse actions.\n//\n// These use the-internet.herokuapp.com because they need hover menus, a\n// right-click target and a drag surface. The banking app has none of those, and\n// the sites the source video used (yatra.com, a Spree store) are a live\n// commercial site and a server that was down during the session — neither is\n// safe to build a lesson on. Every selector below was probed first.\n//\n// Written by a cell in week4/day2_2.ipynb. Run it yourself:\n//   npx playwright test week4/generated/day2-mouse-actions.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\nconst HOVERS = \"https://the-internet.herokuapp.com/hovers\";\nconst CONTEXT = \"https://the-internet.herokuapp.com/context_menu\";\nconst DRAG = \"https://the-internet.herokuapp.com/drag_and_drop\";\n\ntest.describe(\"Mouse actions\", () => {\n  test(\"Step 1 — hover reveals what was hidden\", async ({ page }) => {\n    await page.goto(HOVERS);\n\n    const firstFigure = page.locator(\".figure\").first();\n    const caption = firstFigure.locator(\".figcaption\");\n\n    // Hidden until the pointer arrives.\n    await expect(caption).toBeHidden();\n\n    await firstFigure.hover();\n\n    await expect(caption).toBeVisible();\n    await expect(caption).toContainText(\"name: user1\");\n  });\n\n  test(\"Step 2 — hover is one call, not three\", async ({ page }) => {\n    await page.goto(HOVERS);\n\n    // Both forms work. The locator form is preferred: it auto-waits and reads\n    // consistently with the rest of your suite.\n    await page.locator(\".figure\").nth(1).hover();\n    await expect(page.locator(\".figure\").nth(1).locator(\".figcaption\")).toBeVisible();\n\n    // The direct form, which the source video used.\n    await page.hover(\".figure:nth-child(5)\");\n  });\n\n  test(\"Step 3 — right-click is a click with an option\", async ({ page }) => {\n    await page.goto(CONTEXT);\n\n    // The page answers a right-click with a JS alert, so catch it before clicking.\n    let message = \"\";\n    page.once(\"dialog\", async (dialog) => {\n      message = dialog.message();\n      await dialog.accept();\n    });\n\n    await page.locator(\"#hot-spot\").click({ button: \"right\" });\n\n    await expect.poll(() => message).toBe(\"You selected a context menu\");\n  });\n\n  test(\"Step 4 — the click options, in one place\", async ({ page }) => {\n    await page.goto(CONTEXT);\n\n    const hotSpot = page.locator(\"#hot-spot\");\n\n    // button: \"left\" | \"right\" | \"middle\"\n    await hotSpot.click({ button: \"left\" });\n    // clickCount: 2 is a double-click; dblclick() is the readable form\n    await hotSpot.click({ clickCount: 2 });\n    await hotSpot.dblclick();\n    // delay: hold the button down, for widgets that measure press duration\n    await hotSpot.click({ delay: 120 });\n\n    // All four completed without throwing — that is the assertion here.\n    await expect(hotSpot).toBeVisible();\n  });\n\n  test(\"Step 5 — drag and drop\", async ({ page }) => {\n    await page.goto(DRAG);\n\n    const columnA = page.locator(\"#column-a\");\n    const columnB = page.locator(\"#column-b\");\n\n    await expect(columnA.locator(\"header\")).toHaveText(\"A\");\n\n    await columnA.dragTo(columnB);\n\n    // The columns swap their contents, so A now holds B's header.\n    await expect(columnA.locator(\"header\")).toHaveText(\"B\");\n  });\n});\n`);\n\nawait runSpec(\"week4/generated/day2-mouse-actions.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> ▶ **Run them yourself:**\n> ```\n> npx playwright test week4/generated/day2-frames.spec.ts\n> npx playwright test week4/generated/day2-mouse-actions.spec.ts\n> ```\n\n**Expected:** `6 passed` and `5 passed`.\n\nThe frames spec asserts the **failures** as well as the successes — `toHaveCount(0)` without a frame\nlocator, and the two distinguishable error messages. A test documenting how something fails is as\nuseful as one documenting how it works, and it stays green.\n\nThe mouse spec swaps two explore-cell shortcuts for their spec equivalents: `toBeHidden()` instead of\n`isVisible()` (it auto-waits, so it can't read the state a millisecond too early), and\n`expect.poll(() => message)` instead of `waitForTimeout` — waiting for the **condition** rather than\nguessing at 500 ms.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Best practices\n\n- **Locator returns 0 and you trust it?** Count the iframes before touching the selector.\n- **One `frameLocator` per boundary**, matching the real nesting.\n- **Register dialog handlers before the action** that triggers them.\n- **Assert the consequence** of a gesture, not that it didn't throw.\n- **Treat `force: true` as a question**, not a fix.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Count 0 on a visible element | it's inside a frame | `page.frameLocator(...)` first |\n| Timeout chaining nested frames | wrong hierarchy | check which frame really contains it |\n| `Element is not an <input>` | you're in the right place | it's read-only/disabled, not missing |\n| Test hangs after a right-click | no dialog handler, or too late | `page.once(\"dialog\", …)` before the click |\n| Hover test passes without hovering | asserted on `count()` | `toBeVisible()` / `toBeHidden()` |\n| `dragTo` does nothing | widget uses raw pointer events | manual `mouse.down()` / `mouse.up()` |\n\n**Next:** [Day 2.3](/learn/w4/d2/p3) — hiding both behind a page object.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -247,7 +283,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Hiding the mechanics",
-      "tab_label": "Hiding the mechanics",
+      "tab_label": "Implementation",
       "source_notebook": "week4/day2_3.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -255,31 +291,36 @@
           "type": "markdown",
           "text": "# Week 4, Day 2.3 — Hiding the mechanics\n\nSame API as [Day 2.2](/learn/w4/d2/p2). No new calls. The question is who should know that a frame or a\nhover menu is involved — and the answer for both is *not the test*.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Both are implementation details\n\nA frame is a decision the **developers** made about page structure. A hover menu is a decision the\n**designers** made about interaction. Your test is about what a *user achieved*.\n\nSo both of these have leaked someone else's choice into the test:\n\n```ts\nawait page.frameLocator(\"#mce_0_ifr\").locator(\"body\").click();\nawait page.locator(\"#nav-account\").hover();\nawait page.locator(\"#nav-account .dropdown >> text=Sign out\").click();\n```\n\n| In the test | Behind a class |\n|---|---|\n| `frameLocator(\"#mce_0_ifr\").locator(\"body\")` | `editor.body` |\n| `hover()` then `waitFor()` then `click()` | `await nav.signOut()` |\n| breaks when the frame id or menu style changes | one field or method changes |\n\nWhen iframes go out of fashion, or the menu becomes click-to-open, the wrapped version is a one-line\nchange and no test notices.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import type { FrameLocator, Locator, Page } from \"npm:playwright\";\n\n/** The frame boundary is resolved once, privately. Callers never learn it exists. */\nclass EditorPage {\n  private readonly page: Page;\n  private readonly frame: FrameLocator;\n  readonly body: Locator;\n\n  constructor(page: Page, frameSelector = \"#mce_0_ifr\") {\n    this.page = page;\n    this.frame = page.frameLocator(frameSelector);\n    this.body = this.frame.locator(\"body\");   // exposed as an ordinary Locator\n  }\n\n  async open(): Promise<void> {\n    await this.page.goto(\"https://the-internet.herokuapp.com/iframe\");\n  }\n}\n\n/** A hover menu is a component, not a page — it appears on several screens. */\nclass HoverMenu {\n  private readonly trigger: Locator;\n  private readonly panel: Locator;\n\n  constructor(page: Page, triggerSelector: string) {\n    this.trigger = page.locator(triggerSelector);\n    this.panel = this.trigger.locator(\".figcaption\");\n  }\n\n  /** Hovers AND waits for what the hover reveals — the classic missing step. */\n  async open(): Promise<void> {\n    await this.trigger.hover();\n    await this.panel.waitFor({ state: \"visible\" });\n  }\n\n  caption(): Locator {\n    return this.panel;\n  }\n}\n\nconsole.log(\"Both defined — shapes, not tests.\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| Choice | Reason |\n|---|---|\n| `frameLocator` in the constructor | one place knows about the boundary |\n| `frame` and `trigger` are `private` | no test can reach past the abstraction |\n| `body` / `caption()` return plain `Locator`s | callers can't tell a frame or hover was involved |\n| Selectors are **constructor parameters** | one class serves every frame / every menu on the site |\n| `open()` waits for the panel | `hover()` returning ≠ the menu opened; CSS transitions take time |\n| No `expect()` anywhere | same rule as [week3/day3_3](/learn/w3/d3/p3) |\n\n`FrameLocator` is worth naming as a type: it isn't a `Locator` and has no `.click()` of its own. It's\na **doorway** — you chain a locator off it.\n\nThat \"`open()` waits\" row is the one that saves you. Waiting inside `open()` means every caller gets\nit right without knowing they needed to.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Where each thing belongs\n\n| Action | Page object or test? |\n|---|---|\n| crossing a frame boundary | **page object** — it's page structure |\n| `hover()` to open a menu | **page object** — it's how the menu works |\n| `dragTo()` to reorder a list | **page object** — `reorder(from, to)` |\n| `click({ button: \"right\" })` for a context menu | **page object** — `openContextMenu(row)` |\n| asserting the menu opened | **test** |\n| asserting the list order changed | **test** |\n\nOne line covers both halves of today: **gestures and boundaries are mechanics; outcomes are\nassertions.**\n\n### Where frames genuinely leak\n\nSome things a page object can't hide, and it's better to know which:\n\n| Situation | Why it leaks |\n|---|---|\n| Payment iframes (Stripe, PayPal) | third-party markup you don't control |\n| A frame that appears only sometimes | the caller must handle both shapes |\n| Cross-origin frames | some APIs behave differently |\n\nFor third-party payment frames the honest advice is **don't test through them at all** where you can\navoid it: stub the provider at the network layer and test your own pages. Driving a vendor's iframe\ncouples your suite to their release schedule.\n\n## What a reviewer checks\n\n- **No `frameLocator` or bare `hover()` in a test** — both belong behind a named method.\n- **Selectors passed in**, not hardcoded in the class.\n- **The open method waits** for what the gesture reveals.\n- **No `expect()`** inside the class.\n- **Third-party frames questioned** — is there a stub instead?\n\n**Next:** [Day 2.4](/learn/w4/d2/p4) — your turn.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -296,31 +337,36 @@
           "type": "markdown",
           "text": "# Week 4, Day 2.4 — Practice\n\nThree problems. No answer key.\n\nVerified targets, all on `the-internet.herokuapp.com`:\n\n| Page | Facts |\n|---|---|\n| `/iframe` | 1 iframe, `id=\"mce_0_ifr\"`; body text `\"Your content goes here.\"`; **read-only** |\n| `/nested_frames` | `frame-top` → `frame-left`/`frame-middle`/`frame-right`; `frame-bottom` is a **sibling** |\n| `/hovers` | 3 × `.figure`; `.figcaption` hidden until hover; `\"name: user1 View profile\"` |\n| `/context_menu` | `#hot-spot`; right-click fires a dialog `\"You selected a context menu\"` |\n| `/drag_and_drop` | `#column-a` / `#column-b`; headers swap `A` → `B` |\n\n> Stuck past twenty minutes? Back to [Day 2.2](/learn/w4/d2/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## When you're done\n\n**Count the `frameLocator` and `hover()` calls visible in your Problem 3 spec.** Zero is the target. A\ntest should describe what a person read and did; whether the developers used an iframe, or the\ndesigners used a hover menu, is not the test's business.\n\n**Next:** [Day 3.1](/learn/w4/d3/p1) — changing settings without disturbing your team.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

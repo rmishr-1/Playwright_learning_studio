@@ -17,55 +17,64 @@
           "type": "markdown",
           "text": "# Week 7, Day 2.1 - Prerequisites check\n\n**Almost no new TypeScript today** - Day 2 is about how APIs work, not about the language.\n\n| In play | Taught in |\n|---|---|\n| Objects, nested objects | [week3/day1_1](/learn/w3/d1/p1) |\n| `JSON.parse`, and `any` | [week5/day5_1](/learn/w5/d5/p1) |\n| Template literals | [week6/day3_1](/learn/w6/d3/p1) |\n| `enum` | [day1_2](/learn/w7/d1/p2) |\n\nOne shape is worth five minutes, because every API answer arrives in it.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## JSON is key/value, and it nests\n\n| Rule | Example |\n|---|---|\n| Keys are always quoted strings | `\"title\": \"Git Pocket Guide\"` |\n| Strings quoted, numbers not | `\"pages\": 234` |\n| `[...]` is a list | `\"books\": [ ... ]` |\n| A value can be another object | `\"data\": { \"id\": 2 }` |\n\nThe nesting is what trips people up: to reach a child you must name every parent.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const raw = `{\n  \"books\": [\n    { \"isbn\": \"9781449325862\", \"title\": \"Git Pocket Guide\", \"pages\": 234 },\n    { \"isbn\": \"9781449331818\", \"title\": \"Learning JavaScript Design Patterns\" }\n  ]\n}`;\n\nconst parsedBody = JSON.parse(raw);\n\nconsole.log(\"top-level keys :\", Object.keys(parsedBody));\nconsole.log(\"books is a list:\", Array.isArray(parsedBody.books), \"of\", parsedBody.books.length);\nconsole.log(\"first title    :\", parsedBody.books[0].title);\nconsole.log(\"pages is number:\", typeof parsedBody.books[0].pages);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Skipping a level is the most common error\n\n`parsedBody.title` is `undefined`, because `title` is a child of an item of `books`. And the\nerror message you eventually get blames the wrong line.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const bodyForDemo = JSON.parse('{\"books\":[{\"title\":\"Git Pocket Guide\"}]}');\n\nconsole.log(\"bodyForDemo.title          ->\", bodyForDemo.title, \"<- undefined: skipped two levels\");\nconsole.log(\"bodyForDemo.books[0].title ->\", bodyForDemo.books[0].title);\n\ntry {\n  console.log(bodyForDemo.data.title);\n} catch (e) {\n  console.log(\"bodyForDemo.data.title     -> throws:\", (e as Error).message);\n}",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "Read that message carefully: it complains about reading `title` **of undefined**, so the thing\nthat was missing is `data` - the dot *before* the one named in the error.\n\nRemember that inversion. It is the single most common way to waste ten minutes on an API test:\nthe error names the property you asked for, never the one that was absent.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Next:** [Day 2.2 - What an API is](/learn/w7/d2/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -74,7 +83,7 @@
       "part": 2,
       "kind": "concept",
       "title": "What an API is",
-      "tab_label": "What an API is",
+      "tab_label": "Fundamentals",
       "source_notebook": "week7/day2_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -82,103 +91,120 @@
           "type": "markdown",
           "text": "# Week 7, Day 2.2 - What an API is\n\nSix weeks of this course drove a browser. Today the browser goes away and you talk to the server\ndirectly - which is faster, earlier, and how most testing work is actually heading.\n\n> **Mode: mixed.** Explore cells use `fetch`; one cell writes and runs a real spec.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The testing pyramid, and why anyone cares\n\n| Level | What it checks | Cost of a bug found here |\n|---|---|---|\n| Unit | one function's logic | lowest |\n| **Integration / API** | modules talking to each other | low |\n| System / UI | the whole thing through a browser | high |\n| Acceptance / UAT | a human agrees it is right | highest |\n\nThe pyramid says: many tests at the bottom, few at the top. Most teams do the opposite - and then\nfind bugs at the UI level, where fixing one means re-coding, re-testing and re-regressing.\n\nThe trend the session quotes: **~30% of coverage through the UI, ~70% through the API.**",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Why API tests are worth more per test\n\n| | UI test | API test |\n|---|---|---|\n| Needs a browser | yes | **no** |\n| Typical duration | ~30 s | ~3 s |\n| Breaks when a button moves | yes | no |\n| Can run before the UI exists | no | **yes** |\n| Language of the app matters | no | no |\n\n**Roughly 10x faster.** 2000 tests at 30 s is over 16 hours; at 3 s it is under two.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What API tests cannot do\n\nWorth being honest about, because \"100% API\" is a bad goal:\n\n| Not testable through an API | Why |\n|---|---|\n| Colours, layout, spelling on screen | there is no screen |\n| A confirm dialog - \"Are you sure?\" | that is browser chrome |\n| The browser Back button | there is no browser |\n| Visual regression | see [week4/day5_2](/learn/w4/d5/p2) |\n| That a real person can complete the journey | the whole point of UI tests |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Request and response - the whole model\n\nTwo things travel. That is it.\n\n| Direction | Carries |\n|---|---|\n| **Request** | a verb, a URL, optional headers, optional body |\n| **Response** | a status code, and usually a body |\n\nAnd any URL splits into three parts:\n\n```\nhttps://demoqa.com/BookStore/v1/Books\n-----   ----------  ------------------\nprotocol   host          endpoint\n```\n\nThe endpoint is also called a **microservice** - one service among many at that host.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The three parts, taken apart by the browser's own URL parser.\nfor (const url of [\n  \"https://demoqa.com/BookStore/v1/Books\",\n  \"http://zero.webappsecurity.com/login.html\",\n  \"https://demoqa.com/BookStore/v1/Book?ISBN=9781449325862\",\n]) {\n  const u = new URL(url);\n  console.log(`${u.protocol.padEnd(7)} ${u.host.padEnd(28)} ${u.pathname}${u.search}`);\n}",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## CRUD is four verbs\n\nEvery application does four things to data. HTTP has a verb for each.\n\n| Do | Verb | Body? |\n|---|---|---|\n| Create | `POST` | **yes** |\n| Read | `GET` | no |\n| Update | `PUT` (whole) / `PATCH` (part) | **yes** |\n| Delete | `DELETE` | usually no |\n\n`GET` and `DELETE` carrying no body is the detail that catches people out - see\n[day4_2](/learn/w7/d4/p2), Step 6.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// A read, with no browser anywhere.\nconst booksResponse = await fetch(\"https://demoqa.com/BookStore/v1/Books\");\nconsole.log(\"status:\", booksResponse.status);\n\nconst booksBody = await booksResponse.json();\nconsole.log(\"books returned:\", booksBody.books.length);\nconsole.log(\"first:\", booksBody.books[0].title, \"|\", booksBody.books[0].author);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Status codes come in four families\n\nRemember the **family**, not the number. The first digit is the part that is reliable.\n\n| Family | Means | Whose problem |\n|---|---|---|\n| **2xx** | it worked | nobody's |\n| **3xx** | it moved - look at `Location` | nobody's |\n| **4xx** | your request was wrong | **yours** |\n| **5xx** | the server broke | **theirs** |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week7/generated/day2-status-families.spec.ts\", `// Week 7, Day 2 — the four status-code families, each fetched for real.\n//\n// Written by a cell in week7/day2_2.ipynb. Run it yourself:\n//   npx playwright test week7/generated/day2-status-families.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\nconst DEMOQA = \"https://demoqa.com\";\nconst INTERNET = \"https://the-internet.herokuapp.com\";\n\ntest.describe(\"Status code families\", () => {\n  test(\"Step 1 — 2xx: it worked\", async ({ request }) => {\n    const response = await request.get(\\`\\${DEMOQA}/BookStore/v1/Books\\`);\n\n    expect(response.status()).toBe(200);\n    expect(response.ok()).toBe(true);   // ok() is true for any 2xx\n  });\n\n  test(\"Step 2 — 3xx: go and ask over there instead\", async ({ request }) => {\n    // maxRedirects: 0 stops Playwright following it, so we can SEE the 302.\n    // Without this you get the 200 from the destination and never know a\n    // redirect happened — which is why the session had to open DevTools.\n    const response = await request.get(\\`\\${INTERNET}/redirect\\`, { maxRedirects: 0 });\n\n    expect(response.status()).toBe(302);\n    // A 3xx is only useful with its Location header: that is the \"over there\".\n    expect(response.headers()[\"location\"]).toContain(\"/status_codes\");\n  });\n\n  test(\"Step 3 — 4xx: you asked for something wrong\", async ({ request }) => {\n    const response = await request.get(\\`\\${DEMOQA}/BookStore/v1/Book?ISBN=0000000000\\`);\n\n    // The session expects 404 here. This API answers 400 with a message code.\n    // Both are 4xx — \"your request was the problem\" — and the exact number is\n    // the developer's choice, not a rule. Read the response; do not assume.\n    expect(response.status()).toBe(400);\n    const body = await response.json();\n    expect(body.code).toBe(\"1205\");\n    expect(body.message).toContain(\"not available in Books Collection\");\n  });\n\n  test(\"Step 4 — 404 is a 4xx too, just a more famous one\", async ({ request }) => {\n    const response = await request.get(\\`\\${INTERNET}/status_codes/404\\`);\n    expect(response.status()).toBe(404);\n  });\n\n  test(\"Step 5 — 5xx: the server broke, not you\", async ({ request }) => {\n    const response = await request.get(\\`\\${INTERNET}/status_codes/500\\`);\n\n    expect(response.status()).toBe(500);\n    expect(response.ok()).toBe(false);\n    // Nothing to fix in your test. This one is a bug report for the API team.\n  });\n});\n\ntest.describe(\"Why a status code alone is not a verification\", () => {\n  test(\"Step 6 — a 200 that means failure\", async ({ request }) => {\n    const response = await request.post(\\`\\${DEMOQA}/Account/v1/GenerateToken\\`, {\n      data: { userName: \"user_that_does_not_exist_w7\", password: \"WrongPass@1\" },\n    });\n\n    // 200. Success, surely?\n    expect(response.status()).toBe(200);\n\n    const body = await response.json();\n    // No. The body says it failed and hands back no token.\n    expect(body.status).toBe(\"Failed\");\n    expect(body.token).toBeNull();\n    expect(body.result).toContain(\"authorization failed\");\n  });\n});\n`);\n\n// Expected: 6 passed. One test per family, plus the 200 that means failure.\nawait runSpec(\"week7/generated/day2-status-families.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "Two results from that run deserve your attention.\n\n**Step 3 - the session predicts 404 and the API answers 400.** Both are 4xx. The exact number is\nthe developer's choice; the family is the contract. Never assert a code you have not seen.\n\n**Step 6 - a 200 that means failure.** Sending a wrong password to `GenerateToken` returns:\n\n```json\n{ \"token\": null, \"expires\": null, \"status\": \"Failed\", \"result\": \"User authorization failed.\" }\n```\n\nStatus `200`. Verified live.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## So: always two verifications\n\n| Check | Answers |\n|---|---|\n| The status code | did the server accept the request? |\n| The body | did it do the right thing? |\n\nA test that checks only the status passes on Step 6's response. That is the rule this whole\nlesson exists to install.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The same trap, in four lines you can run.\nconst tokenResponse = await fetch(\"https://demoqa.com/Account/v1/GenerateToken\", {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ userName: \"nobody_at_all_w7\", password: \"WrongPass@1\" }),\n});\n\nconsole.log(\"status  :\", tokenResponse.status, \"<- looks like success\");\nconst tokenBody = await tokenResponse.json();\nconsole.log(\"status field:\", tokenBody.status);\nconsole.log(\"token       :\", tokenBody.token, \"<- there is no token\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Common mistakes\n\n| Mistake | Consequence |\n|---|---|\n| Asserting only the status code | Step 6 passes your test while the login failed |\n| Assuming 404 for \"not found\" | this API says 400; assert what you probed |\n| Following redirects and never noticing | use `maxRedirects: 0` to see the 3xx |\n| Sending a body with `GET` | ignored at best, rejected at worst |\n| Treating 5xx as your bug | it is a bug report, not a test fix |\n\n**Next:** [Day 2.3 - Reading the documentation](/learn/w7/d2/p3)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -187,7 +213,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Reading the documentation",
-      "tab_label": "Reading the documentation",
+      "tab_label": "Implementation",
       "source_notebook": "week7/day2_3.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -195,67 +221,78 @@
           "type": "markdown",
           "text": "# Week 7, Day 2.3 - Reading the documentation\n\nNobody hands you a list of endpoints. You get a docs page, and how quickly you can read it decides\nhow quickly you can test.\n\n## Swagger / OpenAPI\n\nMost APIs publish an interactive page - request shape, response shape, and a **Try it out**\nbutton that fires a real call from the browser.\n\n| Live example | Style |\n|---|---|\n| [demoqa.com/swagger](https://demoqa.com/swagger/) | Swagger UI - the API this week uses |\n| [api.spreecommerce.org](https://api.spreecommerce.org/) | a large, very polished reference |\n| [restful-booker apidoc](https://restful-booker.herokuapp.com/apidoc/index.html) | the API week8 uses |\n\nBoth of the first two are live right now; open one alongside this lesson.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What to extract, in order\n\nFor any endpoint, six questions. Answer them before writing a line of code.\n\n| # | Question | Where it usually is |\n|---|---|---|\n| 1 | Which verb? | the coloured badge |\n| 2 | What URL, and what goes in it? | the path, with `{id}` placeholders |\n| 3 | Does it need auth? | a padlock, or a `token` parameter |\n| 4 | What must the body contain? | \"Request body\", with required fields marked |\n| 5 | What comes back on success? | the 2xx example response |\n| 6 | What comes back on failure? | the 4xx examples - **usually the thinnest section** |\n\nQuestion 6 is where docs are weakest, which is why you probe.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The docs are a claim, not a fact\n\nRead, then verify. This is the habit that separates an API tester from someone typing out\nexamples.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The docs describe one book lookup. Check three things they do not spell out.\nconst base = \"https://demoqa.com/BookStore/v1\";\n\nconst good = await fetch(`${base}/Book?ISBN=9781449325862`);\nconsole.log(\"known ISBN     ->\", good.status);\n\nconst bad = await fetch(`${base}/Book?ISBN=0000000000`);\nconsole.log(\"unknown ISBN   ->\", bad.status, JSON.stringify(await bad.json()));\n\nconst missing = await fetch(`${base}/Book`);\nconsole.log(\"no ISBN at all ->\", missing.status, (await missing.text()).slice(0, 70));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "Three calls, three behaviours, and only the first is prominent in the documentation:\n\n| Call | Status | Verdict |\n|---|---|---|\n| a known ISBN | 200 | as documented |\n| an unknown ISBN | **400** + a message code | **not** the 404 most people would guess |\n| no ISBN parameter at all | **500**, and an HTML error page | **a bug in the API** |\n\nThat third row is worth reporting. A missing required parameter is a *client* mistake, so the\nhonest answer is a 4xx; a 500 means the server fell over trying to read something that was not\nthere. And the body is HTML, not JSON - so a test that called `.json()` on it would fail with a\nparse error and blame itself.\n\nThis is what \"read the docs, then probe\" buys you: two of those three behaviours are not written\ndown anywhere.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Authentication versus authorization\n\nTwo words people use interchangeably. APIs do not.\n\n| | Authentication | Authorization |\n|---|---|---|\n| Question | who are you? | are you allowed? |\n| Typical proof | username + password | a **token** |\n| How often | once, to get a token | on every single request |\n| This API | `POST /Account/v1/GenerateToken` | `Authorization: Bearer <token>` |\n\nA token is like an OTP: short-lived proof it is you, handed over instead of your password.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Authenticate once, then authorise a call with what you got.\nconst B = \"https://demoqa.com\";\nconst J = { \"Content-Type\": \"application/json\" };\nconst who = { userName: `w7d2_${Date.now()}`, password: \"Passw0rd@123\" };\n\nconst made = await fetch(`${B}/Account/v1/User`, { method: \"POST\", headers: J, body: JSON.stringify(who) });\nconst madeBody = await made.json();\nconsole.log(\"create user      ->\", made.status, \"id:\", madeBody.userID?.slice(0, 8) + \"...\");\n\nconst tokenRes = await fetch(`${B}/Account/v1/GenerateToken`, { method: \"POST\", headers: J, body: JSON.stringify(who) });\nconst bearer = (await tokenRes.json()).token;\nconsole.log(\"authenticate     ->\", tokenRes.status, \"token starts:\", bearer.slice(0, 18) + \"...\");\n\nconst noAuth = await fetch(`${B}/Account/v1/User/${madeBody.userID}`);\nconsole.log(\"read WITHOUT it  ->\", noAuth.status, \"<- 401, not allowed\");\n\nconst withAuth = await fetch(`${B}/Account/v1/User/${madeBody.userID}`, {\n  headers: { Authorization: `Bearer ${bearer}` },\n});\nconsole.log(\"read WITH it     ->\", withAuth.status);\n\nawait fetch(`${B}/Account/v1/User/${madeBody.userID}`, {\n  method: \"DELETE\", headers: { Authorization: `Bearer ${bearer}` },\n});\nconsole.log(\"cleaned up (this is a shared public sandbox)\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Monolith or microservices\n\nThe architecture behind the endpoint, and the reason \"endpoint\" and \"microservice\" get used\ninterchangeably.\n\n| | Monolithic | Microservices |\n|---|---|---|\n| Shape | one deployable application | many small services |\n| Deploying a change | often the whole thing goes down | one service restarts |\n| Failure | everything stops | one feature stops |\n| Attack surface | small | **larger - every service is a door** |\n| Testing consequence | few, broad endpoints | many narrow ones, and the gaps between them |\n\nThe session's analogy earns its keep in one line: a corner shop closes entirely to refit; a mall\ncloses one unit. That is why your bank can say \"transfers unavailable 1-2am\" while the rest of\nthe site works.\n\nFor a tester the practical upshot is the last row: **the interesting bugs move to the seams\nbetween services**, which is exactly where API tests live.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Where the data comes from\n\n| Layer | Holds |\n|---|---|\n| Presentation | the UI |\n| **Business / API** | the rules, and the routes between the other two |\n| Data | the database |\n\nStatic pages come from an app server, rows from a database server, and large media often from a\nseparate host entirely - which is why one page can be fast and slow at the same time.\n\n**Next:** [Day 2.4 - Practice](/learn/w7/d2/p4)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -272,61 +309,71 @@
           "type": "markdown",
           "text": "# Week 7, Day 2.4 - Practice\n\nUse `fetch` in a cell for these; the Playwright `request` fixture starts in\n[day3_2](/learn/w7/d3/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "4",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "5",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "6",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "7",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "8",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Next:** [Day 3.1 - Prerequisites](/learn/w7/d3/p1)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

@@ -161,7 +161,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Unique test data and dynamic locators",
-      "tab_label": "Unique test data and dynamic…",
+      "tab_label": "Fundamentals",
       "source_notebook": "week2/day3_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -393,7 +393,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Unique data and dynamic locators, wrapped for reuse",
-      "tab_label": "Unique data and dynamic locat…",
+      "tab_label": "Implementation",
       "source_notebook": "week2/day3_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

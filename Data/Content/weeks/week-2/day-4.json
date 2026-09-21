@@ -70,7 +70,7 @@
       "part": 2,
       "kind": "concept",
       "title": "The sibling axis: finding a row by what it says",
-      "tab_label": "The sibling axis",
+      "tab_label": "Fundamentals",
       "source_notebook": "week2/day4_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -316,7 +316,7 @@
       "part": 3,
       "kind": "concept",
       "title": "The sibling axis, wrapped for reuse",
-      "tab_label": "The sibling axis, wrapped for…",
+      "tab_label": "Implementation",
       "source_notebook": "week2/day4_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

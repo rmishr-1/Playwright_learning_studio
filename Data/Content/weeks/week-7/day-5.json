@@ -17,49 +17,57 @@
           "type": "markdown",
           "text": "# Week 7, Day 5.1 - Prerequisites check\n\nToday you move code out of a spec and into a module. That is `export` / `import`, which you have\nused - plus one Playwright type.\n\n| In play | Taught in |\n|---|---|\n| `export` / `import` (named) | [week3/day3_1](/learn/w3/d3/p1) |\n| `type` aliases for objects | [day1_2](/learn/w7/d1/p2) |\n| Typed parameters and return types | [day1_2](/learn/w7/d1/p2) |\n| Arrays of objects | [week3/day5_1](/learn/w3/d5/p1) |\n| Importing a JSON file | [week5/day5_1](/learn/w5/d5/p1) |\n\n**Next:** [Day 5.2 - Write it once](/learn/w7/d5/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Returning two things\n\nA helper that creates a user has two useful results: the id and the token. A function returns one\nvalue - so return an **object**, and name the shape.\n\n```ts\nexport type Account = { userName: string; password: string; userId: string; token: string };\n\nexport async function createAccount(...): Promise<Account> { ... }\n```\n\n| Alternative | Why not |\n|---|---|\n| Return an array `[id, token]` | the caller has to remember the order |\n| Two functions | two round trips for one job |\n| **An object with a named type** | self-documenting, and destructurable |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "type Account = { userId: string; token: string };\n\nfunction makeAccount(): Account {\n  return { userId: \"id-42\", token: \"tok-abc\" };\n}\n\n// Use the whole thing...\nconst account = makeAccount();\nconsole.log(account.userId, account.token);\n\n// ...or unpack just what you need.\nconst { token } = makeAccount();\nconsole.log(\"just the token:\", token);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Pass `request` in; never import it\n\nThis is the rule that surprises people. `request` belongs to the **running test** - Playwright\ncreates it per test and tears it down after. A module cannot reach for one.\n\n| Written | Result |\n|---|---|\n| `import { request } from \"@playwright/test\"` | not a value you can use like that |\n| `createAccount(request, ...)` as the first parameter | correct |\n\nEvery Playwright helper that touches the network takes it as a parameter. Same reason a page\nobject takes `page` in its constructor ([week5/day3_2](/learn/w5/d3/p2)).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The shape, with a stand-in for the real context.\ntype FakeRequest = { post: (url: string) => Promise<string> };\n\nasync function createThing(req: FakeRequest, name: string): Promise<string> {\n  return `${await req.post(\"/things\")}:${name}`;\n}\n\nconst fakeReq: FakeRequest = { post: async (url) => `POSTed ${url}` };\nconsole.log(await createThing(fakeReq, \"widget\"));\nconsole.log(\"the caller owns the context; the helper just borrows it\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Next:** [Day 5.2 - Write it once](/learn/w7/d5/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -68,7 +76,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Write it once",
-      "tab_label": "Write it once",
+      "tab_label": "Fundamentals",
       "source_notebook": "week7/day5_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -76,91 +84,106 @@
           "type": "markdown",
           "text": "# Week 7, Day 5.2 - Write it once\n\nDay 4's `beforeAll` was nine lines. Every API spec you write from here needs the same nine. Today\nthey become one line, and then five near-identical negative tests become one loop.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The helper module\n\nNot named `.spec.ts` - it calls no `test()`, so the runner never collects it. Same rule as a page\nobject ([week3/day3_2](/learn/w3/d3/p2)).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// A plain module: exported functions and one exported type.\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week7/generated/api-helpers.ts\", `// Week 7, Day 5 — the duplication, removed.\n//\n// Day 4's beforeAll created a user and fetched a token. Every API spec you write\n// from here needs the same six lines. This file is those lines, once.\n//\n// Note the filename: NOT .spec.ts. It defines behaviour and calls no test(), so\n// the runner never collects it — the same rule as a page object (week3/day3_2).\nimport { expect, type APIRequestContext } from \"@playwright/test\";\n\nexport const BASE_URL = \"https://demoqa.com\";\n\n/** What a caller actually needs back. Two values, so return an object. */\nexport type Account = {\n  userName: string;\n  password: string;\n  userId: string;\n  token: string;\n};\n\n/**\n * Create a user and authorise them, in one call.\n *\n * \\`request\\` is passed IN rather than imported: an APIRequestContext belongs to\n * the running test, so a helper cannot conjure one. Every Playwright helper that\n * touches the network takes it as its first parameter.\n */\nexport async function createAccount(\n  request: APIRequestContext,\n  prefix = \"w7\",\n): Promise<Account> {\n  // Unique per call, because this is a shared public sandbox.\n  const userName = \\`\\${prefix}_\\${Date.now()}_\\${Math.floor(Math.random() * 1000)}\\`;\n  const password = \"Passw0rd@123\";\n\n  const created = await request.post(\\`\\${BASE_URL}/Account/v1/User\\`, {\n    data: { userName, password },\n  });\n  // An assertion in a helper is fine when it is about the helper's own contract:\n  // if this fails, no test using it can be meaningful. It is NOT a test's\n  // assertion — see week6/day2_2 for the same rule in a page object.\n  expect(created.status(), \\`createAccount: expected 201, got \\${created.status()}\\`).toBe(201);\n  const userId = (await created.json()).userID as string;\n\n  const tokenResponse = await request.post(\\`\\${BASE_URL}/Account/v1/GenerateToken\\`, {\n    data: { userName, password },\n  });\n  const token = (await tokenResponse.json()).token as string;\n  expect(token, \"createAccount: no token returned\").toBeTruthy();\n\n  return { userName, password, userId, token };\n}\n\n/** The header every authorised call needs. One place to change it. */\nexport function authHeader(account: Account): { Authorization: string } {\n  return { Authorization: \\`Bearer \\${account.token}\\` };\n}\n\n/** Tidy up. Safe to call twice: a second delete just answers 401. */\nexport async function deleteAccount(\n  request: APIRequestContext,\n  account: Account,\n): Promise<void> {\n  await request.delete(\\`\\${BASE_URL}/Account/v1/User/\\${account.userId}\\`, {\n    headers: authHeader(account),\n  });\n}\n`);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| Export | Job |\n|---|---|\n| `BASE_URL` | one host, one place |\n| `type Account` | the shape three files agree on |\n| `createAccount(request, prefix)` | create **and** authorise, returning both values |\n| `authHeader(account)` | the one repeated header |\n| `deleteAccount(request, account)` | tidy up |\n\nTwo details worth stopping on:\n\n- **`request` is the first parameter**, per [day5_1](/learn/w7/d5/p1).\n- **There are `expect`s inside the helper.** Allowed here because they check the *helper's own\n  contract*: if the user was not created, no test using it can mean anything. It is not a test's\n  assertion - the same distinction as [week6/day2_2](/learn/w6/d2/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week7/generated/day5-shared-helper.spec.ts\", `// Week 7, Day 5 — the same journey as Day 4, through the helper.\n//\n// Compare the beforeAll here with day4-chaining.spec.ts: nine lines became one.\n//\n// Written by a cell in week7/day5_2.ipynb. Run it yourself:\n//   npx playwright test week7/generated/day5-shared-helper.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { BASE_URL, authHeader, createAccount, deleteAccount, type Account } from \"./api-helpers\";\n\ntest.describe(\"Using the helper\", () => {\n  test.describe.configure({ mode: \"serial\" });\n\n  let account: Account;\n\n  test.beforeAll(async ({ request }) => {\n    // One line. The user exists and is authorised.\n    account = await createAccount(request, \"w7d5\");\n  });\n\n  test(\"Step 1 — the helper handed back everything we need\", async () => {\n    expect(account.userId).toBeTruthy();\n    expect(account.token).toBeTruthy();\n    expect(account.userName).toContain(\"w7d5\");\n  });\n\n  test(\"Step 2 — authHeader() removes the last repeated line\", async ({ request }) => {\n    const response = await request.get(\\`\\${BASE_URL}/Account/v1/User/\\${account.userId}\\`, {\n      headers: authHeader(account),\n    });\n\n    expect(response.status()).toBe(200);\n    expect((await response.json()).username).toBe(account.userName);\n  });\n\n  test(\"Step 3 — a real test, with no setup noise in it\", async ({ request }) => {\n    const response = await request.post(\\`\\${BASE_URL}/BookStore/v1/Books\\`, {\n      headers: authHeader(account),\n      data: { userId: account.userId, collectionOfIsbns: [{ isbn: \"9781449325862\" }] },\n    });\n\n    expect(response.status()).toBe(201);\n  });\n\n  test(\"Step 4 — adding the same book twice is refused\", async ({ request }) => {\n    // A fresh account, so this test proves the behaviour on its own rather than\n    // depending on whatever Step 3 left behind. A test that needs another test to\n    // have run first is a test that fails mysteriously later.\n    const solo = await createAccount(request, \"w7d5dup\");\n    const body = {\n      userId: solo.userId,\n      collectionOfIsbns: [{ isbn: \"9781449325862\" }],\n    };\n\n    const first = await request.post(\\`\\${BASE_URL}/BookStore/v1/Books\\`, {\n      headers: authHeader(solo),\n      data: body,\n    });\n    expect(first.status()).toBe(201);\n\n    const second = await request.post(\\`\\${BASE_URL}/BookStore/v1/Books\\`, {\n      headers: authHeader(solo),\n      data: body,\n    });\n    expect(second.status()).toBe(400);\n    expect((await second.json()).code).toBe(\"1210\");\n\n    await deleteAccount(request, solo);\n  });\n\n  test.afterAll(async ({ request }) => {\n    await deleteAccount(request, account);\n  });\n});\n`);\n\n// Expected: 4 passed. Compare this beforeAll with day4's.\nawait runSpec(\"week7/generated/day5-shared-helper.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "Nine lines became one:\n\n```ts\ntest.beforeAll(async ({ request }) => {\n  account = await createAccount(request, \"w7d5\");\n});\n```\n\nStep 4 of that run is worth a second look: it creates its **own** account rather than relying on\nStep 3 having added a book first. A test that needs another test to have run is a test that fails\nmysteriously later - and it was written the fragile way first, which is how the bug was found.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Five scenarios, one test\n\nThe session sets this as homework: registration has a valid case and several invalid ones, and\nwriting five near-identical tests is the wrong answer.\n\nPut the differences in **data**:",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// Every status and code below was probed against the live API first.\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week7/generated/day5-register-cases.json\", `{\n  \"cases\": [\n    {\n      \"name\": \"a valid user is created\",\n      \"userName\": \"AUTO\",\n      \"password\": \"Passw0rd@123\",\n      \"expectedStatus\": 201,\n      \"expectedCode\": null,\n      \"messageContains\": null\n    },\n    {\n      \"name\": \"password too weak\",\n      \"userName\": \"AUTO\",\n      \"password\": \"weak\",\n      \"expectedStatus\": 400,\n      \"expectedCode\": \"1300\",\n      \"messageContains\": \"Passwords must have at least\"\n    },\n    {\n      \"name\": \"password missing entirely\",\n      \"userName\": \"AUTO\",\n      \"password\": \"\",\n      \"expectedStatus\": 400,\n      \"expectedCode\": \"1200\",\n      \"messageContains\": \"UserName and Password required\"\n    },\n    {\n      \"name\": \"username missing entirely\",\n      \"userName\": \"\",\n      \"password\": \"Passw0rd@123\",\n      \"expectedStatus\": 400,\n      \"expectedCode\": \"1200\",\n      \"messageContains\": \"UserName and Password required\"\n    },\n    {\n      \"name\": \"both fields blank\",\n      \"userName\": \"\",\n      \"password\": \"\",\n      \"expectedStatus\": 400,\n      \"expectedCode\": \"1200\",\n      \"messageContains\": \"UserName and Password required\"\n    }\n  ]\n}\n`);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| Case | Status | Code | Message |\n|---|---|---|---|\n| valid | **201** | - | - |\n| password too weak | **400** | 1300 | `Passwords must have at least...` |\n| password missing | **400** | 1200 | `UserName and Password required.` |\n| username missing | **400** | 1200 | `UserName and Password required.` |\n| both blank | **400** | 1200 | `UserName and Password required.` |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week7/generated/day5-data-driven.spec.ts\", `// Week 7, Day 5 — five scenarios, one test.\n//\n// The session sets this as homework: rather than five near-identical tests, put\n// the differences in data and loop. Each row still reports as its own test, so a\n// failure names the case.\n//\n// Written by a cell in week7/day5_2.ipynb. Run it yourself:\n//   npx playwright test week7/generated/day5-data-driven.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { BASE_URL, authHeader, createAccount, deleteAccount, type Account } from \"./api-helpers\";\nimport cases from \"./day5-register-cases.json\";\n\ntest.describe(\"Registering a user — the whole truth table\", () => {\n  // Users the valid case creates, so we can clean up afterwards.\n  const created: Account[] = [];\n\n  // The loop is OUTSIDE test(), so Playwright sees five tests at collection\n  // time. Put it inside and you get one test that stops at the first failure.\n  for (const testCase of cases.cases) {\n    test(\\`\\${testCase.expectedStatus} — \\${testCase.name}\\`, async ({ request }) => {\n      // \"AUTO\" means \"give me a unique name\"; a blank string is a real test input.\n      const userName =\n        testCase.userName === \"AUTO\" ? \\`w7dd_\\${Date.now()}_\\${Math.floor(Math.random() * 1000)}\\` : testCase.userName;\n\n      const response = await request.post(\\`\\${BASE_URL}/Account/v1/User\\`, {\n        data: { userName, password: testCase.password },\n      });\n\n      expect(response.status()).toBe(testCase.expectedStatus);\n\n      const body = await response.json();\n\n      if (testCase.expectedCode) {\n        // A failure: the API explains itself with a code and a sentence.\n        expect(body.code).toBe(testCase.expectedCode);\n        expect(body.message).toContain(testCase.messageContains);\n      } else {\n        // The success row: a real user, so remember it and delete it later.\n        expect(body.userID).toBeTruthy();\n        const tokenResponse = await request.post(\\`\\${BASE_URL}/Account/v1/GenerateToken\\`, {\n          data: { userName, password: testCase.password },\n        });\n        created.push({\n          userName,\n          password: testCase.password,\n          userId: body.userID,\n          token: (await tokenResponse.json()).token,\n        });\n      }\n    });\n  }\n\n  test.afterAll(async ({ request }) => {\n    for (const account of created) await deleteAccount(request, account);\n  });\n});\n\ntest.describe(\"The case that does not fit the table\", () => {\n  // \"Registering a name that already exists\" needs a name that already exists -\n  // a prerequisite, not a data row. Not everything belongs in the JSON.\n  test(\"406 — a duplicate username is refused\", async ({ request }) => {\n    const account = await createAccount(request, \"w7ddup\");\n\n    const again = await request.post(\\`\\${BASE_URL}/Account/v1/User\\`, {\n      data: { userName: account.userName, password: account.password },\n    });\n\n    // 406 Not Acceptable for a duplicate USER — while a duplicate BOOK is 400.\n    // Same API, two different choices. Read the response; never assume.\n    expect(again.status()).toBe(406);\n    const body = await again.json();\n    expect(body.code).toBe(\"1204\");\n    expect(body.message).toContain(\"User exists!\");\n\n    await deleteAccount(request, account);\n  });\n});\n`);\n\n// Expected: 6 passed - five from the table, one that could not fit in it.\nawait runSpec(\"week7/generated/day5-data-driven.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Why the loop is outside `test()`\n\n```ts\nfor (const testCase of cases.cases) {\n  test(`${testCase.expectedStatus} — ${testCase.name}`, async ({ request }) => { ... });\n}\n```\n\n| Loop position | Result |\n|---|---|\n| **Outside** `test()` | five separate tests; a failure names the case |\n| Inside `test()` | one test that stops at the first failure |\n\nSame rule as [week4/day4_2](/learn/w4/d4/p2). Putting the case name in the title is what\nmakes the report readable.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The case that does not fit the table\n\n\"A duplicate username is refused\" needs a username that already exists - a **prerequisite**, not\na data row. So it gets its own test.\n\nNot everything belongs in the JSON, and forcing it there produces a table with a special-case\ncolumn that only one row uses.\n\nAnd the result is worth remembering:\n\n| Duplicate | Status | Code |\n|---|---|---|\n| **user** | **406** Not Acceptable | 1204 |\n| **book** | **400** Bad Request | 1210 |\n\nSame API, same kind of conflict, two different codes. Assert the family; probe the number.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Common mistakes\n\n| Mistake | Consequence |\n|---|---|\n| The loop inside `test()` | one test, and only the first failure is reported |\n| A generic test title | the report says `case 3` and you go hunting |\n| Expected values guessed, not probed | a lesson that fails on day one |\n| The valid row not cleaned up | a new user on a shared API every run |\n| Forcing a prerequisite case into the table | a column only one row uses |\n\n**Next:** [Day 5.3 - The next step: fixtures](/learn/w7/d5/p3)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -169,7 +192,7 @@
       "part": 3,
       "kind": "concept",
       "title": "The next step: fixtures",
-      "tab_label": "The next step",
+      "tab_label": "Implementation",
       "source_notebook": "week7/day5_3.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -177,43 +200,50 @@
           "type": "markdown",
           "text": "# Week 7, Day 5.3 - The next step: fixtures\n\n`createAccount()` is a function you must remember to call. A fixture is the same function that\ncalls itself - and cleans up after itself.\n\n## The same helper, as a fixture\n\n```ts\n// api-fixtures.ts\nimport { test as base } from \"@playwright/test\";\nimport { createAccount, deleteAccount, type Account } from \"./api-helpers\";\n\nexport const test = base.extend<{ account: Account }>({\n  account: async ({ request }, use) => {\n    const created = await createAccount(request);\n    await use(created);                       // the test body runs here\n    await deleteAccount(request, created);    // teardown - even if it failed\n  },\n});\nexport { expect } from \"@playwright/test\";\n```\n\nA spec then asks for what it needs and nothing more:\n\n```ts\ntest(\"a new account owns no books\", async ({ request, account }) => {\n  const response = await request.get(`${BASE_URL}/Account/v1/User/${account.userId}`, {\n    headers: authHeader(account),\n  });\n  expect((await response.json()).books).toEqual([]);\n});\n```",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| | `beforeAll` + helper | fixture |\n|---|---|---|\n| Setup runs | once per describe | when a test asks |\n| A test that needs no account | pays anyway | pays nothing |\n| Teardown | a separate `afterAll` you must remember | next to the setup |\n| If setup fails | a confusing hook error | the fixture is named in the failure |\n| Shared across files | import the helper in each | import one `test` |\n\nThat is the same progression as week 5: page objects by hand\n([week5/day3_2](/learn/w5/d3/p2)), then page objects as fixtures\n([week5/day4_2](/learn/w5/d4/p2)). The pattern does not care whether it is holding a page or\nan account.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Why laziness matters, counted. A fixture only runs for tests that ask.\nconst suite = [\n  { test: \"books list is not empty\", needsAccount: false },\n  { test: \"one book by ISBN\", needsAccount: false },\n  { test: \"unknown ISBN is 400\", needsAccount: false },\n  { test: \"a new account owns no books\", needsAccount: true },\n  { test: \"adding a book works\", needsAccount: true },\n];\n\nconst withBeforeAll = suite.length;                          // hook runs for all\nconst withFixture = suite.filter((t) => t.needsAccount).length;\n\nconsole.log(\"accounts created with beforeAll:\", withBeforeAll);\nconsole.log(\"accounts created with a fixture:\", withFixture);\nconsole.log(\"wasted round trips saved       :\", withBeforeAll - withFixture);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "Three fewer users created per run, on an API you do not own.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What week 8 does with all this\n\nYou have the mechanics. Week 8 uses them on a different API (`restful-booker`) and pushes further:\n\n| week8 | Adds |\n|---|---|\n| [day1_2](/learn/w8/d1/p2) | `request.newContext()`, PUT vs PATCH measured, token lifecycle |\n| [day1_3](/learn/w8/d1/p3) | an API client as a fixture |\n| [day2_2](/learn/w8/d2/p2) | negative scenarios where the **API is at fault**, `expect().rejects` |\n| [day3_2](/learn/w8/d3/p2) | `$$eval` and scraping - back to the browser |\n\nSeeing two real APIs is the point. `restful-booker` accepts a blank first name and returns 200\nfor wrong credentials; demoqa returns 406 for a duplicate user and 400 for a duplicate book.\nNeither is *wrong* - which is why you probe rather than assume.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## API and UI in one test\n\nThe combination the session was building towards, and the reason a single tool for both matters:\n\n```ts\ntest(\"a booking made by API appears in the UI\", async ({ request, page }) => {\n  const account = await createAccount(request);          // fast setup, no browser\n  await page.goto(\"/login\");                             // then check what a person sees\n  ...\n});\n```\n\n| Do this by | Because |\n|---|---|\n| API | setup, data creation, teardown - it is ~10x faster |\n| UI | the one assertion that needs a human's view |\n\nAsking for both `request` and `page` in one test is all it takes. No extra library, which was the\nsession's closing point about Playwright.\n\n**Next:** [Day 5.4 - Practice](/learn/w7/d5/p4)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -230,61 +260,71 @@
           "type": "markdown",
           "text": "# Week 7, Day 5.4 - Practice\n\nThe last two close out the week.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "4",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "5",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "6",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "7",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "8",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Week 7 done\n\n| Day | You can now |\n|---|---|\n| 1 | say what TypeScript adds to JavaScript, and which tool catches a type error |\n| 2 | read an API's docs, name the four status families, and never trust a code alone |\n| 3 | write API tests with `request` instead of `page` |\n| 4 | capture an id from one response and use it in the next, headers included |\n| 5 | remove the duplication, drive negatives from data, and see where fixtures go next |\n\nEvery status code and message in these lessons was probed against the live API before it was\nwritten down.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

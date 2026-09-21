@@ -161,7 +161,7 @@
       "part": 2,
       "kind": "concept",
       "title": "XPath, CSS, and your first real assertions",
-      "tab_label": "XPath, CSS, and your first re…",
+      "tab_label": "Fundamentals",
       "source_notebook": "week2/day2_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -340,7 +340,7 @@
       "part": 3,
       "kind": "concept",
       "title": "The same assertions, wrapped for reuse",
-      "tab_label": "The same assertions, wrapped…",
+      "tab_label": "Implementation",
       "source_notebook": "week2/day2_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

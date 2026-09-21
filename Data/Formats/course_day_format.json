@@ -33,7 +33,7 @@
                 "value": "TypeScript check-in: nothing new today"
             },
             "tab_label": {
-                "_comment": "Short label for the tab bar. Derived from the title, not a bare 'Part 2'.",
+                "_comment": "The part's ROLE, from its part number alone: 1 TypeScript, 2 Fundamentals, 3 Implementation, 4 Practice. Derived by tabLabel() in scripts/notebook-parse.ts, never authored. It used to be a truncated copy of the part's own title, which restated the H1 two lines below it and clipped mid-word; the role names give every day one rhythm instead.",
                 "value": "TypeScript"
             },
             "source_notebook": {
