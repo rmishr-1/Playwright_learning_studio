@@ -96,13 +96,20 @@ export function TheoryPane({
             return <Markdown key={i} text={block.text} onLoadIntoEditor={onLoadIntoEditor} />;
           }
           if (block.type === 'your-turn') {
+            // An authored variation replaces the generic "retype from memory" prompt once
+            // written; unauthored (most days, for now) falls back to that generic text - the
+            // same graceful-absence pattern a missing practice solution already uses. Either
+            // way, what loads into the editor also carries the preceding example's own setup,
+            // when there is one, so "Try it" opens on working navigation, not a bare comment.
+            const prompt = block.variation?.prompt ?? block.text.replace(/^\s*\/\/\s?/gm, '').trim();
+            const starting = block.starter ? block.text + '\n\n' + block.starter : block.text;
             return (
               <div className="yourturn" key={i}>
                 <div className="txt">
                   <span className="label">Your turn</span>
-                  {block.text.replace(/^\s*\/\/\s?/gm, '').trim()}
+                  {prompt}
                 </div>
-                <button className="btn small" onClick={() => onLoadIntoEditor(block.text)}>
+                <button className="btn small" onClick={() => onLoadIntoEditor(starting)}>
                   Try it
                 </button>
               </div>

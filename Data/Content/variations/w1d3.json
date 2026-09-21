@@ -1,0 +1,5 @@
+{
+  "p2_yt1": "Same flow, a different check: write a spec that, after logging in, confirms the Payments tile is visible - not just that the login page loads.",
+  "p3_yt1": "Same idea, a different field: as plain data, write what the `use` block would look like with `headless: false` added to it.",
+  "p3_yt2": "Same idea, a different field again: this time add a `retries` value alongside the existing options, as plain data."
+}

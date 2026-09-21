@@ -15,71 +15,105 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 3.1 — TypeScript for a shared class\n\nFour concepts. Today you move the login out of every script into one class, and these are what\nthat class is made of.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs."
+          "text": "# Week 3, Day 3.1 — TypeScript for a shared class\n\nFour concepts. Today you move the login out of every script into one class, and these are what\nthat class is made of.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | `class` | one place to keep the login behaviour |\n| 2 | `constructor` and `this` | how the class receives the page it drives |\n| 3 | `export` / `import` | how other files reach it |\n| 4 | Methods with typed and default parameters | `signIn(user)` that works with or without an argument |"
+          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | `class` | one place to keep the login behaviour |\n| 2 | `constructor` and `this` | how the class receives the page it drives |\n| 3 | `export` / `import` | how other files reach it |\n| 4 | Methods with typed and default parameters | `signIn(user)` that works with or without an argument |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 1. A class\n\nA class bundles related data and behaviour under one name. JavaScript and TypeScript have them,\nsame as Java or C#.\n\n```ts\nclass Thing {\n  // fields hold values\n  // methods do work\n}\n```"
+          "text": "## 1. A class\n\nA class bundles related data and behaviour under one name. JavaScript and TypeScript have them,\nsame as Java or C#.\n\n```ts\nclass Thing {\n  // fields hold values\n  // methods do work\n}\n```",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "class Greeter {\n  language: string;\n\n  constructor(language: string) {\n    this.language = language;\n  }\n\n  greet(name: string): string {\n    return this.language === \"en\" ? `Hello ${name}` : `Bonjour ${name}`;\n  }\n}\n\nconst en = new Greeter(\"en\");\nconst fr = new Greeter(\"fr\");\n\nconsole.log(en.greet(\"Leela\"));\nconsole.log(fr.greet(\"Leela\"));"
+          "text": "class Greeter {\n  language: string;\n\n  constructor(language: string) {\n    this.language = language;\n  }\n\n  greet(name: string): string {\n    return this.language === \"en\" ? `Hello ${name}` : `Bonjour ${name}`;\n  }\n}\n\nconst en = new Greeter(\"en\");\nconst fr = new Greeter(\"fr\");\n\nconsole.log(en.greet(\"Leela\"));\nconsole.log(fr.greet(\"Leela\"));",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `Hello Leela` then `Bonjour Leela`.\n\n`new Greeter(\"en\")` creates an **instance**. Two instances, same class, different data — which\nis exactly how one `LoginPage` class will serve any page you hand it."
+          "text": "**Expected:** `Hello Leela` then `Bonjour Leela`.\n\n`new Greeter(\"en\")` creates an **instance**. Two instances, same class, different data — which\nis exactly how one `LoginPage` class will serve any page you hand it.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 2. `constructor` and `this`\n\nThe **constructor** runs once, automatically, when you write `new`. Its job is to set the\ninstance up.\n\n`this` means *this particular instance*. `this.language` is the field belonging to the object\nyou're inside, which is what keeps `en` and `fr` from interfering."
+          "text": "## 2. `constructor` and `this`\n\nThe **constructor** runs once, automatically, when you write `new`. Its job is to set the\ninstance up.\n\n`this` means *this particular instance*. `this.language` is the field belonging to the object\nyou're inside, which is what keeps `en` and `fr` from interfering.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "class Counter {\n  count: number;\n  readonly label: string;         // readonly: set once in the constructor, never reassigned\n\n  constructor(label: string) {\n    console.log(`  constructor ran for \"${label}\"`);\n    this.label = label;\n    this.count = 0;\n  }\n\n  add(): number {\n    this.count = this.count + 1;   // `this.count` — mine, not the other instance's\n    return this.count;\n  }\n}\n\nconsole.log(\"creating two counters:\");\nconst a = new Counter(\"a\");\nconst b = new Counter(\"b\");\n\na.add(); a.add(); b.add();\nconsole.log(`a.count=${a.count}  b.count=${b.count}`);\n// b.label = \"changed\";        // <- uncomment: readonly, TypeScript refuses"
+          "text": "class Counter {\n  count: number;\n  readonly label: string;         // readonly: set once in the constructor, never reassigned\n\n  constructor(label: string) {\n    console.log(`  constructor ran for \"${label}\"`);\n    this.label = label;\n    this.count = 0;\n  }\n\n  add(): number {\n    this.count = this.count + 1;   // `this.count` — mine, not the other instance's\n    return this.count;\n  }\n}\n\nconsole.log(\"creating two counters:\");\nconst a = new Counter(\"a\");\nconst b = new Counter(\"b\");\n\na.add(); a.add(); b.add();\nconsole.log(`a.count=${a.count}  b.count=${b.count}`);\n// b.label = \"changed\";        // <- uncomment: readonly, TypeScript refuses",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** two \"constructor ran\" lines, then `a.count=2  b.count=1`.\n\nSeparate instances, separate state. Forget `this.` and you're referring to a local variable that\ndisappears when the method ends — a silent bug rather than an error.\n\n`readonly` is worth adopting early: it makes \"set once in the constructor\" a rule the compiler\nenforces, which is exactly what you want for locators."
+          "text": "**Expected:** two \"constructor ran\" lines, then `a.count=2  b.count=1`.\n\nSeparate instances, separate state. Forget `this.` and you're referring to a local variable that\ndisappears when the method ends — a silent bug rather than an error.\n\n`readonly` is worth adopting early: it makes \"set once in the constructor\" a rule the compiler\nenforces, which is exactly what you want for locators.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 3. `export` and `import`\n\nA class in one file is no use to another until it's exported.\n\n```ts\n// login-page.ts\nexport class LoginPage { ... }\n\n// some.spec.ts\nimport { LoginPage } from \"./login-page\";\n```\n\n`export class` is a **named** export, so the importing file uses the same name in braces. (The\n`export default` from Day 1.1 is the other form — one per file, no braces.)\n\nYou may also see the older `require(\"./login-page\")` form; the transcript this lesson comes from\nuses it. `import` is the modern equivalent and what this repo uses."
+          "text": "## 3. `export` and `import`\n\nA class in one file is no use to another until it's exported.\n\n```ts\n// login-page.ts\nexport class LoginPage { ... }\n\n// some.spec.ts\nimport { LoginPage } from \"./login-page\";\n```\n\n`export class` is a **named** export, so the importing file uses the same name in braces. (The\n`export default` from Day 1.1 is the other form — one per file, no braces.)\n\nYou may also see the older `require(\"./login-page\")` form; the transcript this lesson comes from\nuses it. `import` is the modern equivalent and what this repo uses.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// Notebook cells can't use export/import, so here's the shape as text\nconst helperFile = [\n  \"// login-page.ts\",\n  \"export class LoginPage {\",\n  \"  constructor(page) { this.page = page; }\",\n  \"}\",\n].join(\"\\n\");\n\nconst specFile = [\n  \"// dashboard.spec.ts\",\n  'import { LoginPage } from \"./login-page\";',\n  \"const loginPage = new LoginPage(page);\",\n].join(\"\\n\");\n\nconsole.log(helperFile);\nconsole.log(\"---\");\nconsole.log(specFile);"
+          "text": "// Notebook cells can't use export/import, so here's the shape as text\nconst helperFile = [\n  \"// login-page.ts\",\n  \"export class LoginPage {\",\n  \"  constructor(page) { this.page = page; }\",\n  \"}\",\n].join(\"\\n\");\n\nconst specFile = [\n  \"// dashboard.spec.ts\",\n  'import { LoginPage } from \"./login-page\";',\n  \"const loginPage = new LoginPage(page);\",\n].join(\"\\n\");\n\nconsole.log(helperFile);\nconsole.log(\"---\");\nconsole.log(specFile);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** the two file shapes printed.\n\n**One naming rule that bites people:** a helper file must **not** be called `*.spec.ts`. The\nrunner collects every `.spec.ts` file and expects tests in it. Name it `login-page.ts` and it's\njust a module. The transcript makes this point explicitly — *\"dot spec is always executable\"*."
+          "text": "**Expected:** the two file shapes printed.\n\n**One naming rule that bites people:** a helper file must **not** be called `*.spec.ts`. The\nrunner collects every `.spec.ts` file and expects tests in it. Name it `login-page.ts` and it's\njust a module. The transcript makes this point explicitly — *\"dot spec is always executable\"*.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 4. Methods with typed and default parameters\n\n`param: string` says what a method accepts. `param = value` gives it a fallback so the caller\ncan leave it out."
+          "text": "## 4. Methods with typed and default parameters\n\n`param: string` says what a method accepts. `param = value` gives it a fallback so the caller\ncan leave it out.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "type User = { email: string; password: string };\n\nconst LEELA: User = { email: \"leela@gmail.com\", password: \"Leela@123\" };\nconst KATY: User = { email: \"katy@gmail.com\", password: \"Katy@12354\" };\n\nclass Session {\n  // default parameter: called with nothing, it uses LEELA\n  signIn(user: User = LEELA): string {\n    return `signing in as ${user.email}`;\n  }\n\n  // async method: returns a Promise, so callers await it\n  async slowSignIn(user: User = LEELA): Promise<string> {\n    await new Promise((r) => setTimeout(r, 100));\n    return `signed in as ${user.email}`;\n  }\n}\n\nconst s = new Session();\nconsole.log(s.signIn());          // no argument -> the default\nconsole.log(s.signIn(KATY));      // explicit\nconsole.log(await s.slowSignIn(KATY));"
+          "text": "type User = { email: string; password: string };\n\nconst LEELA: User = { email: \"leela@gmail.com\", password: \"Leela@123\" };\nconst KATY: User = { email: \"katy@gmail.com\", password: \"Katy@12354\" };\n\nclass Session {\n  // default parameter: called with nothing, it uses LEELA\n  signIn(user: User = LEELA): string {\n    return `signing in as ${user.email}`;\n  }\n\n  // async method: returns a Promise, so callers await it\n  async slowSignIn(user: User = LEELA): Promise<string> {\n    await new Promise((r) => setTimeout(r, 100));\n    return `signed in as ${user.email}`;\n  }\n}\n\nconst s = new Session();\nconsole.log(s.signIn());          // no argument -> the default\nconsole.log(s.signIn(KATY));      // explicit\nconsole.log(await s.slowSignIn(KATY));",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `signing in as leela@gmail.com`, then `katy@gmail.com` twice.\n\nDefault parameters are why `await loginPage.signIn()` will read so cleanly today — the common\ncase needs no argument, and a multi-user test can still pass one.\n\nEvery method that touches a browser is `async`, because every browser action returns a Promise.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `class` / `new` | One class, many instances, separate state. |\n| `constructor` / `this` | Runs on `new`; `this.x` is *this instance's* `x`. |\n| `export` / `import` | Helper files must not be named `*.spec.ts`. |\n| `signIn(user = DEFAULT)` | Common case needs no argument. |\n\n**Next:** [Day 3.2 — Your first shared class](/learn/w3/d3/p2)"
+          "text": "**Expected:** `signing in as leela@gmail.com`, then `katy@gmail.com` twice.\n\nDefault parameters are why `await loginPage.signIn()` will read so cleanly today — the common\ncase needs no argument, and a multi-user test can still pass one.\n\nEvery method that touches a browser is `async`, because every browser action returns a Promise.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `class` / `new` | One class, many instances, separate state. |\n| `constructor` / `this` | Runs on `new`; `this.x` is *this instance's* `x`. |\n| `export` / `import` | Helper files must not be named `*.spec.ts`. |\n| `signIn(user = DEFAULT)` | Common case needs no argument. |\n\n**Next:** [Day 3.2 — Your first shared class](/learn/w3/d3/p2)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -94,67 +128,99 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 3.2 — Your first shared class\n\nLogin appears in every spec you've written. By the end of this lesson it appears **once**, and\nchanging it is a one-line edit instead of a search across the suite.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened."
+          "text": "# Week 3, Day 3.2 — Your first shared class\n\nLogin appears in every spec you've written. By the end of this lesson it appears **once**, and\nchanging it is a one-line edit instead of a search across the suite.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The problem, in numbers\n\nPicture twenty people on a project. Everyone's spec starts with the same four lines: go to the\nURL, fill email, fill password, click Login.\n\nThen a developer renames the email field's placeholder.\n\n| | Copy-pasted login | One shared class |\n|---|---|---|\n| Files to edit | every spec that logs in | **1** |\n| Chance of missing one | high | none |\n| Time to fix | an afternoon | a minute |\n\nThis isn't a Playwright idea, or even a testing idea. It's the reason functions exist. Automation\nis supposed to *reduce* effort — a suite that costs an afternoon per rename has given the saving\nback."
+          "text": "## The problem, in numbers\n\nPicture twenty people on a project. Everyone's spec starts with the same four lines: go to the\nURL, fill email, fill password, click Login.\n\nThen a developer renames the email field's placeholder.\n\n| | Copy-pasted login | One shared class |\n|---|---|---|\n| Files to edit | every spec that logs in | **1** |\n| Chance of missing one | high | none |\n| Time to fix | an afternoon | a minute |\n\nThis isn't a Playwright idea, or even a testing idea. It's the reason functions exist. Automation\nis supposed to *reduce* effort — a suite that costs an afternoon per rename has given the saving\nback.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 1 — the duplication, so the fix has something to beat\n\n**Objective:** write the login inline, twice, and notice what's repeated."
+          "text": "## Example 1 — the duplication, so the fix has something to beat\n\n**Objective:** write the login inline, twice, and notice what's repeated.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { launch, BASE_URL } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\n\n// \"Spec 1\"\nawait page.goto(BASE_URL);\nawait page.getByPlaceholder(\"Enter Email\").fill(\"leela@gmail.com\");\nawait page.getByPlaceholder(\"Enter Password\").fill(\"Leela@123\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard\");\nconsole.log(\"spec 1 reached:\", page.url().split(\"/\").pop());\n\n// \"Spec 2\" — same four lines again\nawait page.getByRole(\"button\", { name: \"LogOut\" }).click();\nawait page.waitForURL(\"**/login\");\nawait page.getByPlaceholder(\"Enter Email\").fill(\"katy@gmail.com\");\nawait page.getByPlaceholder(\"Enter Password\").fill(\"Katy@12354\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard\");\nconsole.log(\"spec 2 reached:\", page.url().split(\"/\").pop());"
+          "text": "import { launch, BASE_URL } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\n\n// \"Spec 1\"\nawait page.goto(BASE_URL);\nawait page.getByPlaceholder(\"Enter Email\").fill(\"leela@gmail.com\");\nawait page.getByPlaceholder(\"Enter Password\").fill(\"Leela@123\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard\");\nconsole.log(\"spec 1 reached:\", page.url().split(\"/\").pop());\n\n// \"Spec 2\" — same four lines again\nawait page.getByRole(\"button\", { name: \"LogOut\" }).click();\nawait page.waitForURL(\"**/login\");\nawait page.getByPlaceholder(\"Enter Email\").fill(\"katy@gmail.com\");\nawait page.getByPlaceholder(\"Enter Password\").fill(\"Katy@12354\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard\");\nconsole.log(\"spec 2 reached:\", page.url().split(\"/\").pop());",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `spec 1 reached: dashboard` and `spec 2 reached: dashboard`.\n\nCount what's duplicated: two placeholders, one button name, one URL pattern — **four pieces of\nknowledge about how login works**, now in two places. Multiply by twenty specs."
+          "text": "**Expected:** `spec 1 reached: dashboard` and `spec 2 reached: dashboard`.\n\nCount what's duplicated: two placeholders, one button name, one URL pattern — **four pieces of\nknowledge about how login works**, now in two places. Multiply by twenty specs.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": "const { browser, page } = await launch();\n\n// \"Spec 1\"\nawait page.goto(BASE_URL);",
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 2 — the same behaviour, named once\n\n**Objective:** build the class, then use it.\n\nTwo rules while you read it: locators are built in the **constructor**, and methods are named\nfor **what the user does**."
+          "text": "## Example 2 — the same behaviour, named once\n\n**Objective:** build the class, then use it.\n\nTwo rules while you read it: locators are built in the **constructor**, and methods are named\nfor **what the user does**.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import type { Locator, Page } from \"npm:playwright\";\n\nclass LoginPage {\n  readonly page: Page;\n  readonly emailBox: Locator;\n  readonly passwordBox: Locator;\n  readonly loginButton: Locator;\n  readonly logoutButton: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    // Built once. One place to edit when the markup changes.\n    this.emailBox = page.getByPlaceholder(\"Enter Email\");\n    this.passwordBox = page.getByPlaceholder(\"Enter Password\");\n    this.loginButton = page.getByRole(\"button\", { name: \"Login\" });\n    this.logoutButton = page.getByRole(\"button\", { name: \"LogOut\" });\n  }\n\n  async open(): Promise<void> {\n    await this.page.goto(BASE_URL);\n  }\n\n  async signIn(email = \"leela@gmail.com\", password = \"Leela@123\"): Promise<void> {\n    await this.emailBox.fill(email);\n    await this.passwordBox.fill(password);\n    await this.loginButton.click();\n    await this.page.waitForURL(\"**/dashboard\");\n  }\n\n  async signOut(): Promise<void> {\n    await this.logoutButton.click();\n    await this.page.waitForURL(\"**/login\");\n  }\n}\n\n// Now the same two journeys read completely differently\nconst loginPage = new LoginPage(page);\n\nawait loginPage.signOut();\nawait loginPage.open();\nawait loginPage.signIn();\nconsole.log(\"as Leela  ->\", page.url().split(\"/\").pop());\n\nawait loginPage.signOut();\nawait loginPage.signIn(\"katy@gmail.com\", \"Katy@12354\");\nconsole.log(\"as Katy   ->\", page.url().split(\"/\").pop());"
+          "text": "import type { Locator, Page } from \"npm:playwright\";\n\nclass LoginPage {\n  readonly page: Page;\n  readonly emailBox: Locator;\n  readonly passwordBox: Locator;\n  readonly loginButton: Locator;\n  readonly logoutButton: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    // Built once. One place to edit when the markup changes.\n    this.emailBox = page.getByPlaceholder(\"Enter Email\");\n    this.passwordBox = page.getByPlaceholder(\"Enter Password\");\n    this.loginButton = page.getByRole(\"button\", { name: \"Login\" });\n    this.logoutButton = page.getByRole(\"button\", { name: \"LogOut\" });\n  }\n\n  async open(): Promise<void> {\n    await this.page.goto(BASE_URL);\n  }\n\n  async signIn(email = \"leela@gmail.com\", password = \"Leela@123\"): Promise<void> {\n    await this.emailBox.fill(email);\n    await this.passwordBox.fill(password);\n    await this.loginButton.click();\n    await this.page.waitForURL(\"**/dashboard\");\n  }\n\n  async signOut(): Promise<void> {\n    await this.logoutButton.click();\n    await this.page.waitForURL(\"**/login\");\n  }\n}\n\n// Now the same two journeys read completely differently\nconst loginPage = new LoginPage(page);\n\nawait loginPage.signOut();\nawait loginPage.open();\nawait loginPage.signIn();\nconsole.log(\"as Leela  ->\", page.url().split(\"/\").pop());\n\nawait loginPage.signOut();\nawait loginPage.signIn(\"katy@gmail.com\", \"Katy@12354\");\nconsole.log(\"as Katy   ->\", page.url().split(\"/\").pop());",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `as Leela -> dashboard` and `as Katy -> dashboard`.\n\nCompare it with Example 1. No placeholders, no button names, no URL patterns — the journey now\nreads as a description of what a person did.\n\n| Choice | Reason |\n|---|---|\n| Locators in the constructor | one edit when markup changes |\n| `readonly` | a method can't reassign one by accident |\n| `signIn` not `fillAndClick` | the test reads as behaviour, not DOM operations |\n| Default parameters | the common case needs no arguments |\n| Every method `async` | every browser action returns a Promise |\n\n**Challenge:** add an `openTile(name)` method that clicks a dashboard tile, then use it to open\n`Pay Bills`."
+          "text": "**Expected:** `as Leela -> dashboard` and `as Katy -> dashboard`.\n\nCompare it with Example 1. No placeholders, no button names, no URL patterns — the journey now\nreads as a description of what a person did.\n\n| Choice | Reason |\n|---|---|\n| Locators in the constructor | one edit when markup changes |\n| `readonly` | a method can't reassign one by accident |\n| `signIn` not `fillAndClick` | the test reads as behaviour, not DOM operations |\n| Default parameters | the common case needs no arguments |\n| Every method `async` | every browser action returns a Promise |\n\n**Challenge:** add an `openTile(name)` method that clicks a dashboard tile, then use it to open\n`Pay Bills`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": "const { browser, page } = await launch();\n\n// \"Spec 1\"\nawait page.goto(BASE_URL);",
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The filename matters\n\nSave this class as `day3-login-page.ts` — **not** `.spec.ts`.\n\nThe runner collects every `*.spec.ts` and expects tests inside. A helper named `.spec.ts` gets\ncollected, contains no tests, and reports as an empty file or an error. As the transcript puts\nit: *\"dot spec is always executable.\"*"
+          "text": "## The filename matters\n\nSave this class as `day3-login-page.ts` — **not** `.spec.ts`.\n\nThe runner collects every `*.spec.ts` and expects tests inside. A helper named `.spec.ts` gets\ncollected, contains no tests, and reports as an empty file or an error. As the transcript puts\nit: *\"dot spec is always executable.\"*",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "await browser.close();\nconsole.log(\"browser closed\");"
+          "text": "await browser.close();\nconsole.log(\"browser closed\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The real files"
+          "text": "## The real files",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 4 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week3/generated/day3-login-page.ts\", `// Week 3, Day 3 — the common code, in one place.\n//\n// Note the filename: NOT .spec.ts. This file defines behaviour; it contains no\n// test() calls, so the runner never collects it. That distinction matters — a\n// helper named *.spec.ts would be run as an empty test file.\n//\n// Written by a cell in week3/day3_2.ipynb.\nimport { type Locator, type Page } from \"@playwright/test\";\nimport { USERS, type BankUser } from \"../../_shared/test-helpers\";\n\n/**\n * Everything the login and dashboard screens can do, named once.\n *\n * Locators are built in the constructor and marked \\`readonly\\`: one place to edit\n * when the markup changes, and a compile error if a method tries to reassign one.\n */\nexport class LoginPage {\n  readonly page: Page;\n  readonly emailBox: Locator;\n  readonly passwordBox: Locator;\n  readonly loginButton: Locator;\n  readonly logoutButton: Locator;\n  readonly accountBalance: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    // \\`this.page\\` is the page handed in at construction time — the same instance\n    // the test is driving, not a new one.\n    this.emailBox = page.getByPlaceholder(\"Enter Email\");\n    this.passwordBox = page.getByPlaceholder(\"Enter Password\");\n    this.loginButton = page.getByRole(\"button\", { name: \"Login\" });\n    this.logoutButton = page.getByRole(\"button\", { name: \"LogOut\" });\n    this.accountBalance = page.getByText(\"Account Balance\", { exact: true });\n  }\n\n  /** Named for what the user is doing, not for the DOM operations involved. */\n  async open(): Promise<void> {\n    await this.page.goto(\"/\");\n  }\n\n  async signIn(user: BankUser = USERS[0]): Promise<void> {\n    await this.emailBox.fill(user.email);\n    await this.passwordBox.fill(user.password);\n    await this.loginButton.click();\n    await this.page.waitForURL(\"**/dashboard\");\n  }\n\n  async signOut(): Promise<void> {\n    await this.logoutButton.click();\n    await this.page.waitForURL(\"**/login\");\n  }\n\n  /**\n   * Opens one of the dashboard tiles. They are \\`<p>\\` elements, not links, so\n   * getByRole(\"link\", ...) finds nothing here — a real quirk of this app.\n   */\n  async openTile(name: string): Promise<void> {\n    await this.page.getByText(name, { exact: true }).click();\n  }\n}\n`);\n\nawait writeProjectFile(\"week3/generated/day3-base-page.spec.ts\", `// Week 3, Day 3 — the same journeys, driven through the shared class.\n//\n// Compare this with day2-hooks.spec.ts: no placeholders, no button names, no URLs\n// spelled out. If the login markup changes tomorrow, this file does not.\n//\n// Written by a cell in week3/day3_2.ipynb. Run it yourself:\n//   npx playwright test week3/generated/day3-base-page.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { USERS } from \"../../_shared/test-helpers\";\nimport { LoginPage } from \"./day3-login-page\";\n\ntest.describe(\"Using the shared LoginPage\", () => {\n  // beforeEach, not beforeAll: the \\`page\\` fixture is a fresh page per test, so\n  // each test has to sign in for itself. That is the trade for isolation.\n  let loginPage: LoginPage;\n\n  test.beforeEach(async ({ page }) => {\n    loginPage = new LoginPage(page);\n    await loginPage.open();\n    await loginPage.signIn();\n  });\n\n  test(\"Step 1 — signing in lands on the dashboard\", async ({ page }) => {\n    await expect(page).toHaveURL(/\\\\/dashboard/);\n    // The test asserts. The class only got us here.\n    await expect(loginPage.accountBalance).toBeVisible();\n  });\n\n  test(\"Step 2 — a tile opens its own view\", async ({ page }) => {\n    await loginPage.openTile(\"Pay Bills\");\n    await expect(page).toHaveURL(/paymentDashboard/);\n  });\n\n  test(\"Step 3 — signing out returns to the login form\", async () => {\n    await loginPage.signOut();\n    await expect(loginPage.emailBox).toBeVisible();\n  });\n\n  test(\"Step 4 — a different user signs in through the same class\", async ({ page }) => {\n    await loginPage.signOut();\n    await loginPage.signIn(USERS[1]);\n    await expect(page).toHaveURL(/\\\\/dashboard/);\n  });\n});\n`);\n\nawait runSpec(\"week3/generated/day3-base-page.spec.ts\");"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 4 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week3/generated/day3-login-page.ts\", `// Week 3, Day 3 — the common code, in one place.\n//\n// Note the filename: NOT .spec.ts. This file defines behaviour; it contains no\n// test() calls, so the runner never collects it. That distinction matters — a\n// helper named *.spec.ts would be run as an empty test file.\n//\n// Written by a cell in week3/day3_2.ipynb.\nimport { type Locator, type Page } from \"@playwright/test\";\nimport { USERS, type BankUser } from \"../../_shared/test-helpers\";\n\n/**\n * Everything the login and dashboard screens can do, named once.\n *\n * Locators are built in the constructor and marked \\`readonly\\`: one place to edit\n * when the markup changes, and a compile error if a method tries to reassign one.\n */\nexport class LoginPage {\n  readonly page: Page;\n  readonly emailBox: Locator;\n  readonly passwordBox: Locator;\n  readonly loginButton: Locator;\n  readonly logoutButton: Locator;\n  readonly accountBalance: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    // \\`this.page\\` is the page handed in at construction time — the same instance\n    // the test is driving, not a new one.\n    this.emailBox = page.getByPlaceholder(\"Enter Email\");\n    this.passwordBox = page.getByPlaceholder(\"Enter Password\");\n    this.loginButton = page.getByRole(\"button\", { name: \"Login\" });\n    this.logoutButton = page.getByRole(\"button\", { name: \"LogOut\" });\n    this.accountBalance = page.getByText(\"Account Balance\", { exact: true });\n  }\n\n  /** Named for what the user is doing, not for the DOM operations involved. */\n  async open(): Promise<void> {\n    await this.page.goto(\"/\");\n  }\n\n  async signIn(user: BankUser = USERS[0]): Promise<void> {\n    await this.emailBox.fill(user.email);\n    await this.passwordBox.fill(user.password);\n    await this.loginButton.click();\n    await this.page.waitForURL(\"**/dashboard\");\n  }\n\n  async signOut(): Promise<void> {\n    await this.logoutButton.click();\n    await this.page.waitForURL(\"**/login\");\n  }\n\n  /**\n   * Opens one of the dashboard tiles. They are \\`<p>\\` elements, not links, so\n   * getByRole(\"link\", ...) finds nothing here — a real quirk of this app.\n   */\n  async openTile(name: string): Promise<void> {\n    await this.page.getByText(name, { exact: true }).click();\n  }\n}\n`);\n\nawait writeProjectFile(\"week3/generated/day3-base-page.spec.ts\", `// Week 3, Day 3 — the same journeys, driven through the shared class.\n//\n// Compare this with day2-hooks.spec.ts: no placeholders, no button names, no URLs\n// spelled out. If the login markup changes tomorrow, this file does not.\n//\n// Written by a cell in week3/day3_2.ipynb. Run it yourself:\n//   npx playwright test week3/generated/day3-base-page.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { USERS } from \"../../_shared/test-helpers\";\nimport { LoginPage } from \"./day3-login-page\";\n\ntest.describe(\"Using the shared LoginPage\", () => {\n  // beforeEach, not beforeAll: the \\`page\\` fixture is a fresh page per test, so\n  // each test has to sign in for itself. That is the trade for isolation.\n  let loginPage: LoginPage;\n\n  test.beforeEach(async ({ page }) => {\n    loginPage = new LoginPage(page);\n    await loginPage.open();\n    await loginPage.signIn();\n  });\n\n  test(\"Step 1 — signing in lands on the dashboard\", async ({ page }) => {\n    await expect(page).toHaveURL(/\\\\/dashboard/);\n    // The test asserts. The class only got us here.\n    await expect(loginPage.accountBalance).toBeVisible();\n  });\n\n  test(\"Step 2 — a tile opens its own view\", async ({ page }) => {\n    await loginPage.openTile(\"Pay Bills\");\n    await expect(page).toHaveURL(/paymentDashboard/);\n  });\n\n  test(\"Step 3 — signing out returns to the login form\", async () => {\n    await loginPage.signOut();\n    await expect(loginPage.emailBox).toBeVisible();\n  });\n\n  test(\"Step 4 — a different user signs in through the same class\", async ({ page }) => {\n    await loginPage.signOut();\n    await loginPage.signIn(USERS[1]);\n    await expect(page).toHaveURL(/\\\\/dashboard/);\n  });\n});\n`);\n\nawait runSpec(\"week3/generated/day3-base-page.spec.ts\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week3/generated/day3-base-page.spec.ts`\n\n**Expected:** `4 passed`.\n\nTwo things worth noticing in the spec.\n\n**It uses `beforeEach`, not `beforeAll`.** It takes the `page` fixture, which is a fresh page per\ntest, so each test signs in for itself. That's the trade from Day 2.2 — full isolation, at the\ncost of a login each time. `beforeAll` + `browser` would be faster and coupled.\n\n**The class contains no `expect()`.** It knows how to reach the dashboard; the *test* decides\nwhat should be true there. Day 3.3 explains why that split matters more than it looks."
+          "text": "> ▶ **Run it yourself:** `npx playwright test week3/generated/day3-base-page.spec.ts`\n\n**Expected:** `4 passed`.\n\nTwo things worth noticing in the spec.\n\n**It uses `beforeEach`, not `beforeAll`.** It takes the `page` fixture, which is a fresh page per\ntest, so each test signs in for itself. That's the trade from Day 2.2 — full isolation, at the\ncost of a login each time. `beforeAll` + `browser` would be faster and coupled.\n\n**The class contains no `expect()`.** It knows how to reach the dashboard; the *test* decides\nwhat should be true there. Day 3.3 explains why that split matters more than it looks.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **One class per screen**, named for the screen.\n- **Locators in the constructor**, `readonly`.\n- **Methods named as user actions** — `signIn`, not `clickLoginButton`.\n- **Helper files never end in `.spec.ts`.**\n- **No assertions in the class.**\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `No tests found` in your helper | it's named `*.spec.ts` | rename to `.ts` |\n| `Cannot read properties of undefined (reading 'goto')` | forgot `this.` | `this.page.goto(...)` |\n| Locator is stale after navigation | rebuilt inside a method | build it in the constructor |\n| `new LoginPage()` with no page | the constructor needs one | `new LoginPage(page)` |\n| Class asserts, so a failure test needs a second method | assertions leaked in | move them to the test |\n\n**Next:** [Day 3.3](/learn/w3/d3/p3) — the distance between this and a real Page Object Model."
+          "text": "## Best practices\n\n- **One class per screen**, named for the screen.\n- **Locators in the constructor**, `readonly`.\n- **Methods named as user actions** — `signIn`, not `clickLoginButton`.\n- **Helper files never end in `.spec.ts`.**\n- **No assertions in the class.**\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `No tests found` in your helper | it's named `*.spec.ts` | rename to `.ts` |\n| `Cannot read properties of undefined (reading 'goto')` | forgot `this.` | `this.page.goto(...)` |\n| Locator is stale after navigation | rebuilt inside a method | build it in the constructor |\n| `new LoginPage()` with no page | the constructor needs one | `new LoginPage(page)` |\n| Class asserts, so a failure test needs a second method | assertions leaked in | move them to the test |\n\n**Next:** [Day 3.3](/learn/w3/d3/p3) — the distance between this and a real Page Object Model.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -169,27 +235,39 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 3.3 — From shared class to Page Object Model\n\nWhat you built in [Day 3.2](/learn/w3/d3/p2) *is* the beginning of a Page Object Model. No new API\nhere — just the four things a production version adds, and why."
+          "text": "# Week 3, Day 3.3 — From shared class to Page Object Model\n\nWhat you built in [Day 3.2](/learn/w3/d3/p2) *is* the beginning of a Page Object Model. No new API\nhere — just the four things a production version adds, and why.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## What you already have right\n\n| Already correct | Why it matters |\n|---|---|\n| One class per screen | a rename touches one file |\n| Locators in the constructor, `readonly` | one place to edit, compiler-enforced |\n| Methods named as user actions | tests read as behaviour |\n| No assertions inside | one method serves success *and* failure tests |\n\nThat last one is the rule worth being able to argue. Put `expect(url).toContain(\"dashboard\")`\ninside `signIn()` and it can only be used by tests expecting success. The test for a *wrong\npassword* now needs `signInExpectingFailure()`. Then the locked-account test needs a third.\nThree methods, one click.\n\n**The class knows how to ask. The test decides what the answer should be.**"
+          "text": "## What you already have right\n\n| Already correct | Why it matters |\n|---|---|\n| One class per screen | a rename touches one file |\n| Locators in the constructor, `readonly` | one place to edit, compiler-enforced |\n| Methods named as user actions | tests read as behaviour |\n| No assertions inside | one method serves success *and* failure tests |\n\nThat last one is the rule worth being able to argue. Put `expect(url).toContain(\"dashboard\")`\ninside `signIn()` and it can only be used by tests expecting success. The test for a *wrong\npassword* now needs `signInExpectingFailure()`. Then the locked-account test needs a third.\nThree methods, one click.\n\n**The class knows how to ask. The test decides what the answer should be.**",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The four things a real POM adds\n\n| Addition | What it buys |\n|---|---|\n| A `BasePage` other pages extend | shared plumbing — navigation, waits — written once |\n| Components for repeated widgets | a nav bar or table reader isn't a \"page\" |\n| Fixtures that hand pages to tests | no `new LoginPage(page)` in every file |\n| Typed test data | `signIn(USERS[1])` instead of two loose strings |"
+          "text": "## The four things a real POM adds\n\n| Addition | What it buys |\n|---|---|\n| A `BasePage` other pages extend | shared plumbing — navigation, waits — written once |\n| Components for repeated widgets | a nav bar or table reader isn't a \"page\" |\n| Fixtures that hand pages to tests | no `new LoginPage(page)` in every file |\n| Typed test data | `signIn(USERS[1])` instead of two loose strings |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// The shapes. Nothing runs — this is the direction of travel.\nconst basePage = `\nclass BasePage {\n  constructor(protected page: Page) {}\n  async goto(path: string) { await this.page.goto(path); }\n}\n\nclass LoginPage extends BasePage {\n  readonly emailBox = this.page.getByPlaceholder(\"Enter Email\");\n  async signIn(user: BankUser = USERS[0]) { /* ... */ }\n}`.trim();\n\nconst withFixture = `\n// framework/test.ts\nexport const test = base.extend<{ loginPage: LoginPage }>({\n  loginPage: async ({ page }, use) => { await use(new LoginPage(page)); },\n});\n\n// any.spec.ts\ntest(\"signs in\", async ({ loginPage, page }) => {\n  await loginPage.open();\n  await loginPage.signIn();\n  await expect(page).toHaveURL(/dashboard/);\n});`.trim();\n\nconsole.log(basePage);\nconsole.log(\"\\n---\\n\");\nconsole.log(withFixture);"
+          "text": "// The shapes. Nothing runs — this is the direction of travel.\nconst basePage = `\nclass BasePage {\n  constructor(protected page: Page) {}\n  async goto(path: string) { await this.page.goto(path); }\n}\n\nclass LoginPage extends BasePage {\n  readonly emailBox = this.page.getByPlaceholder(\"Enter Email\");\n  async signIn(user: BankUser = USERS[0]) { /* ... */ }\n}`.trim();\n\nconst withFixture = `\n// framework/test.ts\nexport const test = base.extend<{ loginPage: LoginPage }>({\n  loginPage: async ({ page }, use) => { await use(new LoginPage(page)); },\n});\n\n// any.spec.ts\ntest(\"signs in\", async ({ loginPage, page }) => {\n  await loginPage.open();\n  await loginPage.signIn();\n  await expect(page).toHaveURL(/dashboard/);\n});`.trim();\n\nconsole.log(basePage);\nconsole.log(\"\\n---\\n\");\nconsole.log(withFixture);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** the two shapes printed.\n\nNotice what the fixture version removes: no `new LoginPage(page)`, no `beforeEach` to construct\nit. The test declares `{ loginPage }` and receives one ready to use — and a test that doesn't\nneed it never pays for it.\n\n> This repo has no `framework/` folder yet — it was removed in the August 2026 reset. These are\n> shapes being demonstrated, not files you can import. Later weeks build the real thing, and\n> `signIn(USERS[1])` above is the same `USERS` you already import from\n> `_shared/test-helpers.ts`."
+          "text": "**Expected:** the two shapes printed.\n\nNotice what the fixture version removes: no `new LoginPage(page)`, no `beforeEach` to construct\nit. The test declares `{ loginPage }` and receives one ready to use — and a test that doesn't\nneed it never pays for it.\n\n> This repo has no `framework/` folder yet — it was removed in the August 2026 reset. These are\n> shapes being demonstrated, not files you can import. Later weeks build the real thing, and\n> `signIn(USERS[1])` above is the same `USERS` you already import from\n> `_shared/test-helpers.ts`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Where a page object stops\n\nPOM is not a place to put everything. It goes wrong in a specific, recognisable way:\n\n| Belongs in the page object | Does **not** |\n|---|---|\n| locators for that screen | assertions |\n| actions a user performs there | test data |\n| waiting for that screen to settle | business rules about what *should* happen |\n| navigation away from it | other screens' locators |\n\nThe failure mode is a `LoginPage` that grows a `verifyDashboardHasThreeAccounts()` method. Now it\nknows about the dashboard, it asserts, and two unrelated tests depend on it. Once a page object\nstarts asserting, it stops being reusable — which was the entire reason for building it.\n\n## What a reviewer checks\n\n- **No `expect()`** anywhere in a page object or component.\n- **No test data** hardcoded inside — pass it in.\n- **Locators built once**, in the constructor or as fields.\n- **No cross-screen knowledge** — one class, one screen.\n- **Helper files not named `*.spec.ts`.**\n- **Methods named for intent**, so the test reads as a user journey.\n\n**Next:** [Day 3.4](/learn/w3/d3/p4) — your turn."
+          "text": "## Where a page object stops\n\nPOM is not a place to put everything. It goes wrong in a specific, recognisable way:\n\n| Belongs in the page object | Does **not** |\n|---|---|\n| locators for that screen | assertions |\n| actions a user performs there | test data |\n| waiting for that screen to settle | business rules about what *should* happen |\n| navigation away from it | other screens' locators |\n\nThe failure mode is a `LoginPage` that grows a `verifyDashboardHasThreeAccounts()` method. Now it\nknows about the dashboard, it asserts, and two unrelated tests depend on it. Once a page object\nstarts asserting, it stops being reusable — which was the entire reason for building it.\n\n## What a reviewer checks\n\n- **No `expect()`** anywhere in a page object or component.\n- **No test data** hardcoded inside — pass it in.\n- **Locators built once**, in the constructor or as fields.\n- **No cross-screen knowledge** — one class, one screen.\n- **Helper files not named `*.spec.ts`.**\n- **Methods named for intent**, so the test reads as a user journey.\n\n**Next:** [Day 3.4](/learn/w3/d3/p4) — your turn.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -204,23 +282,33 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 3.4 — Practice\n\nThree problems. No answer key.\n\nApp: `https://test-automation-banking.vercel.app/`. Verified locators:\n`getByPlaceholder(\"Enter Email\")`, `getByPlaceholder(\"Enter Password\")`,\n`getByRole(\"button\", { name: \"Login\" })`, `getByRole(\"button\", { name: \"LogOut\" })`.\nTiles are `<p>` elements — use `getByText(name, { exact: true })`, and note `\"Statements\"`\nmatches **two** elements.\n\n> Stuck past twenty minutes? Back to [Day 3.1](/learn/w3/d3/p1) or [Day 3.2](/learn/w3/d3/p2)."
+          "text": "# Week 3, Day 3.4 — Practice\n\nThree problems. No answer key.\n\nApp: `https://test-automation-banking.vercel.app/`. Verified locators:\n`getByPlaceholder(\"Enter Email\")`, `getByPlaceholder(\"Enter Password\")`,\n`getByRole(\"button\", { name: \"Login\" })`, `getByRole(\"button\", { name: \"LogOut\" })`.\nTiles are `<p>` elements — use `getByText(name, { exact: true })`, and note `\"Statements\"`\nmatches **two** elements.\n\n> Stuck past twenty minutes? Back to [Day 3.1](/learn/w3/d3/p1) or [Day 3.2](/learn/w3/d3/p2).",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "1"
+          "text": "1",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "2"
+          "text": "2",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "3"
+          "text": "3",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**Look at your Problem 3 spec and count the DOM details visible in it.** Ideally zero — no\nplaceholders, no button names, no CSS. Everything the tests say should be about what a person\ndid and what should be true afterwards.\n\nThat count is the real measure of whether a page object is doing its job. Not how many classes\nyou have.\n\n## Where this week landed\n\n| Day | Built |\n|---|---|\n| [Day 1](/learn/w3/d1/p1) | timeouts, the two deadlines, and where settings belong |\n| [Day 2](/learn/w3/d2/p1) | isolation, hooks, `page` vs `browser`, dependent tests |\n| Day 3 | one shared class, and the road to a Page Object Model |\n\nThree things decide whether automation works, in order: **how well you know the application**,\nthen the tool, then the language. Everything this week was really about the third — and about\nmaking sure a change in the application costs you one edit rather than twenty."
+          "text": "## When you're done\n\n**Look at your Problem 3 spec and count the DOM details visible in it.** Ideally zero — no\nplaceholders, no button names, no CSS. Everything the tests say should be about what a person\ndid and what should be true afterwards.\n\nThat count is the real measure of whether a page object is doing its job. Not how many classes\nyou have.\n\n## Where this week landed\n\n| Day | Built |\n|---|---|\n| [Day 1](/learn/w3/d1/p1) | timeouts, the two deadlines, and where settings belong |\n| [Day 2](/learn/w3/d2/p1) | isolation, hooks, `page` vs `browser`, dependent tests |\n| Day 3 | one shared class, and the road to a Page Object Model |\n\nThree things decide whether automation works, in order: **how well you know the application**,\nthen the tool, then the language. Everything this week was really about the third — and about\nmaking sure a change in the application costs you one edit rather than twenty.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": [
@@ -228,21 +316,21 @@
           "number": 1,
           "difficulty": "Beginner",
           "statement": "**Build.** A `DashboardPage` class, separate from `LoginPage`.\n\n1. Locators for the LogOut button and the `Account Balance` text, built in the constructor\n2. `openTile(name)` — clicks a tile by its visible text\n3. `currentSection()` — returns the last part of the current URL\n4. A test that signs in, opens `Pay Bills`, and asserts the section is `paymentDashboard`\n\n**Where.** A helper `.ts` plus a spec in `week3/generated/`.\n\n**Check yourself.** It passes, and your class contains **no** `expect()`. If you wanted one,\nnote where — that instinct is what Day 3.3 was about.\n\n> **Hint** — `currentSection()` returning a value the *test* asserts on is the pattern. A method\n> that asserts for you would need a variant per expectation.",
-          "stub": "// Problem 1 — your code here.",
+          "stub": "const { browser, page } = await launch();\n\n// \"Spec 1\"\nawait page.goto(BASE_URL);\n\n// Problem 1 — your code here.",
           "solution": null
         },
         {
           "number": 2,
           "difficulty": "Intermediate",
           "statement": "**Build.** Prove the class earns its keep by surviving a change.\n\n1. Write a spec using your `LoginPage` for all three demo users (Leela, Katy, Jyosthna),\n   asserting each reaches `/dashboard`\n2. Now **deliberately break it**: change the email locator in the class to\n   `getByPlaceholder(\"Email Address\")` — which doesn't exist\n3. Run it. Note how many places you had to edit to break it, and how many to fix it\n\n**Check yourself.** Breaking and fixing were each **one line**, and all three tests failed and\nthen recovered together. Write one sentence stating what the inline version of this would have\ncost.\n\n> **Hint** — the demo users are in `USERS` from `_shared/test-helpers.ts`. Don't retype the\n> credentials; one of them is easy to get subtly wrong.",
-          "stub": "// Problem 2 — your code here.",
+          "stub": "const { browser, page } = await launch();\n\n// \"Spec 1\"\nawait page.goto(BASE_URL);\n\n// Problem 2 — your code here.",
           "solution": null
         },
         {
           "number": 3,
           "difficulty": "Advanced",
           "statement": "**Build.** A two-class setup with a shared base, and a fixture.\n\n1. A `BasePage` holding what both screens need — the `page`, plus a `goto(path)`\n2. `LoginPage extends BasePage` and `DashboardPage extends BasePage`\n3. A fixture supplying both, so tests write `async ({ loginPage, dashboardPage }) => {}` with no\n   `new` and no `beforeEach`\n4. Three tests: a successful sign-in, a tile navigation, and a sign-out\n\n**Where.** Helper `.ts` files plus a spec in `week3/generated/`.\n\n**Constraints — these are the exercise:**\n\n- **No `expect()` in any class**\n- **No `new SomePage(...)` inside a test** — the fixture does it\n- **No credentials typed in a test** — pass a `USERS` entry\n- Every test passes **run on its own**\n\nThen answer in a comment: *which of these three tests would still pass if the login page were\ncompletely redesigned, assuming the placeholders kept their text?*\n\n**Check yourself.** Passes run together, passes run individually, passes with `--workers=4`.\n\n> **Hint** — `test.extend` was shown in Day 3.3. The redesign question is really asking which\n> tests depend on *layout* versus on *behaviour*.",
-          "stub": "// Problem 3 — your code here.",
+          "stub": "const { browser, page } = await launch();\n\n// \"Spec 1\"\nawait page.goto(BASE_URL);\n\n// Problem 3 — your code here.",
           "solution": null
         }
       ]

@@ -7,6 +7,7 @@ import typescript from 'highlight.js/lib/languages/typescript';
 import xml from 'highlight.js/lib/languages/xml';
 import bash from 'highlight.js/lib/languages/bash';
 import json from 'highlight.js/lib/languages/json';
+import { classify } from '../lib/conceptColors';
 
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('typescript', typescript);
@@ -99,6 +100,15 @@ export function Markdown({
       const lang = /language-(\w+)/.exec(block.className)?.[1] ?? '';
       if (hljs.getLanguage(lang)) {
         block.innerHTML = hljs.highlight(code, { language: lang }).value;
+        // Concept color grading. hljs tags every call-shaped identifier - a locator, an
+        // action, an assertion matcher, a wait, `test(` itself - with the SAME class
+        // (`hljs-title function_`, confirmed against the real TypeScript grammar); it cannot
+        // tell them apart. This adds a second, concept-specific class on top of hljs's own,
+        // using the vocabulary both this and the live editor (CodePane.tsx) share.
+        for (const span of block.querySelectorAll('.hljs-title.function_')) {
+          const concept = classify(span.textContent ?? '');
+          if (concept) span.classList.add('concept-' + concept);
+        }
       }
 
       const pre = block.parentElement!;

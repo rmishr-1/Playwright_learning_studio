@@ -15,59 +15,87 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 1.1 - Prerequisites check\n\nToday you replace twelve near-identical methods with one. That needs two pieces of\nTypeScript you have not used yet.\n\n| Concept | Taught in |\n|---|---|\n| `class`, `constructor`, `readonly` | [week3/day3_1](/learn/w3/d3/p1) |\n| `abstract`, `extends`, `super`, `protected` | [week5/day3_1](/learn/w5/d3/p1) |\n| **`switch` / `case` / `break` / `default`** | new - below |\n| **`throw` and `Error`** | new - below |\n| **Union of string literals** | new - below |\n\n**Next:** [Day 1.2 - A second app, and a component](/learn/w6/d1/p2)"
+          "text": "# Week 6, Day 1.1 - Prerequisites check\n\nToday you replace twelve near-identical methods with one. That needs two pieces of\nTypeScript you have not used yet.\n\n| Concept | Taught in |\n|---|---|\n| `class`, `constructor`, `readonly` | [week3/day3_1](/learn/w3/d3/p1) |\n| `abstract`, `extends`, `super`, `protected` | [week5/day3_1](/learn/w5/d3/p1) |\n| **`switch` / `case` / `break` / `default`** | new - below |\n| **`throw` and `Error`** | new - below |\n| **Union of string literals** | new - below |\n\n**Next:** [Day 1.2 - A second app, and a component](/learn/w6/d1/p2)",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Concept 1 - `switch`\n\nOne value, many destinations. An `if/else if` chain does the same job; `switch` reads as a\ntable, which is what a list of tabs actually is.\n\n| Keyword | Job |\n|---|---|\n| `case \"x\":` | run this branch when the value is `\"x\"` |\n| `break` | stop here - **without it execution falls into the next case** |\n| `default` | nothing matched |"
+          "text": "## Concept 1 - `switch`\n\nOne value, many destinations. An `if/else if` chain does the same job; `switch` reads as a\ntable, which is what a list of tabs actually is.\n\n| Keyword | Job |\n|---|---|\n| `case \"x\":` | run this branch when the value is `\"x\"` |\n| `break` | stop here - **without it execution falls into the next case** |\n| `default` | nothing matched |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "function whereDoesItGo(tab: string): string {\n  switch (tab) {\n    case \"Pay Bills\":\n      return \"/paymentDashboard\";\n    case \"Add Payee\":\n      return \"/transferDashboard\";\n    default:\n      return \"(unknown)\";\n  }\n}\n\nfor (const t of [\"Pay Bills\", \"Add Payee\", \"Nonsense\"]) {\n  console.log(t.padEnd(12), \"->\", whereDoesItGo(t));\n}"
+          "text": "function whereDoesItGo(tab: string): string {\n  switch (tab) {\n    case \"Pay Bills\":\n      return \"/paymentDashboard\";\n    case \"Add Payee\":\n      return \"/transferDashboard\";\n    default:\n      return \"(unknown)\";\n  }\n}\n\nfor (const t of [\"Pay Bills\", \"Add Payee\", \"Nonsense\"]) {\n  console.log(t.padEnd(12), \"->\", whereDoesItGo(t));\n}",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Concept 2 - the fall-through trap\n\n`return` exits the function, so the version above needed no `break`. The moment a branch does\nwork instead of returning, a missing `break` runs **every following case too**."
+          "text": "## Concept 2 - the fall-through trap\n\n`return` exits the function, so the version above needed no `break`. The moment a branch does\nwork instead of returning, a missing `break` runs **every following case too**.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "function noBreak(tab: string): string[] {\n  const log: string[] = [];\n  switch (tab) {\n    case \"a\":\n      log.push(\"did a\");\n      // no break - falls through\n    case \"b\":\n      log.push(\"did b\");\n      break;\n    case \"c\":\n      log.push(\"did c\");\n      break;\n  }\n  return log;\n}\n\nconsole.log('\"a\" ->', noBreak(\"a\"));   // BOTH a and b\nconsole.log('\"b\" ->', noBreak(\"b\"));   // just b"
+          "text": "function noBreak(tab: string): string[] {\n  const log: string[] = [];\n  switch (tab) {\n    case \"a\":\n      log.push(\"did a\");\n      // no break - falls through\n    case \"b\":\n      log.push(\"did b\");\n      break;\n    case \"c\":\n      log.push(\"did c\");\n      break;\n  }\n  return log;\n}\n\nconsole.log('\"a\" ->', noBreak(\"a\"));   // BOTH a and b\nconsole.log('\"b\" ->', noBreak(\"b\"));   // just b",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Concept 3 - `throw`\n\n`throw` stops the function immediately and hands an error to whoever called it. In a test, an\nuncaught throw is a **failure with your message on it** - which is what you want when a caller\nasks for a tab that does not exist.\n\n| Instead of | Do |\n|---|---|\n| `return null` | `throw new Error(\"...\")` |\n| Silently doing nothing | throw, so the test fails where the mistake is |"
+          "text": "## Concept 3 - `throw`\n\n`throw` stops the function immediately and hands an error to whoever called it. In a test, an\nuncaught throw is a **failure with your message on it** - which is what you want when a caller\nasks for a tab that does not exist.\n\n| Instead of | Do |\n|---|---|\n| `return null` | `throw new Error(\"...\")` |\n| Silently doing nothing | throw, so the test fails where the mistake is |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "function pickTab(tab: string): string {\n  if (tab !== \"Pay Bills\") throw new Error(`unknown tab \"${tab}\"`);\n  return \"ok\";\n}\n\nconsole.log(pickTab(\"Pay Bills\"));\n\ntry {\n  pickTab(\"Payy Bills\");    // a typo\n} catch (e) {\n  console.log(\"caught:\", (e as Error).message);\n}"
+          "text": "function pickTab(tab: string): string {\n  if (tab !== \"Pay Bills\") throw new Error(`unknown tab \"${tab}\"`);\n  return \"ok\";\n}\n\nconsole.log(pickTab(\"Pay Bills\"));\n\ntry {\n  pickTab(\"Payy Bills\");    // a typo\n} catch (e) {\n  console.log(\"caught:\", (e as Error).message);\n}",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Concept 4 - a union of string literals\n\nA type can be *a specific list of strings*. Now a typo is a **compile error**, months before it\nis a test failure.\n\n```ts\ntype TabName = \"Pay Bills\" | \"Add Payee\" | \"Statements\";\n```\n\n| Passed | Result |\n|---|---|\n| `\"Pay Bills\"` | fine |\n| `\"Payy Bills\"` | `error TS2345: Argument of type '\"Payy Bills\"' is not assignable...` |\n\nThe kernel strips types, so the cell below shows the *values*. The compiler is what enforces the\nlist - the same split you met with `abstract` in [week5/day3_1](/learn/w5/d3/p1)."
+          "text": "## Concept 4 - a union of string literals\n\nA type can be *a specific list of strings*. Now a typo is a **compile error**, months before it\nis a test failure.\n\n```ts\ntype TabName = \"Pay Bills\" | \"Add Payee\" | \"Statements\";\n```\n\n| Passed | Result |\n|---|---|\n| `\"Pay Bills\"` | fine |\n| `\"Payy Bills\"` | `error TS2345: Argument of type '\"Payy Bills\"' is not assignable...` |\n\nThe kernel strips types, so the cell below shows the *values*. The compiler is what enforces the\nlist - the same split you met with `abstract` in [week5/day3_1](/learn/w5/d3/p1).",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "type TabName = \"Pay Bills\" | \"Add Payee\" | \"Statements\";\n\nconst valid: TabName[] = [\"Pay Bills\", \"Add Payee\", \"Statements\"];\nconsole.log(\"the whole allowed set:\", valid);\n\n// const oops: TabName = \"Payy Bills\";   // uncomment, then run: npx tsc --noEmit\nconsole.log(\"a union is a compile-time list, not a runtime one - nothing to print for the typo\");"
+          "text": "type TabName = \"Pay Bills\" | \"Add Payee\" | \"Statements\";\n\nconst valid: TabName[] = [\"Pay Bills\", \"Add Payee\", \"Statements\"];\nconsole.log(\"the whole allowed set:\", valid);\n\n// const oops: TabName = \"Payy Bills\";   // uncomment, then run: npx tsc --noEmit\nconsole.log(\"a union is a compile-time list, not a runtime one - nothing to print for the typo\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 1.2 - A second app, and a component](/learn/w6/d1/p2)"
+          "text": "**Next:** [Day 1.2 - A second app, and a component](/learn/w6/d1/p2)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -82,67 +110,99 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 1.2 - A second app, and a component\n\nWeek 5 built page objects for the banking app. A pattern you can only apply to the app you\nlearned it on is not a pattern - so today you apply it to a **different** site, and meet the\npiece week 5 only described: a **component**.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout."
+          "text": "# Week 6, Day 1.2 - A second app, and a component\n\nWeek 5 built page objects for the banking app. A pattern you can only apply to the app you\nlearned it on is not a pattern - so today you apply it to a **different** site, and meet the\npiece week 5 only described: a **component**.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 1 - the app, and what it can and cannot do\n\n[Zero Bank](http://zero.webappsecurity.com) is a deliberately weak demo bank. Probed live before\nthis lesson was written:\n\n| Page | Reachable? |\n|---|---|\n| Home, Login, Search, Feedback, Online Banking | **yes**, over `http://` |\n| `https://` anything | **no** - `ERR_SSL_VERSION_OR_CIPHER_MISMATCH` |\n| Anything under `/bank/` (account summary, transfers) | **no** - redirects to `/login.html` |\n\nThe site's own credentials are refused over HTTP, and its HTTPS port offers a cipher modern\nChromium removed. So its signed-in pages **cannot be automated at all** from a current browser -\ndiagnosed in [day2_2](/learn/w6/d2/p2). Today uses the five public pages, which are plenty for one\nframework, and the banking app for the component."
+          "text": "## Step 1 - the app, and what it can and cannot do\n\n[Zero Bank](http://zero.webappsecurity.com) is a deliberately weak demo bank. Probed live before\nthis lesson was written:\n\n| Page | Reachable? |\n|---|---|\n| Home, Login, Search, Feedback, Online Banking | **yes**, over `http://` |\n| `https://` anything | **no** - `ERR_SSL_VERSION_OR_CIPHER_MISMATCH` |\n| Anything under `/bank/` (account summary, transfers) | **no** - redirects to `/login.html` |\n\nThe site's own credentials are refused over HTTP, and its HTTPS port offers a cipher modern\nChromium removed. So its signed-in pages **cannot be automated at all** from a current browser -\ndiagnosed in [day2_2](/learn/w6/d2/p2). Today uses the five public pages, which are plenty for one\nframework, and the banking app for the component.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 2 - the base class, again\n\nIdentical in shape to `week5/generated/pages/BasePage.ts`. That is the lesson."
+          "text": "## Step 2 - the base class, again\n\nIdentical in shape to `week5/generated/pages/BasePage.ts`. That is the lesson.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// abstract + protected page. No test() call, so the runner ignores it.\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/zero/BasePage.ts\", `// Week 6, Day 1 — the base every Zero Bank page shares.\n//\n// A second app, the same pattern. Compare with week5/generated/pages/BasePage.ts:\n// the shape is identical, which is the point — a design pattern you can only apply\n// to the app you learned it on is not a pattern.\nimport { type Page } from \"@playwright/test\";\n\nexport const ZERO_BASE = \"http://zero.webappsecurity.com\";\n\nexport abstract class BasePage {\n  protected readonly page: Page;\n\n  constructor(page: Page) {\n    this.page = page;\n  }\n\n  /**\n   * Zero Bank is HTTP-only: its HTTPS port offers a cipher suite modern Chromium\n   * removed, so https:// fails with ERR_SSL_VERSION_OR_CIPHER_MISMATCH. The full\n   * URL is built here so no page class or test has to remember that.\n   */\n  async goto(path: string): Promise<void> {\n    await this.page.goto(\\`\\${ZERO_BASE}\\${path}\\`);\n  }\n\n  /** The page's own title — cheap way for a test to confirm where it landed. */\n  async title(): Promise<string> {\n    return this.page.title();\n  }\n}\n`);"
+          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// abstract + protected page. No test() call, so the runner ignores it.\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/zero/BasePage.ts\", `// Week 6, Day 1 — the base every Zero Bank page shares.\n//\n// A second app, the same pattern. Compare with week5/generated/pages/BasePage.ts:\n// the shape is identical, which is the point — a design pattern you can only apply\n// to the app you learned it on is not a pattern.\nimport { type Page } from \"@playwright/test\";\n\nexport const ZERO_BASE = \"http://zero.webappsecurity.com\";\n\nexport abstract class BasePage {\n  protected readonly page: Page;\n\n  constructor(page: Page) {\n    this.page = page;\n  }\n\n  /**\n   * Zero Bank is HTTP-only: its HTTPS port offers a cipher suite modern Chromium\n   * removed, so https:// fails with ERR_SSL_VERSION_OR_CIPHER_MISMATCH. The full\n   * URL is built here so no page class or test has to remember that.\n   */\n  async goto(path: string): Promise<void> {\n    await this.page.goto(\\`\\${ZERO_BASE}\\${path}\\`);\n  }\n\n  /** The page's own title — cheap way for a test to confirm where it landed. */\n  async title(): Promise<string> {\n    return this.page.title();\n  }\n}\n`);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "One addition worth noting: `goto()` prepends `http://zero.webappsecurity.com`. The HTTP-only\nquirk is now a **one-line fact in one file** instead of a prefix every page repeats."
+          "text": "One addition worth noting: `goto()` prepends `http://zero.webappsecurity.com`. The HTTP-only\nquirk is now a **one-line fact in one file** instead of a prefix every page repeats.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 3 - two page classes"
+          "text": "## Step 3 - two page classes",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/zero/HomePage.ts\", `// Week 6, Day 1 — the Zero Bank landing page.\n//\n// Everything a person can do from this screen becomes one method named after the\n// doing, not after the DOM.\nimport { type Locator, type Page } from \"@playwright/test\";\nimport { BasePage } from \"./BasePage\";\n\nexport class HomePage extends BasePage {\n  readonly signInButton: Locator;\n  readonly searchBox: Locator;\n  readonly feedbackLink: Locator;\n  readonly onlineBankingLink: Locator;\n\n  constructor(page: Page) {\n    super(page);\n    this.signInButton = page.locator(\"#signin_button\");\n    this.searchBox = page.locator(\"#searchTerm\");\n    this.feedbackLink = page.locator(\"#feedback\");\n    this.onlineBankingLink = page.locator(\"#onlineBankingMenu\");\n  }\n\n  async visit(): Promise<void> {\n    await this.goto(\"/index.html\");\n  }\n\n  async clickOnSignIn(): Promise<void> {\n    await this.signInButton.click();\n    await this.page.waitForURL(/login\\\\.html/);\n  }\n\n  async clickOnFeedbackLink(): Promise<void> {\n    await this.feedbackLink.click();\n    await this.page.waitForURL(/feedback\\\\.html/);\n  }\n\n  async clickOnOnlineBanking(): Promise<void> {\n    await this.onlineBankingLink.click();\n    await this.page.waitForURL(/online-banking\\\\.html/);\n  }\n\n  /**\n   * There is no search button on this page, so the only way to submit is the\n   * keyboard. waitForURL matters: the results page is a real navigation, and\n   * without the wait the next line races it.\n   */\n  async searchFor(phrase: string): Promise<void> {\n    await this.searchBox.fill(phrase);\n    await this.page.keyboard.press(\"Enter\");\n    await this.page.waitForURL(/search\\\\.html/);\n  }\n}\n`);\n\nawait writeProjectFile(\"week6/generated/zero/SearchResultsPage.ts\", `// Week 6, Day 1 — the search results screen.\n//\n// One locator and no actions. A page class with a single field is still worth\n// having: it is where the \"results are <li><a>\" fact lives, so no test learns it.\nimport { type Locator, type Page } from \"@playwright/test\";\nimport { BasePage } from \"./BasePage\";\n\nexport class SearchResultsPage extends BasePage {\n  readonly resultLinks: Locator;\n\n  constructor(page: Page) {\n    super(page);\n    // Verified against the live site: a search for \"bank\" yields exactly 2.\n    this.resultLinks = page.locator(\"li a\");\n  }\n}\n`);"
+          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/zero/HomePage.ts\", `// Week 6, Day 1 — the Zero Bank landing page.\n//\n// Everything a person can do from this screen becomes one method named after the\n// doing, not after the DOM.\nimport { type Locator, type Page } from \"@playwright/test\";\nimport { BasePage } from \"./BasePage\";\n\nexport class HomePage extends BasePage {\n  readonly signInButton: Locator;\n  readonly searchBox: Locator;\n  readonly feedbackLink: Locator;\n  readonly onlineBankingLink: Locator;\n\n  constructor(page: Page) {\n    super(page);\n    this.signInButton = page.locator(\"#signin_button\");\n    this.searchBox = page.locator(\"#searchTerm\");\n    this.feedbackLink = page.locator(\"#feedback\");\n    this.onlineBankingLink = page.locator(\"#onlineBankingMenu\");\n  }\n\n  async visit(): Promise<void> {\n    await this.goto(\"/index.html\");\n  }\n\n  async clickOnSignIn(): Promise<void> {\n    await this.signInButton.click();\n    await this.page.waitForURL(/login\\\\.html/);\n  }\n\n  async clickOnFeedbackLink(): Promise<void> {\n    await this.feedbackLink.click();\n    await this.page.waitForURL(/feedback\\\\.html/);\n  }\n\n  async clickOnOnlineBanking(): Promise<void> {\n    await this.onlineBankingLink.click();\n    await this.page.waitForURL(/online-banking\\\\.html/);\n  }\n\n  /**\n   * There is no search button on this page, so the only way to submit is the\n   * keyboard. waitForURL matters: the results page is a real navigation, and\n   * without the wait the next line races it.\n   */\n  async searchFor(phrase: string): Promise<void> {\n    await this.searchBox.fill(phrase);\n    await this.page.keyboard.press(\"Enter\");\n    await this.page.waitForURL(/search\\\\.html/);\n  }\n}\n`);\n\nawait writeProjectFile(\"week6/generated/zero/SearchResultsPage.ts\", `// Week 6, Day 1 — the search results screen.\n//\n// One locator and no actions. A page class with a single field is still worth\n// having: it is where the \"results are <li><a>\" fact lives, so no test learns it.\nimport { type Locator, type Page } from \"@playwright/test\";\nimport { BasePage } from \"./BasePage\";\n\nexport class SearchResultsPage extends BasePage {\n  readonly resultLinks: Locator;\n\n  constructor(page: Page) {\n    super(page);\n    // Verified against the live site: a search for \"bank\" yields exactly 2.\n    this.resultLinks = page.locator(\"li a\");\n  }\n}\n`);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "| Method | Why it is shaped that way |\n|---|---|\n| `searchFor(phrase)` | there is **no search button** on this page, so the only way to submit is `keyboard.press(\"Enter\")` |\n| the `waitForURL` inside it | results are a real navigation; without the wait the next line races it |\n| `SearchResultsPage` with one field | a class with a single locator still earns its place - it is where \"results are `<li><a>`\" lives |"
+          "text": "| Method | Why it is shaped that way |\n|---|---|\n| `searchFor(phrase)` | there is **no search button** on this page, so the only way to submit is `keyboard.press(\"Enter\")` |\n| the `waitForURL` inside it | results are a real navigation; without the wait the next line races it |\n| `SearchResultsPage` with one field | a class with a single locator still earns its place - it is where \"results are `<li><a>`\" lives |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/day1-pom-structure.spec.ts\", `// Week 6, Day 1 — the same pattern, a second app, plus a component.\n//\n// Written by a cell in week6/day1_2.ipynb. Run it yourself:\n//   npx playwright test week6/generated/day1-pom-structure.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { HomePage } from \"./zero/HomePage\";\nimport { SearchResultsPage } from \"./zero/SearchResultsPage\";\nimport { NavBar } from \"./components/NavBar\";\nimport { USERS } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Zero Bank page objects\", () => {\n  test(\"Step 1 — the home page knows its own controls\", async ({ page }) => {\n    const homePage = new HomePage(page);\n    await homePage.visit();\n\n    await expect(homePage.signInButton).toBeVisible();\n    await expect(homePage.searchBox).toBeVisible();\n    await expect(homePage.feedbackLink).toBeVisible();\n    expect(await homePage.title()).toContain(\"Zero\");\n  });\n\n  test(\"Step 2 — searching, with no search button on the page\", async ({ page }) => {\n    const homePage = new HomePage(page);\n    const results = new SearchResultsPage(page);\n\n    await homePage.visit();\n    await homePage.searchFor(\"bank\");\n\n    // Exactly 2, verified against the live site.\n    await expect(results.resultLinks).toHaveCount(2);\n  });\n\n  test(\"Step 3 — one method per thing a person can do\", async ({ page }) => {\n    const homePage = new HomePage(page);\n\n    await homePage.visit();\n    await homePage.clickOnFeedbackLink();\n    expect(page.url()).toContain(\"/feedback.html\");\n\n    await homePage.visit();\n    await homePage.clickOnSignIn();\n    expect(page.url()).toContain(\"/login.html\");\n  });\n\n  test(\"Step 4 — goto() hides that this app is HTTP-only\", async ({ page }) => {\n    const homePage = new HomePage(page);\n    await homePage.visit();\n\n    // No test wrote \"http://\". BasePage owns that, so the day the site finally\n    // fixes its TLS, one line changes.\n    expect(page.url().startsWith(\"http://\")).toBe(true);\n  });\n});\n\ntest.describe(\"The NavBar component\", () => {\n  test.beforeEach(async ({ page }) => {\n    await page.goto(\"/\");\n    await page.getByPlaceholder(\"Enter Email\").fill(USERS[0].email);\n    await page.getByPlaceholder(\"Enter Password\").fill(USERS[0].password);\n    await page.getByRole(\"button\", { name: \"Login\" }).click();\n    await page.waitForURL(\"**/dashboard\");\n  });\n\n  test(\"Step 5 — one switch replaces twelve methods\", async ({ page }) => {\n    const navBar = new NavBar(page);\n    await expect(navBar.tiles).toHaveCount(12);\n\n    await navBar.clickOnTab(\"Pay Bills\");\n    await expect(page).toHaveURL(/paymentDashboard/);\n  });\n\n  test(\"Step 6 — a different tab, the same method\", async ({ page }) => {\n    const navBar = new NavBar(page);\n\n    await navBar.clickOnTab(\"Add Payee\");\n    await expect(page).toHaveURL(/transferDashboard/);\n  });\n\n  test(\"Step 7 — the ambiguous tab is resolved inside the component\", async ({ page }) => {\n    const navBar = new NavBar(page);\n\n    // Two tiles say \"Statements\". The test does not have to know that.\n    await expect(page.getByText(\"Statements\", { exact: true })).toHaveCount(2);\n    await navBar.clickOnTab(\"Statements\");\n  });\n\n  test(\"Step 8 — an unknown tab throws instead of hanging\", async ({ page }) => {\n    const navBar = new NavBar(page);\n\n    // Cast, because TypeScript would otherwise refuse this line outright — which\n    // is the first line of defence. The throw is the second.\n    const bad = navBar.clickOnTab(\"Nonexistent Tab\" as never);\n    await expect(bad).rejects.toThrow(/unknown tab/);\n  });\n});\n`);\n\n// Expected: 8 passed. Steps 1-4 are Zero Bank, 5-8 the component.\nawait runSpec(\"week6/generated/day1-pom-structure.spec.ts\");"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/day1-pom-structure.spec.ts\", `// Week 6, Day 1 — the same pattern, a second app, plus a component.\n//\n// Written by a cell in week6/day1_2.ipynb. Run it yourself:\n//   npx playwright test week6/generated/day1-pom-structure.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { HomePage } from \"./zero/HomePage\";\nimport { SearchResultsPage } from \"./zero/SearchResultsPage\";\nimport { NavBar } from \"./components/NavBar\";\nimport { USERS } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Zero Bank page objects\", () => {\n  test(\"Step 1 — the home page knows its own controls\", async ({ page }) => {\n    const homePage = new HomePage(page);\n    await homePage.visit();\n\n    await expect(homePage.signInButton).toBeVisible();\n    await expect(homePage.searchBox).toBeVisible();\n    await expect(homePage.feedbackLink).toBeVisible();\n    expect(await homePage.title()).toContain(\"Zero\");\n  });\n\n  test(\"Step 2 — searching, with no search button on the page\", async ({ page }) => {\n    const homePage = new HomePage(page);\n    const results = new SearchResultsPage(page);\n\n    await homePage.visit();\n    await homePage.searchFor(\"bank\");\n\n    // Exactly 2, verified against the live site.\n    await expect(results.resultLinks).toHaveCount(2);\n  });\n\n  test(\"Step 3 — one method per thing a person can do\", async ({ page }) => {\n    const homePage = new HomePage(page);\n\n    await homePage.visit();\n    await homePage.clickOnFeedbackLink();\n    expect(page.url()).toContain(\"/feedback.html\");\n\n    await homePage.visit();\n    await homePage.clickOnSignIn();\n    expect(page.url()).toContain(\"/login.html\");\n  });\n\n  test(\"Step 4 — goto() hides that this app is HTTP-only\", async ({ page }) => {\n    const homePage = new HomePage(page);\n    await homePage.visit();\n\n    // No test wrote \"http://\". BasePage owns that, so the day the site finally\n    // fixes its TLS, one line changes.\n    expect(page.url().startsWith(\"http://\")).toBe(true);\n  });\n});\n\ntest.describe(\"The NavBar component\", () => {\n  test.beforeEach(async ({ page }) => {\n    await page.goto(\"/\");\n    await page.getByPlaceholder(\"Enter Email\").fill(USERS[0].email);\n    await page.getByPlaceholder(\"Enter Password\").fill(USERS[0].password);\n    await page.getByRole(\"button\", { name: \"Login\" }).click();\n    await page.waitForURL(\"**/dashboard\");\n  });\n\n  test(\"Step 5 — one switch replaces twelve methods\", async ({ page }) => {\n    const navBar = new NavBar(page);\n    await expect(navBar.tiles).toHaveCount(12);\n\n    await navBar.clickOnTab(\"Pay Bills\");\n    await expect(page).toHaveURL(/paymentDashboard/);\n  });\n\n  test(\"Step 6 — a different tab, the same method\", async ({ page }) => {\n    const navBar = new NavBar(page);\n\n    await navBar.clickOnTab(\"Add Payee\");\n    await expect(page).toHaveURL(/transferDashboard/);\n  });\n\n  test(\"Step 7 — the ambiguous tab is resolved inside the component\", async ({ page }) => {\n    const navBar = new NavBar(page);\n\n    // Two tiles say \"Statements\". The test does not have to know that.\n    await expect(page.getByText(\"Statements\", { exact: true })).toHaveCount(2);\n    await navBar.clickOnTab(\"Statements\");\n  });\n\n  test(\"Step 8 — an unknown tab throws instead of hanging\", async ({ page }) => {\n    const navBar = new NavBar(page);\n\n    // Cast, because TypeScript would otherwise refuse this line outright — which\n    // is the first line of defence. The throw is the second.\n    const bad = navBar.clickOnTab(\"Nonexistent Tab\" as never);\n    await expect(bad).rejects.toThrow(/unknown tab/);\n  });\n});\n`);\n\n// Expected: 8 passed. Steps 1-4 are Zero Bank, 5-8 the component.\nawait runSpec(\"week6/generated/day1-pom-structure.spec.ts\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 4 - the problem a component solves\n\nThe banking dashboard has **12** tiles. Written as page-object methods that is\n`clickOnPayBills()`, `clickOnAddPayee()`, `clickOnStatements()` ... twelve methods whose bodies\ndiffer by one string.\n\n| Approach | Methods | Cost of a 13th tab |\n|---|---|---|\n| One method per tab | 12 | a new method, and a new test for it |\n| One method + `switch` | **1** | **one new `case`** |"
+          "text": "## Step 4 - the problem a component solves\n\nThe banking dashboard has **12** tiles. Written as page-object methods that is\n`clickOnPayBills()`, `clickOnAddPayee()`, `clickOnStatements()` ... twelve methods whose bodies\ndiffer by one string.\n\n| Approach | Methods | Cost of a 13th tab |\n|---|---|---|\n| One method per tab | 12 | a new method, and a new test for it |\n| One method + `switch` | **1** | **one new `case`** |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// A component, not a page: a nav bar sits ON TOP of screens.\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/components/NavBar.ts\", `// Week 6, Day 1 — a COMPONENT, not a page.\n//\n// The dashboard has twelve tiles. Writing clickOnPayBills(), clickOnAddPayee(),\n// clickOnStatements() ... is twelve near-identical methods that all do one thing.\n// One method plus a switch replaces them.\n//\n// It lives in components/ rather than pages/ because a nav bar is not a screen -\n// it appears on top of screens. See day1_3 for when that distinction earns its keep.\nimport { type Locator, type Page } from \"@playwright/test\";\n\n/** The tabs this dispatcher knows. A union type, so a typo is a compile error. */\nexport type TabName =\n  | \"Transaction History\"\n  | \"Pay Bills\"\n  | \"Add Payee\"\n  | \"Statements\";\n\nexport class NavBar {\n  private readonly page: Page;\n  readonly tiles: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    // Verified: 12 tiles, all <p class=\"card-text\"> - not links.\n    this.tiles = page.locator(\"p.card-text\");\n  }\n\n  /**\n   * One entry point for every tab. \\`switch\\` reads as a table of destinations,\n   * which is exactly what it is - and adding a tab is one new case, not a new\n   * method plus a new test.\n   */\n  async clickOnTab(tab: TabName): Promise<void> {\n    switch (tab) {\n      case \"Transaction History\":\n        await this.page.getByText(tab, { exact: true }).click();\n        await this.page.waitForURL(/accountDashboard/);\n        break;\n\n      case \"Pay Bills\":\n        await this.page.getByText(tab, { exact: true }).click();\n        await this.page.waitForURL(/paymentDashboard/);\n        break;\n\n      case \"Add Payee\":\n        await this.page.getByText(tab, { exact: true }).click();\n        await this.page.waitForURL(/transferDashboard/);\n        break;\n\n      case \"Statements\":\n        // \"Statements\" appears TWICE on this dashboard, so a bare click is a\n        // strict-mode violation - see week5/day5_2. Scoping to the first card is a\n        // decision, and the component is the right place to make it once.\n        await this.page.locator(\".card\").first().getByText(tab, { exact: true }).click();\n        break;\n\n      default:\n        // Unreachable while TabName is respected. It catches the caller who reaches\n        // this code from untyped JavaScript, where the union type buys nothing.\n        throw new Error(\\`NavBar: unknown tab \"\\${tab as string}\"\\`);\n    }\n  }\n}\n`);"
+          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// A component, not a page: a nav bar sits ON TOP of screens.\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/components/NavBar.ts\", `// Week 6, Day 1 — a COMPONENT, not a page.\n//\n// The dashboard has twelve tiles. Writing clickOnPayBills(), clickOnAddPayee(),\n// clickOnStatements() ... is twelve near-identical methods that all do one thing.\n// One method plus a switch replaces them.\n//\n// It lives in components/ rather than pages/ because a nav bar is not a screen -\n// it appears on top of screens. See day1_3 for when that distinction earns its keep.\nimport { type Locator, type Page } from \"@playwright/test\";\n\n/** The tabs this dispatcher knows. A union type, so a typo is a compile error. */\nexport type TabName =\n  | \"Transaction History\"\n  | \"Pay Bills\"\n  | \"Add Payee\"\n  | \"Statements\";\n\nexport class NavBar {\n  private readonly page: Page;\n  readonly tiles: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    // Verified: 12 tiles, all <p class=\"card-text\"> - not links.\n    this.tiles = page.locator(\"p.card-text\");\n  }\n\n  /**\n   * One entry point for every tab. \\`switch\\` reads as a table of destinations,\n   * which is exactly what it is - and adding a tab is one new case, not a new\n   * method plus a new test.\n   */\n  async clickOnTab(tab: TabName): Promise<void> {\n    switch (tab) {\n      case \"Transaction History\":\n        await this.page.getByText(tab, { exact: true }).click();\n        await this.page.waitForURL(/accountDashboard/);\n        break;\n\n      case \"Pay Bills\":\n        await this.page.getByText(tab, { exact: true }).click();\n        await this.page.waitForURL(/paymentDashboard/);\n        break;\n\n      case \"Add Payee\":\n        await this.page.getByText(tab, { exact: true }).click();\n        await this.page.waitForURL(/transferDashboard/);\n        break;\n\n      case \"Statements\":\n        // \"Statements\" appears TWICE on this dashboard, so a bare click is a\n        // strict-mode violation - see week5/day5_2. Scoping to the first card is a\n        // decision, and the component is the right place to make it once.\n        await this.page.locator(\".card\").first().getByText(tab, { exact: true }).click();\n        break;\n\n      default:\n        // Unreachable while TabName is respected. It catches the caller who reaches\n        // this code from untyped JavaScript, where the union type buys nothing.\n        throw new Error(\\`NavBar: unknown tab \"\\${tab as string}\"\\`);\n    }\n  }\n}\n`);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "Three things in that file worth stopping on:\n\n- **`TabName` is a union**, so `clickOnTab(\"Payy Bills\")` fails to compile.\n- **`\"Statements\"` is scoped to `.card` first.** That label appears **twice** on this dashboard -\n  a bare click is the strict-mode violation from [week5/day5_2](/learn/w5/d5/p2). The\n  component decides once; no test has to know.\n- **`default` throws.** Unreachable while the union is respected, and the safety net when the\n  caller is untyped JavaScript."
+          "text": "Three things in that file worth stopping on:\n\n- **`TabName` is a union**, so `clickOnTab(\"Payy Bills\")` fails to compile.\n- **`\"Statements\"` is scoped to `.card` first.** That label appears **twice** on this dashboard -\n  a bare click is the strict-mode violation from [week5/day5_2](/learn/w5/d5/p2). The\n  component decides once; no test has to know.\n- **`default` throws.** Unreachable while the union is respected, and the safety net when the\n  caller is untyped JavaScript.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 5 - what the run proved\n\n| Step | Claim |\n|---|---|\n| 2 | a search for `\"bank\"` yields **exactly 2** links |\n| 5 | **12** tiles; `clickOnTab(\"Pay Bills\")` lands on `/paymentDashboard` |\n| 7 | `\"Statements\"` matches **2** elements and the component still clicks cleanly |\n| 8 | an unknown tab **rejects with `unknown tab`** rather than hanging until timeout |\n\nStep 8 is the one to remember: a bad locator times out after 30 seconds and tells you nothing\nuseful. A `throw` fails in milliseconds with the reason."
+          "text": "## Step 5 - what the run proved\n\n| Step | Claim |\n|---|---|\n| 2 | a search for `\"bank\"` yields **exactly 2** links |\n| 5 | **12** tiles; `clickOnTab(\"Pay Bills\")` lands on `/paymentDashboard` |\n| 7 | `\"Statements\"` matches **2** elements and the component still clicks cleanly |\n| 8 | an unknown tab **rejects with `unknown tab`** rather than hanging until timeout |\n\nStep 8 is the one to remember: a bad locator times out after 30 seconds and tells you nothing\nuseful. A `throw` fails in milliseconds with the reason.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Common mistakes\n\n| Mistake | What happens |\n|---|---|\n| Forgetting `break` | every case below yours also runs - see [day1_1](/learn/w6/d1/p1) |\n| `clickOnTab(tab: string)` | you lose the compile-time check; typos become timeouts |\n| Putting `NavBar` in `pages/` | it is not a screen; the folder stops meaning anything |\n| A `default` that returns quietly | the test carries on and fails somewhere unrelated |\n\n**Next:** [Day 1.3 - Where these files live](/learn/w6/d1/p3)"
+          "text": "## Common mistakes\n\n| Mistake | What happens |\n|---|---|\n| Forgetting `break` | every case below yours also runs - see [day1_1](/learn/w6/d1/p1) |\n| `clickOnTab(tab: string)` | you lose the compile-time check; typos become timeouts |\n| Putting `NavBar` in `pages/` | it is not a screen; the folder stops meaning anything |\n| A `default` that returns quietly | the test carries on and fails somewhere unrelated |\n\n**Next:** [Day 1.3 - Where these files live](/learn/w6/d1/p3)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -157,27 +217,39 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 1.3 - Where these files live\n\nSame classes, same `switch` - arranged so a stranger can find things.\n\n## The folder split\n\n```\nweek6/generated/\n  zero/                  <- one app's pages\n    BasePage.ts\n    HomePage.ts\n    SearchResultsPage.ts\n    LoginPage.ts\n    FeedbackPage.ts\n  components/            <- things that sit ON TOP of pages\n    NavBar.ts\n```\n\nThe test for whether something is a component: **can it appear on more than one page?** A nav\nbar, a header, a cookie banner, a data table - yes. A login form - no."
+          "text": "# Week 6, Day 1.3 - Where these files live\n\nSame classes, same `switch` - arranged so a stranger can find things.\n\n## The folder split\n\n```\nweek6/generated/\n  zero/                  <- one app's pages\n    BasePage.ts\n    HomePage.ts\n    SearchResultsPage.ts\n    LoginPage.ts\n    FeedbackPage.ts\n  components/            <- things that sit ON TOP of pages\n    NavBar.ts\n```\n\nThe test for whether something is a component: **can it appear on more than one page?** A nav\nbar, a header, a cookie banner, a data table - yes. A login form - no.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Two apps, two folders\n\nThis repo now holds page objects for two different sites. They do not share a base class, and\nshould not:\n\n| | `week5/generated/pages/` | `week6/generated/zero/` |\n|---|---|---|\n| App | banking app (HTTPS, real login) | Zero Bank (HTTP only) |\n| `BasePage.goto` | a path against `baseURL` | prepends the full `http://` origin |\n| Login | succeeds | refused - see [day2_2](/learn/w6/d2/p2) |\n\nA shared base class would have to know both, which is how a base class becomes a junk drawer.\n**One base per app** is the rule; the *pattern* is what is shared, not the code."
+          "text": "## Two apps, two folders\n\nThis repo now holds page objects for two different sites. They do not share a base class, and\nshould not:\n\n| | `week5/generated/pages/` | `week6/generated/zero/` |\n|---|---|---|\n| App | banking app (HTTPS, real login) | Zero Bank (HTTP only) |\n| `BasePage.goto` | a path against `baseURL` | prepends the full `http://` origin |\n| Login | succeeds | refused - see [day2_2](/learn/w6/d2/p2) |\n\nA shared base class would have to know both, which is how a base class becomes a junk drawer.\n**One base per app** is the rule; the *pattern* is what is shared, not the code.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// Why a union type beats a string, priced in the only currency that matters: how\n// long it takes to find out you were wrong.\nconst stages = [\n  { approach: 'clickOnTab(tab: string)', findsOut: \"test run\", seconds: 30 },\n  { approach: 'clickOnTab(tab: TabName)', findsOut: \"typing it\", seconds: 0 },\n];\n\nfor (const s of stages) {\n  console.log(`${s.approach.padEnd(28)} you learn at: ${s.findsOut.padEnd(10)} (~${s.seconds}s)`);\n}"
+          "text": "// Why a union type beats a string, priced in the only currency that matters: how\n// long it takes to find out you were wrong.\nconst stages = [\n  { approach: 'clickOnTab(tab: string)', findsOut: \"test run\", seconds: 30 },\n  { approach: 'clickOnTab(tab: TabName)', findsOut: \"typing it\", seconds: 0 },\n];\n\nfor (const s of stages) {\n  console.log(`${s.approach.padEnd(28)} you learn at: ${s.findsOut.padEnd(10)} (~${s.seconds}s)`);\n}",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "Thirty seconds versus zero, per typo, forever. That is the whole argument for the union."
+          "text": "Thirty seconds versus zero, per typo, forever. That is the whole argument for the union.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## When a switch is the wrong tool\n\n`switch` suits a **fixed, small** list. Past roughly a dozen branches, or when the tabs come from\ndata rather than from you, a lookup object is better:\n\n```ts\nprivate readonly routes: Record<TabName, RegExp> = {\n  \"Pay Bills\": /paymentDashboard/,\n  \"Add Payee\": /transferDashboard/,\n};\n\nasync clickOnTab(tab: TabName): Promise<void> {\n  await this.page.getByText(tab, { exact: true }).click();\n  await this.page.waitForURL(this.routes[tab]);\n}\n```\n\n| | `switch` | lookup object |\n|---|---|---|\n| Per-tab special handling | **easy** - each case is its own code | awkward |\n| 30 tabs | 120 lines | 30 lines |\n| Adding one | a `case` | a line of data |\n\n`NavBar` uses `switch` because `\"Statements\"` genuinely needs different handling from the others.\nUniform tabs belong in the lookup."
+          "text": "## When a switch is the wrong tool\n\n`switch` suits a **fixed, small** list. Past roughly a dozen branches, or when the tabs come from\ndata rather than from you, a lookup object is better:\n\n```ts\nprivate readonly routes: Record<TabName, RegExp> = {\n  \"Pay Bills\": /paymentDashboard/,\n  \"Add Payee\": /transferDashboard/,\n};\n\nasync clickOnTab(tab: TabName): Promise<void> {\n  await this.page.getByText(tab, { exact: true }).click();\n  await this.page.waitForURL(this.routes[tab]);\n}\n```\n\n| | `switch` | lookup object |\n|---|---|---|\n| Per-tab special handling | **easy** - each case is its own code | awkward |\n| 30 tabs | 120 lines | 30 lines |\n| Adding one | a `case` | a line of data |\n\n`NavBar` uses `switch` because `\"Statements\"` genuinely needs different handling from the others.\nUniform tabs belong in the lookup.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Reviewer's checklist\n\n| Look for | Why |\n|---|---|\n| A locator string in a spec file | the abstraction has a hole - see [day2_2](/learn/w6/d2/p2) |\n| `tab: string` on a dispatcher | the union was the point |\n| A component in `pages/` | folders stop carrying meaning |\n| A base class that knows about a specific screen | it is not a base class any more |\n| Two apps sharing one `BasePage` | the origin/login differences leak into everything |\n\n**Next:** [Day 1.4 - Practice](/learn/w6/d1/p4)"
+          "text": "## Reviewer's checklist\n\n| Look for | Why |\n|---|---|\n| A locator string in a spec file | the abstraction has a hole - see [day2_2](/learn/w6/d2/p2) |\n| `tab: string` on a dispatcher | the union was the point |\n| A component in `pages/` | folders stop carrying meaning |\n| A base class that knows about a specific screen | it is not a base class any more |\n| Two apps sharing one `BasePage` | the origin/login differences leak into everything |\n\n**Next:** [Day 1.4 - Practice](/learn/w6/d1/p4)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -192,39 +264,57 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 1.4 - Practice\n\nAdd files under `week6/generated/` rather than editing the ones you were given, so the Day 1.2\ncells keep running."
+          "text": "# Week 6, Day 1.4 - Practice\n\nAdd files under `week6/generated/` rather than editing the ones you were given, so the Day 1.2\ncells keep running.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "1"
+          "text": "1",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "2"
+          "text": "2",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "3"
+          "text": "3",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "4"
+          "text": "4",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "5"
+          "text": "5",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "6"
+          "text": "6",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "7"
+          "text": "7",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 2.1 - Prerequisites](/learn/w6/d2/p1)"
+          "text": "**Next:** [Day 2.1 - Prerequisites](/learn/w6/d2/p1)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": [

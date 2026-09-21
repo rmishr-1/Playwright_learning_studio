@@ -1,0 +1,9 @@
+{
+  "p1_yt1": "Same two shapes, different logic: write a single-expression arrow that cubes a number, and a block-body arrow that builds a farewell message from a name.",
+  "p1_yt2": "Same pattern, a different message: write your own wait-based async function that pauses, then returns a goodbye message instead of a greeting.",
+  "p1_yt3": "Same destructured-parameter shape, different fields: write a one-line arrow that takes `{ city, country }` and returns a formatted \"city, country\" string.",
+  "p1_yt4": "Same shape again, applied to Playwright: write a one-line arrow that takes `{ page, isMobile }` and returns a string describing them, the way `showFixtures` did for `page`/`browserName`.",
+  "p2_yt1": "Same gap, Katy's credentials: write the two-test spec again, but log in as Katy with a wrong password instead of Leela.",
+  "p2_yt2": "Same gap, a different missing assertion: this time, the second test should check the page URL stays on the login page instead of checking for the dashboard redirect.",
+  "p3_yt1": "Same class, Katy's login: reuse `LoginPage.signIn`, but prove it for Katy's credentials instead of Leela's."
+}

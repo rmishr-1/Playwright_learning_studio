@@ -172,6 +172,62 @@ function matchProblemHeading(
 }
 
 /**
+ * The setup lines out of an example: harness import stripped (explore mode needs none), then
+ * everything through the first `page.goto(...)` - launch(), any base-URL constant the goto
+ * needs, and the navigation itself. Deliberately stops there rather than guessing how much of
+ * what follows is "setup" versus the concept the example is actually teaching, so a your-turn
+ * or practice stub built from it gets you TO the page, never partway through solving the
+ * exercise for you. A multi-step setup (e.g. a login the example does before its own real work)
+ * is only partially captured this way - a known, accepted limit, not a bug: partial setup still
+ * beats none.
+ */
+export function extractBoilerplate(exampleText: string): string | null {
+  // Refuse anything not runnable in the explore-mode harness itself - the same signals
+  // Markdown.tsx's isExecutable() checks for the Run button. Without this, a `writeProjectFile`
+  // example's `page.goto(...)` INSIDE its own nested spec string (text, not executable code
+  // here) gets mistaken for real setup, handing the learner a broken starter built around
+  // functions the harness never provides.
+  if (/\bDeno\b/.test(exampleText)) return null;
+  if (/\b(writeProjectFile|runSpec)\s*\(/.test(exampleText)) return null;
+  if (/\b(test|expect)\s*\(/.test(exampleText)) return null;
+
+  const withoutHarnessImports = exampleText
+    .split('\n')
+    .filter(
+      (l) =>
+        !/^\s*import\s+\{[^}]*\}\s+from\s+["'](?:\.\.\/)*_shared\/deno-helpers(?:\.ts)?["'];?\s*$/.test(
+          l,
+        ),
+    )
+    .join('\n')
+    .replace(/^\n+/, '');
+
+  const lines = withoutHarnessImports.split('\n');
+  const gotoIndex = lines.findIndex((l) => /\bawait\s+page\.goto\(/.test(l));
+  if (gotoIndex === -1) return null;
+  return lines
+    .slice(0, gotoIndex + 1)
+    .join('\n')
+    .trim();
+}
+
+/**
+ * Searches a run of examples MOST-RECENT-FIRST for the nearest one that yields real boilerplate.
+ * Not simply the last example: a part's final example is very often the "write this out as a
+ * real project file and run it with the CLI" pattern (see extractBoilerplate's own guards) - the
+ * teaching point right before it usually is not. Falling back to an earlier example beats
+ * leaving a your-turn or a practice problem with no starter just because the day happened to end
+ * on one the harness cannot run.
+ */
+export function nearestBoilerplate(examples: string[]): string | null {
+  for (let i = examples.length - 1; i >= 0; i--) {
+    const boilerplate = extractBoilerplate(examples[i]);
+    if (boilerplate) return boilerplate;
+  }
+  return null;
+}
+
+/**
  * A _4 notebook is: intro markdown, then three (heading, statement, stub) triples,
  * then a closing markdown. Everything outside the problems stays as ordinary blocks so
  * the intro's "no answer key" framing and the closing question are not lost.
@@ -179,10 +235,15 @@ function matchProblemHeading(
 export function parsePractice(
   nb: RawNotebook,
   week: number,
-): { blocks: ContentBlock[]; problems: PracticeProblem[] } {
+): { blocks: ContentBlock[]; problems: PracticeProblem[]; examples: string[] } {
   const blocks: ContentBlock[] = [];
   const problems: PracticeProblem[] = [];
   let current: { number: number; difficulty: Difficulty | null; statement: string[] } | null = null;
+  // Every example cell seen so far, in document order, so a your-turn right after one (rare in a
+  // practice notebook, but it happens) draws on the nearest RUNNABLE one via nearestBoilerplate()
+  // rather than just whichever happened to come last. Handed back whole to the importer, which
+  // uses it as the practice PROBLEMS' own boilerplate source when this part carries examples.
+  const examples: string[] = [];
 
   const flush = (stub: string) => {
     if (!current) return;
@@ -195,7 +256,7 @@ export function parsePractice(
     });
     // Record WHERE the problem sat. Without this marker the renderer put every paragraph
     // before every problem, so the closing "When you are done" note landed above Problem 1.
-    blocks.push({ type: 'problem-ref', text: String(current.number) });
+    blocks.push({ type: 'problem-ref', text: String(current.number), starter: null, variation: null });
     current = null;
   };
 
@@ -210,28 +271,49 @@ export function parsePractice(
       } else if (current) {
         current.statement.push(text);
       } else {
-        blocks.push({ type: 'markdown', text: rewriteLinks(text, week) });
+        blocks.push({ type: 'markdown', text: rewriteLinks(text, week), starter: null, variation: null });
       }
     } else if (cell.cell_type === 'code') {
-      if (current) flush(text.trim());
-      else blocks.push({ type: isYourTurn(text) ? 'your-turn' : 'example', text });
+      if (current) {
+        flush(text.trim());
+      } else if (isYourTurn(text)) {
+        blocks.push({ type: 'your-turn', text, starter: nearestBoilerplate(examples), variation: null });
+      } else {
+        blocks.push({ type: 'example', text, starter: null, variation: null });
+        examples.push(text);
+      }
     }
   }
   flush('');
-  return { blocks, problems };
+  return { blocks, problems, examples };
 }
 
 /** A teaching part (_1, _2, _3): ordered markdown / example / your-turn blocks. */
-export function parseTeaching(nb: RawNotebook, week: number): ContentBlock[] {
-  return nb.cells
-    .filter((c) => c.cell_type === 'markdown' || c.cell_type === 'code')
-    .map((c) => {
-      const text = cellText(c);
-      if (c.cell_type === 'markdown') {
-        return { type: 'markdown' as const, text: rewriteLinks(text, week) };
-      }
-      return { type: isYourTurn(text) ? ('your-turn' as const) : ('example' as const), text };
-    });
+export function parseTeaching(
+  nb: RawNotebook,
+  week: number,
+): { blocks: ContentBlock[]; examples: string[] } {
+  const blocks: ContentBlock[] = [];
+  const examples: string[] = [];
+
+  for (const c of nb.cells) {
+    if (c.cell_type !== 'markdown' && c.cell_type !== 'code') continue;
+    const text = cellText(c);
+    if (c.cell_type === 'markdown') {
+      blocks.push({ type: 'markdown', text: rewriteLinks(text, week), starter: null, variation: null });
+      continue;
+    }
+    if (isYourTurn(text)) {
+      // Usually echoes the example directly above it, but that one is sometimes a
+      // writeProjectFile/CLI cell the harness cannot run - nearestBoilerplate() walks
+      // backward past it to the nearest one that is.
+      blocks.push({ type: 'your-turn', text, starter: nearestBoilerplate(examples), variation: null });
+    } else {
+      blocks.push({ type: 'example', text, starter: null, variation: null });
+      examples.push(text);
+    }
+  }
+  return { blocks, examples };
 }
 
 /** Tab labels. A bare "Part 2 / Part 3" tells the learner nothing, so use the part's own title. */

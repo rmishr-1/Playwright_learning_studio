@@ -15,111 +15,165 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.1 — TypeScript for API testing\n\nSix concepts, six runnable cells. Everything tomorrow's API tests are built from.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.\n>\n> **`Identifier 'x' has already been declared`?** Cells share one workspace, so re-running"
+          "text": "# Week 8, Day 1.1 — TypeScript for API testing\n\nSix concepts, six runnable cells. Everything tomorrow's API tests are built from.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.\n>\n> **`Identifier 'x' has already been declared`?** Cells share one workspace, so re-running",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "| # | Concept | Why an API test needs it |\n|---|---|---|\n| 1 | `let` vs `const` | The token is made in one place, used in another. |\n| 2 | Template literals | Glue a runtime token into a header. |\n| 3 | Objects | A request body *is* an object. |\n| 4 | Nested access | The answer is a tree you walk. |\n| 5 | `async` / `await` | Every call answers later, not now. |\n| 6 | Destructuring | How a test asks for its tools. |"
+          "text": "| # | Concept | Why an API test needs it |\n|---|---|---|\n| 1 | `let` vs `const` | The token is made in one place, used in another. |\n| 2 | Template literals | Glue a runtime token into a header. |\n| 3 | Objects | A request body *is* an object. |\n| 4 | Nested access | The answer is a tree you walk. |\n| 5 | `async` / `await` | Every call answers later, not now. |\n| 6 | Destructuring | How a test asks for its tools. |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 1. `let` vs `const`\n\n`const` = this name always points here. `let` = can be repointed later.\n\nYour token doesn't exist when the file starts — it arrives after a login call. So it needs\na name that exists early and gets filled in later. That's `let`."
+          "text": "## 1. `let` vs `const`\n\n`const` = this name always points here. `let` = can be repointed later.\n\nYour token doesn't exist when the file starts — it arrives after a login call. So it needs\na name that exists early and gets filled in later. That's `let`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const appName = \"Booking API tests\";\n// appName = \"other\";     // ← uncomment: TypeScript refuses to reassign a const\n\nlet token = \"\";           // exists, empty for now\nconsole.log(\"before login:\", JSON.stringify(token));\n\ntoken = \"abc123\";         // allowed — it's a `let`\nconsole.log(\"after login: \", JSON.stringify(token));"
+          "text": "const appName = \"Booking API tests\";\n// appName = \"other\";     // ← uncomment: TypeScript refuses to reassign a const\n\nlet token = \"\";           // exists, empty for now\nconsole.log(\"before login:\", JSON.stringify(token));\n\ntoken = \"abc123\";         // allowed — it's a `let`\nconsole.log(\"after login: \", JSON.stringify(token));",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `before login: \"\"` then `after login: \"abc123\"`\n\n**The mistake this prevents.** Tomorrow you'll write this:\n\n```ts\nlet token = \"\";                        // outside every test\ntest.beforeAll(async () => {\n  const token = await getToken();      // ← WRONG: a second, separate variable\n});\n```\n\nThat inner `const` is a *new* variable that dies with the hook. The outer `token` stays\n`\"\"`. Fix: drop the `const`, just assign."
+          "text": "**Expected:** `before login: \"\"` then `after login: \"abc123\"`\n\n**The mistake this prevents.** Tomorrow you'll write this:\n\n```ts\nlet token = \"\";                        // outside every test\ntest.beforeAll(async () => {\n  const token = await getToken();      // ← WRONG: a second, separate variable\n});\n```\n\nThat inner `const` is a *new* variable that dies with the hook. The outer `token` stays\n`\"\"`. Fix: drop the `const`, just assign.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 2. Template literals\n\nA string in backticks (`` ` ``), where `${...}` drops a value into the text. The backtick\nkey sits left of `1`.\n\n```ts\n`token=${token}`\n```"
+          "text": "## 2. Template literals\n\nA string in backticks (`` ` ``), where `${...}` drops a value into the text. The backtick\nkey sits left of `1`.\n\n```ts\n`token=${token}`\n```",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const authToken = \"abc123\";\n\nconsole.log(\"with plus:      \" + \"token=\" + authToken);   // easy to lose a space\nconsole.log(`with backticks: token=${authToken}`);        // readable\n\nconst nightlyPrice = 111;\nconsole.log(`Total is ${nightlyPrice * 2} for two nights`);   // any expression works\n\nconsole.log(`spans\ntwo lines`);                                              // quotes can't do this"
+          "text": "const authToken = \"abc123\";\n\nconsole.log(\"with plus:      \" + \"token=\" + authToken);   // easy to lose a space\nconsole.log(`with backticks: token=${authToken}`);        // readable\n\nconst nightlyPrice = 111;\nconsole.log(`Total is ${nightlyPrice * 2} for two nights`);   // any expression works\n\nconsole.log(`spans\ntwo lines`);                                              // quotes can't do this",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** the first two lines both print `token=abc123` — that's the point.\n\n**Where it shows up:** every authenticated call tomorrow carries\n`` headers: { Cookie: `token=${token}` } ``. The token differs every run, so it *must* be\nbuilt at runtime.\n\n**Challenge:** set `id = 3652` and print `booking/3652`."
+          "text": "**Expected:** the first two lines both print `token=abc123` — that's the point.\n\n**Where it shows up:** every authenticated call tomorrow carries\n`` headers: { Cookie: `token=${token}` } ``. The token differs every run, so it *must* be\nbuilt at runtime.\n\n**Challenge:** set `id = 3652` and print `booking/3652`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 3. Objects\n\nNamed values in curly braces. A value can be another object — that's how you get a second\nlevel. Objects are the language of APIs: you send one, you get one back."
+          "text": "## 3. Objects\n\nNamed values in curly braces. A value can be another object — that's how you get a second\nlevel. Objects are the language of APIs: you send one, you get one back.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const credentials = { username: \"admin\", password: \"password123\" };\nconsole.log(credentials.username);\n\nconst booking = {\n  firstname: \"Jim\",\n  totalprice: 111,            // number — not \"111\"\n  depositpaid: true,          // boolean — not \"true\"\n  bookingdates: {             // an object inside the object\n    checkin: \"2018-01-01\",\n    checkout: \"2019-01-01\",\n  },\n};\n\nconsole.log(booking.bookingdates.checkin);        // two levels down\nconsole.log(JSON.stringify(booking, null, 2));    // see the whole shape"
+          "text": "const credentials = { username: \"admin\", password: \"password123\" };\nconsole.log(credentials.username);\n\nconst booking = {\n  firstname: \"Jim\",\n  totalprice: 111,            // number — not \"111\"\n  depositpaid: true,          // boolean — not \"true\"\n  bookingdates: {             // an object inside the object\n    checkin: \"2018-01-01\",\n    checkout: \"2019-01-01\",\n  },\n};\n\nconsole.log(booking.bookingdates.checkin);        // two levels down\nconsole.log(JSON.stringify(booking, null, 2));    // see the whole shape",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `admin`, `2018-01-01`, then the booking printed across several lines.\n\nWatch the quotes: `111` is a number, `\"111\"` is a string, and some APIs reject the wrong one.\n\n**Challenge:** add a `contact` object with an `email`, then print just the email."
+          "text": "**Expected:** `admin`, `2018-01-01`, then the booking printed across several lines.\n\nWatch the quotes: `111` is a number, `\"111\"` is a string, and some APIs reject the wrong one.\n\n**Challenge:** add a `contact` object with an `email`, then print just the email.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 4. Reading a nested value\n\nWalk down with dots, one per level. Take a wrong turn and you don't get an error *there* —\nyou get `undefined`, and the error appears on the **next** dot. That's what makes this\nconfusing the first time."
+          "text": "## 4. Reading a nested value\n\nWalk down with dots, one per level. Take a wrong turn and you don't get an error *there* —\nyou get `undefined`, and the error appears on the **next** dot. That's what makes this\nconfusing the first time.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// Exactly what the booking API returns when you create a booking\nconst response = {\n  bookingid: 3652,\n  booking: {\n    firstname: \"Jim\",\n    bookingdates: { checkin: \"2018-01-01\" },\n  },\n};\n\nconsole.log(response.bookingid);                      // 3652\nconsole.log(response.booking.firstname);              // Jim\nconsole.log(response.booking.bookingdates.checkin);   // 2018-01-01\n\n// console.log(response.firstname);\n//   -> undefined   (no error — it quietly hands you nothing)\n// console.log(response.data.firstname);\n//   -> TypeError: Cannot read properties of undefined (reading 'firstname')"
+          "text": "// Exactly what the booking API returns when you create a booking\nconst response = {\n  bookingid: 3652,\n  booking: {\n    firstname: \"Jim\",\n    bookingdates: { checkin: \"2018-01-01\" },\n  },\n};\n\nconsole.log(response.bookingid);                      // 3652\nconsole.log(response.booking.firstname);              // Jim\nconsole.log(response.booking.bookingdates.checkin);   // 2018-01-01\n\n// console.log(response.firstname);\n//   -> undefined   (no error — it quietly hands you nothing)\n// console.log(response.data.firstname);\n//   -> TypeError: Cannot read properties of undefined (reading 'firstname')",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `3652`, `Jim`, `2018-01-01`\n\n**`Cannot read properties of undefined` means an *earlier* dot was wrong.** The cure is\nalways the same and takes five seconds:\n\n```ts\nconsole.log(JSON.stringify(response, null, 2));\n```\n\nLook at the real shape, then write the path. Guessing twice is slower than looking once."
+          "text": "**Expected:** `3652`, `Jim`, `2018-01-01`\n\n**`Cannot read properties of undefined` means an *earlier* dot was wrong.** The cure is\nalways the same and takes five seconds:\n\n```ts\nconsole.log(JSON.stringify(response, null, 2));\n```\n\nLook at the real shape, then write the path. Guessing twice is slower than looking once.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 5. `async` / `await`\n\nA network call can't answer instantly, so you get a **Promise** — an IOU. `await` means\n\"wait here until it's paid, then give me the real value.\"\n\nEvery API call is async. Miss one `await` and you're checking the status of an IOU."
+          "text": "## 5. `async` / `await`\n\nA network call can't answer instantly, so you get a **Promise** — an IOU. `await` means\n\"wait here until it's paid, then give me the real value.\"\n\nEvery API call is async. Miss one `await` and you're checking the status of an IOU.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "function fetchToken(): Promise<string> {                 // pretend network call\n  return new Promise((resolve) => setTimeout(() => resolve(\"abc123\"), 300));\n}\n\nconsole.log(\"without await:\", fetchToken());             // Promise { <pending> }\nconsole.log(\"with await:   \", await fetchToken());       // abc123"
+          "text": "function fetchToken(): Promise<string> {                 // pretend network call\n  return new Promise((resolve) => setTimeout(() => resolve(\"abc123\"), 300));\n}\n\nconsole.log(\"without await:\", fetchToken());             // Promise { <pending> }\nconsole.log(\"with await:   \", await fetchToken());       // abc123",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:**\n\n```\nwithout await: Promise { <pending> }\nwith await:    abc123\n```\n\nThat first line is the whole lesson. See `Promise { <pending> }` anywhere and you've missed\nan `await`.\n\n**Two awaits per API call:** `await api.post(...)` for the response, then `await res.json()`\nto read it. Forgetting the second is the common slip."
+          "text": "**Expected:**\n\n```\nwithout await: Promise { <pending> }\nwith await:    abc123\n```\n\nThat first line is the whole lesson. See `Promise { <pending> }` anywhere and you've missed\nan `await`.\n\n**Two awaits per API call:** `await api.post(...)` for the response, then `await res.json()`\nto read it. Forgetting the second is the common slip.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 6. Destructuring\n\nPull named values out of an object in one line. It's how Playwright hands you your tools:\n`async ({ request }) => {}` means \"of everything you offer, I want `request`\"."
+          "text": "## 6. Destructuring\n\nPull named values out of an object in one line. It's how Playwright hands you your tools:\n`async ({ request }) => {}` means \"of everything you offer, I want `request`\".",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const body = { bookingid: 3652, booking: { firstname: \"Jim\", lastname: \"Brown\" } };\n\nconst { bookingid } = body;                     // same as body.bookingid\nconst { firstname, lastname } = body.booking;   // two at once, one level down\nconst { bookingid: id } = body;                 // rename while unpacking\n\nconsole.log(bookingid, firstname, lastname, id);"
+          "text": "const body = { bookingid: 3652, booking: { firstname: \"Jim\", lastname: \"Brown\" } };\n\nconst { bookingid } = body;                     // same as body.bookingid\nconst { firstname, lastname } = body.booking;   // two at once, one level down\nconst { bookingid: id } = body;                 // rename while unpacking\n\nconsole.log(bookingid, firstname, lastname, id);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `3652 Jim Brown 3652`\n\nThat rename form appears tomorrow as\n`const { bookingid: id, booking } = await created.json();` — two values, one shortened, one line."
+          "text": "**Expected:** `3652 Jim Brown 3652`\n\nThat rename form appears tomorrow as\n`const { bookingid: id, booking } = await created.json();` — two values, one shortened, one line.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `let` vs `const` | Filled in later → `let`, declared outside. |\n| Template literals | `` `token=${token}` `` for runtime values. |\n| Objects | Numbers and booleans go unquoted. |\n| Nested access | `undefined` blames an *earlier* dot — print the object. |\n| `async` / `await` | Two per call: response, then `.json()`. |\n| Destructuring | `{ request }` is a test asking for tools. |\n\n**Next:** [Day 1.2 — Testing an API end to end](/learn/w8/d1/p2)"
+          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `let` vs `const` | Filled in later → `let`, declared outside. |\n| Template literals | `` `token=${token}` `` for runtime values. |\n| Objects | Numbers and booleans go unquoted. |\n| Nested access | `undefined` blames an *earlier* dot — print the object. |\n| `async` / `await` | Two per call: response, then `.json()`. |\n| Destructuring | `{ request }` is a test asking for tools. |\n\n**Next:** [Day 1.2 — Testing an API end to end](/learn/w8/d1/p2)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -134,135 +188,201 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.2 — Testing an API end to end\n\nYou'll log into a real API, create a booking, read it back, get refused without a token,\nupdate it two ways, delete it, and prove it's gone. **No browser. About five seconds.**\nThe same journey clicked through a UI takes closer to thirty.\n\nPrerequisites: [Day 1.1](/learn/w8/d1/p1).\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened."
+          "text": "# Week 8, Day 1.2 — Testing an API end to end\n\nYou'll log into a real API, create a booking, read it back, get refused without a token,\nupdate it two ways, delete it, and prove it's gone. **No browser. About five seconds.**\nThe same journey clicked through a UI takes closer to thirty.\n\nPrerequisites: [Day 1.1](/learn/w8/d1/p1).\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Why test the API, not just the UI\n\nA click sends a message to a server. Testing that message directly buys you three things:\n\n| | Through the UI | Through the API |\n|---|---|---|\n| Create-and-verify | ~25–30 s | ~3 s |\n| Can start | once screens exist | as soon as the endpoint does — often weeks earlier |\n| Fails when | a button moves, a class is renamed | behaviour actually changed |\n\nThat last row is the one people underestimate: UI tests fail for cosmetic reasons, API tests\nmostly fail when something is really wrong. Hence the pyramid — many API tests, fewer UI ones."
+          "text": "## Why test the API, not just the UI\n\nA click sends a message to a server. Testing that message directly buys you three things:\n\n| | Through the UI | Through the API |\n|---|---|---|\n| Create-and-verify | ~25–30 s | ~3 s |\n| Can start | once screens exist | as soon as the endpoint does — often weeks earlier |\n| Fails when | a button moves, a class is renamed | behaviour actually changed |\n\nThat last row is the one people underestimate: UI tests fail for cosmetic reasons, API tests\nmostly fail when something is really wrong. Hence the pyramid — many API tests, fewer UI ones.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The app, and reading its docs\n\n**Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)). A small public bookings API.\n\n> **Why not the banking app?** It has no documented public API, and API testing needs one.\n> Week 8 is the exception, and uses this one throughout.\n\nReading the docs *is* the first skill. Before any code, you need five facts:\n\n| What | For the login call |\n|---|---|\n| Host | `https://restful-booker.herokuapp.com` |\n| Endpoint | `/auth` |\n| Method | `POST` |\n| Send | `{ \"username\": \"admin\", \"password\": \"password123\" }` |\n| Expect | `200` + `{ \"token\": \"...\" }` |\n\n### Where API docs come from\n\nDevelopers publish docs with a tool. Two names cover most of what you'll meet:\n\n| Tool | What it also does |\n|---|---|\n| **Swagger / OpenAPI** | generated from the API's own definition, so it can't drift out of date |\n| **Postman** | manual API testing *and* publishing docs from the same saved collection |\n\nPostman is worth knowing for both halves — you'll poke an endpoint by hand before automating\nit, and your team may publish its documentation from there.\n\nDoc quality varies enormously, and it decides how long your job takes. A page stating the\nresponse shape per endpoint saves you guessing. One that doesn't means you probe the API\nyourself — which is what the next few cells do, and a habit worth keeping either way."
+          "text": "## The app, and reading its docs\n\n**Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)). A small public bookings API.\n\n> **Why not the banking app?** It has no documented public API, and API testing needs one.\n> Week 8 is the exception, and uses this one throughout.\n\nReading the docs *is* the first skill. Before any code, you need five facts:\n\n| What | For the login call |\n|---|---|\n| Host | `https://restful-booker.herokuapp.com` |\n| Endpoint | `/auth` |\n| Method | `POST` |\n| Send | `{ \"username\": \"admin\", \"password\": \"password123\" }` |\n| Expect | `200` + `{ \"token\": \"...\" }` |\n\n### Where API docs come from\n\nDevelopers publish docs with a tool. Two names cover most of what you'll meet:\n\n| Tool | What it also does |\n|---|---|\n| **Swagger / OpenAPI** | generated from the API's own definition, so it can't drift out of date |\n| **Postman** | manual API testing *and* publishing docs from the same saved collection |\n\nPostman is worth knowing for both halves — you'll poke an endpoint by hand before automating\nit, and your team may publish its documentation from there.\n\nDoc quality varies enormously, and it decides how long your job takes. A page stating the\nresponse shape per endpoint saves you guessing. One that doesn't means you probe the API\nyourself — which is what the next few cells do, and a habit worth keeping either way.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Head and body, authentication and authorization\n\nEvery request splits in two: the **header** carries instructions *about* the message, the\n**body** carries the data. (Body is also called *data* or *payload* — same thing.)\n\n| Header | Says |\n|---|---|\n| `Content-Type` | \"my data is in this format\" |\n| `Authorization` / `Cookie` | \"here's proof of who I am\" |\n\n**Authentication** = who are you (username + password). **Authorization** = what may you do\n(the token you got back). You authenticate once, then attach the token to everything after.\n\nA token is a short-lived proof it's you — same idea as an OTP. It expires, which is exactly\nwhy your test must fetch a fresh one at runtime instead of pasting yesterday's into the file."
+          "text": "## Head and body, authentication and authorization\n\nEvery request splits in two: the **header** carries instructions *about* the message, the\n**body** carries the data. (Body is also called *data* or *payload* — same thing.)\n\n| Header | Says |\n|---|---|\n| `Content-Type` | \"my data is in this format\" |\n| `Authorization` / `Cookie` | \"here's proof of who I am\" |\n\n**Authentication** = who are you (username + password). **Authorization** = what may you do\n(the token you got back). You authenticate once, then attach the token to everything after.\n\nA token is a short-lived proof it's you — same idea as an OTP. It expires, which is exactly\nwhy your test must fetch a fresh one at runtime instead of pasting yesterday's into the file.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 1 — get a token\n\n**Objective:** POST credentials to `/auth`, get a token."
+          "text": "## Example 1 — get a token\n\n**Objective:** POST credentials to `/auth`, get a token.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { request } from \"npm:playwright\";\n\nconst api = await request.newContext();      // reused by every cell below\n\nconst res = await api.post(\"https://restful-booker.herokuapp.com/auth\", {\n  data: { username: \"admin\", password: \"password123\" },\n});\n\nconsole.log(\"status:\", res.status());\nconst authBody = await res.json();\nlet token = authBody.token;\nconsole.log(\"token: \", token);"
+          "text": "import { request } from \"npm:playwright\";\n\nconst api = await request.newContext();      // reused by every cell below\n\nconst res = await api.post(\"https://restful-booker.herokuapp.com/auth\", {\n  data: { username: \"admin\", password: \"password123\" },\n});\n\nconsole.log(\"status:\", res.status());\nconst authBody = await res.json();\nlet token = authBody.token;\nconsole.log(\"token: \", token);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "| Line | Does |\n|---|---|\n| `request.newContext()` | Opens a reusable API connection. No browser starts. |\n| `api.post(url, { data })` | Sends POST; Playwright turns `data` into JSON. |\n| `res.status()` | Status code, as a number. |\n| `res.json()` | Parses the body into an object you can use dots on. |\n\n**Expected:** `status: 200` and a token like `25b3f24d16a6fbe`. Yours will differ — that's\nwhat makes it a token.\n\n**Challenge:** use a wrong password and re-run. The status is still **200** — the failure is\ndescribed *in the body*. That's why checking only the status code isn't enough."
+          "text": "| Line | Does |\n|---|---|\n| `request.newContext()` | Opens a reusable API connection. No browser starts. |\n| `api.post(url, { data })` | Sends POST; Playwright turns `data` into JSON. |\n| `res.status()` | Status code, as a number. |\n| `res.json()` | Parses the body into an object you can use dots on. |\n\n**Expected:** `status: 200` and a token like `25b3f24d16a6fbe`. Yours will differ — that's\nwhat makes it a token.\n\n**Challenge:** use a wrong password and re-run. The status is still **200** — the failure is\ndescribed *in the body*. That's why checking only the status code isn't enough.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 2 — create a booking\n\n**Objective:** send a booking, capture the id the server invents."
+          "text": "## Example 2 — create a booking\n\n**Objective:** send a booking, capture the id the server invents.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const created = await api.post(\"https://restful-booker.herokuapp.com/booking\", {\n  headers: { \"Content-Type\": \"application/json\" },\n  data: {\n    firstname: \"Jim\",\n    lastname: \"Brown\",\n    totalprice: 111,\n    depositpaid: true,\n    bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n    additionalneeds: \"Breakfast\",\n  },\n});\n\nconsole.log(\"status:\", created.status());\nconst createdBody = await created.json();\nconsole.log(JSON.stringify(createdBody, null, 2));\n\nlet bookingId = createdBody.bookingid;\nconsole.log(\"bookingId:\", bookingId);"
+          "text": "const created = await api.post(\"https://restful-booker.herokuapp.com/booking\", {\n  headers: { \"Content-Type\": \"application/json\" },\n  data: {\n    firstname: \"Jim\",\n    lastname: \"Brown\",\n    totalprice: 111,\n    depositpaid: true,\n    bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n    additionalneeds: \"Breakfast\",\n  },\n});\n\nconsole.log(\"status:\", created.status());\nconst createdBody = await created.json();\nconsole.log(JSON.stringify(createdBody, null, 2));\n\nlet bookingId = createdBody.bookingid;\nconsole.log(\"bookingId:\", bookingId);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `200`, then `{ \"bookingid\": 3652, \"booking\": { ... } }`\n\nThree things worth stopping on:\n\n| Observation | Why it matters |\n|---|---|\n| Returned **`200`, not `201`** | `201 Created` is the *convention*, not a rule. Assert what your API does. |\n| **No token sent, and it worked** | Creating is open here. Don't assume every call needs auth. |\n| The **id came from the server** | You couldn't know it in advance. |\n\nThat third one is the most important habit in API testing: **create your own data, read back\nits id, use that.** Never hardcode an id you found by hand — it'll be gone tomorrow."
+          "text": "**Expected:** `200`, then `{ \"bookingid\": 3652, \"booking\": { ... } }`\n\nThree things worth stopping on:\n\n| Observation | Why it matters |\n|---|---|\n| Returned **`200`, not `201`** | `201 Created` is the *convention*, not a rule. Assert what your API does. |\n| **No token sent, and it worked** | Creating is open here. Don't assume every call needs auth. |\n| The **id came from the server** | You couldn't know it in advance. |\n\nThat third one is the most important habit in API testing: **create your own data, read back\nits id, use that.** Never hardcode an id you found by hand — it'll be gone tomorrow.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 3 — read it back\n\n**Objective:** fetch by id, and meet a shape change."
+          "text": "## Example 3 — read it back\n\n**Objective:** fetch by id, and meet a shape change.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const fetched = await api.get(`https://restful-booker.herokuapp.com/booking/${bookingId}`);\n\nconsole.log(\"status:\", fetched.status());\nconst fetchedBody = await fetched.json();\nconsole.log(JSON.stringify(fetchedBody, null, 2));\n\nconsole.log(\"firstname:\", fetchedBody.firstname);          // NOT .booking.firstname\nconsole.log(\"checkin:  \", fetchedBody.bookingdates.checkin);"
+          "text": "const fetched = await api.get(`https://restful-booker.herokuapp.com/booking/${bookingId}`);\n\nconsole.log(\"status:\", fetched.status());\nconst fetchedBody = await fetched.json();\nconsole.log(JSON.stringify(fetchedBody, null, 2));\n\nconsole.log(\"firstname:\", fetchedBody.firstname);          // NOT .booking.firstname\nconsole.log(\"checkin:  \", fetchedBody.bookingdates.checkin);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `200`, and the booking — but look at the shape.\n\n- **Create** wrapped it: `createdBody.booking.firstname`\n- **Read** doesn't: `fetchedBody.firstname`\n\nSame data, two shapes, one API. Assume they match and you get `Cannot read properties of\nundefined` — the Day 1.1 error. Same fix: print the body, then write the path.\n\nThe URL uses backticks because the id is only known at runtime."
+          "text": "**Expected:** `200`, and the booking — but look at the shape.\n\n- **Create** wrapped it: `createdBody.booking.firstname`\n- **Read** doesn't: `fetchedBody.firstname`\n\nSame data, two shapes, one API. Assume they match and you get `Cannot read properties of\nundefined` — the Day 1.1 error. Same fix: print the body, then write the path.\n\nThe URL uses backticks because the id is only known at runtime.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 4 — the token earns its keep\n\n**Objective:** update without a token, then with one. Creating was open; changing is not."
+          "text": "## Example 4 — the token earns its keep\n\n**Objective:** update without a token, then with one. Creating was open; changing is not.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const updated = {\n  firstname: \"James\", lastname: \"Brown\", totalprice: 222, depositpaid: true,\n  bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n  additionalneeds: \"Breakfast\",\n};\n\nconst refused = await api.put(`https://restful-booker.herokuapp.com/booking/${bookingId}`, { data: updated });\nconsole.log(\"no token   ->\", refused.status(), await refused.text());\n\nconst accepted = await api.put(`https://restful-booker.herokuapp.com/booking/${bookingId}`, {\n  headers: { \"Content-Type\": \"application/json\", Cookie: `token=${token}` },\n  data: updated,\n});\nconsole.log(\"with token ->\", accepted.status());\nconsole.log(\"firstname: \", (await accepted.json()).firstname);"
+          "text": "const updated = {\n  firstname: \"James\", lastname: \"Brown\", totalprice: 222, depositpaid: true,\n  bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n  additionalneeds: \"Breakfast\",\n};\n\nconst refused = await api.put(`https://restful-booker.herokuapp.com/booking/${bookingId}`, { data: updated });\nconsole.log(\"no token   ->\", refused.status(), await refused.text());\n\nconst accepted = await api.put(`https://restful-booker.herokuapp.com/booking/${bookingId}`, {\n  headers: { \"Content-Type\": \"application/json\", Cookie: `token=${token}` },\n  data: updated,\n});\nconsole.log(\"with token ->\", accepted.status());\nconsole.log(\"firstname: \", (await accepted.json()).firstname);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:**\n\n```\nno token   -> 403 Forbidden\nwith token -> 200\nfirstname:  James\n```\n\n**403 is what a missing or wrong token looks like.** See 403 — or a message like \"bad\ncredential\" — and suspect the token first, not your data.\n\n### Bearer or Cookie?\n\nThis API wants `` Cookie: `token=${token}` ``. Many others want\n`` Authorization: `Bearer ${token}` ``. Both mean \"proof of identity, in a header\". Which one\nis not guessable — the docs say, and getting it wrong gives a 403 identical to sending nothing.\n\n**Challenge:** send it as `Authorization: Bearer …` and confirm you get 403."
+          "text": "**Expected:**\n\n```\nno token   -> 403 Forbidden\nwith token -> 200\nfirstname:  James\n```\n\n**403 is what a missing or wrong token looks like.** See 403 — or a message like \"bad\ncredential\" — and suspect the token first, not your data.\n\n### Bearer or Cookie?\n\nThis API wants `` Cookie: `token=${token}` ``. Many others want\n`` Authorization: `Bearer ${token}` ``. Both mean \"proof of identity, in a header\". Which one\nis not guessable — the docs say, and getting it wrong gives a 403 identical to sending nothing.\n\n**Challenge:** send it as `Authorization: Bearer …` and confirm you get 403.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The Bearer shape, for when you meet it\n\nMost e-commerce APIs use OAuth 2.0 bearer tokens and wrap their data one level deeper. The\ncalls look like this — **read only, don't run it**; it's here so the shape is familiar:\n\n```ts\n// Typical bearer-token API\nconst res = await api.post(`${base}/api/v2/storefront/account/addresses`, {\n  headers: {\n    \"Content-Type\": \"application/json\",\n    Authorization: `Bearer ${token}`,        // Bearer, space, token\n  },\n  data: { address: { firstname: \"Deepika\", /* ... */ } },\n});\n\nconst body = await res.json();\nconst id = body.data.id;                      // note: wrapped in `data`\nconst name = body.data.attributes.firstname;  // and attributes below that\n```\n\nTwo differences from Restful Booker, and both are the point:\n\n| | Restful Booker | Bearer-style API |\n|---|---|---|\n| Token header | `Cookie: token=…` | `Authorization: Bearer …` |\n| Reading a field | `body.firstname` | `body.data.attributes.firstname` |\n\nDeeper nesting, same skill — walk the tree with dots, and print the body when unsure."
+          "text": "## The Bearer shape, for when you meet it\n\nMost e-commerce APIs use OAuth 2.0 bearer tokens and wrap their data one level deeper. The\ncalls look like this — **read only, don't run it**; it's here so the shape is familiar:\n\n```ts\n// Typical bearer-token API\nconst res = await api.post(`${base}/api/v2/storefront/account/addresses`, {\n  headers: {\n    \"Content-Type\": \"application/json\",\n    Authorization: `Bearer ${token}`,        // Bearer, space, token\n  },\n  data: { address: { firstname: \"Deepika\", /* ... */ } },\n});\n\nconst body = await res.json();\nconst id = body.data.id;                      // note: wrapped in `data`\nconst name = body.data.attributes.firstname;  // and attributes below that\n```\n\nTwo differences from Restful Booker, and both are the point:\n\n| | Restful Booker | Bearer-style API |\n|---|---|---|\n| Token header | `Cookie: token=…` | `Authorization: Bearer …` |\n| Reading a field | `body.firstname` | `body.data.attributes.firstname` |\n\nDeeper nesting, same skill — walk the tree with dots, and print the body when unsure.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 5 — PUT vs PATCH\n\n| Method | Means | A field you leave out |\n|---|---|---|\n| `PUT` | replace the whole thing | is wiped |\n| `PATCH` | change only what I send | is left alone |"
+          "text": "## Example 5 — PUT vs PATCH\n\n| Method | Means | A field you leave out |\n|---|---|---|\n| `PUT` | replace the whole thing | is wiped |\n| `PATCH` | change only what I send | is left alone |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const patched = await api.patch(`https://restful-booker.herokuapp.com/booking/${bookingId}`, {\n  headers: { \"Content-Type\": \"application/json\", Cookie: `token=${token}` },\n  data: { firstname: \"Patched\" },          // one field only\n});\n\nconst p = await patched.json();\nconsole.log(\"status:   \", patched.status());\nconsole.log(\"firstname:\", p.firstname);      // changed\nconsole.log(\"lastname: \", p.lastname);       // untouched\nconsole.log(\"price:    \", p.totalprice);     // untouched"
+          "text": "const patched = await api.patch(`https://restful-booker.herokuapp.com/booking/${bookingId}`, {\n  headers: { \"Content-Type\": \"application/json\", Cookie: `token=${token}` },\n  data: { firstname: \"Patched\" },          // one field only\n});\n\nconst p = await patched.json();\nconsole.log(\"status:   \", patched.status());\nconsole.log(\"firstname:\", p.firstname);      // changed\nconsole.log(\"lastname: \", p.lastname);       // untouched\nconsole.log(\"price:    \", p.totalprice);     // untouched",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `200`, `Patched`, `Brown`, `222` — the last two prove PATCH left them alone.\n\nTry the same with `put` and only a `firstname`: this API rejects it, because a replace needs\nthe complete object.\n\nCaution for real work: plenty of teams accept partial data on `PUT` anyway. Read the docs,\nthen test what actually happens — as you just did."
+          "text": "**Expected:** `200`, `Patched`, `Brown`, `222` — the last two prove PATCH left them alone.\n\nTry the same with `put` and only a `firstname`: this API rejects it, because a replace needs\nthe complete object.\n\nCaution for real work: plenty of teams accept partial data on `PUT` anyway. Read the docs,\nthen test what actually happens — as you just did.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 6 — delete, and prove it\n\n**Objective:** remove the booking, then verify instead of trusting."
+          "text": "## Example 6 — delete, and prove it\n\n**Objective:** remove the booking, then verify instead of trusting.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const deleted = await api.delete(`https://restful-booker.herokuapp.com/booking/${bookingId}`, {\n  headers: { Cookie: `token=${token}` },\n});\nconsole.log(\"delete           ->\", deleted.status(), await deleted.text());\n\nconst gone = await api.get(`https://restful-booker.herokuapp.com/booking/${bookingId}`);\nconsole.log(\"get after delete ->\", gone.status());\n\nawait api.dispose();"
+          "text": "const deleted = await api.delete(`https://restful-booker.herokuapp.com/booking/${bookingId}`, {\n  headers: { Cookie: `token=${token}` },\n});\nconsole.log(\"delete           ->\", deleted.status(), await deleted.text());\n\nconst gone = await api.get(`https://restful-booker.herokuapp.com/booking/${bookingId}`);\nconsole.log(\"get after delete ->\", gone.status());\n\nawait api.dispose();",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `delete -> 201 Created`, `get after delete -> 404`\n\n**`201` for a delete is odd** — the usual convention is `204 No Content`. It doesn't matter:\nyour job is to test what the API *does*. Assert `204` because a course said so and your test\nfails against a working API.\n\nThe second call is what makes this a real test. A delete that reports success and deletes\nnothing is a genuine bug, and only the follow-up `404` catches it.\n\n| Code | Means | Seen when |\n|---|---|---|\n| `200` | worked, here's data | most successes |\n| `201` | worked, something new exists | creates — and this API's deletes |\n| `204` | worked, nothing to return | most deletes, elsewhere |\n| `400` | your data was malformed | a missing required field |\n| `403` | not allowed | missing or wrong token |\n| `404` | no such thing | deleted or invented id |\n\n200s = success. 400s = your fault. 500s = the server's fault."
+          "text": "**Expected:** `delete -> 201 Created`, `get after delete -> 404`\n\n**`201` for a delete is odd** — the usual convention is `204 No Content`. It doesn't matter:\nyour job is to test what the API *does*. Assert `204` because a course said so and your test\nfails against a working API.\n\nThe second call is what makes this a real test. A delete that reports success and deletes\nnothing is a genuine bug, and only the follow-up `404` catches it.\n\n| Code | Means | Seen when |\n|---|---|---|\n| `200` | worked, here's data | most successes |\n| `201` | worked, something new exists | creates — and this API's deletes |\n| `204` | worked, nothing to return | most deletes, elsewhere |\n| `400` | your data was malformed | a missing required field |\n| `403` | not allowed | missing or wrong token |\n| `404` | no such thing | deleted or invented id |\n\n200s = success. 400s = your fault. 500s = the server's fault.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Now the real thing: a spec file\n\nCells remember things between runs. A test can't — it must set itself up.\n\nGetting the token is a **prerequisite**, not the thing under test, so it goes in `beforeAll`\nand lands in a `let` at the top of the file. Exactly the Day 1.1 situation.\n\nThe cell below writes a real spec to disk and runs it with genuine `npx playwright test`."
+          "text": "## Now the real thing: a spec file\n\nCells remember things between runs. A test can't — it must set itself up.\n\nGetting the token is a **prerequisite**, not the thing under test, so it goes in `beforeAll`\nand lands in a `let` at the top of the file. Exactly the Day 1.1 situation.\n\nThe cell below writes a real spec to disk and runs it with genuine `npx playwright test`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because this file sits inside a template\n// literal — see Day 1.1, concept 2.\nconst specPath = \"week8/generated/day1-booking-flow.spec.ts\";\n\nawait writeProjectFile(specPath, `// Week 8, Day 1 — the full booking journey against a real API.\n//\n// Written by a cell in week8/day1_2.ipynb. You can open, edit and run this file\n// yourself:  npx playwright test week8/generated/day1-booking-flow.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\n// Restful Booker is a public practice API. The root playwright.config.ts points\n// baseURL at the banking app, so every call here spells out the full URL.\nconst BASE = \"https://restful-booker.herokuapp.com\";\n\n// Declared with \\`let\\`, outside the tests, because the token is created in one\n// place (beforeAll) and used in another (the tests). A \\`const\\` inside beforeAll\n// would vanish the moment that hook finished.\nlet token: string;\nlet bookingId: number;\n\nconst booking = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n  depositpaid: true,\n  bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n  additionalneeds: \"Breakfast\",\n};\n\ntest.describe(\"Booking API — the full journey\", () => {\n  // Each step depends on the booking the previous step made, so these must run\n  // in order. Without this line Playwright would run them in parallel and they\n  // would fight over the same bookingId.\n  test.describe.configure({ mode: \"serial\" });\n\n  test.beforeAll(async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/auth\\`, {\n      data: { username: \"admin\", password: \"password123\" },\n    });\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.token).toBeTruthy();\n    token = body.token;\n  });\n\n  test(\"Step 1 — create a booking\", async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/booking\\`, {\n      headers: { \"Content-Type\": \"application/json\" },\n      data: booking,\n    });\n\n    // 200, not 201 — this API returns plain OK for a create. Always check\n    // rather than assuming the textbook value.\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.booking.firstname).toBe(\"Jim\");\n\n    bookingId = body.bookingid;\n    expect(bookingId).toBeTruthy();\n  });\n\n  test(\"Step 2 — read it back\", async ({ request }) => {\n    const res = await request.get(\\`\\${BASE}/booking/\\${bookingId}\\`);\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    // Note the shape changed: GET returns the booking directly, with no\n    // wrapper. POST wrapped it inside \\`booking\\`.\n    expect(body.firstname).toBe(\"Jim\");\n    expect(body.bookingdates.checkin).toBe(\"2018-01-01\");\n  });\n\n  test(\"Step 3 — updating without a token is refused\", async ({ request }) => {\n    const res = await request.put(\\`\\${BASE}/booking/\\${bookingId}\\`, {\n      data: { ...booking, firstname: \"Nobody\" },\n    });\n\n    // 403 Forbidden. This is what \"bad credential\" actually looks like.\n    expect(res.status()).toBe(403);\n  });\n\n  test(\"Step 4 — PUT replaces the whole booking\", async ({ request }) => {\n    const res = await request.put(\\`\\${BASE}/booking/\\${bookingId}\\`, {\n      headers: { Cookie: \\`token=\\${token}\\` },\n      data: { ...booking, firstname: \"James\", totalprice: 222 },\n    });\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.firstname).toBe(\"James\");\n    expect(body.totalprice).toBe(222);\n  });\n\n  test(\"Step 5 — PATCH changes only what you send\", async ({ request }) => {\n    const res = await request.patch(\\`\\${BASE}/booking/\\${bookingId}\\`, {\n      headers: { Cookie: \\`token=\\${token}\\` },\n      data: { firstname: \"Patched\" },\n    });\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.firstname).toBe(\"Patched\");\n    // Untouched, because PATCH is a partial update.\n    expect(body.lastname).toBe(\"Brown\");\n  });\n\n  test(\"Step 6 — delete it, then prove it is gone\", async ({ request }) => {\n    const del = await request.delete(\\`\\${BASE}/booking/\\${bookingId}\\`, {\n      headers: { Cookie: \\`token=\\${token}\\` },\n    });\n\n    // 201 Created — an odd choice for a delete, but it is what this API does.\n    expect(del.status()).toBe(201);\n\n    const after = await request.get(\\`\\${BASE}/booking/\\${bookingId}\\`);\n    expect(after.status()).toBe(404);\n  });\n});\n`);\n\nawait runSpec(specPath);"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because this file sits inside a template\n// literal — see Day 1.1, concept 2.\nconst specPath = \"week8/generated/day1-booking-flow.spec.ts\";\n\nawait writeProjectFile(specPath, `// Week 8, Day 1 — the full booking journey against a real API.\n//\n// Written by a cell in week8/day1_2.ipynb. You can open, edit and run this file\n// yourself:  npx playwright test week8/generated/day1-booking-flow.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\n// Restful Booker is a public practice API. The root playwright.config.ts points\n// baseURL at the banking app, so every call here spells out the full URL.\nconst BASE = \"https://restful-booker.herokuapp.com\";\n\n// Declared with \\`let\\`, outside the tests, because the token is created in one\n// place (beforeAll) and used in another (the tests). A \\`const\\` inside beforeAll\n// would vanish the moment that hook finished.\nlet token: string;\nlet bookingId: number;\n\nconst booking = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n  depositpaid: true,\n  bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n  additionalneeds: \"Breakfast\",\n};\n\ntest.describe(\"Booking API — the full journey\", () => {\n  // Each step depends on the booking the previous step made, so these must run\n  // in order. Without this line Playwright would run them in parallel and they\n  // would fight over the same bookingId.\n  test.describe.configure({ mode: \"serial\" });\n\n  test.beforeAll(async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/auth\\`, {\n      data: { username: \"admin\", password: \"password123\" },\n    });\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.token).toBeTruthy();\n    token = body.token;\n  });\n\n  test(\"Step 1 — create a booking\", async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/booking\\`, {\n      headers: { \"Content-Type\": \"application/json\" },\n      data: booking,\n    });\n\n    // 200, not 201 — this API returns plain OK for a create. Always check\n    // rather than assuming the textbook value.\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.booking.firstname).toBe(\"Jim\");\n\n    bookingId = body.bookingid;\n    expect(bookingId).toBeTruthy();\n  });\n\n  test(\"Step 2 — read it back\", async ({ request }) => {\n    const res = await request.get(\\`\\${BASE}/booking/\\${bookingId}\\`);\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    // Note the shape changed: GET returns the booking directly, with no\n    // wrapper. POST wrapped it inside \\`booking\\`.\n    expect(body.firstname).toBe(\"Jim\");\n    expect(body.bookingdates.checkin).toBe(\"2018-01-01\");\n  });\n\n  test(\"Step 3 — updating without a token is refused\", async ({ request }) => {\n    const res = await request.put(\\`\\${BASE}/booking/\\${bookingId}\\`, {\n      data: { ...booking, firstname: \"Nobody\" },\n    });\n\n    // 403 Forbidden. This is what \"bad credential\" actually looks like.\n    expect(res.status()).toBe(403);\n  });\n\n  test(\"Step 4 — PUT replaces the whole booking\", async ({ request }) => {\n    const res = await request.put(\\`\\${BASE}/booking/\\${bookingId}\\`, {\n      headers: { Cookie: \\`token=\\${token}\\` },\n      data: { ...booking, firstname: \"James\", totalprice: 222 },\n    });\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.firstname).toBe(\"James\");\n    expect(body.totalprice).toBe(222);\n  });\n\n  test(\"Step 5 — PATCH changes only what you send\", async ({ request }) => {\n    const res = await request.patch(\\`\\${BASE}/booking/\\${bookingId}\\`, {\n      headers: { Cookie: \\`token=\\${token}\\` },\n      data: { firstname: \"Patched\" },\n    });\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.firstname).toBe(\"Patched\");\n    // Untouched, because PATCH is a partial update.\n    expect(body.lastname).toBe(\"Brown\");\n  });\n\n  test(\"Step 6 — delete it, then prove it is gone\", async ({ request }) => {\n    const del = await request.delete(\\`\\${BASE}/booking/\\${bookingId}\\`, {\n      headers: { Cookie: \\`token=\\${token}\\` },\n    });\n\n    // 201 Created — an odd choice for a delete, but it is what this API does.\n    expect(del.status()).toBe(201);\n\n    const after = await request.get(\\`\\${BASE}/booking/\\${bookingId}\\`);\n    expect(after.status()).toBe(404);\n  });\n});\n`);\n\nawait runSpec(specPath);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day1-booking-flow.spec.ts`\n\n**Expected:** `6 passed`, ~5 seconds.\n\nTwo things changed by moving into the runner:\n\n- **`expect()` replaced `console.log()`.** You judged the output; now the test judges it.\n  That's the whole difference between exploring and testing.\n- **`test.describe.configure({ mode: \"serial\" })`.** Each step uses the previous step's\n  booking, and Playwright runs tests in parallel by default. Being explicit about the\n  dependency is honest; hoping the order works out is how flaky suites start.\n\nNeeding serial mode is a smell, though. A test that makes its own data can run alone, in any\norder. Day 1.3 shows that version."
+          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day1-booking-flow.spec.ts`\n\n**Expected:** `6 passed`, ~5 seconds.\n\nTwo things changed by moving into the runner:\n\n- **`expect()` replaced `console.log()`.** You judged the output; now the test judges it.\n  That's the whole difference between exploring and testing.\n- **`test.describe.configure({ mode: \"serial\" })`.** Each step uses the previous step's\n  booking, and Playwright runs tests in parallel by default. Being explicit about the\n  dependency is honest; hoping the order works out is how flaky suites start.\n\nNeeding serial mode is a smell, though. A test that makes its own data can run alone, in any\norder. Day 1.3 shows that version.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Make your own data**, and use the id you got back.\n- **Fetch tokens at runtime.** Never paste one into a file.\n- **Assert more than the status code.** `200` only means the server answered.\n- **Verify deletes.** A delete isn't proven by its own status code.\n- **Base URL in one place**, so the suite can point at staging.\n- **Print the body when confused** — faster than reasoning about it.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `No tests found` | wrong path or filename | copy the path, don't type it |\n| `Cannot read properties of undefined` | an earlier dot is wrong | print the whole body |\n| `403` / \"bad credential\" | missing token, or right token in the wrong header | check `Cookie` vs `Authorization` |\n| `Promise { <pending> }` | missing `await` | two per call |\n| passes alone, fails in the suite | tests sharing data | make each test create its own |\n| `Cannot assign to 'token'` | `const token` inside the hook | drop the `const` |\n\n**Next:** [Day 1.3](/learn/w8/d1/p3) — the same code, organised so the 60th test isn't a\ncopy-paste of the 6th."
+          "text": "## Best practices\n\n- **Make your own data**, and use the id you got back.\n- **Fetch tokens at runtime.** Never paste one into a file.\n- **Assert more than the status code.** `200` only means the server answered.\n- **Verify deletes.** A delete isn't proven by its own status code.\n- **Base URL in one place**, so the suite can point at staging.\n- **Print the body when confused** — faster than reasoning about it.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `No tests found` | wrong path or filename | copy the path, don't type it |\n| `Cannot read properties of undefined` | an earlier dot is wrong | print the whole body |\n| `403` / \"bad credential\" | missing token, or right token in the wrong header | check `Cookie` vs `Authorization` |\n| `Promise { <pending> }` | missing `await` | two per call |\n| passes alone, fails in the suite | tests sharing data | make each test create its own |\n| `Cannot assign to 'token'` | `const token` inside the hook | drop the `const` |\n\n**Next:** [Day 1.3](/learn/w8/d1/p3) — the same code, organised so the 60th test isn't a\ncopy-paste of the 6th.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -277,51 +397,75 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.3 — The same calls, the way a project writes them\n\nEvery method here is one you ran in [Day 1.2](/learn/w8/d1/p2). **No new API.** The only new\nthing is the structure around it — much easier to absorb when the code is already familiar."
+          "text": "# Week 8, Day 1.3 — The same calls, the way a project writes them\n\nEvery method here is one you ran in [Day 1.2](/learn/w8/d1/p2). **No new API.** The only new\nthing is the structure around it — much easier to absorb when the code is already familiar.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Measure before you refactor\n\nDon't take my word that yesterday's file needs work. Count."
+          "text": "## Measure before you refactor\n\nDon't take my word that yesterday's file needs work. Count.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// REPO_ROOT comes from the shared helper, so this works no matter which folder\n// Jupyter was started from.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst spec = await Deno.readTextFile(\n  `${REPO_ROOT}week8/generated/day1-booking-flow.spec.ts`,\n);\n\nconst count = (needle: string) => spec.split(needle).length - 1;\n\nconsole.log(\"base URL written out:     \", count(\"https://restful-booker\"));\nconsole.log(\"endpoint path built:      \", count(\"/booking\"));\nconsole.log(\"auth header spelled out:  \", count(\"Cookie:\"));"
+          "text": "// REPO_ROOT comes from the shared helper, so this works no matter which folder\n// Jupyter was started from.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst spec = await Deno.readTextFile(\n  `${REPO_ROOT}week8/generated/day1-booking-flow.spec.ts`,\n);\n\nconst count = (needle: string) => spec.split(needle).length - 1;\n\nconsole.log(\"base URL written out:     \", count(\"https://restful-booker\"));\nconsole.log(\"endpoint path built:      \", count(\"/booking\"));\nconsole.log(\"auth header spelled out:  \", count(\"Cookie:\"));",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**The base URL scores 1.** You already did that one right — it's a `const` at the top, so\nmoving to staging is a single edit. Good instinct; keep it.\n\nThe other two are the friction:\n\n- The **endpoint path** is rebuilt in every test. Each one has to get the URL right.\n- The **auth header** is spelled out once per authenticated call. The day this API moves to\n  bearer tokens, that's an edit in every one of them — and missing one gives you a 403 you'll\n  spend an afternoon on.\n\nThere's a subtler cost too: *every test knows the token travels in a cookie.* That's a fact\nabout how the API works, and it has leaked into code that only wants to **use** the API.\n\nThe fix is the page-object idea applied to an API: **put the knowledge of how the API works\nin one place; let tests describe what should be true.**\n\n| Day 1.2 | Here | Why |\n|---|---|---|\n| `api.put(`${BASE}/booking/${id}`, …)` | `api.update(id, changes)` | the URL is built in one place |\n| `` Cookie: `token=${token}` `` in each call | `this.authHeaders()` | one line to change |\n| `beforeAll` in every spec file | an `api` fixture | requested by name, not copy-pasted |\n| `let token` visible file-wide | `private token` | no test can corrupt it |\n| `expect()` mixed into the flow | `expect()` only in tests | client asks, test judges |"
+          "text": "**The base URL scores 1.** You already did that one right — it's a `const` at the top, so\nmoving to staging is a single edit. Good instinct; keep it.\n\nThe other two are the friction:\n\n- The **endpoint path** is rebuilt in every test. Each one has to get the URL right.\n- The **auth header** is spelled out once per authenticated call. The day this API moves to\n  bearer tokens, that's an edit in every one of them — and missing one gives you a 403 you'll\n  spend an afternoon on.\n\nThere's a subtler cost too: *every test knows the token travels in a cookie.* That's a fact\nabout how the API works, and it has leaked into code that only wants to **use** the API.\n\nThe fix is the page-object idea applied to an API: **put the knowledge of how the API works\nin one place; let tests describe what should be true.**\n\n| Day 1.2 | Here | Why |\n|---|---|---|\n| `api.put(`${BASE}/booking/${id}`, …)` | `api.update(id, changes)` | the URL is built in one place |\n| `` Cookie: `token=${token}` `` in each call | `this.authHeaders()` | one line to change |\n| `beforeAll` in every spec file | an `api` fixture | requested by name, not copy-pasted |\n| `let token` visible file-wide | `private token` | no test can corrupt it |\n| `expect()` mixed into the flow | `expect()` only in tests | client asks, test judges |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The client\n\nSame six calls, wearing a coat."
+          "text": "## The client\n\nSame six calls, wearing a coat.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import type { APIRequestContext, APIResponse } from \"npm:playwright\";\n\ntype Booking = {\n  firstname: string;\n  lastname: string;\n  totalprice: number;\n  depositpaid: boolean;\n  bookingdates: { checkin: string; checkout: string };\n  additionalneeds?: string;                 // ? = optional\n};\n\nclass BookingApi {\n  private readonly request: APIRequestContext;\n  private readonly base: string;\n  private token = \"\";\n\n  constructor(request: APIRequestContext, base = \"https://restful-booker.herokuapp.com\") {\n    this.request = request;\n    this.base = base;\n  }\n\n  async signIn(username = \"admin\", password = \"password123\"): Promise<void> {\n    const res = await this.request.post(`${this.base}/auth`, {\n      data: { username, password },\n    });\n    this.token = (await res.json()).token ?? \"\";\n  }\n\n  private authHeaders(): Record<string, string> {          // built once, not at 8 call sites\n    return { \"Content-Type\": \"application/json\", Cookie: `token=${this.token}` };\n  }\n\n  create(booking: Booking): Promise<APIResponse> {\n    return this.request.post(`${this.base}/booking`, {\n      headers: { \"Content-Type\": \"application/json\" },\n      data: booking,\n    });\n  }\n\n  read(id: number): Promise<APIResponse> {\n    return this.request.get(`${this.base}/booking/${id}`);\n  }\n\n  update(id: number, changes: Partial<Booking>): Promise<APIResponse> {\n    return this.request.patch(`${this.base}/booking/${id}`, {\n      headers: this.authHeaders(), data: changes,\n    });\n  }\n\n  remove(id: number): Promise<APIResponse> {\n    return this.request.delete(`${this.base}/booking/${id}`, {\n      headers: this.authHeaders(),\n    });\n  }\n}\n\nconsole.log(\"Class defined — a shape, not a test.\");"
+          "text": "import type { APIRequestContext, APIResponse } from \"npm:playwright\";\n\ntype Booking = {\n  firstname: string;\n  lastname: string;\n  totalprice: number;\n  depositpaid: boolean;\n  bookingdates: { checkin: string; checkout: string };\n  additionalneeds?: string;                 // ? = optional\n};\n\nclass BookingApi {\n  private readonly request: APIRequestContext;\n  private readonly base: string;\n  private token = \"\";\n\n  constructor(request: APIRequestContext, base = \"https://restful-booker.herokuapp.com\") {\n    this.request = request;\n    this.base = base;\n  }\n\n  async signIn(username = \"admin\", password = \"password123\"): Promise<void> {\n    const res = await this.request.post(`${this.base}/auth`, {\n      data: { username, password },\n    });\n    this.token = (await res.json()).token ?? \"\";\n  }\n\n  private authHeaders(): Record<string, string> {          // built once, not at 8 call sites\n    return { \"Content-Type\": \"application/json\", Cookie: `token=${this.token}` };\n  }\n\n  create(booking: Booking): Promise<APIResponse> {\n    return this.request.post(`${this.base}/booking`, {\n      headers: { \"Content-Type\": \"application/json\" },\n      data: booking,\n    });\n  }\n\n  read(id: number): Promise<APIResponse> {\n    return this.request.get(`${this.base}/booking/${id}`);\n  }\n\n  update(id: number, changes: Partial<Booking>): Promise<APIResponse> {\n    return this.request.patch(`${this.base}/booking/${id}`, {\n      headers: this.authHeaders(), data: changes,\n    });\n  }\n\n  remove(id: number): Promise<APIResponse> {\n    return this.request.delete(`${this.base}/booking/${id}`, {\n      headers: this.authHeaders(),\n    });\n  }\n}\n\nconsole.log(\"Class defined — a shape, not a test.\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "| Choice | Reason |\n|---|---|\n| `readonly` on `request`, `base` | set once; swapping them mid-test becomes a compile error |\n| `private token` | exactly one place can set it — `signIn()` |\n| `authHeaders()` is a method | the token doesn't exist when the object is built |\n| `create` / `read` / `update` / `remove` | intent, not plumbing (`postToBookingEndpoint`) |\n| `Partial<Booking>` | PATCH takes *some* fields; stops you passing a full object by accident |\n| `?? \"\"` | a failed login has no token; empty string fails fast instead of sending `undefined` |\n\nNotice `create` isn't `async`. It returns the promise `request.post` gave it — nothing to\nwait for in between, so nothing to await. The caller awaits. Adding `async` would work but\nsay something untrue."
+          "text": "| Choice | Reason |\n|---|---|\n| `readonly` on `request`, `base` | set once; swapping them mid-test becomes a compile error |\n| `private token` | exactly one place can set it — `signIn()` |\n| `authHeaders()` is a method | the token doesn't exist when the object is built |\n| `create` / `read` / `update` / `remove` | intent, not plumbing (`postToBookingEndpoint`) |\n| `Partial<Booking>` | PATCH takes *some* fields; stops you passing a full object by accident |\n| `?? \"\"` | a failed login has no token; empty string fails fast instead of sending `undefined` |\n\nNotice `create` isn't `async`. It returns the promise `request.post` gave it — nothing to\nwait for in between, so nothing to await. The caller awaits. Adding `async` would work but\nsay something untrue.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The rule: no assertions in the client\n\nThere isn't one `expect()` in `BookingApi`. Same rule as \"no assertions in a page object\".\n\nTempting to assert `200` inside `create()` and save every test a line. But then `create()`\nonly serves tests that expect success. The rejected-create test needs a second method; the\nduplicate-booking test a third. You end up with `createExpectingSuccess`,\n`createExpectingFailure`, `createExpectingConflict` — three methods making one call.\n\n**The client knows how to ask. The test decides what the answer should be.**\n\nWorth being able to explain, not just recite — it's a common interview question."
+          "text": "## The rule: no assertions in the client\n\nThere isn't one `expect()` in `BookingApi`. Same rule as \"no assertions in a page object\".\n\nTempting to assert `200` inside `create()` and save every test a line. But then `create()`\nonly serves tests that expect success. The rejected-create test needs a second method; the\nduplicate-booking test a third. You end up with `createExpectingSuccess`,\n`createExpectingFailure`, `createExpectingConflict` — three methods making one call.\n\n**The client knows how to ask. The test decides what the answer should be.**\n\nWorth being able to explain, not just recite — it's a common interview question.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The fixture\n\nBuilding and signing in the client still has to happen somewhere. A `beforeAll` in every\nspec file is the old copy-paste in a new place. A **fixture** is setup a test asks for by name:\n\n```ts\nconst test = base.extend<{ api: BookingApi }>({\n  api: async ({ request }, use) => {\n    const api = new BookingApi(request);\n    await api.signIn();     // setup\n    await use(api);         // the test runs here\n                            // anything after `use` would be cleanup\n  },\n});\n```\n\n| `beforeAll` | Fixture |\n|---|---|\n| runs for every test in the file | runs only for tests that ask for `api` |\n| result lands in a file-level `let` | handed straight to the test |\n| copy-pasted into the next file | imported |\n| cleanup lives in a separate `afterAll` | cleanup sits next to its setup |\n\nThat last row matters most on a real suite: setup and teardown in one function is what stops\nthem drifting apart."
+          "text": "## The fixture\n\nBuilding and signing in the client still has to happen somewhere. A `beforeAll` in every\nspec file is the old copy-paste in a new place. A **fixture** is setup a test asks for by name:\n\n```ts\nconst test = base.extend<{ api: BookingApi }>({\n  api: async ({ request }, use) => {\n    const api = new BookingApi(request);\n    await api.signIn();     // setup\n    await use(api);         // the test runs here\n                            // anything after `use` would be cleanup\n  },\n});\n```\n\n| `beforeAll` | Fixture |\n|---|---|\n| runs for every test in the file | runs only for tests that ask for `api` |\n| result lands in a file-level `let` | handed straight to the test |\n| copy-pasted into the next file | imported |\n| cleanup lives in a separate `afterAll` | cleanup sits next to its setup |\n\nThat last row matters most on a real suite: setup and teardown in one function is what stops\nthem drifting apart.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Running it for real"
+          "text": "## Running it for real",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because this file sits inside a template\n// literal — see Day 1.1, concept 2.\nconst specPath = \"week8/generated/day1-api-client.spec.ts\";\n\nawait writeProjectFile(specPath, `// Week 8, Day 1.3 — the same calls, wrapped the way a real project wraps them.\n//\n// Written by a cell in week8/day1_3.ipynb. Run it yourself:\n//   npx playwright test week8/generated/day1-api-client.spec.ts\nimport { test as base, expect, type APIRequestContext, type APIResponse } from \"@playwright/test\";\n\nconst BASE = \"https://restful-booker.herokuapp.com\";\n\n/** The shape of a booking, written down once so every test agrees on it. */\ntype Booking = {\n  firstname: string;\n  lastname: string;\n  totalprice: number;\n  depositpaid: boolean;\n  bookingdates: { checkin: string; checkout: string };\n  additionalneeds?: string;\n};\n\n/**\n * One class per API, the same way there is one page object per screen.\n *\n * Notice what is NOT in here: not a single expect(). The client knows how to\n * make a call; the test decides whether the answer was right. That split is\n * what lets one method serve a happy-path test and a 403 test without growing\n * a second version of itself.\n */\nclass BookingApi {\n  private readonly request: APIRequestContext;\n  private readonly base: string;\n  /** Filled in by signIn(). Private so a test cannot quietly corrupt it. */\n  private token = \"\";\n\n  constructor(request: APIRequestContext, base: string = BASE) {\n    this.request = request;\n    this.base = base;\n  }\n\n  /** Trades the demo credentials for a token and remembers it. */\n  async signIn(username = \"admin\", password = \"password123\"): Promise<void> {\n    const res = await this.request.post(\\`\\${this.base}/auth\\`, {\n      data: { username, password },\n    });\n    const body = await res.json();\n    this.token = body.token ?? \"\";\n  }\n\n  /**\n   * Built once here rather than at each call site, because the day this API\n   * switches from a cookie to a bearer header, this is the only line to change.\n   */\n  private authHeaders(): Record<string, string> {\n    return { \"Content-Type\": \"application/json\", Cookie: \\`token=\\${this.token}\\` };\n  }\n\n  create(booking: Booking): Promise<APIResponse> {\n    return this.request.post(\\`\\${this.base}/booking\\`, {\n      headers: { \"Content-Type\": \"application/json\" },\n      data: booking,\n    });\n  }\n\n  read(id: number): Promise<APIResponse> {\n    return this.request.get(\\`\\${this.base}/booking/\\${id}\\`);\n  }\n\n  /** Full replace (PUT). Everything you leave out is wiped. */\n  replace(id: number, booking: Booking): Promise<APIResponse> {\n    return this.request.put(\\`\\${this.base}/booking/\\${id}\\`, {\n      headers: this.authHeaders(),\n      data: booking,\n    });\n  }\n\n  /** Partial update (PATCH). Only the fields you pass are touched. */\n  update(id: number, changes: Partial<Booking>): Promise<APIResponse> {\n    return this.request.patch(\\`\\${this.base}/booking/\\${id}\\`, {\n      headers: this.authHeaders(),\n      data: changes,\n    });\n  }\n\n  remove(id: number): Promise<APIResponse> {\n    return this.request.delete(\\`\\${this.base}/booking/\\${id}\\`, {\n      headers: this.authHeaders(),\n    });\n  }\n}\n\n/**\n * A fixture: setup that a test asks for by name. Every test that declares\n * \\`{ api }\\` gets a client that is already signed in, and no test has to\n * remember to do it.\n */\nconst test = base.extend<{ api: BookingApi }>({\n  api: async ({ request }, use) => {\n    const api = new BookingApi(request);\n    await api.signIn();\n    await use(api);\n  },\n});\n\nconst sample: Booking = {\n  firstname: \"Ada\",\n  lastname: \"Lovelace\",\n  totalprice: 350,\n  depositpaid: true,\n  bookingdates: { checkin: \"2024-05-01\", checkout: \"2024-05-08\" },\n  additionalneeds: \"Late checkout\",\n};\n\ntest(\"a booking can be created, changed and removed\", async ({ api }) => {\n  // Create — the test asserts, the client does not.\n  const created = await api.create(sample);\n  expect(created.status()).toBe(200);\n  const { bookingid: id, booking } = await created.json();\n  expect(booking.firstname).toBe(\"Ada\");\n\n  // Partial update — lastname must survive untouched.\n  const patched = await api.update(id, { firstname: \"Grace\" });\n  expect(patched.status()).toBe(200);\n  const afterPatch = await patched.json();\n  expect(afterPatch.firstname).toBe(\"Grace\");\n  expect(afterPatch.lastname).toBe(\"Lovelace\");\n\n  // Remove, then prove it is really gone.\n  expect((await api.remove(id)).status()).toBe(201);\n  expect((await api.read(id)).status()).toBe(404);\n});\n\ntest(\"a client that never signed in cannot change anything\", async ({ request }) => {\n  // Deliberately skipping signIn() to show what the token is actually doing.\n  const anonymous = new BookingApi(request);\n\n  const created = await anonymous.create(sample);\n  expect(created.status()).toBe(200); // creating needs no token on this API\n\n  const { bookingid: id } = await created.json();\n  const blocked = await anonymous.update(id, { firstname: \"Mallory\" });\n  expect(blocked.status()).toBe(403);\n});\n`);\n\nawait runSpec(specPath);"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because this file sits inside a template\n// literal — see Day 1.1, concept 2.\nconst specPath = \"week8/generated/day1-api-client.spec.ts\";\n\nawait writeProjectFile(specPath, `// Week 8, Day 1.3 — the same calls, wrapped the way a real project wraps them.\n//\n// Written by a cell in week8/day1_3.ipynb. Run it yourself:\n//   npx playwright test week8/generated/day1-api-client.spec.ts\nimport { test as base, expect, type APIRequestContext, type APIResponse } from \"@playwright/test\";\n\nconst BASE = \"https://restful-booker.herokuapp.com\";\n\n/** The shape of a booking, written down once so every test agrees on it. */\ntype Booking = {\n  firstname: string;\n  lastname: string;\n  totalprice: number;\n  depositpaid: boolean;\n  bookingdates: { checkin: string; checkout: string };\n  additionalneeds?: string;\n};\n\n/**\n * One class per API, the same way there is one page object per screen.\n *\n * Notice what is NOT in here: not a single expect(). The client knows how to\n * make a call; the test decides whether the answer was right. That split is\n * what lets one method serve a happy-path test and a 403 test without growing\n * a second version of itself.\n */\nclass BookingApi {\n  private readonly request: APIRequestContext;\n  private readonly base: string;\n  /** Filled in by signIn(). Private so a test cannot quietly corrupt it. */\n  private token = \"\";\n\n  constructor(request: APIRequestContext, base: string = BASE) {\n    this.request = request;\n    this.base = base;\n  }\n\n  /** Trades the demo credentials for a token and remembers it. */\n  async signIn(username = \"admin\", password = \"password123\"): Promise<void> {\n    const res = await this.request.post(\\`\\${this.base}/auth\\`, {\n      data: { username, password },\n    });\n    const body = await res.json();\n    this.token = body.token ?? \"\";\n  }\n\n  /**\n   * Built once here rather than at each call site, because the day this API\n   * switches from a cookie to a bearer header, this is the only line to change.\n   */\n  private authHeaders(): Record<string, string> {\n    return { \"Content-Type\": \"application/json\", Cookie: \\`token=\\${this.token}\\` };\n  }\n\n  create(booking: Booking): Promise<APIResponse> {\n    return this.request.post(\\`\\${this.base}/booking\\`, {\n      headers: { \"Content-Type\": \"application/json\" },\n      data: booking,\n    });\n  }\n\n  read(id: number): Promise<APIResponse> {\n    return this.request.get(\\`\\${this.base}/booking/\\${id}\\`);\n  }\n\n  /** Full replace (PUT). Everything you leave out is wiped. */\n  replace(id: number, booking: Booking): Promise<APIResponse> {\n    return this.request.put(\\`\\${this.base}/booking/\\${id}\\`, {\n      headers: this.authHeaders(),\n      data: booking,\n    });\n  }\n\n  /** Partial update (PATCH). Only the fields you pass are touched. */\n  update(id: number, changes: Partial<Booking>): Promise<APIResponse> {\n    return this.request.patch(\\`\\${this.base}/booking/\\${id}\\`, {\n      headers: this.authHeaders(),\n      data: changes,\n    });\n  }\n\n  remove(id: number): Promise<APIResponse> {\n    return this.request.delete(\\`\\${this.base}/booking/\\${id}\\`, {\n      headers: this.authHeaders(),\n    });\n  }\n}\n\n/**\n * A fixture: setup that a test asks for by name. Every test that declares\n * \\`{ api }\\` gets a client that is already signed in, and no test has to\n * remember to do it.\n */\nconst test = base.extend<{ api: BookingApi }>({\n  api: async ({ request }, use) => {\n    const api = new BookingApi(request);\n    await api.signIn();\n    await use(api);\n  },\n});\n\nconst sample: Booking = {\n  firstname: \"Ada\",\n  lastname: \"Lovelace\",\n  totalprice: 350,\n  depositpaid: true,\n  bookingdates: { checkin: \"2024-05-01\", checkout: \"2024-05-08\" },\n  additionalneeds: \"Late checkout\",\n};\n\ntest(\"a booking can be created, changed and removed\", async ({ api }) => {\n  // Create — the test asserts, the client does not.\n  const created = await api.create(sample);\n  expect(created.status()).toBe(200);\n  const { bookingid: id, booking } = await created.json();\n  expect(booking.firstname).toBe(\"Ada\");\n\n  // Partial update — lastname must survive untouched.\n  const patched = await api.update(id, { firstname: \"Grace\" });\n  expect(patched.status()).toBe(200);\n  const afterPatch = await patched.json();\n  expect(afterPatch.firstname).toBe(\"Grace\");\n  expect(afterPatch.lastname).toBe(\"Lovelace\");\n\n  // Remove, then prove it is really gone.\n  expect((await api.remove(id)).status()).toBe(201);\n  expect((await api.read(id)).status()).toBe(404);\n});\n\ntest(\"a client that never signed in cannot change anything\", async ({ request }) => {\n  // Deliberately skipping signIn() to show what the token is actually doing.\n  const anonymous = new BookingApi(request);\n\n  const created = await anonymous.create(sample);\n  expect(created.status()).toBe(200); // creating needs no token on this API\n\n  const { bookingid: id } = await created.json();\n  const blocked = await anonymous.update(id, { firstname: \"Mallory\" });\n  expect(blocked.status()).toBe(403);\n});\n`);\n\nawait runSpec(specPath);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day1-api-client.spec.ts`\n\n**Expected:** `2 passed`, ~3 seconds.\n\nRead what the test says now:\n\n```ts\nconst created = await api.create(sample);\nexpect(created.status()).toBe(200);\nconst patched = await api.update(id, { firstname: \"Grace\" });\n```\n\nNo URLs, no headers, no token — a description of behaviour. If this API moved to bearer\ntokens tomorrow, the test wouldn't change at all. Only `authHeaders()` would.\n\nThese tests also **don't need `mode: \"serial\"`**. Each makes its own booking, so they're\nindependent and run in parallel. The structure didn't just tidy the code — it removed a\nreal constraint.\n\n## What a reviewer checks\n\n- No `expect()` in the client — the most common first-review comment\n- No hardcoded ids; every id read back from a create\n- No token in the source\n- Base URL in one place, ideally from config or an env var\n- Method names describing intent\n- **Every test able to run alone** — otherwise it's the one that fails in CI at 3am\n\n**Next:** [Day 1.4](/learn/w8/d1/p4) — your turn, no worked examples."
+          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day1-api-client.spec.ts`\n\n**Expected:** `2 passed`, ~3 seconds.\n\nRead what the test says now:\n\n```ts\nconst created = await api.create(sample);\nexpect(created.status()).toBe(200);\nconst patched = await api.update(id, { firstname: \"Grace\" });\n```\n\nNo URLs, no headers, no token — a description of behaviour. If this API moved to bearer\ntokens tomorrow, the test wouldn't change at all. Only `authHeaders()` would.\n\nThese tests also **don't need `mode: \"serial\"`**. Each makes its own booking, so they're\nindependent and run in parallel. The structure didn't just tidy the code — it removed a\nreal constraint.\n\n## What a reviewer checks\n\n- No `expect()` in the client — the most common first-review comment\n- No hardcoded ids; every id read back from a create\n- No token in the source\n- Base URL in one place, ideally from config or an env var\n- Method names describing intent\n- **Every test able to run alone** — otherwise it's the one that fails in CI at 3am\n\n**Next:** [Day 1.4](/learn/w8/d1/p4) — your turn, no worked examples.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -336,23 +480,33 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.4 — Practice\n\nThree problems, getting harder. No answer key — each one tells you how to check yourself.\n\nTarget: **Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)). Credentials `admin` /\n`password123`.\n\nWork in the cells below, or write a spec into `week8/generated/`. Problem 3 expects a spec.\n\n> Stuck past twenty minutes? The gap is in [Day 1.1](/learn/w8/d1/p1) or\n> [Day 1.2](/learn/w8/d1/p2), not in your ability."
+          "text": "# Week 8, Day 1.4 — Practice\n\nThree problems, getting harder. No answer key — each one tells you how to check yourself.\n\nTarget: **Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)). Credentials `admin` /\n`password123`.\n\nWork in the cells below, or write a spec into `week8/generated/`. Problem 3 expects a spec.\n\n> Stuck past twenty minutes? The gap is in [Day 1.1](/learn/w8/d1/p1) or\n> [Day 1.2](/learn/w8/d1/p2), not in your ability.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "1"
+          "text": "1",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "2"
+          "text": "2",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "3"
+          "text": "3",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**If this API switched to a bearer token tomorrow, how many lines would you change?**\n\nOne means you understood Day 1.3. More means look at where the header gets built — Day 1.2's\nversion needed four.\n\n**Could two people run your Problem 3 test at the same time?** That's the difference between\na test that works and a test that works in CI.\n\n**Next:** Day 2 — what to do when the API under test is down, checking a response's *shape*\nrather than its values, and chaining calls where one booking feeds the next."
+          "text": "## When you're done\n\n**If this API switched to a bearer token tomorrow, how many lines would you change?**\n\nOne means you understood Day 1.3. More means look at where the header gets built — Day 1.2's\nversion needed four.\n\n**Could two people run your Problem 3 test at the same time?** That's the difference between\na test that works and a test that works in CI.\n\n**Next:** Day 2 — what to do when the API under test is down, checking a response's *shape*\nrather than its values, and chaining calls where one booking feeds the next.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": [

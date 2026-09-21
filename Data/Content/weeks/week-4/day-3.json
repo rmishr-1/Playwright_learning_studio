@@ -15,7 +15,9 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 3.1 — Prerequisites check\n\n**No new TypeScript today.** Everything you need is an options object and a number.\n\n| You'll use | Taught in |\n|---|---|\n| Objects as options (`{ mode: \"parallel\" }`) | [week3/day1_1](/learn/w3/d1/p1) |\n| Numeric separators (`60_000`) | [week3/day1_1](/learn/w3/d1/p1) |\n| Arrow functions | [week3/day2_1](/learn/w3/d2/p1) |\n\nToday builds directly on two earlier days — [week3/day1_2](/learn/w3/d1/p2) (timeouts) and\n[week3/day5_2](/learn/w3/d5/p2) (workers and parallelism). If either is hazy, skim it first:\ntoday is about moving those same settings to a smaller scope.\n\n**Next:** [Day 3.2 — Changing settings without disturbing your team](/learn/w4/d3/p2)"
+          "text": "# Week 4, Day 3.1 — Prerequisites check\n\n**No new TypeScript today.** Everything you need is an options object and a number.\n\n| You'll use | Taught in |\n|---|---|\n| Objects as options (`{ mode: \"parallel\" }`) | [week3/day1_1](/learn/w3/d1/p1) |\n| Numeric separators (`60_000`) | [week3/day1_1](/learn/w3/d1/p1) |\n| Arrow functions | [week3/day2_1](/learn/w3/d2/p1) |\n\nToday builds directly on two earlier days — [week3/day1_2](/learn/w3/d1/p2) (timeouts) and\n[week3/day5_2](/learn/w3/d5/p2) (workers and parallelism). If either is hazy, skim it first:\ntoday is about moving those same settings to a smaller scope.\n\n**Next:** [Day 3.2 — Changing settings without disturbing your team](/learn/w4/d3/p2)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -30,51 +32,75 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 3.2 — Changing settings without disturbing your team\n\nYou need one test to run in parallel, or one test to wait longer. Editing\n`playwright.config.ts` gets you there — and changes the behaviour of every test your colleagues\nown. By the end of this lesson you can make the change in the smallest possible place.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout."
+          "text": "# Week 4, Day 3.2 — Changing settings without disturbing your team\n\nYou need one test to run in parallel, or one test to wait longer. Editing\n`playwright.config.ts` gets you there — and changes the behaviour of every test your colleagues\nown. By the end of this lesson you can make the change in the smallest possible place.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The problem with editing the shared config\n\nA config change is a change to everyone's suite:\n\n| You want | If you edit the config | Cost to the team |\n|---|---|---|\n| one group to run in parallel | `fullyParallel: true` | dependent tests elsewhere start failing |\n| one slow test to wait longer | `timeout: 80_000` | *every* failure now takes 80s to report |\n| to try three workers | `workers: 3` | someone's serial suite breaks |\n\nNone of these are hypothetical. And nobody remembers to change them back, so a temporary\nexperiment becomes the team's permanent default.\n\nPlaywright's answer is that most of these settings can also be set **in the spec**, where they\naffect only what you own."
+          "text": "## The problem with editing the shared config\n\nA config change is a change to everyone's suite:\n\n| You want | If you edit the config | Cost to the team |\n|---|---|---|\n| one group to run in parallel | `fullyParallel: true` | dependent tests elsewhere start failing |\n| one slow test to wait longer | `timeout: 80_000` | *every* failure now takes 80s to report |\n| to try three workers | `workers: 3` | someone's serial suite breaks |\n\nNone of these are hypothetical. And nobody remembers to change them back, so a temporary\nexperiment becomes the team's permanent default.\n\nPlaywright's answer is that most of these settings can also be set **in the spec**, where they\naffect only what you own.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Three scopes, smallest first\n\n| Scope | How | Affects |\n|---|---|---|\n| One assertion | `expect(x).toBeVisible({ timeout: 9_000 })` | that one check |\n| One test | `test.setTimeout(60_000)` / `test.slow()` | that one test |\n| One `describe` group | `test.describe.configure({ mode: \"parallel\" })` | that group |\n| Everything | the config file | **everyone** |\n\nPick the narrowest row that solves your problem. That's the whole of today."
+          "text": "## Three scopes, smallest first\n\n| Scope | How | Affects |\n|---|---|---|\n| One assertion | `expect(x).toBeVisible({ timeout: 9_000 })` | that one check |\n| One test | `test.setTimeout(60_000)` / `test.slow()` | that one test |\n| One `describe` group | `test.describe.configure({ mode: \"parallel\" })` | that group |\n| Everything | the config file | **everyone** |\n\nPick the narrowest row that solves your problem. That's the whole of today.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 1 — parallel for one group only\n\n**Objective:** run three tests concurrently without touching `fullyParallel`.\n\n`test.describe.configure()` goes inside the group. `mode: \"parallel\"` lets its tests run at the\nsame time; `mode: \"serial\"` forces them in order — which is what\n[week3/day2_2](/learn/w3/d2/p2) used for dependent tests."
+          "text": "## Example 1 — parallel for one group only\n\n**Objective:** run three tests concurrently without touching `fullyParallel`.\n\n`test.describe.configure()` goes inside the group. `mode: \"parallel\"` lets its tests run at the\nsame time; `mode: \"serial\"` forces them in order — which is what\n[week3/day2_2](/learn/w3/d2/p2) used for dependent tests.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 4 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week4/generated/day3-script-level.spec.ts\", `// Week 4, Day 3 — changing settings for YOUR test, not for the whole team.\n//\n// Everything here overrides a config value from inside the spec. The root\n// playwright.config.ts is never touched, so nobody else's run changes.\n//\n// Written by a cell in week4/day3_2.ipynb. Run it yourself:\n//   npx playwright test week4/generated/day3-script-level.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Script-level overrides\", () => {\n  // Applies to this group only. The config's fullyParallel setting is untouched.\n  test.describe.configure({ mode: \"parallel\" });\n\n  test(\"A — runs in parallel with its siblings\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n\n  test(\"B — independent, so parallel is safe\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page.getByText(\"Account Balance\", { exact: true })).toBeVisible();\n  });\n\n  test(\"C — three fresh contexts, no shared state\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page.getByRole(\"button\", { name: \"LogOut\" })).toBeVisible();\n  });\n});\n\ntest.describe(\"Test-level timeout\", () => {\n  test(\"this one test gets a longer budget\", async ({ page }) => {\n    // Raises the deadline for THIS test only. The config default still applies\n    // to every other test in the suite.\n    test.setTimeout(60_000);\n\n    await loginAs(page);\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n\n  test(\"and this one keeps the default\", async ({ page }) => {\n    await loginAs(page);\n    // Proof the override above did not leak: this test's budget is whatever the\n    // config says, not 60s.\n    expect(test.info().timeout).toBeLessThan(60_000);\n  });\n\n  test(\"test.slow() triples the budget instead of naming a number\", async ({ page }) => {\n    const before = test.info().timeout;\n    test.slow();\n    expect(test.info().timeout).toBe(before * 3);\n\n    await loginAs(page);\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n});\n\ntest.describe(\"What cannot be overridden per test\", () => {\n  test(\"the expect() deadline is per-assertion, not per-test\", async ({ page }) => {\n    await loginAs(page);\n\n    // There is no test.setExpectTimeout(). The assertion budget is either a\n    // config value (expect.timeout) or an option on the individual assertion.\n    await expect(page.getByText(\"Leela\")).toBeVisible({ timeout: 9_000 });\n\n    // test.setTimeout changes the TEST budget; it does nothing to expect().\n    test.setTimeout(45_000);\n    await expect(page.getByRole(\"button\", { name: \"LogOut\" })).toBeVisible({ timeout: 3_000 });\n  });\n});\n`);\n\nawait runSpec(\"week4/generated/day3-script-level.spec.ts\");"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 4 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week4/generated/day3-script-level.spec.ts\", `// Week 4, Day 3 — changing settings for YOUR test, not for the whole team.\n//\n// Everything here overrides a config value from inside the spec. The root\n// playwright.config.ts is never touched, so nobody else's run changes.\n//\n// Written by a cell in week4/day3_2.ipynb. Run it yourself:\n//   npx playwright test week4/generated/day3-script-level.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Script-level overrides\", () => {\n  // Applies to this group only. The config's fullyParallel setting is untouched.\n  test.describe.configure({ mode: \"parallel\" });\n\n  test(\"A — runs in parallel with its siblings\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n\n  test(\"B — independent, so parallel is safe\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page.getByText(\"Account Balance\", { exact: true })).toBeVisible();\n  });\n\n  test(\"C — three fresh contexts, no shared state\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page.getByRole(\"button\", { name: \"LogOut\" })).toBeVisible();\n  });\n});\n\ntest.describe(\"Test-level timeout\", () => {\n  test(\"this one test gets a longer budget\", async ({ page }) => {\n    // Raises the deadline for THIS test only. The config default still applies\n    // to every other test in the suite.\n    test.setTimeout(60_000);\n\n    await loginAs(page);\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n\n  test(\"and this one keeps the default\", async ({ page }) => {\n    await loginAs(page);\n    // Proof the override above did not leak: this test's budget is whatever the\n    // config says, not 60s.\n    expect(test.info().timeout).toBeLessThan(60_000);\n  });\n\n  test(\"test.slow() triples the budget instead of naming a number\", async ({ page }) => {\n    const before = test.info().timeout;\n    test.slow();\n    expect(test.info().timeout).toBe(before * 3);\n\n    await loginAs(page);\n    await expect(page.getByText(\"Leela\")).toBeVisible();\n  });\n});\n\ntest.describe(\"What cannot be overridden per test\", () => {\n  test(\"the expect() deadline is per-assertion, not per-test\", async ({ page }) => {\n    await loginAs(page);\n\n    // There is no test.setExpectTimeout(). The assertion budget is either a\n    // config value (expect.timeout) or an option on the individual assertion.\n    await expect(page.getByText(\"Leela\")).toBeVisible({ timeout: 9_000 });\n\n    // test.setTimeout changes the TEST budget; it does nothing to expect().\n    test.setTimeout(45_000);\n    await expect(page.getByRole(\"button\", { name: \"LogOut\" })).toBeVisible({ timeout: 3_000 });\n  });\n});\n`);\n\nawait runSpec(\"week4/generated/day3-script-level.spec.ts\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week4/generated/day3-script-level.spec.ts`\n\n**Expected:** `7 passed`.\n\nTwo groups, two different policies, one file. The first is `mode: \"parallel\"`; the second isn't,\nso it uses whatever the config says. Neither changed the config.\n\n**The precondition for parallel is independence.** Those three tests each sign in on their own\n`page` and share nothing. Mark a dependent group parallel and you get failures that look random —\nthat's the same lesson as week3, from the other direction."
+          "text": "> ▶ **Run it yourself:** `npx playwright test week4/generated/day3-script-level.spec.ts`\n\n**Expected:** `7 passed`.\n\nTwo groups, two different policies, one file. The first is `mode: \"parallel\"`; the second isn't,\nso it uses whatever the config says. Neither changed the config.\n\n**The precondition for parallel is independence.** Those three tests each sign in on their own\n`page` and share nothing. Mark a dependent group parallel and you get failures that look random —\nthat's the same lesson as week3, from the other direction.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 2 — a longer budget for one test\n\n`test.setTimeout()` is the first line inside the test body. It replaces the budget for that test\nonly."
+          "text": "## Example 2 — a longer budget for one test\n\n`test.setTimeout()` is the first line inside the test body. It replaces the budget for that test\nonly.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// The three forms, as plain data — this is what you would write.\nconst forms = {\n  oneAssertion: 'await expect(locator).toBeVisible({ timeout: 9_000 });',\n  oneTest:      'test.setTimeout(60_000);   // first line inside the test',\n  tripleIt:     'test.slow();               // 3x whatever the config says',\n  wholeSuite:   '{ timeout: 60_000 }        // in playwright.config.ts',\n};\n\nfor (const [name, code] of Object.entries(forms)) {\n  console.log(`${name.padEnd(13)} ${code}`);\n}"
+          "text": "// The three forms, as plain data — this is what you would write.\nconst forms = {\n  oneAssertion: 'await expect(locator).toBeVisible({ timeout: 9_000 });',\n  oneTest:      'test.setTimeout(60_000);   // first line inside the test',\n  tripleIt:     'test.slow();               // 3x whatever the config says',\n  wholeSuite:   '{ timeout: 60_000 }        // in playwright.config.ts',\n};\n\nfor (const [name, code] of Object.entries(forms)) {\n  console.log(`${name.padEnd(13)} ${code}`);\n}",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** four lines, narrowest scope first.\n\n`test.slow()` is worth knowing: it multiplies the configured timeout by three rather than naming\na number. That keeps working when the config changes, whereas a hardcoded `60_000` quietly stops\nbeing three times the default.\n\nThe spec above proves the isolation — one test raises its budget to 60s, and the next test\nasserts its own budget is still **below** 60s. The override didn't leak."
+          "text": "**Expected:** four lines, narrowest scope first.\n\n`test.slow()` is worth knowing: it multiplies the configured timeout by three rather than naming\na number. That keeps working when the config changes, whereas a hardcoded `60_000` quietly stops\nbeing three times the default.\n\nThe spec above proves the isolation — one test raises its budget to 60s, and the next test\nasserts its own budget is still **below** 60s. The override didn't leak.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## What you cannot move into the spec\n\nThere is no `test.setExpectTimeout()`. The auto-retrying assertion deadline is either:\n\n- a config value — `expect: { timeout: 8_000 }`, or\n- an option on the individual assertion — `toBeVisible({ timeout: 9_000 })`\n\nAnd `test.setTimeout()` does **not** touch it. Raise the test budget to 45 seconds and an\nassertion still gives up after its own 5 — which produces the confusing situation where a test\nwith a generous timeout fails in five seconds.\n\n| Setting | Config | Per test | Per assertion |\n|---|---|---|---|\n| test/action timeout | yes | **yes** | — |\n| expect timeout | yes | **no** | **yes** |\n| parallel mode | yes | **yes** (per describe) | — |\n| workers | yes | **no** | — |\n| retries | yes | no (per describe: `retries`) | — |\n\nWorkers are the other one people expect to be per-spec and aren't: a worker is an OS process, so\nit's decided before your file is even loaded."
+          "text": "## What you cannot move into the spec\n\nThere is no `test.setExpectTimeout()`. The auto-retrying assertion deadline is either:\n\n- a config value — `expect: { timeout: 8_000 }`, or\n- an option on the individual assertion — `toBeVisible({ timeout: 9_000 })`\n\nAnd `test.setTimeout()` does **not** touch it. Raise the test budget to 45 seconds and an\nassertion still gives up after its own 5 — which produces the confusing situation where a test\nwith a generous timeout fails in five seconds.\n\n| Setting | Config | Per test | Per assertion |\n|---|---|---|---|\n| test/action timeout | yes | **yes** | — |\n| expect timeout | yes | **no** | **yes** |\n| parallel mode | yes | **yes** (per describe) | — |\n| workers | yes | **no** | — |\n| retries | yes | no (per describe: `retries`) | — |\n\nWorkers are the other one people expect to be per-spec and aren't: a worker is an OS process, so\nit's decided before your file is even loaded.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Narrowest scope that works.** Assertion, then test, then group, then config.\n- **`test.slow()` over a hardcoded number** when you just mean \"this one is heavy\".\n- **Only mark a group parallel if its tests are genuinely independent.**\n- **Config changes get discussed**, because they're changes to other people's suites.\n- **Never leave an experiment in the config.** If it must go there, it needs a comment saying why.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Assertion fails in 5s despite `setTimeout(45_000)` | expect has its own deadline | pass `{ timeout }` to the assertion |\n| Parallel group fails randomly | its tests aren't independent | `mode: \"serial\"`, or make them independent |\n| `test.setTimeout` seems ignored | called outside the test body | first line *inside* the test |\n| Colleague's suite broke after your push | you edited the shared config | move it into your spec |\n| `workers` in a spec does nothing | it's process-level | set it in the config or on the CLI |\n\n**Next:** [Day 3.3](/learn/w4/d3/p3) — which knob belongs where, on a real team."
+          "text": "## Best practices\n\n- **Narrowest scope that works.** Assertion, then test, then group, then config.\n- **`test.slow()` over a hardcoded number** when you just mean \"this one is heavy\".\n- **Only mark a group parallel if its tests are genuinely independent.**\n- **Config changes get discussed**, because they're changes to other people's suites.\n- **Never leave an experiment in the config.** If it must go there, it needs a comment saying why.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Assertion fails in 5s despite `setTimeout(45_000)` | expect has its own deadline | pass `{ timeout }` to the assertion |\n| Parallel group fails randomly | its tests aren't independent | `mode: \"serial\"`, or make them independent |\n| `test.setTimeout` seems ignored | called outside the test body | first line *inside* the test |\n| Colleague's suite broke after your push | you edited the shared config | move it into your spec |\n| `workers` in a spec does nothing | it's process-level | set it in the config or on the CLI |\n\n**Next:** [Day 3.3](/learn/w4/d3/p3) — which knob belongs where, on a real team.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -89,23 +115,33 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 3.3 — Where settings belong on a real team\n\nSame overrides as [Day 3.2](/learn/w4/d3/p2). No new API. The question is which knob belongs in the\nrepo, which belongs in a spec, and which belongs on the command line."
+          "text": "# Week 4, Day 3.3 — Where settings belong on a real team\n\nSame overrides as [Day 3.2](/learn/w4/d3/p2). No new API. The question is which knob belongs in the\nrepo, which belongs in a spec, and which belongs on the command line.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Three homes, three lifetimes\n\n| Home | Lifetime | Good for |\n|---|---|---|\n| **Command line** | one run | `--headed`, `--workers=1`, `--repeat-each`, `--debug` |\n| **Spec file** | as long as that test exists | this group is parallel; this test is slow |\n| **Config** | forever, for everyone | baseURL, reporters, trace policy, the browser matrix |\n\nThe test for the config is simple: **would every current and future teammate want this?** A\nreporter, yes. Your 80-second timeout because one screen is slow today, no."
+          "text": "## Three homes, three lifetimes\n\n| Home | Lifetime | Good for |\n|---|---|---|\n| **Command line** | one run | `--headed`, `--workers=1`, `--repeat-each`, `--debug` |\n| **Spec file** | as long as that test exists | this group is parallel; this test is slow |\n| **Config** | forever, for everyone | baseURL, reporters, trace policy, the browser matrix |\n\nThe test for the config is simple: **would every current and future teammate want this?** A\nreporter, yes. Your 80-second timeout because one screen is slow today, no.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// Sort a handful of real decisions into the right home.\nconst decisions = [\n  { want: \"watch a test in a browser\",            home: \"CLI    --headed\" },\n  { want: \"this group can run in parallel\",        home: \"spec   describe.configure\" },\n  { want: \"this one journey is genuinely slow\",    home: \"spec   test.slow()\" },\n  { want: \"traces kept on failure\",                home: \"config trace: retain-on-failure\" },\n  { want: \"run only one test while debugging\",     home: \"CLI    -g \\\"name\\\"\" },\n  { want: \"the app under test lives here\",         home: \"config baseURL\" },\n  { want: \"CI is slower than my laptop\",           home: \"config process.env.CI ? ... : ...\" },\n  { want: \"try three workers, once\",               home: \"CLI    --workers=3\" },\n];\n\nfor (const d of decisions) console.log(`${d.want.padEnd(36)} -> ${d.home}`);"
+          "text": "// Sort a handful of real decisions into the right home.\nconst decisions = [\n  { want: \"watch a test in a browser\",            home: \"CLI    --headed\" },\n  { want: \"this group can run in parallel\",        home: \"spec   describe.configure\" },\n  { want: \"this one journey is genuinely slow\",    home: \"spec   test.slow()\" },\n  { want: \"traces kept on failure\",                home: \"config trace: retain-on-failure\" },\n  { want: \"run only one test while debugging\",     home: \"CLI    -g \\\"name\\\"\" },\n  { want: \"the app under test lives here\",         home: \"config baseURL\" },\n  { want: \"CI is slower than my laptop\",           home: \"config process.env.CI ? ... : ...\" },\n  { want: \"try three workers, once\",               home: \"CLI    --workers=3\" },\n];\n\nfor (const d of decisions) console.log(`${d.want.padEnd(36)} -> ${d.home}`);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** eight lines, each naming a home.\n\nRead the CLI rows together: they are all **temporary by construction**. Nothing to remember to\nremove, nothing to review, nothing that can leak into someone else's run. That's why the command\nline is the right home for anything you're only doing today."
+          "text": "**Expected:** eight lines, each naming a home.\n\nRead the CLI rows together: they are all **temporary by construction**. Nothing to remember to\nremove, nothing to review, nothing that can leak into someone else's run. That's why the command\nline is the right home for anything you're only doing today.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The escape hatch that becomes technical debt\n\nA per-test override is a small, local, documented decision — or an undocumented workaround that\noutlives everyone who understood it. The difference is one comment:\n\n```ts\n// Statement generation calls a third-party PDF service; 45s is its p99.\n// Ticket PERF-284 tracks getting this under 10s.\ntest.setTimeout(45_000);\n```\n\nversus:\n\n```ts\ntest.setTimeout(45_000);\n```\n\nThe second one will still be there in three years, and nobody will dare remove it because nobody\nknows what breaks. Every override worth keeping is worth one line of why.\n\n## What a reviewer checks\n\n- **Is this the narrowest scope** that solves the problem?\n- **Does a config change belong to everyone**, or is it one person's workaround?\n- **Does each override carry a reason** — ideally a ticket?\n- **Is a parallel group actually independent?**\n- **Nothing temporary committed** — no `--headed` equivalent, no `slowMo`, no stray `only`.\n\n**Next:** [Day 3.4](/learn/w4/d3/p4) — your turn."
+          "text": "## The escape hatch that becomes technical debt\n\nA per-test override is a small, local, documented decision — or an undocumented workaround that\noutlives everyone who understood it. The difference is one comment:\n\n```ts\n// Statement generation calls a third-party PDF service; 45s is its p99.\n// Ticket PERF-284 tracks getting this under 10s.\ntest.setTimeout(45_000);\n```\n\nversus:\n\n```ts\ntest.setTimeout(45_000);\n```\n\nThe second one will still be there in three years, and nobody will dare remove it because nobody\nknows what breaks. Every override worth keeping is worth one line of why.\n\n## What a reviewer checks\n\n- **Is this the narrowest scope** that solves the problem?\n- **Does a config change belong to everyone**, or is it one person's workaround?\n- **Does each override carry a reason** — ideally a ticket?\n- **Is a parallel group actually independent?**\n- **Nothing temporary committed** — no `--headed` equivalent, no `slowMo`, no stray `only`.\n\n**Next:** [Day 3.4](/learn/w4/d3/p4) — your turn.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -120,23 +156,33 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 3.4 — Practice\n\nThree problems. No answer key.\n\nApp: `https://test-automation-banking.vercel.app/`. Do not edit the root\n`playwright.config.ts` in any of these — that constraint *is* the exercise.\n\n> Stuck past twenty minutes? Back to [Day 3.2](/learn/w4/d3/p2)."
+          "text": "# Week 4, Day 3.4 — Practice\n\nThree problems. No answer key.\n\nApp: `https://test-automation-banking.vercel.app/`. Do not edit the root\n`playwright.config.ts` in any of these — that constraint *is* the exercise.\n\n> Stuck past twenty minutes? Back to [Day 3.2](/learn/w4/d3/p2).",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "1"
+          "text": "1",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "2"
+          "text": "2",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "3"
+          "text": "3",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**The deletion check from Problem 3 is worth running on real suites too.** Overrides accumulate\nbecause adding one is easy and removing one feels risky. Deleting them and watching what actually\nfails converts a guess into evidence.\n\n**Next:** [Day 4.1](/learn/w4/d4/p1) — elements you can see but cannot reach."
+          "text": "## When you're done\n\n**The deletion check from Problem 3 is worth running on real suites too.** Overrides accumulate\nbecause adding one is easy and removing one feels risky. Deleting them and watching what actually\nfails converts a guess into evidence.\n\n**Next:** [Day 4.1](/learn/w4/d4/p1) — elements you can see but cannot reach.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": [

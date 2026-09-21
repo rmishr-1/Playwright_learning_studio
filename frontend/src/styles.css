@@ -71,6 +71,16 @@
   --ed-rule: #333b4a;
   --ed-text: #dbe2ee;
   --ed-dim: #8e99ad;
+  /* Concept color grading. Like --ed-bg above, these are literal values, not var(--accent) etc -
+     the editor's theme toggles independently of the page's, so a page-scoped token would take
+     whatever the PAGE currently is, not the editor. The values match the dark :root's own
+     --accent/--good/--warn, so a learner who reads blue-as-interactive and green-as-passing
+     elsewhere in the studio gets the same association here - just pinned, not inherited. */
+  --concept-locator: #6f9bff;
+  --concept-assertion: #3dc97f;
+  --concept-action: #e3a250;
+  --concept-wait: #b794f6;
+  --concept-test: #eab308;
 }
 .pane-editor[data-editor-theme='light'] {
   --ed-bg: #ffffff;
@@ -78,6 +88,11 @@
   --ed-rule: var(--rule);
   --ed-text: var(--graphite);
   --ed-dim: var(--muted);
+  --concept-locator: #2563eb;
+  --concept-assertion: #15a34a;
+  --concept-action: #d97706;
+  --concept-wait: #7c3aed;
+  --concept-test: #a16207;
 }
 
 * { box-sizing: border-box; }
@@ -298,6 +313,13 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
   white-space: pre-wrap; word-break: break-word;
 }
+/* Concept color grading (lesson code - always dark, so these are literal, not var()-driven -
+   see the .pane-editor blocks above for the live-editor equivalent, which toggles theme). */
+.example pre .concept-locator { color: #6f9bff; }
+.example pre .concept-assertion { color: #3dc97f; }
+.example pre .concept-action { color: #e3a250; }
+.example pre .concept-wait { color: #b794f6; }
+.example pre .concept-test { color: #eab308; }
 
 .yourturn {
   margin: 18px 0; border: 1px dashed var(--warn); background: var(--warn-wash);
@@ -360,6 +382,14 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 .editor-body > * { flex: 1; min-width: 0; }
 .editor-body .cm-editor { height: 100%; }
 .editor-body .cm-scroller { overflow: auto; }
+/* Concept color grading, live in the editor - see conceptHighlight.ts. Values come from the
+   --concept-* vars the .pane-editor[data-editor-theme] blocks above set, so this follows the
+   EDITOR's own light/dark toggle, not the page's. */
+.editor-body .cm-concept-locator { color: var(--concept-locator); }
+.editor-body .cm-concept-assertion { color: var(--concept-assertion); }
+.editor-body .cm-concept-action { color: var(--concept-action); }
+.editor-body .cm-concept-wait { color: var(--concept-wait); }
+.editor-body .cm-concept-test { color: var(--concept-test); }
 
 /* The idle panel below the editor. Without it the pane was a large dead void whenever a
    run was not in flight. */

@@ -3,6 +3,7 @@ import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { RunOverlay, type RunState } from './RunOverlay';
+import { conceptHighlight } from '../lib/conceptHighlight';
 
 const LANGUAGES = [
   { id: 'ts', label: 'TypeScript', ready: true },
@@ -123,8 +124,11 @@ export function CodePane({
           // Wrap rather than scroll sideways: code that runs off the edge is code the
           // learner does not read. EditorView comes from @uiw/react-codemirror, NOT from
           // @codemirror/view - importing that directly pulls in a second copy of
-          // @codemirror/state and the editor dies on "Unrecognized extension value".
-          extensions={[javascript({ typescript: true }), EditorView.lineWrapping]}
+          // @codemirror/state and the editor dies on "Unrecognized extension value". (This is
+          // also why conceptHighlight.ts imports Decoration/ViewPlugin straight from
+          // @codemirror/view instead - vite.config.ts's resolve.dedupe is what makes that
+          // safe, by forcing a single copy of the package regardless of import path.)
+          extensions={[javascript({ typescript: true }), EditorView.lineWrapping, conceptHighlight]}
           onChange={onChange}
           basicSetup={{ lineNumbers: true, foldGutter: false, highlightActiveLine: true }}
         />

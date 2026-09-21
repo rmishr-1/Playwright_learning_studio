@@ -17,6 +17,20 @@ export const ContentBlock = z.object({
    * and the problem number as a string for problem-ref.
    */
   text: z.string(),
+  /**
+   * A 'your-turn' block's runnable starting point - the setup (harness launch + the page it
+   * opens) pulled from the example it immediately follows, so "Try it" never hands the editor a
+   * comment-only stub. null for every other block type, and for a your-turn block whose example
+   * never opened a page in the first place.
+   */
+  starter: z.string().nullable().default(null),
+  /**
+   * A 'your-turn' block's authored variation - a same-concept, different-scenario prompt that
+   * REPLACES the generic "retype the example above from memory" text once written. null (the
+   * default) falls back to that generic prompt, the same graceful-absence pattern
+   * PracticeProblem.solution already uses: an unauthored day looks unfinished, never broken.
+   */
+  variation: z.object({ prompt: z.string() }).nullable().default(null),
 });
 
 export const PartKind = z.enum([

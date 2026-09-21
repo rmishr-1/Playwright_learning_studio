@@ -1,0 +1,7 @@
+{
+  "p2_yt1": "Same idea, one more tool: also print the Playwright CLI's own version with `npx playwright --version` (`npx.cmd` on Windows), alongside node and npm.",
+  "p2_yt2": "Same file read, a different line: find and print the `testDir:` line instead of `testMatch:`.",
+  "p2_yt3": "Same check, a different folder: does `week1/generated/day2` exist yet? List what's in it if so, or say it doesn't exist yet if not.",
+  "p3_yt1": "Same idea, one more shape: as plain data, write what a config would look like if it only ever ran files under a single `smoke/` folder.",
+  "p3_yt2": "Same file read, different entries: check the `.gitignore` for `.env` and `dist` instead of `node_modules` and `test-results`."
+}

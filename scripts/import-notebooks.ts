@@ -12,6 +12,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
+  nearestBoilerplate,
   parsePractice,
   parseTeaching,
   parseTitle,
@@ -28,6 +29,7 @@ const TRAINING_REPO = path.resolve(process.env.TRAINING_REPO || DEFAULT_REPO);
 const ROOT = path.resolve(__dirname, '..');
 const CONTENT = path.join(ROOT, 'Data', 'Content');
 const SOLUTIONS = path.join(CONTENT, 'solutions');
+const VARIATIONS = path.join(CONTENT, 'variations');
 
 /** Weeks the learner can open. Everything else imports but stays locked in the UI. */
 const AVAILABLE_WEEKS = Number(process.env.AVAILABLE_WEEKS || 2);
@@ -68,7 +70,7 @@ function placeholderPart(week: number, day: number): CoursePart {
     tab_label: 'TypeScript',
     source_notebook: null,
     has_runnable_code: false,
-    blocks: [{ type: 'markdown', text: body }],
+    blocks: [{ type: 'markdown', text: body, starter: null, variation: null }],
     problems: [],
   };
 }
@@ -85,18 +87,25 @@ function loadSolutions(week: number, day: number): Record<string, string> {
   return JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, string>;
 }
 
+/** Authored your-turn variations, same treatment as solutions - outside the generated tree. */
+function loadVariations(week: number, day: number): Record<string, string> {
+  const file = path.join(VARIATIONS, 'w' + week + 'd' + day + '.json');
+  if (!fs.existsSync(file)) return {};
+  return JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, string>;
+}
+
 function buildPart(
   week: number,
   day: number,
   part: PartNumber,
   nb: RawNotebook,
   notebookPath: string,
-): CoursePart {
+): { built: CoursePart; examples: string[] } {
   const title = parseTitle(nb) ?? 'Part ' + part;
   const isPractice = part === 4;
   const parsed = isPractice
     ? parsePractice(nb, week)
-    : { blocks: parseTeaching(nb, week), problems: [] as PracticeProblem[] };
+    : { ...parseTeaching(nb, week), problems: [] as PracticeProblem[] };
 
   if (isPractice) {
     const authored = loadSolutions(week, day);
@@ -105,7 +114,19 @@ function buildPart(
     }
   }
 
-  return {
+  // your-turn blocks aren't numbered like practice problems, so they're addressed positionally:
+  // 'p<part>_yt<n>' is the Nth your-turn block in THIS part, in document order. Authoring a
+  // variation means writing that same key by hand in Data/Content/variations/.
+  const variations = loadVariations(week, day);
+  let yourTurnCount = 0;
+  for (const block of parsed.blocks) {
+    if (block.type !== 'your-turn') continue;
+    yourTurnCount++;
+    const prompt = variations['p' + part + '_yt' + yourTurnCount];
+    block.variation = prompt ? { prompt } : null;
+  }
+
+  const built: CoursePart = {
     part,
     kind: isPractice ? 'practice' : part === 1 ? 'prerequisite' : 'concept',
     title,
@@ -119,11 +140,17 @@ function buildPart(
     blocks: parsed.blocks,
     problems: parsed.problems,
   };
+  return { built, examples: parsed.examples };
 }
 
 function importDay(week: number, day: number): CourseDay | null {
   const parts: CoursePart[] = [];
   let dayTitle = '';
+  // Every example seen in parts 1-3, in reading order - part 3's come last, matching "the
+  // concept just taught". A practice notebook (_4) almost never has an example of its own to
+  // draw from, so its problems borrow from this instead, via nearestBoilerplate().
+  const dayExamples: string[] = [];
+  let practicePart: CoursePart | null = null;
 
   for (const part of [1, 2, 3, 4] as PartNumber[]) {
     const rel = 'week' + week + '/day' + day + '_' + part + '.ipynb';
@@ -141,9 +168,25 @@ function importDay(week: number, day: number): CourseDay | null {
       if (part === 4) continue;
       return null;
     }
-    const built = buildPart(week, day, part, nb, rel);
+    const { built, examples } = buildPart(week, day, part, nb, rel);
     if (part === 2) dayTitle = built.title;
+    if (part !== 4) dayExamples.push(...examples);
+    if (part === 4) practicePart = built;
     parts.push(built);
+  }
+
+  // Practice problems get the same "never a blank comment" treatment as a your-turn block -
+  // the day's own setup, prepended to each stub. Skipped for Reflection problems (a written
+  // answer, not code) and when nothing taught that day ever opened a page in a way the harness
+  // can replay.
+  if (practicePart) {
+    const boilerplate = nearestBoilerplate(dayExamples);
+    if (boilerplate) {
+      for (const p of practicePart.problems) {
+        if (p.difficulty === 'Reflection') continue;
+        p.stub = boilerplate + '\n\n' + p.stub;
+      }
+    }
   }
 
   return {

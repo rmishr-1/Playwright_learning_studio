@@ -1,0 +1,5 @@
+{
+  "p2_yt1": "Do the same thing, but click through to the Transactions tile instead of Payments, and take a screenshot with `show(page)` once you're there.",
+  "p3_yt1": "Same idea, a different near-miss: write the same no-op file, but end it in `.test.ts` instead of `.spec.ts` (or no suffix at all) - is `.test.ts` picked up by `--list`, or does it need the exact `.spec.ts` ending?",
+  "p3_yt2": "Same `--list` command, a narrower run: add `--project=chromium` to the args and confirm the output looks the same on this single-project config."
+}

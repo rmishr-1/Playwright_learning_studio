@@ -15,23 +15,33 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 5.1 - Prerequisites check\n\n**No new TypeScript today.** Pipelines are written in YAML or Groovy, not TypeScript - so the\nprerequisite is reading two file formats.\n\n| In play | Taught in |\n|---|---|\n| `Deno.Command`, exit codes | [day3_1](/learn/w6/d3/p1) |\n| `package.json` scripts | [day4_1](/learn/w6/d4/p1) |\n| Objects and nesting | [week3/day1_1](/learn/w3/d1/p1) |\n\n**Next:** [Day 5.2 - Pipelines](/learn/w6/d5/p2)"
+          "text": "# Week 6, Day 5.1 - Prerequisites check\n\n**No new TypeScript today.** Pipelines are written in YAML or Groovy, not TypeScript - so the\nprerequisite is reading two file formats.\n\n| In play | Taught in |\n|---|---|\n| `Deno.Command`, exit codes | [day3_1](/learn/w6/d3/p1) |\n| `package.json` scripts | [day4_1](/learn/w6/d4/p1) |\n| Objects and nesting | [week3/day1_1](/learn/w3/d1/p1) |\n\n**Next:** [Day 5.2 - Pipelines](/learn/w6/d5/p2)",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## YAML in ninety seconds\n\nYAML is a nested object where **indentation is the nesting**. Two spaces, never tabs.\n\n| YAML | The object it means |\n|---|---|\n| `name: ci` | `{ name: \"ci\" }` |\n| `on:`<br>`  push:` | `{ on: { push: {} } }` |\n| `- uses: actions/checkout@v4` | an **array** entry: `[{ uses: \"...\" }]` |\n\nA leading `-` means \"another item in a list\". Steps are a list; that is why every step starts\nwith one."
+          "text": "## YAML in ninety seconds\n\nYAML is a nested object where **indentation is the nesting**. Two spaces, never tabs.\n\n| YAML | The object it means |\n|---|---|\n| `name: ci` | `{ name: \"ci\" }` |\n| `on:`<br>`  push:` | `{ on: { push: {} } }` |\n| `- uses: actions/checkout@v4` | an **array** entry: `[{ uses: \"...\" }]` |\n\nA leading `-` means \"another item in a list\". Steps are a list; that is why every step starts\nwith one.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// The same structure both ways, so the indentation stops being mysterious.\nconst asObject = {\n  name: \"ci\",\n  on: { push: { branches: [\"main\"] } },\n  jobs: { smoke: { \"runs-on\": \"ubuntu-latest\", steps: [{ run: \"npm ci\" }] } },\n};\n\nconsole.log(JSON.stringify(asObject, null, 2));\nconsole.log(\"\\n--- the YAML for exactly that ---\");\nconsole.log(`name: ci\non:\n  push:\n    branches: [main]\njobs:\n  smoke:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm ci`);"
+          "text": "// The same structure both ways, so the indentation stops being mysterious.\nconst asObject = {\n  name: \"ci\",\n  on: { push: { branches: [\"main\"] } },\n  jobs: { smoke: { \"runs-on\": \"ubuntu-latest\", steps: [{ run: \"npm ci\" }] } },\n};\n\nconsole.log(JSON.stringify(asObject, null, 2));\nconsole.log(\"\\n--- the YAML for exactly that ---\");\nconsole.log(`name: ci\non:\n  push:\n    branches: [main]\njobs:\n  smoke:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm ci`);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 5.2 - Pipelines](/learn/w6/d5/p2)"
+          "text": "**Next:** [Day 5.2 - Pipelines](/learn/w6/d5/p2)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -46,51 +56,75 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 5.2 - Pipelines\n\nDay 4's jobs still needed a human to press **Build Now**. A pipeline removes the human: the\ndeveloper's deploy and your tests become one sequence, and yours runs because theirs finished.\n\n> **Mode: read-and-compare.** Jenkins is not installed here, so the Jenkinsfile is **authored,\n> never executed** - and labelled as such. The commands inside it are the ones\n> [day4_2](/learn/w6/d4/p2) ran."
+          "text": "# Week 6, Day 5.2 - Pipelines\n\nDay 4's jobs still needed a human to press **Build Now**. A pipeline removes the human: the\ndeveloper's deploy and your tests become one sequence, and yours runs because theirs finished.\n\n> **Mode: read-and-compare.** Jenkins is not installed here, so the Jenkinsfile is **authored,\n> never executed** - and labelled as such. The commands inside it are the ones\n> [day4_2](/learn/w6/d4/p2) ran.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## What \"pipeline\" buys\n\n| | A job someone presses | A pipeline |\n|---|---|---|\n| Starts because | a human decided | a deploy finished |\n| Weekend hotfix at 11pm | waits for you | already ran |\n| Developer depends on you | **yes** | no |\n\nThe session's framing is the right one: the developer keeps your repo URL and your three\ncommands, and hooks them into *their* deploy. Nobody waits for anybody."
+          "text": "## What \"pipeline\" buys\n\n| | A job someone presses | A pipeline |\n|---|---|---|\n| Starts because | a human decided | a deploy finished |\n| Weekend hotfix at 11pm | waits for you | already ran |\n| Developer depends on you | **yes** | no |\n\nThe session's framing is the right one: the developer keeps your repo URL and your three\ncommands, and hooks them into *their* deploy. Nobody waits for anybody.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Stages\n\nA pipeline is a list of named stages, and the report shows you which one failed:\n\n| Stage | Who owns it |\n|---|---|\n| **Build / Deploy** | developers - put the new code somewhere |\n| **Test** | you - run against what they deployed |\n| **Post** | reports, artefacts, notifications |\n\nYour part is one stage in the middle. That is the whole mental model."
+          "text": "## Stages\n\nA pipeline is a list of named stages, and the report shows you which one failed:\n\n| Stage | Who owns it |\n|---|---|\n| **Build / Deploy** | developers - put the new code somewhere |\n| **Test** | you - run against what they deployed |\n| **Post** | reports, artefacts, notifications |\n\nYour part is one stage in the middle. That is the whole mental model.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\n// AUTHORED, NOT EXECUTED - Jenkins is not installed here.\n\nconst jenkinsfile = await Deno.readTextFile(`${REPO_ROOT}/week6/generated/day5-Jenkinsfile`);\nconsole.log(jenkinsfile);"
+          "text": "import { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\n// AUTHORED, NOT EXECUTED - Jenkins is not installed here.\n\nconst jenkinsfile = await Deno.readTextFile(`${REPO_ROOT}/week6/generated/day5-Jenkinsfile`);\nconsole.log(jenkinsfile);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "Three details in that file that cost real people real hours:\n\n| Detail | Why |\n|---|---|\n| `bat`, not `sh` | the UI samples assume Linux. On Windows `sh` fails with *Cannot run program sh* |\n| No `tools { maven ... }` | copied from a Java sample; a Node project has no Maven, and the build fails **before** it starts |\n| No `junit` in `post` | Playwright writes an HTML report, not JUnit XML - unless you configure that reporter |\n\n`node { }` here is the scripted form; `pipeline { agent any ... }` is the declarative form, shown\nat the bottom of the file. Both mean *any free machine*."
+          "text": "Three details in that file that cost real people real hours:\n\n| Detail | Why |\n|---|---|\n| `bat`, not `sh` | the UI samples assume Linux. On Windows `sh` fails with *Cannot run program sh* |\n| No `tools { maven ... }` | copied from a Java sample; a Node project has no Maven, and the build fails **before** it starts |\n| No `junit` in `post` | Playwright writes an HTML report, not JUnit XML - unless you configure that reporter |\n\n`node { }` here is the scripted form; `pipeline { agent any ... }` is the declarative form, shown\nat the bottom of the file. Both mean *any free machine*.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The same pipeline, somewhere it can actually run\n\nJenkins is a server you maintain. The hosted equivalents need no server at all, and Playwright's\nown docs ship ready-made configs for each - GitHub Actions, Azure Pipelines, GitLab CI, CircleCI,\nBitbucket, Docker.\n\nThey differ in syntax and **not** in content: install Node, install packages, install browsers,\nrun the suite."
+          "text": "## The same pipeline, somewhere it can actually run\n\nJenkins is a server you maintain. The hosted equivalents need no server at all, and Playwright's\nown docs ship ready-made configs for each - GitHub Actions, Azure Pipelines, GitLab CI, CircleCI,\nBitbucket, Docker.\n\nThey differ in syntax and **not** in content: install Node, install packages, install browsers,\nrun the suite.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\n// A real workflow. NOT installed - it lives in week6/generated/ on purpose.\n\nconst workflowYaml = await Deno.readTextFile(`${REPO_ROOT}/week6/generated/day5-github-actions.yml`);\nconsole.log(workflowYaml);"
+          "text": "import { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\n// A real workflow. NOT installed - it lives in week6/generated/ on purpose.\n\nconst workflowYaml = await Deno.readTextFile(`${REPO_ROOT}/week6/generated/day5-github-actions.yml`);\nconsole.log(workflowYaml);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "| Jenkins | GitHub Actions | Same idea |\n|---|---|---|\n| Job | `job` | a unit of work |\n| Build step | `step` with `run:` | a command |\n| SCM → Git | `actions/checkout@v4` | fetch the code |\n| Build Now | `workflow_dispatch` | a manual trigger |\n| Custom workspace | *(none needed)* | the runner clones for you |\n| Console Output | the log view | what happened |\n| Agent you maintain | `runs-on: ubuntu-latest` | the machine |\n\nTwo rows carry the real difference:\n\n- **`actions/setup-node`** - a cloud runner has no Node. Neither does a fresh Jenkins agent; you\n  installed it by hand there.\n- **`upload-artifact`** - Jenkins keeps its workspace, so the report is still on disk. A cloud\n  runner is **destroyed** at the end of the job. Without that step the report is gone."
+          "text": "| Jenkins | GitHub Actions | Same idea |\n|---|---|---|\n| Job | `job` | a unit of work |\n| Build step | `step` with `run:` | a command |\n| SCM → Git | `actions/checkout@v4` | fetch the code |\n| Build Now | `workflow_dispatch` | a manual trigger |\n| Custom workspace | *(none needed)* | the runner clones for you |\n| Console Output | the log view | what happened |\n| Agent you maintain | `runs-on: ubuntu-latest` | the machine |\n\nTwo rows carry the real difference:\n\n- **`actions/setup-node`** - a cloud runner has no Node. Neither does a fresh Jenkins agent; you\n  installed it by hand there.\n- **`upload-artifact`** - Jenkins keeps its workspace, so the report is still on disk. A cloud\n  runner is **destroyed** at the end of the job. Without that step the report is gone.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// The cheapest CI habit there is: check the file before you push it.\nimport { REPO_ROOT as ROOT2 } from \"../_shared/deno-helpers.ts\";\n\nconst wf = await Deno.readTextFile(`${ROOT2}/week6/generated/day5-github-actions.yml`);\nconst wfLines = wf.split(String.fromCharCode(10));\n\n// 1. Tabs are illegal in YAML. This is the single most common breakage.\nconst tabbed = wfLines.filter((l) => l.includes(String.fromCharCode(9)));\nconsole.log(\"lines containing a TAB:\", tabbed.length, tabbed.length ? \"<- would fail\" : \"<- good\");\n\n// 2. The keys a workflow cannot do without.\nfor (const key of [\"name:\", \"on:\", \"jobs:\", \"runs-on:\", \"steps:\"]) {\n  console.log(`  ${wf.includes(key) ? \"present\" : \"MISSING\"}  ${key}`);\n}\n\n// 3. Which branch does it actually trigger on?\nconst branch = wfLines.find((l) => l.includes(\"branches:\"));\nconsole.log(\"trigger branch line:\", branch?.trim());"
+          "text": "// The cheapest CI habit there is: check the file before you push it.\nimport { REPO_ROOT as ROOT2 } from \"../_shared/deno-helpers.ts\";\n\nconst wf = await Deno.readTextFile(`${ROOT2}/week6/generated/day5-github-actions.yml`);\nconst wfLines = wf.split(String.fromCharCode(10));\n\n// 1. Tabs are illegal in YAML. This is the single most common breakage.\nconst tabbed = wfLines.filter((l) => l.includes(String.fromCharCode(9)));\nconsole.log(\"lines containing a TAB:\", tabbed.length, tabbed.length ? \"<- would fail\" : \"<- good\");\n\n// 2. The keys a workflow cannot do without.\nfor (const key of [\"name:\", \"on:\", \"jobs:\", \"runs-on:\", \"steps:\"]) {\n  console.log(`  ${wf.includes(key) ? \"present\" : \"MISSING\"}  ${key}`);\n}\n\n// 3. Which branch does it actually trigger on?\nconst branch = wfLines.find((l) => l.includes(\"branches:\"));\nconsole.log(\"trigger branch line:\", branch?.trim());",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "A tab check and five key names catch most broken workflows before a push burns CI minutes. The\nbranch line matters just as much: `branches: [master]` on a `main` repo produces a workflow that\nnever runs and never complains."
+          "text": "A tab check and five key names catch most broken workflows before a push burns CI minutes. The\nbranch line matters just as much: `branches: [master]` on a `main` repo produces a workflow that\nnever runs and never complains.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Why it is not installed\n\nThat file sits in `week6/generated/`, not `.github/workflows/`. Dropping a workflow into the\nlatter makes it run on **every push** - a decision a lesson should not make for you. To switch it\non:\n\n```bash\ncp week6/generated/day5-github-actions.yml .github/workflows/week6.yml\n```\n\n## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| `sh` on a Windows agent | *Cannot run program sh* |\n| A `tools` block from a Java sample | fails before the first command |\n| `branches: [master]` on a `main` repo | the workflow never triggers |\n| No artefact upload | green or red, and no report either way |\n| `npm install` instead of `npm ci` | versions drift from the lockfile; CI stops being repeatable |\n\n**Next:** [Day 5.3 - How this goes wrong in a real repo](/learn/w6/d5/p3)"
+          "text": "## Why it is not installed\n\nThat file sits in `week6/generated/`, not `.github/workflows/`. Dropping a workflow into the\nlatter makes it run on **every push** - a decision a lesson should not make for you. To switch it\non:\n\n```bash\ncp week6/generated/day5-github-actions.yml .github/workflows/week6.yml\n```\n\n## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| `sh` on a Windows agent | *Cannot run program sh* |\n| A `tools` block from a Java sample | fails before the first command |\n| `branches: [master]` on a `main` repo | the workflow never triggers |\n| No artefact upload | green or red, and no report either way |\n| `npm install` instead of `npm ci` | versions drift from the lockfile; CI stops being repeatable |\n\n**Next:** [Day 5.3 - How this goes wrong in a real repo](/learn/w6/d5/p3)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -105,27 +139,39 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 5.3 - How this goes wrong in a real repo\n\nThe best worked example of CI rot is in this repository, committed and broken.\n\n## Three workflows nobody runs\n\n`.github/workflows/` holds `ci.yml`, `e2e.yml` and `e2e-sharded.yml`, written for a version of\nthis course that was deleted. Every file they reference is gone."
+          "text": "# Week 6, Day 5.3 - How this goes wrong in a real repo\n\nThe best worked example of CI rot is in this repository, committed and broken.\n\n## Three workflows nobody runs\n\n`.github/workflows/` holds `ci.yml`, `e2e.yml` and `e2e-sharded.yml`, written for a version of\nthis course that was deleted. Every file they reference is gone.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// Find every path those workflows reference, and check whether it exists.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst dir = `${REPO_ROOT}/.github/workflows`;\nconst referenced = new Set<string>();\n\nfor await (const entry of Deno.readDir(dir)) {\n  const text = await Deno.readTextFile(`${dir}/${entry.name}`);\n  for (const m of text.matchAll(/week\\d[\\w/.-]*\\.(ts|mts|json|ipynb)/g)) referenced.add(m[0]);\n}\n\nlet missing = 0;\nfor (const path of [...referenced].sort()) {\n  const exists = await Deno.stat(`${REPO_ROOT}/${path}`).then(() => true).catch(() => false);\n  if (!exists) missing++;\n  console.log(`${exists ? \"EXISTS \" : \"MISSING\"}  ${path}`);\n}\nconsole.log(`\\n${missing} of ${referenced.size} referenced files are gone.`);"
+          "text": "// Find every path those workflows reference, and check whether it exists.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst dir = `${REPO_ROOT}/.github/workflows`;\nconst referenced = new Set<string>();\n\nfor await (const entry of Deno.readDir(dir)) {\n  const text = await Deno.readTextFile(`${dir}/${entry.name}`);\n  for (const m of text.matchAll(/week\\d[\\w/.-]*\\.(ts|mts|json|ipynb)/g)) referenced.add(m[0]);\n}\n\nlet missing = 0;\nfor (const path of [...referenced].sort()) {\n  const exists = await Deno.stat(`${REPO_ROOT}/${path}`).then(() => true).catch(() => false);\n  if (!exists) missing++;\n  console.log(`${exists ? \"EXISTS \" : \"MISSING\"}  ${path}`);\n}\nconsole.log(`\\n${missing} of ${referenced.size} referenced files are gone.`);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "Every one. Those workflows would fail on the next push to `main` - not because a test broke, but\nbecause the files they name no longer exist.\n\n| Symptom | What it teaches |\n|---|---|\n| References `week8/day5.ipynb` | week8 is `day1_1`-`day3_4`; the file never came back |\n| References `week7/playwright.config.ts` | there is no week7 |\n| Header claims the repo \"is not a git repository and has no GitHub remote\" | it is, and it has one |\n| Three workflows on every push | three times the minutes, three things to rot |"
+          "text": "Every one. Those workflows would fail on the next push to `main` - not because a test broke, but\nbecause the files they name no longer exist.\n\n| Symptom | What it teaches |\n|---|---|\n| References `week8/day5.ipynb` | week8 is `day1_1`-`day3_4`; the file never came back |\n| References `week7/playwright.config.ts` | there is no week7 |\n| Header claims the repo \"is not a git repository and has no GitHub remote\" | it is, and it has one |\n| Three workflows on every push | three times the minutes, three things to rot |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The lesson\n\nA CI file is **code that nobody reads until it fails.** It rots more quietly than a test, because\na broken test shouts on your laptop and a broken workflow only shouts on a server you are not\nwatching.\n\n| Habit | Why |\n|---|---|\n| One workflow, not three | three is three times the rot and the minutes |\n| Delete workflows for deleted code | history keeps them if you need them back |\n| Reference paths that exist - check in review | a renamed folder silently breaks CI |\n| Read the run log after a rename | the only place the breakage shows |\n| Comments describe **now** | a stale comment is worse than none |"
+          "text": "## The lesson\n\nA CI file is **code that nobody reads until it fails.** It rots more quietly than a test, because\na broken test shouts on your laptop and a broken workflow only shouts on a server you are not\nwatching.\n\n| Habit | Why |\n|---|---|\n| One workflow, not three | three is three times the rot and the minutes |\n| Delete workflows for deleted code | history keeps them if you need them back |\n| Reference paths that exist - check in review | a renamed folder silently breaks CI |\n| Read the run log after a rename | the only place the breakage shows |\n| Comments describe **now** | a stale comment is worse than none |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Self-hosted or hosted\n\nThe session's closing point, and it is the right one to end on:\n\n| | Jenkins you run | Hosted (Actions, Azure, GitLab) |\n|---|---|---|\n| Setup | install, patch, back up | none |\n| Parallel machines | what you own | as many as you pay for |\n| Access | your network | anywhere |\n| Cost | a machine plus your time | per minute |\n| Full control of the box | **yes** | no |\n\nThe direction of travel is towards hosted, for the reason the session gives: **one machine cannot\nrun ten suites at once**, and maintaining ten machines is somebody's whole job.\n\nJenkins is still worth knowing. Plenty of enterprises run it, and the model - job, workspace,\nstep, exit code - is the same everywhere."
+          "text": "## Self-hosted or hosted\n\nThe session's closing point, and it is the right one to end on:\n\n| | Jenkins you run | Hosted (Actions, Azure, GitLab) |\n|---|---|---|\n| Setup | install, patch, back up | none |\n| Parallel machines | what you own | as many as you pay for |\n| Access | your network | anywhere |\n| Cost | a machine plus your time | per minute |\n| Full control of the box | **yes** | no |\n\nThe direction of travel is towards hosted, for the reason the session gives: **one machine cannot\nrun ten suites at once**, and maintaining ten machines is somebody's whole job.\n\nJenkins is still worth knowing. Plenty of enterprises run it, and the model - job, workspace,\nstep, exit code - is the same everywhere.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Sharding, when one machine is not enough\n\nThe mechanism you would reach for next, and the repo's stale `e2e-sharded.yml` was built around\nit:\n\n```yaml\nstrategy:\n  matrix:\n    shard: [1, 2, 3]\nsteps:\n  - run: npx playwright test --shard=${{ matrix.shard }}/3\n```\n\nThree machines, a third of the tests each, then `npx playwright merge-reports` to get one report.\nThat is the answer to \"the regression suite takes 40 minutes\" - and it needs hosted runners,\nwhich is why it is the argument that usually ends the Jenkins conversation.\n\n**Next:** [Day 5.4 - Practice](/learn/w6/d5/p4)"
+          "text": "## Sharding, when one machine is not enough\n\nThe mechanism you would reach for next, and the repo's stale `e2e-sharded.yml` was built around\nit:\n\n```yaml\nstrategy:\n  matrix:\n    shard: [1, 2, 3]\nsteps:\n  - run: npx playwright test --shard=${{ matrix.shard }}/3\n```\n\nThree machines, a third of the tests each, then `npx playwright merge-reports` to get one report.\nThat is the answer to \"the regression suite takes 40 minutes\" - and it needs hosted runners,\nwhich is why it is the argument that usually ends the Jenkins conversation.\n\n**Next:** [Day 5.4 - Practice](/learn/w6/d5/p4)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -140,39 +186,57 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 5.4 - Practice\n\nThe last three close out the week rather than the day."
+          "text": "# Week 6, Day 5.4 - Practice\n\nThe last three close out the week rather than the day.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "1"
+          "text": "1",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "2"
+          "text": "2",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "3"
+          "text": "3",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "4"
+          "text": "4",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "5"
+          "text": "5",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "6"
+          "text": "6",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "7"
+          "text": "7",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Week 6 done\n\n| Day | You can now |\n|---|---|\n| 1 | apply page objects to a second app, and replace twelve methods with one `switch` |\n| 2 | say exactly which assertions a page object may own, and prove a message is invariant |\n| 3 | create, commit, push, pull - and explain a rejected push |\n| 4 | run a suite from Jenkins, and name your suites so the CI job never changes |\n| 5 | read and write a pipeline, and spot CI that has rotted |\n\nEvery claim in these lessons was run except the Jenkins UI steps and the Jenkinsfile, which are\nlabelled where they appear."
+          "text": "## Week 6 done\n\n| Day | You can now |\n|---|---|\n| 1 | apply page objects to a second app, and replace twelve methods with one `switch` |\n| 2 | say exactly which assertions a page object may own, and prove a message is invariant |\n| 3 | create, commit, push, pull - and explain a rejected push |\n| 4 | run a suite from Jenkins, and name your suites so the CI job never changes |\n| 5 | read and write a pipeline, and spot CI that has rotted |\n\nEvery claim in these lessons was run except the Jenkins UI steps and the Jenkinsfile, which are\nlabelled where they appear.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": [

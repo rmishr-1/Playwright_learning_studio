@@ -54,6 +54,15 @@
                     "text": {
                         "_comment": "Markdown source for a markdown block; TypeScript source for example and your-turn blocks.",
                         "value": ""
+                    },
+                    "starter": {
+                        "_comment": "your-turn ONLY: the preceding example's setup (harness launch through its first page.goto), so 'Try it' opens the editor on working navigation rather than a bare comment. null for every other block type, and for a your-turn whose example never opened a page.",
+                        "value": null
+                    },
+                    "variation": {
+                        "_comment": "your-turn ONLY: an authored same-concept, different-scenario prompt (Data/Content/variations/w<week>d<day>.json, keyed 'p<part>_yt<n>'), replacing the generic 'retype from memory' text once written. null = not yet authored, and the generic prompt renders instead - the reveal-solution pattern, not a broken callout.",
+                        "prompt": { "value": "Do the same thing, but sign in as Katy instead of Leela." },
+                        "value": null
                     }
                 },
                 "value": []
@@ -75,7 +84,7 @@
                         "value": ""
                     },
                     "stub": {
-                        "_comment": "The starter cell, e.g. '// Problem 1 - your code here.'",
+                        "_comment": "The starter cell, e.g. '// Problem 1 - your code here.'. For a non-Reflection problem, prefixed at import time with the day's own setup boilerplate (the last example's launch + goto, from parts 2-3) so the editor is never a blank comment - see extractBoilerplate() in scripts/notebook-parse.ts.",
                         "value": ""
                     },
                     "solution": {

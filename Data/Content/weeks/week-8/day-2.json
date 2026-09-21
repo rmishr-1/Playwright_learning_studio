@@ -15,87 +15,129 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 2.1 — TypeScript for many test cases at once\n\nFive concepts. Today you stop writing one test per scenario and start driving many\nscenarios from one file of data.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs."
+          "text": "# Week 8, Day 2.1 — TypeScript for many test cases at once\n\nFive concepts. Today you stop writing one test per scenario and start driving many\nscenarios from one file of data.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | Arrays | Your test cases become a list. |\n| 2 | `forEach` with index | One loop generates many tests. |\n| 3 | Spread `...` | Copy a booking, change one field. |\n| 4 | Rest in destructuring | Remove a field to test what happens. |\n| 5 | Importing a JSON file | Test data lives outside the test. |\n\nAlready covered — one link each, no re-teaching: `let`/`const`, template literals, objects,\nnested access, `async`/`await` and destructuring are all in\n[Day 1.1](/learn/w8/d1/p1)."
+          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | Arrays | Your test cases become a list. |\n| 2 | `forEach` with index | One loop generates many tests. |\n| 3 | Spread `...` | Copy a booking, change one field. |\n| 4 | Rest in destructuring | Remove a field to test what happens. |\n| 5 | Importing a JSON file | Test data lives outside the test. |\n\nAlready covered — one link each, no re-teaching: `let`/`const`, template literals, objects,\nnested access, `async`/`await` and destructuring are all in\n[Day 1.1](/learn/w8/d1/p1).",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 1. Arrays\n\nA list, in square brackets. Items are reached by position, starting at **0**.\n\nAn array can hold objects — and a list of objects is exactly what \"my test cases\" looks like."
+          "text": "## 1. Arrays\n\nA list, in square brackets. Items are reached by position, starting at **0**.\n\nAn array can hold objects — and a list of objects is exactly what \"my test cases\" looks like.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const names = [\"Ada\", \"Grace\", \"Alan\"];\nconsole.log(names[0], names.length);\n\n// The shape you will use all day: a list of objects\nconst caseList = [\n  { name: \"normal booking\", firstname: \"Ada\", expected: 200 },\n  { name: \"blank first name\", firstname: \"\", expected: 200 },\n];\n\nconsole.log(caseList[1].name);\nconsole.log(caseList[1].firstname === \"\" ? \"(blank)\" : caseList[1].firstname);\nconsole.log(\"how many cases:\", caseList.length);"
+          "text": "const names = [\"Ada\", \"Grace\", \"Alan\"];\nconsole.log(names[0], names.length);\n\n// The shape you will use all day: a list of objects\nconst caseList = [\n  { name: \"normal booking\", firstname: \"Ada\", expected: 200 },\n  { name: \"blank first name\", firstname: \"\", expected: 200 },\n];\n\nconsole.log(caseList[1].name);\nconsole.log(caseList[1].firstname === \"\" ? \"(blank)\" : caseList[1].firstname);\nconsole.log(\"how many cases:\", caseList.length);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `Ada 3`, then `blank first name`, `(blank)`, `how many cases: 2`\n\n`caseList[1]` is the *second* item. Counting from zero is the single most common off-by-one\nsource in test code.\n\n**Challenge:** add a third case and print its `expected`."
+          "text": "**Expected:** `Ada 3`, then `blank first name`, `(blank)`, `how many cases: 2`\n\n`caseList[1]` is the *second* item. Counting from zero is the single most common off-by-one\nsource in test code.\n\n**Challenge:** add a third case and print its `expected`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 2. `forEach` with an index\n\nRuns a function once per item. The second parameter is the position — useful for numbering\ntests, because \"Case 3 failed\" beats \"a test failed\"."
+          "text": "## 2. `forEach` with an index\n\nRuns a function once per item. The second parameter is the position — useful for numbering\ntests, because \"Case 3 failed\" beats \"a test failed\".",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const cases = [\n  { name: \"normal booking\", firstname: \"Ada\" },\n  { name: \"blank first name\", firstname: \"\" },\n  { name: \"long stay\", firstname: \"Grace\" },\n];\n\ncases.forEach((testCase, index) => {\n  console.log(`Case ${index + 1} — ${testCase.name}`);\n});"
+          "text": "const cases = [\n  { name: \"normal booking\", firstname: \"Ada\" },\n  { name: \"blank first name\", firstname: \"\" },\n  { name: \"long stay\", firstname: \"Grace\" },\n];\n\ncases.forEach((testCase, index) => {\n  console.log(`Case ${index + 1} — ${testCase.name}`);\n});",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:**\n\n```\nCase 1 — normal booking\nCase 2 — blank first name\nCase 3 — long stay\n```\n\n`index + 1` because humans count from 1 and arrays count from 0.\n\n**Where it shows up:** tomorrow's data-driven spec is this exact loop, with `test(...)`\ninside instead of `console.log`."
+          "text": "**Expected:**\n\n```\nCase 1 — normal booking\nCase 2 — blank first name\nCase 3 — long stay\n```\n\n`index + 1` because humans count from 1 and arrays count from 0.\n\n**Where it shows up:** tomorrow's data-driven spec is this exact loop, with `test(...)`\ninside instead of `console.log`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 3. Spread `...` — copy, then change one thing\n\n`{ ...original, field: newValue }` means \"everything from original, but with this field\nreplaced\". The original is untouched.\n\nNegative testing is mostly this: take something valid, break exactly one part."
+          "text": "## 3. Spread `...` — copy, then change one thing\n\n`{ ...original, field: newValue }` means \"everything from original, but with this field\nreplaced\". The original is untouched.\n\nNegative testing is mostly this: take something valid, break exactly one part.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const validBooking = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n  depositpaid: true,\n};\n\nconst blankName = { ...validBooking, firstname: \"\" };\nconst badPrice = { ...validBooking, totalprice: \"not-a-number\" };\n\nconsole.log(\"original:  \", JSON.stringify(validBooking));\nconsole.log(\"blankName: \", JSON.stringify(blankName));\nconsole.log(\"badPrice:  \", JSON.stringify(badPrice));"
+          "text": "const validBooking = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n  depositpaid: true,\n};\n\nconst blankName = { ...validBooking, firstname: \"\" };\nconst badPrice = { ...validBooking, totalprice: \"not-a-number\" };\n\nconsole.log(\"original:  \", JSON.stringify(validBooking));\nconsole.log(\"blankName: \", JSON.stringify(blankName));\nconsole.log(\"badPrice:  \", JSON.stringify(badPrice));",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** three lines — the original unchanged, then two copies each differing in one field.\n\nOrder matters: `{ firstname: \"\", ...validBooking }` puts the spread *last*, so `firstname`\ngets overwritten back to `\"Jim\"`. The override has to come after.\n\n**Challenge:** make a copy with `depositpaid` set to `false`."
+          "text": "**Expected:** three lines — the original unchanged, then two copies each differing in one field.\n\nOrder matters: `{ firstname: \"\", ...validBooking }` puts the spread *last*, so `firstname`\ngets overwritten back to `\"Jim\"`. The override has to come after.\n\n**Challenge:** make a copy with `depositpaid` set to `false`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 4. Rest in destructuring — remove a field\n\n`const { firstname, ...rest } = booking` pulls `firstname` out and puts *everything else*\ninto `rest`. So `rest` is the booking **without** that field.\n\nThat is how you test \"what happens if this is missing entirely?\" — different from sending it\nblank, and often a very different answer."
+          "text": "## 4. Rest in destructuring — remove a field\n\n`const { firstname, ...rest } = booking` pulls `firstname` out and puts *everything else*\ninto `rest`. So `rest` is the booking **without** that field.\n\nThat is how you test \"what happens if this is missing entirely?\" — different from sending it\nblank, and often a very different answer.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const sample = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n};\n\nconst { firstname, ...withoutFirstname } = sample;\n\nconsole.log(\"pulled out:\", firstname);\nconsole.log(\"what's left:\", JSON.stringify(withoutFirstname));\nconsole.log(\"still has firstname?\", \"firstname\" in withoutFirstname);"
+          "text": "const sample = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n};\n\nconst { firstname, ...withoutFirstname } = sample;\n\nconsole.log(\"pulled out:\", firstname);\nconsole.log(\"what's left:\", JSON.stringify(withoutFirstname));\nconsole.log(\"still has firstname?\", \"firstname\" in withoutFirstname);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `pulled out: Jim`, `{\"lastname\":\"Brown\",\"totalprice\":111}`, `false`\n\nBlank (`\"\"`) and missing are **not** the same test. Today you will find an API that accepts\none and crashes on the other."
+          "text": "**Expected:** `pulled out: Jim`, `{\"lastname\":\"Brown\",\"totalprice\":111}`, `false`\n\nBlank (`\"\"`) and missing are **not** the same test. Today you will find an API that accepts\none and crashes on the other.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## 5. Importing a JSON file\n\nTest data belongs in its own file, so adding a case means editing data, not code.\n\n```ts\nimport testData from \"./day2-booking-data.json\";\n```\n\nThis works because `tsconfig.json` has `resolveJsonModule: true`. The import gives you a\nnormal object — no parsing step.\n\n> Notebook cells cannot use this import form. Below is the equivalent for exploring; the\n> `import` line is what goes in the real spec file."
+          "text": "## 5. Importing a JSON file\n\nTest data belongs in its own file, so adding a case means editing data, not code.\n\n```ts\nimport testData from \"./day2-booking-data.json\";\n```\n\nThis works because `tsconfig.json` has `resolveJsonModule: true`. The import gives you a\nnormal object — no parsing step.\n\n> Notebook cells cannot use this import form. Below is the equivalent for exploring; the\n> `import` line is what goes in the real spec file.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// In a notebook, read and parse the file instead.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst raw = await Deno.readTextFile(`${REPO_ROOT}week8/generated/day2-booking-data.json`);\nconst testData = JSON.parse(raw);\n\nconsole.log(\"cases found:\", testData.cases.length);\ntestData.cases.forEach((c: { name: string }, i: number) => {\n  console.log(`  ${i + 1}. ${c.name}`);\n});"
+          "text": "// In a notebook, read and parse the file instead.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst raw = await Deno.readTextFile(`${REPO_ROOT}week8/generated/day2-booking-data.json`);\nconst testData = JSON.parse(raw);\n\nconsole.log(\"cases found:\", testData.cases.length);\ntestData.cases.forEach((c: { name: string }, i: number) => {\n  console.log(`  ${i + 1}. ${c.name}`);\n});",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `cases found: 4`, then the four case names.\n\nIf you get \"No such file or directory\", that file gets written by\n[Day 2.2](/learn/w8/d2/p2) — run that lesson's data cell first, or just read on.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Arrays | Position starts at 0. |\n| `forEach((item, i) => …)` | `i + 1` for human-readable numbering. |\n| Spread `...` | Copy then override — override goes last. |\n| Rest `{ x, ...others }` | Missing and blank are different tests. |\n| JSON import | Data in a file; adding a case edits no code. |\n\n**Next:** [Day 2.2 — Negative scenarios and data-driven tests](/learn/w8/d2/p2)"
+          "text": "**Expected:** `cases found: 4`, then the four case names.\n\nIf you get \"No such file or directory\", that file gets written by\n[Day 2.2](/learn/w8/d2/p2) — run that lesson's data cell first, or just read on.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Arrays | Position starts at 0. |\n| `forEach((item, i) => …)` | `i + 1` for human-readable numbering. |\n| Spread `...` | Copy then override — override goes last. |\n| Rest `{ x, ...others }` | Missing and blank are different tests. |\n| JSON import | Data in a file; adding a case edits no code. |\n\n**Next:** [Day 2.2 — Negative scenarios and data-driven tests](/learn/w8/d2/p2)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -110,119 +152,177 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 2.2 — Testing what *shouldn't* work\n\nDay 1 proved the happy path. Today you break things on purpose — and find four real defects\nin the API you have been testing.\n\nYou will also stop copy-pasting a test per scenario, and drive many scenarios from one JSON file.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened."
+          "text": "# Week 8, Day 2.2 — Testing what *shouldn't* work\n\nDay 1 proved the happy path. Today you break things on purpose — and find four real defects\nin the API you have been testing.\n\nYou will also stop copy-pasting a test per scenario, and drive many scenarios from one JSON file.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Why negative testing is your job\n\nCustomers describe what should work. Nobody writes a requirement saying \"and if the password\nis wrong, refuse it\" — so negative scenarios are designed by testers, not handed over.\n\nCar makers don't crash-test because a buyer asked; they crash-test so the airbag works when a\nbuyer makes a mistake. Same reasoning, same responsibility.\n\n| Status | Means | Whose fault |\n|---|---|---|\n| `400 Bad Request` | your data was malformed | yours |\n| `401` / `403` | not authenticated / not allowed | yours |\n| `404 Not Found` | no such thing | yours |\n| `500 Internal Server Error` | the server threw | **theirs — that's a bug** |\n\nA `500` is never an acceptable answer to bad input. A good API says `400` and explains which\nfield. Remember that; you are about to see one that doesn't."
+          "text": "## Why negative testing is your job\n\nCustomers describe what should work. Nobody writes a requirement saying \"and if the password\nis wrong, refuse it\" — so negative scenarios are designed by testers, not handed over.\n\nCar makers don't crash-test because a buyer asked; they crash-test so the airbag works when a\nbuyer makes a mistake. Same reasoning, same responsibility.\n\n| Status | Means | Whose fault |\n|---|---|---|\n| `400 Bad Request` | your data was malformed | yours |\n| `401` / `403` | not authenticated / not allowed | yours |\n| `404 Not Found` | no such thing | yours |\n| `500 Internal Server Error` | the server threw | **theirs — that's a bug** |\n\nA `500` is never an acceptable answer to bad input. A good API says `400` and explains which\nfield. Remember that; you are about to see one that doesn't.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Running just one test: `test.only`\n\nWhile hunting a scenario you don't want the other twenty tests in the way.\n\n```ts\ntest.only(\"the one I am working on\", async ({ request }) => { … });\n```\n\nPlaywright then runs *only* that test. Two rules: it works per file, and **never commit it** —\nyour suite would silently shrink to one test. The root config sets `forbidOnly` under CI,\nso it fails the build rather than passing quietly."
+          "text": "## Running just one test: `test.only`\n\nWhile hunting a scenario you don't want the other twenty tests in the way.\n\n```ts\ntest.only(\"the one I am working on\", async ({ request }) => { … });\n```\n\nPlaywright then runs *only* that test. Two rules: it works per file, and **never commit it** —\nyour suite would silently shrink to one test. The root config sets `forbidOnly` under CI,\nso it fails the build rather than passing quietly.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 1 — a wrong password\n\n**Objective:** log in with bad credentials and see what actually comes back."
+          "text": "## Example 1 — a wrong password\n\n**Objective:** log in with bad credentials and see what actually comes back.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { request } from \"npm:playwright\";\n\nconst api = await request.newContext();\n\nconst bad = await api.post(\"https://restful-booker.herokuapp.com/auth\", {\n  data: { username: \"admin\", password: \"definitely-wrong\" },\n});\n\nconsole.log(\"status:\", bad.status());\n\nconst badBody = await bad.json();\nconsole.log(\"token: \", badBody.token);              // undefined\nconsole.log(\"body:  \", JSON.stringify(badBody));    // ← the useful bit"
+          "text": "import { request } from \"npm:playwright\";\n\nconst api = await request.newContext();\n\nconst bad = await api.post(\"https://restful-booker.herokuapp.com/auth\", {\n  data: { username: \"admin\", password: \"definitely-wrong\" },\n});\n\nconsole.log(\"status:\", bad.status());\n\nconst badBody = await bad.json();\nconsole.log(\"token: \", badBody.token);              // undefined\nconsole.log(\"body:  \", JSON.stringify(badBody));    // ← the useful bit",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:**\n\n```\nstatus: 200\ntoken:  undefined\nbody:   {\"reason\":\"Bad credentials\"}\n```\n\nTwo findings, and the second one is a lesson about *you*, not the API:\n\n**The status is `200`.** A failed login is still a successfully *delivered request*. This API\nreports the failure in the body. So `expect(res.status()).toBe(200)` passing tells you nothing\nabout whether the login worked — you have to check the body.\n\n**Printing one field would have misled you.** `token` is `undefined`, and it's tempting to\nconclude the API returns nothing at all. It returns `{\"reason\":\"Bad credentials\"}` — a perfectly\nclear message you'd have missed. Print the *whole body* before drawing conclusions.\n\n**Challenge:** try a wrong username with the right password. Same response?"
+          "text": "**Expected:**\n\n```\nstatus: 200\ntoken:  undefined\nbody:   {\"reason\":\"Bad credentials\"}\n```\n\nTwo findings, and the second one is a lesson about *you*, not the API:\n\n**The status is `200`.** A failed login is still a successfully *delivered request*. This API\nreports the failure in the body. So `expect(res.status()).toBe(200)` passing tells you nothing\nabout whether the login worked — you have to check the body.\n\n**Printing one field would have misled you.** `token` is `undefined`, and it's tempting to\nconclude the API returns nothing at all. It returns `{\"reason\":\"Bad credentials\"}` — a perfectly\nclear message you'd have missed. Print the *whole body* before drawing conclusions.\n\n**Challenge:** try a wrong username with the right password. Same response?",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 2 — blank, and missing, are different tests\n\n**Objective:** send a booking with an empty first name, then with no first name at all."
+          "text": "## Example 2 — blank, and missing, are different tests\n\n**Objective:** send a booking with an empty first name, then with no first name at all.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const validBooking = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n  depositpaid: true,\n  bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n  additionalneeds: \"Breakfast\",\n};\n\n// Blank — spread, then override\nconst blank = await api.post(\"https://restful-booker.herokuapp.com/booking\", { data: { ...validBooking, firstname: \"\" } });\nconsole.log(\"blank firstname   ->\", blank.status(),\n            JSON.stringify((await blank.json()).booking.firstname));\n\n// Missing entirely — rest destructuring\nconst { firstname, ...withoutFirstname } = validBooking;\nconst missing = await api.post(\"https://restful-booker.herokuapp.com/booking\", { data: withoutFirstname });\nconsole.log(\"missing firstname ->\", missing.status(), (await missing.text()).slice(0, 40));"
+          "text": "const validBooking = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n  depositpaid: true,\n  bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n  additionalneeds: \"Breakfast\",\n};\n\n// Blank — spread, then override\nconst blank = await api.post(\"https://restful-booker.herokuapp.com/booking\", { data: { ...validBooking, firstname: \"\" } });\nconsole.log(\"blank firstname   ->\", blank.status(),\n            JSON.stringify((await blank.json()).booking.firstname));\n\n// Missing entirely — rest destructuring\nconst { firstname, ...withoutFirstname } = validBooking;\nconst missing = await api.post(\"https://restful-booker.herokuapp.com/booking\", { data: withoutFirstname });\nconsole.log(\"missing firstname ->\", missing.status(), (await missing.text()).slice(0, 40));",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:**\n\n```\nblank firstname   -> 200 \"\"\nmissing firstname -> 500 Internal Server Error\n```\n\n**Two defects in three lines.**\n\nA blank name is accepted and stored — no validation at all. And leaving the field out entirely\n**crashes the server**. A `500` means the code threw an exception instead of checking its input.\n\nThis is what negative testing is for. Both would have gone unnoticed forever by happy-path tests.\n\n**What to do at work:** raise these as defects. Do not soften the test to match the bug — a test\nasserting `500` documents that the crash is known, which is honest. A test that skips the case\npretends it never happened."
+          "text": "**Expected:**\n\n```\nblank firstname   -> 200 \"\"\nmissing firstname -> 500 Internal Server Error\n```\n\n**Two defects in three lines.**\n\nA blank name is accepted and stored — no validation at all. And leaving the field out entirely\n**crashes the server**. A `500` means the code threw an exception instead of checking its input.\n\nThis is what negative testing is for. Both would have gone unnoticed forever by happy-path tests.\n\n**What to do at work:** raise these as defects. Do not soften the test to match the bug — a test\nasserting `500` documents that the crash is known, which is honest. A test that skips the case\npretends it never happened.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 3 — the quiet one\n\n**Objective:** send a price that isn't a number."
+          "text": "## Example 3 — the quiet one\n\n**Objective:** send a price that isn't a number.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const badType = await api.post(\"https://restful-booker.herokuapp.com/booking\", {\n  data: { ...validBooking, totalprice: \"not-a-number\" },\n});\n\nconst badTypeBody = await badType.json();\nconsole.log(\"status:    \", badType.status());\nconsole.log(\"totalprice:\", badTypeBody.booking.totalprice);\nconsole.log(\"firstname: \", badTypeBody.booking.firstname);"
+          "text": "const badType = await api.post(\"https://restful-booker.herokuapp.com/booking\", {\n  data: { ...validBooking, totalprice: \"not-a-number\" },\n});\n\nconst badTypeBody = await badType.json();\nconsole.log(\"status:    \", badType.status());\nconsole.log(\"totalprice:\", badTypeBody.booking.totalprice);\nconsole.log(\"firstname: \", badTypeBody.booking.firstname);",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `200`, `totalprice: null`, `firstname: Jim`\n\nThis is the worst of the four. The request **succeeds**, the booking is created, and the price\nis silently thrown away and replaced with `null`. No error, no warning.\n\nA customer's booking exists with no price attached. Nothing in a happy-path suite would ever\ncatch it — and neither would a human clicking through the UI, because they'd type a number.\n\n**Challenge:** try `depositpaid: \"yes\"` instead of `true`. Does it survive?"
+          "text": "**Expected:** `200`, `totalprice: null`, `firstname: Jim`\n\nThis is the worst of the four. The request **succeeds**, the booking is created, and the price\nis silently thrown away and replaced with `null`. No error, no warning.\n\nA customer's booking exists with no price attached. Nothing in a happy-path suite would ever\ncatch it — and neither would a human clicking through the UI, because they'd type a number.\n\n**Challenge:** try `depositpaid: \"yes\"` instead of `true`. Does it survive?",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Example 4 — why parsing a delete blows up\n\n**Objective:** find out what a delete actually returns.\n\nDay 1 checked the status code of a delete and moved on. Look closer."
+          "text": "## Example 4 — why parsing a delete blows up\n\n**Objective:** find out what a delete actually returns.\n\nDay 1 checked the status code of a delete and moved on. Look closer.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const auth = await api.post(\"https://restful-booker.herokuapp.com/auth\", {\n  data: { username: \"admin\", password: \"password123\" },\n});\nconst token = (await auth.json()).token;\n\nconst made = await api.post(\"https://restful-booker.herokuapp.com/booking\", { data: validBooking });\nconst id = (await made.json()).bookingid;\n\nconst del = await api.delete(`https://restful-booker.herokuapp.com/booking/${id}`, {\n  headers: { Cookie: `token=${token}` },\n});\n\nconst text = await del.text();\nconsole.log(\"status:\", del.status());\nconsole.log(\"body:  \", JSON.stringify(text), \"| length:\", text.length);\n\ntry {\n  JSON.parse(text);\n  console.log(\"JSON.parse succeeded\");\n} catch (err) {\n  console.log(\"JSON.parse THREW:\", (err as Error).message);\n}"
+          "text": "const auth = await api.post(\"https://restful-booker.herokuapp.com/auth\", {\n  data: { username: \"admin\", password: \"password123\" },\n});\nconst token = (await auth.json()).token;\n\nconst made = await api.post(\"https://restful-booker.herokuapp.com/booking\", { data: validBooking });\nconst id = (await made.json()).bookingid;\n\nconst del = await api.delete(`https://restful-booker.herokuapp.com/booking/${id}`, {\n  headers: { Cookie: `token=${token}` },\n});\n\nconst text = await del.text();\nconsole.log(\"status:\", del.status());\nconsole.log(\"body:  \", JSON.stringify(text), \"| length:\", text.length);\n\ntry {\n  JSON.parse(text);\n  console.log(\"JSON.parse succeeded\");\n} catch (err) {\n  console.log(\"JSON.parse THREW:\", (err as Error).message);\n}",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:**\n\n```\nstatus: 201\nbody:   \"Created\" | length: 7\nJSON.parse THREW: Unexpected token 'C', \"Created\" is not valid JSON\n```\n\nThe body is seven characters of plain text — **not JSON**. So calling `.json()` on a delete\nthrows, and the error message points at JSON parsing rather than at your real mistake.\n\n**The rule:** a response with no content has nothing to parse. Check the status, read `.text()`\nif you're curious, and don't reach for `.json()` out of habit.\n\nIf you ever see `Unexpected token … is not valid JSON` right after a delete, this is why."
+          "text": "**Expected:**\n\n```\nstatus: 201\nbody:   \"Created\" | length: 7\nJSON.parse THREW: Unexpected token 'C', \"Created\" is not valid JSON\n```\n\nThe body is seven characters of plain text — **not JSON**. So calling `.json()` on a delete\nthrows, and the error message points at JSON parsing rather than at your real mistake.\n\n**The rule:** a response with no content has nothing to parse. Check the status, read `.text()`\nif you're curious, and don't reach for `.json()` out of habit.\n\nIf you ever see `Unexpected token … is not valid JSON` right after a delete, this is why.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## The same four checks, as a real spec\n\n`console.log` showed you the behaviour. A test has to assert it — including asserting that a\n`500` happens, which is how a known defect gets documented rather than forgotten."
+          "text": "## The same four checks, as a real spec\n\n`console.log` showed you the behaviour. A test has to assert it — including asserting that a\n`500` happens, which is how a known defect gets documented rather than forgotten.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 8 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week8/generated/day2-negative.spec.ts\", `// Week 8, Day 2 — negative scenarios: what this API really does when you\n// give it bad input.\n//\n// Every expectation below was probed against the live API first. Several\n// contradict what you would assume from the documentation, which is the point:\n// a negative test asserts observed behaviour, not hoped-for behaviour.\n//\n// Written by a cell in week8/day2_2.ipynb. Run it yourself:\n//   npx playwright test week8/generated/day2-negative.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\nconst BASE = \"https://restful-booker.herokuapp.com\";\n\nconst validBooking = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n  depositpaid: true,\n  bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n  additionalneeds: \"Breakfast\",\n};\n\ntest.describe(\"Negative scenarios\", () => {\n  test(\"wrong credentials return 200, with a reason instead of a token\", async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/auth\\`, {\n      data: { username: \"admin\", password: \"definitely-wrong\" },\n    });\n\n    // Not 401. A failed login is still a successful *request*, and this API\n    // reports the failure in the body rather than the status code.\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.token).toBeUndefined();\n    expect(body.reason).toBe(\"Bad credentials\");\n  });\n\n  test(\"a blank first name is accepted\", async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/booking\\`, {\n      data: { ...validBooking, firstname: \"\" },\n    });\n\n    expect(res.status()).toBe(200);\n    const body = await res.json();\n    // No validation at all — the empty string is stored as-is.\n    expect(body.booking.firstname).toBe(\"\");\n  });\n\n  test(\"a wrong type is silently turned into null\", async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/booking\\`, {\n      data: { ...validBooking, totalprice: \"not-a-number\" },\n    });\n\n    expect(res.status()).toBe(200);\n    const body = await res.json();\n    // Worse than a rejection: the request \"succeeds\" and the data is quietly\n    // destroyed. Exactly the kind of bug only a negative test finds.\n    expect(body.booking.totalprice).toBeNull();\n  });\n\n  test(\"a missing required field crashes the server\", async ({ request }) => {\n    const { firstname, ...withoutFirstname } = validBooking;\n    const res = await request.post(\\`\\${BASE}/booking\\`, { data: withoutFirstname });\n\n    // 500 means the server threw. A well-built API would answer 400 and explain\n    // which field was missing. Report this as a defect — do not \"fix\" the test.\n    expect(res.status()).toBe(500);\n  });\n\n  test(\"an unknown booking id gives 404\", async ({ request }) => {\n    const res = await request.get(\\`\\${BASE}/booking/99999999\\`);\n    expect(res.status()).toBe(404);\n  });\n\n  test(\"changing a booking without a token gives 403\", async ({ request }) => {\n    const created = await request.post(\\`\\${BASE}/booking\\`, { data: validBooking });\n    const { bookingid } = await created.json();\n\n    const res = await request.put(\\`\\${BASE}/booking/\\${bookingid}\\`, { data: validBooking });\n    expect(res.status()).toBe(403);\n  });\n\n  test(\"a delete response is not JSON, so parsing it throws\", async ({ request }) => {\n    const auth = await request.post(\\`\\${BASE}/auth\\`, {\n      data: { username: \"admin\", password: \"password123\" },\n    });\n    const { token } = await auth.json();\n\n    const created = await request.post(\\`\\${BASE}/booking\\`, { data: validBooking });\n    const { bookingid } = await created.json();\n\n    const del = await request.delete(\\`\\${BASE}/booking/\\${bookingid}\\`, {\n      headers: { Cookie: \\`token=\\${token}\\` },\n    });\n\n    expect(del.status()).toBe(201);\n\n    // The body is the seven characters \"Created\" — plain text, not JSON.\n    const text = await del.text();\n    expect(text).toBe(\"Created\");\n\n    // This is why calling .json() on a delete blows up with a confusing error.\n    await expect(del.json()).rejects.toThrow();\n  });\n});\n`);\n\nawait runSpec(\"week8/generated/day2-negative.spec.ts\");"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 8 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week8/generated/day2-negative.spec.ts\", `// Week 8, Day 2 — negative scenarios: what this API really does when you\n// give it bad input.\n//\n// Every expectation below was probed against the live API first. Several\n// contradict what you would assume from the documentation, which is the point:\n// a negative test asserts observed behaviour, not hoped-for behaviour.\n//\n// Written by a cell in week8/day2_2.ipynb. Run it yourself:\n//   npx playwright test week8/generated/day2-negative.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\nconst BASE = \"https://restful-booker.herokuapp.com\";\n\nconst validBooking = {\n  firstname: \"Jim\",\n  lastname: \"Brown\",\n  totalprice: 111,\n  depositpaid: true,\n  bookingdates: { checkin: \"2018-01-01\", checkout: \"2019-01-01\" },\n  additionalneeds: \"Breakfast\",\n};\n\ntest.describe(\"Negative scenarios\", () => {\n  test(\"wrong credentials return 200, with a reason instead of a token\", async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/auth\\`, {\n      data: { username: \"admin\", password: \"definitely-wrong\" },\n    });\n\n    // Not 401. A failed login is still a successful *request*, and this API\n    // reports the failure in the body rather than the status code.\n    expect(res.status()).toBe(200);\n\n    const body = await res.json();\n    expect(body.token).toBeUndefined();\n    expect(body.reason).toBe(\"Bad credentials\");\n  });\n\n  test(\"a blank first name is accepted\", async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/booking\\`, {\n      data: { ...validBooking, firstname: \"\" },\n    });\n\n    expect(res.status()).toBe(200);\n    const body = await res.json();\n    // No validation at all — the empty string is stored as-is.\n    expect(body.booking.firstname).toBe(\"\");\n  });\n\n  test(\"a wrong type is silently turned into null\", async ({ request }) => {\n    const res = await request.post(\\`\\${BASE}/booking\\`, {\n      data: { ...validBooking, totalprice: \"not-a-number\" },\n    });\n\n    expect(res.status()).toBe(200);\n    const body = await res.json();\n    // Worse than a rejection: the request \"succeeds\" and the data is quietly\n    // destroyed. Exactly the kind of bug only a negative test finds.\n    expect(body.booking.totalprice).toBeNull();\n  });\n\n  test(\"a missing required field crashes the server\", async ({ request }) => {\n    const { firstname, ...withoutFirstname } = validBooking;\n    const res = await request.post(\\`\\${BASE}/booking\\`, { data: withoutFirstname });\n\n    // 500 means the server threw. A well-built API would answer 400 and explain\n    // which field was missing. Report this as a defect — do not \"fix\" the test.\n    expect(res.status()).toBe(500);\n  });\n\n  test(\"an unknown booking id gives 404\", async ({ request }) => {\n    const res = await request.get(\\`\\${BASE}/booking/99999999\\`);\n    expect(res.status()).toBe(404);\n  });\n\n  test(\"changing a booking without a token gives 403\", async ({ request }) => {\n    const created = await request.post(\\`\\${BASE}/booking\\`, { data: validBooking });\n    const { bookingid } = await created.json();\n\n    const res = await request.put(\\`\\${BASE}/booking/\\${bookingid}\\`, { data: validBooking });\n    expect(res.status()).toBe(403);\n  });\n\n  test(\"a delete response is not JSON, so parsing it throws\", async ({ request }) => {\n    const auth = await request.post(\\`\\${BASE}/auth\\`, {\n      data: { username: \"admin\", password: \"password123\" },\n    });\n    const { token } = await auth.json();\n\n    const created = await request.post(\\`\\${BASE}/booking\\`, { data: validBooking });\n    const { bookingid } = await created.json();\n\n    const del = await request.delete(\\`\\${BASE}/booking/\\${bookingid}\\`, {\n      headers: { Cookie: \\`token=\\${token}\\` },\n    });\n\n    expect(del.status()).toBe(201);\n\n    // The body is the seven characters \"Created\" — plain text, not JSON.\n    const text = await del.text();\n    expect(text).toBe(\"Created\");\n\n    // This is why calling .json() on a delete blows up with a confusing error.\n    await expect(del.json()).rejects.toThrow();\n  });\n});\n`);\n\nawait runSpec(\"week8/generated/day2-negative.spec.ts\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day2-negative.spec.ts`\n\n**Expected:** `7 passed`.\n\nNote the last assertion:\n\n```ts\nawait expect(del.json()).rejects.toThrow();\n```\n\n`rejects` is how you assert that something fails. Testing that the wrong thing breaks is as\nlegitimate as testing that the right thing works."
+          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day2-negative.spec.ts`\n\n**Expected:** `7 passed`.\n\nNote the last assertion:\n\n```ts\nawait expect(del.json()).rejects.toThrow();\n```\n\n`rejects` is how you assert that something fails. Testing that the wrong thing breaks is as\nlegitimate as testing that the right thing works.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Now the duplication problem\n\nYou have four negative cases. A real create-booking form has six fields, so blank-each-field\nalone is six more tests — and each is the same request with one value changed.\n\nCopy-pasting the test six times gives you six places to update when the endpoint moves. That is\n**code duplication**, and it is the difference between a suite people maintain and one they\nabandon.\n\nThe fix: the *test* is one thing, the *data* is a list. Put the list in a file."
+          "text": "## Now the duplication problem\n\nYou have four negative cases. A real create-booking form has six fields, so blank-each-field\nalone is six more tests — and each is the same request with one value changed.\n\nCopy-pasting the test six times gives you six places to update when the endpoint moves. That is\n**code duplication**, and it is the difference between a suite people maintain and one they\nabandon.\n\nThe fix: the *test* is one thing, the *data* is a list. Put the list in a file.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// The shape: everything that varies, in one place.\nconst cases = [\n  { name: \"a normal booking\", firstname: \"Ada\", expectedStatus: 200 },\n  { name: \"a long stay\", firstname: \"Grace\", expectedStatus: 200 },\n  { name: \"blank first name\", firstname: \"\", expectedStatus: 200 },\n];\n\ncases.forEach((testCase, index) => {\n  console.log(`Case ${index + 1} — ${testCase.name} (expects ${testCase.expectedStatus})`);\n});"
+          "text": "// The shape: everything that varies, in one place.\nconst cases = [\n  { name: \"a normal booking\", firstname: \"Ada\", expectedStatus: 200 },\n  { name: \"a long stay\", firstname: \"Grace\", expectedStatus: 200 },\n  { name: \"blank first name\", firstname: \"\", expectedStatus: 200 },\n];\n\ncases.forEach((testCase, index) => {\n  console.log(`Case ${index + 1} — ${testCase.name} (expects ${testCase.expectedStatus})`);\n});",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** three numbered lines.\n\nNow swap `console.log` for `test(...)` and each case becomes a **real, separately-named test**\nwith its own pass/fail and its own retry. That is the whole trick.\n\nThe loop runs while Playwright is *collecting* tests, before any of them execute — which is why\nthis produces four tests rather than one test that loops four times. One failure doesn't hide\nthe other three."
+          "text": "**Expected:** three numbered lines.\n\nNow swap `console.log` for `test(...)` and each case becomes a **real, separately-named test**\nwith its own pass/fail and its own retry. That is the whole trick.\n\nThe loop runs while Playwright is *collecting* tests, before any of them execute — which is why\nthis produces four tests rather than one test that loops four times. One failure doesn't hide\nthe other three.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Data in a file, tests generated from it\n\nThe cell below writes the data file and the spec, then runs it."
+          "text": "## Data in a file, tests generated from it\n\nThe cell below writes the data file and the spec, then runs it.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 8 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week8/generated/day2-booking-data.json\", `{\n  \"cases\": [\n    {\n      \"name\": \"a normal booking\",\n      \"booking\": {\n        \"firstname\": \"Ada\",\n        \"lastname\": \"Lovelace\",\n        \"totalprice\": 350,\n        \"depositpaid\": true,\n        \"bookingdates\": { \"checkin\": \"2024-05-01\", \"checkout\": \"2024-05-08\" },\n        \"additionalneeds\": \"Late checkout\"\n      },\n      \"expectedStatus\": 200,\n      \"expectedFirstname\": \"Ada\"\n    },\n    {\n      \"name\": \"a long stay with no extras\",\n      \"booking\": {\n        \"firstname\": \"Grace\",\n        \"lastname\": \"Hopper\",\n        \"totalprice\": 1200,\n        \"depositpaid\": false,\n        \"bookingdates\": { \"checkin\": \"2024-06-01\", \"checkout\": \"2024-06-30\" },\n        \"additionalneeds\": \"None\"\n      },\n      \"expectedStatus\": 200,\n      \"expectedFirstname\": \"Grace\"\n    },\n    {\n      \"name\": \"a one-night stay\",\n      \"booking\": {\n        \"firstname\": \"Alan\",\n        \"lastname\": \"Turing\",\n        \"totalprice\": 95,\n        \"depositpaid\": true,\n        \"bookingdates\": { \"checkin\": \"2024-07-04\", \"checkout\": \"2024-07-05\" },\n        \"additionalneeds\": \"Breakfast\"\n      },\n      \"expectedStatus\": 200,\n      \"expectedFirstname\": \"Alan\"\n    },\n    {\n      \"name\": \"NEGATIVE - a blank first name is accepted anyway\",\n      \"booking\": {\n        \"firstname\": \"\",\n        \"lastname\": \"Nobody\",\n        \"totalprice\": 10,\n        \"depositpaid\": false,\n        \"bookingdates\": { \"checkin\": \"2024-08-01\", \"checkout\": \"2024-08-02\" },\n        \"additionalneeds\": \"None\"\n      },\n      \"expectedStatus\": 200,\n      \"expectedFirstname\": \"\"\n    }\n  ]\n}\n`);\n\nawait writeProjectFile(\"week8/generated/day2-data-driven.spec.ts\", `// Week 8, Day 2 — one test, many data sets.\n//\n// The four cases live in day2-booking-data.json. Adding a fifth means editing\n// that file and nothing else: no new test, no copy-pasted block.\n//\n// Written by a cell in week8/day2_2.ipynb. Run it yourself:\n//   npx playwright test week8/generated/day2-data-driven.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport testData from \"./day2-booking-data.json\";\n\nconst BASE = \"https://restful-booker.herokuapp.com\";\n\ntest.describe(\"Create a booking, once per data set\", () => {\n  // The loop runs while Playwright is *collecting* tests, so each case becomes\n  // its own test with its own name, its own pass/fail, and its own retry.\n  // That is the whole reason to loop out here rather than inside one test.\n  testData.cases.forEach((testCase, index) => {\n    test(\\`Case \\${index + 1} — \\${testCase.name}\\`, async ({ request }) => {\n      const res = await request.post(\\`\\${BASE}/booking\\`, {\n        headers: { \"Content-Type\": \"application/json\" },\n        data: testCase.booking,\n      });\n\n      expect(res.status()).toBe(testCase.expectedStatus);\n\n      const body = await res.json();\n\n      // Assert against the data file, never against a value typed twice.\n      expect(body.booking.firstname).toBe(testCase.expectedFirstname);\n      expect(body.booking.lastname).toBe(testCase.booking.lastname);\n      expect(body.booking.bookingdates.checkin).toBe(testCase.booking.bookingdates.checkin);\n      expect(body.bookingid).toBeTruthy();\n    });\n  });\n});\n`);\n\nawait runSpec(\"week8/generated/day2-data-driven.spec.ts\");"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 8 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week8/generated/day2-booking-data.json\", `{\n  \"cases\": [\n    {\n      \"name\": \"a normal booking\",\n      \"booking\": {\n        \"firstname\": \"Ada\",\n        \"lastname\": \"Lovelace\",\n        \"totalprice\": 350,\n        \"depositpaid\": true,\n        \"bookingdates\": { \"checkin\": \"2024-05-01\", \"checkout\": \"2024-05-08\" },\n        \"additionalneeds\": \"Late checkout\"\n      },\n      \"expectedStatus\": 200,\n      \"expectedFirstname\": \"Ada\"\n    },\n    {\n      \"name\": \"a long stay with no extras\",\n      \"booking\": {\n        \"firstname\": \"Grace\",\n        \"lastname\": \"Hopper\",\n        \"totalprice\": 1200,\n        \"depositpaid\": false,\n        \"bookingdates\": { \"checkin\": \"2024-06-01\", \"checkout\": \"2024-06-30\" },\n        \"additionalneeds\": \"None\"\n      },\n      \"expectedStatus\": 200,\n      \"expectedFirstname\": \"Grace\"\n    },\n    {\n      \"name\": \"a one-night stay\",\n      \"booking\": {\n        \"firstname\": \"Alan\",\n        \"lastname\": \"Turing\",\n        \"totalprice\": 95,\n        \"depositpaid\": true,\n        \"bookingdates\": { \"checkin\": \"2024-07-04\", \"checkout\": \"2024-07-05\" },\n        \"additionalneeds\": \"Breakfast\"\n      },\n      \"expectedStatus\": 200,\n      \"expectedFirstname\": \"Alan\"\n    },\n    {\n      \"name\": \"NEGATIVE - a blank first name is accepted anyway\",\n      \"booking\": {\n        \"firstname\": \"\",\n        \"lastname\": \"Nobody\",\n        \"totalprice\": 10,\n        \"depositpaid\": false,\n        \"bookingdates\": { \"checkin\": \"2024-08-01\", \"checkout\": \"2024-08-02\" },\n        \"additionalneeds\": \"None\"\n      },\n      \"expectedStatus\": 200,\n      \"expectedFirstname\": \"\"\n    }\n  ]\n}\n`);\n\nawait writeProjectFile(\"week8/generated/day2-data-driven.spec.ts\", `// Week 8, Day 2 — one test, many data sets.\n//\n// The four cases live in day2-booking-data.json. Adding a fifth means editing\n// that file and nothing else: no new test, no copy-pasted block.\n//\n// Written by a cell in week8/day2_2.ipynb. Run it yourself:\n//   npx playwright test week8/generated/day2-data-driven.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport testData from \"./day2-booking-data.json\";\n\nconst BASE = \"https://restful-booker.herokuapp.com\";\n\ntest.describe(\"Create a booking, once per data set\", () => {\n  // The loop runs while Playwright is *collecting* tests, so each case becomes\n  // its own test with its own name, its own pass/fail, and its own retry.\n  // That is the whole reason to loop out here rather than inside one test.\n  testData.cases.forEach((testCase, index) => {\n    test(\\`Case \\${index + 1} — \\${testCase.name}\\`, async ({ request }) => {\n      const res = await request.post(\\`\\${BASE}/booking\\`, {\n        headers: { \"Content-Type\": \"application/json\" },\n        data: testCase.booking,\n      });\n\n      expect(res.status()).toBe(testCase.expectedStatus);\n\n      const body = await res.json();\n\n      // Assert against the data file, never against a value typed twice.\n      expect(body.booking.firstname).toBe(testCase.expectedFirstname);\n      expect(body.booking.lastname).toBe(testCase.booking.lastname);\n      expect(body.booking.bookingdates.checkin).toBe(testCase.booking.bookingdates.checkin);\n      expect(body.bookingid).toBeTruthy();\n    });\n  });\n});\n`);\n\nawait runSpec(\"week8/generated/day2-data-driven.spec.ts\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day2-data-driven.spec.ts`\n\n**Expected:** `4 passed`, named `Case 1 — a normal booking` through `Case 4 — NEGATIVE …`.\n\n**Add a fifth scenario by editing the JSON file and nothing else.** No new test, no copy-paste.\nThat is the payoff.\n\nTwo details worth copying into your own work:\n\n- The expected result lives **in the data file** (`expectedStatus`, `expectedFirstname`), so a\n  negative case sits alongside the positive ones instead of needing its own test.\n- Assertions compare against `testCase.booking.…`, never against a value typed a second time.\n  Typing `\"Ada\"` twice means a typo makes the test pass for the wrong reason."
+          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day2-data-driven.spec.ts`\n\n**Expected:** `4 passed`, named `Case 1 — a normal booking` through `Case 4 — NEGATIVE …`.\n\n**Add a fifth scenario by editing the JSON file and nothing else.** No new test, no copy-paste.\nThat is the payoff.\n\nTwo details worth copying into your own work:\n\n- The expected result lives **in the data file** (`expectedStatus`, `expectedFirstname`), so a\n  negative case sits alongside the positive ones instead of needing its own test.\n- Assertions compare against `testCase.booking.…`, never against a value typed a second time.\n  Typing `\"Ada\"` twice means a typo makes the test pass for the wrong reason.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Break one thing at a time.** Spread from a known-good object so a failure has one cause.\n- **Blank ≠ missing ≠ wrong type.** Three different tests, and today all three behaved differently.\n- **Assert the real behaviour**, then raise the defect. Never soften a test to make a bug pass.\n- **Print the whole body** before concluding an API returns nothing.\n- **`test.only` never gets committed.**\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Unexpected token … is not valid JSON` | parsed a body with no content | check status; use `.text()` |\n| Only one test ran | a stray `test.only` | remove it |\n| All cases pass suspiciously | you asserted a hardcoded value, not the data | compare against `testCase.…` |\n| `500` from bad input | a server-side defect | raise it; assert it so it's documented |\n| Spread didn't override | the spread came last | `{ ...base, field: value }` |\n\n**Next:** [Day 2.3](/learn/w8/d2/p3) — where this data lives once the suite is real."
+          "text": "## Best practices\n\n- **Break one thing at a time.** Spread from a known-good object so a failure has one cause.\n- **Blank ≠ missing ≠ wrong type.** Three different tests, and today all three behaved differently.\n- **Assert the real behaviour**, then raise the defect. Never soften a test to make a bug pass.\n- **Print the whole body** before concluding an API returns nothing.\n- **`test.only` never gets committed.**\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Unexpected token … is not valid JSON` | parsed a body with no content | check status; use `.text()` |\n| Only one test ran | a stray `test.only` | remove it |\n| All cases pass suspiciously | you asserted a hardcoded value, not the data | compare against `testCase.…` |\n| `500` from bad input | a server-side defect | raise it; assert it so it's documented |\n| Spread didn't override | the spread came last | `{ ...base, field: value }` |\n\n**Next:** [Day 2.3](/learn/w8/d2/p3) — where this data lives once the suite is real.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -237,39 +337,57 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 2.3 — Test data that scales\n\nSame data-driven idea as [Day 2.2](/learn/w8/d2/p2). No new API. The change is **where the data\nlives and what shape it has** once a suite has hundreds of cases."
+          "text": "# Week 8, Day 2.3 — Test data that scales\n\nSame data-driven idea as [Day 2.2](/learn/w8/d2/p2). No new API. The change is **where the data\nlives and what shape it has** once a suite has hundreds of cases.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## What breaks first\n\nA raw JSON file is right for four cases. Watch what happens as it grows:\n\n| Problem at scale | Why it hurts |\n|---|---|\n| Every case repeats all six fields | 40 cases means 40 copies of `bookingdates`; one format change is 40 edits |\n| A typo in a field name is silent | `frstname` in JSON is not a compile error — the test just fails oddly |\n| No types | Nothing stops `totalprice: \"free\"` reaching the request |\n| Cases share mutable objects | One test's edit leaks into another's data |\n\nThe fix is the same instinct as Day 1.3's API client: **name the knowledge once**. Here that\nmeans a **type** for the shape and a **factory** for the defaults."
+          "text": "## What breaks first\n\nA raw JSON file is right for four cases. Watch what happens as it grows:\n\n| Problem at scale | Why it hurts |\n|---|---|\n| Every case repeats all six fields | 40 cases means 40 copies of `bookingdates`; one format change is 40 edits |\n| A typo in a field name is silent | `frstname` in JSON is not a compile error — the test just fails oddly |\n| No types | Nothing stops `totalprice: \"free\"` reaching the request |\n| Cases share mutable objects | One test's edit leaks into another's data |\n\nThe fix is the same instinct as Day 1.3's API client: **name the knowledge once**. Here that\nmeans a **type** for the shape and a **factory** for the defaults.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// A type: the shape, written down once.\ntype Booking = {\n  firstname: string;\n  lastname: string;\n  totalprice: number;\n  depositpaid: boolean;\n  bookingdates: { checkin: string; checkout: string };\n  additionalneeds?: string;\n};\n\n// A factory: sensible defaults, overridable per case.\n// Returning a fresh object each call is the point — no two cases share state.\nfunction aBooking(overrides: Partial<Booking> = {}): Booking {\n  return {\n    firstname: \"Ada\",\n    lastname: \"Lovelace\",\n    totalprice: 350,\n    depositpaid: true,\n    bookingdates: { checkin: \"2024-05-01\", checkout: \"2024-05-08\" },\n    additionalneeds: \"Late checkout\",\n    ...overrides,\n  };\n}\n\nconsole.log(JSON.stringify(aBooking()));\nconsole.log(JSON.stringify(aBooking({ firstname: \"\", totalprice: 0 })));\n\n// A typo is now caught before the test ever runs:\n// aBooking({ frstname: \"x\" });   // ← uncomment: TypeScript refuses"
+          "text": "// A type: the shape, written down once.\ntype Booking = {\n  firstname: string;\n  lastname: string;\n  totalprice: number;\n  depositpaid: boolean;\n  bookingdates: { checkin: string; checkout: string };\n  additionalneeds?: string;\n};\n\n// A factory: sensible defaults, overridable per case.\n// Returning a fresh object each call is the point — no two cases share state.\nfunction aBooking(overrides: Partial<Booking> = {}): Booking {\n  return {\n    firstname: \"Ada\",\n    lastname: \"Lovelace\",\n    totalprice: 350,\n    depositpaid: true,\n    bookingdates: { checkin: \"2024-05-01\", checkout: \"2024-05-08\" },\n    additionalneeds: \"Late checkout\",\n    ...overrides,\n  };\n}\n\nconsole.log(JSON.stringify(aBooking()));\nconsole.log(JSON.stringify(aBooking({ firstname: \"\", totalprice: 0 })));\n\n// A typo is now caught before the test ever runs:\n// aBooking({ frstname: \"x\" });   // ← uncomment: TypeScript refuses",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** the default booking, then one with a blank name and zero price — everything else\nstill filled in.\n\nCompare the two ways of writing a case:\n\n| JSON file | Factory |\n|---|---|\n| all six fields, every time | `aBooking({ firstname: \"\" })` |\n| typo fails at runtime, confusingly | typo fails at compile time |\n| shared object, mutable | fresh object per call |\n\nThe line that matters is `...overrides` **last** — the same rule from Day 2.1. Put it first and\nyour overrides get silently reset to the defaults."
+          "text": "**Expected:** the default booking, then one with a blank name and zero price — everything else\nstill filled in.\n\nCompare the two ways of writing a case:\n\n| JSON file | Factory |\n|---|---|\n| all six fields, every time | `aBooking({ firstname: \"\" })` |\n| typo fails at runtime, confusingly | typo fails at compile time |\n| shared object, mutable | fresh object per call |\n\nThe line that matters is `...overrides` **last** — the same rule from Day 2.1. Put it first and\nyour overrides get silently reset to the defaults.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Cases as a typed table\n\nWith a factory, a case is a name plus what makes it different. The whole suite fits on a screen\nand reads like a specification."
+          "text": "## Cases as a typed table\n\nWith a factory, a case is a name plus what makes it different. The whole suite fits on a screen\nand reads like a specification.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// `Booking` and `aBooking` come from the cell above — cells share one workspace,\n// so there is no need to define them twice (and doing so would be an error).\ntype Case = { name: string; booking: Booking; expectedStatus: number };\n\nconst cases: Case[] = [\n  { name: \"a normal booking\",     booking: aBooking(),                      expectedStatus: 200 },\n  { name: \"a free stay\",          booking: aBooking({ totalprice: 0 }),     expectedStatus: 200 },\n  { name: \"no deposit\",           booking: aBooking({ depositpaid: false }), expectedStatus: 200 },\n  { name: \"NEGATIVE blank name\",  booking: aBooking({ firstname: \"\" }),     expectedStatus: 200 },\n];\n\ncases.forEach((c, i) => console.log(`Case ${i + 1} — ${c.name} → ${c.expectedStatus}`));"
+          "text": "// `Booking` and `aBooking` come from the cell above — cells share one workspace,\n// so there is no need to define them twice (and doing so would be an error).\ntype Case = { name: string; booking: Booking; expectedStatus: number };\n\nconst cases: Case[] = [\n  { name: \"a normal booking\",     booking: aBooking(),                      expectedStatus: 200 },\n  { name: \"a free stay\",          booking: aBooking({ totalprice: 0 }),     expectedStatus: 200 },\n  { name: \"no deposit\",           booking: aBooking({ depositpaid: false }), expectedStatus: 200 },\n  { name: \"NEGATIVE blank name\",  booking: aBooking({ firstname: \"\" }),     expectedStatus: 200 },\n];\n\ncases.forEach((c, i) => console.log(`Case ${i + 1} — ${c.name} → ${c.expectedStatus}`));",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** four numbered lines.\n\nEach case now says only what is *interesting* about it. `aBooking({ totalprice: 0 })` reads as\n\"a normal booking, except free\" — which is what the tester actually meant."
+          "text": "**Expected:** four numbered lines.\n\nEach case now says only what is *interesting* about it. `aBooking({ totalprice: 0 })` reads as\n\"a normal booking, except free\" — which is what the tester actually meant.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## When to keep the JSON file anyway\n\nTypes and factories are not always right. Choose by **who edits the data**:\n\n| Use a factory | Use a JSON/CSV file |\n|---|---|\n| Testers own the data | Non-developers contribute cases |\n| Cases differ by one or two fields | Every case is genuinely different |\n| You want compile-time safety | Data is exported from another system |\n| Data lives with the tests | Data changes without a code release |\n\nMany real suites use both: JSON for a bulk table exported by the business, a factory for the\nhandful of edge cases engineers add.\n\nWhichever you pick, one rule does not bend: **the expected result travels with the input.** A\ncase that says what to send but not what should happen is not a test case."
+          "text": "## When to keep the JSON file anyway\n\nTypes and factories are not always right. Choose by **who edits the data**:\n\n| Use a factory | Use a JSON/CSV file |\n|---|---|\n| Testers own the data | Non-developers contribute cases |\n| Cases differ by one or two fields | Every case is genuinely different |\n| You want compile-time safety | Data is exported from another system |\n| Data lives with the tests | Data changes without a code release |\n\nMany real suites use both: JSON for a bulk table exported by the business, a factory for the\nhandful of edge cases engineers add.\n\nWhichever you pick, one rule does not bend: **the expected result travels with the input.** A\ncase that says what to send but not what should happen is not a test case.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## What a reviewer checks\n\n- **No expected value typed twice** — assert against the case data, not a repeated literal.\n- **Every case independently named**, so a failure report says which one.\n- **A fresh object per case** — no shared mutable data between tests.\n- **Negative cases sit with positive ones**, not in a separate forgotten file.\n- **No `test.only`** anywhere.\n- **Known defects asserted, not skipped** — a test pinning the `500` is documentation.\n\n**Next:** [Day 2.4](/learn/w8/d2/p4) — your turn."
+          "text": "## What a reviewer checks\n\n- **No expected value typed twice** — assert against the case data, not a repeated literal.\n- **Every case independently named**, so a failure report says which one.\n- **A fresh object per case** — no shared mutable data between tests.\n- **Negative cases sit with positive ones**, not in a separate forgotten file.\n- **No `test.only`** anywhere.\n- **Known defects asserted, not skipped** — a test pinning the `500` is documentation.\n\n**Next:** [Day 2.4](/learn/w8/d2/p4) — your turn.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -284,23 +402,33 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 2.4 — Practice\n\nThree problems. No answer key — each says how to check yourself.\n\nTarget: **Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)), credentials `admin` / `password123`.\n\n> Stuck past twenty minutes? The gap is in [Day 2.1](/learn/w8/d2/p1) or [Day 2.2](/learn/w8/d2/p2)."
+          "text": "# Week 8, Day 2.4 — Practice\n\nThree problems. No answer key — each says how to check yourself.\n\nTarget: **Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)), credentials `admin` / `password123`.\n\n> Stuck past twenty minutes? The gap is in [Day 2.1](/learn/w8/d2/p1) or [Day 2.2](/learn/w8/d2/p2).",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "1"
+          "text": "1",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "2"
+          "text": "2",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "3"
+          "text": "3",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**Which of the four defects from Day 2.2 would a user actually notice?** The silent\n`totalprice: null` is the dangerous one — no error, no clue, wrong data. Ranking findings by\nuser impact is most of what makes a bug report worth reading.\n\n**Next:** [Day 3.1](/learn/w8/d3/p1) — pulling data straight out of a page."
+          "text": "## When you're done\n\n**Which of the four defects from Day 2.2 would a user actually notice?** The silent\n`totalprice: null` is the dangerous one — no error, no clue, wrong data. Ranking findings by\nuser impact is most of what makes a bug report worth reading.\n\n**Next:** [Day 3.1](/learn/w8/d3/p1) — pulling data straight out of a page.",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": [

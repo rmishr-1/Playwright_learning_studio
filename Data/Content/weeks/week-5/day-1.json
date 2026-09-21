@@ -15,47 +15,69 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.1 - Prerequisites check\n\nToday is about **config files**, so the TypeScript is small: one regular expression literal and\none shallow-copy trap.\n\n| Concept | What it looks like | Taught in |\n|---|---|---|\n| Typed object export | `export default defineConfig({ ... })` | [week3/day1_1](/learn/w3/d1/p1) |\n| Spread with override | `{ ...base, retries: 0 }` | [week3/day5_1](/learn/w3/d5/p1) |\n| Array of strings | `testMatch: [\"a.spec.ts\"]` | [week3/day5_1](/learn/w3/d5/p1) |\n| Regex literal | `/@smoke/` | new - below |\n\n**Next:** [Day 1.2 - One suite, two configs](/learn/w5/d1/p2)"
+          "text": "# Week 5, Day 1.1 - Prerequisites check\n\nToday is about **config files**, so the TypeScript is small: one regular expression literal and\none shallow-copy trap.\n\n| Concept | What it looks like | Taught in |\n|---|---|---|\n| Typed object export | `export default defineConfig({ ... })` | [week3/day1_1](/learn/w3/d1/p1) |\n| Spread with override | `{ ...base, retries: 0 }` | [week3/day5_1](/learn/w3/d5/p1) |\n| Array of strings | `testMatch: [\"a.spec.ts\"]` | [week3/day5_1](/learn/w3/d5/p1) |\n| Regex literal | `/@smoke/` | new - below |\n\n**Next:** [Day 1.2 - One suite, two configs](/learn/w5/d1/p2)",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Concept 1 - a regex literal\n\nSlashes instead of quotes. `/@smoke/` is not a string; it is a **pattern object** with a\n`.test()` method that answers *does this text contain that?*\n\n| Expression | Result |\n|---|---|\n| `/@smoke/.test(\"login @smoke\")` | `true` |\n| `/@smoke/.test(\"login @regression\")` | `false` |\n| `/@smoke/.test(\"@smoketest\")` | `true` - it matches *inside* words too |\n\nThat last row is the trap: a tag named `@smoke` also matches `@smoketest`. Keep tag names\ndistinct."
+          "text": "## Concept 1 - a regex literal\n\nSlashes instead of quotes. `/@smoke/` is not a string; it is a **pattern object** with a\n`.test()` method that answers *does this text contain that?*\n\n| Expression | Result |\n|---|---|\n| `/@smoke/.test(\"login @smoke\")` | `true` |\n| `/@smoke/.test(\"login @regression\")` | `false` |\n| `/@smoke/.test(\"@smoketest\")` | `true` - it matches *inside* words too |\n\nThat last row is the trap: a tag named `@smoke` also matches `@smoketest`. Keep tag names\ndistinct.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// A regex is an object, not a string.\nconst smokePattern = /@smoke/;\n\nconsole.log(typeof smokePattern);                       // \"object\"\nconsole.log(smokePattern.test(\"checkout @smoke\"));      // true\nconsole.log(smokePattern.test(\"checkout @regression\")); // false\nconsole.log(smokePattern.test(\"@smoketest run\"));       // true  <- matches inside a word"
+          "text": "// A regex is an object, not a string.\nconst smokePattern = /@smoke/;\n\nconsole.log(typeof smokePattern);                       // \"object\"\nconsole.log(smokePattern.test(\"checkout @smoke\"));      // true\nconsole.log(smokePattern.test(\"checkout @regression\")); // false\nconsole.log(smokePattern.test(\"@smoketest run\"));       // true  <- matches inside a word",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Concept 2 - combining patterns\n\n`|` means *or*. You will want this the moment you have more than two tags."
+          "text": "## Concept 2 - combining patterns\n\n`|` means *or*. You will want this the moment you have more than two tags.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const eitherTag = /@smoke|@critical/;\n\nfor (const title of [\"pay bills @smoke\", \"transfer @critical\", \"report @regression\"]) {\n  console.log(`${eitherTag.test(title) ? \"RUN \" : \"skip\"}  ${title}`);\n}"
+          "text": "const eitherTag = /@smoke|@critical/;\n\nfor (const title of [\"pay bills @smoke\", \"transfer @critical\", \"report @regression\"]) {\n  console.log(`${eitherTag.test(title) ? \"RUN \" : \"skip\"}  ${title}`);\n}",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Concept 3 - spread copies only the top level\n\nYou used spread-with-override in [week3/day5_1](/learn/w3/d5/p1) to build a browser project\nout of a preset. Today you build one whole config out of another - which exposes the half that day\ndid not need: spread is **shallow**. Nested objects are copied as a single value, so naming a\nnested key below replaces the whole thing rather than merging into it."
+          "text": "## Concept 3 - spread copies only the top level\n\nYou used spread-with-override in [week3/day5_1](/learn/w3/d5/p1) to build a browser project\nout of a preset. Today you build one whole config out of another - which exposes the half that day\ndid not need: spread is **shallow**. Nested objects are copied as a single value, so naming a\nnested key below replaces the whole thing rather than merging into it.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "const baseConfig = { timeout: 30_000, use: { baseURL: \"https://example.com\", headless: false } };\n\nconst brokenCopy = { ...baseConfig, use: { headless: true } };\nconst fixedCopy  = { ...baseConfig, use: { ...baseConfig.use, headless: true } };\n\nconsole.log(\"broken.use:\", brokenCopy.use);  // baseURL is gone\nconsole.log(\"fixed.use: \", fixedCopy.use);   // both kept"
+          "text": "const baseConfig = { timeout: 30_000, use: { baseURL: \"https://example.com\", headless: false } };\n\nconst brokenCopy = { ...baseConfig, use: { headless: true } };\nconst fixedCopy  = { ...baseConfig, use: { ...baseConfig.use, headless: true } };\n\nconsole.log(\"broken.use:\", brokenCopy.use);  // baseURL is gone\nconsole.log(\"fixed.use: \", fixedCopy.use);   // both kept",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 1.2 - One suite, two configs](/learn/w5/d1/p2)"
+          "text": "**Next:** [Day 1.2 - One suite, two configs](/learn/w5/d1/p2)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -70,79 +92,117 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.2 - One suite, two configs\n\nYour suite has 400 tests. Before every deploy you want the 40 that matter, in two minutes. Once\na night you want all 400. Same tests, two different runs.\n\nTwo things get you there: **a tag in the test title** and **a second config file**.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout."
+          "text": "# Week 5, Day 1.2 - One suite, two configs\n\nYour suite has 400 tests. Before every deploy you want the 40 that matter, in two minutes. Once\na night you want all 400. Same tests, two different runs.\n\nTwo things get you there: **a tag in the test title** and **a second config file**.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 1 - tag the tests\n\nA tag is just text in the title. Playwright has no special tag syntax; `@smoke` is a convention\nthat a pattern can find.\n\n```ts\ntest(\"sign in works @smoke\", async ({ page }) => { ... });\ntest(\"statement export @regression\", async ({ page }) => { ... });\n```\n\n| Convention | Meaning in practice |\n|---|---|\n| `@smoke` | fast, run on every commit |\n| `@regression` | slow, run nightly |\n| `@critical` | must never break; page someone if it does |\n\nThe `@` is not required. It just makes the tag easy to spot by eye and unlikely to appear in\nprose by accident."
+          "text": "## Step 1 - tag the tests\n\nA tag is just text in the title. Playwright has no special tag syntax; `@smoke` is a convention\nthat a pattern can find.\n\n```ts\ntest(\"sign in works @smoke\", async ({ page }) => { ... });\ntest(\"statement export @regression\", async ({ page }) => { ... });\n```\n\n| Convention | Meaning in practice |\n|---|---|\n| `@smoke` | fast, run on every commit |\n| `@regression` | slow, run nightly |\n| `@critical` | must never break; page someone if it does |\n\nThe `@` is not required. It just makes the tag easy to spot by eye and unlikely to appear in\nprose by accident.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 2 - the spec, and selecting from it\n\nFour tests below: two tagged `@smoke`, two tagged `@regression`."
+          "text": "## Step 2 - the spec, and selecting from it\n\nFour tests below: two tagged `@smoke`, two tagged `@regression`.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day1-tagged.spec.ts\", `// Week 5, Day 1 — one spec, two lanes.\n//\n// The tags in the test titles are just text. What makes them useful is that a\n// config or a --grep can select on them, so the same file serves a 30-second\n// smoke run and a full regression run.\n//\n// Filename is NOT *.spec.ts by root-config standards? It is — but the root\n// config's testMatch covers week*/**/*.spec.ts, so it runs there too. That is\n// deliberate: these tests are honest tests, not demos.\n//\n//   npx playwright test -c week5/generated/day1-smoke.config.ts        (2 tests)\n//   npx playwright test -c week5/generated/day1-regression.config.ts   (4 tests)\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest(\"@smoke sign-in reaches the dashboard\", async ({ page }) => {\n  await loginAs(page);\n  await expect(page.getByText(\"Leela\")).toBeVisible();\n});\n\ntest(\"@smoke the dashboard shows an account balance\", async ({ page }) => {\n  await loginAs(page);\n  await expect(page.getByText(\"Account Balance\", { exact: true })).toBeVisible();\n});\n\ntest(\"@regression every dashboard tile is present\", async ({ page }) => {\n  await loginAs(page);\n  // 12 tiles, verified — two of them share the label \"Statements\".\n  await expect(page.locator(\"p.card-text\")).toHaveCount(12);\n});\n\ntest(\"@regression signing out returns to the login form\", async ({ page }) => {\n  await loginAs(page);\n  await page.getByRole(\"button\", { name: \"LogOut\" }).click();\n  await expect(page.getByPlaceholder(\"Enter Email\")).toBeVisible();\n});\n`);\n\n// All four, under the repo's normal config.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\");"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day1-tagged.spec.ts\", `// Week 5, Day 1 — one spec, two lanes.\n//\n// The tags in the test titles are just text. What makes them useful is that a\n// config or a --grep can select on them, so the same file serves a 30-second\n// smoke run and a full regression run.\n//\n// Filename is NOT *.spec.ts by root-config standards? It is — but the root\n// config's testMatch covers week*/**/*.spec.ts, so it runs there too. That is\n// deliberate: these tests are honest tests, not demos.\n//\n//   npx playwright test -c week5/generated/day1-smoke.config.ts        (2 tests)\n//   npx playwright test -c week5/generated/day1-regression.config.ts   (4 tests)\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest(\"@smoke sign-in reaches the dashboard\", async ({ page }) => {\n  await loginAs(page);\n  await expect(page.getByText(\"Leela\")).toBeVisible();\n});\n\ntest(\"@smoke the dashboard shows an account balance\", async ({ page }) => {\n  await loginAs(page);\n  await expect(page.getByText(\"Account Balance\", { exact: true })).toBeVisible();\n});\n\ntest(\"@regression every dashboard tile is present\", async ({ page }) => {\n  await loginAs(page);\n  // 12 tiles, verified — two of them share the label \"Statements\".\n  await expect(page.locator(\"p.card-text\")).toHaveCount(12);\n});\n\ntest(\"@regression signing out returns to the login form\", async ({ page }) => {\n  await loginAs(page);\n  await page.getByRole(\"button\", { name: \"LogOut\" }).click();\n  await expect(page.getByPlaceholder(\"Enter Email\")).toBeVisible();\n});\n`);\n\n// All four, under the repo's normal config.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\");",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "Four ran. Now select just the fast ones. `--grep` keeps titles that match the pattern."
+          "text": "Four ran. Now select just the fast ones. `--grep` keeps titles that match the pattern.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Expected: 2 passed.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", { grep: \"@smoke\" });"
+          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Expected: 2 passed.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", { grep: \"@smoke\" });",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 3 - `--grep-invert`, the other direction\n\n`--grep` keeps matches. `--grep-invert` throws them away. Useful for *everything except the\nslow ones*."
+          "text": "## Step 3 - `--grep-invert`, the other direction\n\n`--grep` keeps matches. `--grep-invert` throws them away. Useful for *everything except the\nslow ones*.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\";\n\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", { extraArgs: [\"--grep-invert\", \"@regression\"] });"
+          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\";\n\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", { extraArgs: [\"--grep-invert\", \"@regression\"] });",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Step 4 - move the choice into a config file\n\nTyping `--grep @smoke` every time is a thing to forget. Put it in a config and the config\nbecomes the decision:\n\n```ts\nexport default defineConfig({\n  grep: /@smoke/,     // the config selects the tag - no flag needed\n  retries: 0,\n  workers: 3,\n});\n```\n\nTwo files, one spec:\n\n| | smoke config | regression config |\n|---|---|---|\n| `grep` | `/@smoke/` | *(none - everything runs)* |\n| `retries` | `0` | `1` |\n| `workers` | `3` | `2` |\n| `trace` | *(default)* | `retain-on-failure` |\n| Expected | **2 tests** | **4 tests** |"
+          "text": "## Step 4 - move the choice into a config file\n\nTyping `--grep @smoke` every time is a thing to forget. Put it in a config and the config\nbecomes the decision:\n\n```ts\nexport default defineConfig({\n  grep: /@smoke/,     // the config selects the tag - no flag needed\n  retries: 0,\n  workers: 3,\n});\n```\n\nTwo files, one spec:\n\n| | smoke config | regression config |\n|---|---|---|\n| `grep` | `/@smoke/` | *(none - everything runs)* |\n| `retries` | `0` | `1` |\n| `workers` | `3` | `2` |\n| `trace` | *(default)* | `retain-on-failure` |\n| Expected | **2 tests** | **4 tests** |",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day1-smoke.config.ts\", `// Week 5, Day 1 — one config per purpose: the fast smoke lane.\n//\n// The point of a second config is that your team's default stays untouched. This\n// one runs only tests tagged @smoke, on one browser, with no retries — the shape\n// you want on every push.\n//\n//   npx playwright test -c week5/generated/day1-smoke.config.ts\nimport { defineConfig, devices } from \"@playwright/test\";\n\nexport default defineConfig({\n  testDir: \".\",\n  testMatch: [\"day1-tagged.spec.ts\"],\n  grep: /@smoke/,          // the config selects the tag; no flag needed\n  retries: 0,\n  workers: 3,\n  reporter: [[\"list\"]],\n  use: { ...devices[\"Desktop Chrome\"], baseURL: \"https://test-automation-banking.vercel.app\" },\n});\n`);\n\n// Expected: 2 passed. The config picked the tag; we passed no --grep.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", { extraArgs: [\"-c\", \"week5/generated/day1-smoke.config.ts\"] });"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day1-smoke.config.ts\", `// Week 5, Day 1 — one config per purpose: the fast smoke lane.\n//\n// The point of a second config is that your team's default stays untouched. This\n// one runs only tests tagged @smoke, on one browser, with no retries — the shape\n// you want on every push.\n//\n//   npx playwright test -c week5/generated/day1-smoke.config.ts\nimport { defineConfig, devices } from \"@playwright/test\";\n\nexport default defineConfig({\n  testDir: \".\",\n  testMatch: [\"day1-tagged.spec.ts\"],\n  grep: /@smoke/,          // the config selects the tag; no flag needed\n  retries: 0,\n  workers: 3,\n  reporter: [[\"list\"]],\n  use: { ...devices[\"Desktop Chrome\"], baseURL: \"https://test-automation-banking.vercel.app\" },\n});\n`);\n\n// Expected: 2 passed. The config picked the tag; we passed no --grep.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", { extraArgs: [\"-c\", \"week5/generated/day1-smoke.config.ts\"] });",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day1-regression.config.ts\", `// Week 5, Day 1 — the same tests, the slow thorough lane.\n//\n// Same testMatch, different everything else: no grep (so every tag runs), retries\n// on, traces kept. Nothing about the tests changed — only the config.\n//\n//   npx playwright test -c week5/generated/day1-regression.config.ts\nimport { defineConfig, devices } from \"@playwright/test\";\n\nexport default defineConfig({\n  testDir: \".\",\n  testMatch: [\"day1-tagged.spec.ts\"],\n  // No grep: everything runs.\n  retries: 1,\n  workers: 2,\n  reporter: [[\"list\"]],\n  use: {\n    ...devices[\"Desktop Chrome\"],\n    baseURL: \"https://test-automation-banking.vercel.app\",\n    trace: \"retain-on-failure\",\n  },\n});\n`);\n\n// Expected: 4 passed. Same spec file, no grep, retries on.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", { extraArgs: [\"-c\", \"week5/generated/day1-regression.config.ts\"] });"
+          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day1-regression.config.ts\", `// Week 5, Day 1 — the same tests, the slow thorough lane.\n//\n// Same testMatch, different everything else: no grep (so every tag runs), retries\n// on, traces kept. Nothing about the tests changed — only the config.\n//\n//   npx playwright test -c week5/generated/day1-regression.config.ts\nimport { defineConfig, devices } from \"@playwright/test\";\n\nexport default defineConfig({\n  testDir: \".\",\n  testMatch: [\"day1-tagged.spec.ts\"],\n  // No grep: everything runs.\n  retries: 1,\n  workers: 2,\n  reporter: [[\"list\"]],\n  use: {\n    ...devices[\"Desktop Chrome\"],\n    baseURL: \"https://test-automation-banking.vercel.app\",\n    trace: \"retain-on-failure\",\n  },\n});\n`);\n\n// Expected: 4 passed. Same spec file, no grep, retries on.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", { extraArgs: [\"-c\", \"week5/generated/day1-regression.config.ts\"] });",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**2 versus 4, from one spec file.** That is the whole technique.\n\n## Step 5 - what happens when the config and the flag disagree\n\n\"The flag overrides the file\" is the answer most people give. It is only half right, and the\nother half will cost you an afternoon. Run this."
+          "text": "**2 versus 4, from one spec file.** That is the whole technique.\n\n## Step 5 - what happens when the config and the flag disagree\n\n\"The flag overrides the file\" is the answer most people give. It is only half right, and the\nother half will cost you an afternoon. Run this.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\";\n\n// The config says /@smoke/. The command line says @regression.\n// Predict the count before you run it.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", {\n  extraArgs: [\"-c\", \"week5/generated/day1-smoke.config.ts\", \"--grep\", \"@regression\"],\n});"
+          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\";\n\n// The config says /@smoke/. The command line says @regression.\n// Predict the count before you run it.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", {\n  extraArgs: [\"-c\", \"week5/generated/day1-smoke.config.ts\", \"--grep\", \"@regression\"],\n});",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**`Error: No tests found`.**\n\nNot the 2 `@regression` tests. Zero. The CLI `--grep` did **not** replace the config's `grep` -\nthe two were combined, and a test has to match **both** patterns. No test is tagged `@smoke` *and*\n`@regression`, so nothing ran.\n\n`grep` is a **filter**, and filters stack. That is the trap: your config narrows to a lane, and\nevery `--grep` you type afterwards can only narrow further, never sideways."
+          "text": "**`Error: No tests found`.**\n\nNot the 2 `@regression` tests. Zero. The CLI `--grep` did **not** replace the config's `grep` -\nthe two were combined, and a test has to match **both** patterns. No test is tagged `@smoke` *and*\n`@regression`, so nothing ran.\n\n`grep` is a **filter**, and filters stack. That is the trap: your config narrows to a lane, and\nevery `--grep` you type afterwards can only narrow further, never sideways.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Now a plain number instead of a filter. The config says workers: 3.\n// Expected: \"Running 2 tests using 1 worker\" - here the flag really does win.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", {\n  extraArgs: [\"-c\", \"week5/generated/day1-smoke.config.ts\", \"--workers=1\"],\n});"
+          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Now a plain number instead of a filter. The config says workers: 3.\n// Expected: \"Running 2 tests using 1 worker\" - here the flag really does win.\nawait runSpec(\"week5/generated/day1-tagged.spec.ts\", {\n  extraArgs: [\"-c\", \"week5/generated/day1-smoke.config.ts\", \"--workers=1\"],\n});",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck."
+          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "| Setting | Config | Command line | Result | Rule |\n|---|---|---|---|---|\n| `grep` | `/@smoke/` | `--grep @regression` | **0 tests** | combined - must match both |\n| `workers` | `3` | `--workers=1` | 1 worker | overridden |\n| `retries` | `2` | `--retries=0` | 1 attempt, no retry | overridden |\n\nRemember it as: **plain values are overridden; filters are added to.** Every row above was\nchecked by running it - including the first, which is why this lesson does not say \"the flag\nalways wins\".\n\nThe practical consequence: to run a different lane, point at a different config. Do not try to\n`--grep` your way out of one.\n\n**Next:** [Day 1.3 - How a real repo lays this out](/learn/w5/d1/p3)"
+          "text": "| Setting | Config | Command line | Result | Rule |\n|---|---|---|---|---|\n| `grep` | `/@smoke/` | `--grep @regression` | **0 tests** | combined - must match both |\n| `workers` | `3` | `--workers=1` | 1 worker | overridden |\n| `retries` | `2` | `--retries=0` | 1 attempt, no retry | overridden |\n\nRemember it as: **plain values are overridden; filters are added to.** Every row above was\nchecked by running it - including the first, which is why this lesson does not say \"the flag\nalways wins\".\n\nThe practical consequence: to run a different lane, point at a different config. Do not try to\n`--grep` your way out of one.\n\n**Next:** [Day 1.3 - How a real repo lays this out](/learn/w5/d1/p3)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -157,31 +217,45 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.3 - How a real repo lays this out\n\nSame `grep`, same `testMatch`, same `--grep` - arranged the way a team actually keeps them.\n\n## The layout\n\n```\nplaywright.config.ts          <- shared settings, the one source of truth\nconfig/\n  smoke.config.ts             <- imports the base, overrides 3 things\n  regression.config.ts\n  ci.config.ts\npackage.json                  <- names each run so nobody types flags\n```"
+          "text": "# Week 5, Day 1.3 - How a real repo lays this out\n\nSame `grep`, same `testMatch`, same `--grep` - arranged the way a team actually keeps them.\n\n## The layout\n\n```\nplaywright.config.ts          <- shared settings, the one source of truth\nconfig/\n  smoke.config.ts             <- imports the base, overrides 3 things\n  regression.config.ts\n  ci.config.ts\npackage.json                  <- names each run so nobody types flags\n```",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## One base, several thin overrides\n\nCopying a whole config per environment means five files that drift apart. Import the base:\n\n```ts\n// config/smoke.config.ts\nimport { defineConfig } from \"@playwright/test\";\nimport base from \"../playwright.config\";\n\nexport default defineConfig({\n  ...base,                    // everything the base decided\n  grep: /@smoke/,             // the three things this run changes\n  retries: 0,\n  workers: 3,\n});\n```\n\n`...base` is the spread from [day1_1](/learn/w5/d1/p1), concept 3 - and its shallowness is exactly\nthe bug you saw there. `use: { headless: true }` under a `...base` **deletes `baseURL`**. Spread\nthe inner object too:\n\n```ts\nuse: { ...base.use, headless: true },\n```"
+          "text": "## One base, several thin overrides\n\nCopying a whole config per environment means five files that drift apart. Import the base:\n\n```ts\n// config/smoke.config.ts\nimport { defineConfig } from \"@playwright/test\";\nimport base from \"../playwright.config\";\n\nexport default defineConfig({\n  ...base,                    // everything the base decided\n  grep: /@smoke/,             // the three things this run changes\n  retries: 0,\n  workers: 3,\n});\n```\n\n`...base` is the spread from [day1_1](/learn/w5/d1/p1), concept 3 - and its shallowness is exactly\nthe bug you saw there. `use: { headless: true }` under a `...base` **deletes `baseURL`**. Spread\nthe inner object too:\n\n```ts\nuse: { ...base.use, headless: true },\n```",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "example",
-          "text": "// The three-config layout, resolved. No browser needed - this is just objects.\nconst sharedBase = {\n  timeout: 30_000,\n  use: { baseURL: \"https://test-automation-banking.vercel.app\", headless: true },\n};\n\nconst smokeLane = { ...sharedBase, grep: /@smoke/, retries: 0, workers: 3 };\nconst ciLane = {\n  ...sharedBase,\n  use: { ...sharedBase.use, headless: true },   // inner spread: keeps baseURL\n  retries: 2,\n  workers: 1,\n};\n\nfor (const [name, cfg] of Object.entries({ smokeLane, ciLane })) {\n  console.log(name.padEnd(10), \"baseURL:\", cfg.use.baseURL ?? \"*** LOST ***\",\n              \"| retries:\", cfg.retries, \"| workers:\", cfg.workers);\n}"
+          "text": "// The three-config layout, resolved. No browser needed - this is just objects.\nconst sharedBase = {\n  timeout: 30_000,\n  use: { baseURL: \"https://test-automation-banking.vercel.app\", headless: true },\n};\n\nconst smokeLane = { ...sharedBase, grep: /@smoke/, retries: 0, workers: 3 };\nconst ciLane = {\n  ...sharedBase,\n  use: { ...sharedBase.use, headless: true },   // inner spread: keeps baseURL\n  retries: 2,\n  workers: 1,\n};\n\nfor (const [name, cfg] of Object.entries({ smokeLane, ciLane })) {\n  console.log(name.padEnd(10), \"baseURL:\", cfg.use.baseURL ?? \"*** LOST ***\",\n              \"| retries:\", cfg.retries, \"| workers:\", cfg.workers);\n}",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "Both lanes kept `baseURL`, and each changed only what it meant to. Drop the `...sharedBase.use`\nfrom `ciLane` and re-run: the second line prints `*** LOST ***`. That one-line difference is the\nmost common bug in a multi-config repo."
+          "text": "Both lanes kept `baseURL`, and each changed only what it meant to. Drop the `...sharedBase.use`\nfrom `ciLane` and re-run: the second line prints `*** LOST ***`. That one-line difference is the\nmost common bug in a multi-config repo.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Naming the runs in package.json\n\n```json\n{\n  \"scripts\": {\n    \"test:smoke\":      \"playwright test -c config/smoke.config.ts\",\n    \"test:regression\": \"playwright test -c config/regression.config.ts\",\n    \"test:one\":        \"playwright test -c config/smoke.config.ts --workers=1 --headed\"\n  }\n}\n```\n\n`npm run test:smoke` is now the interface. The flags live in one place, and CI runs the same\ncommand a developer runs."
+          "text": "## Naming the runs in package.json\n\n```json\n{\n  \"scripts\": {\n    \"test:smoke\":      \"playwright test -c config/smoke.config.ts\",\n    \"test:regression\": \"playwright test -c config/regression.config.ts\",\n    \"test:one\":        \"playwright test -c config/smoke.config.ts --workers=1 --headed\"\n  }\n}\n```\n\n`npm run test:smoke` is now the interface. The flags live in one place, and CI runs the same\ncommand a developer runs.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Where tags come from in a real team\n\n| Who | Adds which tag | Why |\n|---|---|---|\n| The author of a new test | `@regression` | default; safe, runs nightly |\n| Whoever owns the release checklist | promotes a few to `@smoke` | keeps the fast set fast |\n| The on-call engineer | `@critical` | this one wakes people up |\n\nThe rule that keeps it working: **the smoke set has a time budget.** Two minutes. When it grows\npast that, something gets demoted - otherwise `@smoke` slowly becomes `@everything` and the\nscheme is pointless."
+          "text": "## Where tags come from in a real team\n\n| Who | Adds which tag | Why |\n|---|---|---|\n| The author of a new test | `@regression` | default; safe, runs nightly |\n| Whoever owns the release checklist | promotes a few to `@smoke` | keeps the fast set fast |\n| The on-call engineer | `@critical` | this one wakes people up |\n\nThe rule that keeps it working: **the smoke set has a time budget.** Two minutes. When it grows\npast that, something gets demoted - otherwise `@smoke` slowly becomes `@everything` and the\nscheme is pointless.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "## Playwright's built-in `tag` option\n\nNewer Playwright takes tags as data rather than title text:\n\n```ts\ntest(\"sign in works\", { tag: [\"@smoke\"] }, async ({ page }) => { ... });\n```\n\n`--grep @smoke` finds both forms.\n\n| | in the title | `tag:` option |\n|---|---|---|\n| Survives a title reword | no | **yes** |\n| Visible in the report | yes | yes |\n| Found by `--grep` | yes | yes |\n| What most existing suites use | **yes** | not yet |\n\nWrite new tests with `tag:`; expect to read both.\n\n**Next:** [Day 1.4 - Practice](/learn/w5/d1/p4)"
+          "text": "## Playwright's built-in `tag` option\n\nNewer Playwright takes tags as data rather than title text:\n\n```ts\ntest(\"sign in works\", { tag: [\"@smoke\"] }, async ({ page }) => { ... });\n```\n\n`--grep @smoke` finds both forms.\n\n| | in the title | `tag:` option |\n|---|---|---|\n| Survives a title reword | no | **yes** |\n| Visible in the report | yes | yes |\n| Found by `--grep` | yes | yes |\n| What most existing suites use | **yes** | not yet |\n\nWrite new tests with `tag:`; expect to read both.\n\n**Next:** [Day 1.4 - Practice](/learn/w5/d1/p4)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": []
@@ -196,39 +270,57 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.4 - Practice\n\nNo solutions here. Each problem says how to know you got it right.\n\nWork in `week5/generated/`. Copy `day1-tagged.spec.ts` to a new name first so you can always get\nback to something that ran."
+          "text": "# Week 5, Day 1.4 - Practice\n\nNo solutions here. Each problem says how to know you got it right.\n\nWork in `week5/generated/`. Copy `day1-tagged.spec.ts` to a new name first so you can always get\nback to something that ran.",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "1"
+          "text": "1",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "2"
+          "text": "2",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "3"
+          "text": "3",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "4"
+          "text": "4",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "5"
+          "text": "5",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "6"
+          "text": "6",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "problem-ref",
-          "text": "7"
+          "text": "7",
+          "starter": null,
+          "variation": null
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 2.1 - Prerequisites](/learn/w5/d2/p1)"
+          "text": "**Next:** [Day 2.1 - Prerequisites](/learn/w5/d2/p1)",
+          "starter": null,
+          "variation": null
         }
       ],
       "problems": [
