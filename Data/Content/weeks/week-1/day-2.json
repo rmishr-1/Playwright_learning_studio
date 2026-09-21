@@ -16,7 +16,9 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 2.1 — TypeScript check-in: nothing new today\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
-          "starter": null
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -33,25 +35,29 @@
           "type": "markdown",
           "text": "# Week 1, Day 2.2 — Environment setup & your first Playwright project\n\nBy the end of this lesson you will have checked your own Node install, know what\n`npm init playwright@latest` actually produces, and have opened this repo's real\n`playwright.config.ts` to recognize the pieces in it.\n\n> **No new TypeScript today.** This is npm/CLI/editor setup, not language syntax — nothing\n> to primer, so there's no Day 2.1. [Day 1.2](/learn/w1/d1/p2) covered the why; this is the\n> how.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 1. Node.js\n\nPlaywright (and the whole npm ecosystem it sits on) needs Node installed. Check yours:\n\n```bash\nnode -v\nnpm -v\n```\n\nIf either command isn't found, install Node from https://nodejs.org (the LTS build) and\nre-open your terminal.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst NPX = Deno.build.os === \"windows\" ? \"npx.cmd\" : \"npx\";\nconst NODE = Deno.build.os === \"windows\" ? \"node.exe\" : \"node\";\n\nfor (const [label, cmd, args] of [\n  [\"node -v\", NODE, [\"-v\"]],\n  [\"npm -v\", Deno.build.os === \"windows\" ? \"npm.cmd\" : \"npm\", [\"-v\"]],\n] as const) {\n  const { stdout } = await new Deno.Command(cmd, { args, cwd: REPO_ROOT, stdout: \"piped\" }).output();\n  console.log(label, \"->\", new TextDecoder().decode(stdout).trim());\n}",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** two version strings, something like `v24.21.0` and `11.19.0` — the\nexact numbers will differ on your machine, and that's fine. Any Node 18+ works with current\nPlaywright.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
@@ -59,43 +65,50 @@
           "starter": null,
           "variation": {
             "prompt": "Same idea, one more tool: also print the Playwright CLI's own version with `npx playwright --version` (`npx.cmd` on Windows), alongside node and npm."
-          }
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 2. VS Code\n\nThree things worth doing once, before you write any test code:\n\n| Step | Why |\n|---|---|\n| **File → Open Folder**, open this repo's root | So VS Code's IntelliSense, `tsconfig.json`, and the Jupyter extension all see the right project |\n| **Trust the workspace** when prompted | VS Code sandboxes an unfamiliar folder until you trust it — required before tasks/extensions run |\n| Use the **integrated terminal** (`` Ctrl+` ``) | Keeps every command you run scoped to this project's folder, with the right `PATH` |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 3. What `npm init playwright@latest` actually does\n\n**This repo is already a set-up Playwright project** — running that command again here\nwould overwrite a shared config other weeks depend on, so **don't run it in this repo**.\nWhat follows is what it produces on a **fresh, empty folder**, so you recognize the pieces\nwhen you see them (which you will, right below, in this repo's real files).\n\n```bash\nnpm init playwright@latest\n```\n\nIt asks you four questions:\n\n| Prompt | Answer for this course |\n|---|---|\n| TypeScript or JavaScript? | **TypeScript** |\n| Name of your tests folder | default (`tests`) is fine |\n| Add a GitHub Actions workflow? | **No** — not needed for this course |\n| Install Playwright browsers? | **Yes** |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "It then installs `@playwright/test`, downloads the Chromium/Firefox/WebKit binaries, and\nwrites:\n\n```\nnode_modules/            # dependencies — never edit, never commit\npackage.json             # your project's dependency + script list\npackage-lock.json        # exact installed versions, for reproducible installs\nplaywright.config.ts     # the file Playwright reads for every run\ntests/                   # example specs, to delete once you've read them\ntests-examples/          # a second folder of longer demo specs\n```\n\nA fresh `playwright.config.ts` looks roughly like this:\n\n```ts\nimport { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',\n  fullyParallel: true,\n  reporter: 'html',\n  use: {\n    trace: 'on-first-retry',\n  },\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n    { name: 'webkit', use: { ...devices['Desktop Safari'] } },\n  ],\n});\n```\n\nThree browsers (`projects`), one report format (`html`), tracing only kept on a retry. All of\nthat is exactly what Day 3 tours in more detail.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 4. This repo's *actual* config — open it for real\n\nThis is not a fresh scaffold — it's a shared course repo, already configured, with 8 weeks of\nmaterial depending on the same config staying put. Open `playwright.config.ts` at the repo\nroot (not inside `week1/`) in VS Code right now and find:\n\n- `testMatch: [\"week*/**/*.spec.ts\", ...]` — this is *why* a spec you write into\n  `week1/generated/` gets picked up automatically, with no registration step.\n- `use: { baseURL: \"https://test-automation-banking.vercel.app\", ... }` — every relative\n  `page.goto(\"/\")` in this course resolves against that.\n\nYou'll read the rest of this file properly in [Day 3.3](/learn/w1/d3/p3) — for today, just\nconfirm you can find those two lines.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Read the real config file's text so you can see those two lines from right here too,\n// without leaving the notebook. This is plain file reading — nothing Playwright-specific.\n// (REPO_ROOT is already imported above — the Deno kernel shares one module scope\n// across every cell in a notebook, so importing it twice would clash.)\nconst configText = await Deno.readTextFile(REPO_ROOT + \"playwright.config.ts\");\nconst testMatchLine = configText.split(\"\\n\").find((l) => l.includes(\"testMatch:\"));\n// Look for \"baseURL:\" (with the colon) — the file also has a comment that mentions\n// \"baseURL\" in passing, and a plain .includes(\"baseURL\") would match that instead.\nconst baseUrlLine = configText.split(\"\\n\").find((l) => l.includes(\"baseURL:\"));\n\nconsole.log(testMatchLine?.trim());\nconsole.log(baseUrlLine?.trim());",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** the `testMatch` array (mentioning `week*/**/*.spec.ts`) and the\n`baseURL` line pointing at the banking app, printed straight from the file on disk.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
@@ -103,25 +116,29 @@
           "starter": null,
           "variation": {
             "prompt": "Same file read, a different line: find and print the `testDir:` line instead of `testMatch:`."
-          }
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 5. Confirm `week1/generated/` doesn't exist yet\n\nEvery generated spec in this course gets written by a lesson cell, not hand-created ahead\nof time — you'll write the first one on [Day 4](/learn/w1/d4/p2). Confirm the folder is\ngenuinely empty right now:",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// REPO_ROOT is already imported in the first code cell above — reused here.\ntry {\n  const entries = [...Deno.readDirSync(REPO_ROOT + \"week1/generated\")];\n  console.log(\"week1/generated exists already, contains:\", entries.map((e) => e.name));\n} catch (err) {\n  console.log(\"week1/generated does not exist yet:\", (err as Error).message.split(\"\\n\")[0]);\n}",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** a \"does not exist yet\" message (`NotFound` error). That's correct —\nnobody has written anything there.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
@@ -129,13 +146,15 @@
           "starter": null,
           "variation": {
             "prompt": "Same check, a different folder: does `week1/generated/day2` exist yet? List what's in it if so, or say it doesn't exist yet if not."
-          }
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Best practices\n\n- Never run `npm init playwright@latest` inside a repo that already has a config you care\n  about — it can overwrite `playwright.config.ts`.\n- Commit `package.json` and `package-lock.json`. Never commit `node_modules/` (it's already\n  in `.gitignore`).\n- Trust the workspace once, and VS Code stops asking.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Ran `npm init playwright@latest` in this shared repo | Root config gets overwritten, other weeks break | Don't — this repo is already initialized |\n| Didn't trust the workspace | Extensions/tasks silently don't run | File → the trust prompt, or **View → Command Palette → \"Trust Workspace\"** |\n| Forgot `--with-deps` / skipped the browser-install prompt | `browserType.launch: Executable doesn't exist` later | Re-run `npx playwright install` |\n\n## What's next\n\n[Day 2.3](/learn/w1/d2/p3) looks at how a real project organizes its test folders and config —\nbeyond the one flat `tests/` folder a fresh scaffold gives you.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -152,31 +171,36 @@
           "type": "markdown",
           "text": "# Week 1, Day 2.3 — Organizing a real project's folders and config\n\nBy the end of this lesson you will understand how `testDir` and folder-per-test-type\nconventions turn a flat scaffold into something a whole team can navigate, and what actually\nneeds to be in `.gitignore` for a Playwright project.\n\n> No new API here — \"advanced\" for a setup day means organizing what Day 2.2 gave you\n> sensibly, not new Playwright calls.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The problem with the fresh scaffold\n\n`npm init playwright@latest` gives you one `tests/` folder. That's fine for a demo, but a\nreal project quickly ends up with UI tests, API tests, and maybe visual/performance tests —\nall needing different setup, different fixtures, sometimes different configs. Dumping\neverything into one `tests/` folder makes it hard to run \"just the API suite\" or \"just smoke\ntests\" without a lot of `--grep` gymnastics.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## A convention: split by test type\n\nA common pattern (used in the source training session, and worth knowing even before you\nhave both kinds of tests) is separate top-level folders per testing vertical:\n\n```\nUI_test/\n  login.spec.ts\n  dashboard.spec.ts\nAPI_test/\n  bookings.spec.ts\n```\n\n`testDir` in the config points at the root that contains both, and `testMatch` (or per-folder\nconfigs, which week3/day5 covers) decides what counts as a test. This course doesn't use the\n`UI_test`/`API_test` split literally — the config you read on Day 2.2 organizes by **week**\ninstead (`week1/`, `week2/`, …, each with its own `generated/` folder) — but the underlying\nidea is the same: **group tests by what they need in common**, not by the order you wrote\nthem.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The shape of the choice, as data — not runnable Playwright, just the config option itself.\nconst freshScaffold = { testDir: \"./tests\" };\nconst splitByType = { testDir: \"./\", testMatch: [\"UI_test/**/*.spec.ts\", \"API_test/**/*.spec.ts\"] };\nconst thisRepo = { testDir: \"./\", testMatch: [\"week*/**/*.spec.ts\"] };\n\nconsole.log(\"fresh scaffold:\", JSON.stringify(freshScaffold));\nconsole.log(\"split by type: \", JSON.stringify(splitByType));\nconsole.log(\"this repo:     \", JSON.stringify(thisRepo));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** three config shapes printed. Notice `testDir` alone isn't the whole\nanswer — `testMatch` is what actually decides which files count as specs once you're not\nusing one flat default folder.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
@@ -184,25 +208,29 @@
           "starter": null,
           "variation": {
             "prompt": "Same idea, one more shape: as plain data, write what a config would look like if it only ever ran files under a single `smoke/` folder."
-          }
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## `.gitignore` for a Playwright project\n\nThree entries every Playwright project needs, and why:\n\n| Entry | Why it's ignored |\n|---|---|\n| `node_modules/` | Regenerated from `package.json` by `npm install` — never source, often huge |\n| `test-results/` | Per-run artifacts (screenshots, videos, traces on failure) — regenerated every run |\n| `playwright-report/` | The HTML report — also regenerated every run, and would blow up repo size if committed |\n\nThis repo's real `.gitignore` has all three, plus course-specific entries (old build output,\nscreenshots from a legacy folder). The pattern to remember: **if a run regenerates it, it\ndoesn't belong in git.**",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\nconst gitignore = await Deno.readTextFile(REPO_ROOT + \".gitignore\");\nfor (const needle of [\"node_modules\", \"test-results\", \"playwright-report\"]) {\n  console.log(needle, \"->\", gitignore.includes(needle) ? \"present\" : \"MISSING\");\n}",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** `present` for all three — confirmed straight from this repo's real\n`.gitignore`, not assumed.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
@@ -210,13 +238,15 @@
           "starter": null,
           "variation": {
             "prompt": "Same file read, different entries: check the `.gitignore` for `.env` and `dist` instead of `node_modules` and `test-results`."
-          }
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Best practices\n\n- Group test folders by what they share (setup, fixtures, tags) — not by creation order.\n- Keep `testDir`/`testMatch` in the config, not scattered CLI flags every run needs to repeat.\n- `.gitignore` anything a run regenerates: reports, traces, screenshots, `node_modules/`.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Committed `test-results/` or `playwright-report/` once | Repo size balloons, diffs are noisy binary reports | Add to `.gitignore`, then `git rm -r --cached` the committed copy |\n| Two unrelated test types dumped in one folder | Can't run \"just API tests\" without fragile `--grep` | Split by folder, matched via `testMatch` |\n\n## What's next\n\n[Day 2.4 — Practice](/learn/w1/d2/p4) checks your own setup and has you read this repo's real\nconfig more closely. [Day 3](/learn/w1/d3/p2) covers actually *running* tests from the CLI.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -233,31 +263,36 @@
           "type": "markdown",
           "text": "# Week 1, Day 2.4 — Practice: environment setup\n\nThree problems. The first two use your real environment and this repo's real config — no\nguessing needed, everything here is something you can check.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## When you are done\n\nYou've now got a working understanding of what this repo's config is and why it's shaped\nthis way. [Day 3](/learn/w1/d3/p2) is where you actually run tests from the command line.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

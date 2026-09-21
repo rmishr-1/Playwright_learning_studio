@@ -1,0 +1,5 @@
+{
+  "p2_yt1": "Same five fields, different data: fill the form for a learner of your own invention. Then switch ONE of the five to `.pressSequentially()` with `{ delay: 50 }` and watch that field type itself out letter by letter while the other four snap in at once.",
+  "p2_yt2": "Same two methods, different controls: check the OTHER gender radio — read its `value` off the page rather than guessing what it is spelled — and add the Hockey checkbox alongside Cricket. The lesson only verified the ids for Cricket and Movies, so Hockey's is yours to find.",
+  "p2_yt3": "Same method, different picks: select a skill other than Java by its label, and a country other than India. Then point `.selectOption()` at `#countries` — the dead `Country*` field — and read the timeout it gives you before it gives up."
+}

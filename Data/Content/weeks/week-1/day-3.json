@@ -16,7 +16,9 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 3.1 — TypeScript check-in: nothing new today\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
-          "starter": null
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -33,37 +35,43 @@
           "type": "markdown",
           "text": "# Week 1, Day 3.2 — Running tests from the CLI\n\nBy the end of this lesson you will have run a real spec from the command line, seen an\nHTML report, and know the difference between `package.json` and `package-lock.json`.\n\n> **No new TypeScript today** — the CLI commands below are shell commands, not language\n> syntax, so there's no Day 3.1. [Day 2](/learn/w1/d2/p2) got your environment ready; this is\n> where you actually use it.\n\n> **Mode: mixed.** The first cells run real terminal commands (like `runSpec` does under the\n> hood); the rest is explore-mode as usual.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## `package.json` vs `package-lock.json`\n\n| File | What it holds | Do you edit it? |\n|---|---|---|\n| `package.json` | Your project's declared dependencies (version *ranges*), plus scripts like `npm test` | Yes — by hand, or via `npm install <pkg>` |\n| `package-lock.json` | The *exact* resolved version of every dependency (and their dependencies), for a reproducible install | No — npm writes it; you just commit it |\n\n`npm install` reads `package.json`, resolves versions, and writes/updates\n`package-lock.json`. Committing the lock file is what guarantees your teammate — or CI —\ninstalls the exact same versions you tested against.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Running tests\n\n```bash\nnpx playwright test                                    # run everything testMatch finds\nnpx playwright test week1/generated/day3-smoke.spec.ts  # run just this file\nnpx playwright test --headed                            # watch the browser while it runs\nnpx playwright show-report                               # open the last HTML report\n```\n\n`npx` runs the locally-installed `playwright` CLI (the one in `node_modules/.bin`) without\nneeding it installed globally.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example — run a real spec and read the output\n\nThere's no default example spec in this repo (a *fresh* `npm init playwright@latest` scaffold\nships one, but this shared repo doesn't keep one lying around) — so the cell below writes a\nsmall, real smoke spec against the banking app, then runs it exactly the way `npx playwright\ntest` would from your terminal.\n\n**Objective:** run a real spec via the CLI and read a real pass/fail report.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week1/generated/day3-smoke.spec.ts\";\n\nawait writeProjectFile(specPath, `\n// Week 1, Day 3 — a trivial smoke spec, written just to give the CLI commands\n// (npx playwright test, --headed, show-report) something real to run against.\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Day 3 smoke\", () => {\n  test(\"the login page loads with an email field\", async ({ page }) => {\n    await page.goto(\"/\");\n    await expect(page.getByPlaceholder(\"Enter Email\")).toBeVisible();\n  });\n\n  test(\"valid credentials reach the dashboard\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page).toHaveURL(/dashboard/);\n  });\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> ▶ **Run it yourself too**, exactly as you would on a real project:\n> `npx playwright test week1/generated/day3-smoke.spec.ts`\n> Try `--headed` once to watch it, then `npx playwright show-report` to open the HTML report.\n\n**Expected result:** `2 passed`.\n\nA note on the number: a *fresh* `npm init playwright@latest` scaffold runs every test against\n**three** browser projects (chromium, firefox, webkit), so two tests there would report\n`6 passed`. This repo's config runs **chromium only** by default (you saw the commented-out\n`firefox`/`webkit` lines on Day 2.2) — so two tests here means `2 passed`, not 6. Same\nmechanism, different project count. Week 3 Day 5 covers turning the other browsers back on.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
@@ -71,13 +79,15 @@
           "starter": null,
           "variation": {
             "prompt": "Same flow, a different check: write a spec that, after logging in, confirms the Payments tile is visible - not just that the login page loads."
-          }
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Best practices\n\n- Commit `package.json` **and** `package-lock.json` together, every time either changes.\n- Prefer running one spec file while you're actively writing it (`npx playwright test\n  path/to.spec.ts`); run the whole suite before you're done.\n- `show-report` after any run that surprised you — the HTML report has the trace/screenshot\n  a line of terminal output can't show.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Expecting \"6 passed\" like a fresh scaffold | Only chromium runs here — fewer results than you expected | Check `projects` in the config before assuming a browser count |\n| Editing `package-lock.json` by hand | Installs drift, confusing \"works on my machine\" bugs | Never hand-edit it — let `npm install` write it |\n| Forgetting `--headed` is a flag, not a default | Every run is headless and you can't see what's happening | Add `--headed` when you want to watch |\n\n## What's next\n\n[Day 3.3](/learn/w1/d3/p3) takes a first, deliberately shallow look inside `playwright.config.ts`\nitself.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -94,31 +104,36 @@
           "type": "markdown",
           "text": "# Week 1, Day 3.3 — A first look inside `playwright.config.ts`\n\nBy the end of this lesson you will recognize every top-level setting in this repo's real\nconfig file and roughly what it does — not master any of them yet.\n\n> **This is deliberately shallow, and that's flagged on purpose.** This slot usually shows\n> Day 3.2's API wrapped in framework structure — but there's no framework yet, and this\n> config file gets much deeper, dedicated treatment later: **week3/day1** covers timeouts in\n> the config, and **week3/day5** covers `projects`/`workers`/`retries` properly, with\n> measurements. Today is just: here's what's in the file, and roughly what each piece is for.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The whole file, section by section\n\nOpen `playwright.config.ts` at the repo root. Here's what each top-level key is for:\n\n| Setting | What you saw in this repo's file | Roughly means |\n|---|---|---|\n| `testDir` / `testMatch` | `\"./\"` and `[\"week*/**/*.spec.ts\", ...]` | Where to look for spec files (you read this on Day 2.2) |\n| `fullyParallel` | `true` | Run tests in the same file in parallel, not just across files |\n| `forbidOnly` | `!!process.env.CI` | In CI, refuse to run if anyone left a `.only` in a spec |\n| `retries` | `process.env.CI ? 2 : 0` | Re-run a failed test this many times before calling it failed — locally: never |\n| `reporter` | `[[\"html\", ...], [\"list\"]]` | Two reporters at once: an HTML report file, and live output in the terminal |\n| `use` | see below | Shared settings every test gets, unless overridden |\n| `projects` | one entry per browser | Which browser(s) each test runs against |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The `use` block\n\n| Setting | Value here | What it does |\n|---|---|---|\n| `baseURL` | the banking app's URL | Lets a test write `page.goto(\"/\")` instead of the full URL |\n| `trace` | `\"retain-on-failure\"` | Records a full trace (DOM snapshots, network, console) — but only keeps it if the test fails |\n| `screenshot` | `\"only-on-failure\"` | Same idea, for a screenshot |\n| `video` | `\"retain-on-failure\"` | Same idea, for a video recording |\n\n`retain-on-failure` is the setting worth remembering as \"the recommended default\" — recording\neverything, always, is expensive; recording nothing means a CI failure you can't diagnose.\nKeeping evidence **only when something went wrong** is the sweet spot.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The use block, as plain data, so the shape is visible without opening the file.\nconst useBlock = {\n  baseURL: \"https://test-automation-banking.vercel.app\",\n  trace: \"retain-on-failure\",\n  screenshot: \"only-on-failure\",\n  video: \"retain-on-failure\",\n};\nconsole.log(JSON.stringify(useBlock, null, 2));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** the object printed with four keys. Notice all three artifact settings\n(`trace`/`screenshot`/`video`) use the same \"only keep it on failure\" shape — that's a\npattern, not three separate decisions.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
@@ -126,13 +141,15 @@
           "starter": null,
           "variation": {
             "prompt": "Same idea, a different field: as plain data, write what the `use` block would look like with `headless: false` added to it."
-          }
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## `projects`\n\n```ts\nprojects: [\n  { name: \"chromium\", use: { ...devices[\"Desktop Chrome\"] } },\n  // { name: \"firefox\", use: { ...devices[\"Desktop Firefox\"] } },\n  // { name: \"webkit\", use: { ...devices[\"Desktop Safari\"] } },\n],\n```\n\nOne entry per browser you want to test against. Each test in your suite runs once per\nactive project — which is exactly why Day 3.2's two tests only ran twice: one project\n(chromium) is active, the other two are commented out.\n\n**We'll go much deeper on `projects` — plus `workers` and `retries` — in week3/day5**, with\nmeasured test counts and real cross-browser runs. For today, just recognize that the array's\n*length* is what multiplies your test count.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
@@ -140,13 +157,15 @@
           "starter": null,
           "variation": {
             "prompt": "Same idea, a different field again: this time add a `retries` value alongside the existing options, as plain data."
-          }
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Best practices\n\n- Read `projects` before you're surprised by a test count — it's the single biggest\n  multiplier in any report.\n- Leave `retries` at 0 locally; let CI (`process.env.CI`) be the only place it turns on.\n- Don't touch `trace`/`screenshot`/`video` settings without a reason — `retain-on-failure` is\n  the default worth keeping.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Assumed all 3 browsers run | Confused by a lower test count than expected | Check which `projects` entries are actually uncommented |\n| Thought `trace: \"retain-on-failure\"` records every run | Missing traces on a passing test you wanted to inspect | It's by design — force one with `--trace on` for a single run if you need it |\n| Looked for `workers` and didn't find it here | Assumed it wasn't configurable | It's a real setting, just not set in this file — Playwright picks a sensible default. week3/day5 covers it. |\n\n## What's next\n\n[Day 3.4](/learn/w1/d3/p4) — practice reading this config for real.\n[Day 4](/learn/w1/d4/p2) — Codegen and finding locators the right way.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -163,31 +182,36 @@
           "type": "markdown",
           "text": "# Week 1, Day 3.4 — Practice: running tests & the config file\n\nThree problems, using the real CLI and the real config — nothing invented.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## When you're done\n\nYou can now run a suite, read its report, and recognize every top-level setting in the\nconfig. [Day 4](/learn/w1/d4/p2) is where you learn to *find* the locators that go inside a\ntest, using Codegen.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

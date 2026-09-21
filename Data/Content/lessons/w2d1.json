@@ -1,0 +1,89 @@
+{
+  "schema": "lesson-overlay/v1",
+  "week": 2,
+  "day": 1,
+  "parts": {
+    "1": {
+      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — this tab is a 60-second check that last week stuck |\n| **Leans on** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Then go to** | [Day 1.2](/learn/w2/d1/p2), which is all Playwright API |",
+      "checkpoints": [
+        {
+          "question": "Every test today is written `async ({ page }) => { ... }`. What is that `page`?",
+          "options": [
+            "A fresh browser tab, created for this test alone",
+            "One shared browser tab that every test in the file takes turns using",
+            "The page object for the site under test, which you define yourself"
+          ],
+          "answer": 0,
+          "explanation": "Each test gets its own `page` — a fresh tab, so nothing one test does leaks into the next. That per-test isolation was [Week 1, Day 5.1](/learn/w1/d5/p1), and Day 5 of this week is about what happens when you split a test and lose it."
+        }
+      ],
+      "recap": "No new TypeScript today. If the table above had any surprises in it, follow the link before starting [Day 1.2](/learn/w2/d1/p2) — the Playwright will be easier to see if the language underneath it is not also new."
+    },
+    "2": {
+      "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `.fill()` · `.pressSequentially()` · `.check()` · `.selectOption()` |\n| **On** | [the Register.html signup form](https://demo.automationtesting.in/Register.html) — every control type on one page |\n| **Assumes** | [locators](/learn/w1/d4/p2) · [async and the page fixture](/learn/w1/d5/p1) |\n| **Not yet** | assertions — nothing here checks the form *worked*. That is [Day 2](/learn/w2/d2/p2). |",
+      "checkpoints": [
+        {
+          "question": "You are filling a search box that shows autocomplete suggestions as you type, and the suggestions are what you need to click. Which method fills it?",
+          "options": [
+            "`.fill()` — it is the default, and faster",
+            "`.pressSequentially()`, because the page reacts to each keystroke",
+            "Either — they produce identical events, only at different speeds"
+          ],
+          "answer": 1,
+          "explanation": "`.fill()` sets the value directly, so a page listening for per-key events never hears them and the suggestions never appear. That is exactly the case the lesson reserves `.pressSequentially()` for — it costs you the speed (68ms vs 92ms measured here) and you spend it deliberately."
+        },
+        {
+          "question": "On `#Skills` you call `.selectOption({ label: \"Java\" })`, then `.selectOption({ label: \"Python\" })`. What is selected at the end?",
+          "options": [
+            "Both Java and Python — it has 78 options and takes multiple",
+            "Python only",
+            "Java only — the first pick wins and later calls are ignored",
+            "Neither — the second call throws, because the option is already taken"
+          ],
+          "answer": 1,
+          "explanation": "\"Select Skills\" reads like a multi-select and has 78 options, but it carries no `multiple` attribute — verified in the lesson. A single-select keeps only your last pick, so Python replaces Java silently. Nothing errors, which is what makes it worth knowing."
+        },
+        {
+          "question": "The spec at the end of this lesson reports `1 passed`. What has it actually proved?",
+          "options": [
+            "That the form accepted the data and the registration succeeded",
+            "That every locator matched and no line threw — nothing more",
+            "That the page navigated away after Submit"
+          ],
+          "answer": 1,
+          "explanation": "There is not one `expect()` in that file, so \"passed\" means only that nothing threw on the way through. It is the same gap [Week 1, Day 5.2](/learn/w1/d5/p2) showed with a wrong password, and [Day 2](/learn/w2/d2/p2) is where you close it."
+        }
+      ],
+      "recap": "- `.fill()` by default. `.pressSequentially()` only when the page reacts to each keystroke.\n- `.check()` makes a control checked — it does not toggle it, so calling it twice is safe and you never compute the current state first.\n- `.selectOption({ label })` matches the visible text; a bare string matches the option's `value`.\n- Verify a skinned `<select>` rather than assuming. `#country` carries `aria-hidden` and a Select2 class and still takes `.selectOption()` — on another app it might not.\n- **A test with no `expect()` cannot fail for the right reason.** Everything today is actions; assertions start tomorrow."
+    },
+    "3": {
+      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — every line here is something you ran in [Day 1.2](/learn/w2/d1/p2) |\n| **What changes** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Not yet** | the Page Object Model. This is a plain function; the class version is week 3. |",
+      "checkpoints": [
+        {
+          "question": "The helper is saved as `registration-helpers.ts`, deliberately not `registration-helpers.spec.ts`. Why does the suffix matter?",
+          "options": [
+            "The runner collects every `*.spec.ts` file and would try to execute a file with no tests in it",
+            "TypeScript refuses to export a function from a `.spec.ts` file",
+            "It is only a naming convention — either name works identically"
+          ],
+          "answer": 0,
+          "explanation": "The spec suffix is what the runner globs for. A helper that carries it gets collected and executed as a test file, and a file with no `test()` calls in it is an error, not a pass. The rule gets named formally in week 3."
+        },
+        {
+          "question": "Why does `fillRegistrationForm` take `email` as a parameter, but keep the first name, address and phone hardcoded?",
+          "options": [
+            "Because strings are the only type a helper can safely accept",
+            "Because the email is the one value these tests actually need to differ — parameterising the rest would add knobs nobody turns",
+            "Because Playwright requires every helper to take exactly one parameter beyond `page`"
+          ],
+          "answer": 1,
+          "explanation": "Two tests register two learners, and the only thing that has to differ between them is the email. Everything else is fixed on purpose. Problem 3 asks you to add the phone as a second parameter — because there the tests do need it to vary."
+        }
+      ],
+      "recap": "- Repetition across tests is a structural problem, not a typing problem: ten lines in thirty specs is thirty edits when the form changes.\n- The fix is the simplest thing that works — a function. The Page Object Model is the same instinct with a class around it, and it arrives in week 3.\n- Name a helper for what it does (`fillRegistrationForm`), not for the calls inside it.\n- No `expect()` inside a helper that performs actions. That is a preview of the \"no assertions in a page object\" rule, and it holds for the same reason."
+    },
+    "4": {
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | Beginner → Advanced, no answer key on the first two |\n| **Pulls on** | [Day 1.2](/learn/w2/d1/p2) for the actions · [Day 1.3](/learn/w2/d1/p3) for the structure |\n| **If you stall** | more than ~20 minutes on one means the gap is in the lesson, not in you — go back and re-read |"
+    }
+  }
+}

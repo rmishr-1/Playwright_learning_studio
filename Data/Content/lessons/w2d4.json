@@ -1,0 +1,88 @@
+{
+  "schema": "lesson-overlay/v1",
+  "week": 2,
+  "day": 4,
+  "parts": {
+    "1": {
+      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — this tab is a 60-second check that the week so far stuck |\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Day 4.2](/learn/w2/d4/p2) |",
+      "checkpoints": [
+        {
+          "question": "Day 4 switches to OrangeHRM's demo HR system instead of the registration form used all week. Why?",
+          "options": [
+            "Because the registration form's locators had started to break",
+            "Because today's technique finds one row among many that look alike, and none of the earlier apps has a real multi-row table",
+            "Because the sibling axis only works on applications built with tables"
+          ],
+          "answer": 1,
+          "explanation": "The app changed to fit the technique, not the other way round. It is also a shared public sandbox, which is why every employee the lesson creates gets deleted before the lesson ends."
+        }
+      ],
+      "recap": "No new TypeScript today — `const`, `Math.random()`, XPath and `async` all carry over unchanged. If any row in the table above was a surprise, follow its link before starting [Day 4.2](/learn/w2/d4/p2)."
+    },
+    "2": {
+      "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `parent::` · `following-sibling::` · `[last()]` · `contains()` |\n| **On** | OrangeHRM's demo HR system — a **shared public sandbox**, so everything created here is deleted again |\n| **Assumes** | [XPath syntax](/learn/w2/d2/p2) · [Math.random() for unique data](/learn/w2/d3/p1) |\n| **The idea worth keeping** | anchor on text you know, then walk sideways — never count columns |",
+      "checkpoints": [
+        {
+          "question": "The Actions cell is currently the 8th column. Why is `following-sibling::div[last()]` better than `.nth(7)`?",
+          "options": [
+            "It is faster, because XPath does not have to count the cells",
+            "It asks for the last cell in the row whatever the column count is, so adding or reordering a column cannot break it",
+            "`.nth()` does not work on table rows in Playwright"
+          ],
+          "answer": 1,
+          "explanation": "`.nth(7)` commits to wherever Actions happens to sit today — one added, hidden or reordered column and every locator built that way breaks at once. `[last()]` commits only to \"the last cell in this row\", which stays true. Same instinct as reaching for \"the last one\" instead of \"the fourth one\" whenever the length is not fixed."
+        },
+        {
+          "question": "`//div[text()='Verify12345']/following-sibling::div[last()]` — without the `parent::div` step — returns how many matches?",
+          "options": [
+            "1 — it is the same row either way",
+            "0 — the text sits in an inner wrapper div that has no siblings; the real cells are one level up",
+            "2 — it matches the cell and the row"
+          ],
+          "answer": 1,
+          "explanation": "This is the gotcha the lesson calls out by name. The element holding the text is a wrapper inside the cell, and it has no siblings at all, so stepping sideways from it finds nothing. `/parent::div` first gets you to the real table cell, which does have siblings."
+        },
+        {
+          "question": "The app shows \"Successfully Updated\". What does the lesson do before believing the rename landed?",
+          "options": [
+            "Waits for the toast to disappear, then continues",
+            "Reloads the record and reads the field back, retrying the save if it does not match",
+            "Re-searches the Employee List for the new name"
+          ],
+          "answer": 1,
+          "explanation": "Measured on this live demo, the toast can fire a beat before the save actually lands. Reloading the record reads ground truth. Re-searching the list is worse than useless here — its search index can lag a rename by even longer, which is why Example 4 anchors on the random id instead of either name."
+        }
+      ],
+      "recap": "- **Anchor on text you know, then walk sideways.** Position is the one thing about a table you can rely on changing.\n- `/parent::div` before `following-sibling::` — the text's immediate parent is a wrapper, not the cell.\n- `[last()]` over a guessed offset: it survives a column being added.\n- `contains()` once you cannot be certain the visible text has not changed underneath you — and anchor on the part that cannot change, like the random id.\n- **Verify a write by reading the record back**, not by trusting a success toast.\n- On a shared sandbox, every create is paired with a delete. Prove the delete with a count of 0, not with the toast."
+    },
+    "3": {
+      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 4.2](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
+      "checkpoints": [
+        {
+          "question": "`findRow` returns a `Locator` and clicks nothing. What does that buy?",
+          "options": [
+            "One function serves every use — a pencil click, a trash click, or just counting the buttons",
+            "It makes the function synchronous, so callers need no `await`",
+            "It lets Playwright cache the row between tests"
+          ],
+          "answer": 0,
+          "explanation": "A `findRow` that clicked the pencil itself would need a sibling function for the trash, and a third for counting. Returning the locator keeps the sideways-walk in one place and leaves the decision to the caller — which is why `deleteEmployee` can be built on top of it."
+        },
+        {
+          "question": "There is not one `expect()` in `employee-list-helpers.ts`. Why not?",
+          "options": [
+            "Because `expect()` cannot be called outside a `.spec.ts` file",
+            "Because these functions act and locate — the test is what decides what should be true",
+            "Because the helpers run before the test does, when no assertions are allowed yet"
+          ],
+          "answer": 1,
+          "explanation": "Same separation as [Day 2.3](/learn/w2/d2/p3), from the other side: there the assertion helper was allowed to assert because checking was its whole job. These functions act, so they do not. A helper that both acts and asserts leaves a caller unable to use it for either job alone."
+        }
+      ],
+      "recap": "- Three uses today is thirty in a real suite — and a markup change is then thirty edits.\n- A locator function should hand back the locator, not decide what to do with it.\n- Name the parameter for what it really is: `term`, not `lastName`, because sometimes the anchor is just the id.\n- Helpers act and locate; tests assert. Keep the two on opposite sides of the file boundary.\n- The random id, not a fixed name, is what makes any of this safe to run twice in a row."
+    },
+    "4": {
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | on a live, shared HR system |\n| **Pulls on** | [Day 4.2](/learn/w2/d4/p2) for the axes · [Day 4.3](/learn/w2/d4/p3) for the helper shape |\n| **Non-negotiable** | anything you create, you delete — someone else is using this demo right now |"
+    }
+  }
+}

@@ -17,91 +17,142 @@
           "type": "markdown",
           "text": "# Week 2, Day 3.1 — TypeScript for building a unique value at runtime\n\nBy the end of this lesson you will build a guaranteed-different string on every run\nusing `+` and `Math.random()` — the exact technique [Day 3.2](/learn/w2/d3/p2) uses so two\nruns of the same test never collide.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | `+` on strings | building a unique value, and a dynamic XPath string |\n| 2 | `Math.random()` | the source of the \"unique\" part |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 1. The `+` operator on strings\n\n`+` concatenates two strings into one. A number gets converted to text first, rather\nthan mixing silently.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const base = \"Learner\";\nconst suffix = \"42\";\nconsole.log(base + suffix); // \"Learner42\" — no space; you add one yourself\nconsole.log(base + \" \" + suffix); // \"Learner 42\"\nconsole.log(base + 42); // \"Learner42\" — the number 42 is converted to \"42\" first",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `Learner42`, `Learner 42`, `Learner42`.\n\nNothing in this course uses template literals (`` `${}` ``) yet — that's a later day.\n`+` is the whole toolkit for now.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": {
+            "prompt": "Same operator, different pieces: build one sentence out of three separate `const` strings, with the spaces in the right places. Then print `typeof (\"id\" + 42)` and confirm for yourself that the result is a string, not a number."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 2. `Math.random()`\n\nReturns a float, always `0 <= x < 1` — never negative, never exactly 1. On its own it's\nnot a usable id; you convert or slice it into something readable.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "console.log(Math.random()); // e.g. 0.7392... — different every run\nconsole.log(Math.random().toString(36)); // base-36: digits + letters, e.g. \"0.k3j9f2...\"\nconsole.log(Math.random().toString(36).slice(2, 8)); // drop the \"0.\" prefix, keep 6 chars",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** three lines, all different on every run you make — that unpredictability\nis exactly what makes it useful for uniqueness. `.toString(36)` turns the float into\nletters+digits instead of a long decimal.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": {
+            "prompt": "Same generator, a shorter slice: keep 4 characters instead of 6, and print the length to prove you got 4. Run the cell three or four times and watch the value change each time — that unpredictability is the whole feature."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 3. Putting them together\n\n```ts\nconst unique = \"learner\" + Math.random().toString(36).slice(2, 8);\n```\n\nWhere you'll use this next: `\"//input[@value='\" + unique + \"']\"` — Day 3.2 builds an\nXPath string the same way, by concatenating a runtime value into a fixed template.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const unique = \"learner\" + Math.random().toString(36).slice(2, 8);\nconsole.log(unique);\n\nconst xpath = \"//input[@value='\" + unique + \"']\";\nconsole.log(xpath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** a string starting with `learner`, followed by 6 random characters; then\nthat same string embedded inside an XPath expression.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": {
+            "prompt": "Same technique, a different template: build a unique username and embed it in a CSS selector string (`\"input[name='\" + unique + \"']\"`) instead of an XPath one. Print both the value and the finished selector — string-building does not care which locator syntax it is feeding."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `+` on strings | concatenates; numbers get converted to text first |\n| `Math.random()` | always `0 <= x < 1`; slice/convert it into something readable |\n| Combining them | `\"prefix\" + Math.random().toString(36).slice(2, 8)` — a fresh value every run |\n\n**Next:** [Day 3.2 — Unique test data and dynamic locators](/learn/w2/d3/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What can `Math.random()` return?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Any float from 0 up to but not including 1",
+              "Any float from 0 up to and including 1",
+              "Any float, including negative ones"
+            ],
+            "answer": 0,
+            "explanation": "`0 <= x < 1` — never negative, and never exactly 1. On its own it is not a usable id, which is why the lesson runs it through `.toString(36).slice(2, 8)` to get something short and readable."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "`console.log(\"Learner\" + 42)` prints what?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`Learner 42` — `+` inserts a separator between the two",
+              "`Learner42` — the number is converted to text first",
+              "A type error — you cannot add a number to a string"
+            ],
+            "answer": 1,
+            "explanation": "`+` converts the number to `\"42\"` and joins them with nothing in between. No space appears unless you add one yourself, which is the mistake that shows up as `Learner42` where `Learner 42` was wanted."
+          }
         }
       ],
       "problems": []
@@ -118,133 +169,222 @@
           "type": "markdown",
           "text": "# Week 2, Day 3.2 — Unique test data and dynamic locators\n\nBy the end of this lesson you will generate a unique value per run, fill it into the\nform, build a runtime XPath that *fails* and understand exactly why, build one that\n*works*, and prove `text()` vs `normalize-space()` on real markup.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **You'll build** | a value that differs every run, and an XPath assembled at runtime from it |\n| **You'll prove** | why `@value` cannot find what you just typed — and what it *can* find |\n| **Assumes** | [string building and Math.random()](/learn/w2/d3/p1) · [XPath syntax](/learn/w2/d2/p2) |\n| **The idea worth keeping** | an HTML attribute and a live property are two different things |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> **Mode: explore**, with one real spec at the end. ",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The problem with re-running the same test\n\n| Rejected approach | Why |\n|---|---|\n| Delete the record after creating it | adds a second failure point — cleanup itself can fail |\n| A file of pre-seeded data | runs out after N runs |\n| `Date.now()` alone | two runs in the same second collide |\n\nThe fix from [Day 3.1](/learn/w2/d3/p1): `\"prefix\" + Math.random().toString(36).slice(2, 8)`\n— different every run, no file to run out of, nothing to clean up.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch, show } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst uniqueEmail = \"learner\" + Math.random().toString(36).slice(2, 8) + \"@example.com\";\nconsole.log(\"generated:\", uniqueEmail);\n\nconst emailBox = page.locator(\"input[type='email']\");\nawait emailBox.fill(uniqueEmail);\n\nawait show(page);\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected result:** the screenshot shows the field filled with a value starting\n`learner...@example.com` — different characters every time you run the cell.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same idea, a different field: generate a unique phone number — digits only, no `@example.com` on the end — and fill it into the `input[type='tel']` field. Getting this right now makes Problem 3 mostly typing."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Finding it again — the naive way, and why it fails\n\nThe obvious next move: build an XPath from that same string and locate the field by it.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst attemptEmail = \"learner\" + Math.random().toString(36).slice(2, 8) + \"@example.com\";\nconst attemptEmailBox = page.locator(\"input[type='email']\");\nawait attemptEmailBox.fill(attemptEmail);\n\nconst xpath = \"//input[@value='\" + attemptEmail + \"']\";\nconsole.log(\"xpath:\", xpath);\nconsole.log(\"matches:\", await page.locator(\"xpath=\" + xpath).count());\nconsole.log(\"getAttribute('value'):\", await attemptEmailBox.getAttribute(\"value\"));\nconsole.log(\"inputValue():\", await attemptEmailBox.inputValue());\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected (verified live):** `matches: 0`. `getAttribute('value')` prints `null`;\n`inputValue()` prints the real string you filled.\n\nHTML inputs keep two separate things: the **attribute** (`value=\"...\"` in the original\nmarkup — the default) and the **property** (what's actually in the box right now).\n`.fill()` — and typing in general — only ever changes the property. XPath's `@value`\nreads the attribute, which never moved. This is true of every plain `<input>`, not just\nthis app: **you cannot find a field by the value you just typed into it, via `@value`.**\nIf you need that value back, ask the locator you already have (`.inputValue()`), not XPath.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same proof, a different field: fill First Name with a generated value, then count `//input[@value='...']` for that value and print `.inputValue()` next to it. Confirm the count is 0 here too — so you know it is a rule about every plain `<input>`, not something peculiar to the email box."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## A dynamic XPath that does work\n\n`@value` matching works for anything whose value is **baked into the HTML markup** —\nradio buttons and `<option>` tags, for example — because that attribute is part of the\npage source, not something a script sets afterward. `Math.random()` can still decide\n*which* one at runtime; you just can't invent an attribute value that was never there.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst genderChoice = Math.random() < 0.5 ? \"Male\" : \"FeMale\";\nconst genderXPath = \"//input[@value='\" + genderChoice + \"']\";\nconsole.log(\"choosing:\", genderChoice);\nconsole.log(\"matches:\", await page.locator(\"xpath=\" + genderXPath).count());\n\nawait page.locator(\"xpath=\" + genderXPath).check();\nconsole.log(\"checked:\", await page.locator(\"xpath=\" + genderXPath).isChecked());\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `matches: 1` and `checked: true`, whichever gender `Math.random()` picked\nthis run. Same string-building technique as the failing example — the difference is\nentirely in what's really in the DOM, not in the XPath syntax.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same pattern, a different control: let `Math.random()` choose between the two checkbox ids you know (`#checkbox1` and `#checkbox2`), build the selector by concatenating the number onto `\"#checkbox\"`, then check it and print which one it picked."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## `text()` vs `normalize-space()`\n\n`text()` in XPath matches the exact text node — every leading, trailing, and internal\nspace included. Real markup is full of stray whitespace nobody notices.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst raw = await page.locator(\"h1\").innerText();\nconsole.log(\"raw text:\", JSON.stringify(raw)); // note the trailing space\n\nconsole.log(\"text() match:\", await page.locator(\"xpath=//h1[text()='Automation Demo Site']\").count());\nconsole.log(\"normalize-space() match:\", await page.locator(\"xpath=//h1[normalize-space()='Automation Demo Site']\").count());\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected (verified live):** raw text is `\"Automation Demo Site \"` — a real trailing\nspace baked into this app's markup, not a typo. `text()` finds **0**; `normalize-space()`\nfinds **1**. Default to `normalize-space()` whenever you match by text in XPath.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": null
+          "variation": {
+            "prompt": "Same two functions, the opposite direction: write the `text()` XPath that *does* match the heading, by putting the real trailing space inside your string. Then confirm `normalize-space()` still matches it as well. Both find it — and you will not want to maintain the first one."
+          },
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Doing it for real, in a spec file\n\nUnique email, dynamic-XPath gender pick, and a `normalize-space()` check, all in one test.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day3-unique-data.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"a fresh unique value every run, located dynamically\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  const uniqueEmail = \"learner\" + Math.random().toString(36).slice(2, 8) + \"@example.com\";\n  await page.locator(\"input[type='email']\").fill(uniqueEmail);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(uniqueEmail);\n\n  const genderChoice = Math.random() < 0.5 ? \"Male\" : \"FeMale\";\n  const genderXPath = \"//input[@value='\" + genderChoice + \"']\";\n  await page.locator(\"xpath=\" + genderXPath).check();\n  await expect(page.locator(\"xpath=\" + genderXPath)).toBeChecked();\n\n  await expect(page.locator(\"xpath=//h1[normalize-space()='Automation Demo Site']\")).toHaveCount(1);\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> ▶ **Run it yourself.** `npx playwright test week2/generated/day3-unique-data.spec.ts`\n>\n> Run it a second time immediately — it generates a different email and may pick the\n> other gender, and still passes. That's the whole point of today.\n\n## Best practices\n\n- Build unique values with `+` and `Math.random()` — never a bare timestamp.\n- Never assume `@value` finds what a user just typed — verify with `inputValue()` instead.\n- Default to `normalize-space()` over `text()` for any XPath text match.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| `//input[@value='...']` for a value you just `.fill()`ed | 0 matches, every time | use `.inputValue()`, or match on an attribute that's really in the markup |\n| `//h1[text()='...']` against real markup | 0 matches when there's stray whitespace | use `normalize-space()` |\n| A bare `Date.now()` as the \"unique\" value | two tests in the same second collide | concatenate `Math.random()` too |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You `.fill()` the email box with `learner7f3k2x@example.com`, then count `//input[@value='learner7f3k2x@example.com']`. How many matches?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "1 — the field holds exactly that value",
+              "0 — `@value` reads the markup attribute, which `.fill()` never touched",
+              "0, but only because the `@` in the email breaks the XPath"
+            ],
+            "answer": 1,
+            "explanation": "An `<input>` keeps two separate things: the `value=\"...\"` **attribute** written in the markup, and the **property** holding what is in the box right now. `.fill()` and real typing change only the property. `getAttribute('value')` returns `null` here while `.inputValue()` returns your string. This is true of every plain `<input>`, not just this app."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "So why does `//input[@value='FeMale']` find the gender radio perfectly well?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because radios are exempt from the attribute-versus-property split",
+              "Because `FeMale` is written into the page source, so the attribute really is there",
+              "Because `.check()` writes the value attribute, unlike `.fill()`"
+            ],
+            "answer": 1,
+            "explanation": "A radio's `value` is part of the HTML the server sent — as is an `<option>`'s. Nothing at runtime had to set it, so `@value` finds it. `Math.random()` can still choose *which* one; what you cannot do is invent an attribute value that was never in the markup."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "The heading's real text is `\"Automation Demo Site \"`. Which XPath matches it?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`//h1[text()='Automation Demo Site']`",
+              "`//h1[normalize-space()='Automation Demo Site']`",
+              "Both — XPath trims whitespace before comparing"
+            ],
+            "answer": 1,
+            "explanation": "`text()` matches the text node exactly, trailing space and all, so it finds 0. `normalize-space()` collapses the whitespace first and finds 1. Note this is the opposite of Playwright's own `toContainText`, which normalises for you — the normalisation you get depends on which tool is doing the matching."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Build unique values with `\"prefix\" + Math.random().toString(36).slice(2, 8)`. A bare `Date.now()` collides when two runs land in the same second.\n- **An attribute is not a property.** `@value` reads the markup; `.fill()` writes the live value. You cannot find a field by what you just typed into it.\n- To read back what you typed, ask the locator you already have: `.inputValue()`.\n- `@value` *does* work for values baked into the source — radios, `<option>` tags. Randomness picking which one is fine.\n- Default to `normalize-space()` over `text()` for XPath text matching.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What's next\n\n[Day 3.3](/learn/w2/d3/p3) wraps unique-value generation and the working dynamic locator in a reusable function.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -261,31 +401,86 @@
           "type": "markdown",
           "text": "# Week 2, Day 3.3 — Unique data and dynamic locators, wrapped for reuse\n\nBy the end of this lesson you will have a `uniqueEmail()` generator and a\n`pickAndCheckGender()` helper that any spec can call, extending the same\n`registration-helpers.ts` file from Days 1 and 2.\n\n> **No new API here on purpose.** Everything below is something you already ran in [Day 3.2](/learn/w2/d3/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 3.2](/learn/w2/d3/p2) |\n| **What changes** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Builds on** | the same `registration-helpers.ts` that Days [1.3](/learn/w2/d1/p3) and [2.3](/learn/w2/d2/p3) have been growing |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The problem with what we wrote yesterday\n\nEvery test that needs a unique value re-writes the same `Math.random()` line; every test\nthat needs a dynamic gender pick re-writes the same XPath-building line. Small lines, but\ncopy-pasted enough times they become the thing that's wrong when the pattern needs to change.\n\n## Same code, with structure around it\n\n| In Day 3.2 you wrote | Here it becomes | Why |\n|---|---|---|\n| `\"learner\" + Math.random()...` inline | `uniqueEmail()` | one function that returns a fresh value; the \"how\" lives in exactly one place |\n| the gender XPath built inline, then `.check()`ed | `pickAndCheckGender(page)` | the working dynamic-locator pattern, reusable without re-deriving it |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// Extends the same file from Day 1.3 and Day 2.3 with two more helpers.\nawait writeProjectFile(\"week2/generated/registration-helpers.ts\", `// Week 2 — shared actions, checks, and unique-data helpers for the Register.html form.\nimport type { Page } from \"@playwright/test\";\nimport { expect } from \"@playwright/test\";\n\nexport async function fillRegistrationForm(page: Page, email: string) {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  await page.getByPlaceholder(\"First Name\").fill(\"Ada\");\n  await page.getByPlaceholder(\"Last Name\").fill(\"Lovelace\");\n  await page.locator(\"textarea\").fill(\"123 Analytical Engine Way\");\n  await page.locator(\"input[type='email']\").fill(email);\n  await page.locator(\"input[type='tel']\").fill(\"5551234567\");\n\n  await page.locator(\"input[value='FeMale']\").check();\n  await page.locator(\"#checkbox1\").check();\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n}\n\nexport async function expectFormFilledCorrectly(page: Page, email: string) {\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await expect(page.getByPlaceholder(\"First Name\")).toHaveValue(\"Ada\");\n  await expect(page).toHaveURL(/Register\\\\.html/);\n}\n\n// A fresh, collision-free email on every call.\nexport function uniqueEmail(): string {\n  return \"learner\" + Math.random().toString(36).slice(2, 8) + \"@example.com\";\n}\n\n// Picks Male or FeMale at random and checks it via a dynamic XPath built from\n// that choice — @value works here because both values are static markup, not\n// something .fill() set at runtime (see Day 3.2 for why that distinction matters).\nexport async function pickAndCheckGender(page: Page): Promise<string> {\n  const choice = Math.random() < 0.5 ? \"Male\" : \"FeMale\";\n  const xpath = \"//input[@value='\" + choice + \"']\";\n  await page.locator(\"xpath=\" + xpath).check();\n  return choice;\n}\n`.trim());",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { runSpec } from \"../_shared/deno-helpers.ts\"; // writeProjectFile already imported above\n\nconst specPath = \"week2/generated/day3-reuse.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test, expect } from \"@playwright/test\";\nimport { uniqueEmail, pickAndCheckGender } from \"./registration-helpers\";\n\ntest(\"run A gets its own unique data\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n  const email = uniqueEmail();\n  await page.locator(\"input[type='email']\").fill(email);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await pickAndCheckGender(page);\n});\n\ntest(\"run B gets a different unique value than run A\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n  const email = uniqueEmail();\n  await page.locator(\"input[type='email']\").fill(email);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await pickAndCheckGender(page);\n});\n`.trim());\n\nawait runSpec(specPath);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected result:** `2 passed`. Both tests call `uniqueEmail()` independently and get\ndifferent strings — check the traces or add a `console.log` if you want to see both values.\n\n## What a reviewer would look for\n\n- The randomness lives inside `uniqueEmail()`, not copy-pasted into every test.\n- `pickAndCheckGender` returns the choice it made, so a test can log or assert on it instead of guessing.\n- Nothing here duplicates Day 3.2's logic — it's the same lines, moved once.\n\n## What's next\n\n[Day 3.4](/learn/w2/d3/p4) — your turn, with no worked examples to lean on.",
+          "text": "**Expected result:** `2 passed`. Both tests call `uniqueEmail()` independently and get\ndifferent strings — check the traces or add a `console.log` if you want to see both values.\n\n## What a reviewer would look for\n\n- The randomness lives inside `uniqueEmail()`, not copy-pasted into every test.\n- `pickAndCheckGender` returns the choice it made, so a test can log or assert on it instead of guessing.\n- Nothing here duplicates Day 3.2's logic — it's the same lines, moved once.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Two tests in the same file both call `uniqueEmail()`. Do they get the same string?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Yes — the module is loaded once, so the value is computed once and shared",
+              "No — the function body runs on each call, producing a fresh value each time"
+            ],
+            "answer": 1,
+            "explanation": "`uniqueEmail()` computes its value inside the function, so every call produces a new one. Had the randomness been assigned to a module-level `const` instead, both tests really would have shared it — and the collision this whole day exists to prevent would be back."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why does `pickAndCheckGender(page)` return the choice it made, rather than just checking the radio and returning nothing?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "So the caller can log or assert on which one was picked instead of guessing",
+              "Because an `async` function has to return something",
+              "So the next call knows which one to avoid"
+            ],
+            "answer": 0,
+            "explanation": "The function makes a random decision the test cannot otherwise see. Returning it hands that knowledge back to the caller, so a failure message can say which gender was picked. A helper that makes an invisible random choice is a helper you will be debugging blind."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Randomness belongs inside one generator function, not copy-pasted into every test that needs a fresh value.\n- Compute the random value *inside* the function. A module-level `const` would be computed once and shared by every caller.\n- A helper that makes a hidden decision should return it, so failures can say what it chose.\n- These are the same lines from [Day 3.2](/learn/w2/d3/p2), moved once — not rewritten.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 3.4](/learn/w2/d3/p4) — your turn, with no worked examples to lean on.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -302,31 +497,43 @@
           "type": "markdown",
           "text": "# Week 2, Day 3.4 — Practice: unique data and dynamic locators\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 3.1](/learn/w2/d3/p1) or [Day 3.2](/learn/w2/d3/p2). Go back, re-read, come here again.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Three problems** | a unique value, then a dynamic locator over real `<option>` markup, then a generator of your own |\n| **Pulls on** | [Day 3.1](/learn/w2/d3/p1) for the string building · [Day 3.2](/learn/w2/d3/p2) for which attributes are real |\n| **The question to keep asking** | is this attribute really in the page source, or did a script set it? |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## When you are done\n\nAsk yourself the Day 3.2 question one more time: for any locator you wrote today, could\nyou swap in a value the site itself generated (not one you typed) and have it still work?\nIf the answer is \"only via `@value`\", check whether that attribute is really live markup\nor something a script set — that's this week's whole lesson in one question.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

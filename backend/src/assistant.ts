@@ -46,7 +46,13 @@ function buildContext(day: CourseDay, part: number): string {
   for (const p of day.parts) {
     lines.push('--- Part ' + p.part + ': ' + p.title + ' (' + p.kind + ')');
     for (const b of p.blocks) {
-      lines.push(b.type === 'markdown' ? b.text : '```ts\n' + b.text + '\n```');
+      // A checkpoint is a question with a right answer attached. Its payload is an answer key by
+      // another name, so the whole block is withheld - same reasoning as invariant 4 keeps
+      // q.solution out. Handing the assistant the question invites it to answer it for them,
+      // which is the one thing a retrieval check cannot survive.
+      if (b.type === 'checkpoint') continue;
+      const isProse = b.type === 'markdown' || b.type === 'at-a-glance' || b.type === 'recap';
+      lines.push(isProse ? b.text : '```ts\n' + b.text + '\n```');
     }
     for (const q of p.problems) {
       lines.push('Practice problem ' + q.number + (q.difficulty ? ' (' + q.difficulty + ')' : ''));

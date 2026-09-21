@@ -1,0 +1,95 @@
+{
+  "schema": "lesson-overlay/v1",
+  "week": 2,
+  "day": 3,
+  "parts": {
+    "1": {
+      "checkpoints": [
+        {
+          "question": "What can `Math.random()` return?",
+          "options": [
+            "Any float from 0 up to but not including 1",
+            "Any float from 0 up to and including 1",
+            "Any float, including negative ones"
+          ],
+          "answer": 0,
+          "explanation": "`0 <= x < 1` — never negative, and never exactly 1. On its own it is not a usable id, which is why the lesson runs it through `.toString(36).slice(2, 8)` to get something short and readable."
+        },
+        {
+          "question": "`console.log(\"Learner\" + 42)` prints what?",
+          "options": [
+            "`Learner 42` — `+` inserts a separator between the two",
+            "`Learner42` — the number is converted to text first",
+            "A type error — you cannot add a number to a string"
+          ],
+          "answer": 1,
+          "explanation": "`+` converts the number to `\"42\"` and joins them with nothing in between. No space appears unless you add one yourself, which is the mistake that shows up as `Learner42` where `Learner 42` was wanted."
+        }
+      ]
+    },
+    "2": {
+      "at_a_glance": "| | |\n|---|---|\n| **You'll build** | a value that differs every run, and an XPath assembled at runtime from it |\n| **You'll prove** | why `@value` cannot find what you just typed — and what it *can* find |\n| **Assumes** | [string building and Math.random()](/learn/w2/d3/p1) · [XPath syntax](/learn/w2/d2/p2) |\n| **The idea worth keeping** | an HTML attribute and a live property are two different things |",
+      "checkpoints": [
+        {
+          "question": "You `.fill()` the email box with `learner7f3k2x@example.com`, then count `//input[@value='learner7f3k2x@example.com']`. How many matches?",
+          "options": [
+            "1 — the field holds exactly that value",
+            "0 — `@value` reads the markup attribute, which `.fill()` never touched",
+            "0, but only because the `@` in the email breaks the XPath"
+          ],
+          "answer": 1,
+          "explanation": "An `<input>` keeps two separate things: the `value=\"...\"` **attribute** written in the markup, and the **property** holding what is in the box right now. `.fill()` and real typing change only the property. `getAttribute('value')` returns `null` here while `.inputValue()` returns your string. This is true of every plain `<input>`, not just this app."
+        },
+        {
+          "question": "So why does `//input[@value='FeMale']` find the gender radio perfectly well?",
+          "options": [
+            "Because radios are exempt from the attribute-versus-property split",
+            "Because `FeMale` is written into the page source, so the attribute really is there",
+            "Because `.check()` writes the value attribute, unlike `.fill()`"
+          ],
+          "answer": 1,
+          "explanation": "A radio's `value` is part of the HTML the server sent — as is an `<option>`'s. Nothing at runtime had to set it, so `@value` finds it. `Math.random()` can still choose *which* one; what you cannot do is invent an attribute value that was never in the markup."
+        },
+        {
+          "question": "The heading's real text is `\"Automation Demo Site \"`. Which XPath matches it?",
+          "options": [
+            "`//h1[text()='Automation Demo Site']`",
+            "`//h1[normalize-space()='Automation Demo Site']`",
+            "Both — XPath trims whitespace before comparing"
+          ],
+          "answer": 1,
+          "explanation": "`text()` matches the text node exactly, trailing space and all, so it finds 0. `normalize-space()` collapses the whitespace first and finds 1. Note this is the opposite of Playwright's own `toContainText`, which normalises for you — the normalisation you get depends on which tool is doing the matching."
+        }
+      ],
+      "recap": "- Build unique values with `\"prefix\" + Math.random().toString(36).slice(2, 8)`. A bare `Date.now()` collides when two runs land in the same second.\n- **An attribute is not a property.** `@value` reads the markup; `.fill()` writes the live value. You cannot find a field by what you just typed into it.\n- To read back what you typed, ask the locator you already have: `.inputValue()`.\n- `@value` *does* work for values baked into the source — radios, `<option>` tags. Randomness picking which one is fine.\n- Default to `normalize-space()` over `text()` for XPath text matching."
+    },
+    "3": {
+      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 3.2](/learn/w2/d3/p2) |\n| **What changes** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Builds on** | the same `registration-helpers.ts` that Days [1.3](/learn/w2/d1/p3) and [2.3](/learn/w2/d2/p3) have been growing |",
+      "checkpoints": [
+        {
+          "question": "Two tests in the same file both call `uniqueEmail()`. Do they get the same string?",
+          "options": [
+            "Yes — the module is loaded once, so the value is computed once and shared",
+            "No — the function body runs on each call, producing a fresh value each time"
+          ],
+          "answer": 1,
+          "explanation": "`uniqueEmail()` computes its value inside the function, so every call produces a new one. Had the randomness been assigned to a module-level `const` instead, both tests really would have shared it — and the collision this whole day exists to prevent would be back."
+        },
+        {
+          "question": "Why does `pickAndCheckGender(page)` return the choice it made, rather than just checking the radio and returning nothing?",
+          "options": [
+            "So the caller can log or assert on which one was picked instead of guessing",
+            "Because an `async` function has to return something",
+            "So the next call knows which one to avoid"
+          ],
+          "answer": 0,
+          "explanation": "The function makes a random decision the test cannot otherwise see. Returning it hands that knowledge back to the caller, so a failure message can say which gender was picked. A helper that makes an invisible random choice is a helper you will be debugging blind."
+        }
+      ],
+      "recap": "- Randomness belongs inside one generator function, not copy-pasted into every test that needs a fresh value.\n- Compute the random value *inside* the function. A module-level `const` would be computed once and shared by every caller.\n- A helper that makes a hidden decision should return it, so failures can say what it chose.\n- These are the same lines from [Day 3.2](/learn/w2/d3/p2), moved once — not rewritten."
+    },
+    "4": {
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | a unique value, then a dynamic locator over real `<option>` markup, then a generator of your own |\n| **Pulls on** | [Day 3.1](/learn/w2/d3/p1) for the string building · [Day 3.2](/learn/w2/d3/p2) for which attributes are real |\n| **The question to keep asking** | is this attribute really in the page source, or did a script set it? |"
+    }
+  }
+}

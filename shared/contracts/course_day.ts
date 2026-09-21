@@ -7,14 +7,45 @@ import { Difficulty, DayNumber, PartNumber, ProblemNumber, WeekNumber } from './
  * 'problem-ref' marks the position of a practice problem in the document flow. Without it,
  * every non-problem paragraph was rendered before every problem - which put the practice
  * notebook's closing "When you are done" note ABOVE Problem 1.
+ *
+ * The last three are never parsed out of a notebook: they come from an authored lesson overlay
+ * (Data/Content/lessons/), which is how a generated day gets the fixed section template -
+ * 'at-a-glance' opens the lesson, 'checkpoint' and 'recap' close it.
  */
-export const BlockType = z.enum(['markdown', 'example', 'your-turn', 'problem-ref']);
+export const BlockType = z.enum([
+  'markdown',
+  'example',
+  'your-turn',
+  'problem-ref',
+  'at-a-glance',
+  'checkpoint',
+  'recap',
+]);
+
+/**
+ * One multiple-choice retrieval check. Formative, never scored: the learner picks, sees at once
+ * whether they were right, and reads why. Nothing is recorded, so a wrong answer costs nothing
+ * but the reading - which is the point of putting it mid-lesson rather than in an exam.
+ */
+export const Checkpoint = z
+  .object({
+    options: z.array(z.string()).min(2).max(5),
+    /** Index into options. */
+    answer: z.number().int().min(0),
+    /** Shown after answering, right or wrong - the reason, not just the verdict. */
+    explanation: z.string(),
+  })
+  .refine((c) => c.answer < c.options.length, {
+    message: 'answer must be an index into options',
+    path: ['answer'],
+  });
 
 export const ContentBlock = z.object({
   type: BlockType,
   /**
    * Markdown source for a markdown block, TypeScript source for example / your-turn,
-   * and the problem number as a string for problem-ref.
+   * the problem number as a string for problem-ref, and markdown again for the three
+   * overlay-authored types - the question itself, for a checkpoint.
    */
   text: z.string(),
   /**
@@ -31,6 +62,12 @@ export const ContentBlock = z.object({
    * PracticeProblem.solution already uses: an unauthored day looks unfinished, never broken.
    */
   variation: z.object({ prompt: z.string() }).nullable().default(null),
+  /**
+   * A 'checkpoint' block's options, answer and explanation. null for every other block type,
+   * and the same graceful-absence default as the two fields above: a day imported before any
+   * overlay existed parses unchanged.
+   */
+  checkpoint: Checkpoint.nullable().default(null),
 });
 
 export const PartKind = z.enum([
@@ -75,6 +112,7 @@ export const CourseDay = z.object({
   parts: z.array(CoursePart).min(1).max(4),
 });
 
+export type Checkpoint = z.infer<typeof Checkpoint>;
 export type ContentBlock = z.infer<typeof ContentBlock>;
 export type PracticeProblem = z.infer<typeof PracticeProblem>;
 export type CoursePart = z.infer<typeof CoursePart>;

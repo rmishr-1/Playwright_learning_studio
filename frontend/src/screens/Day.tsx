@@ -437,7 +437,8 @@ export function Day({
             viewed={viewed}
             onLoadIntoEditor={loadIntoEditor}
             onStartProblem={startProblem}
-            onShowWeeks={weeksShown ? undefined : () => setWeeksShown(true)}
+            weeksShown={weeksShown}
+            onToggleWeeks={() => setWeeksShown((shown) => !shown)}
           />
         </div>
         <div className="gutter" onMouseDown={() => (draggingRef.current = true)} />

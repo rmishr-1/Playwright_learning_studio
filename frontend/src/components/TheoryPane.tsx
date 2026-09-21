@@ -1,6 +1,80 @@
 import { useState } from 'react';
 import { Markdown } from './Markdown';
-import type { CoursePart, PracticeProblem } from '../../../shared/contracts/course_day';
+import type { ContentBlock, CoursePart, PracticeProblem } from '../../../shared/contracts/course_day';
+
+/**
+ * Option labels are one line of phrasing content inside a `<button>`, where the Markdown
+ * component's wrapper `<div>` would be invalid HTML - so the one bit of markdown they actually
+ * use, a backtick code span, is rendered directly. `<code>` is phrasing content, and `.lesson
+ * code` already styles it the same as inline code anywhere else in the lesson.
+ */
+function withCodeSpans(text: string) {
+  return text
+    .split(/(`[^`]+`)/g)
+    .filter(Boolean)
+    .map((piece, i) =>
+      piece.length > 2 && piece.startsWith('`') && piece.endsWith('`')
+        ? <code key={i}>{piece.slice(1, -1)}</code>
+        : piece,
+    );
+}
+
+/**
+ * A retrieval check, mid-lesson. Formative by design (registry invariant 10): the pick lives in
+ * local state and nothing is written to progress, so revisiting the day offers the question again
+ * and a wrong answer costs nothing. Answering locks the options and reveals which one was right -
+ * there is no score to chase, and the explanation is the whole point.
+ */
+function Checkpoint({ block }: { block: ContentBlock }) {
+  const [picked, setPicked] = useState<number | null>(null);
+  const check = block.checkpoint;
+  if (!check) return null;
+
+  const answered = picked !== null;
+  const correct = picked === check.answer;
+
+  return (
+    <div className="checkpoint">
+      <span className="label">Check yourself</span>
+      <Markdown text={block.text} />
+      <div className="options">
+        {check.options.map((option, i) => {
+          // After answering, the right one is always marked - including when the learner found it,
+          // so the correct answer is never something they have to infer from an absence.
+          const state = !answered
+            ? ''
+            : i === check.answer
+              ? ' right'
+              : i === picked
+                ? ' wrong'
+                : ' dim';
+          return (
+            <button
+              key={i}
+              type="button"
+              className={'option' + state}
+              disabled={answered}
+              onClick={() => setPicked(i)}
+            >
+              <span className="marker">{answered && i === check.answer ? '✓' : answered && i === picked ? '✗' : ''}</span>
+              {/* NOT className="body" - that is the app's main layout region, a flex container,
+                  and reusing the name here laid the option's words out in columns. */}
+              <span className="opt-text">{withCodeSpans(option)}</span>
+            </button>
+          );
+        })}
+      </div>
+      {answered && (
+        // The verdict is spelled out as well as coloured - colour alone would carry it for
+        // nobody who cannot see the difference between the green and the red.
+        <div className={'verdict' + (correct ? ' right' : ' wrong')}>
+          <strong>{correct ? 'Correct.' : 'Not quite.'}</strong>{' '}
+          <Markdown text={check.explanation} />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Problem({
   problem,
@@ -54,7 +128,8 @@ export function TheoryPane({
   viewed,
   onLoadIntoEditor,
   onStartProblem,
-  onShowWeeks,
+  weeksShown,
+  onToggleWeeks,
 }: {
   parts: CoursePart[];
   active: number;
@@ -62,16 +137,26 @@ export function TheoryPane({
   viewed: number[];
   onLoadIntoEditor: (code: string) => void;
   onStartProblem: (code: string, problemNumber: number) => void;
-  /** Present only while the week list is hidden - the way back to it. */
-  onShowWeeks?: () => void;
+  /** Whether the week list is open, so the one button can say which way it goes. */
+  weeksShown?: boolean;
+  onToggleWeeks?: () => void;
 }) {
   const part = parts.find((p) => p.part === active) ?? parts[0];
 
   return (
     <div className="pane-theory">
       <div className="tabbar">
-        {onShowWeeks && (
-          <button className="show-weeks" onClick={onShowWeeks} title="Show the week list">
+        {/* A toggle, and always present. It used to render only while the week list was hidden,
+            which removed the control at exactly the moment it was needed to close it again -
+            leaving no way back except picking a day you did not want. */}
+        {onToggleWeeks && (
+          <button
+            className="show-weeks"
+            onClick={onToggleWeeks}
+            aria-expanded={weeksShown ?? false}
+            aria-label={weeksShown ? 'Hide the week list' : 'Show the week list'}
+            title={weeksShown ? 'Hide the week list' : 'Show the week list'}
+          >
             ☰
           </button>
         )}
@@ -94,6 +179,20 @@ export function TheoryPane({
           }
           if (block.type === 'markdown') {
             return <Markdown key={i} text={block.text} onLoadIntoEditor={onLoadIntoEditor} />;
+          }
+          // The three authored-overlay types. Cards rather than more prose: they are the fixed
+          // furniture of every lesson, and a learner scanning for "what is this for" or "what do
+          // I keep" should find them without reading the paragraphs in between.
+          if (block.type === 'at-a-glance' || block.type === 'recap') {
+            return (
+              <div className={'lesson-card ' + block.type} key={i}>
+                <span className="label">{block.type === 'recap' ? 'Recap' : 'At a glance'}</span>
+                <Markdown text={block.text} onLoadIntoEditor={onLoadIntoEditor} />
+              </div>
+            );
+          }
+          if (block.type === 'checkpoint') {
+            return <Checkpoint key={i} block={block} />;
           }
           if (block.type === 'your-turn') {
             // An authored variation replaces the generic "retype from memory" prompt once
