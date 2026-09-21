@@ -181,6 +181,25 @@ function main(): void {
     notebookisms.slice(0, 6).join(' | '),
   );
 
+  // Tab labels name the part's role, so they come from the part number alone. They used to be a
+  // truncated copy of the part's own title, which restated the H1 below it and clipped mid-word.
+  const ROLE_LABEL: Record<number, string> = {
+    1: 'TypeScript',
+    2: 'Fundamentals',
+    3: 'Implementation',
+    4: 'Practice',
+  };
+  const mislabelled = days.flatMap((d) =>
+    d.parts
+      .filter((p) => p.tab_label !== ROLE_LABEL[p.part])
+      .map((p) => 'w' + d.week + 'd' + d.day + 'p' + p.part + ' = ' + JSON.stringify(p.tab_label)),
+  );
+  check(
+    'every tab is labelled for its role, on every day',
+    mislabelled.length === 0,
+    mislabelled.slice(0, 5).join(' | '),
+  );
+
   // The authored lesson overlays. Week 2 is the authored week; weeks 1 and 3-8 have no overlay
   // yet, and the checks below are written so that stays a difference in coverage, not a failure.
   console.log('\nLesson overlays');

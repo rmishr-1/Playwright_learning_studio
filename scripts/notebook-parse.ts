@@ -316,10 +316,25 @@ export function parseTeaching(
   return { blocks, examples };
 }
 
-/** Tab labels. A bare "Part 2 / Part 3" tells the learner nothing, so use the part's own title. */
-export function tabLabel(part: PartNumber, title: string): string {
-  if (part === 1) return 'TypeScript';
-  if (part === 4) return 'Practice';
-  const head = title.split(':')[0].replace(/`/g, '').trim();
-  return head.length <= 30 ? head : `${head.slice(0, 29).trimEnd()}\u2026`;
+/**
+ * Tab labels name the part's ROLE in the day, not its subject.
+ *
+ * Parts 1 and 4 always did ("TypeScript", "Practice"); 2 and 3 used to carry a truncated copy of
+ * their own title, which the day's H1 already states two lines below the tab. That left the tab
+ * bar restating the heading in labels clipped mid-word - "The same assertions, wrapped...",
+ * "A first look inside playwrigh..." - and made every day's tabs a different width and shape.
+ * Naming the role instead gives one rhythm to learn: what the language needs, the technique, how
+ * a real project writes it, then your turn.
+ */
+export function tabLabel(part: PartNumber): string {
+  switch (part) {
+    case 1:
+      return 'TypeScript';
+    case 2:
+      return 'Fundamentals';
+    case 3:
+      return 'Implementation';
+    case 4:
+      return 'Practice';
+  }
 }

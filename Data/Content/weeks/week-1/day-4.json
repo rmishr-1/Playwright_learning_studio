@@ -27,7 +27,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Codegen and finding your way around locators",
-      "tab_label": "Codegen and finding your way…",
+      "tab_label": "Fundamentals",
       "source_notebook": "week1/day4_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -110,7 +110,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Proving the `.spec.ts` naming convention",
-      "tab_label": "Proving the .spec.ts naming c…",
+      "tab_label": "Implementation",
       "source_notebook": "week1/day4_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

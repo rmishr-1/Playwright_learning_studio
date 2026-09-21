@@ -17,79 +17,92 @@
           "type": "markdown",
           "text": "# Week 3, Day 1.1 — TypeScript for configuring the runner\n\nThree small things. Today you edit `playwright.config.ts`, and all three appear in it.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "| # | Concept | Where it shows up today |\n|---|---|---|\n| 1 | Objects, and objects inside objects | the config *is* one big object |\n| 2 | Numeric separators (`60_000`) | timeouts in milliseconds |\n| 3 | `export default` | how the config hands itself to Playwright |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 1. Objects, and objects inside objects\n\nNamed values in curly braces, commas between. A value can be another object — that's\nhow settings get grouped.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const settings = {\n  testDir: \"./tests\",\n  timeout: 30000,\n  retries: 0,\n  use: {                       // an object inside the object\n    headless: true,\n    baseURL: \"https://test-automation-banking.vercel.app\",\n  },\n};\n\nconsole.log(settings.testDir);\nconsole.log(settings.use.baseURL);        // two levels down\nconsole.log(JSON.stringify(settings, null, 2));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `./tests`, the URL, then the whole object printed across several lines.\n\n`timeout: 30000` has no quotes — it's a number. `\"30000\"` would be a string, and Playwright\nwants a number.\n\n**Challenge:** add an `expect` group holding its own `timeout`, then print just that value.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 2. Numeric separators\n\n`60_000` and `60000` are the *same number*. The underscore is ignored by TypeScript and\nexists purely so you can see at a glance that it's sixty thousand, not six thousand.\n\nEvery Playwright timeout is in **milliseconds**, so these numbers get big fast.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "console.log(60_000 === 60000);        // true — identical\nconsole.log(5_000, 30_000, 60_000);\n\nconst ms = 90_000;\nconsole.log(`${ms} ms is ${ms / 1000} seconds`);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** `true`, then `5000 30000 60000`, then `90000 ms is 90 seconds`.\n\nMisreading `30000` as 3 seconds instead of 30 is a genuinely common mistake when you're\nscanning a config quickly. The underscore removes the ambiguity for free.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## 3. `export default`\n\nA file can hand exactly one thing to whoever imports it. That's `export default`.\n\n`playwright.config.ts` ends with one, which is how the runner finds your settings:\n\n```ts\nexport default defineConfig({ ... });\n```\n\nYou never call it yourself — Playwright imports the file and reads the default export.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Two exports, so the difference is visible.\n// A file may have many *named* exports, but only one default.\n\nconst config = { timeout: 60_000, retries: 1 };\nconst NAMED = \"any number of these are allowed\";\n\nconsole.log(\"default-ish value:\", JSON.stringify(config));\nconsole.log(\"named value:      \", NAMED);\n\n// In a real .ts file these would be:\n//   export default config;      <- one per file\n//   export const NAMED = ...;   <- as many as you like",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** the config object, then the string.\n\nNotebook cells can't use `export`, so the real forms are shown as comments. You'll write the\ngenuine `export default` in Day 3 when you build a shared class.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Objects | The config is one object; groups are nested objects. |\n| `60_000` | Same as `60000`. Milliseconds, always. |\n| `export default` | One per file. How the config reaches Playwright. |\n\n**Next:** [Day 1.2 — Timeouts: what waits, and for how long](/learn/w3/d1/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -98,7 +111,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Timeouts: what waits, and for how long",
-      "tab_label": "Timeouts",
+      "tab_label": "Fundamentals",
       "source_notebook": "week3/day1_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -106,163 +119,190 @@
           "type": "markdown",
           "text": "## Two separate deadlines\n\nPlaywright ships with two, and they are unrelated:\n\n| What | Default | Applies to |\n|---|---|---|\n| **Action / test timeout** | **30 s** | each `click`, `fill`, `goto`, `waitFor` — and the test as a whole |\n| **`expect()` timeout** | **5 s** | a single auto-retrying assertion |\n\nThe reasoning behind each: if an element hasn't appeared in 30 seconds, either the app is\nbroken or the locator is wrong — waiting longer won't help. And if an expected result hasn't\narrived in 5 seconds, something is genuinely wrong rather than slow.\n\n> For comparison, Selenium's implicit wait is commonly set to 60 s. Playwright splits the\n> budget in two so an assertion fails fast while a page load still gets room.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "# Week 3, Day 1.2 — Timeouts: what waits, and for how long\n\nBy the end you'll know why a test can hang for 30 seconds, why an assertion gives up after 5,\nand why raising both is usually the wrong fix.\n\nYou'll also measure it yourself rather than taking my word for it.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The point everyone misses\n\n**A timeout is a limit, not a wait.** Setting 30 seconds does not make anything take 30\nseconds. If the element is there in 40 ms, the line returns in 40 ms.\n\nYou only ever spend the budget when something is already going wrong. Which is exactly why\nraising it doesn't fix tests — it just makes failures slower to discover.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 1 — the forced wait, and why it's the wrong tool\n\n**Objective:** see `waitForTimeout` spend real time doing nothing.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { launch, login } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait login(page);\n\nconst t0 = Date.now();\nawait page.waitForTimeout(3000);       // sleep for 3s, unconditionally\nconsole.log(\"waitForTimeout(3000) actually took:\", Date.now() - t0, \"ms\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** roughly `3000`–`3100` ms.\n\nThat's the whole problem. It waits the full time **even when the page was ready instantly**,\nand it still isn't long enough on the one slow day that matters. You pay the cost every run\nand keep the flakiness.\n\nPlaywright's own waiting is conditional: it polls and continues the moment the condition\nholds. `waitForTimeout` is the one wait that can't do that, which is why it belongs in\nexperiments and never in a committed test.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 2 — a locator that never matches\n\n**Objective:** measure what happens when the thing you asked for isn't there.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const started = Date.now();\nlet message = \"\";\n\ntry {\n  // 2s instead of the 30s default, so this cell doesn't take half a minute\n  await page.getByText(\"No Such Panel Exists\").waitFor({ timeout: 2000 });\n} catch (err) {\n  message = (err as Error).message;\n}\n\nconsole.log(\"waited:\", Date.now() - started, \"ms\");\nconsole.log(\"error first line:\", message.split(\"\\n\")[0]);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** about `2000` ms, and an error mentioning `Timeout 2000ms exceeded`.\n\nTwo things to take from this. It *did* keep checking for the full 2 seconds — it didn't glance\nonce and give up. And the message names the deadline, so a real failure tells you whether you\nhit a timeout or something else entirely.\n\n**Challenge:** change `2000` to `500` and confirm the wait shortens to match.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 3 — the same generous deadline, on something that exists\n\n**Objective:** prove a timeout is a ceiling, not a duration.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const t1 = Date.now();\nawait page.getByText(\"Account Balance\", { exact: true }).waitFor({ timeout: 30_000 });\nconsole.log(\"30s deadline, actually took:\", Date.now() - t1, \"ms\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** a few hundred milliseconds at most — nowhere near 30,000.\n\nThis is the answer to \"won't a big timeout slow my suite down?\" No. It costs you nothing on\nsuccess. It costs you only on failure, and that's precisely when you want the tool to have\ntried properly before giving up.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Example 4 — a failure that isn't about time at all\n\n**Objective:** meet strict mode, so you don't misdiagnose it as a timeout.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "let strictMessage = \"\";\nconst t2 = Date.now();\n\ntry {\n  // \"Statements\" appears twice on this dashboard — verified, not a guess\n  await page.getByText(\"Statements\", { exact: true }).click({ timeout: 4000 });\n} catch (err) {\n  strictMessage = (err as Error).message;\n}\n\nconsole.log(\"took:\", Date.now() - t2, \"ms\");\nconsole.log(strictMessage.split(\"\\n\").slice(0, 3).join(\" | \"));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Expected:** it fails in well under 4 seconds, with `strict mode violation` and\n`resolved to 2 elements`.\n\n**Playwright refused rather than guessing.** Two matches means your locator is ambiguous, and\npicking the first one silently would give you a test that passes today and clicks the wrong\nthing after a redesign.\n\nNote it failed *fast*. If you see a slow failure, suspect the element is missing; a quick one\nusually means the locator matched too much. The fix here is `.first()` only when you genuinely\nmean \"any of them\", or a narrower locator when you mean one specific tile.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Changing the defaults\n\nSettings live in the config, never in the script — so one edit covers every test, and running\nagainst a slower environment doesn't mean touching a hundred files.\n\n```ts\n// playwright.config.ts\nexport default defineConfig({\n  testDir: \"./\",\n  timeout: 60_000,               // per test (was 30s)\n  expect: { timeout: 8_000 },    // per assertion (was 5s)\n});\n```\n\n`timeout` sits at the top level; the assertion budget is nested under `expect`. Putting\n`timeout` inside `expect` by mistake changes the wrong thing and is easy to miss.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// What the two settings look like as plain data\nconst configShape = {\n  testDir: \"./\",\n  timeout: 60_000,\n  expect: { timeout: 8_000 },\n};\nconsole.log(JSON.stringify(configShape, null, 2));\n\nawait browser.close();",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**When to actually raise them:** the developers have told you the server is slow today and\ncan't fix it yet. That's a real reason. \"The test is flaky\" is not — a longer timeout hides\nthe flake instead of fixing it, and every future failure now takes twice as long to report.\n\nPrefer the narrowest scope that solves it: one assertion, then one test (`test.setTimeout`),\nthen the whole project. Day 1.3 covers those.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The same measurements, as a real spec",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template\n// literal — see Week 4 Day 1.1, concept 2.\n\nawait writeProjectFile(\"week3/generated/day1-timeouts.spec.ts\", `// Week 3, Day 1 — how Playwright's timeouts actually behave.\n//\n// Every deadline below was measured against the live app, not read off a doc page.\n// Note that these tests all PASS: each one proves a timeout happened, rather than\n// being a test that times out. A suite full of deliberately-red tests teaches you\n// to ignore red.\n//\n// Written by a cell in week3/day1_2.ipynb. Run it yourself:\n//   npx playwright test week3/generated/day1-timeouts.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Timeouts\", () => {\n  test(\"Step 1 — a locator that never matches waits, then explains itself\", async ({ page }) => {\n    await loginAs(page);\n\n    const started = Date.now();\n    let message = \"\";\n    try {\n      // 2s instead of the 30s default, so the lesson does not take half a minute.\n      await page.getByText(\"No Such Panel Exists\").waitFor({ timeout: 2000 });\n    } catch (error) {\n      message = (error as Error).message;\n    }\n    const elapsed = Date.now() - started;\n\n    expect(message).toContain(\"Timeout\");\n    // It really did wait — it did not give up immediately.\n    expect(elapsed).toBeGreaterThanOrEqual(1800);\n    expect(elapsed).toBeLessThan(8000);\n  });\n\n  test(\"Step 2 — expect() carries its own, shorter deadline\", async ({ page }) => {\n    await loginAs(page);\n\n    const started = Date.now();\n    let failed = false;\n    try {\n      await expect(page.getByText(\"No Such Panel Exists\")).toBeVisible({ timeout: 1500 });\n    } catch {\n      failed = true;\n    }\n    const elapsed = Date.now() - started;\n\n    expect(failed).toBe(true);\n    expect(elapsed).toBeGreaterThanOrEqual(1300);\n    // The action default is 30s; expect's default is 5s. They are separate settings.\n    expect(elapsed).toBeLessThan(6000);\n  });\n\n  test(\"Step 3 — a matching locator returns at once, deadline unused\", async ({ page }) => {\n    await loginAs(page);\n\n    const started = Date.now();\n    // Generous deadline, but the element is already there.\n    await expect(page.getByText(\"Account Balance\", { exact: true })).toBeVisible({ timeout: 30_000 });\n    const elapsed = Date.now() - started;\n\n    // A timeout is a limit, not a wait. This is the single most misunderstood point.\n    expect(elapsed).toBeLessThan(3000);\n  });\n\n  test(\"Step 4 — an ambiguous locator fails fast, and not because of time\", async ({ page }) => {\n    await loginAs(page);\n\n    let message = \"\";\n    try {\n      // \"Statements\" appears twice on this dashboard — verified.\n      await page.getByText(\"Statements\", { exact: true }).click({ timeout: 4000 });\n    } catch (error) {\n      message = (error as Error).message;\n    }\n\n    // Strict mode: two matches is your bug, so Playwright refuses rather than guessing.\n    expect(message).toMatch(/strict mode violation|resolved to 2 elements/);\n  });\n\n  test(\"Step 5 — setTimeout raises the budget for one test only\", async ({ page }) => {\n    // Per-test override. Useful for one genuinely slow journey; better than\n    // raising the global timeout and slowing every failure down.\n    test.setTimeout(45_000);\n    await loginAs(page);\n    await expect(page.getByRole(\"button\", { name: \"LogOut\" })).toBeVisible();\n  });\n});\n`);\n\nawait runSpec(\"week3/generated/day1-timeouts.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "> ▶ **Run it yourself:** `npx playwright test week3/generated/day1-timeouts.spec.ts`\n\n**Expected:** `5 passed`.\n\nNotice every test **passes** while proving a timeout happened. The transcript this lesson\ncomes from demonstrated timeouts by letting tests fail — fine when a human is watching, but a\ncommitted suite full of deliberate red teaches you to ignore red. Asserting that the failure\noccurs keeps the lesson and the signal.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Best practices\n\n- **Never commit `waitForTimeout`.** Wait for a condition, not a clock.\n- **Leave the defaults alone** unless you have a named, temporary reason.\n- **Narrowest scope first** — one assertion beats one test beats the whole project.\n- **Read the error before changing a number.** Strict-mode and timeout failures look similar and need opposite fixes.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Timeout 30000ms exceeded` | locator matches nothing | check the selector, not the timeout |\n| `strict mode violation … 2 elements` | locator matches too much | narrow it |\n| Suite got slower after raising a timeout | failures now take longer | put it back; fix the locator |\n| `expect` still fails at 5s after raising `timeout` | wrong setting | it lives under `expect: { timeout }` |\n| Test passes locally, times out in CI | CI is slower | raise for that project only |\n\n**Next:** [Day 1.3](/learn/w3/d1/p3) — where these settings belong once a suite is real.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -271,7 +311,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Timeouts in a real config",
-      "tab_label": "Timeouts in a real config",
+      "tab_label": "Implementation",
       "source_notebook": "week3/day1_3.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -279,31 +319,36 @@
           "type": "markdown",
           "text": "# Week 3, Day 1.3 — Timeouts in a real config\n\nSame settings as [Day 1.2](/learn/w3/d1/p2). No new API. What changes is **scope** — choosing the\nsmallest place a change can live.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Four scopes, narrowest first\n\n| Scope | How | Use when |\n|---|---|---|\n| One assertion | `expect(x).toBeVisible({ timeout: 10_000 })` | one known-slow element |\n| One test | `test.setTimeout(60_000)` | one long journey |\n| One test, roughly | `test.slow()` — triples the timeout | a test you know is heavy |\n| Every test | `timeout` in the config | the whole environment is slow |\n| One environment | a project-specific override | CI is slower than your laptop |\n\n**Always reach for the narrowest one that works.** A global timeout is the loudest possible\nstatement — it slows down the reporting of *every* failure in the suite, forever, to\naccommodate one slow screen.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The shapes, as plain data. Nothing runs — this is what you would write.\nconst perAssertion = 'await expect(locator).toBeVisible({ timeout: 10_000 });';\nconst perTest      = 'test.setTimeout(60_000);       // first line inside the test';\nconst roughlyPer   = 'test.slow();                    // 3x the configured timeout';\nconst global       = '{ timeout: 60_000, expect: { timeout: 8_000 } }';\n\nfor (const [name, form] of Object.entries({ perAssertion, perTest, roughlyPer, global })) {\n  console.log(`${name.padEnd(14)} ${form}`);\n}",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Per-environment, which is the one people forget\n\nCI machines are usually slower than a laptop, and the honest fix is to say so in one place\nrather than raise the global default for everyone:\n\n```ts\nexport default defineConfig({\n  timeout: process.env.CI ? 90_000 : 30_000,\n  retries: process.env.CI ? 2 : 0,\n  use: { trace: \"retain-on-failure\" },\n});\n```\n\nThis repo's root config already does the `retries` half of that. The pattern is worth\nrecognising: **one expression, two environments**, instead of a value someone edits before\nevery push and forgets to put back.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What a framework does instead of waiting\n\nMost timeout increases are a symptom. The underlying cause is nearly always one of these, and\neach has a real fix:\n\n| Symptom | Root cause | Real fix |\n|---|---|---|\n| Waiting for a spinner to clear | asserting on the wrong thing | assert on the *result*, not the spinner |\n| Waiting after a click | racing a navigation | `await expect(page).toHaveURL(...)` |\n| Waiting for data to load | the API is slow | mock it, or seed data via API |\n| Waiting \"just in case\" | no condition in mind | delete the wait; find the condition |\n\nThat last row is the common one. A `waitForTimeout` with no comment is a note saying *\"I did\nnot know what I was waiting for\"* — and it will be copied into the next twenty tests by\nsomeone who assumes it was load-bearing.\n\n## What a reviewer checks\n\n- **No `waitForTimeout` in committed code.** If it's genuinely needed, it carries a comment saying why.\n- **No timeout raised without a reason** recorded next to it.\n- **Global timeouts unchanged** unless the whole environment is slow.\n- **CI differences expressed in config**, not edited by hand before a push.\n- Slow tests marked `test.slow()` rather than the project timeout being raised for all.\n\n**Next:** [Day 1.4](/learn/w3/d1/p4) — your turn.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -320,31 +365,36 @@
           "type": "markdown",
           "text": "# Week 3, Day 1.4 — Practice\n\nThree problems. No answer key — each tells you how to check yourself.\n\nApp: `https://test-automation-banking.vercel.app/`, sign in with Leela (`leela@gmail.com` /\n`Leela@123`) or use the `login()` helper.\n\n> Stuck past twenty minutes? Back to [Day 1.2](/learn/w3/d1/p2).",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## When you're done\n\n**Which of your three timeout overrides would still be there in a year?** The per-assertion\none usually survives, because it documents a genuinely slow element. The global one usually\nturns out to be somebody's temporary workaround that nobody dared remove.\n\n**Next:** [Day 2.1](/learn/w3/d2/p1) — sharing one login across several tests.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

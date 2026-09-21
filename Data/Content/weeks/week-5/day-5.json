@@ -17,49 +17,57 @@
           "type": "markdown",
           "text": "# Week 5, Day 5.1 - Prerequisites check\n\nToday is about locators that keep working. The TypeScript is about reading data out of objects\nand knowing when the compiler stops helping you.\n\n| Concept | Taught in |\n|---|---|\n| `import x from \"file.json\"` | [week4/day4_2](/learn/w4/d4/p2) |\n| `readFileSync` + `JSON.parse` | [week4/day4_1](/learn/w4/d4/p1) |\n| `Object.entries` | new - below, on top of [week4/day4_1](/learn/w4/d4/p1) |\n| `any` and why `as` is not a check | new - below |\n\n**Next:** [Day 5.2 - Locators that survive](/learn/w5/d5/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Concept 1 - `Object.entries`\n\nIn [week4/day4_1](/learn/w4/d4/p1) you destructured `[i, value]` pairs out of an array's\n`.entries()`. `Object.entries` is the same shape for an **object**: it hands back `[key, value]`\npairs, so you can loop over something that has names instead of positions.\n\nYou will use it to check every selector in a JSON file at once.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const selectors = { emailBox: \"#email\", passwordBox: \"#pass\", loginButton: \"#login\" };\n\nfor (const [key, value] of Object.entries(selectors)) {\n  console.log(`${key.padEnd(14)} -> ${value}`);\n}\n\nconsole.log(\"keys:\", Object.keys(selectors).length);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Concept 2 - `any` switches the compiler off\n\n`JSON.parse` returns `any`. Anything typed `any` accepts every property access without complaint\n- including the ones that do not exist.\n\n| Expression | Type | Typo caught? |\n|---|---|---|\n| `import L from \"./l.json\"; L.login.emialBox` | inferred from the file | **yes, at compile time** |\n| `JSON.parse(s).login.emialBox` | `any` | no - `undefined` at run time |\n\nThis decides which of the two loading styles you should use, so it is not a detail.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The kernel strips types, so this cell shows the *runtime* half: undefined, silently.\nconst parsed = JSON.parse('{\"login\": {\"emailBox\": \"#email\"}}');\n\nconsole.log(\"correct key:\", parsed.login.emailBox);\nconsole.log(\"typo:       \", parsed.login.emialBox);   // undefined, no error",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Concept 3 - `as` asserts, it does not check\n\n`JSON.parse(raw) as Config` tells the compiler *trust me*. Nothing is verified at run time - if\nthe file's shape is different, you get `undefined` exactly as before, only now with autocomplete\nlying to you about it.\n\n| Tool | Checks at compile time | Checks at run time |\n|---|---|---|\n| `import` a JSON file | **yes** | n/a - the shape is the file |\n| `as SomeType` | no - it silences the compiler | **no** |\n| A validator (zod, ajv) | yes | **yes** |\n\n**Next:** [Day 5.2 - Locators that survive](/learn/w5/d5/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -68,7 +76,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Locators that survive",
-      "tab_label": "Locators that survive",
+      "tab_label": "Fundamentals",
       "source_notebook": "week5/day5_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -76,55 +84,64 @@
           "type": "markdown",
           "text": "# Week 5, Day 5.2 - Locators that survive\n\nA suite that passed in March fails in June with nobody having touched it. Two causes account for\nmost of it: **whitespace moved**, and **a second element appeared with the same name**.\n\nBoth are demonstrated below on the real app, with the fix measured rather than asserted.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 1 - whitespace, and `normalize-space()`\n\nA developer reformats a template. The rendered text looks identical; the markup now reads:\n\n```html\n<p>   Pay\n     Bills   </p>\n```\n\n| Locator | Matches? |\n|---|---|\n| `//p[text()=\"Pay Bills\"]` | **no** - `text()` compares the raw string |\n| `//p[normalize-space()=\"Pay Bills\"]` | **yes** |\n| `getByText(\"Pay Bills\", { exact: true })` | **yes** |\n| `text=\"Pay Bills\"` | **yes** |\n\n`normalize-space()` trims both ends and collapses every run of whitespace to one space, *then*\ncompares.\n\nThe row that should change your habits is the third: **Playwright's own text locators already\nnormalize.** `normalize-space()` is a fix for a problem XPath has and `getByText` does not.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 2 - the second failure: a duplicate name\n\nSign in to the banking app and count the dashboard tiles: **12 tiles, and \"Statements\" appears\ntwice.**\n\n`getByText(\"Statements\", { exact: true })` matches 2 elements. You saw this failure in\n[week3/day1_2](/learn/w3/d1/p2), where the point was *how fast* it fails compared with a\ntimeout. Here the point is what to do about it.\n\nMatching 2 is fine to count and fine to assert on. Clicking is what fails:\n\n```\nError: strict mode violation: getByText('Statements', { exact: true })\n       resolved to 2 elements\n```\n\n**Strict mode is a feature.** The alternative - silently acting on whichever element came first\nin the DOM - is a test that passes while checking the wrong thing.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day5-locators.spec.ts\", `// Week 5, Day 5 — locators that survive.\n//\n// Two things break a locator months after you wrote it: whitespace in the markup,\n// and a second element appearing with the same name. Both are demonstrated here\n// against the real app, with the fix measured rather than asserted.\n//\n// Written by a cell in week5/day5_2.ipynb. Run it yourself:\n//   npx playwright test week5/generated/day5-locators.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\ntest.describe(\"Whitespace\", () => {\n  test(\"Step 1 — XPath text() is literal; normalize-space() is not\", async ({ page }) => {\n    // Markup a developer will one day reformat: a newline and padding inside <p>.\n    await page.setContent(\\`<p id=\"a\">   Pay\\\\n     Bills   </p>\\`);\n\n    // text() compares the raw string, spaces and newline included. No match.\n    await expect(page.locator('xpath=//p[text()=\"Pay Bills\"]')).toHaveCount(0);\n\n    // normalize-space() trims the ends and collapses every run of whitespace to\n    // one space first, then compares. Match.\n    await expect(page.locator('xpath=//p[normalize-space()=\"Pay Bills\"]')).toHaveCount(1);\n  });\n\n  test(\"Step 2 — Playwright's own text locators normalize for you\", async ({ page }) => {\n    await page.setContent(\\`<p id=\"a\">   Pay\\\\n     Bills   </p>\\`);\n\n    // Same messy markup, no normalize-space() anywhere, and both match. Playwright's\n    // text engine collapses whitespace before comparing — so normalize-space() is a\n    // fix for a problem XPath has and getByText() does not. One more reason the\n    // built-in locators outlive hand-written XPath.\n    await expect(page.getByText(\"Pay Bills\", { exact: true })).toHaveCount(1);\n    await expect(page.locator('text=\"Pay Bills\"')).toHaveCount(1);\n  });\n});\n\ntest.describe(\"Duplicates\", () => {\n  test.beforeEach(async ({ page }) => {\n    await page.goto(\"/\");\n    await page.getByPlaceholder(\"Enter Email\").fill(\"leela@gmail.com\");\n    await page.getByPlaceholder(\"Enter Password\").fill(\"Leela@123\");\n    await page.getByRole(\"button\", { name: \"Login\" }).click();\n    await page.waitForURL(\"**/dashboard\");\n  });\n\n  test(\"Step 3 — the dashboard says Statements twice\", async ({ page }) => {\n    const statements = page.getByText(\"Statements\", { exact: true });\n    await expect(statements).toHaveCount(2);\n\n    // A locator matching 2 elements is fine to count and fine to assert on. It is\n    // clicking that fails: an action needs exactly one target. Playwright calls\n    // this strict mode, and it is a feature — the alternative is silently acting on\n    // whichever element happened to come first in the DOM.\n    const failure = await statements.click({ timeout: 3000 }).catch((e: Error) => e.message);\n    expect(String(failure)).toContain(\"strict mode violation\");\n    expect(String(failure)).toContain(\"resolved to 2 elements\");\n  });\n\n  test(\"Step 4 — the fix that does NOT work here\", async ({ page }) => {\n    // The usual advice is \"narrow by the parent\". On this page it fails: both\n    // tiles sit in a div.card-body.text-color inside a div.col-md-8. Identical\n    // ancestors, so the parent tells them apart not at all.\n    await expect(\n      page.locator(\"div.card-body\").getByText(\"Statements\", { exact: true }),\n    ).toHaveCount(2);\n  });\n\n  test(\"Step 5 — the fixes that do work\", async ({ page }) => {\n    // (a) Go further up, to the enclosing card. There are three cards; the two\n    //     Statements tiles live in different ones, so this is a real discriminator.\n    const cards = page.locator(\".card\");\n    await expect(cards).toHaveCount(3);\n    await expect(cards.first().getByText(\"Statements\", { exact: true })).toHaveCount(1);\n\n    // (b) Or pick by position. Honest, and brittle: insert a tile above it and\n    //     .nth(3) now points at something else. Use it when nothing else exists.\n    const tiles = page.locator(\"p.card-text\");\n    await expect(tiles).toHaveCount(12);\n    await expect(tiles.nth(3)).toHaveText(\"Statements\");\n\n    // (c) .first() silences the error without deciding anything. It is the fix you\n    //     reach for at 6pm and regret in review — the test now passes whichever of\n    //     the two it lands on, which means it stopped checking.\n    await expect(page.getByText(\"Statements\", { exact: true }).first()).toBeVisible();\n  });\n});\n`);\n\n// Expected: 5 passed. Steps 1-2 are whitespace; 3-5 are the duplicate.\nawait runSpec(\"week5/generated/day5-locators.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 3 - the fix that does not work here\n\nThe standard advice is *narrow by the parent*. On this page it fails: both `Statements` tiles sit\nin a `div.card-body.text-color` inside a `div.col-md-8`. Identical ancestors, so the parent tells\nthem apart not at all - `page.locator(\"div.card-body\").getByText(\"Statements\")` still matches 2.\n\nWorth knowing that the textbook answer can miss, and worth checking rather than assuming.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 4 - the fixes that do work\n\n| Fix | Code | Honest verdict |\n|---|---|---|\n| Go further up | `page.locator(\".card\").first().getByText(\"Statements\")` | best here - 3 cards, the two tiles are in different ones |\n| Pick by position | `page.locator(\"p.card-text\").nth(3)` | works; breaks the moment a tile is inserted above |\n| `.first()` | `...getByText(\"Statements\").first()` | silences the error without deciding anything |\n\nThat last one deserves its reputation. `.first()` makes the test pass whichever of the two it\nlands on - which means it stopped checking. It is the fix you reach for at 6pm and regret in\nreview.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 5 - the ranking worth memorising\n\n| Prefer | Why |\n|---|---|\n| `getByRole`, `getByLabel` | tied to what the control *is*; also normalizes whitespace |\n| `getByTestId` | changes only when someone means to change it |\n| `getByText` | good, but text is translated and reworded |\n| CSS on a semantic class | survives layout changes, dies with a redesign |\n| XPath by position (`//div[3]/p[2]`) | records where things sit today |\n\nEvery locator is a bet about what will not change. The list is ordered by how good the bet is.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Next:** [Day 5.3 - Externalised locators, and their cost](/learn/w5/d5/p3)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -133,7 +150,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Externalised locators, and their cost",
-      "tab_label": "Externalised locators, and th…",
+      "tab_label": "Implementation",
       "source_notebook": "week5/day5_3.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -141,49 +158,57 @@
           "type": "markdown",
           "text": "# Week 5, Day 5.3 - Externalised locators, and their cost\n\nThe next thing teams try after POM: move every selector into a JSON file, so a non-programmer can\nfix one without touching TypeScript.\n\nIt works. It also costs more than people expect, and this lesson measures both.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 1 - the file\n\n```json\n{\n  \"login\":     { \"emailBox\": \"...\", \"passwordBox\": \"...\", \"loginButton\": \"#login\" },\n  \"dashboard\": { \"tile\": \"p.card-text\", \"card\": \".card\", \"logoutButton\": \"button.btn-primary\" }\n}\n```\n\nEvery selector the suite depends on, in one place you can read in ten seconds. That is a real\nbenefit and not a small one.\n\n> Both of those `button.btn-primary` and `#login` values were **checked against the live page**\n> before being written down. My first draft guessed `button.logout-btn` - it matches zero\n> elements. A locator file full of plausible guesses is worse than no file, because it looks\n> authoritative.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week5/generated/day5-locators.json\", `{\n  \"login\": {\n    \"emailBox\": \"input[placeholder='Enter Email']\",\n    \"passwordBox\": \"input[placeholder='Enter Password']\",\n    \"loginButton\": \"#login\"\n  },\n  \"dashboard\": {\n    \"tile\": \"p.card-text\",\n    \"card\": \".card\",\n    \"logoutButton\": \"button.btn-primary\"\n  }\n}\n`);\n\nawait writeProjectFile(\"week5/generated/day5-external.spec.ts\", `// Week 5, Day 5 — locators in a JSON file instead of in the code.\n//\n// The pitch: a non-programmer can fix a selector without touching TypeScript, and\n// one file shows every selector the suite depends on. Real benefits.\n//\n// The cost is at the bottom of this file, and it is not small. Read that before\n// you do this to a real suite.\n//\n// Written by a cell in week5/day5_2.ipynb. Run it yourself:\n//   npx playwright test week5/generated/day5-external.spec.ts\nimport { test, expect } from \"@playwright/test\";\nimport { readFileSync } from \"node:fs\";\nimport path from \"node:path\";\n\n// A plain import, not readFileSync. This needs \"resolveJsonModule\": true in\n// tsconfig.json — already set for this repo. Why it matters: see Step 4.\nimport LOCATORS from \"./day5-locators.json\";\n\ntest.describe(\"Externalised locators\", () => {\n  test(\"Step 1 — a sign-in driven entirely from JSON\", async ({ page }) => {\n    await page.goto(\"/\");\n    await page.locator(LOCATORS.login.emailBox).fill(\"leela@gmail.com\");\n    await page.locator(LOCATORS.login.passwordBox).fill(\"Leela@123\");\n    await page.locator(LOCATORS.login.loginButton).click();\n    await page.waitForURL(\"**/dashboard\");\n\n    await expect(page.locator(LOCATORS.dashboard.tile)).toHaveCount(12);\n    await expect(page.locator(LOCATORS.dashboard.logoutButton)).toBeVisible();\n  });\n\n  test(\"Step 2 — every selector in the file still matches something\", async ({ page }) => {\n    // Worth having as a real test. An externalised selector that quietly stops\n    // matching is invisible until some unrelated test fails for a confusing reason;\n    // this one names the dead key instead.\n    await page.goto(\"/\");\n    for (const [key, selector] of Object.entries(LOCATORS.login)) {\n      await expect(page.locator(selector), \\`login.\\${key} -> \\${selector}\\`).toHaveCount(1);\n    }\n\n    await page.locator(LOCATORS.login.emailBox).fill(\"leela@gmail.com\");\n    await page.locator(LOCATORS.login.passwordBox).fill(\"Leela@123\");\n    await page.locator(LOCATORS.login.loginButton).click();\n    await page.waitForURL(\"**/dashboard\");\n\n    for (const [key, selector] of Object.entries(LOCATORS.dashboard)) {\n      const n = await page.locator(selector).count();\n      expect(n, \\`dashboard.\\${key} -> \\${selector} matched nothing\\`).toBeGreaterThan(0);\n    }\n  });\n\n  test(\"Step 3 — the same file read at run time\", async ({ page }) => {\n    // The other way to load it. Looks equivalent. It is not — Step 4 shows why.\n    const raw = readFileSync(path.join(__dirname, \"day5-locators.json\"), \"utf-8\");\n    const runtime = JSON.parse(raw) as typeof LOCATORS;\n\n    expect(runtime.login.emailBox).toBe(LOCATORS.login.emailBox);\n    await page.goto(\"/\");\n    await expect(page.locator(runtime.login.loginButton)).toBeVisible();\n  });\n\n  test(\"Step 4 — the cost: a typo is no longer a compile error\", async () => {\n    // With the plain \\`import\\`, TypeScript knows the exact shape of the JSON. Write\n    //     LOCATORS.login.emialBox\n    // and tsc refuses to build:\n    //     error TS2551: Property 'emialBox' does not exist on type\n    //     '{ emailBox: string; passwordBox: string; loginButton: string; }'.\n    //     Did you mean 'emailBox'?\n    // Try it — uncomment the line below and run \\`npx tsc --noEmit\\`.\n    // const oops = LOCATORS.login.emialBox;\n\n    // JSON.parse returns \\`any\\`, so the same typo compiles happily and fails at run\n    // time with a message about \\`undefined\\` — from a stack that points at the\n    // locator call, not at the typo.\n    const loose = JSON.parse(\n      readFileSync(path.join(__dirname, \"day5-locators.json\"), \"utf-8\"),\n    );\n    expect(loose.login.emialBox).toBeUndefined();\n    expect(LOCATORS.login.emailBox).toBe(\"input[placeholder='Enter Email']\");\n\n    // So: externalise if a non-programmer really will edit the file. Otherwise a\n    // page class gives you the same one-place-to-edit plus autocomplete, rename\n    // refactoring, and a compiler that catches the typo. JSON trades those away —\n    // and \\`as typeof LOCATORS\\` in Step 3 only *claims* the shape, it checks nothing.\n  });\n});\n`);\n\n// Expected: 4 passed.\nawait runSpec(\"week5/generated/day5-external.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 2 - a test that checks the file itself\n\nStep 2 of that spec loops over every entry with `Object.entries` and asserts each one still\nmatches something.\n\nWorth having for real. An externalised selector that quietly stops matching is invisible until\nsome unrelated test fails for a confusing reason; this test names the dead key instead.\n\n```ts\nfor (const [key, selector] of Object.entries(LOCATORS.login)) {\n  await expect(page.locator(selector), `login.${key} -> ${selector}`).toHaveCount(1);\n}\n```\n\nThe second argument to `expect` is the message shown on failure - which is what turns *a test\nfailed* into *`login.loginButton` is dead*.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 3 - the cost, measured\n\nTwo ways to load the same file:\n\n```ts\nimport LOCATORS from \"./day5-locators.json\";                       // A\nconst LOCATORS = JSON.parse(readFileSync(p, \"utf-8\"));             // B\n```\n\nNow make a typo - `LOCATORS.login.emialBox`:\n\n| | A: `import` | B: `JSON.parse` |\n|---|---|---|\n| `npx tsc --noEmit` | **error TS2551: Property 'emialBox' does not exist... Did you mean 'emailBox'?** | passes |\n| At run time | never gets there | `undefined`, then a confusing locator error |\n\nVerified with the compiler, not assumed. Prefer A - it needs `\"resolveJsonModule\": true` in\n`tsconfig.json`, already set in this repo.\n\nAnd note what A does *not* give you: the compiler checks the **key**, never the selector. Both\nstyles will happily hand Playwright a selector that matches nothing. Only Step 2's test catches\nthat.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 4 - so should you externalise?\n\n| Externalise when | Keep it in the page class when |\n|---|---|\n| A non-programmer really will edit the file | it is developers all the way down |\n| Selectors differ per environment or per tenant | one app, one DOM |\n| A generator produces them | humans write them |\n\nFor most teams: **a page class already gives you one-place-to-edit**, plus autocomplete, rename\nrefactoring, and a compiler that catches typos. JSON trades all three away for editability by\nsomeone who, in practice, is rarely the one editing it.\n\nAsk who the file is for. If the answer is \"it seemed tidier\", keep the class.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 5 - what actually makes a suite survive\n\nNothing on this list is a Playwright feature.\n\n| Practice | Effect |\n|---|---|\n| One name for one thing (page class or JSON key) | a markup change is one edit |\n| Prefer role and label locators | fewer bets on things that change |\n| A test over your own locator file | dead selectors get named, not hunted |\n| Fail loudly on ambiguity (strict mode) | never a test that passes while checking nothing |\n| Delete tests nobody reads | the cheapest maintenance there is |\n\n**Next:** [Day 5.4 - Practice](/learn/w5/d5/p4)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -200,61 +225,71 @@
           "type": "markdown",
           "text": "# Week 5, Day 5.4 - Practice\n\nWork in `week5/generated/`. Copy `day5-locators.json` before editing it.\n\nThe last two problems close out the week rather than the day.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "4",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "5",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "6",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "7",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "8",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Week 5 done\n\n| Day | You can now |\n|---|---|\n| 1 | run one suite two ways, from two configs, and say which setting wins |\n| 2 | sign in once per run and prove the saved session is doing the work |\n| 3 | name the Page Object Model's three rules and why rule 3 pays |\n| 4 | hand out page objects as fixtures, including worker-scoped ones |\n| 5 | pick locators that survive, and decide whether to externalise them |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

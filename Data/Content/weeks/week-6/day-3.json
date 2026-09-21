@@ -17,67 +17,78 @@
           "type": "markdown",
           "text": "# Week 6, Day 3.1 - Prerequisites check\n\n**No new TypeScript today.** Git is a tool, not a language feature - so this file is short.\n\n| In play | Taught in |\n|---|---|\n| `async` / `await`, Promises | [week3/day3_1](/learn/w3/d3/p1) |\n| Template literals | no formal primer yet - short recap below |\n| Arrays of objects | [week3/day5_1](/learn/w3/d5/p1) |\n| `for...of` | [week4/day4_1](/learn/w4/d4/p1) |\n\nOne new API - and it is not Playwright.\n\n**Next:** [Day 3.2 - Git, for people who write tests](/learn/w6/d3/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Recap - template literals\n\nYou have been reading these since your very first spec without a formal introduction, and today's\ncells are full of them. Backticks instead of quotes, and `${...}` drops a value in:\n\n| Written | Produces |\n|---|---|\n| `` `git version` `` | `git version` |\n| `` `${REPO_ROOT}/package.json` `` | the path, with the variable substituted |\n| `\"${REPO_ROOT}/x\"` | the literal text `${REPO_ROOT}/x` - **quotes do not substitute** |\n\nThat third row is the mistake to avoid: `${}` only means anything inside backticks.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const folder = \"week6\";\nconsole.log(`backticks : ${folder}/generated`);\nconsole.log(\"quotes    : ${folder}/generated\");   // literal, not substituted\nconsole.log(`arithmetic and calls work too: ${folder.toUpperCase()}, ${2 + 3}`);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## `Deno.Command` - running a program from a cell\n\nEvery Git command in [day3_2](/learn/w6/d3/p2) really runs. This is the mechanism: it starts a\nprogram, waits, and hands back what it printed.\n\n| Piece | Meaning |\n|---|---|\n| `new Deno.Command(\"git\", { args: [...] })` | the program and its arguments, **not** a shell string |\n| `cwd` | which folder to run in - decisive for git |\n| `stdout: \"piped\"` | capture the output instead of letting it vanish |\n| `await p.output()` | run it, wait, get `{ code, stdout, stderr }` |\n| `code` | **0 means success.** Every CI tool on earth reads this |\n\nArguments are an array, so nothing is word-split or glob-expanded - a path with a space works.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Run a real program and read its output.\nconst gitVersion = new Deno.Command(\"git\", {\n  args: [\"--version\"],\n  stdout: \"piped\",\n  stderr: \"piped\",\n});\nconst result = await gitVersion.output();\n\nconsole.log(\"exit code:\", result.code);\nconsole.log(\"stdout   :\", new TextDecoder().decode(result.stdout).trim());",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Exit codes are the whole CI contract\n\nA test run that exits `0` is a green build. Anything else is red. That is all Jenkins, GitHub\nActions and Azure ever check - worth internalising now, because Days 4 and 5 are built on it.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// A deliberately failing command, to see the other outcome.\nconst bad = new Deno.Command(\"git\", {\n  args: [\"rev-parse\", \"--verify\", \"definitely-not-a-branch\"],\n  stdout: \"piped\",\n  stderr: \"piped\",\n});\nconst badResult = await bad.output();\n\nconsole.log(\"exit code:\", badResult.code, \"<- non-zero means failure\");\nconsole.log(\"stderr   :\", new TextDecoder().decode(badResult.stderr).trim().split(\"\\n\")[0]);",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Next:** [Day 3.2 - Git, for people who write tests](/learn/w6/d3/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -86,7 +97,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Git, for people who write tests",
-      "tab_label": "Git, for people who write tes…",
+      "tab_label": "Fundamentals",
       "source_notebook": "week6/day3_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -94,73 +105,85 @@
           "type": "markdown",
           "text": "# Week 6, Day 3.2 - Git, for people who write tests\n\nUntil now your tests have lived on your machine. That is fine until the day someone else needs\nthem, or a CI server does - and a CI server can only run code it can **fetch**.\n\nBy the end of this lesson you will have watched a repository get created, committed, pushed,\npulled, and a push **rejected** - all for real, in a temp folder.\n\n> **Mode: Deno.** No Playwright here. These cells run `git`.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Why a tester needs this at all\n\n| Without a shared repo | With one |\n|---|---|\n| Your tests exist on one laptop | anyone can fetch them |\n| A teammate off sick blocks the suite | their work is already pushed |\n| Jenkins cannot reach your code | it clones a URL |\n| A dead disk loses the work | history is on the server |\n\nGitHub's job in one line: **one agreed copy of the code that is not on anybody's laptop.**",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The two words\n\n| Word | Direction |\n|---|---|\n| **push** | my commits → the server |\n| **pull** | the server's commits → me |\n\nAnd the rule that prevents most Git pain: **pull before you push.** Step 11 below shows what\nhappens when you do not.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The commands, in order\n\n| # | Command | Job |\n|---|---|---|\n| 1 | `git init` | turn a folder into a repository |\n| 2 | `git remote add origin <url>` | tell it where the server is |\n| 3 | `git status` | what has changed, what is tracked |\n| 4 | `git add -A` | stage everything for the next commit |\n| 5 | `git commit -m \"message\"` | save a snapshot, with a reason |\n| 6 | `git push -u origin master` | send it |\n| 7 | `git pull origin master` | collect what others sent |\n\nThree states, which is the part people find confusing:\n\n| State | `git status` shows | Means |\n|---|---|---|\n| untracked / modified | `??` or ` M` | git is not storing this yet |\n| staged | `A` or `M` | will be in the next commit |\n| committed | nothing | saved locally - **still not on the server** |\n\nCommitted is not pushed. That trips up everyone once.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Now watch it happen\n\nThe script below builds a throwaway repo **and a second one that acts as GitHub**, so push and\npull are real rather than described.\n\n> **Safe:** it works in a temp folder and deletes it afterwards. It never touches this project or\n> its remote.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\n// Runs git for real in a temp folder, then cleans up.\n\n// Backslashes before ` and ${ because the file sits inside a template literal.\n\nawait writeProjectFile(\"week6/generated/day3-git-walkthrough.ts\", `// Week 6, Day 3 — every Git command from the session, actually executed.\n//\n// SAFETY: this builds a throwaway repository in a temp folder and a second one to\n// act as \"GitHub\". It never touches this project or its real remote. You can run it\n// as many times as you like.\n//\n//   deno run -A week6/generated/day3-git-walkthrough.ts\n//\n// Written by a cell in week6/day3_2.ipynb.\n\n/** Run a command and print it the way a terminal would. */\nasync function run(cmd: string, args: string[], cwd: string): Promise<string> {\n  const p = new Deno.Command(cmd, { args, cwd, stdout: \"piped\", stderr: \"piped\" });\n  const { stdout, stderr } = await p.output();\n  const out = (new TextDecoder().decode(stdout) + new TextDecoder().decode(stderr)).trim();\n  console.log(\\`$ \\${cmd} \\${args.join(\" \")}\\`);\n  if (out) console.log(out.split(\"\\\\n\").map((l) => \"  \" + l).join(\"\\\\n\"));\n  return out;\n}\n\n// Identity passed per-command so nothing is written to your global git config.\nconst WHO = [\"-c\", \"user.email=learner@example.com\", \"-c\", \"user.name=learner\"];\n\nconst root = await Deno.makeTempDir({ prefix: \"week6-git-\" });\nconst work = \\`\\${root}/playwright_training\\`;\nconst remote = \\`\\${root}/origin.git\\`;\nawait Deno.mkdir(work);\n\nconsole.log(\"=== 1. A bare repo to stand in for GitHub ===\");\n// A real GitHub repository is a \"bare\" repo: history, no working files.\nawait run(\"git\", [\"init\", \"--bare\", \"-b\", \"master\", remote], root);\n\nconsole.log(\"\\\\n=== 2. git init — turn a folder into a repository ===\");\nawait run(\"git\", [\"init\", \"-b\", \"master\", \".\"], work);\n\nawait Deno.writeTextFile(\\`\\${work}/package.json\\`, JSON.stringify({\n  name: \"playwright_training\",\n  scripts: { \"zerobank_headless\": \"playwright test --config=zerobank.config.ts\" },\n}, null, 2) + \"\\\\n\");\nawait Deno.writeTextFile(\\`\\${work}/login.spec.ts\\`, \"// a test file\\\\n\");\n\nconsole.log(\"\\\\n=== 3. git remote add origin — point it at the remote ===\");\nawait run(\"git\", [\"remote\", \"add\", \"origin\", remote], work);\nawait run(\"git\", [\"remote\", \"-v\"], work);\n\nconsole.log(\"\\\\n=== 4. git status — what is not yet tracked ===\");\nawait run(\"git\", [\"status\", \"--short\"], work);\nconsole.log(\"  (?? means untracked — git can see the file but is not storing it)\");\n\nconsole.log(\"\\\\n=== 5. git add -A — stage everything ===\");\nawait run(\"git\", [\"add\", \"-A\"], work);\nawait run(\"git\", [\"status\", \"--short\"], work);\nconsole.log(\"  (A means added/staged — staged, but not yet committed)\");\n\nconsole.log(\"\\\\n=== 6. git commit -m — save a snapshot ===\");\nawait run(\"git\", [...WHO, \"commit\", \"-m\", \"adding new project\"], work);\n\nconsole.log(\"\\\\n=== 7. git push -u origin master — send it to the remote ===\");\nawait run(\"git\", [...WHO, \"push\", \"-u\", \"origin\", \"master\"], work);\n\nconsole.log(\"\\\\n=== 8. Someone else clones, changes a file, and pushes ===\");\nconst mate = \\`\\${root}/teammate\\`;\nawait run(\"git\", [\"clone\", remote, mate], root);\nawait Deno.writeTextFile(\\`\\${mate}/playwright.config.ts\\`, \"// added by a teammate\\\\n\");\nawait run(\"git\", [\"add\", \"-A\"], mate);\nawait run(\"git\", [...WHO, \"commit\", \"-m\", \"add config\"], mate);\nawait run(\"git\", [...WHO, \"push\", \"origin\", \"master\"], mate);\n\nconsole.log(\"\\\\n=== 9. Your copy does not have their file yet ===\");\nconsole.log(\\`  playwright.config.ts present locally? \\${\n  await Deno.stat(\\`\\${work}/playwright.config.ts\\`).then(() => \"yes\").catch(() => \"NO\")\n}\\`);\n\nconsole.log(\"\\\\n=== 10. git pull origin master — collect their work ===\");\nawait run(\"git\", [...WHO, \"pull\", \"origin\", \"master\"], work);\nconsole.log(\\`  playwright.config.ts present now? \\${\n  await Deno.stat(\\`\\${work}/playwright.config.ts\\`).then(() => \"yes\").catch(() => \"NO\")\n}\\`);\n\nconsole.log(\"\\\\n=== 11. Why 'pull before push' is the rule ===\");\n// Both sides change the same file, without pulling first.\nawait Deno.writeTextFile(\\`\\${mate}/README.md\\`, \"teammate's version\\\\n\");\nawait run(\"git\", [\"add\", \"-A\"], mate);\nawait run(\"git\", [...WHO, \"commit\", \"-m\", \"readme from teammate\"], mate);\nawait run(\"git\", [...WHO, \"push\", \"origin\", \"master\"], mate);\n\nawait Deno.writeTextFile(\\`\\${work}/README.md\\`, \"my version\\\\n\");\nawait run(\"git\", [\"add\", \"-A\"], work);\nawait run(\"git\", [...WHO, \"commit\", \"-m\", \"readme from me\"], work);\nconst rejected = await run(\"git\", [...WHO, \"push\", \"origin\", \"master\"], work);\nconsole.log(\\`\\\\n  push rejected? \\${/rejected|failed/i.test(rejected) ? \"YES\" : \"no\"}\\`);\nconsole.log(\"  Git refuses rather than silently discarding their commit.\");\nconsole.log(\"  The fix is the rule: pull first, resolve, then push.\");\n\nconsole.log(\"\\\\n=== 12. git log — the history you built ===\");\nawait run(\"git\", [\"log\", \"--oneline\"], work);\n\nawait Deno.remove(root, { recursive: true });\nconsole.log(\"\\\\n(temp folders removed)\");\n`);\n\n// Run it the way you would from a terminal.\nconst proc = new Deno.Command(\"deno\", {\n  args: [\"run\", \"-A\", \"week6/generated/day3-git-walkthrough.ts\"],\n  cwd: REPO_ROOT,\n  stdout: \"piped\",\n  stderr: \"piped\",\n});\nconst { stdout, stderr } = await proc.output();\nconsole.log(new TextDecoder().decode(stdout) + new TextDecoder().decode(stderr));",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What that output proved\n\n| Step | Watch for |\n|---|---|\n| 4 | `??` - git can see the files and is not storing them |\n| 5 | `A` - now staged |\n| 7 | `master -> master` - the commit reaches the remote |\n| 9 → 10 | the teammate's file is **absent**, then present after `pull` |\n| 11 | `! [rejected] ... (fetch first)` |\n\nStep 11 is the lesson. Git **refuses** the push rather than quietly discarding the teammate's\ncommit. The hint it prints is the rule: *use 'git pull' before pushing again.*",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## `master` or `main`?\n\nThe session pushes to `master` throughout. This repository's branch is **`main`**.\n\n| | |\n|---|---|\n| Older repos, and the session | `master` |\n| GitHub's default since 2020 | `main` |\n| How to check, always | `git branch --show-current` |\n\nCopying `git push -u origin master` into a `main` repo gives\n`error: src refspec master does not match any`. Check first.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Which branch is THIS repository on? Run it rather than assuming.\nconst branch = new Deno.Command(\"git\", {\n  args: [\"branch\", \"--show-current\"],\n  stdout: \"piped\",\n});\nconst branchOut = await branch.output();\nconsole.log(\"this repo's branch:\", new TextDecoder().decode(branchOut.stdout).trim());",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| Commit, then assume it is shared | nothing on GitHub; you never pushed |\n| Push without pulling | `! [rejected] (fetch first)` |\n| `git add .` from the wrong folder | half the project committed |\n| `master` when the branch is `main` | `src refspec master does not match any` |\n| Committing `node_modules/` | a huge, unreviewable repo - see [day3_3](/learn/w6/d3/p3) |\n\n**Next:** [Day 3.3 - What a real repo does and never commits](/learn/w6/d3/p3)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -169,7 +192,7 @@
       "part": 3,
       "kind": "concept",
       "title": "What a real repo does, and never commits",
-      "tab_label": "What a real repo does, and ne…",
+      "tab_label": "Implementation",
       "source_notebook": "week6/day3_3.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -177,55 +200,64 @@
           "type": "markdown",
           "text": "# Week 6, Day 3.3 - What a real repo does, and never commits\n\nSame commands, used the way a team uses them.\n\n## The daily loop\n\n```\ngit pull origin main        <- FIRST. before you write anything\n...write tests...\ngit status                  <- read it; do not skip to add\ngit add -A\ngit commit -m \"add payee validation tests\"\ngit push origin main\n```\n\nPull at the **start**, not just before pushing: you want to write against current code, not\ndiscover a conflict an hour later.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What never goes in\n\n| Never commit | Why |\n|---|---|\n| `node_modules/` | thousands of files; `npm ci` rebuilds it exactly |\n| `playwright-report/`, `test-results/` | regenerated every run; enormous diffs |\n| **`.auth/` storage state** | a live session - [week5/day2_2](/learn/w5/d2/p2) |\n| `.env`, credentials, tokens | history is forever, even after you delete the file |\n| Visual baselines from another OS | platform-locked - [week4/day5_2](/learn/w4/d5/p2) |\n\nThat third row is the dangerous one. A storage-state file is a working credential, and a repo is\nthe easiest place in the world to leak one.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// This repo's own .gitignore, and proof the auth file is covered.\nimport { REPO_ROOT } from \"../_shared/deno-helpers.ts\";\n\n// REPO_ROOT, not \"..\": the kernel's cwd is wherever Jupyter was started.\nconst ignoreFile = await Deno.readTextFile(`${REPO_ROOT}/.gitignore`);\nconsole.log(ignoreFile.trim());\n\nconst check = new Deno.Command(\"git\", {\n  args: [\"check-ignore\", \"-v\", \"week5/generated/.auth/saucedemo.json\"],\n  cwd: REPO_ROOT,\n  stdout: \"piped\",\n  stderr: \"piped\",\n});\nconst checked = await check.output();\nconsole.log(\"\\ngit check-ignore says:\");\nconsole.log(new TextDecoder().decode(checked.stdout).trim() || \"(not ignored!)\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "`git check-ignore -v` names the **line** that ignored it. That is how you prove a secret is safe\nrather than hoping.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Why a leaked credential is not fixed by deleting the file.\nconst secretRoot = await Deno.makeTempDir({ prefix: \"week6-secret-\" });\nconst gitWho = [\"-c\", \"user.email=l@e.com\", \"-c\", \"user.name=l\"];\n\nasync function g(args: string[]): Promise<string> {\n  const c = new Deno.Command(\"git\", { args, cwd: secretRoot, stdout: \"piped\", stderr: \"piped\" });\n  const o = await c.output();\n  return (new TextDecoder().decode(o.stdout) + new TextDecoder().decode(o.stderr)).trim();\n}\n\nawait g([\"init\", \"-q\", \"-b\", \"main\", \".\"]);\nawait Deno.writeTextFile(`${secretRoot}/.env`, \"TOKEN=super-secret-value\");\nawait g([\"add\", \"-A\"]);\nawait g([...gitWho, \"commit\", \"-q\", \"-m\", \"oops, committed the token\"]);\n\n// Now \"remove\" it, the way people do.\nawait Deno.remove(`${secretRoot}/.env`);\nawait g([\"add\", \"-A\"]);\nawait g([...gitWho, \"commit\", \"-q\", \"-m\", \"remove .env\"]);\n\nconsole.log(\"working copy still has .env?\",\n  await Deno.stat(`${secretRoot}/.env`).then(() => \"yes\").catch(() => \"no\"));\n\nconst history = await g([\"log\", \"-p\", \"--all\"]);\nconsole.log(\"token still recoverable from history?\",\n  history.includes(\"super-secret-value\") ? \"YES - it is still there\" : \"no\");\n\nawait Deno.remove(secretRoot, { recursive: true });",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "The file is gone and the token is not. Deleting a committed secret does **not** remove it - it is\nin every clone and every fork. The only real fix is to **rotate the credential**.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Commit messages a reviewer can use\n\n| Poor | Better |\n|---|---|\n| `update` | `add payee validation tests` |\n| `fix` | `fix flaky wait on transfer page` |\n| `asdf` | `wire smoke suite into package.json` |\n\nThe session's `\"adding new project\"` is fine for a first commit. Six months later the only reason\nanyone reads history is to answer *why did this change* - so answer it.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Branches and pull requests\n\nThe session pushes straight to `master`. Real teams rarely do:\n\n```\ngit checkout -b payee-tests     # your own branch\n...commit...\ngit push -u origin payee-tests  # then open a Pull Request\n```\n\n| | Straight to main | Branch + PR |\n|---|---|---|\n| Review before it lands | no | **yes** |\n| CI on the change alone | no | **yes** |\n| Breaks everyone when wrong | **yes** | no |\n\nThis matters for Day 5: CI usually runs **on the pull request**, so a broken test is caught\nbefore it reaches the branch everyone shares.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Public or private\n\nThe session uses a public repo so anyone can clone it in Jenkins with no credentials. Convenient\nfor learning, wrong at work.\n\n| | Public | Private |\n|---|---|---|\n| Jenkins needs credentials | no | **yes** |\n| Your selectors, URLs, test data are visible | **to everyone** | to your team |\n\n**Next:** [Day 3.4 - Practice](/learn/w6/d3/p4)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -242,55 +274,64 @@
           "type": "markdown",
           "text": "# Week 6, Day 3.4 - Practice\n\n> **Do these in a scratch folder**, the way [day3_2](/learn/w6/d3/p2) does. Do not practise against\n> this repository's real remote.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "4",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "5",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "6",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "7",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Next:** [Day 4.1 - Prerequisites](/learn/w6/d4/p1)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

@@ -17,49 +17,57 @@
           "type": "markdown",
           "text": "# Week 7, Day 4.1 - Prerequisites check\n\n**No new TypeScript today.** Today's difficulty is *ordering*, not syntax.\n\n| In play | Taught in |\n|---|---|\n| `let` vs `const`, block scope | [week3/day2_1](/learn/w3/d2/p1) |\n| Template literals | [week6/day3_1](/learn/w6/d3/p1) |\n| `beforeAll` / `beforeEach` | [week3/day2_2](/learn/w3/d2/p2) |\n| Objects as return values | [week3/day1_1](/learn/w3/d1/p1) |\n\nOne pattern is worth its own cell, because getting it wrong produces a confusing failure.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Declare outside, assign inside\n\nA value produced in a hook has to be visible to every test. So it is **declared** in the\n`describe` scope with `let` and **assigned** inside the hook.\n\n| Written | Result |\n|---|---|\n| `const id = ...` inside the hook | invisible to the tests - block-scoped |\n| `let id = \"\"` outside, assigned inside | every test can read it |\n\n`const` is impossible here: the value does not exist yet when the line runs.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The scoping, without Playwright.\nlet capturedId = \"\";                    // declared out here\n\nfunction pretendHook(): void {\n  const fromServer = \"id-42\";           // block-scoped: dies with the function\n  capturedId = fromServer;              // assigned to the outer variable\n}\n\nconsole.log(\"before hook:\", JSON.stringify(capturedId));\npretendHook();\nconsole.log(\"after hook :\", JSON.stringify(capturedId), \"<- the tests can see this\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Building a URL with a value in it\n\nTwo ways. Both work; one reads better once there is more than one piece.\n\n| Style | Written |\n|---|---|\n| Concatenation | `BASE + \"/Account/v1/User/\" + userId` |\n| **Template literal** | `` `${BASE}/Account/v1/User/${userId}` `` |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "const BASE = \"https://demoqa.com\";\nconst userId = \"9b09305e-e878\";\n\nconsole.log(\"concatenated:\", BASE + \"/Account/v1/User/\" + userId);\nconsole.log(\"template    :\", `${BASE}/Account/v1/User/${userId}`);\n\n// The trap concatenation invites: a missing slash, silently.\nconsole.log(\"missing / ->\", BASE + \"Account/v1/User/\" + userId, \"<- broken URL, no error\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Next:** [Day 4.2 - One response feeds the next request](/learn/w7/d4/p2)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -68,7 +76,7 @@
       "part": 2,
       "kind": "concept",
       "title": "One response feeds the next request",
-      "tab_label": "One response feeds the next r…",
+      "tab_label": "Fundamentals",
       "source_notebook": "week7/day4_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -76,85 +84,99 @@
           "type": "markdown",
           "text": "# Week 7, Day 4.2 - One response feeds the next request\n\nTo update something you need its id. To delete it you need its id. **The server invents the id**,\nso you cannot write it down in advance - you have to create the thing, catch the id, and carry it\nforward.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## The problem, stated once\n\n| You want to test | You need |\n|---|---|\n| Update | an id that exists |\n| Delete | an id that exists |\n| Read one item | an id that exists |\n\nReusing an id you found by hand is the trap: someone else deletes that record and your suite\nturns red for a reason that has nothing to do with your code. **Create your own, every run.**",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## `beforeAll`, not `beforeEach`\n\n| Hook | Runs | Here |\n|---|---|---|\n| `beforeEach` | before every test | six users created, five abandoned |\n| **`beforeAll`** | once per describe | one user, used by all six |\n\nThe prerequisite is not part of what any test is checking, so it belongs in a hook - and it only\nneeds doing once.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\n// Backslashes before ` and ${ because each file sits inside a template literal.\n\nawait writeProjectFile(\"week7/generated/day4-chaining.spec.ts\", `// Week 7, Day 4 — one response feeds the next request.\n//\n// The problem this file solves: to update or delete something, you need its id.\n// The server invents the id. So you cannot hard-code it — you have to create the\n// thing first, catch the id, and carry it forward.\n//\n// Written by a cell in week7/day4_2.ipynb. Run it yourself:\n//   npx playwright test week7/generated/day4-chaining.spec.ts\nimport { test, expect } from \"@playwright/test\";\n\nconst BASE_URL = \"https://demoqa.com\";\nconst GIT_BOOK = \"9781449325862\";\nconst JS_BOOK = \"9781449331818\";\n\ntest.describe(\"Create, then use what you got back\", () => {\n  // These tests are one journey, in order, sharing a user.\n  test.describe.configure({ mode: \"serial\" });\n\n  const userName = \\`w7d4_\\${Date.now()}\\`;\n  const password = \"Passw0rd@123\";\n\n  // Declared out here so every test can see them; assigned in beforeAll.\n  let userId = \"\";\n  let token = \"\";\n\n  // beforeAll, NOT beforeEach: creating the user is a prerequisite for the whole\n  // block, and doing it per test would make four users and leave three behind.\n  test.beforeAll(async ({ request }) => {\n    const created = await request.post(\\`\\${BASE_URL}/Account/v1/User\\`, {\n      data: { userName, password },\n    });\n    expect(created.status()).toBe(201);\n    userId = (await created.json()).userID;\n\n    const tokenResponse = await request.post(\\`\\${BASE_URL}/Account/v1/GenerateToken\\`, {\n      data: { userName, password },\n    });\n    token = (await tokenResponse.json()).token;\n    expect(token).toBeTruthy();\n  });\n\n  test(\"Step 1 — the prerequisite actually produced something\", async () => {\n    expect(userId).toBeTruthy();\n    expect(token).toBeTruthy();\n  });\n\n  test(\"Step 2 — without the token, the door is shut\", async ({ request }) => {\n    const response = await request.get(\\`\\${BASE_URL}/Account/v1/User/\\${userId}\\`);\n\n    // 401: authenticated as nobody. The id alone is not permission.\n    expect(response.status()).toBe(401);\n    expect((await response.json()).message).toContain(\"not authorized\");\n  });\n\n  test(\"Step 3 — the same request, with the header\", async ({ request }) => {\n    const response = await request.get(\\`\\${BASE_URL}/Account/v1/User/\\${userId}\\`, {\n      // headers is the third thing a request can carry, alongside the URL and\n      // the body. \"Bearer <token>\" is the convention for a token in one.\n      headers: { Authorization: \\`Bearer \\${token}\\` },\n    });\n\n    expect(response.status()).toBe(200);\n    const body = await response.json();\n    expect(body.username).toBe(userName);\n    expect(body.books).toEqual([]);      // a brand-new user owns nothing\n  });\n\n  test(\"Step 4 — POST using the captured id\", async ({ request }) => {\n    const response = await request.post(\\`\\${BASE_URL}/BookStore/v1/Books\\`, {\n      headers: { Authorization: \\`Bearer \\${token}\\` },\n      // The id goes in the BODY here. Some APIs want it in the URL, some in the\n      // body; only the documentation tells you which.\n      data: { userId, collectionOfIsbns: [{ isbn: GIT_BOOK }, { isbn: JS_BOOK }] },\n    });\n\n    expect(response.status()).toBe(201);\n    expect((await response.json()).books).toHaveLength(2);\n  });\n\n  test(\"Step 5 — PUT replaces one book with another\", async ({ request }) => {\n    const response = await request.put(\\`\\${BASE_URL}/BookStore/v1/Books/\\${GIT_BOOK}\\`, {\n      headers: { Authorization: \\`Bearer \\${token}\\` },\n      data: { userId, isbn: \"9781491904244\" },\n    });\n\n    expect(response.status()).toBe(200);\n\n    // Assert on the CONSEQUENCE, not just the status: read the collection back.\n    const after = await request.get(\\`\\${BASE_URL}/Account/v1/User/\\${userId}\\`, {\n      headers: { Authorization: \\`Bearer \\${token}\\` },\n    });\n    const isbns = (await after.json()).books.map((b: { isbn: string }) => b.isbn);\n    expect(isbns).toContain(\"9781491904244\");\n    expect(isbns).not.toContain(GIT_BOOK);\n  });\n\n  test(\"Step 6 — DELETE answers 204, and has no body at all\", async ({ request }) => {\n    const response = await request.delete(\\`\\${BASE_URL}/BookStore/v1/Book\\`, {\n      headers: { Authorization: \\`Bearer \\${token}\\` },\n      data: { isbn: JS_BOOK, userId },\n    });\n\n    // 204 = \"done, and there is nothing to tell you\".\n    expect(response.status()).toBe(204);\n\n    const raw = await response.text();\n    expect(raw).toBe(\"\");\n\n    // So parsing it throws. The session hits exactly this and has to delete the\n    // line. An empty string is not valid JSON — there is no object to make.\n    await expect(response.json()).rejects.toThrow();\n  });\n\n  test.afterAll(async ({ request }) => {\n    if (!userId || !token) return;\n    const gone = await request.delete(\\`\\${BASE_URL}/Account/v1/User/\\${userId}\\`, {\n      headers: { Authorization: \\`Bearer \\${token}\\` },\n    });\n    expect(gone.status()).toBe(204);\n  });\n});\n`);\n\n// Expected: 6 passed. Watch the order: nothing works until beforeAll has run.\nawait runSpec(\"week7/generated/day4-chaining.spec.ts\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## What each step showed\n\n| Step | Point |\n|---|---|\n| 1 | the hook actually produced an id and a token |\n| 2 | the id alone is **401** - not permission |\n| 3 | the same request with `Authorization: Bearer` is 200 |\n| 4 | the captured id used in a **body**, giving 201 |\n| 5 | `PUT`, then **read it back** to prove the change |\n| 6 | `DELETE` answers **204** with an empty body |",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 3, in detail: headers\n\nThe third thing a request can carry, and the one the session had to defer.\n\n| Header | Says |\n|---|---|\n| `Content-Type: application/json` | the body I am sending is JSON - Playwright sets this from `data` |\n| `Authorization: Bearer <token>` | here is my proof; I am allowed |\n| `Accept` | the format I would like back |\n\n```ts\nawait request.get(url, { headers: { Authorization: `Bearer ${token}` } });\n```\n\nMiss it and you get **401** - not a wrong answer, an unanswered question.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// The same endpoint, three ways, so the 401 is unmistakable.\nconst B = \"https://demoqa.com\";\nconst J = { \"Content-Type\": \"application/json\" };\nconst who = { userName: `w7d4x_${Date.now()}`, password: \"Passw0rd@123\" };\n\nconst made = await (await fetch(`${B}/Account/v1/User`, { method: \"POST\", headers: J, body: JSON.stringify(who) })).json();\nconst bearer = (await (await fetch(`${B}/Account/v1/GenerateToken`, { method: \"POST\", headers: J, body: JSON.stringify(who) })).json()).token;\n\nfor (const [label, headers] of [\n  [\"no header at all\", {}],\n  [\"a wrong token\", { Authorization: \"Bearer not-a-real-token\" }],\n  [\"the real token\", { Authorization: `Bearer ${bearer}` }],\n] as [string, Record<string, string>][]) {\n  const r = await fetch(`${B}/Account/v1/User/${made.userID}`, { headers });\n  console.log(`${label.padEnd(18)} -> ${r.status}`);\n}\n\nawait fetch(`${B}/Account/v1/User/${made.userID}`, { method: \"DELETE\", headers: { Authorization: `Bearer ${bearer}` } });\nconsole.log(\"cleaned up\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 5, in detail: assert the consequence\n\n`PUT` returned 200. That only means the server accepted the instruction.\n\n```ts\nexpect(response.status()).toBe(200);          // it accepted\n\nconst after = await request.get(...);          // now go and look\nexpect(isbns).toContain(\"9781491904244\");      // the new one is there\nexpect(isbns).not.toContain(GIT_BOOK);         // the old one is gone\n```\n\nBoth halves matter. Checking only that the new value appeared would pass even if the update had\n*added* rather than *replaced*.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Step 6, in detail: 204 has no body\n\n`204 No Content` means done, nothing to say. So there is nothing to parse.\n\n| Call | Result |\n|---|---|\n| `response.status()` | `204` |\n| `await response.text()` | `\"\"` |\n| `await response.json()` | **throws** - an empty string is not JSON |\n\nThe session hits this live and has to delete the line. It is not a bug in the API and not a bug\nin Playwright; it is what \"no content\" means.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Reproduce it deliberately: parse an empty body.\ntry {\n  JSON.parse(\"\");\n} catch (e) {\n  console.log(\"JSON.parse('') ->\", (e as Error).message);\n}\n\nconsole.log();\nconsole.log(\"So for a 204: assert the status, and read text() if you must - never json().\");",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## PUT or PATCH?\n\n| Verb | Means | If you omit a field |\n|---|---|---|\n| `PUT` | replace the whole thing | it is **cleared** |\n| `PATCH` | change what I send | it is left alone |\n\nThe session says developers treat them as interchangeable, and in practice many do. But the\ndifference is real and measurable - [week8/day1_2](/learn/w8/d1/p2) sends both to the same\nrecord and shows a `PUT` wiping a field that `PATCH` preserved. Read the docs, then probe.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| A hard-coded id from yesterday | red suite, unrelated cause |\n| `beforeEach` for a one-time prerequisite | slow, and litter left on the server |\n| `const` for a value assigned in a hook | it will not compile |\n| `.json()` on a 204 | throws, and looks like an API fault |\n| Trusting a 200 without reading it back | an update that did nothing still passes |\n\n**Next:** [Day 4.3 - Where the setup should live](/learn/w7/d4/p3)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -163,7 +185,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Where the setup should live",
-      "tab_label": "Where the setup should live",
+      "tab_label": "Implementation",
       "source_notebook": "week7/day4_3.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -171,43 +193,50 @@
           "type": "markdown",
           "text": "# Week 7, Day 4.3 - Where the setup should live\n\nSame `beforeAll`, same header - arranged so it is written once for the whole suite.\n\n## Four homes for setup, worst to best\n\n| Where | Runs | Problem |\n|---|---|---|\n| Inside each test | every test | the same eight lines, forever |\n| `beforeEach` | every test | a user per test, most abandoned |\n| **`beforeAll`** | once per describe | good - but repeated in every *file* |\n| **A fixture** | once, wherever asked | the real answer |\n\n[day4_2](/learn/w7/d4/p2) is the third row. [day5_2](/learn/w7/d5/p2) takes the fourth step in two\nstages: a plain function first, then a fixture.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "example",
           "text": "// Count the cost of each home, for a suite of 5 files x 6 tests.\nconst files = 5, testsPerFile = 6, setupLines = 8;\n\nconst homes = [\n  { name: \"in each test\", copies: files * testsPerFile, users: files * testsPerFile },\n  { name: \"beforeEach\", copies: files, users: files * testsPerFile },\n  { name: \"beforeAll\", copies: files, users: files },\n  { name: \"a fixture\", copies: 1, users: files },\n];\n\nfor (const h of homes) {\n  console.log(\n    `${h.name.padEnd(14)} setup lines: ${String(h.copies * setupLines).padStart(4)}   users created: ${h.users}`,\n  );\n}",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "240 lines versus 8, and 30 abandoned users versus 5. The abandoned-users column is the one that\ngets you a stern email from whoever runs the sandbox.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "your-turn",
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Worker scope, and why it is tempting\n\nA token is expensive and reusable, so \"fetch it once per worker\" looks obvious:\n\n```ts\nexport const test = base.extend<{}, { token: string }>({\n  token: [async ({}, use) => {\n    await use(await fetchToken());\n  }, { scope: \"worker\" }],\n});\n```\n\n| Scope | Runs | Good for |\n|---|---|---|\n| `test` | once per test | anything a test mutates |\n| `worker` | once per worker process | a read-only token |\n\nThe catch, from [week5/day4_3](/learn/w5/d4/p3): worker-scoped values are **shared**. A\ntoken is fine because nothing changes it. A *user* is not - two tests adding books to the same\naccount interfere, and the failure depends on the worker count.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Cleaning up is part of the design\n\n| Where | Cleans up |\n|---|---|\n| `afterAll` | what the describe created |\n| A fixture's teardown (after `use()`) | what the fixture created - automatically |\n\nA fixture is better here too: teardown sits next to setup, so it is hard to forget one and not\nthe other.\n\n```ts\naccount: async ({ request }, use) => {\n  const created = await createAccount(request);\n  await use(created);                       // the test runs here\n  await deleteAccount(request, created);    // always, even if it failed\n}\n```",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "## Reviewer's checklist for an API suite\n\n| Look for | Why |\n|---|---|\n| A hard-coded id or token | it will rot, and not on your schedule |\n| A fixed username on a shared API | passes once, then collides forever |\n| `.json()` near a `DELETE` | 204 has no body |\n| A status assertion with no body assertion | [day2_2](/learn/w7/d2/p2) Step 6 |\n| Something created and never deleted | you are a guest |\n| A base URL spelled out in each test | one host change, many edits |\n\n**Next:** [Day 4.4 - Practice](/learn/w7/d4/p4)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -224,55 +253,64 @@
           "type": "markdown",
           "text": "# Week 7, Day 4.4 - Practice\n\nDelete whatever you create.",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "1",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "2",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "4",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "5",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "6",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "problem-ref",
           "text": "7",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         },
         {
           "type": "markdown",
           "text": "**Next:** [Day 5.1 - Prerequisites](/learn/w7/d5/p1)",
           "starter": null,
-          "variation": null
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": [

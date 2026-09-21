@@ -70,7 +70,7 @@
       "part": 2,
       "kind": "concept",
       "title": "Splitting one long test, and the problem it creates",
-      "tab_label": "Splitting one long test, and…",
+      "tab_label": "Fundamentals",
       "source_notebook": "week2/day5_2.ipynb",
       "has_runnable_code": true,
       "blocks": [
@@ -235,7 +235,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Preview: the shape of the fix",
-      "tab_label": "Preview",
+      "tab_label": "Implementation",
       "source_notebook": "week2/day5_3.ipynb",
       "has_runnable_code": true,
       "blocks": [
