@@ -135,7 +135,7 @@
       "part": 3,
       "kind": "concept",
       "title": "The sibling axis, wrapped for reuse",
-      "tab_label": "Reuse",
+      "tab_label": "The sibling axis, wrapped for…",
       "source_notebook": "week2/day4_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

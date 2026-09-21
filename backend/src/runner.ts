@@ -16,6 +16,7 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import * as ts from 'typescript';
 import { config } from './config';
 import type { RunRequest, RunResult, RunStreamEvent } from '../../shared/contracts/run';
 
@@ -26,25 +27,25 @@ import type { RunRequest, RunResult, RunStreamEvent } from '../../shared/contrac
 const SENTINEL = '__STUDIO_EVT__';
 
 type Listener = (e: RunStreamEvent) => void;
+type Stream = {
+  listeners: Set<Listener>;
+  buffered: RunStreamEvent[];
+  /**
+   * The most recent frame and the terminal status, kept independently of who is listening.
+   * A listener that attaches (or re-attaches, from a Detach window opened after the fact) only
+   * ever gets frames buffered while NOBODY was listening - once the original page's overlay
+   * has drained a run's frames, a second listener attaching later gets nothing further from the
+   * stream itself. GET /api/run/:run_id/last-frame reads these two fields so a freshly opened
+   * detached window has something to show immediately, whether the run is still going or is
+   * long since finished.
+   */
+  lastFrame: string | null;
+  status: string | null;
+};
 
 /** Frames arrive before the client may have attached, so buffer until it does. */
-const streams = new Map<string, { listeners: Set<Listener>; buffered: RunStreamEvent[] }>();
+const streams = new Map<string, Stream>();
 let active = 0;
-
-/**
- * Rendering a certificate to PDF also launches a browser, so it shares this cap rather than
- * having its own - otherwise a burst of certificate downloads can exhaust the box while the
- * run queue still believes it has headroom.
- */
-export async function withBrowserSlot<T>(fn: () => Promise<T>): Promise<T | { queue_full: true }> {
-  if (active >= config.run.max_concurrent) return { queue_full: true };
-  active++;
-  try {
-    return await fn();
-  } finally {
-    active--;
-  }
-}
 
 export function attachStream(runId: string, listener: Listener): () => void {
   const s = streams.get(runId);
@@ -55,9 +56,18 @@ export function attachStream(runId: string, listener: Listener): () => void {
   return () => s.listeners.delete(listener);
 }
 
+/** What a freshly attaching viewer should be shown right away - see the Stream type above. */
+export function lastFrame(runId: string): { frame: string | null; status: string | null } | null {
+  const s = streams.get(runId);
+  if (!s) return null;
+  return { frame: s.lastFrame, status: s.status };
+}
+
 function emit(runId: string, event: RunStreamEvent): void {
   const s = streams.get(runId);
   if (!s) return;
+  if (event.event === 'frame') s.lastFrame = event.data;
+  else if (event.event === 'ended') s.status = event.status;
   if (s.listeners.size === 0) {
     // Cap the buffer: a long run with no viewer must not grow without bound.
     if (s.buffered.length < 200) s.buffered.push(event);
@@ -202,6 +212,27 @@ function stripAnsi(text: string): string {
   return text.replace(/\x1b\[[0-9;]*m/g, '');
 }
 
+/**
+ * The editor is a TypeScript editor - learners write type annotations, interfaces and Page
+ * Object classes. The program is executed with a plain `node run.js`, and a .js file gets none
+ * of Node's own TypeScript support, so real course TypeScript (`(n: number) =>`, `private
+ * readonly page: Page`, `import { type Page }`) threw a SyntaxError before a single line of the
+ * learner's own code ran. Transpiling through the real compiler - not relying on Node's own
+ * strip-only mode, which additionally rejects parameter properties and enums outright - removes
+ * that whole class of failure. This is a syntax-only pass with no project type-checking, so it
+ * does not reject anything `tsc` would merely warn about.
+ */
+function transpile(program: string): string {
+  const out = ts.transpileModule(program, {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      esModuleInterop: true,
+    },
+  });
+  return out.outputText;
+}
+
 export type StartedRun = { run_id: string; done: Promise<RunResult> };
 
 /**
@@ -211,7 +242,7 @@ export type StartedRun = { run_id: string; done: Promise<RunResult> };
  */
 export function prepareRun(): string {
   const runId = crypto.randomUUID();
-  streams.set(runId, { listeners: new Set(), buffered: [] });
+  streams.set(runId, { listeners: new Set(), buffered: [], lastFrame: null, status: null });
   // An id nobody uses must not leak a stream entry.
   setTimeout(() => {
     const s = streams.get(runId);
@@ -224,12 +255,12 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   if (active >= config.run.max_concurrent) return { queue_full: true };
 
   const runId = req.run_id;
-  if (!streams.has(runId)) streams.set(runId, { listeners: new Set(), buffered: [] });
+  if (!streams.has(runId)) streams.set(runId, { listeners: new Set(), buffered: [], lastFrame: null, status: null });
   active++;
 
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-run-'));
   const program = path.join(scratch, 'run.js');
-  fs.writeFileSync(program, buildProgram(rewriteHarnessImports(req.code)));
+  fs.writeFileSync(program, transpile(buildProgram(rewriteHarnessImports(req.code))));
 
   const started = Date.now();
   let stdout = '';
@@ -316,7 +347,9 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
       fs.rmSync(scratch, { recursive: true, force: true });
       if (status === 'ok' && stderr.trim() && !screenshot) status = 'error';
       emit(runId, { event: 'ended', status });
-      setTimeout(() => streams.delete(runId), 30_000);
+      // Long enough that pressing Detach a little while after a run finished still has a last
+      // frame to show - the whole point of last-frame() above.
+      setTimeout(() => streams.delete(runId), 5 * 60_000);
       resolve({
         run_id: runId,
         status,

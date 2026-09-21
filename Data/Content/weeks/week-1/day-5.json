@@ -139,7 +139,7 @@
       "part": 3,
       "kind": "concept",
       "title": "The same login, with a little structure",
-      "tab_label": "Reuse",
+      "tab_label": "The same login, with a little…",
       "source_notebook": "week1/day5_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

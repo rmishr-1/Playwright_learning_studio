@@ -1,8 +1,6 @@
 node_modules/
 dist/
-Data/Learners/
+Data/Progress/
 Data/Config/*.json
 !Data/Config/*.example.json
 .run-scratch/
-Data/Config/session.secret
-Data/Outbox/

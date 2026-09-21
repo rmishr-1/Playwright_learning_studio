@@ -84,13 +84,6 @@ export function TheoryPane({
       </div>
 
       <div className="lesson">
-        {part.kind === 'generated-prerequisite' && (
-          <div className="notice" style={{ marginBottom: 18 }}>
-            This part is written by the studio, not the course. These early days predate the
-            course’s TypeScript-primer convention, so there is no notebook behind this tab.
-          </div>
-        )}
-
         {part.blocks.map((block, i) => {
           if (block.type === 'problem-ref') {
             // Render the problem exactly where it sat in the source document.

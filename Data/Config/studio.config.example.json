@@ -1,8 +1,5 @@
 {
   "port": 3010,
-  "admins": [
-    "rishant-mishra"
-  ],
   "run": {
     "timeout_ms": 30000,
     "max_concurrent": 3,
@@ -18,16 +15,5 @@
   "assistant": {
     "enabled": true,
     "model": "claude-opus-5"
-  },
-  "mail": {
-    "host": "",
-    "port": 587,
-    "secure": false,
-    "user": "",
-    "from": "Playwright Studio <no-reply@evoketechnologies.com>"
-  },
-  "reset": {
-    "code_ttl_minutes": 10,
-    "max_attempts": 5
   }
 }

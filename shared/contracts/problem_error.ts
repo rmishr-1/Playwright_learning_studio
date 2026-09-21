@@ -2,17 +2,6 @@ import { z } from 'zod';
 
 /** Mirrors Data/Formats/problem_error_format.json. Clients branch on `code`, never on `detail`. */
 export const ErrorCode = z.enum([
-  'NOT_AUTHENTICATED',
-  'INVALID_CREDENTIALS',
-  'FORBIDDEN',
-  'ACCOUNT_EXISTS',
-  'WEAK_PASSWORD',
-  'RESET_CODE_INVALID',
-  'RESET_CODE_EXPIRED',
-  'NO_EMAIL_ON_FILE',
-  'CERTIFICATE_NOT_EARNED',
-  'LEARNER_NAME_REQUIRED',
-  'LEARNER_NOT_FOUND',
   'DAY_NOT_FOUND',
   'DAY_LOCKED',
   'WEEK_NOT_UNLOCKED',

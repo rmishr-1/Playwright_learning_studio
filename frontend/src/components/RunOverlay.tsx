@@ -6,6 +6,8 @@ export type RunState = {
   frame: string | null;
   lines: string[];
   result: RunResult | null;
+  /** Set once prepareRun() resolves. Lets the Detach button reconnect to this run's own stream. */
+  run_id: string | null;
 };
 
 const STATUS_TEXT: Record<string, string> = {
@@ -16,6 +18,23 @@ const STATUS_TEXT: Record<string, string> = {
   blocked: 'blocked',
   queued_out: 'queue full',
 };
+
+/**
+ * Pops the live view out into its own window, still connected to the run's own WebSocket
+ * stream - not a snapshot, so it keeps painting new frames as the run continues. Window
+ * features (not just `_blank`) are what asks the browser for a separate window rather than a
+ * new tab. Collapses the in-page overlay afterwards: the point of detaching is to hand the
+ * editor pane its height back, not to show the same feed twice.
+ *
+ * The window itself seeds its starting frame from GET /run/:run_id/last-frame (see RunView.tsx)
+ * rather than anything handed to it here - `noopener` means it does not share this page's
+ * sessionStorage, and a run that already finished would leave it with nothing to show anyway
+ * once the original listener has drained the stream (see runner.ts).
+ */
+function detach(runId: string, onClose: () => void): void {
+  window.open('/run/' + runId, '_blank', 'popup=yes,width=980,height=760,noopener,noreferrer');
+  onClose();
+}
 
 /**
  * Floats over the editor while a run is in flight; dismissible, so the editor gets its full
@@ -75,6 +94,15 @@ export function RunOverlay({ run, onClose }: { run: RunState; onClose: () => voi
           <span className="status" style={{ color: '#8a94a6' }}>
             {run.result.duration_ms} ms
           </span>
+        )}
+        {run.run_id && (
+          <button
+            className="expand"
+            onClick={() => detach(run.run_id!, onClose)}
+            title="Detach the live browser into its own window"
+          >
+            ⇱
+          </button>
         )}
         <button className="close" onClick={onClose} aria-label="Close results">
           ×

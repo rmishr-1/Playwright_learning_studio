@@ -1,0 +1,26 @@
+{
+    "_comment": "Data/Progress/progress.json - the ONE progress record this server keeps. There are no accounts: each clone of this repo is run by one person, so there is nothing to identify and nothing to authenticate.",
+    "schema": {
+        "value": "progress/v1"
+    },
+    "resume": {
+        "_comment": "Where the app sends you back to on your next visit. null until you have opened anything.",
+        "week": { "value": 1 },
+        "day": { "value": 1 },
+        "part": { "value": 1 }
+    },
+    "progress": {
+        "_comment": "Keyed 'w<week>d<day>'. A part completes when viewed; a day completes when all of its parts have. attempted_problems records practice problems you have run code against.",
+        "_itemTemplate": {
+            "parts_viewed": {
+                "options": [1, 2, 3, 4],
+                "value": []
+            },
+            "completed": { "value": false },
+            "attempted_problems": { "value": [] },
+            "first_opened_at": { "value": "2026-09-19T00:00:00Z" },
+            "completed_at": { "value": null }
+        },
+        "value": {}
+    }
+}

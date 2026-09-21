@@ -179,7 +179,7 @@
       "part": 3,
       "kind": "concept",
       "title": "Unique data and dynamic locators, wrapped for reuse",
-      "tab_label": "Reuse",
+      "tab_label": "Unique data and dynamic locat…",
       "source_notebook": "week2/day3_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

@@ -234,16 +234,10 @@ export function parseTeaching(nb: RawNotebook, week: number): ContentBlock[] {
     });
 }
 
-/**
- * Tab labels. A bare "Part 2 / Part 3" tells the learner nothing, and the course has a
- * consistent rhythm worth surfacing: _2 teaches it, _3 shows the same thing wrapped for reuse.
- */
+/** Tab labels. A bare "Part 2 / Part 3" tells the learner nothing, so use the part's own title. */
 export function tabLabel(part: PartNumber, title: string): string {
   if (part === 1) return 'TypeScript';
   if (part === 4) return 'Practice';
-  if (/wrapped for reuse|the way a real project|with a little structure|shape of the fix|, wrapped/i.test(title)) {
-    return 'Reuse';
-  }
   const head = title.split(':')[0].replace(/`/g, '').trim();
   return head.length <= 30 ? head : `${head.slice(0, 29).trimEnd()}\u2026`;
 }

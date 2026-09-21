@@ -27,7 +27,6 @@ if not exist "Data\Config\studio.config.json" (
   echo.
   echo Writing a local-dev Data\Config\studio.config.json ...
   copy /y "Data\Config\studio.config.example.json" "Data\Config\studio.config.json" >nul
-  echo   Trainer code is "change-me" - change it before anyone else uses this.
 )
 
 echo.

@@ -33,10 +33,10 @@ They set the git identity **repo-locally** to `rmishr-1 <rmishra@evoketechnologi
 from the global config on this machine. Change those lines if someone else works in this clone,
 or their commits will carry the wrong name.
 
-**Nothing secret is committed.** `.gitignore` covers `Data/Learners/` (accounts and password
-digests), `Data/Config/*.json` (the admin list and any SMTP settings), `Data/Config/session.secret`
-and `Data/Outbox/`. Only `studio.config.example.json` ships. `Data/Content/` **is** committed —
-1.3 MB of imported course JSON — so a fresh clone runs without needing the training repo.
+**Nothing secret is committed.** `.gitignore` covers `Data/Progress/` (the one progress record a
+clone keeps for whoever runs it) and `Data/Config/*.json`. Only `studio.config.example.json`
+ships. `Data/Content/` **is** committed — 1.3 MB of imported course JSON — so a fresh clone runs
+without needing the training repo.
 
 ---
 
@@ -90,7 +90,7 @@ process that touches `Data/`, so a keyed mutex is enough and there is no CAS or 
 | `frontend/` | Vite + React on `5180`, proxying `/api` to the backend |
 | `Data/Formats/` | The wire contracts + [FORMAT-REGISTRY.md](Data/Formats/FORMAT-REGISTRY.md) |
 | `Data/Content/` | **Generated.** Imported course content |
-| `Data/Learners/` | One file per account: identity, role, password digest, progress |
+| `Data/Progress/` | **Generated.** The one progress record, for whoever runs this clone |
 
 The backend binds loopback only. In dev, Vite proxies to it; a deployment puts a TLS edge in
 front. It is never directly reachable.
@@ -128,100 +128,21 @@ your own user.
 
 ---
 
-## Accounts, roles and the dashboard
+## No accounts
 
-Everyone signs in. `/login` is shown on every launch when signed out — there is no silent
-auto-resume, which is what used to make the app always come back as whoever used it last.
+There is no login, no roles, no admin panel and no dashboard. Each clone of this repo is run by
+one person, so there is nothing to sign into and no one else's progress to see — the backend
+keeps exactly one progress record, at `Data/Progress/progress.json`, for whoever is running it.
+`GET /api/progress` reads it and `POST /api/progress` updates it; neither takes an id, because
+there is nothing to identify.
 
-**Passwords** are scrypt digests with a per-account salt, hashed with `node:crypto` (no new
-dependency). **Sessions** are an HMAC-signed token in an httpOnly cookie, so page scripts cannot
-read it. The token carries the user id and an expiry and deliberately **not** the role: every
-request re-reads the account, so demoting a trainer takes effect on their next request rather
-than whenever their token expires.
+The app opens straight onto the course and resumes wherever that record last left off, falling
+back to Week 1 Day 1 for a clone that has not been opened yet.
 
-### Three roles
-
-| Role | Course | Dashboard | People |
-|---|---|---|---|
-| `learner` | ✓ | | |
-| `trainer` | ✓ | ✓ | |
-| `admin` | ✓ | ✓ | ✓ |
-
-Everyone self-registers as a learner. An **admin** promotes people from `/people`. Both checks
-happen server-side as well as in the menu — a hidden menu item is not a permission, and
-`/dashboard` and `/people` return 403 to a learner who types the URL.
-
-**Bootstrap.** `admins` in `Data/Config/studio.config.json` lists account ids that are admins
-whatever the stored record says. That is the escape hatch: without it, one bad demotion would
-lock everyone out of the only screen that can undo it. Pinned accounts cannot be demoted from
-the UI, and the last remaining admin cannot demote themselves.
-
-**The acting user comes from the cookie, never the request body.** Progress, runs and the
-assistant all take the learner id from the session. Before this, `learner_id` travelled in the
-payload and was trusted, so one learner could write another's progress — which would have made
-both the dashboard and the certificate meaningless.
-
-### Forgotten passwords
-
-`/login` carries a **Forgot your password?** link. It asks for the name, mails a six-digit code
-to the address on the account, and the same card then takes the code and a new password.
-
-Four things make that safe enough to expose:
-
-- **No enumeration.** `/auth/forgot` answers identically whether the account exists, whether it
-  has an email, and whether the mail succeeded. A helpful "no such account" would turn the
-  endpoint into a way to list who is registered.
-- **The code is never stored** — only a salted scrypt digest of it, the same treatment as the
-  password, so a leaked record cannot be used to reset anyone.
-- **Single use and time-boxed.** Ten minutes by default, cleared the moment it is used.
-- **Guessing is capped.** Five wrong attempts discard the code. Six digits is only a million
-  wide; unlimited guesses would fall in minutes.
-
-Resetting does **not** sign you in — you then sign in with the new password, which proves you
-know it.
-
-#### Mail is not configured, and the code says so
-
-This repo ships with no SMTP credentials, so **nothing is actually sent**. The message is written
-to `Data/Outbox/` and the log says loudly that it was not delivered; an operator reads the code
-out and passes it on. That is the same shape as the assessment portal's *Copy email* button,
-which also shipped before its Outlook credential existed.
-
-To turn on real sending, fill in `mail` in `Data/Config/studio.config.json` and put the password
-in `STUDIO_SMTP_PASSWORD` — never in the file:
-
-```json
-"mail": { "host": "smtp.office365.com", "port": 587, "secure": false,
-          "user": "no-reply@evoketechnologies.com",
-          "from": "Playwright Studio <no-reply@evoketechnologies.com>" }
-```
-
-**Accounts created before emails existed have none**, so they cannot use this until an admin
-gives them one from the **People** screen.
-
-### Unclaimed accounts — a real weakness
-
-Records created before logins existed have no password. Such an account is **unclaimed**: the
-first person to sign in with that name sets the password and takes it. It is a bootstrap
-convenience, not a feature. The People screen flags them, and you should **delete records you do
-not recognise** from `Data/Learners/` rather than leave them claimable — the test accounts
-`ada-lovelace`, `nora-beginner` and `test-runner` are exactly that.
-
-## The certificate
-
-Awarded when **every day of the course is complete — all 38**, not just the weeks open today.
-Weeks 3–8 are not authored yet, so nobody can earn it now; until then `/certificate` shows honest
-progress (*"You have completed 10 of 38 days"*) rather than a page nobody can open.
-
-`issued_at` is stamped once, the first time it is earned, so the date does not move if a learner
-reopens a day afterwards.
-
-The backend owns the markup at `GET /api/certificate/view.html`; the page embeds it in an iframe
-and the PDF renders **that same HTML**, so there is no second template to drift. The PDF comes
-from `page.pdf()` on the Chromium the code runner already depends on — no PDF library — and it
-takes a slot from the same concurrency cap as code runs, so a burst of downloads cannot exhaust
-the box. It is issued by **Evoke Technologies Private Limited**; the design is text-only and a
-logo can be dropped in later.
+This used to be an RBAC system — real accounts, a login screen, three roles, a cohort dashboard,
+an admin People screen, a certificate, forgotten-password email. All of it is gone, on purpose;
+see the format registry's invariant 5 for why re-adding any of it needs a deliberate decision,
+not a quiet regression.
 
 ### The week list collapses
 
@@ -234,8 +155,9 @@ page with no tab bar. The choice is remembered per viewer.
 
 A week opens only once **every day of the previous week is complete**. Week 1 is always open.
 This is enforced in `blockingWeek()` on **both** sides — the sidebar greys the week and shows a
-`locked` pill, and `GET /api/course/:week/:day` returns `423 WEEK_NOT_UNLOCKED` when a learner id
-is supplied. The sidebar alone would be a suggestion: the URL is right there in the address bar.
+`locked` pill, and `GET /api/course/:week/:day` returns `423 WEEK_NOT_UNLOCKED` against the one
+progress record. The sidebar alone would be a suggestion: the URL is right there in the address
+bar.
 
 Two locks exist and they never merge, because they mean different things:
 
@@ -243,8 +165,6 @@ Two locks exist and they never merge, because they mean different things:
 |---|---|---|
 | `soon` | Not written yet (weeks 3–8) | `DAY_LOCKED` |
 | `locked` | Written, but you have not finished the week before it | `WEEK_NOT_UNLOCKED` |
-
-`/dashboard` shows cohort progress to trainers and admins.
 
 ---
 
@@ -269,9 +189,7 @@ Without it the rest of the studio works and the assistant reports itself unavail
 ```bash
 npm run import     # .ipynb -> Data/Content/
 npm run verify              # structural checks over the imported content
-npm run verify:auth         # registration, sign-in, the role gates, session identity
-npm run verify:certificate  # refused part-way, a real PDF when earned, a stable date
-npm run verify:reset        # no enumeration, single use, capped guessing, digest-only storage
+npm run verify:runnable     # every "Load into editor" button actually runs clean
 npm run typecheck  # both workspaces, against shared/contracts/
 ```
 

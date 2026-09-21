@@ -151,7 +151,7 @@
       "part": 3,
       "kind": "concept",
       "title": "The same assertions, wrapped for reuse",
-      "tab_label": "Reuse",
+      "tab_label": "The same assertions, wrapped…",
       "source_notebook": "week2/day2_3.ipynb",
       "has_runnable_code": true,
       "blocks": [

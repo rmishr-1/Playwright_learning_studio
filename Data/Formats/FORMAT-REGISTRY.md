@@ -14,8 +14,8 @@ only process that touches `Data/`, so a keyed mutex is sufficient and there is n
 |---|---|---|---|
 | `Data/Formats/` | These wire contracts | format changes only | both sides |
 | `Data/Content/` | Imported course content — `course-index.json` + `week-N/day-N.json` | `scripts/import-notebooks.ts` **only** | backend |
-| `Data/Learners/` | One file per account: identity, role, password digest, progress | backend | backend |
-| `Data/Config/` | `studio.config.json` — trainer code, training-repo path, run limits, assistant key | operator | backend |
+| `Data/Progress/` | The ONE progress record. No accounts: each clone of this repo is run by one person | backend | backend |
+| `Data/Config/` | `studio.config.json` — training-repo path, run limits, assistant key | operator | backend |
 
 **`Data/Content/` is generated.** The 147 notebooks in the training repo are the master. Hand-editing
 an imported day is always wrong: the next import overwrites it. The one exception is authored
@@ -41,8 +41,7 @@ Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **I*
 | `problem_error_format.json` | response | B → F | every non-2xx |
 | `course_index_format.json` | content | I → B → F | `GET /api/course` |
 | `course_day_format.json` | content | I → B → F | `GET /api/course/:week/:day` |
-| `learner_format.json` | state | F ↔ B | `GET /api/learner/me`, `POST /api/learner/progress` |
-| `session_format.json` | req/resp | F ↔ B | `POST /api/auth/{register,login,logout}`, `GET /api/auth/me`, `GET /api/people`, `PUT /api/people/:id/role` |
+| `progress_format.json` | state | F ↔ B | `GET /api/progress`, `POST /api/progress` |
 | `run_format.json` | req/resp | F ↔ B | `POST /api/run` + `WS /api/run/:run_id/stream` |
 | `assistant_format.json` | req/SSE | F ↔ B | `POST /api/assistant` |
 
@@ -63,19 +62,13 @@ Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **I*
 4. **No answer keys reach the assistant.** The assistant's context carries lesson text and progress
    only. `problems[].solution` must never be placed in an assistant prompt — that would route around
    the hints-only guardrail.
-5. **Identity IS authentication, and the server is the only judge of it.** This inverts the
-   original invariant: `learner_id` used to be a slug off a self-declared name that anyone could
-   claim, and nothing sensitive was allowed near it. Accounts now carry a scrypt password digest
-   and a role, so three rules replace it:
-   - **The acting user comes from the session cookie, never from the request body.** A
-     `learner_id` in a payload is a claim, not a fact. Progress, runs and the assistant all read
-     it from the session — otherwise one learner can write another's progress, which would make
-     both the dashboard and the certificate meaningless.
-   - **`password` never leaves the server.** Not in `/auth/me`, not in the People roster, not in
-     the dashboard. No format in this folder may carry it outward.
-   - **The role is never trusted from the client.** The session token deliberately omits it, so
-     every request re-reads the account and a demotion applies immediately. A hidden menu item is
-     not a permission: each protected route checks the role server-side as well.
+5. **There is no identity, so there is nothing to check it against.** This is the second inversion
+   of this invariant. It first said identity is not authentication (anyone could claim a name); a
+   later revision added real accounts, roles and a session cookie. Both are gone. Each clone of
+   this repo is run by one person, so `Data/Progress/progress.json` is not "someone's" record to
+   protect from someone else — it is simply the state. Nothing in this codebase may reintroduce a
+   `learner_id`, a role, or a credential without first updating this invariant and the format it
+   would touch.
 6. **Timestamps.** ISO-8601 UTC `Z`; `_ms` suffix for durations; stored, not derived.
 7. **Template vs instance.** `{options, value}`, `_itemTemplate` and `_comment` exist ONLY in
    `*_format.json`. Real payloads are plain values.
@@ -88,7 +81,7 @@ Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **I*
 ## Verification checklist
 
 - [ ] Every `*.json` here parses.
-- [ ] No `options`, `_itemTemplate` or `_comment` key in anything under `Data/Content/` or `Data/Learners/`.
+- [ ] No `options`, `_itemTemplate` or `_comment` key in anything under `Data/Content/` or `Data/Progress/`.
 - [ ] `shared/contracts/` reflects the change and `npm run typecheck` passes in both workspaces.
 - [ ] `grep -r "fetch(" frontend/src` matches only `api/client.ts`.
 - [ ] `npm run verify` (the import proof) is green.

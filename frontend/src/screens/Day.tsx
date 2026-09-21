@@ -12,12 +12,10 @@ import {
 } from '../api/client';
 import { TheoryPane } from '../components/TheoryPane';
 import { CodePane } from '../components/CodePane';
-import { Assistant } from '../components/Assistant';
 import type { RunState } from '../components/RunOverlay';
 import type { CourseDay } from '../../../shared/contracts/course_day';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
-import type { Learner } from '../../../shared/contracts/learner';
-import type { Me } from '../../../shared/contracts/session';
+import type { Progress } from '../../../shared/contracts/progress';
 import type { PartNumber } from '../../../shared/contracts/common';
 
 const STARTER = `// The studio gives you launch(), show(), login(), USERS and BASE_URL.
@@ -32,27 +30,27 @@ await show(page);
  * Sequential progression, mirroring blockingWeek() on the server: a week opens only once
  * every day of the previous week is complete. Returns the week still to finish, or null.
  */
-function blockingWeek(index: CourseIndex, learner: Learner | null, week: number): number | null {
+function blockingWeek(index: CourseIndex, progress: Progress | null, week: number): number | null {
   if (week <= 1) return null;
-  if (!learner) return week - 1;
+  if (!progress) return week - 1;
   for (let w = 1; w < week; w++) {
     const days = index.weeks.find((x) => x.week === w)?.days ?? [];
     if (days.length === 0) continue;
-    if (!days.every((d) => learner.progress['w' + w + 'd' + d.day]?.completed)) return w;
+    if (!days.every((d) => progress.progress['w' + w + 'd' + d.day]?.completed)) return w;
   }
   return null;
 }
 
-/** The first day the learner has not completed - where "continue" should send them. */
+/** The first day not yet completed - where "continue" should send you. */
 function firstUnfinishedDay(
   index: CourseIndex | null,
-  learner: Learner | null,
+  progress: Progress | null,
 ): { week: number; day: number } {
   if (!index) return { week: 1, day: 1 };
   for (const w of index.weeks) {
     if (w.locked) continue;
     for (const d of w.days) {
-      if (!learner?.progress['w' + w.week + 'd' + d.day]?.completed) {
+      if (!progress?.progress['w' + w.week + 'd' + d.day]?.completed) {
         return { week: w.week, day: d.day };
       }
     }
@@ -62,13 +60,13 @@ function firstUnfinishedDay(
 
 function Sidebar({
   index,
-  learner,
+  progress,
   week,
   day,
   onHide,
 }: {
   index: CourseIndex;
-  learner: Learner | null;
+  progress: Progress | null;
   week: number;
   day: number;
   /** Collapses the entire week list so the lesson gets the space. */
@@ -87,7 +85,7 @@ function Sidebar({
     setOpen((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]));
 
   const totalDone = index.weeks.reduce(
-    (n, w) => n + w.days.filter((d) => learner?.progress['w' + w.week + 'd' + d.day]?.completed).length,
+    (n, w) => n + w.days.filter((d) => progress?.progress['w' + w.week + 'd' + d.day]?.completed).length,
     0,
   );
   const totalAvailable = index.weeks
@@ -96,6 +94,17 @@ function Sidebar({
 
   return (
     <nav className="sidebar">
+      {/* No logo file ships in the repo yet - this mark is a text placeholder, styled to sit
+          where a real Evoke Technologies logo image would go, and swaps in cleanly once one
+          is added. */}
+      <div className="brand">
+        <span className="brand-mark" aria-hidden="true">ET</span>
+        <span className="brand-text">
+          <span className="brand-org">Evoke Technologies</span>
+          <span className="brand-title">QA Practice</span>
+        </span>
+      </div>
+
       {/* The master control: one click hides every week and hands the width to the lesson. */}
       <button className="wk-all" onClick={onHide} title="Hide the week list">
         <span className="chev-left" aria-hidden="true">
@@ -111,11 +120,11 @@ function Sidebar({
       {index.weeks.map((w) => {
         const isOpen = open.includes(w.week);
         const done = w.days.filter(
-          (d) => learner?.progress['w' + w.week + 'd' + d.day]?.completed,
+          (d) => progress?.progress['w' + w.week + 'd' + d.day]?.completed,
         ).length;
         // Two different reasons a week can be shut: not written yet, or not earned yet.
         // They say different things to the learner, so they are never merged.
-        const gatedBy = w.locked ? null : blockingWeek(index, learner, w.week);
+        const gatedBy = w.locked ? null : blockingWeek(index, progress, w.week);
         const gated = gatedBy !== null;
         return (
         <div className="wk" key={w.week}>
@@ -144,7 +153,7 @@ function Sidebar({
           </button>
           <ul hidden={!isOpen}>
             {w.days.map((d) => {
-              const done = learner?.progress['w' + w.week + 'd' + d.day]?.completed;
+              const done = progress?.progress['w' + w.week + 'd' + d.day]?.completed;
               const on = w.week === week && d.day === day;
               return (
                 <li key={d.day}>
@@ -177,21 +186,16 @@ function Sidebar({
 }
 
 export function Day({
-  me,
-  onProgress,
   appTheme,
 }: {
-  me: Me;
-  /** Lets the shell refresh /auth/me, so the resume point stays current. */
-  onProgress: () => void;
   /** The editor starts on the page theme, and can then be overridden on its own. */
   appTheme: 'light' | 'dark';
 }) {
-  // Progress drives the sidebar ticks and the gating, and is fetched for the signed-in user.
-  const [learner, setLearner] = useState<Learner | null>(null);
+  // Drives the sidebar ticks and the gating. There is only the one record - see api/client.ts.
+  const [progress, setProgress] = useState<Progress | null>(null);
 
   useEffect(() => {
-    getMyProgress().then(setLearner).catch(() => undefined);
+    getMyProgress().then(setProgress).catch(() => undefined);
   }, []);
   const params = useParams();
   const navigate = useNavigate();
@@ -249,17 +253,13 @@ export function Day({
         else if (e instanceof ApiError && e.code === 'WEEK_NOT_UNLOCKED') setGated(e.message);
         else setError((e as Error).message);
       });
-  }, [week, day, learner?.learner_id]);
+  }, [week, day]);
 
-  // Viewing a part is what completes it, so record on arrival. No learner id is sent - the
-  // server takes the acting user from the session cookie (invariant 5).
+  // Viewing a part is what completes it, so record on arrival.
   useEffect(() => {
     if (!content) return;
     recordProgress({ week, day, part })
-      .then((updated) => {
-        setLearner(updated);
-        onProgress();
-      })
+      .then(setProgress)
       .catch(() => undefined);
   }, [content, week, day, part]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -296,12 +296,14 @@ export function Day({
   async function doRun(): Promise<void> {
     if (running) return;
     setRunning(true);
-    setRun({ status: 'running', frame: null, lines: [], result: null });
+    setRun({ status: 'running', frame: null, lines: [], result: null, run_id: null });
 
     let close: (() => void) | undefined;
     try {
       // Attach the socket BEFORE the run so the first frames are not missed.
       const { run_id } = await prepareRun();
+      // The Detach button needs the id to open its own connection to this run's stream.
+      setRun((prev) => (prev ? { ...prev, run_id } : prev));
       close = openRunStream(run_id, (event) => {
         if (event.event === 'frame') {
           setRun((prev) => (prev ? { ...prev, frame: event.data } : prev));
@@ -323,6 +325,7 @@ export function Day({
         frame: prev?.frame ?? null,
         lines: prev?.lines ?? [],
         result,
+        run_id,
       }));
     } catch (e) {
       setRun({
@@ -339,6 +342,7 @@ export function Day({
           duration_ms: 0,
           blocked_url: null,
         },
+        run_id: null,
       });
     } finally {
       close?.();
@@ -352,7 +356,7 @@ export function Day({
     return (
       <div className="body">
         {index && weeksShown && (
-          <Sidebar index={index} learner={learner} week={week} day={day} onHide={() => setWeeksShown(false)} />
+          <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} />
         )}
         <div className="centered">
           {!weeksShown && (
@@ -372,7 +376,7 @@ export function Day({
             <button
               className="btn"
               onClick={() => {
-                const next = firstUnfinishedDay(index, learner);
+                const next = firstUnfinishedDay(index, progress);
                 navigate('/learn/w' + next.week + '/d' + next.day + '/p1');
               }}
             >
@@ -388,7 +392,7 @@ export function Day({
     return (
       <div className="body">
         {index && weeksShown && (
-          <Sidebar index={index} learner={learner} week={week} day={day} onHide={() => setWeeksShown(false)} />
+          <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} />
         )}
         <div className="centered">
           {!weeksShown && (
@@ -417,12 +421,12 @@ export function Day({
   if (!content || !index) return <div className="centered muted">Loading…</div>;
 
   const activePart = content.parts.find((p) => p.part === part) ?? content.parts[0];
-  const viewed = learner?.progress['w' + week + 'd' + day]?.parts_viewed ?? [];
+  const viewed = progress?.progress['w' + week + 'd' + day]?.parts_viewed ?? [];
 
   return (
     <div className="body">
       {weeksShown && (
-        <Sidebar index={index} learner={learner} week={week} day={day} onHide={() => setWeeksShown(false)} />
+        <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} />
       )}
       <div className="split">
         <div style={{ flex: '0 0 ' + split + '%', minWidth: 0, display: 'flex' }}>
@@ -450,7 +454,6 @@ export function Day({
           />
         </div>
       </div>
-      <Assistant week={week} day={day} part={part} />
     </div>
   );
 }

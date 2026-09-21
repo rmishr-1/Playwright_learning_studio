@@ -13,9 +13,7 @@
         "import": "tsx scripts/import-notebooks.ts",
         "typecheck": "npm run typecheck --workspaces --if-present",
         "verify": "tsx backend/test/import-proof.ts",
-        "verify:auth": "tsx backend/test/auth-proof.ts",
-        "verify:certificate": "tsx backend/test/certificate-proof.ts",
-        "verify:reset": "tsx backend/test/reset-proof.ts"
+        "verify:runnable": "tsx backend/test/week1-runnable-proof.ts"
     },
     "devDependencies": {
         "@types/node": "^20.14.0",

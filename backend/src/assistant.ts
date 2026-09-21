@@ -9,7 +9,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { anthropicKey, config } from './config';
-import { courseDay, readLearner } from './store';
+import { courseDay, readProgress } from './store';
 import type { AssistantRequest } from '../../shared/contracts/assistant';
 import type { CourseDay } from '../../shared/contracts/course_day';
 
@@ -57,15 +57,13 @@ function buildContext(day: CourseDay, part: number): string {
   return lines.join('\n\n');
 }
 
-function progressSummary(learnerId: string): string {
-  const learner = readLearner(learnerId);
-  if (!learner) return 'No progress recorded yet.';
-  const done = Object.entries(learner.progress)
+function progressSummary(): string {
+  const current = readProgress();
+  const done = Object.entries(current.progress)
     .filter(([, v]) => v.completed)
     .map(([k]) => k);
-  const seen = Object.keys(learner.progress);
+  const seen = Object.keys(current.progress);
   return [
-    'Learner: ' + learner.display_name,
     'Days completed: ' + (done.length ? done.join(', ') : 'none yet'),
     'Days opened: ' + (seen.length ? seen.join(', ') : 'none yet'),
   ].join('\n');
@@ -73,7 +71,7 @@ function progressSummary(learnerId: string): string {
 
 export type Chunk = { type: 'delta'; text: string } | { type: 'done' } | { type: 'error'; text: string };
 
-export async function* ask(req: AssistantRequest & { learner_id: string }): AsyncGenerator<Chunk> {
+export async function* ask(req: AssistantRequest): AsyncGenerator<Chunk> {
   if (!client) {
     yield { type: 'error', text: 'The assistant is not configured on this server.' };
     return;
@@ -97,7 +95,7 @@ export async function* ask(req: AssistantRequest & { learner_id: string }): Asyn
           text: 'LESSON TEXT\n\n' + buildContext(day, req.part),
           cache_control: { type: 'ephemeral' },
         },
-        { type: 'text', text: 'LEARNER PROGRESS\n\n' + progressSummary(req.learner_id) },
+        { type: 'text', text: 'LEARNER PROGRESS\n\n' + progressSummary() },
       ],
       messages: [
         ...req.history.map((t) => ({ role: t.role, content: t.text }) as const),
