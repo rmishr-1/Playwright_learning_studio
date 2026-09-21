@@ -128,7 +128,8 @@ export function TheoryPane({
   viewed,
   onLoadIntoEditor,
   onStartProblem,
-  onShowWeeks,
+  weeksShown,
+  onToggleWeeks,
 }: {
   parts: CoursePart[];
   active: number;
@@ -136,16 +137,26 @@ export function TheoryPane({
   viewed: number[];
   onLoadIntoEditor: (code: string) => void;
   onStartProblem: (code: string, problemNumber: number) => void;
-  /** Present only while the week list is hidden - the way back to it. */
-  onShowWeeks?: () => void;
+  /** Whether the week list is open, so the one button can say which way it goes. */
+  weeksShown?: boolean;
+  onToggleWeeks?: () => void;
 }) {
   const part = parts.find((p) => p.part === active) ?? parts[0];
 
   return (
     <div className="pane-theory">
       <div className="tabbar">
-        {onShowWeeks && (
-          <button className="show-weeks" onClick={onShowWeeks} title="Show the week list">
+        {/* A toggle, and always present. It used to render only while the week list was hidden,
+            which removed the control at exactly the moment it was needed to close it again -
+            leaving no way back except picking a day you did not want. */}
+        {onToggleWeeks && (
+          <button
+            className="show-weeks"
+            onClick={onToggleWeeks}
+            aria-expanded={weeksShown ?? false}
+            aria-label={weeksShown ? 'Hide the week list' : 'Show the week list'}
+            title={weeksShown ? 'Hide the week list' : 'Show the week list'}
+          >
             ☰
           </button>
         )}

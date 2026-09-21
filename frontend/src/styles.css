@@ -263,12 +263,16 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 .tabbar button:hover { color: var(--heading); }
 .tabbar button.on { color: var(--heading); border-bottom-color: var(--accent); font-weight: 600; }
 .tabbar .viewed { color: var(--good); font-size: 11px; margin-left: 6px; }
-/* Only rendered while the week list is hidden. */
+/* Always rendered - it toggles the week list both ways, so it must not move or disappear when
+   the list opens. Styled off aria-expanded rather than a class, so the look cannot drift from
+   the state screen readers are told about. Deliberately not `.on`: that is the active-TAB style
+   (an accent underline), and this is a control, not one of the parts. */
 .tabbar .show-weeks {
   padding: 13px 12px; font-size: 15px; color: var(--muted); border-bottom: 2px solid transparent;
   flex: 0 0 auto;
 }
 .tabbar .show-weeks:hover { color: var(--accent); }
+.tabbar .show-weeks[aria-expanded='true'] { color: var(--heading); background: var(--rule-soft); }
 
 /* Centred: on a wide pane, left-aligned text left a large empty column to its right. */
 .lesson { padding: 26px 34px 90px; max-width: 74ch; margin: 0 auto; }
