@@ -107,5 +107,10 @@ Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **I*
 - [ ] `shared/contracts/` reflects the change and `npm run typecheck` passes in both workspaces.
 - [ ] `grep -r "fetch(" frontend/src` matches only `api/client.ts`.
 - [ ] `npm run verify` (the import proof) is green.
-- [ ] Overlays still apply: `npm run overlay` is idempotent (running it twice leaves the tree unchanged).
+- [ ] Overlays still apply: `npm run overlay` is idempotent (running it twice leaves the tree unchanged),
+      and on a fresh clone the first run reports **0 updated** — if it rewrites tracked files, every
+      launcher run dirties the working tree and fights the next `git pull`.
+- [ ] A content edit is visible **without restarting the backend**. `store.ts` caches a day against
+      that day's own mtime; anything that caches on a different file's stamp will serve stale content
+      to whichever writer it is not watching.
 - [ ] This registry updated if a consumer was added, moved or removed.

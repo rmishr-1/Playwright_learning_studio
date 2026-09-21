@@ -19,7 +19,8 @@ const nowIso = (): string => new Date().toISOString().replace(/\.\d+Z$/, 'Z');
 
 let indexCache: CourseIndex | null = null;
 let indexStamp = 0;
-const dayCache = new Map<string, CourseDay>();
+/** Each day is cached with the mtime it was read at - see courseDay(). */
+const dayCache = new Map<string, { day: CourseDay; stamp: number }>();
 
 const indexFile = (): string => path.join(CONTENT, 'course-index.json');
 
@@ -47,15 +48,26 @@ export function courseIndex(): CourseIndex {
   return indexCache;
 }
 
+/**
+ * Cached against the DAY FILE's own mtime, not just the index's.
+ *
+ * The index stamp alone was not enough: `npm run overlay` rewrites day files without touching
+ * course-index.json, so every authored lesson change was served from a cache that had no reason
+ * to believe anything had happened - the exact "every fix looks like it did not work" failure
+ * invalidateIfReimported() was written to prevent, arriving through a door it did not watch.
+ * Keying on the file being read makes this correct for any writer: the importer, the overlay
+ * script, or a hand edit.
+ */
 export function courseDay(week: number, day: number): CourseDay | null {
   if (fs.existsSync(indexFile())) invalidateIfReimported();
   const key = dayKey(week, day);
-  const cached = dayCache.get(key);
-  if (cached) return cached;
   const file = path.join(CONTENT, 'weeks', 'week-' + week, 'day-' + day + '.json');
   if (!fs.existsSync(file)) return null;
+  const stamp = fs.statSync(file).mtimeMs;
+  const cached = dayCache.get(key);
+  if (cached && cached.stamp === stamp) return cached.day;
   const parsed = CourseDay.parse(JSON.parse(fs.readFileSync(file, 'utf-8')));
-  dayCache.set(key, parsed);
+  dayCache.set(key, { day: parsed, stamp });
   return parsed;
 }
 
