@@ -40,7 +40,7 @@
       "recap": "- **Software testing** checks that an application works as expected. A bug is a difference between the expected result and the actual result.\n- **Automation does not find bugs.** It reports whether each check passed or failed, and a person decides what a failure means.\n- Before you automate a test, you need a known expected result and a way to find the element.\n- **Playwright** is a free, open-source tool that tests web applications through a browser, from the first step of a task to the last.\n- About half of the effort on a project goes into learning the application. The other half goes into the language, finding elements, and organizing each test."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | three reflection and research problems |\n| **Prerequisites** | [Fundamentals](/learn/w1/d1/p2) — and on the playwright.dev tab it asked you to open |\n| **Next** | [Day 2](/learn/w1/d2/p2) turns all of this into a working setup on your machine |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three written problems that review this day's lesson, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d1/p2), including the Playwright website that it asks you to explore. |\n| **Environment** | The editor on the right, where you write each answer as comments. |"
     }
   }
 }

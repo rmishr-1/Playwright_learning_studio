@@ -510,6 +510,11 @@ function main(): void {
   const rewriteFiles = fs.existsSync(rewriteDir) ? fs.readdirSync(rewriteDir).filter((f) => f.endsWith('.md')).sort() : [];
   for (const file of rewriteFiles) {
     findings.push(...lintProse(fs.readFileSync(path.join(rewriteDir, file), 'utf-8'), 'rewrites/' + file));
+    const sibling = path.join(rewriteDir, file.replace(/\.md$/, '.problems.json'));
+    if (fs.existsSync(sibling)) {
+      const over = JSON.parse(fs.readFileSync(sibling, 'utf-8')) as Record<string, { statement: string }>;
+      for (const [n, o] of Object.entries(over)) findings.push(...lintProse(o.statement, 'rewrites/' + file + ' problem ' + n));
+    }
   }
 
   const errors = findings.filter((f) => f.severity === 'error');
@@ -618,8 +623,16 @@ function main(): void {
     if (!d || !p) { staleRewrites.push(file + ' has no matching part'); continue; }
     if (d.locked) { staleRewrites.push(file + ' rewrites a locked week'); continue; }
     const want = splitRewrite(fs.readFileSync(path.join(rewriteDir, file), 'utf-8'));
-    const got = p.blocks.filter((b) => b.type === 'markdown').map((b) => b.text);
+    const got = p.blocks.filter((b) => b.type === 'markdown' || b.type === 'problem-ref').map((b) => ({ type: b.type, text: b.text }));
     if (JSON.stringify(got) !== JSON.stringify(want)) staleRewrites.push(file);
+    const sibling = path.join(rewriteDir, file.replace(/\.md$/, '.problems.json'));
+    if (fs.existsSync(sibling)) {
+      const over = JSON.parse(fs.readFileSync(sibling, 'utf-8')) as Record<string, { statement: string; stub: string }>;
+      for (const [n, o] of Object.entries(over)) {
+        const q = p.problems.find((x) => String(x.number) === n);
+        if (!q || q.statement !== o.statement || q.stub !== o.stub) staleRewrites.push(file + ' problem ' + n);
+      }
+    }
   }
   check('every rewritten lesson ships exactly its authored text', staleRewrites.length === 0, staleRewrites.join(' | '));
 

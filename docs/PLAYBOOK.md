@@ -56,7 +56,9 @@ to match them.
 | Second person throughout | The reader is "you", in explanations as well as instructions. |
 | Contractions sparingly | Allowed, as in the Playwright docs, but not in every sentence. |
 | American spelling | *organize*, *behavior*, *favorite*. |
-| At-a-glance cards use formal labels | Every card uses only Focus, Goals, Prerequisites, Tools, Environment, Scope, Key takeaway, and Next, in that order. Each row is a full, formal sentence. See [section 2](#the-at-a-glance-card). |
+| At-a-glance cards use formal labels | Every card uses only Focus, Goals, Prerequisites, Tools, Environment, Scope, and Key takeaway, in that order. Each row is a full, formal sentence. See [section 2](#the-at-a-glance-card). |
+| No "Next" row on a card | The tab bar and the week menu already show where to go next, so a card never repeats it. |
+| Explain the course's own conventions on first use | A beginner has not seen a practice page before. The first one explains the Beginner, Intermediate, and Advanced levels, the editor, and `//` comments, instead of referring to them as if they were known. |
 | Code examples follow the GeeksforGeeks order | A lead-in ending in a colon, then the code, **Output**, and **Explanation**. See [section 8](#8-code-presentation). |
 
 ### Scope and way of working
@@ -190,9 +192,11 @@ Output → Explanation**. That predictability is its main strength, and this cou
 **Practice**:
 
 1. Opening
-2. How the problems are graded
-3. The at-a-glance card
-4. Three problems, each using the fixed labels in section 10
+2. The at-a-glance card
+3. How the problems work: the three levels, how to use the editor, and how to check an answer.
+   Explain these in full on the first practice page of the course, and briefly after that.
+4. Three problems, each using the fixed labels in section 10, and each with an editor template
+   that lists the questions to answer as `//` comment lines
 5. When you are done
 
 ### The at-a-glance card
@@ -208,7 +212,6 @@ Every card uses the same labels, in the same order, and a card includes only the
 | **Environment** | Where the code runs, and on which app | In your own project, because these examples need the Playwright test runner. |
 | **Scope** | What is covered here, and what is left for later | This lesson uses a plain function. The class-based Page Object Model is covered in Week 3. |
 | **Key takeaway** | The one idea to keep | Automation does not find defects. It reports whether each check passed or failed. |
-| **Next** | Where to go after this lesson | [Fundamentals](/learn/w2/d1/p2). |
 
 **Write each row as a full, formal sentence** that makes sense without its label. The old labels
 often started a sentence that the row finished ("**You'll watch** | a test pass with the wrong
@@ -664,9 +667,13 @@ overlay and import, and `applyOverlay()` then places the cards around them as us
 
 - The file is authored text, so every rule in this section applies to it, and `verify` fails if
   the shipped lesson differs from it by a single character.
-- It cannot replace a part that contains code examples, your-turn prompts, or practice problems.
-  The step refuses rather than deleting them. Support for those parts is added when the review
-  first reaches one.
+- **Practice problems are supported.** A line reading exactly `<!-- problem 2 -->` places a
+  problem at that point, and the rewrite must place every problem the part has exactly once. The
+  problems' statements and editor templates, which are also generated, go in a sibling file,
+  `w<week>d<day>p<part>.problems.json`. Their model answers stay in `Data/Content/solutions/`.
+  Both are linted and drift-checked like the rest.
+- **Code examples and your-turn prompts are not supported yet.** The step refuses a part that
+  contains them, rather than deleting them. Support is added when the review first reaches one.
 - Week 1 Day 1 Fundamentals is the first lesson rewritten this way, for a complete beginner. It went
   from 12 sections to 8, and from 33 em dashes to none. It is clean under every rule, where the old
   text had 3 errors and 5 warnings. Its word count barely changed (1,422 to 1,339), because

@@ -153,6 +153,7 @@ export const MAX_WORDS_WARN = 32;
 export function stripCode(md: string): string {
   return md
     .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ') // an HTML comment is never shown, e.g. a rewrite's problem placeholder
     .replace(/`[^`]*`/g, 'CODE')
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1') // keep the link label, drop the href
     .replace(/^#{1,6}\s+/gm, '')
@@ -253,7 +254,9 @@ export function lintProse(text: string, where: string): Finding[] {
  * the text beside it is. A row needing a label outside this set is a sign the row belongs elsewhere.
  */
 export const CARD_LABELS: readonly string[] = [
-  'Focus', 'Goals', 'Prerequisites', 'Tools', 'Environment', 'Scope', 'Key takeaway', 'Next',
+  // No 'Next': the tab bar and the week menu already show where to go next, so a card row saying
+  // so repeats the navigation. The course owner removed it.
+  'Focus', 'Goals', 'Prerequisites', 'Tools', 'Environment', 'Scope', 'Key takeaway',
 ];
 
 export function lintCardLabels(md: string, where: string): Finding[] {

@@ -66,7 +66,7 @@
       "recap": "- Discovery happens by **filename**, before a line of your code is read.\n- A file that does not match is invisible: no error, no warning, no count.\n- `npx playwright test <dir> --list` is the cheap way to check what the runner can actually see.\n- Never assume \"the file is there, so it must be running\" — when in doubt, list and count."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | the first genuinely needs a terminal, like Codegen itself |\n| **Goals** | Problem 3 reproduces the silent-file failure on purpose, so that you recognize it later. |\n| **Next** | [Day 5](/learn/w1/d5/p1) is the week's capstone — your first real test, and why assertions matter |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | the first genuinely needs a terminal, like Codegen itself |\n| **Goals** | Problem 3 reproduces the silent-file failure on purpose, so that you recognize it later. |"
     }
   }
 }

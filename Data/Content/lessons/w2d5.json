@@ -4,7 +4,7 @@
   "day": 5,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | a fact about how Playwright runs tests, not a language feature |\n| **Tools** | `test.describe`, which uses syntax you already know |\n| **Next** | [Fundamentals](/learn/w2/d5/p2), where that fact breaks a test in front of you |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | a fact about how Playwright runs tests, not a language feature |\n| **Tools** | `test.describe`, which uses syntax you already know |",
       "checkpoints": [
         {
           "question": "What is the one new thing Day 5 introduces?",

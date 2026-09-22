@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | a fact about how Playwright runs tests, not a language feature |\n| **Tools** | `test.describe`, which uses syntax you already know |\n| **Next** | [Fundamentals](/learn/w2/d5/p2), where that fact breaks a test in front of you |",
+          "text": "| | |\n|---|---|\n| **Focus** | a fact about how Playwright runs tests, not a language feature |\n| **Tools** | `test.describe`, which uses syntax you already know |",
           "starter": null,
           "variation": null,
           "checkpoint": null

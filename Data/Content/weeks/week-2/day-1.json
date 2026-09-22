@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Prerequisites** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Next** | [Fundamentals](/learn/w2/d1/p2), which is all Playwright API |",
+          "text": "| | |\n|---|---|\n| **Prerequisites** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |",
           "starter": null,
           "variation": null,
           "checkpoint": null

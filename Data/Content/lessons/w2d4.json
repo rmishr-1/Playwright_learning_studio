@@ -4,7 +4,7 @@
   "day": 4,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Next** | [Fundamentals](/learn/w2/d4/p2) |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | one locator technique, the sibling axis — and a new app, because it needs a real table |",
       "checkpoints": [
         {
           "question": "Day 4 switches to OrangeHRM's demo HR system instead of the registration form used all week. Why?",

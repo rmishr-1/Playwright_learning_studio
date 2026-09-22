@@ -4,7 +4,7 @@
   "day": 1,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **Prerequisites** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Next** | [Fundamentals](/learn/w2/d1/p2), which is all Playwright API |",
+      "at_a_glance": "| | |\n|---|---|\n| **Prerequisites** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |",
       "checkpoints": [
         {
           "question": "Every test today is written `async ({ page }) => { ... }`. What is that `page`?",

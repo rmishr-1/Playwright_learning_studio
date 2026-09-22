@@ -326,50 +326,76 @@ export function applyStudioCopy(day: CourseDay): CourseDay {
  * the H1, and the checkpoints and recap before `## What's next`, so the file only needs to open
  * with the H1 and end with a What's next section.
  */
-export function loadRewrites(contentDir: string, week: number, day: number): Map<number, string[]> {
-  const out = new Map<number, string[]>();
+export type RewriteBlock = { type: 'markdown' | 'problem-ref'; text: string };
+export type ProblemRewrite = { statement: string; stub: string };
+export type PartRewrite = { blocks: RewriteBlock[]; problems: Record<string, ProblemRewrite> };
+
+export function loadRewrites(contentDir: string, week: number, day: number): Map<number, PartRewrite> {
+  const out = new Map<number, PartRewrite>();
   const dir = path.join(contentDir, 'rewrites');
   if (!fs.existsSync(dir)) return out;
   for (const f of fs.readdirSync(dir)) {
     const m = /^w(\d+)d(\d+)p(\d)\.md$/.exec(f);
     if (!m || +m[1] !== week || +m[2] !== day) continue;
-    out.set(+m[3], splitRewrite(fs.readFileSync(path.join(dir, f), 'utf-8')));
+    // Optional sibling: w<W>d<D>p<P>.problems.json, authored statements and editor templates for
+    // the part's practice problems, which are generated from the notebooks like the body.
+    const sibling = path.join(dir, f.replace(/\.md$/, '.problems.json'));
+    out.set(+m[3], {
+      blocks: splitRewrite(fs.readFileSync(path.join(dir, f), 'utf-8')),
+      problems: fs.existsSync(sibling) ? (JSON.parse(fs.readFileSync(sibling, 'utf-8')) as Record<string, ProblemRewrite>) : {},
+    });
   }
   return out;
 }
 
-/** One block per `## ` section, with the H1 and its opening paragraphs as the first block. */
-export function splitRewrite(md: string): string[] {
-  return md
-    .replace(/\r\n/g, '\n')
-    .split(/\n(?=## )/)
-    .map((b) => b.trim())
-    .filter(Boolean);
+/**
+ * One markdown block per `## ` section, with the H1 and its opening paragraphs as the first block.
+ * A line reading exactly `<!-- problem N -->` becomes a problem-ref block at that position, which is
+ * how a rewritten Practice page says where each problem is shown.
+ */
+export function splitRewrite(md: string): RewriteBlock[] {
+  const out: RewriteBlock[] = [];
+  for (const chunk of md.replace(/\r\n/g, '\n').split(/\n(?=## )/)) {
+    for (const piece of chunk.split(/^(<!-- problem \d+ -->)$/m)) {
+      const ref = /^<!-- problem (\d+) -->$/.exec(piece.trim());
+      if (ref) out.push({ type: 'problem-ref', text: ref[1] });
+      else if (piece.trim()) out.push({ type: 'markdown', text: piece.trim() });
+    }
+  }
+  return out;
 }
 
 /** Block types a whole-body rewrite would silently delete if it replaced the part wholesale. */
-const GENERATED_NON_PROSE = new Set(['example', 'your-turn', 'problem-ref']);
+const GENERATED_CODE = new Set(['example', 'your-turn']);
 
-export function applyRewrites(day: CourseDay, rewrites: Map<number, string[]>): CourseDay {
+export function applyRewrites(day: CourseDay, rewrites: Map<number, PartRewrite>): CourseDay {
   if (day.locked || rewrites.size === 0) return day;
+  const at = (part: number) => 'w' + day.week + 'd' + day.day + 'p' + part;
   return {
     ...day,
     parts: day.parts.map((part) => {
-      const body = rewrites.get(part.part);
-      if (!body) return part;
-      // A lesson with code examples cannot be replaced wholesale: the examples, and the
-      // your-turn prompts and practice problems anchored among them, would disappear. That needs
-      // placeholders in the rewrite file, and is built when the review first reaches such a part.
-      const code = part.blocks.find((b) => GENERATED_NON_PROSE.has(b.type));
+      const rw = rewrites.get(part.part);
+      if (!rw) return part;
+      // A lesson with code examples cannot be replaced wholesale: the examples, and the your-turn
+      // prompts anchored among them, would disappear. That needs code placeholders in the rewrite
+      // file, and is built when the review first reaches such a part.
+      const code = part.blocks.find((b) => GENERATED_CODE.has(b.type));
       if (code) {
-        throw new Error(
-          'w' + day.week + 'd' + day.day + 'p' + part.part + ' has a generated "' + code.type +
-            '" block, which a whole-body rewrite would delete. Rewrites support prose-only parts.',
-        );
+        throw new Error(at(part.part) + ' has a generated "' + code.type + '" block, which a whole-body rewrite would delete.');
       }
-      const kept = part.blocks.filter((b) => b.type !== 'markdown');
-      const prose = body.map((text) => ({ type: 'markdown' as const, text, starter: null, variation: null, checkpoint: null }));
-      return { ...part, blocks: [...prose, ...kept] };
+      // Every problem the part has must be placed exactly once, or it would vanish or repeat.
+      const placed = rw.blocks.filter((b) => b.type === 'problem-ref').map((b) => b.text).sort().join(',');
+      const needed = part.problems.map((q) => String(q.number)).sort().join(',');
+      if (placed !== needed) {
+        throw new Error(at(part.part) + ' rewrite places problems [' + placed + '] but the part has [' + needed + '].');
+      }
+      const cards = part.blocks.filter((b) => b.type !== 'markdown' && b.type !== 'problem-ref');
+      const body = rw.blocks.map((b) => ({ type: b.type, text: b.text, starter: null, variation: null, checkpoint: null }));
+      const problems = part.problems.map((q) => {
+        const o = rw.problems[String(q.number)];
+        return o ? { ...q, statement: o.statement, stub: o.stub } : q;
+      });
+      return { ...part, blocks: [...body, ...cards], problems };
     }) as CourseDay['parts'],
   };
 }
