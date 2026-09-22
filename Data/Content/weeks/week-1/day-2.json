@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Where it runs** | here in the editor. The cells read real files on your disk. |\n| **Assumes** | nothing but a terminal |",
+          "text": "| | |\n|---|---|\n| **Goals** | check Node · open this repo in VS Code · read its real `playwright.config.ts`; what `npm init playwright@latest` writes, and why you must not run it here |\n| **Prerequisites** | nothing but a terminal |\n| **Environment** | here in the editor. The cells read real files on your disk. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -224,7 +224,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll learn** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Builds on** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
+          "text": "| | |\n|---|---|\n| **Goals** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Prerequisites** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -367,7 +367,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | your real environment, and this repo's real config |\n| **Nothing to guess** | every answer is something you can read off your own machine |\n| **Pulls on** | [Fundamentals](/learn/w1/d2/p2) for the config · [Implementation](/learn/w1/d2/p3) for the structure |",
+          "text": "| | |\n|---|---|\n| **Focus** | your real environment, and this repo's real config |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2) for the config · [Implementation](/learn/w1/d2/p3) for the structure |\n| **Environment** | every answer is something you can read off your own machine |",
           "starter": null,
           "variation": null,
           "checkpoint": null

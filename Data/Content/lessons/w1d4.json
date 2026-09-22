@@ -4,7 +4,7 @@
   "day": 4,
   "parts": {
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea to take away** | locate by what an element *is* to a user, not by where it sits in the markup |",
+      "at_a_glance": "| | |\n|---|---|\n| **Tools** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **Environment** | the course's banking app, signed in as Leela; Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **Key takeaway** | locate by what an element *is* to a user, not by where it sits in the markup |",
       "checkpoints": [
         {
           "question": "Why does Codegen generate `getByRole(\"button\", { name: \"Login\" })` rather than something like `#ng-x7f2q3`?",
@@ -40,7 +40,7 @@
       "recap": "- Prefer `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText`. Let Codegen's defaults be yours.\n- Generated ids and raw XPath encode the markup of the day, and break when it changes.\n- Codegen gives a **draft**: keep the locators, drop the noise.\n- **A missing `.spec.ts` suffix is a silent failure, not a loud one** — the runner simply never looks at the file.\n- On this app the dashboard tiles are `<p>` elements, so `getByRole(\"link\", ...)` finds nothing."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **The API** | the same locators from [Fundamentals](/learn/w1/d4/p2), used to prove a rule about discovery |\n| **What you'll watch** | a valid test file ignored entirely, then found, purely because of its name |\n| **The tool** | `npx playwright test <dir> --list` — counts what the runner can actually see |",
+      "at_a_glance": "| | |\n|---|---|\n| **Goals** | Watch the test runner ignore a valid test file, then find it, purely because of the file's name. |\n| **Tools** | the same locators from [Fundamentals](/learn/w1/d4/p2), used to prove a rule about discovery; `npx playwright test <dir> --list` — counts what the runner can actually see |",
       "checkpoints": [
         {
           "question": "`--list` reports `Total: 2 tests in 1 file`, but you know there are two test files in that folder. What does that tell you?",
@@ -66,7 +66,7 @@
       "recap": "- Discovery happens by **filename**, before a line of your code is read.\n- A file that does not match is invisible: no error, no warning, no count.\n- `npx playwright test <dir> --list` is the cheap way to check what the runner can actually see.\n- Never assume \"the file is there, so it must be running\" — when in doubt, list and count."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | the first genuinely needs a terminal, like Codegen itself |\n| **Problem 3** | reproduces the silent-file failure on purpose, so you recognize it later |\n| **Next** | [Day 5](/learn/w1/d5/p1) is the week's capstone — your first real test, and why assertions matter |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | the first genuinely needs a terminal, like Codegen itself |\n| **Goals** | Problem 3 reproduces the silent-file failure on purpose, so that you recognize it later. |\n| **Next** | [Day 5](/learn/w1/d5/p1) is the week's capstone — your first real test, and why assertions matter |"
     }
   }
 }

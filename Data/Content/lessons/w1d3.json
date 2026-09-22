@@ -4,7 +4,7 @@
   "day": 3,
   "parts": {
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `npx playwright test` · `--headed` · `show-report` |\n| **You'll learn** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Where it runs** | here, though the first cells run real terminal commands |\n| **Watch for** | the test count. This repo runs chromium only, so it is lower than a fresh scaffold's. |",
+      "at_a_glance": "| | |\n|---|---|\n| **Goals** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Tools** | `npx playwright test` · `--headed` · `show-report` |\n| **Environment** | here, though the first cells run real terminal commands |\n| **Key takeaway** | Check the test count. This repo runs Chromium only, so the count is lower than a fresh scaffold's. |",
       "checkpoints": [
         {
           "question": "Two tests run here and report `2 passed`. The same two tests on a fresh `npm init playwright@latest` scaffold report `6 passed`. Why?",
@@ -40,7 +40,7 @@
       "recap": "- `npx` runs the locally installed CLI out of `node_modules/.bin`, so nothing needs installing globally.\n- `package.json` is yours to edit; `package-lock.json` is npm's to write and yours to commit.\n- Run one spec file while writing it; run the suite before you call it done.\n- `--headed` to watch it happen, `show-report` to see what already happened.\n- **The `projects` array multiplies your test count.** Check it before being surprised by a number."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **Deliberately shallow** | recognize every setting; master none of them yet |\n| **Covered properly later** | timeouts in week 3 day 1 · `projects`, `workers`, `retries` in week 3 day 5 |\n| **The one to remember today** | `retain-on-failure` — keep the evidence only when something went wrong |",
+      "at_a_glance": "| | |\n|---|---|\n| **Scope** | Recognize every setting, without mastering any of them yet. Timeouts are covered in Week 3 - Day 1, and `projects`, `workers`, and `retries` in Week 3 - Day 5. |\n| **Key takeaway** | `retain-on-failure` — keep the evidence only when something went wrong |",
       "checkpoints": [
         {
           "question": "`trace`, `screenshot` and `video` are all set to keep artifacts only on failure. Why not simply record everything?",
@@ -66,7 +66,7 @@
       "recap": "- `testDir`/`testMatch` find the specs; `projects` decides which browsers, and multiplies the count.\n- `use` holds what every test gets by default — `baseURL` is why `page.goto(\"/\")` works.\n- `retain-on-failure` for trace, screenshot and video: one decision, three settings.\n- `retries` on in CI, off locally. `forbidOnly` stops a stray `.only` passing CI on one test.\n- Today is recognition, not mastery. Week 3 takes the same file apart with measurements."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | the real CLI and the real config, nothing invented |\n| **Problem 1 wants a terminal** | run it yourself with `--headed`, not through the studio's runner |\n| **Pulls on** | [Fundamentals](/learn/w1/d3/p2) for the commands · [Implementation](/learn/w1/d3/p3) for the settings |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | the real CLI and the real config, nothing invented |\n| **Prerequisites** | [Fundamentals](/learn/w1/d3/p2) for the commands · [Implementation](/learn/w1/d3/p3) for the settings |\n| **Environment** | Run Problem 1 yourself with `--headed`, in your own project rather than the studio's test runner. |"
     }
   }
 }

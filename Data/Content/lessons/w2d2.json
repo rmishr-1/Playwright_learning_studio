@@ -28,7 +28,7 @@
       ]
     },
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `xpath=//tag[@attr='v']` · `tag[attr='v']` · `expect().toContainText()` · `.toHaveValue()` · `.toHaveURL()` |\n| **Assumes** | [const and type inference](/learn/w2/d2/p1) · [locators](/learn/w1/d4/p2) |\n| **Mode** | mixed — locator syntax runs live, but `expect()` only retries inside the test runner, so assertions go into a spec |\n| **The shift** | [Day 1](/learn/w2/d1/p2) could only prove nothing threw. From here a test can fail for the right reason. |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | [Day 1](/learn/w2/d1/p2) could only prove nothing threw. From here a test can fail for the right reason. |\n| **Prerequisites** | [const and type inference](/learn/w2/d2/p1) · [locators](/learn/w1/d4/p2) |\n| **Tools** | `xpath=//tag[@attr='v']` · `tag[attr='v']` · `expect().toContainText()` · `.toHaveValue()` · `.toHaveURL()` |\n| **Environment** | mixed — locator syntax runs live, but `expect()` only retries inside the test runner, so assertions go into a spec |",
       "checkpoints": [
         {
           "question": "Which XPath belongs in code you intend to keep?",
@@ -64,7 +64,7 @@
       "recap": "- Relative XPath (`//tag[@attr='v']`) always; absolute XPath never.\n- XPath can go up and sideways in the DOM; CSS can only go down and to the next sibling. That is the one real reason to reach for XPath.\n- `expect()` **retries**; a plain `if` checks once. That is the whole difference, and it only works inside the test runner.\n- `toContainText` for a fragment, `toHaveText` only when you know the exact string. Text matchers normalize whitespace.\n- Assert something observable. \"It didn't throw\" is not an assertion."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1 - Implementation](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Prerequisites** | [Day 1 - Implementation](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |\n| **Tools** | every line ran in [Fundamentals](/learn/w2/d2/p2) |",
       "checkpoints": [
         {
           "question": "A page object must never assert. So why is `expectFormFilledCorrectly` allowed to be nothing but `expect()` calls?",
@@ -90,7 +90,7 @@
       "recap": "- Copy-pasted `expect()` calls are the same problem as copy-pasted actions, with the same fix: put them in one function.\n- Name a checker for what it checks (`expectFormFilledCorrectly`), so a reader can tell at the call site that nothing is being *done* to the page.\n- Keep actions and checks in separate functions. Week 3 formalises that split into a class; the discipline is identical today."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | XPath by hand, then assertions, then a helper of your own |\n| **Pulls on** | [TypeScript](/learn/w2/d2/p1) for `const` · [Fundamentals](/learn/w2/d2/p2) for matchers · [Implementation](/learn/w2/d2/p3) for the shape |\n| **Watch for** | an assertion that passes for the wrong reason — it is the failure mode this whole day exists to fix |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | XPath by hand, then assertions, then a helper of your own |\n| **Prerequisites** | [TypeScript](/learn/w2/d2/p1) for `const` · [Fundamentals](/learn/w2/d2/p2) for matchers · [Implementation](/learn/w2/d2/p3) for the shape |\n| **Key takeaway** | Watch for an assertion that passes for the wrong reason. This day exists to prevent that failure. |"
     }
   }
 }

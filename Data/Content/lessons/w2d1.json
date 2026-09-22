@@ -4,7 +4,7 @@
   "day": 1,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **Leans on** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Then go to** | [Fundamentals](/learn/w2/d1/p2), which is all Playwright API |",
+      "at_a_glance": "| | |\n|---|---|\n| **Prerequisites** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Next** | [Fundamentals](/learn/w2/d1/p2), which is all Playwright API |",
       "checkpoints": [
         {
           "question": "Every test today is written `async ({ page }) => { ... }`. What is that `page`?",
@@ -20,7 +20,7 @@
       "recap": "Today's code uses the TypeScript from Week 1. If the table above had any surprises in it, follow the link before starting [Fundamentals](/learn/w2/d1/p2) — the Playwright will be easier to see if the language underneath it is not also new."
     },
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `.fill()` · `.pressSequentially()` · `.check()` · `.selectOption()` |\n| **On** | [the Register.html signup form](https://demo.automationtesting.in/Register.html) — every control type on one page |\n| **Assumes** | [locators](/learn/w1/d4/p2) · [async and the page fixture](/learn/w1/d5/p1) |\n| **Not yet** | assertions — nothing here checks the form *worked*. That is [Day 2](/learn/w2/d2/p2). |",
+      "at_a_glance": "| | |\n|---|---|\n| **Prerequisites** | [locators](/learn/w1/d4/p2) · [async and the page fixture](/learn/w1/d5/p1) |\n| **Tools** | `.fill()` · `.pressSequentially()` · `.check()` · `.selectOption()` |\n| **Environment** | [the Register.html signup form](https://demo.automationtesting.in/Register.html) — every control type on one page |\n| **Scope** | This lesson fills the form. Checking that it worked, with assertions, is covered in [Day 2 - Fundamentals](/learn/w2/d2/p2). |",
       "checkpoints": [
         {
           "question": "You are filling a search box that shows autocomplete suggestions as you type, and the suggestions are what you need to click. Which method fills it?",
@@ -57,7 +57,7 @@
       "recap": "- `.fill()` by default. `.pressSequentially()` only when the page reacts to each keystroke.\n- `.check()` makes a control checked — it does not toggle it, so calling it twice is safe and you never compute the current state first.\n- `.selectOption({ label })` matches the visible text; a bare string matches the option's `value`.\n- Verify a skinned `<select>` rather than assuming. `#country` carries `aria-hidden` and a Select2 class and still takes `.selectOption()` — on another app it might not.\n- **A test with no `expect()` cannot fail for the right reason.** Everything today is actions; assertions start tomorrow."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line here is something you ran in [Fundamentals](/learn/w2/d1/p2) |\n| **What changes** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Not yet** | the Page Object Model. This is a plain function; the class version is week 3. |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Tools** | every line here is something you ran in [Fundamentals](/learn/w2/d1/p2) |\n| **Scope** | This lesson uses a plain function. The class-based Page Object Model is covered in Week 3. |",
       "checkpoints": [
         {
           "question": "The helper is saved as `registration-helpers.ts`, deliberately not `registration-helpers.spec.ts`. Why does the suffix matter?",
@@ -83,7 +83,7 @@
       "recap": "- Repetition across tests is a structural problem, not a typing problem: ten lines in thirty specs is thirty edits when the form changes.\n- The fix is the simplest thing that works — a function. The Page Object Model is the same instinct with a class around it, and it arrives in week 3.\n- Name a helper for what it does (`fillRegistrationForm`), not for the calls inside it.\n- No `expect()` inside a helper that performs actions. That is a preview of the \"no assertions in a page object\" rule, and it holds for the same reason."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | Beginner → Advanced, no answer key on the first two |\n| **Pulls on** | [Fundamentals](/learn/w2/d1/p2) for the actions · [Implementation](/learn/w2/d1/p3) for the structure |\n| **If you stall** | more than ~20 minutes on one means the gap is in the lesson, not in you — go back and re-read |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Beginner → Advanced, no answer key on the first two |\n| **Prerequisites** | [Fundamentals](/learn/w2/d1/p2) for the actions · [Implementation](/learn/w2/d1/p3) for the structure |\n| **Key takeaway** | more than ~20 minutes on one means the gap is in the lesson, not in you — go back and re-read |"
     }
   }
 }

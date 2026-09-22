@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea to take away** | locate by what an element *is* to a user, not by where it sits in the markup |",
+          "text": "| | |\n|---|---|\n| **Tools** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **Environment** | the course's banking app, signed in as Leela; Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **Key takeaway** | locate by what an element *is* to a user, not by where it sits in the markup |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -171,7 +171,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **The API** | the same locators from [Fundamentals](/learn/w1/d4/p2), used to prove a rule about discovery |\n| **What you'll watch** | a valid test file ignored entirely, then found, purely because of its name |\n| **The tool** | `npx playwright test <dir> --list` — counts what the runner can actually see |",
+          "text": "| | |\n|---|---|\n| **Goals** | Watch the test runner ignore a valid test file, then find it, purely because of the file's name. |\n| **Tools** | the same locators from [Fundamentals](/learn/w1/d4/p2), used to prove a rule about discovery; `npx playwright test <dir> --list` — counts what the runner can actually see |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -335,7 +335,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | the first genuinely needs a terminal, like Codegen itself |\n| **Problem 3** | reproduces the silent-file failure on purpose, so you recognize it later |\n| **Next** | [Day 5](/learn/w1/d5/p1) is the week's capstone — your first real test, and why assertions matter |",
+          "text": "| | |\n|---|---|\n| **Focus** | the first genuinely needs a terminal, like Codegen itself |\n| **Goals** | Problem 3 reproduces the silent-file failure on purpose, so that you recognize it later. |\n| **Next** | [Day 5](/learn/w1/d5/p1) is the week's capstone — your first real test, and why assertions matter |",
           "starter": null,
           "variation": null,
           "checkpoint": null

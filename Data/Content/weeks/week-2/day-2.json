@@ -174,7 +174,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll use** | `xpath=//tag[@attr='v']` · `tag[attr='v']` · `expect().toContainText()` · `.toHaveValue()` · `.toHaveURL()` |\n| **Assumes** | [const and type inference](/learn/w2/d2/p1) · [locators](/learn/w1/d4/p2) |\n| **Mode** | mixed — locator syntax runs live, but `expect()` only retries inside the test runner, so assertions go into a spec |\n| **The shift** | [Day 1](/learn/w2/d1/p2) could only prove nothing threw. From here a test can fail for the right reason. |",
+          "text": "| | |\n|---|---|\n| **Focus** | [Day 1](/learn/w2/d1/p2) could only prove nothing threw. From here a test can fail for the right reason. |\n| **Prerequisites** | [const and type inference](/learn/w2/d2/p1) · [locators](/learn/w1/d4/p2) |\n| **Tools** | `xpath=//tag[@attr='v']` · `tag[attr='v']` · `expect().toContainText()` · `.toHaveValue()` · `.toHaveURL()` |\n| **Environment** | mixed — locator syntax runs live, but `expect()` only retries inside the test runner, so assertions go into a spec |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -353,7 +353,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1 - Implementation](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
+          "text": "| | |\n|---|---|\n| **Focus** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Prerequisites** | [Day 1 - Implementation](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |\n| **Tools** | every line ran in [Fundamentals](/learn/w2/d2/p2) |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -450,7 +450,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | XPath by hand, then assertions, then a helper of your own |\n| **Pulls on** | [TypeScript](/learn/w2/d2/p1) for `const` · [Fundamentals](/learn/w2/d2/p2) for matchers · [Implementation](/learn/w2/d2/p3) for the shape |\n| **Watch for** | an assertion that passes for the wrong reason — it is the failure mode this whole day exists to fix |",
+          "text": "| | |\n|---|---|\n| **Focus** | XPath by hand, then assertions, then a helper of your own |\n| **Prerequisites** | [TypeScript](/learn/w2/d2/p1) for `const` · [Fundamentals](/learn/w2/d2/p2) for matchers · [Implementation](/learn/w2/d2/p3) for the shape |\n| **Key takeaway** | Watch for an assertion that passes for the wrong reason. This day exists to prevent that failure. |",
           "starter": null,
           "variation": null,
           "checkpoint": null

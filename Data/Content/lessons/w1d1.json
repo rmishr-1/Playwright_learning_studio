@@ -4,7 +4,7 @@
   "day": 1,
   "parts": {
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **Today's shape** | orientation, plus one \"go and look at this\" step |\n| **You'll be able to say** | what automation cannot do · why Playwright over Selenium · where the effort really goes |\n| **Assumes** | nothing at all — this is the first lesson |\n| **The sentence to keep** | automation never finds a defect. It reports pass or fail. |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | An orientation to test automation, with one guided look at the Playwright website. |\n| **Goals** | Explain what automation cannot do, why teams choose Playwright over Selenium, and where automation effort is spent. |\n| **Prerequisites** | No prior knowledge is required. This is the first lesson in the course. |\n| **Key takeaway** | Automation does not find defects. It reports whether each check passed or failed. |",
       "checkpoints": [
         {
           "question": "Your suite of 500 automated tests runs green overnight. What has it proved?",
@@ -40,7 +40,7 @@
       "recap": "- **Automation never finds a defect.** It reports pass or fail against checks a person wrote; a person decides what a failure means.\n- Two non-negotiables before automating anything: a known expected result, and an identifiable object.\n- Playwright folds in what Selenium needs extra tooling for — auto-waiting, assertions, a runner, tracing. Selenium is older, not bad.\n- Its home is system-level end-to-end testing, and its mobile support is emulation, not native apps.\n- About half your effort on a real project goes into learning the **application**, not the tool."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **What you'll do** | three reflection and research problems |\n| **Pulls on** | [Fundamentals](/learn/w1/d1/p2) — and on the playwright.dev tab it asked you to open |\n| **Next** | [Day 2](/learn/w1/d2/p2) turns all of this into a working setup on your machine |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | three reflection and research problems |\n| **Prerequisites** | [Fundamentals](/learn/w1/d1/p2) — and on the playwright.dev tab it asked you to open |\n| **Next** | [Day 2](/learn/w1/d2/p2) turns all of this into a working setup on your machine |"
     }
   }
 }

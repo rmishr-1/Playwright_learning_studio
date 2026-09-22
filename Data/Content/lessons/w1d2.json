@@ -4,7 +4,7 @@
   "day": 2,
   "parts": {
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Where it runs** | here in the editor. The cells read real files on your disk. |\n| **Assumes** | nothing but a terminal |",
+      "at_a_glance": "| | |\n|---|---|\n| **Goals** | check Node · open this repo in VS Code · read its real `playwright.config.ts`; what `npm init playwright@latest` writes, and why you must not run it here |\n| **Prerequisites** | nothing but a terminal |\n| **Environment** | here in the editor. The cells read real files on your disk. |",
       "checkpoints": [
         {
           "question": "Why does this lesson tell you NOT to run `npm init playwright@latest` in this repo?",
@@ -40,7 +40,7 @@
       "recap": "- Any Node 18+ is fine; the exact numbers on your machine will differ from anyone else's.\n- **Never re-scaffold a repo that already has a config you care about.** This one is already set up.\n- `testMatch` in the root config is why a spec written into `week*/generated/` is found without registering it anywhere.\n- `baseURL` is why every `page.goto(\"/\")` in this course resolves to the banking app.\n- Commit `package.json` and `package-lock.json`; never `node_modules/`.\n- The browsers are a separate download from the npm package — `npx playwright install` if they are missing."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll learn** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Builds on** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
+      "at_a_glance": "| | |\n|---|---|\n| **Goals** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Prerequisites** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
       "checkpoints": [
         {
           "question": "You move off the flat `tests/` folder and split specs into `UI_test/` and `API_test/`. Is setting `testDir` enough?",
@@ -66,7 +66,7 @@
       "recap": "- Group test folders by what they have in common: shared setup, fixtures, tags. Do not group them by the order you wrote them.\n- `testDir` finds the root; `testMatch` decides what is a spec. You usually need both.\n- This course groups by week rather than by test type. The principle is the same.\n- **If a run regenerates it, it does not belong in git**: `node_modules/`, `test-results/`, `playwright-report/`."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | your real environment, and this repo's real config |\n| **Nothing to guess** | every answer is something you can read off your own machine |\n| **Pulls on** | [Fundamentals](/learn/w1/d2/p2) for the config · [Implementation](/learn/w1/d2/p3) for the structure |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | your real environment, and this repo's real config |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2) for the config · [Implementation](/learn/w1/d2/p3) for the structure |\n| **Environment** | every answer is something you can read off your own machine |"
     }
   }
 }

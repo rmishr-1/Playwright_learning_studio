@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Fundamentals](/learn/w2/d4/p2) |",
+          "text": "| | |\n|---|---|\n| **Focus** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Next** | [Fundamentals](/learn/w2/d4/p2) |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -83,7 +83,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll use** | `parent::` · `following-sibling::` · `[last()]` · `contains()` |\n| **On** | OrangeHRM's demo HR system — a **shared public sandbox**, so everything created here is deleted again |\n| **Assumes** | [XPath syntax](/learn/w2/d2/p2) · [Math.random() for unique data](/learn/w2/d3/p1) |\n| **The idea worth keeping** | anchor on text you know, then walk sideways — never count columns |",
+          "text": "| | |\n|---|---|\n| **Prerequisites** | [XPath syntax](/learn/w2/d2/p2) · [Math.random() for unique data](/learn/w2/d3/p1) |\n| **Tools** | `parent::` · `following-sibling::` · `[last()]` · `contains()` |\n| **Environment** | OrangeHRM's demo HR system — a **shared public sandbox**, so everything created here is deleted again |\n| **Key takeaway** | anchor on text you know, then walk sideways — never count columns |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -329,7 +329,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
+          "text": "| | |\n|---|---|\n| **Focus** | create, find and delete each become a function; the long cell becomes three calls |\n| **Tools** | every line ran in [Fundamentals](/learn/w2/d4/p2) |\n| **Key takeaway** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -470,7 +470,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | on a live, shared HR system |\n| **Pulls on** | [Fundamentals](/learn/w2/d4/p2) for the axes · [Implementation](/learn/w2/d4/p3) for the helper shape |\n| **Non-negotiable** | anything you create, you delete — someone else is using this demo right now |",
+          "text": "| | |\n|---|---|\n| **Focus** | on a live, shared HR system |\n| **Prerequisites** | [Fundamentals](/learn/w2/d4/p2) for the axes · [Implementation](/learn/w2/d4/p3) for the helper shape |\n| **Key takeaway** | anything you create, you delete — someone else is using this demo right now |",
           "starter": null,
           "variation": null,
           "checkpoint": null

@@ -11,7 +11,7 @@ import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
 import { findNotebookisms, findSupersededCopy, findUnresolvedLinks } from '../../scripts/notebook-parse';
 import { applyHeadingFormat, REMOVED_PARTS, ROLE_HEADING_WEEKS } from '../../scripts/lesson-overlay';
-import { ERROR_RULES, lintExplanationShape, lintProse, type Finding } from './style-rules';
+import { ERROR_RULES, lintCardLabels, lintExplanationShape, lintProse, type Finding } from './style-rules';
 
 const CONTENT = path.resolve(__dirname, '..', '..', 'Data', 'Content');
 
@@ -472,7 +472,10 @@ function main(): void {
     };
     for (const [partNo, part] of Object.entries(raw.parts)) {
       const at = 'lessons/' + file + ' p' + partNo;
-      if (part.at_a_glance) findings.push(...lintProse(part.at_a_glance, at + ' at_a_glance'));
+      if (part.at_a_glance) {
+        findings.push(...lintProse(part.at_a_glance, at + ' at_a_glance'));
+        findings.push(...lintCardLabels(part.at_a_glance, at + ' at_a_glance'));
+      }
       if (part.recap) findings.push(...lintProse(part.recap, at + ' recap'));
       (part.checkpoints ?? []).forEach((c, i) => {
         const cp = at + ' checkpoint ' + (i + 1);

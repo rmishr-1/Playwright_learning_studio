@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Leans on** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Then go to** | [Fundamentals](/learn/w2/d1/p2), which is all Playwright API |",
+          "text": "| | |\n|---|---|\n| **Prerequisites** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Next** | [Fundamentals](/learn/w2/d1/p2), which is all Playwright API |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -83,7 +83,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll use** | `.fill()` · `.pressSequentially()` · `.check()` · `.selectOption()` |\n| **On** | [the Register.html signup form](https://demo.automationtesting.in/Register.html) — every control type on one page |\n| **Assumes** | [locators](/learn/w1/d4/p2) · [async and the page fixture](/learn/w1/d5/p1) |\n| **Not yet** | assertions — nothing here checks the form *worked*. That is [Day 2](/learn/w2/d2/p2). |",
+          "text": "| | |\n|---|---|\n| **Prerequisites** | [locators](/learn/w1/d4/p2) · [async and the page fixture](/learn/w1/d5/p1) |\n| **Tools** | `.fill()` · `.pressSequentially()` · `.check()` · `.selectOption()` |\n| **Environment** | [the Register.html signup form](https://demo.automationtesting.in/Register.html) — every control type on one page |\n| **Scope** | This lesson fills the form. Checking that it worked, with assertions, is covered in [Day 2 - Fundamentals](/learn/w2/d2/p2). |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -293,7 +293,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **The API** | every line here is something you ran in [Fundamentals](/learn/w2/d1/p2) |\n| **What changes** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Not yet** | the Page Object Model. This is a plain function; the class version is week 3. |",
+          "text": "| | |\n|---|---|\n| **Focus** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Tools** | every line here is something you ran in [Fundamentals](/learn/w2/d1/p2) |\n| **Scope** | This lesson uses a plain function. The class-based Page Object Model is covered in Week 3. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -404,7 +404,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | Beginner → Advanced, no answer key on the first two |\n| **Pulls on** | [Fundamentals](/learn/w2/d1/p2) for the actions · [Implementation](/learn/w2/d1/p3) for the structure |\n| **If you stall** | more than ~20 minutes on one means the gap is in the lesson, not in you — go back and re-read |",
+          "text": "| | |\n|---|---|\n| **Focus** | Beginner → Advanced, no answer key on the first two |\n| **Prerequisites** | [Fundamentals](/learn/w2/d1/p2) for the actions · [Implementation](/learn/w2/d1/p3) for the structure |\n| **Key takeaway** | more than ~20 minutes on one means the gap is in the lesson, not in you — go back and re-read |",
           "starter": null,
           "variation": null,
           "checkpoint": null

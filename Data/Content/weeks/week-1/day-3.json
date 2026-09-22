@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll use** | `npx playwright test` · `--headed` · `show-report` |\n| **You'll learn** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Where it runs** | here, though the first cells run real terminal commands |\n| **Watch for** | the test count. This repo runs chromium only, so it is lower than a fresh scaffold's. |",
+          "text": "| | |\n|---|---|\n| **Goals** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Tools** | `npx playwright test` · `--headed` · `show-report` |\n| **Environment** | here, though the first cells run real terminal commands |\n| **Key takeaway** | Check the test count. This repo runs Chromium only, so the count is lower than a fresh scaffold's. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -157,7 +157,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Deliberately shallow** | recognize every setting; master none of them yet |\n| **Covered properly later** | timeouts in week 3 day 1 · `projects`, `workers`, `retries` in week 3 day 5 |\n| **The one to remember today** | `retain-on-failure` — keep the evidence only when something went wrong |",
+          "text": "| | |\n|---|---|\n| **Scope** | Recognize every setting, without mastering any of them yet. Timeouts are covered in Week 3 - Day 1, and `projects`, `workers`, and `retries` in Week 3 - Day 5. |\n| **Key takeaway** | `retain-on-failure` — keep the evidence only when something went wrong |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -286,7 +286,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | the real CLI and the real config, nothing invented |\n| **Problem 1 wants a terminal** | run it yourself with `--headed`, not through the studio's runner |\n| **Pulls on** | [Fundamentals](/learn/w1/d3/p2) for the commands · [Implementation](/learn/w1/d3/p3) for the settings |",
+          "text": "| | |\n|---|---|\n| **Focus** | the real CLI and the real config, nothing invented |\n| **Prerequisites** | [Fundamentals](/learn/w1/d3/p2) for the commands · [Implementation](/learn/w1/d3/p3) for the settings |\n| **Environment** | Run Problem 1 yourself with `--headed`, in your own project rather than the studio's test runner. |",
           "starter": null,
           "variation": null,
           "checkpoint": null

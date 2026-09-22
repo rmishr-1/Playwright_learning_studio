@@ -205,7 +205,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll watch** | a test pass with the wrong password, because it never checked anything |\n| **Then** | fix it, and watch it fail correctly |\n| **Where it runs** | in your own project. These need the Playwright test runner. |\n| **Assumes** | [arrow functions, `async`, destructuring](/learn/w1/d5/p1) |\n| **The week's headline** | a test that only acts and never asserts is a recording, not a test |",
+          "text": "| | |\n|---|---|\n| **Goals** | Watch a test pass with the wrong password because it checks nothing, then fix it and watch it fail correctly. |\n| **Prerequisites** | [arrow functions, `async`, destructuring](/learn/w1/d5/p1) |\n| **Environment** | in your own project. These need the Playwright test runner. |\n| **Key takeaway** | a test that only acts and never asserts is a recording, not a test |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -356,7 +356,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **The API** | the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **What changes** | three repeated locators become a class built once, and one named `signIn` step |\n| **Not yet named** | this is the Page Object Model. Week 5 names it and covers it in full. |\n| **The rule to take away** | a page object never asserts |",
+          "text": "| | |\n|---|---|\n| **Focus** | three repeated locators become a class built once, and one named `signIn` step |\n| **Tools** | the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **Scope** | This structure is the Page Object Model. Week 5 names it and covers it in full. |\n| **Key takeaway** | a page object never asserts |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -469,7 +469,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | closing out the week: a test of your own, the assertions gap, then a small page object |\n| **No solutions** | the report tells you whether you are right |\n| **Closes** | week 1 — why automate, setup, the CLI, Codegen, and the assertion that makes a test a test |",
+          "text": "| | |\n|---|---|\n| **Focus** | Three problems that close the week: a test of your own, the assertions gap, and a small page object. The test report tells you whether each answer is correct. |\n| **Scope** | These problems close Week 1, which covered why teams automate, setup, the CLI, Codegen, and the assertion that makes a test a test. |",
           "starter": null,
           "variation": null,
           "checkpoint": null

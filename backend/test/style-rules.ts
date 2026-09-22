@@ -117,6 +117,7 @@ export const ERROR_RULES: readonly string[] = [
   'stacked-asides',
   'explanation-shape',
   'explanation-empty',
+  'card-label',
 ];
 
 /**
@@ -242,6 +243,29 @@ export function lintProse(text: string, where: string): Finding[] {
       if (!ACRONYMS.has(w) && w !== 'CODE') warn('emphasis-caps', `"${w}"`);
     }
   }
+  return out;
+}
+
+/**
+ * The at-a-glance card's row labels, in the order a card lists them. The course owner chose a
+ * fixed, formal set: 53 different labels had grown across 36 cards ("Today's shape", "The idea
+ * worth keeping", "Non-negotiable"), and a label invented per card reads as informal however good
+ * the text beside it is. A row needing a label outside this set is a sign the row belongs elsewhere.
+ */
+export const CARD_LABELS: readonly string[] = [
+  'Focus', 'Goals', 'Prerequisites', 'Tools', 'Environment', 'Scope', 'Key takeaway', 'Next',
+];
+
+export function lintCardLabels(md: string, where: string): Finding[] {
+  const out: Finding[] = [];
+  const labels = [...md.matchAll(/^\|\s*\*\*(.+?)\*\*\s*\|/gm)].map((m) => m[1]);
+  for (const l of labels) {
+    if (!CARD_LABELS.includes(l)) out.push({ where, rule: 'card-label', detail: `"${l}" is not one of: ${CARD_LABELS.join(', ')}`, severity: 'error' });
+  }
+  const known = labels.filter((l) => CARD_LABELS.includes(l));
+  if (new Set(known).size !== known.length) out.push({ where, rule: 'card-label', detail: 'a label appears twice: merge the rows', severity: 'error' });
+  const order = known.map((l) => CARD_LABELS.indexOf(l));
+  if (order.some((n, i) => i > 0 && n < order[i - 1])) out.push({ where, rule: 'card-label', detail: 'rows are out of order: ' + known.join(', '), severity: 'error' });
   return out;
 }
 

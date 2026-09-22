@@ -54,6 +54,7 @@ to match them.
 | Second person throughout | The reader is "you", in explanations as well as instructions. |
 | Contractions sparingly | Allowed, as in the Playwright docs, but not in every sentence. |
 | American spelling | *organize*, *behavior*, *favorite*. |
+| At-a-glance cards use formal labels | Every card uses only Focus, Goals, Prerequisites, Tools, Environment, Scope, Key takeaway, and Next, in that order. Each row is a full, formal sentence. See [section 2](#the-at-a-glance-card). |
 | Code examples follow the GeeksforGeeks order | A lead-in ending in a colon, then the code, **Output**, and **Explanation**. See [section 8](#8-code-presentation). |
 
 ### Scope and way of working
@@ -179,6 +180,36 @@ Output → Explanation**. That predictability is its main strength, and this cou
 3. The at-a-glance card
 4. Three problems, each using the fixed labels in section 10
 5. When you are done
+
+### The at-a-glance card
+
+Every card uses the same labels, in the same order, and a card includes only the rows it needs.
+
+| Label | What the row states | Example (Week 1 Day 1 Fundamentals) |
+|---|---|---|
+| **Focus** | What the lesson covers | An orientation to test automation, with one guided look at the Playwright website. |
+| **Goals** | What the learner can do afterwards | Explain what automation cannot do, why teams choose Playwright over Selenium, and where automation effort is spent. |
+| **Prerequisites** | What the lesson assumes | No prior knowledge is required. This is the first lesson in the course. |
+| **Tools** | The APIs, commands, or tools used | `npx playwright test`, `--headed`, and `show-report`. |
+| **Environment** | Where the code runs, and on which app | In your own project, because these examples need the Playwright test runner. |
+| **Scope** | What is covered here, and what is left for later | This lesson uses a plain function. The class-based Page Object Model is covered in Week 3. |
+| **Key takeaway** | The one idea to keep | Automation does not find defects. It reports whether each check passed or failed. |
+| **Next** | Where to go after this lesson | [Fundamentals](/learn/w2/d1/p2). |
+
+**Write each row as a full, formal sentence** that makes sense without its label. The old labels
+often started a sentence that the row finished ("**You'll watch** | a test pass with the wrong
+password"). Under a noun label, that fragment no longer reads. A **Scope** row that describes what
+the lesson does *not* cover must say so in the sentence itself, or it reads as the opposite.
+
+| Before | After |
+|---|---|
+| **Today's shape** \| orientation, plus one "go and look at this" step | **Focus** \| An orientation to test automation, with one guided look at the Playwright website. |
+| **Assumes** \| nothing at all — this is the first lesson | **Prerequisites** \| No prior knowledge is required. This is the first lesson in the course. |
+| **The sentence to keep** \| automation never finds a defect. It reports pass or fail. | **Key takeaway** \| Automation does not find defects. It reports whether each check passed or failed. |
+| **What this is not** \| the hooks lesson. | **Scope** \| This lesson shows the problem that hooks solve. Hooks themselves are taught in Week 3 - Day 2. |
+
+If a row needs a label outside this set, it probably belongs in the lesson body instead of the card.
+`npm run verify` fails a card that uses any other label, repeats a label, or lists rows out of order.
 
 ### Tabs with no content are removed
 
@@ -566,6 +597,7 @@ checked only a hard-coded list of rule names. As a result, a rule could be added
 | `exclamation` | Any exclamation mark outside code |
 | `sentence-length` | A sentence over 45 words |
 | `stacked-asides` | Two or more em dashes in one sentence |
+| `card-label` | An at-a-glance label outside the fixed set, a repeated label, or rows out of order |
 | `explanation-shape`, `explanation-empty` | A checkpoint explanation that is empty or is not a full sentence |
 
 **Warnings**

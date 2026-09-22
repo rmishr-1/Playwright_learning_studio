@@ -28,7 +28,7 @@
       ]
     },
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll build** | a value that differs every run, and an XPath assembled at runtime from it |\n| **You'll prove** | why `@value` cannot find what you just typed — and what it *can* find |\n| **Assumes** | [string building and Math.random()](/learn/w2/d3/p1) · [XPath syntax](/learn/w2/d2/p2) |\n| **The idea worth keeping** | an HTML attribute and a live property are two different things |",
+      "at_a_glance": "| | |\n|---|---|\n| **Goals** | a value that differs every run, and an XPath assembled at runtime from it; why `@value` cannot find what you just typed — and what it *can* find |\n| **Prerequisites** | [string building and Math.random()](/learn/w2/d3/p1) · [XPath syntax](/learn/w2/d2/p2) |\n| **Key takeaway** | an HTML attribute and a live property are two different things |",
       "checkpoints": [
         {
           "question": "You `.fill()` the email box with `learner7f3k2x@example.com`, then count `//input[@value='learner7f3k2x@example.com']`. How many matches?",
@@ -64,7 +64,7 @@
       "recap": "- Build unique values with `\"prefix\" + Math.random().toString(36).slice(2, 8)`. A bare `Date.now()` collides when two runs land in the same second.\n- **An attribute is not a property.** `@value` reads the markup; `.fill()` writes the live value. You cannot find a field by what you just typed into it.\n- To read back what you typed, ask the locator you already have: `.inputValue()`.\n- `@value` *does* work for values baked into the source — radios, `<option>` tags. Randomness picking which one is fine.\n- Default to `normalize-space()` over `text()` for XPath text matching."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d3/p2) |\n| **What changes** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Builds on** | the same `registration-helpers.ts` that Days [Day 1 - Implementation](/learn/w2/d1/p3) and [Day 2 - Implementation](/learn/w2/d2/p3) have been growing |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Prerequisites** | the same `registration-helpers.ts` that Days [Day 1 - Implementation](/learn/w2/d1/p3) and [Day 2 - Implementation](/learn/w2/d2/p3) have been growing |\n| **Tools** | every line ran in [Fundamentals](/learn/w2/d3/p2) |",
       "checkpoints": [
         {
           "question": "Two tests in the same file both call `uniqueEmail()`. Do they get the same string?",
@@ -89,7 +89,7 @@
       "recap": "- Randomness belongs inside one generator function, not copy-pasted into every test that needs a fresh value.\n- Compute the random value *inside* the function. A module-level `const` would be computed once and shared by every caller.\n- A helper that makes a hidden decision should return it, so failures can say what it chose.\n- These are the same lines from [Fundamentals](/learn/w2/d3/p2), moved once — not rewritten."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | a unique value, then a dynamic locator over real `<option>` markup, then a generator of your own |\n| **Pulls on** | [TypeScript](/learn/w2/d3/p1) for the string building · [Fundamentals](/learn/w2/d3/p2) for which attributes are real |\n| **The question to keep asking** | is this attribute really in the page source, or did a script set it? |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | a unique value, then a dynamic locator over real `<option>` markup, then a generator of your own |\n| **Prerequisites** | [TypeScript](/learn/w2/d3/p1) for the string building · [Fundamentals](/learn/w2/d3/p2) for which attributes are real |\n| **Key takeaway** | is this attribute really in the page source, or did a script set it? |"
     }
   }
 }
