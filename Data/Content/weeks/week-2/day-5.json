@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New syntax today** | none — `test.describe` is a new *name*, not new syntax |\n| **What *is* new** | a fact about how Playwright runs tests, not a language feature |\n| **Then go to** | [Day 5.2](/learn/w2/d5/p2), where that fact breaks a test in front of you |",
+          "text": "| | |\n|---|---|\n| **One new name** | `test.describe`, which uses syntax you already know |\n| **What *is* new** | a fact about how Playwright runs tests, not a language feature |\n| **Then go to** | [Day 5.2](/learn/w2/d5/p2), where that fact breaks a test in front of you |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -36,7 +36,7 @@
         },
         {
           "type": "checkpoint",
-          "text": "Day 5 introduces no new TypeScript. What is the one new thing it does introduce?",
+          "text": "What is the one new thing Day 5 introduces?",
           "starter": null,
           "variation": null,
           "checkpoint": {
@@ -51,7 +51,7 @@
         },
         {
           "type": "recap",
-          "text": "No new TypeScript today. What changes is what you know about the runner: each test starts from a blank tab. Hold that thought going into [Day 5.2](/learn/w2/d5/p2) — it is about to fail a test that has nothing wrong with it.",
+          "text": "Today changes what you know about the runner: each test starts from a blank tab. Hold that thought going into [Day 5.2](/learn/w2/d5/p2) — it is about to fail a test that has nothing wrong with it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -196,7 +196,7 @@
               "Because Playwright suppresses the real error when tests run in a describe block"
             ],
             "answer": 1,
-            "explanation": "An isolation problem always surfaces as something further downstream — an element that is not there, a value that is empty. The runner cannot know you *expected* to still be signed in. Recognising the shape of this failure is most of what today is for."
+            "explanation": "An isolation problem always surfaces as something further downstream — an element that is not there, a value that is empty. The runner cannot know you *expected* to still be signed in. Recognizing the shape of this failure is most of what today is for."
           }
         },
         {

@@ -58,13 +58,13 @@
             "Both — XPath trims whitespace before comparing"
           ],
           "answer": 1,
-          "explanation": "`text()` matches the text node exactly, trailing space and all, so it finds 0. `normalize-space()` collapses the whitespace first and finds 1. Note this is the opposite of Playwright's own `toContainText`, which normalises for you — the normalisation you get depends on which tool is doing the matching."
+          "explanation": "`text()` matches the text node exactly, trailing space and all, so it finds 0. `normalize-space()` collapses the whitespace first and finds 1. Note this is the opposite of Playwright's own `toContainText`, which normalizes for you — the normalization you get depends on which tool is doing the matching."
         }
       ],
       "recap": "- Build unique values with `\"prefix\" + Math.random().toString(36).slice(2, 8)`. A bare `Date.now()` collides when two runs land in the same second.\n- **An attribute is not a property.** `@value` reads the markup; `.fill()` writes the live value. You cannot find a field by what you just typed into it.\n- To read back what you typed, ask the locator you already have: `.inputValue()`.\n- `@value` *does* work for values baked into the source — radios, `<option>` tags. Randomness picking which one is fine.\n- Default to `normalize-space()` over `text()` for XPath text matching."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 3.2](/learn/w2/d3/p2) |\n| **What changes** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Builds on** | the same `registration-helpers.ts` that Days [1.3](/learn/w2/d1/p3) and [2.3](/learn/w2/d2/p3) have been growing |",
+      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line ran in [Day 3.2](/learn/w2/d3/p2) |\n| **What changes** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Builds on** | the same `registration-helpers.ts` that Days [1.3](/learn/w2/d1/p3) and [2.3](/learn/w2/d2/p3) have been growing |",
       "checkpoints": [
         {
           "question": "Two tests in the same file both call `uniqueEmail()`. Do they get the same string?",

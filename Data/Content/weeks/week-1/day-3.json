@@ -204,7 +204,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Deliberately shallow** | recognise every setting; master none of them yet |\n| **Covered properly later** | timeouts in week 3 day 1 · `projects`, `workers`, `retries` in week 3 day 5 |\n| **The one to remember today** | `retain-on-failure` — keep the evidence only when something went wrong |",
+          "text": "| | |\n|---|---|\n| **Deliberately shallow** | recognize every setting; master none of them yet |\n| **Covered properly later** | timeouts in week 3 day 1 · `projects`, `workers`, `retries` in week 3 day 5 |\n| **The one to remember today** | `retain-on-failure` — keep the evidence only when something went wrong |",
           "starter": null,
           "variation": null,
           "checkpoint": null

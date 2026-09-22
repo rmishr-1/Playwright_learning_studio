@@ -29,7 +29,7 @@
         },
         {
           "type": "checkpoint",
-          "text": "From [Day 1](/learn/w1/d1/p2): which level of testing is Playwright's home turf?",
+          "text": "From [Day 1](/learn/w1/d1/p2): which level of testing is Playwright designed for?",
           "starter": null,
           "variation": null,
           "checkpoint": {
@@ -204,7 +204,7 @@
               "Because it would reinstall the browsers you already have"
             ],
             "answer": 1,
-            "explanation": "This repo is already a set-up Playwright project. Re-scaffolding would rewrite the root config every week's specs rely on. The lesson walks through what the command produces so you recognise the pieces — in this repo's real files, rather than by running it."
+            "explanation": "This repo is already a set-up Playwright project. Re-scaffolding would rewrite the root config every week's specs rely on. The lesson walks through what the command produces so you recognize the pieces — in this repo's real files, rather than by running it."
           }
         },
         {
@@ -362,7 +362,7 @@
               "No — each folder needs its own `playwright.config.ts`"
             ],
             "answer": 1,
-            "explanation": "`testDir` says where to start looking; `testMatch` says what counts once you are there. This repo shows the same pair in use, organised by week rather than by test type. Per-folder configs are a real option too, but they are week 3's subject, not a requirement here."
+            "explanation": "`testDir` says where to start looking; `testMatch` says what counts once you are there. This repo shows the same pair in use, organized by week rather than by test type. Per-folder configs are a real option too, but they are week 3's subject, not a requirement here."
           }
         },
         {

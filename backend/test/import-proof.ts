@@ -11,7 +11,7 @@ import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
 import { findNotebookisms, findSupersededCopy, findUnresolvedLinks } from '../../scripts/notebook-parse';
 import { applyHeadingFormat, ROLE_HEADING_WEEKS } from '../../scripts/lesson-overlay';
-import { lintExplanationShape, lintProse, type Finding } from './style-rules';
+import { ERROR_RULES, lintExplanationShape, lintProse, type Finding } from './style-rules';
 
 const CONTENT = path.resolve(__dirname, '..', '..', 'Data', 'Content');
 
@@ -439,11 +439,11 @@ function main(): void {
     filler.length + ' without a variation: ' + [...new Set(filler)].join(' '),
   );
 
-  // Voice and style - the mechanical half of docs/STYLE.md.
+  // Voice and style - the mechanical half of docs/PLAYBOOK.md.
   //
   // These lint the text this project AUTHORS. Lesson bodies are generated from notebooks that are
   // not in this checkout, so linting them would fail on text nobody here can edit and would leave
-  // `npm run verify` permanently red. The rules, and their honest limits, are in docs/STYLE.md.
+  // `npm run verify` permanently red. The rules, and their limits, are in docs/PLAYBOOK.md.
   console.log('\nVoice and style');
   const findings: Finding[] = [];
   const authoredFiles = (dir: string): string[] => {
@@ -485,18 +485,30 @@ function main(): void {
     }
   }
 
+  // EVERY error-severity finding fails the build, whatever its rule is called. This used to loop
+  // over a hard-coded list of rule names, so a rule added to style-rules.ts but not to that list
+  // was computed and then silently dropped - which is exactly what happened to defines-by-absence,
+  // announced as enforced while 11 violations passed. The list below is for reporting only: every
+  // known rule gets a PASS line so the output shows what was checked, and any rule not on it is
+  // still reported and still fails.
   const errors = findings.filter((f) => f.severity === 'error');
-  const byRule = (rule: string) => errors.filter((f) => f.rule === rule);
-  for (const rule of ['banned-phrase', 'exclamation', 'sentence-length', 'stacked-asides', 'explanation-shape', 'explanation-empty']) {
-    const hits = byRule(rule);
+  const errorRules = [...new Set([...ERROR_RULES, ...errors.map((f) => f.rule)])];
+  for (const rule of errorRules) {
+    const hits = errors.filter((f) => f.rule === rule);
     check(
       'authored text passes: ' + rule,
       hits.length === 0,
-      hits.slice(0, 3).map((f) => f.where + ' ' + f.detail).join(' | '),
+      hits.length + ' hit(s): ' + hits.slice(0, 3).map((f) => f.where + ' ' + f.detail).join(' | '),
     );
   }
-  for (const f of findings.filter((x) => x.severity === 'warn').slice(0, 8)) {
-    warn(f.rule, f.where + ' ' + f.detail);
+
+  // Warnings are advisory, so they are summarised by rule rather than listed in full: the counts
+  // are the useful signal, and a wall of individual warnings trains people to scroll past them.
+  const warns = findings.filter((x) => x.severity === 'warn');
+  const warnRules = [...new Set(warns.map((f) => f.rule))].sort();
+  for (const rule of warnRules) {
+    const hits = warns.filter((f) => f.rule === rule);
+    warn(rule, hits.length + ' hit(s), e.g. ' + hits[0].where + ' ' + hits[0].detail);
   }
 
   // Closes the loop: the text linted above is the text a learner sees. An overlay-typed block in a

@@ -286,7 +286,7 @@
               "Either; they are two spellings of the same thing"
             ],
             "answer": 1,
-            "explanation": "An absolute path encodes the whole document structure, so one inserted `<div>` anywhere above your element breaks it. A relative XPath matches on the element's own attributes and survives the markup moving. The lesson shows absolute XPath only so you recognise it and avoid it."
+            "explanation": "An absolute path encodes the whole document structure, so one inserted `<div>` anywhere above your element breaks it. A relative XPath matches on the element's own attributes and survives the markup moving. The lesson shows absolute XPath only so you recognize it and avoid it."
           }
         },
         {
@@ -312,16 +312,16 @@
           "checkpoint": {
             "options": [
               "Because `toContainText` only checks that the text starts with the string",
-              "Because Playwright's text matchers normalise whitespace before comparing",
+              "Because Playwright's text matchers normalize whitespace before comparing",
               "Because the assertion retried until the space was removed"
             ],
             "answer": 1,
-            "explanation": "Text matchers normalise whitespace, so the trailing space never reaches the comparison. Worth knowing precisely because it is not universal — [Day 3](/learn/w2/d3/p2) shows where that normalisation does *not* happen, and the raw string bites."
+            "explanation": "Text matchers normalize whitespace, so the trailing space never reaches the comparison. Worth knowing precisely because it is not universal — [Day 3](/learn/w2/d3/p2) shows where that normalization does *not* happen, and the raw string bites."
           }
         },
         {
           "type": "recap",
-          "text": "- Relative XPath (`//tag[@attr='v']`) always; absolute XPath never.\n- XPath can go up and sideways in the DOM; CSS can only go down and to the next sibling. That is the one real reason to reach for XPath.\n- `expect()` **retries**; a plain `if` checks once. That is the whole difference, and it only works inside the test runner.\n- `toContainText` for a fragment, `toHaveText` only when you know the exact string. Text matchers normalise whitespace.\n- Assert something observable. \"It didn't throw\" is not an assertion.",
+          "text": "- Relative XPath (`//tag[@attr='v']`) always; absolute XPath never.\n- XPath can go up and sideways in the DOM; CSS can only go down and to the next sibling. That is the one real reason to reach for XPath.\n- `expect()` **retries**; a plain `if` checks once. That is the whole difference, and it only works inside the test runner.\n- `toContainText` for a fragment, `toHaveText` only when you know the exact string. Text matchers normalize whitespace.\n- Assert something observable. \"It didn't throw\" is not an assertion.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -353,7 +353,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 2.2](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1.3](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
+          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Day 2.2](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1.3](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
           "starter": null,
           "variation": null,
           "checkpoint": null

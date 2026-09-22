@@ -50,7 +50,7 @@
             "Yes, but only on an emulator rather than a real device"
           ],
           "answer": 1,
-          "explanation": "Playwright emulates mobile: real device viewports and user agents, in a desktop browser. That is genuinely useful for mobile *web*, and it is not a native app driver. Picking the right tool for the vertical matters more than picking your favourite one."
+          "explanation": "Playwright emulates mobile: real device viewports and user agents, in a desktop browser. That is genuinely useful for mobile *web*, and it is not a native app driver. Picking the right tool for the vertical matters more than picking your favorite one."
         }
       ],
       "recap": "- **Automation never finds a defect.** It reports pass or fail against checks a person wrote; a person decides what a failure means.\n- Two non-negotiables before automating anything: a known expected result, and an identifiable object.\n- Playwright folds in what Selenium needs extra tooling for — auto-waiting, assertions, a runner, tracing. Selenium is older, not bad.\n- Its home is system-level end-to-end testing, and its mobile support is emulation, not native apps.\n- About half your effort on a real project goes into learning the **application**, not the tool."

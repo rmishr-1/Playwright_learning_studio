@@ -4,10 +4,10 @@
   "day": 5,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — `test.describe` is a new *name*, not new syntax |\n| **What *is* new** | a fact about how Playwright runs tests, not a language feature |\n| **Then go to** | [Day 5.2](/learn/w2/d5/p2), where that fact breaks a test in front of you |",
+      "at_a_glance": "| | |\n|---|---|\n| **One new name** | `test.describe`, which uses syntax you already know |\n| **What *is* new** | a fact about how Playwright runs tests, not a language feature |\n| **Then go to** | [Day 5.2](/learn/w2/d5/p2), where that fact breaks a test in front of you |",
       "checkpoints": [
         {
-          "question": "Day 5 introduces no new TypeScript. What is the one new thing it does introduce?",
+          "question": "What is the one new thing Day 5 introduces?",
           "options": [
             "`test.describe`, which is new syntax for grouping tests",
             "That every `test()` gets its own fresh `page` — a fact about how the runner works",
@@ -17,7 +17,7 @@
           "explanation": "`test.describe` is just a function call wrapped around `test()`s you already know how to write — a new name, not new syntax. The actual lesson is per-test isolation, and today is where you first feel it cost you something."
         }
       ],
-      "recap": "No new TypeScript today. What changes is what you know about the runner: each test starts from a blank tab. Hold that thought going into [Day 5.2](/learn/w2/d5/p2) — it is about to fail a test that has nothing wrong with it."
+      "recap": "Today changes what you know about the runner: each test starts from a blank tab. Hold that thought going into [Day 5.2](/learn/w2/d5/p2) — it is about to fail a test that has nothing wrong with it."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll watch** | a correct test fail, because of a design decision rather than a bug |\n| **Mode** | test-runner — the studio editor runs library code, so follow these in your own checkout |\n| **Assumes** | [test() and the assertions gap](/learn/w1/d5/p2) · [the page fixture](/learn/w1/d5/p1) |\n| **Today ends unresolved on purpose** | [Day 5.3](/learn/w2/d5/p3) shows the fix's shape; week 3 builds it properly |",
@@ -40,7 +40,7 @@
             "Because Playwright suppresses the real error when tests run in a describe block"
           ],
           "answer": 1,
-          "explanation": "An isolation problem always surfaces as something further downstream — an element that is not there, a value that is empty. The runner cannot know you *expected* to still be signed in. Recognising the shape of this failure is most of what today is for."
+          "explanation": "An isolation problem always surfaces as something further downstream — an element that is not there, a value that is empty. The runner cannot know you *expected* to still be signed in. Recognizing the shape of this failure is most of what today is for."
         },
         {
           "question": "Why is `await expect(page).toHaveURL(/dashboard/)` not proof that you are logged in?",

@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New syntax today** | none — this tab is a 60-second check that the week so far stuck |\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Day 4.2](/learn/w2/d4/p2) |",
+          "text": "| | |\n|---|---|\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Day 4.2](/learn/w2/d4/p2) |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -51,7 +51,7 @@
         },
         {
           "type": "recap",
-          "text": "No new TypeScript today — `const`, `Math.random()`, XPath and `async` all carry over unchanged. If any row in the table above was a surprise, follow its link before starting [Day 4.2](/learn/w2/d4/p2).",
+          "text": "Today's code uses `const`, `Math.random()`, XPath and `async`, all from earlier this week. If any row in the table above was a surprise, follow its link before starting [Day 4.2](/learn/w2/d4/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -90,7 +90,7 @@
         },
         {
           "type": "markdown",
-          "text": "> **Try it here**, with one real spec at the end. ## A new app, on purpose\n\nEvery locator so far worked on a single form. Today's technique — finding one row among\nmany that all look alike — needs an actual table, which none of this course's apps so\nfar have. **OrangeHRM's demo HR system** does, and it's a real, public, shared QA-practice\napp (the same idea as `demoqa.com`, used from [week7](/learn/w7/d1/p1) onward).\n\n| | |\n|---|---|\n| App | `opensource-demo.orangehrmlive.com` |\n| Login | `Admin` / `admin123` |\n| Screens used | Add Employee, Employee List |\n\n**It's shared with everyone using this demo right now.** Every employee this lesson\ncreates gets deleted before the lesson ends — the same rule week7 follows for\n`demoqa.com`.",
+          "text": "> **Try it here**, with one real spec at the end.\n\n## A new app, on purpose\n\nEvery locator so far worked on a single form. Today's technique — finding one row among\nmany that all look alike — needs an actual table, which none of this course's apps so\nfar have. **OrangeHRM's demo HR system** does, and it's a real, public, shared QA-practice\napp (the same idea as `demoqa.com`, used from [week7](/learn/w7/d1/p1) onward).\n\n| | |\n|---|---|\n| App | `opensource-demo.orangehrmlive.com` |\n| Login | `Admin` / `admin123` |\n| Screens used | Add Employee, Employee List |\n\n**It's shared with everyone using this demo right now.** Every employee this lesson\ncreates gets deleted before the lesson ends — the same rule week7 follows for\n`demoqa.com`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -329,7 +329,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 4.2](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
+          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Day 4.2](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
           "starter": null,
           "variation": null,
           "checkpoint": null

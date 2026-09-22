@@ -4,7 +4,7 @@
   "day": 4,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — this tab is a 60-second check that the week so far stuck |\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Day 4.2](/learn/w2/d4/p2) |",
+      "at_a_glance": "| | |\n|---|---|\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Day 4.2](/learn/w2/d4/p2) |",
       "checkpoints": [
         {
           "question": "Day 4 switches to OrangeHRM's demo HR system instead of the registration form used all week. Why?",
@@ -17,7 +17,7 @@
           "explanation": "The app changed to fit the technique, not the other way round. It is also a shared public sandbox, which is why every employee the lesson creates gets deleted before the lesson ends."
         }
       ],
-      "recap": "No new TypeScript today — `const`, `Math.random()`, XPath and `async` all carry over unchanged. If any row in the table above was a surprise, follow its link before starting [Day 4.2](/learn/w2/d4/p2)."
+      "recap": "Today's code uses `const`, `Math.random()`, XPath and `async`, all from earlier this week. If any row in the table above was a surprise, follow its link before starting [Day 4.2](/learn/w2/d4/p2)."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `parent::` · `following-sibling::` · `[last()]` · `contains()` |\n| **On** | OrangeHRM's demo HR system — a **shared public sandbox**, so everything created here is deleted again |\n| **Assumes** | [XPath syntax](/learn/w2/d2/p2) · [Math.random() for unique data](/learn/w2/d3/p1) |\n| **The idea worth keeping** | anchor on text you know, then walk sideways — never count columns |",
@@ -56,7 +56,7 @@
       "recap": "- **Anchor on text you know, then walk sideways.** Position is the one thing about a table you can rely on changing.\n- `/parent::div` before `following-sibling::` — the text's immediate parent is a wrapper, not the cell.\n- `[last()]` over a guessed offset: it survives a column being added.\n- `contains()` once you cannot be certain the visible text has not changed underneath you — and anchor on the part that cannot change, like the random id.\n- **Verify a write by reading the record back**, not by trusting a success toast.\n- On a shared sandbox, every create is paired with a delete. Prove the delete with a count of 0, not with the toast."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — every line ran in [Day 4.2](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
+      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line ran in [Day 4.2](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
       "checkpoints": [
         {
           "question": "`findRow` returns a `Locator` and clicks nothing. What does that buy?",

@@ -1,5 +1,5 @@
 /**
- * The mechanical half of docs/STYLE.md.
+ * The mechanical half of docs/PLAYBOOK.md.
  *
  * These rules lint the text this project AUTHORS - the lesson cards, your-turn variations and
  * practice solutions under Data/Content/. They deliberately do NOT lint the lesson bodies, which
@@ -7,7 +7,7 @@
  * on text nobody here can edit turns `npm run verify` permanently red, and a check everyone
  * ignores is worse than no check.
  *
- * What they can and cannot prove is written out in docs/STYLE.md. In short: they catch known-bad
+ * What they can and cannot prove is written out in docs/PLAYBOOK.md. In short: they catch known-bad
  * phrasing and runaway structure. They cannot tell you whether an explanation actually lands.
  */
 
@@ -26,6 +26,91 @@ const BANNED: ReadonlyArray<readonly [RegExp, string]> = [
   [/\bno big deal\b/i, 'no big deal'],
   [/\bdon['’]t worry\b/i, "don't worry"],
   [/\bstuff\b/i, 'stuff'],
+  // From the playbook audit: phrases that read as a colleague talking, not as course material.
+  [/\bhome turf\b/i, 'home turf'],
+  [/\bgymnastics\b/i, 'gymnastics'],
+  [/\bwhole trick\b/i, 'whole trick'],
+  [/\bfor free\b/i, 'for free'],
+  [/\bneighbou?rhood\b/i, 'neighbourhood'],
+  [/\bblow(s|ing)? up\b/i, 'blow up'],
+  [/\bpoked at\b/i, 'poked at'],
+];
+
+/**
+ * American spelling, to match Playwright, TypeScript and the APIs themselves (`color`,
+ * `initialize`). The course was split, generated text mostly American and authored text mostly
+ * British, which a reader notices as carelessness long before they could name it.
+ */
+const BRITISH: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\b(organi|recogni|normali|parameteri|memori|summari|emphasi|initiali|customi|minimi|prioriti|optimi|standardi|synchroni|seriali|categori|characteri)s(e|ed|es|ing|ation|ations)\b/i, '-ise (use -ize)'],
+  [/\b(behaviour|colour|favourite|honour|labour)s?\b/i, '-our (use -or)'],
+  [/\b(centre|metre|litre)s?\b/i, '-re (use -er)'],
+  [/\b(catalogue|dialogue)s?\b/i, '-ogue (use -og)'],
+  [/\b(cancell|travell|modell|labell)(ed|ing)\b/i, 'double l (use single)'],
+];
+
+/**
+ * Words that describe how the lesson was made, or the notebook it was made in, rather than the
+ * thing it teaches. A learner in a browser has no notebook, no cells and no kernel, and whether
+ * an example was "verified live while writing this" is a note for the author, not the reader.
+ */
+const INSIDER: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\bnotebooks?\b/i, '"notebook"'],
+  [/\bkernel\b/i, '"kernel"'],
+  [/\bverified live\b/i, '"verified live"'],
+  [/\bwhile writing this\b/i, '"while writing this"'],
+  [/\bsource training session\b/i, '"source training session"'],
+  [/_shared\//, 'an internal _shared/ path'],
+  [/\byesterday\b/i, '"yesterday"'],
+];
+
+/**
+ * Tools do not have opinions, feelings or intentions. "The runner is happy" and "the class has no
+ * opinion" are vivid, but they make a beginner wonder what else the software is deciding. Say
+ * what it does. A warning, because "reaches for" and "knows" have legitimate technical senses.
+ */
+const ANTHROPOMORPHISM: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\b(is|are) happy\b/i, '"is happy"'],
+  [/\bhas no opinion\b|\bhave no opinion\b|\bany opinion\b/i, '"has an opinion"'],
+  [/\bcomplain(s|ed|ing)?\b|\bcomplaint\b/i, '"complains"'],
+  [/\btells? the truth\b/i, '"tells the truth"'],
+  [/\b(is |are )?lying\b|\blies to\b/i, '"lying"'],
+  [/\breach(es)? for\b/i, '"reaches for"'],
+  [/\bobjected\b/i, '"objected"'],
+  [/\bwants to\b/i, '"wants to"'],
+];
+
+/** Filler and intensifiers that add emphasis without adding meaning. Advisory. */
+const FILLER: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\bjust\b/i, 'just'],
+  [/\bactually\b/i, 'actually'],
+  [/\bgenuinely\b/i, 'genuinely'],
+  [/\bfor real\b/i, 'for real'],
+  [/\bbasically\b/i, 'basically'],
+  [/\bsimply\b/i, 'simply'],
+  [/\bwhole point\b/i, 'whole point'],
+  [/\bobviously\b/i, 'obviously'],
+];
+
+const CONTRACTION = /\b\w+(?:n['’]t|['’](?:ll|re|ve|d|s|m))\b/gi;
+/** "Sparingly": more than one contraction per this many words in a single string warns. */
+export const CONTRACTION_WORDS_PER = 40;
+
+/**
+ * Every error-severity rule this module can emit. import-proof prints a PASS line for each, so a
+ * clean run still shows what was checked. It is NOT the enforcement list: import-proof fails on
+ * any error finding whether or not its rule appears here.
+ */
+export const ERROR_RULES: readonly string[] = [
+  'banned-phrase',
+  'defines-by-absence',
+  'british-spelling',
+  'insider-term',
+  'exclamation',
+  'sentence-length',
+  'stacked-asides',
+  'explanation-shape',
+  'explanation-empty',
 ];
 
 /**
@@ -46,7 +131,7 @@ const ABSENCE: ReadonlyArray<readonly [RegExp, string]> = [
 /** Acronyms that are legitimately upper-case, so the shouting check does not flag them. */
 const ACRONYMS = new Set([
   'CSS', 'XPATH', 'DOM', 'CI', 'GET', 'POST', 'HTML', 'URL', 'API', 'UI', 'E2E', 'JSON',
-  'TS', 'JS', 'HR', 'MCQ', 'AND', 'OR', 'NOT', 'ONLY', 'ALL', 'NO', 'YES',
+  'TS', 'JS', 'HR', 'MCQ', 'AND', 'OR', 'NO', 'YES',
   'CLI', 'VS', 'IDE', 'HTTP', 'HTTPS', 'SPA', 'CSV', 'PR', 'QA', 'SDET', 'UAT', 'BDD', 'DRY',
 ]);
 
@@ -113,6 +198,23 @@ export function lintProse(text: string, where: string): Finding[] {
   for (const [re, name] of ABSENCE) {
     if (re.test(clean)) err('defines-by-absence', name);
   }
+  for (const [re, name] of BRITISH) {
+    const m = clean.match(re);
+    if (m) err('british-spelling', `"${m[0]}" - ${name}`);
+  }
+  for (const [re, name] of INSIDER) {
+    if (re.test(clean)) err('insider-term', name);
+  }
+  for (const [re, name] of ANTHROPOMORPHISM) {
+    if (re.test(clean)) warn('anthropomorphism', name);
+  }
+  const fillers = FILLER.filter(([re]) => re.test(clean)).map(([, name]) => name);
+  if (fillers.length) warn('filler', fillers.map((f) => `"${f}"`).join(', '));
+  const contractions = clean.match(CONTRACTION) ?? [];
+  const allowed = Math.max(1, Math.floor(words(clean) / CONTRACTION_WORDS_PER));
+  if (contractions.length > allowed) {
+    warn('contractions', `${contractions.length} in ${words(clean)} words (${contractions.slice(0, 4).join(', ')})`);
+  }
   if (/!/.test(clean.replace(/\bCODE\b/g, ''))) err('exclamation', 'contains "!"');
 
   const proseLines = clean.split('\n').filter((l) => !isTableRow(l));
@@ -131,7 +233,7 @@ export function lintProse(text: string, where: string): Finding[] {
       warn('parentheticals', `more than one aside: "${shown}"`);
     }
     for (const w of sentence.match(/\b[A-Z]{2,}\b/g) ?? []) {
-      if (!ACRONYMS.has(w) && w !== 'CODE') warn('shouting', `"${w}"`);
+      if (!ACRONYMS.has(w) && w !== 'CODE') warn('emphasis-caps', `"${w}"`);
     }
   }
   return out;

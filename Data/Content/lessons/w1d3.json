@@ -56,7 +56,7 @@
       "recap": "- `npx` runs the locally installed CLI out of `node_modules/.bin`, so nothing needs installing globally.\n- `package.json` is yours to edit; `package-lock.json` is npm's to write and yours to commit.\n- Run one spec file while writing it; run the suite before you call it done.\n- `--headed` to watch it happen, `show-report` to see what already happened.\n- **The `projects` array multiplies your test count.** Check it before being surprised by a number."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **Deliberately shallow** | recognise every setting; master none of them yet |\n| **Covered properly later** | timeouts in week 3 day 1 · `projects`, `workers`, `retries` in week 3 day 5 |\n| **The one to remember today** | `retain-on-failure` — keep the evidence only when something went wrong |",
+      "at_a_glance": "| | |\n|---|---|\n| **Deliberately shallow** | recognize every setting; master none of them yet |\n| **Covered properly later** | timeouts in week 3 day 1 · `projects`, `workers`, `retries` in week 3 day 5 |\n| **The one to remember today** | `retain-on-failure` — keep the evidence only when something went wrong |",
       "checkpoints": [
         {
           "question": "`trace`, `screenshot` and `video` are all set to keep artifacts only on failure. Why not simply record everything?",

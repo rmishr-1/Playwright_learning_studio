@@ -102,7 +102,7 @@ const LEGACY_COPY: ReadonlyArray<readonly [RegExp, string]> = [
  * Still carrying a "Mode:" label: week 4's "read-and-compare", week 6's "read-and-do" and
  * "Mode: Deno". Those weeks are locked and unreleased, and their prose is expected to be
  * revised before they open, so they are deliberately left rather than churned now.
- * docs/STYLE.md records them as work for whoever opens those weeks.
+ * docs/PLAYBOOK.md records them as work for whoever opens those weeks.
  */
 
 /**
@@ -228,7 +228,13 @@ export function studioise(md: string): string {
       'runner, which the editor here does not provide. Copy them into your own checkout to run them.',
   );
   // Any surviving mention of the Jupyter kernel.
-  out = out.replace(/Kernel must say \*\*Deno\*\*(?: \(top-right\))?\.?\s*/g, '');
+  // [ \t]* rather than \s*: the old \s* also ate the newlines after the phrase, which glued the
+  // NEXT line - a `## ` heading, in W2D4P2 - onto the end of this banner, where it rendered as
+  // literal "## ..." text inside a quote.
+  out = out.replace(/Kernel must say \*\*Deno\*\*(?: \(top-right\))?\.?[ \t]*/g, '');
+  // Repairs text that the old pattern already damaged: a heading glued onto the end of a
+  // blockquote sentence goes back onto its own line. Idempotent - once split, it cannot match.
+  out = out.replace(/^(>[^\n]*[.:])[ \t]+(#{2,6} [^\n]*)$/gm, '$1\n\n$2');
   out = out.replace(/\bthe Deno kernel is happy to run either\b/g, 'either form will run');
 
   // The "restart the kernel when a const is already declared" callouts. In the studio every
@@ -257,7 +263,7 @@ export function studioise(md: string): string {
   // The two callouts above are already caught by their own patterns, because those match on
   // text the replacement removes. These two are not, so without this the old phrasing would
   // survive in every day file until someone re-imported from the notebooks - which needs the
-  // training repo. See docs/STYLE.md.
+  // training repo. See docs/PLAYBOOK.md.
   for (const [was, now] of LEGACY_COPY) out = out.replace(was, now);
   for (const [was, now] of ABSENCE_BANNERS) out = out.replace(was, now);
 

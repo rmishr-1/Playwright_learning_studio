@@ -193,7 +193,7 @@
               "Yes, but only on an emulator rather than a real device"
             ],
             "answer": 1,
-            "explanation": "Playwright emulates mobile: real device viewports and user agents, in a desktop browser. That is genuinely useful for mobile *web*, and it is not a native app driver. Picking the right tool for the vertical matters more than picking your favourite one."
+            "explanation": "Playwright emulates mobile: real device viewports and user agents, in a desktop browser. That is genuinely useful for mobile *web*, and it is not a native app driver. Picking the right tool for the vertical matters more than picking your favorite one."
           }
         },
         {

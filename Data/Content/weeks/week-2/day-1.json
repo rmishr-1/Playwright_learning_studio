@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New syntax today** | none — this tab is a 60-second check that last week stuck |\n| **Leans on** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Then go to** | [Day 1.2](/learn/w2/d1/p2), which is all Playwright API |",
+          "text": "| | |\n|---|---|\n| **Leans on** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |\n| **Then go to** | [Day 1.2](/learn/w2/d1/p2), which is all Playwright API |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -51,7 +51,7 @@
         },
         {
           "type": "recap",
-          "text": "No new TypeScript today. If the table above had any surprises in it, follow the link before starting [Day 1.2](/learn/w2/d1/p2) — the Playwright will be easier to see if the language underneath it is not also new.",
+          "text": "Today's code uses the TypeScript from Week 1. If the table above had any surprises in it, follow the link before starting [Day 1.2](/learn/w2/d1/p2) — the Playwright will be easier to see if the language underneath it is not also new.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -293,7 +293,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New API** | none — every line here is something you ran in [Day 1.2](/learn/w2/d1/p2) |\n| **What changes** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Not yet** | the Page Object Model. This is a plain function; the class version is week 3. |",
+          "text": "| | |\n|---|---|\n| **The API** | every line here is something you ran in [Day 1.2](/learn/w2/d1/p2) |\n| **What changes** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Not yet** | the Page Object Model. This is a plain function; the class version is week 3. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -363,7 +363,7 @@
           "checkpoint": {
             "options": [
               "Because strings are the only type a helper can safely accept",
-              "Because the email is the one value these tests actually need to differ — parameterising the rest would add knobs nobody turns",
+              "Because the email is the one value these tests actually need to differ — parameterizing the rest would add knobs nobody turns",
               "Because Playwright requires every helper to take exactly one parameter beyond `page`"
             ],
             "answer": 1,
