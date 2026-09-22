@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# TypeScript - What JavaScript gives you\n\nEvery file you have written this course is TypeScript. Today you find out what that actually\nmeans - starting with the language underneath it.\n\n| Already taught | Where |\n|---|---|\n| `let` / `const` / `var`, block scope | [week3/day2_1](/learn/w3/d2/p1) |\n| Arrow functions, `async` | [week1/day5_1](/learn/w1/d5/p1) |\n| `const` and dynamic vs static typing (the idea) | [week2/day2_1](/learn/w2/d2/p1) |\n| Objects, arrays of objects | see the week3/week4 links in `_shared/CONCEPTS.md` |",
+          "text": "# Week 7, Day 1.1 - What JavaScript gives you\n\nEvery file you have written this course is TypeScript. Today you find out what that actually\nmeans - starting with the language underneath it.\n\n| Already taught | Where |\n|---|---|\n| `let` / `const` / `var`, block scope | [week3/day2_1](/learn/w3/d2/p1) |\n| Arrow functions, `async` | [week1/day5_1](/learn/w1/d5/p1) |\n| `const` and dynamic vs static typing (the idea) | [week2/day2_1](/learn/w2/d2/p1) |\n| Objects, arrays of objects | see the week3/week4 links in `_shared/CONCEPTS.md` |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -92,7 +92,7 @@
         },
         {
           "type": "markdown",
-          "text": "`NaN` instead of a number, and the stack trace points at the multiplication rather than at the\ncapital `P`. That is the single problem TypeScript was built to solve.\n\n**Next:** [Fundamentals - The same code, in TypeScript](/learn/w7/d1/p2)",
+          "text": "`NaN` instead of a number, and the stack trace points at the multiplication rather than at the\ncapital `P`. That is the single problem TypeScript was built to solve.\n\n**Next:** [Day 1.2 - The same code, in TypeScript](/learn/w7/d1/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -110,7 +110,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Fundamentals - The same code, in TypeScript\n\nTypeScript is JavaScript plus a type checker. **Every JavaScript file is already valid\nTypeScript** - which is why switching a project over is mostly renaming `.js` to `.ts`.\n\nBy the end of this lesson you will have annotated variables, arrays, functions and a class,\nand watched the compiler reject something the kernel happily runs.\n\n> **Mode: Deno.** These cells run TypeScript directly. One catch, stated up front and repeated\n> where it matters: **the kernel strips types and does not check them.** `npx tsc --noEmit` is the\n> tool that checks. That split is the whole point of Step 6.",
+          "text": "# Week 7, Day 1.2 - The same code, in TypeScript\n\nTypeScript is JavaScript plus a type checker. **Every JavaScript file is already valid\nTypeScript** - which is why switching a project over is mostly renaming `.js` to `.ts`.\n\nBy the end of this lesson you will have annotated variables, arrays, functions and a class,\nand watched the compiler reject something the kernel happily runs.\n\n> **Mode: Deno.** These cells run TypeScript directly. One catch, stated up front and repeated\n> where it matters: **the kernel strips types and does not check them.** `npx tsc --noEmit` is the\n> tool that checks. That split is the whole point of Step 6.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -292,7 +292,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Common mistakes\n\n| Mistake | What happens |\n|---|---|\n| Annotating everything | noise; inference was already correct |\n| Reaching for `any` to silence an error | the error was the useful part |\n| Expecting the lesson to catch type errors | it strips types - run `npx tsc --noEmit` |\n| `enum` where a string union would do | ships extra JavaScript for nothing |\n| Assuming `.ts` runs in a browser | it is transpiled first |\n\n**Next:** [Implementation - How this repo actually uses it](/learn/w7/d1/p3)",
+          "text": "## Common mistakes\n\n| Mistake | What happens |\n|---|---|\n| Annotating everything | noise; inference was already correct |\n| Reaching for `any` to silence an error | the error was the useful part |\n| Expecting the lesson to catch type errors | it strips types - run `npx tsc --noEmit` |\n| `enum` where a string union would do | ships extra JavaScript for nothing |\n| Assuming `.ts` runs in a browser | it is transpiled first |\n\n**Next:** [Day 1.3 - How this repo actually uses it](/learn/w7/d1/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -310,7 +310,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Implementation - How this repo actually uses it\n\nSame annotations, in the files you have been running for six weeks.\n\n## Where the compiler is configured\n\n`tsconfig.json` decides how strict TypeScript is. The two lines that matter most:\n\n| Setting | Effect |\n|---|---|\n| `\"strict\": true` | no implicit `any`, null checks on - **on in this repo** |\n| `\"types\": [\"node\", \"@playwright/test\"]` | which global type packages are in scope |",
+          "text": "# Week 7, Day 1.3 - How this repo actually uses it\n\nSame annotations, in the files you have been running for six weeks.\n\n## Where the compiler is configured\n\n`tsconfig.json` decides how strict TypeScript is. The two lines that matter most:\n\n| Setting | Effect |\n|---|---|\n| `\"strict\": true` | no implicit `any`, null checks on - **on in this repo** |\n| `\"types\": [\"node\", \"@playwright/test\"]` | which global type packages are in scope |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -366,7 +366,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Migrating a JavaScript project\n\nThe session's claim - \"rename the files and you are 99% done\" - is broadly right, in this order:\n\n| Step | Detail |\n|---|---|\n| 1 | rename `.js` to `.ts` |\n| 2 | add a `tsconfig.json`, **`strict: false`** at first |\n| 3 | run `npx tsc --noEmit` and fix what it finds |\n| 4 | turn `strict` on and fix the next wave |\n| 5 | replace each `any` as you touch that code |\n\nTurning `strict` on at step 2 buries you in errors on day one, which is how migrations get\nabandoned.\n\n**Next:** [Practice](/learn/w7/d1/p4)",
+          "text": "## Migrating a JavaScript project\n\nThe session's claim - \"rename the files and you are 99% done\" - is broadly right, in this order:\n\n| Step | Detail |\n|---|---|\n| 1 | rename `.js` to `.ts` |\n| 2 | add a `tsconfig.json`, **`strict: false`** at first |\n| 3 | run `npx tsc --noEmit` and fix what it finds |\n| 4 | turn `strict` on and fix the next wave |\n| 5 | replace each `any` as you touch that code |\n\nTurning `strict` on at step 2 buries you in errors on day one, which is how migrations get\nabandoned.\n\n**Next:** [Day 1.4 - Practice](/learn/w7/d1/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -384,7 +384,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Practice - Practice\n\nMost of these use `npx tsc --noEmit`, because the lesson kernel cannot see a type error.",
+          "text": "# Week 7, Day 1.4 - Practice\n\nMost of these use `npx tsc --noEmit`, because the lesson kernel cannot see a type error.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -440,7 +440,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 2 - TypeScript - Prerequisites](/learn/w7/d2/p1)",
+          "text": "**Next:** [Day 2.1 - Prerequisites](/learn/w7/d2/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null

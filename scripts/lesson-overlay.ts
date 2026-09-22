@@ -309,7 +309,9 @@ export function loadSolutions(contentDir: string, week: number, day: number): Re
  * shown to a learner. This is the same side-car pattern the cards and variations already use.
  */
 export function applySolutions(day: CourseDay, solutions: Record<string, string>): CourseDay {
-  if (Object.keys(solutions).length === 0) return day;
+  // Open weeks only: work on the course is scoped to weeks 1 and 2, and a locked week's generated
+  // files are left exactly as imported.
+  if (day.locked || Object.keys(solutions).length === 0) return day;
   return {
     ...day,
     parts: day.parts.map((part) => ({
@@ -325,6 +327,9 @@ export function applySolutions(day: CourseDay, solutions: Record<string, string>
  * overlay must ship them byte-for-byte as written. See relabelDayRefs() for the label format.
  */
 export function applyDayRefs(day: CourseDay): CourseDay {
+  // Open weeks only, as for applySolutions. Keyed off `locked` rather than a week number, so a
+  // week is brought in by opening it, not by editing this file.
+  if (day.locked) return day;
   const fix = (t: string) => relabelDayRefs(t, day.week, day.day);
   return {
     ...day,

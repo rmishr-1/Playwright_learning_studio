@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# TypeScript - Prerequisites check\n\n**Almost no new TypeScript today** - Day 2 is about how APIs work, not about the language.\n\n| In play | Taught in |\n|---|---|\n| Objects, nested objects | [week3/day1_1](/learn/w3/d1/p1) |\n| `JSON.parse`, and `any` | [week5/day5_1](/learn/w5/d5/p1) |\n| Template literals | [week6/day3_1](/learn/w6/d3/p1) |\n| `enum` | [day1_2](/learn/w7/d1/p2) |\n\nOne shape is worth five minutes, because every API answer arrives in it.",
+          "text": "# Week 7, Day 2.1 - Prerequisites check\n\n**Almost no new TypeScript today** - Day 2 is about how APIs work, not about the language.\n\n| In play | Taught in |\n|---|---|\n| Objects, nested objects | [week3/day1_1](/learn/w3/d1/p1) |\n| `JSON.parse`, and `any` | [week5/day5_1](/learn/w5/d5/p1) |\n| Template literals | [week6/day3_1](/learn/w6/d3/p1) |\n| `enum` | [day1_2](/learn/w7/d1/p2) |\n\nOne shape is worth five minutes, because every API answer arrives in it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -71,7 +71,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Fundamentals - What an API is](/learn/w7/d2/p2)",
+          "text": "**Next:** [Day 2.2 - What an API is](/learn/w7/d2/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -89,7 +89,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Fundamentals - What an API is\n\nSix weeks of this course drove a browser. Today the browser goes away and you talk to the server\ndirectly - which is faster, earlier, and how most testing work is actually heading.\n\n> **Partly here, partly in your own project.** Explore cells use `fetch`; one cell writes and runs a real spec.",
+          "text": "# Week 7, Day 2.2 - What an API is\n\nSix weeks of this course drove a browser. Today the browser goes away and you talk to the server\ndirectly - which is faster, earlier, and how most testing work is actually heading.\n\n> **Partly here, partly in your own project.** Explore cells use `fetch`; one cell writes and runs a real spec.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -201,7 +201,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Common mistakes\n\n| Mistake | Consequence |\n|---|---|\n| Asserting only the status code | Step 6 passes your test while the login failed |\n| Assuming 404 for \"not found\" | this API says 400; assert what you probed |\n| Following redirects and never noticing | use `maxRedirects: 0` to see the 3xx |\n| Sending a body with `GET` | ignored at best, rejected at worst |\n| Treating 5xx as your bug | it is a bug report, not a test fix |\n\n**Next:** [Implementation - Reading the documentation](/learn/w7/d2/p3)",
+          "text": "## Common mistakes\n\n| Mistake | Consequence |\n|---|---|\n| Asserting only the status code | Step 6 passes your test while the login failed |\n| Assuming 404 for \"not found\" | this API says 400; assert what you probed |\n| Following redirects and never noticing | use `maxRedirects: 0` to see the 3xx |\n| Sending a body with `GET` | ignored at best, rejected at worst |\n| Treating 5xx as your bug | it is a bug report, not a test fix |\n\n**Next:** [Day 2.3 - Reading the documentation](/learn/w7/d2/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -219,7 +219,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Implementation - Reading the documentation\n\nNobody hands you a list of endpoints. You get a docs page, and how quickly you can read it decides\nhow quickly you can test.\n\n## Swagger / OpenAPI\n\nMost APIs publish an interactive page - request shape, response shape, and a **Try it out**\nbutton that fires a real call from the browser.\n\n| Live example | Style |\n|---|---|\n| [demoqa.com/swagger](https://demoqa.com/swagger/) | Swagger UI - the API this week uses |\n| [api.spreecommerce.org](https://api.spreecommerce.org/) | a large, very polished reference |\n| [restful-booker apidoc](https://restful-booker.herokuapp.com/apidoc/index.html) | the API week8 uses |\n\nBoth of the first two are live right now; open one alongside this lesson.",
+          "text": "# Week 7, Day 2.3 - Reading the documentation\n\nNobody hands you a list of endpoints. You get a docs page, and how quickly you can read it decides\nhow quickly you can test.\n\n## Swagger / OpenAPI\n\nMost APIs publish an interactive page - request shape, response shape, and a **Try it out**\nbutton that fires a real call from the browser.\n\n| Live example | Style |\n|---|---|\n| [demoqa.com/swagger](https://demoqa.com/swagger/) | Swagger UI - the API this week uses |\n| [api.spreecommerce.org](https://api.spreecommerce.org/) | a large, very polished reference |\n| [restful-booker apidoc](https://restful-booker.herokuapp.com/apidoc/index.html) | the API week8 uses |\n\nBoth of the first two are live right now; open one alongside this lesson.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -289,7 +289,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Where the data comes from\n\n| Layer | Holds |\n|---|---|\n| Presentation | the UI |\n| **Business / API** | the rules, and the routes between the other two |\n| Data | the database |\n\nStatic pages come from an app server, rows from a database server, and large media often from a\nseparate host entirely - which is why one page can be fast and slow at the same time.\n\n**Next:** [Practice](/learn/w7/d2/p4)",
+          "text": "## Where the data comes from\n\n| Layer | Holds |\n|---|---|\n| Presentation | the UI |\n| **Business / API** | the rules, and the routes between the other two |\n| Data | the database |\n\nStatic pages come from an app server, rows from a database server, and large media often from a\nseparate host entirely - which is why one page can be fast and slow at the same time.\n\n**Next:** [Day 2.4 - Practice](/learn/w7/d2/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -307,7 +307,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Practice - Practice\n\nUse `fetch` in a cell for these; the Playwright `request` fixture starts in\n[day3_2](/learn/w7/d3/p2).",
+          "text": "# Week 7, Day 2.4 - Practice\n\nUse `fetch` in a cell for these; the Playwright `request` fixture starts in\n[day3_2](/learn/w7/d3/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -370,7 +370,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 3 - TypeScript - Prerequisites](/learn/w7/d3/p1)",
+          "text": "**Next:** [Day 3.1 - Prerequisites](/learn/w7/d3/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null

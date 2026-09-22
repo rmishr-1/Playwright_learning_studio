@@ -251,6 +251,16 @@ export function relabelDayRefs(md: string, week: number, day: number): string {
       },
     );
 
+    // 1b. Two more label shapes from the notebook era: a bare "[2.2]" (the second of a pair, as in
+    //     "Day 2.1 and 2.2"), rebuilt from its href like the rest, and a path-like "[week7]",
+    //     which refers to a whole week and so becomes "Week 7".
+    out = out.replace(
+      /\[(\d+)\.(\d+)\]\(\/learn\/w(\d+)\/d(\d+)\/p(\d+)\)/g,
+      (m, _a: string, _b: string, w: string, d: string, p: string) =>
+        validPart(+p) ? '[' + label(+w, +d, +p) + '](' + href(+w, +d, +p) + ')' : m,
+    );
+    out = out.replace(/\[week ?(\d+)\](\(\/learn\/w\d+\/[^)]*\))/gi, '[Week $1]$2');
+
     // 2. "Day 4.2 and 4.3" - the second number borrows the first one's "Day".
     out = out.replace(/\bDay (\d+)\.(\d+) and (\d+)\.(\d+)\b/g, 'Day $1.$2 and Day $3.$4');
 

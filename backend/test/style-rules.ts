@@ -65,6 +65,9 @@ const INSIDER: ReadonlyArray<readonly [RegExp, string]> = [
   // The notebook numbering: day 5, notebook 2. The page calls that lesson "Fundamentals", and its
   // heading calls it "Week 1 - Day 5 - Fundamentals"; "Day 5.2" appears nowhere a learner looks.
   [/\bDay \d+\.\d+\b/, 'an old "Day N.P" reference (use the tab name; see relabelDayRefs)'],
+  // The same numbering as a bare link label, "[2.2](/learn/...)", and a path used as a label.
+  [/\[\d+\.\d+\]\(/, 'a bare "[N.P]" link label'],
+  [/\[week ?\d+\]\(/, 'a path-like "[week7]" link label'],
 ];
 
 /**

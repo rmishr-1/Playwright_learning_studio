@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# TypeScript - Prerequisites check\n\nToday you move code out of a spec and into a module. That is `export` / `import`, which you have\nused - plus one Playwright type.\n\n| In play | Taught in |\n|---|---|\n| `export` / `import` (named) | [week3/day3_1](/learn/w3/d3/p1) |\n| `type` aliases for objects | [day1_2](/learn/w7/d1/p2) |\n| Typed parameters and return types | [day1_2](/learn/w7/d1/p2) |\n| Arrays of objects | [week3/day5_1](/learn/w3/d5/p1) |\n| Importing a JSON file | [week5/day5_1](/learn/w5/d5/p1) |\n\n**Next:** [Fundamentals - Write it once](/learn/w7/d5/p2)",
+          "text": "# Week 7, Day 5.1 - Prerequisites check\n\nToday you move code out of a spec and into a module. That is `export` / `import`, which you have\nused - plus one Playwright type.\n\n| In play | Taught in |\n|---|---|\n| `export` / `import` (named) | [week3/day3_1](/learn/w3/d3/p1) |\n| `type` aliases for objects | [day1_2](/learn/w7/d1/p2) |\n| Typed parameters and return types | [day1_2](/learn/w7/d1/p2) |\n| Arrays of objects | [week3/day5_1](/learn/w3/d5/p1) |\n| Importing a JSON file | [week5/day5_1](/learn/w5/d5/p1) |\n\n**Next:** [Day 5.2 - Write it once](/learn/w7/d5/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -64,7 +64,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Fundamentals - Write it once](/learn/w7/d5/p2)",
+          "text": "**Next:** [Day 5.2 - Write it once](/learn/w7/d5/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -82,7 +82,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Fundamentals - Write it once\n\nDay 4's `beforeAll` was nine lines. Every API spec you write from here needs the same nine. Today\nthey become one line, and then five near-identical negative tests become one loop.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Week 7, Day 5.2 - Write it once\n\nDay 4's `beforeAll` was nine lines. Every API spec you write from here needs the same nine. Today\nthey become one line, and then five near-identical negative tests become one loop.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -180,7 +180,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Common mistakes\n\n| Mistake | Consequence |\n|---|---|\n| The loop inside `test()` | one test, and only the first failure is reported |\n| A generic test title | the report says `case 3` and you go hunting |\n| Expected values guessed, not probed | a lesson that fails on day one |\n| The valid row not cleaned up | a new user on a shared API every run |\n| Forcing a prerequisite case into the table | a column only one row uses |\n\n**Next:** [Implementation - The next step: fixtures](/learn/w7/d5/p3)",
+          "text": "## Common mistakes\n\n| Mistake | Consequence |\n|---|---|\n| The loop inside `test()` | one test, and only the first failure is reported |\n| A generic test title | the report says `case 3` and you go hunting |\n| Expected values guessed, not probed | a lesson that fails on day one |\n| The valid row not cleaned up | a new user on a shared API every run |\n| Forcing a prerequisite case into the table | a column only one row uses |\n\n**Next:** [Day 5.3 - The next step: fixtures](/learn/w7/d5/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -198,7 +198,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Implementation - The next step: fixtures\n\n`createAccount()` is a function you must remember to call. A fixture is the same function that\ncalls itself - and cleans up after itself.\n\n## The same helper, as a fixture\n\n```ts\n// api-fixtures.ts\nimport { test as base } from \"@playwright/test\";\nimport { createAccount, deleteAccount, type Account } from \"./api-helpers\";\n\nexport const test = base.extend<{ account: Account }>({\n  account: async ({ request }, use) => {\n    const created = await createAccount(request);\n    await use(created);                       // the test body runs here\n    await deleteAccount(request, created);    // teardown - even if it failed\n  },\n});\nexport { expect } from \"@playwright/test\";\n```\n\nA spec then asks for what it needs and nothing more:\n\n```ts\ntest(\"a new account owns no books\", async ({ request, account }) => {\n  const response = await request.get(`${BASE_URL}/Account/v1/User/${account.userId}`, {\n    headers: authHeader(account),\n  });\n  expect((await response.json()).books).toEqual([]);\n});\n```",
+          "text": "# Week 7, Day 5.3 - The next step: fixtures\n\n`createAccount()` is a function you must remember to call. A fixture is the same function that\ncalls itself - and cleans up after itself.\n\n## The same helper, as a fixture\n\n```ts\n// api-fixtures.ts\nimport { test as base } from \"@playwright/test\";\nimport { createAccount, deleteAccount, type Account } from \"./api-helpers\";\n\nexport const test = base.extend<{ account: Account }>({\n  account: async ({ request }, use) => {\n    const created = await createAccount(request);\n    await use(created);                       // the test body runs here\n    await deleteAccount(request, created);    // teardown - even if it failed\n  },\n});\nexport { expect } from \"@playwright/test\";\n```\n\nA spec then asks for what it needs and nothing more:\n\n```ts\ntest(\"a new account owns no books\", async ({ request, account }) => {\n  const response = await request.get(`${BASE_URL}/Account/v1/User/${account.userId}`, {\n    headers: authHeader(account),\n  });\n  expect((await response.json()).books).toEqual([]);\n});\n```",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -240,7 +240,7 @@
         },
         {
           "type": "markdown",
-          "text": "## API and UI in one test\n\nThe combination the session was building towards, and the reason a single tool for both matters:\n\n```ts\ntest(\"a booking made by API appears in the UI\", async ({ request, page }) => {\n  const account = await createAccount(request);          // fast setup, no browser\n  await page.goto(\"/login\");                             // then check what a person sees\n  ...\n});\n```\n\n| Do this by | Because |\n|---|---|\n| API | setup, data creation, teardown - it is ~10x faster |\n| UI | the one assertion that needs a human's view |\n\nAsking for both `request` and `page` in one test is all it takes. No extra library, which was the\nsession's closing point about Playwright.\n\n**Next:** [Practice](/learn/w7/d5/p4)",
+          "text": "## API and UI in one test\n\nThe combination the session was building towards, and the reason a single tool for both matters:\n\n```ts\ntest(\"a booking made by API appears in the UI\", async ({ request, page }) => {\n  const account = await createAccount(request);          // fast setup, no browser\n  await page.goto(\"/login\");                             // then check what a person sees\n  ...\n});\n```\n\n| Do this by | Because |\n|---|---|\n| API | setup, data creation, teardown - it is ~10x faster |\n| UI | the one assertion that needs a human's view |\n\nAsking for both `request` and `page` in one test is all it takes. No extra library, which was the\nsession's closing point about Playwright.\n\n**Next:** [Day 5.4 - Practice](/learn/w7/d5/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -258,7 +258,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Practice - Practice\n\nThe last two close out the week.",
+          "text": "# Week 7, Day 5.4 - Practice\n\nThe last two close out the week.",
           "starter": null,
           "variation": null,
           "checkpoint": null

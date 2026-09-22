@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ApiError,
@@ -11,6 +11,7 @@ import {
   runCode,
 } from '../api/client';
 import { TheoryPane } from '../components/TheoryPane';
+import { OpenWeeks } from '../components/Markdown';
 import { CodePane } from '../components/CodePane';
 import type { RunState } from '../components/RunOverlay';
 import type { CourseDay } from '../../../shared/contracts/course_day';
@@ -301,6 +302,10 @@ export function Day({
     }
   }
 
+  // Declared before the early returns below, as every hook must be. The index lists open weeks
+  // only, so this is the set a lesson link may lead into.
+  const openWeeks = useMemo(() => (index ? new Set(index.weeks.map((w) => w.week)) : null), [index]);
+
   if (error) return <div className="centered"><div className="notice">{error}</div></div>;
 
   if (locked !== null) {
@@ -339,6 +344,7 @@ export function Day({
   const viewed = progress?.progress['w' + week + 'd' + day]?.parts_viewed ?? [];
 
   return (
+    <OpenWeeks.Provider value={openWeeks}>
     <div className="body">
       {weeksShown && (
         <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} />
@@ -371,5 +377,6 @@ export function Day({
         </div>
       </div>
     </div>
+    </OpenWeeks.Provider>
   );
 }

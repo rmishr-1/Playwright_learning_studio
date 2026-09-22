@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# TypeScript - Prerequisites check\n\n**No new TypeScript today.** Today's difficulty is *ordering*, not syntax.\n\n| In play | Taught in |\n|---|---|\n| `let` vs `const`, block scope | [week3/day2_1](/learn/w3/d2/p1) |\n| Template literals | [week6/day3_1](/learn/w6/d3/p1) |\n| `beforeAll` / `beforeEach` | [week3/day2_2](/learn/w3/d2/p2) |\n| Objects as return values | [week3/day1_1](/learn/w3/d1/p1) |\n\nOne pattern is worth its own cell, because getting it wrong produces a confusing failure.",
+          "text": "# Week 7, Day 4.1 - Prerequisites check\n\n**No new TypeScript today.** Today's difficulty is *ordering*, not syntax.\n\n| In play | Taught in |\n|---|---|\n| `let` vs `const`, block scope | [week3/day2_1](/learn/w3/d2/p1) |\n| Template literals | [week6/day3_1](/learn/w6/d3/p1) |\n| `beforeAll` / `beforeEach` | [week3/day2_2](/learn/w3/d2/p2) |\n| Objects as return values | [week3/day1_1](/learn/w3/d1/p1) |\n\nOne pattern is worth its own cell, because getting it wrong produces a confusing failure.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -64,7 +64,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Fundamentals - One response feeds the next request](/learn/w7/d4/p2)",
+          "text": "**Next:** [Day 4.2 - One response feeds the next request](/learn/w7/d4/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -82,7 +82,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Fundamentals - One response feeds the next request\n\nTo update something you need its id. To delete it you need its id. **The server invents the id**,\nso you cannot write it down in advance - you have to create the thing, catch the id, and carry it\nforward.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Week 7, Day 4.2 - One response feeds the next request\n\nTo update something you need its id. To delete it you need its id. **The server invents the id**,\nso you cannot write it down in advance - you have to create the thing, catch the id, and carry it\nforward.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -173,7 +173,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| A hard-coded id from yesterday | red suite, unrelated cause |\n| `beforeEach` for a one-time prerequisite | slow, and litter left on the server |\n| `const` for a value assigned in a hook | it will not compile |\n| `.json()` on a 204 | throws, and looks like an API fault |\n| Trusting a 200 without reading it back | an update that did nothing still passes |\n\n**Next:** [Implementation - Where the setup should live](/learn/w7/d4/p3)",
+          "text": "## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| A hard-coded id from yesterday | red suite, unrelated cause |\n| `beforeEach` for a one-time prerequisite | slow, and litter left on the server |\n| `const` for a value assigned in a hook | it will not compile |\n| `.json()` on a 204 | throws, and looks like an API fault |\n| Trusting a 200 without reading it back | an update that did nothing still passes |\n\n**Next:** [Day 4.3 - Where the setup should live](/learn/w7/d4/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -191,7 +191,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Implementation - Where the setup should live\n\nSame `beforeAll`, same header - arranged so it is written once for the whole suite.\n\n## Four homes for setup, worst to best\n\n| Where | Runs | Problem |\n|---|---|---|\n| Inside each test | every test | the same eight lines, forever |\n| `beforeEach` | every test | a user per test, most abandoned |\n| **`beforeAll`** | once per describe | good - but repeated in every *file* |\n| **A fixture** | once, wherever asked | the real answer |\n\n[day4_2](/learn/w7/d4/p2) is the third row. [day5_2](/learn/w7/d5/p2) takes the fourth step in two\nstages: a plain function first, then a fixture.",
+          "text": "# Week 7, Day 4.3 - Where the setup should live\n\nSame `beforeAll`, same header - arranged so it is written once for the whole suite.\n\n## Four homes for setup, worst to best\n\n| Where | Runs | Problem |\n|---|---|---|\n| Inside each test | every test | the same eight lines, forever |\n| `beforeEach` | every test | a user per test, most abandoned |\n| **`beforeAll`** | once per describe | good - but repeated in every *file* |\n| **A fixture** | once, wherever asked | the real answer |\n\n[day4_2](/learn/w7/d4/p2) is the third row. [day5_2](/learn/w7/d5/p2) takes the fourth step in two\nstages: a plain function first, then a fixture.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -233,7 +233,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Reviewer's checklist for an API suite\n\n| Look for | Why |\n|---|---|\n| A hard-coded id or token | it will rot, and not on your schedule |\n| A fixed username on a shared API | passes once, then collides forever |\n| `.json()` near a `DELETE` | 204 has no body |\n| A status assertion with no body assertion | [day2_2](/learn/w7/d2/p2) Step 6 |\n| Something created and never deleted | you are a guest |\n| A base URL spelled out in each test | one host change, many edits |\n\n**Next:** [Practice](/learn/w7/d4/p4)",
+          "text": "## Reviewer's checklist for an API suite\n\n| Look for | Why |\n|---|---|\n| A hard-coded id or token | it will rot, and not on your schedule |\n| A fixed username on a shared API | passes once, then collides forever |\n| `.json()` near a `DELETE` | 204 has no body |\n| A status assertion with no body assertion | [day2_2](/learn/w7/d2/p2) Step 6 |\n| Something created and never deleted | you are a guest |\n| A base URL spelled out in each test | one host change, many edits |\n\n**Next:** [Day 4.4 - Practice](/learn/w7/d4/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -251,7 +251,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Practice - Practice\n\nDelete whatever you create.",
+          "text": "# Week 7, Day 4.4 - Practice\n\nDelete whatever you create.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -307,7 +307,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 5 - TypeScript - Prerequisites](/learn/w7/d5/p1)",
+          "text": "**Next:** [Day 5.1 - Prerequisites](/learn/w7/d5/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null

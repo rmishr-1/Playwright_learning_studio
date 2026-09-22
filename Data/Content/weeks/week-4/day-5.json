@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# TypeScript — Prerequisites check\n\n**No new TypeScript today.** Visual testing is one assertion and a handful of options.\n\n| You'll use | Taught in |\n|---|---|\n| Options objects | [week3/day1_1](/learn/w3/d1/p1) |\n| Locators | [week3/day3_2](/learn/w3/d3/p2) |\n| `expect` with options | [day1_2](/learn/w4/d1/p2) |\n| A separate config file | [week3/day5_2](/learn/w3/d5/p2) |\n\nThat last row matters today: the visual lesson runs under **its own config**, for reasons [Fundamentals](/learn/w4/d5/p2)\nexplains in its first paragraph.\n\n**Next:** [Fundamentals - Testing what a page looks like](/learn/w4/d5/p2)",
+          "text": "# Week 4, Day 5.1 — Prerequisites check\n\n**No new TypeScript today.** Visual testing is one assertion and a handful of options.\n\n| You'll use | Taught in |\n|---|---|\n| Options objects | [week3/day1_1](/learn/w3/d1/p1) |\n| Locators | [week3/day3_2](/learn/w3/d3/p2) |\n| `expect` with options | [day1_2](/learn/w4/d1/p2) |\n| A separate config file | [week3/day5_2](/learn/w3/d5/p2) |\n\nThat last row matters today: the visual lesson runs under **its own config**, for reasons Day 5.2\nexplains in its first paragraph.\n\n**Next:** [Day 5.2 — Testing what a page looks like](/learn/w4/d5/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -33,7 +33,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Fundamentals — Testing what a page looks like\n\nEvery assertion so far checked *text, URLs or counts*. None would notice if the login button turned\nbright orange, moved 200 pixels left, or vanished behind a banner.\n\nBy the end of this lesson Playwright compares screenshots pixel by pixel — and you'll know why this\nis the most abandoned kind of test in the industry.\n\n> **Follow this one in your own project, which needs its own config.** Two reasons the visual spec doesn't join the default suite: on the\n> first run there is **no baseline**, so it fails by design while creating one; and baselines are\n> **platform-specific**. A default suite that goes red on a clean checkout is useless, so this lives\n> under `week4/generated/day5-visual.config.ts`.",
+          "text": "# Week 4, Day 5.2 — Testing what a page looks like\n\nEvery assertion so far checked *text, URLs or counts*. None would notice if the login button turned\nbright orange, moved 200 pixels left, or vanished behind a banner.\n\nBy the end of this lesson Playwright compares screenshots pixel by pixel — and you'll know why this\nis the most abandoned kind of test in the industry.\n\n> **Follow this one in your own project, which needs its own config.** Two reasons the visual spec doesn't join the default suite: on the\n> first run there is **no baseline**, so it fails by design while creating one; and baselines are\n> **platform-specific**. A default suite that goes red on a clean checkout is useless, so this lives\n> under `week4/generated/day5-visual.config.ts`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -103,7 +103,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Static pages only.** Anything with a clock, carousel or live data will never settle.\n- **Element over full page.**\n- **Fix the viewport**, disable animations, hide the caret.\n- **Generate baselines where CI runs them.**\n- **Review a diff before `--update-snapshots`.**\n- **Baseline the pages users see most** — a checkout, a dashboard. Not every screen.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| First run fails | no baseline yet — by design | run again, and review the image |\n| Passes locally, fails in CI | different OS → different pixels | baseline in CI's container |\n| Fails every run by a few pixels | anti-aliasing | small `maxDiffPixelRatio` |\n| Fails after an intended redesign | stale baseline | review the diff, then `--update-snapshots` |\n| Screenshot test never fails | you used `page.screenshot()` | that saves; `toHaveScreenshot()` asserts |\n| Random failures on one region | dynamic content | `mask: [locator]` |\n\n**Next:** [Implementation](/learn/w4/d5/p3) — when visual testing is worth it.",
+          "text": "## Best practices\n\n- **Static pages only.** Anything with a clock, carousel or live data will never settle.\n- **Element over full page.**\n- **Fix the viewport**, disable animations, hide the caret.\n- **Generate baselines where CI runs them.**\n- **Review a diff before `--update-snapshots`.**\n- **Baseline the pages users see most** — a checkout, a dashboard. Not every screen.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| First run fails | no baseline yet — by design | run again, and review the image |\n| Passes locally, fails in CI | different OS → different pixels | baseline in CI's container |\n| Fails every run by a few pixels | anti-aliasing | small `maxDiffPixelRatio` |\n| Fails after an intended redesign | stale baseline | review the diff, then `--update-snapshots` |\n| Screenshot test never fails | you used `page.screenshot()` | that saves; `toHaveScreenshot()` asserts |\n| Random failures on one region | dynamic content | `mask: [locator]` |\n\n**Next:** [Day 5.3](/learn/w4/d5/p3) — when visual testing is worth it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -121,21 +121,21 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Implementation — When visual testing is worth it\n\nSame assertion as [Fundamentals](/learn/w4/d5/p2). No new API. The question is whether to use it at all —\nbecause visual tests are abandoned more often than any other kind.",
+          "text": "# Week 4, Day 5.3 — When visual testing is worth it\n\nSame assertion as [Day 5.2](/learn/w4/d5/p2). No new API. The question is whether to use it at all —\nbecause visual tests are abandoned more often than any other kind.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Why they get abandoned\n\nA visual test fails when **any** pixel changes. Most pixel changes are not bugs:\n\n| Change | A bug? |\n|---|---|\n| the Submit button turned orange | maybe — ask the designer |\n| a font rendered 1px differently after an OS update | no |\n| an advert rotated | no |\n| the header moved 200px because a CSS file failed to load | **yes** |\n| a timestamp advanced by a second | no |\n\nFour of five are noise. A suite that cries wolf four times out of five gets muted, then deleted.\nEverything in the [Fundamentals](/learn/w4/d5/p2) lesson's \"survivable\" table exists to shift that ratio.",
+          "text": "## Why they get abandoned\n\nA visual test fails when **any** pixel changes. Most pixel changes are not bugs:\n\n| Change | A bug? |\n|---|---|\n| the Submit button turned orange | maybe — ask the designer |\n| a font rendered 1px differently after an OS update | no |\n| an advert rotated | no |\n| the header moved 200px because a CSS file failed to load | **yes** |\n| a timestamp advanced by a second | no |\n\nFour of five are noise. A suite that cries wolf four times out of five gets muted, then deleted.\nEverything in Day 5.2's \"survivable\" table exists to shift that ratio.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Determinism is the entry requirement — and it is measurable\n\nBefore baselining a page, check it renders the same twice. I ran that check on this course's banking\napp:\n\n```\nshot 1 bytes: 31868   shot 2 bytes: 38418\nbyte-identical across 1.5s: false\n```\n\n**Two screenshots of the same page, 1.5 seconds apart, are different sizes.** Something loads or\nanimates late. A baseline from that page would fail unpredictably forever — and no\n`maxDiffPixelRatio` fixes a page that hasn't finished rendering.\n\nThat's why [Fundamentals](/learn/w4/d5/p2) uses a deliberately static third-party page. Not a preference: the banking app\n**fails the entry requirement**.\n\n**Run this check first, on any page you're about to baseline.** Thirty seconds of work that saves weeks\nof flaky failures.",
+          "text": "## Determinism is the entry requirement — and it is measurable\n\nBefore baselining a page, check it renders the same twice. I ran that check on this course's banking\napp:\n\n```\nshot 1 bytes: 31868   shot 2 bytes: 38418\nbyte-identical across 1.5s: false\n```\n\n**Two screenshots of the same page, 1.5 seconds apart, are different sizes.** Something loads or\nanimates late. A baseline from that page would fail unpredictably forever — and no\n`maxDiffPixelRatio` fixes a page that hasn't finished rendering.\n\nThat's why Day 5.2 uses a deliberately static third-party page. Not a preference: the banking app\n**fails the entry requirement**.\n\n**Run this check first, on any page you're about to baseline.** Thirty seconds of work that saves weeks\nof flaky failures.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -156,7 +156,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Where it genuinely pays\n\n| Good candidate | Why |\n|---|---|\n| a checkout or payment page | a layout break costs money directly |\n| a design-system component library | consistency *is* the requirement |\n| a print or PDF export | no text assertion catches a layout break |\n| an empty state or error page | rarely exercised, easy to break unnoticed |\n| a page after a CSS framework upgrade | exactly what text assertions can't see |\n\n| Poor candidate | Why |\n|---|---|\n| a dashboard with live numbers | never identical twice |\n| a feed or search results | content changes by the minute |\n| anything with adverts | not your pixels |\n| a page you're actively redesigning | you'd re-baseline daily |\n\nThe pattern: **visual tests protect things that are supposed to stop changing.**\n\n> This capability used to be expensive. Licensed tools called it a *bitmap checkpoint*. Getting it free\n> in an open-source runner is genuinely new — which is also why teams adopt it before deciding where it\n> belongs.\n\n## What a reviewer checks\n\n- **Was determinism checked** before the page was baselined?\n- **Element or page?** A full-page baseline needs justifying.\n- **Viewport pinned**, animations disabled.\n- **Baselines generated in CI's environment**, not on a laptop.\n- **Does the diff get reviewed**, or is `--update-snapshots` run reflexively?\n- **Is the page one that should stop changing?**\n\n**Next:** [Practice](/learn/w4/d5/p4) — your turn.",
+          "text": "## Where it genuinely pays\n\n| Good candidate | Why |\n|---|---|\n| a checkout or payment page | a layout break costs money directly |\n| a design-system component library | consistency *is* the requirement |\n| a print or PDF export | no text assertion catches a layout break |\n| an empty state or error page | rarely exercised, easy to break unnoticed |\n| a page after a CSS framework upgrade | exactly what text assertions can't see |\n\n| Poor candidate | Why |\n|---|---|\n| a dashboard with live numbers | never identical twice |\n| a feed or search results | content changes by the minute |\n| anything with adverts | not your pixels |\n| a page you're actively redesigning | you'd re-baseline daily |\n\nThe pattern: **visual tests protect things that are supposed to stop changing.**\n\n> This capability used to be expensive. Licensed tools called it a *bitmap checkpoint*. Getting it free\n> in an open-source runner is genuinely new — which is also why teams adopt it before deciding where it\n> belongs.\n\n## What a reviewer checks\n\n- **Was determinism checked** before the page was baselined?\n- **Element or page?** A full-page baseline needs justifying.\n- **Viewport pinned**, animations disabled.\n- **Baselines generated in CI's environment**, not on a laptop.\n- **Does the diff get reviewed**, or is `--update-snapshots` run reflexively?\n- **Is the page one that should stop changing?**\n\n**Next:** [Day 5.4](/learn/w4/d5/p4) — your turn.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -174,7 +174,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Practice — Practice\n\nThree problems. No answer key.\n\nConfig to copy: `week4/generated/day5-visual.config.ts`. Static page safe to baseline:\n`https://the-internet.herokuapp.com/tables`.\n\n> **Before you baseline anything**, run the determinism check from [Implementation](/learn/w4/d5/p3).\n\n> Stuck past twenty minutes? Back to [Fundamentals](/learn/w4/d5/p2).",
+          "text": "# Week 4, Day 5.4 — Practice\n\nThree problems. No answer key.\n\nConfig to copy: `week4/generated/day5-visual.config.ts`. Static page safe to baseline:\n`https://the-internet.herokuapp.com/tables`.\n\n> **Before you baseline anything**, run the determinism check from [Day 5.3](/learn/w4/d5/p3).\n\n> Stuck past twenty minutes? Back to [Day 5.2](/learn/w4/d5/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null

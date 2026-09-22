@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# TypeScript - Prerequisites check\n\nToday names a pattern you have already half-built. The TypeScript underneath it is all\nclass syntax.\n\n| Concept | Taught in |\n|---|---|\n| `class`, `constructor`, `this` | [week3/day3_1](/learn/w3/d3/p1) |\n| `readonly` and `private` fields | [week3/day3_1](/learn/w3/d3/p1) |\n| `extends` and `super()` | new - below |\n| `abstract` classes | new - below |\n| `protected` | new - below |\n\n**Next:** [Fundamentals - The Page Object Model](/learn/w5/d3/p2)",
+          "text": "# Week 5, Day 3.1 - Prerequisites check\n\nToday names a pattern you have already half-built. The TypeScript underneath it is all\nclass syntax.\n\n| Concept | Taught in |\n|---|---|\n| `class`, `constructor`, `this` | [week3/day3_1](/learn/w3/d3/p1) |\n| `readonly` and `private` fields | [week3/day3_1](/learn/w3/d3/p1) |\n| `extends` and `super()` | new - below |\n| `abstract` classes | new - below |\n| `protected` | new - below |\n\n**Next:** [Day 3.2 - The Page Object Model](/learn/w5/d3/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -64,7 +64,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Concept 3 - `abstract`\n\nAn `abstract` class exists only to be extended. `new BasePage(page)` is a compile error - which\nis exactly what you want for a class that is plumbing rather than a page.\n\n```ts\nexport abstract class BasePage {\n  protected readonly page: Page;\n  constructor(page: Page) { this.page = page; }\n}\n```\n\n> **Which tool actually stops you.** Nothing at run time does - `abstract` vanishes when the types\n> are stripped, so this lesson's kernel, and even `deno run`, will construct one happily. The\n> **type-checker** is what refuses:\n>\n> ```\n> error TS2511: Cannot create an instance of an abstract class.\n> ```\n>\n> from `npx tsc --noEmit` or `deno check`. That is the tool CI runs, which is what makes the\n> guarantee real - but it is also why you will never see this fail in a lesson cell.\n\n**Next:** [Fundamentals - The Page Object Model](/learn/w5/d3/p2)",
+          "text": "## Concept 3 - `abstract`\n\nAn `abstract` class exists only to be extended. `new BasePage(page)` is a compile error - which\nis exactly what you want for a class that is plumbing rather than a page.\n\n```ts\nexport abstract class BasePage {\n  protected readonly page: Page;\n  constructor(page: Page) { this.page = page; }\n}\n```\n\n> **Which tool actually stops you.** Nothing at run time does - `abstract` vanishes when the types\n> are stripped, so this lesson's kernel, and even `deno run`, will construct one happily. The\n> **type-checker** is what refuses:\n>\n> ```\n> error TS2511: Cannot create an instance of an abstract class.\n> ```\n>\n> from `npx tsc --noEmit` or `deno check`. That is the tool CI runs, which is what makes the\n> guarantee real - but it is also why you will never see this fail in a lesson cell.\n\n**Next:** [Day 3.2 - The Page Object Model](/learn/w5/d3/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -82,7 +82,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Fundamentals - The Page Object Model\n\nYou built a `LoginPage` class in [week3/day3_2](/learn/w3/d3/p2) because three tests kept\nrepeating the same lines. Today that gets its name - the **Page Object Model** - and, more\nusefully, its **rules**.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Week 5, Day 3.2 - The Page Object Model\n\nYou built a `LoginPage` class in [week3/day3_2](/learn/w3/d3/p2) because three tests kept\nrepeating the same lines. Today that gets its name - the **Page Object Model** - and, more\nusefully, its **rules**.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -187,7 +187,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What POM does *not* solve\n\n| Limitation | What it means |\n|---|---|\n| A redesign that moves a control to another page | the method moves too; tests that called it break |\n| Non-programmers still cannot write tests | it is TypeScript either way - see [day5_2](/learn/w5/d5/p2) |\n| Over-abstraction | `dashboardPage.doTheThing()` hiding 40 lines is not readable, just short |\n\nThe honest summary: POM makes markup changes cheap. It does not make *behaviour* changes cheap,\nand nothing does.\n\n**Next:** [Implementation - How a real repo shapes it](/learn/w5/d3/p3)",
+          "text": "## What POM does *not* solve\n\n| Limitation | What it means |\n|---|---|\n| A redesign that moves a control to another page | the method moves too; tests that called it break |\n| Non-programmers still cannot write tests | it is TypeScript either way - see [day5_2](/learn/w5/d5/p2) |\n| Over-abstraction | `dashboardPage.doTheThing()` hiding 40 lines is not readable, just short |\n\nThe honest summary: POM makes markup changes cheap. It does not make *behaviour* changes cheap,\nand nothing does.\n\n**Next:** [Day 3.3 - How a real repo shapes it](/learn/w5/d3/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -205,7 +205,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Implementation - How a real repo shapes it\n\nSame classes, same locators-as-fields - arranged so that a suite of 300 tests stays navigable.\n\n## Folder shape\n\n```\ntests/\n  pages/\n    BasePage.ts\n    LoginPage.ts\n    DashboardPage.ts\n    components/\n      Header.ts            <- appears on every page; not a page itself\n      TransactionTable.ts\n  fixtures/\n    test.ts                <- the one import every spec uses  (day4_2)\n  specs/\n    login.spec.ts\n```",
+          "text": "# Week 5, Day 3.3 - How a real repo shapes it\n\nSame classes, same locators-as-fields - arranged so that a suite of 300 tests stays navigable.\n\n## Folder shape\n\n```\ntests/\n  pages/\n    BasePage.ts\n    LoginPage.ts\n    DashboardPage.ts\n    components/\n      Header.ts            <- appears on every page; not a page itself\n      TransactionTable.ts\n  fixtures/\n    test.ts                <- the one import every spec uses  (day4_2)\n  specs/\n    login.spec.ts\n```",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -247,7 +247,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Reviewer's checklist\n\n| Look for | Because |\n|---|---|\n| `expect(` in a `pages/` file | rule 3 - it halves the class's uses |\n| A locator string in a spec file | the abstraction has a hole |\n| `page.waitForTimeout` anywhere | a hidden race, not a fix |\n| A method named `clickSubmitButton` | named for the DOM, not for the user |\n| A class over ~150 lines | probably two pages, or a page plus a component |\n\n**Next:** [Practice](/learn/w5/d3/p4)",
+          "text": "## Reviewer's checklist\n\n| Look for | Because |\n|---|---|\n| `expect(` in a `pages/` file | rule 3 - it halves the class's uses |\n| A locator string in a spec file | the abstraction has a hole |\n| `page.waitForTimeout` anywhere | a hidden race, not a fix |\n| A method named `clickSubmitButton` | named for the DOM, not for the user |\n| A class over ~150 lines | probably two pages, or a page plus a component |\n\n**Next:** [Day 3.4 - Practice](/learn/w5/d3/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -265,7 +265,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Practice - Practice\n\nWork in `week5/generated/`. Add to `pages/` rather than editing the classes you were given, so\nthe [Fundamentals](/learn/w5/d3/p2) cells still run.",
+          "text": "# Week 5, Day 3.4 - Practice\n\nWork in `week5/generated/`. Add to `pages/` rather than editing the classes you were given, so\nthe Day 3.2 cells still run.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -321,7 +321,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 4 - TypeScript - Prerequisites](/learn/w5/d4/p1)",
+          "text": "**Next:** [Day 4.1 - Prerequisites](/learn/w5/d4/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null

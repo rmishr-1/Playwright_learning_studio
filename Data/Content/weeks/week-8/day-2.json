@@ -15,14 +15,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# TypeScript — TypeScript for many test cases at once\n\nFive concepts. Today you stop writing one test per scenario and start driving many\nscenarios from one file of data.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# Week 8, Day 2.1 — TypeScript for many test cases at once\n\nFive concepts. Today you stop writing one test per scenario and start driving many\nscenarios from one file of data.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | Arrays | Your test cases become a list. |\n| 2 | `forEach` with index | One loop generates many tests. |\n| 3 | Spread `...` | Copy a booking, change one field. |\n| 4 | Rest in destructuring | Remove a field to test what happens. |\n| 5 | Importing a JSON file | Test data lives outside the test. |\n\nAlready covered — one link each, no re-teaching: `let`/`const`, template literals, objects,\nnested access, `async`/`await` and destructuring are all in\n[Day 1 - TypeScript](/learn/w8/d1/p1).",
+          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | Arrays | Your test cases become a list. |\n| 2 | `forEach` with index | One loop generates many tests. |\n| 3 | Spread `...` | Copy a booking, change one field. |\n| 4 | Rest in destructuring | Remove a field to test what happens. |\n| 5 | Importing a JSON file | Test data lives outside the test. |\n\nAlready covered — one link each, no re-teaching: `let`/`const`, template literals, objects,\nnested access, `async`/`await` and destructuring are all in\n[Day 1.1](/learn/w8/d1/p1).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -155,7 +155,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `cases found: 4`, then the four case names.\n\nIf you get \"No such file or directory\", that file gets written by\n[Fundamentals](/learn/w8/d2/p2) — run that lesson's data cell first, or just read on.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Arrays | Position starts at 0. |\n| `forEach((item, i) => …)` | `i + 1` for human-readable numbering. |\n| Spread `...` | Copy then override — override goes last. |\n| Rest `{ x, ...others }` | Missing and blank are different tests. |\n| JSON import | Data in a file; adding a case edits no code. |\n\n**Next:** [Fundamentals - Negative scenarios and data-driven tests](/learn/w8/d2/p2)",
+          "text": "**Expected:** `cases found: 4`, then the four case names.\n\nIf you get \"No such file or directory\", that file gets written by\n[Day 2.2](/learn/w8/d2/p2) — run that lesson's data cell first, or just read on.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Arrays | Position starts at 0. |\n| `forEach((item, i) => …)` | `i + 1` for human-readable numbering. |\n| Spread `...` | Copy then override — override goes last. |\n| Rest `{ x, ...others }` | Missing and blank are different tests. |\n| JSON import | Data in a file; adding a case edits no code. |\n\n**Next:** [Day 2.2 — Negative scenarios and data-driven tests](/learn/w8/d2/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -173,7 +173,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Fundamentals — Testing what *shouldn't* work\n\nDay 1 proved the happy path. Today you break things on purpose — and find four real defects\nin the API you have been testing.\n\nYou will also stop copy-pasting a test per scenario, and drive many scenarios from one JSON file.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
+          "text": "# Week 8, Day 2.2 — Testing what *shouldn't* work\n\nDay 1 proved the happy path. Today you break things on purpose — and find four real defects\nin the API you have been testing.\n\nYou will also stop copy-pasting a test per scenario, and drive many scenarios from one JSON file.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -369,7 +369,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Break one thing at a time.** Spread from a known-good object so a failure has one cause.\n- **Blank ≠ missing ≠ wrong type.** Three different tests, and today all three behaved differently.\n- **Assert the real behaviour**, then raise the defect. Never soften a test to make a bug pass.\n- **Print the whole body** before concluding an API returns nothing.\n- **`test.only` never gets committed.**\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Unexpected token … is not valid JSON` | parsed a body with no content | check status; use `.text()` |\n| Only one test ran | a stray `test.only` | remove it |\n| All cases pass suspiciously | you asserted a hardcoded value, not the data | compare against `testCase.…` |\n| `500` from bad input | a server-side defect | raise it; assert it so it's documented |\n| Spread didn't override | the spread came last | `{ ...base, field: value }` |\n\n**Next:** [Implementation](/learn/w8/d2/p3) — where this data lives once the suite is real.",
+          "text": "## Best practices\n\n- **Break one thing at a time.** Spread from a known-good object so a failure has one cause.\n- **Blank ≠ missing ≠ wrong type.** Three different tests, and today all three behaved differently.\n- **Assert the real behaviour**, then raise the defect. Never soften a test to make a bug pass.\n- **Print the whole body** before concluding an API returns nothing.\n- **`test.only` never gets committed.**\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Unexpected token … is not valid JSON` | parsed a body with no content | check status; use `.text()` |\n| Only one test ran | a stray `test.only` | remove it |\n| All cases pass suspiciously | you asserted a hardcoded value, not the data | compare against `testCase.…` |\n| `500` from bad input | a server-side defect | raise it; assert it so it's documented |\n| Spread didn't override | the spread came last | `{ ...base, field: value }` |\n\n**Next:** [Day 2.3](/learn/w8/d2/p3) — where this data lives once the suite is real.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -387,14 +387,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Implementation — Test data that scales\n\nSame data-driven idea as [Fundamentals](/learn/w8/d2/p2). No new API. The change is **where the data\nlives and what shape it has** once a suite has hundreds of cases.",
+          "text": "# Week 8, Day 2.3 — Test data that scales\n\nSame data-driven idea as [Day 2.2](/learn/w8/d2/p2). No new API. The change is **where the data\nlives and what shape it has** once a suite has hundreds of cases.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What breaks first\n\nA raw JSON file is right for four cases. Watch what happens as it grows:\n\n| Problem at scale | Why it hurts |\n|---|---|\n| Every case repeats all six fields | 40 cases means 40 copies of `bookingdates`; one format change is 40 edits |\n| A typo in a field name is silent | `frstname` in JSON is not a compile error — the test just fails oddly |\n| No types | Nothing stops `totalprice: \"free\"` reaching the request |\n| Cases share mutable objects | One test's edit leaks into another's data |\n\nThe fix is the same instinct as the [Day 1 - Implementation](/learn/w8/d1/p3) lesson's API client: **name the knowledge once**. Here that\nmeans a **type** for the shape and a **factory** for the defaults.",
+          "text": "## What breaks first\n\nA raw JSON file is right for four cases. Watch what happens as it grows:\n\n| Problem at scale | Why it hurts |\n|---|---|\n| Every case repeats all six fields | 40 cases means 40 copies of `bookingdates`; one format change is 40 edits |\n| A typo in a field name is silent | `frstname` in JSON is not a compile error — the test just fails oddly |\n| No types | Nothing stops `totalprice: \"free\"` reaching the request |\n| Cases share mutable objects | One test's edit leaks into another's data |\n\nThe fix is the same instinct as Day 1.3's API client: **name the knowledge once**. Here that\nmeans a **type** for the shape and a **factory** for the defaults.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -408,7 +408,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected:** the default booking, then one with a blank name and zero price — everything else\nstill filled in.\n\nCompare the two ways of writing a case:\n\n| JSON file | Factory |\n|---|---|\n| all six fields, every time | `aBooking({ firstname: \"\" })` |\n| typo fails at runtime, confusingly | typo fails at compile time |\n| shared object, mutable | fresh object per call |\n\nThe line that matters is `...overrides` **last** — the same rule from [TypeScript](/learn/w8/d2/p1). Put it first and\nyour overrides get silently reset to the defaults.",
+          "text": "**Expected:** the default booking, then one with a blank name and zero price — everything else\nstill filled in.\n\nCompare the two ways of writing a case:\n\n| JSON file | Factory |\n|---|---|\n| all six fields, every time | `aBooking({ firstname: \"\" })` |\n| typo fails at runtime, confusingly | typo fails at compile time |\n| shared object, mutable | fresh object per call |\n\nThe line that matters is `...overrides` **last** — the same rule from Day 2.1. Put it first and\nyour overrides get silently reset to the defaults.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -443,7 +443,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What a reviewer checks\n\n- **No expected value typed twice** — assert against the case data, not a repeated literal.\n- **Every case independently named**, so a failure report says which one.\n- **A fresh object per case** — no shared mutable data between tests.\n- **Negative cases sit with positive ones**, not in a separate forgotten file.\n- **No `test.only`** anywhere.\n- **Known defects asserted, not skipped** — a test pinning the `500` is documentation.\n\n**Next:** [Practice](/learn/w8/d2/p4) — your turn.",
+          "text": "## What a reviewer checks\n\n- **No expected value typed twice** — assert against the case data, not a repeated literal.\n- **Every case independently named**, so a failure report says which one.\n- **A fresh object per case** — no shared mutable data between tests.\n- **Negative cases sit with positive ones**, not in a separate forgotten file.\n- **No `test.only`** anywhere.\n- **Known defects asserted, not skipped** — a test pinning the `500` is documentation.\n\n**Next:** [Day 2.4](/learn/w8/d2/p4) — your turn.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -461,7 +461,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Practice — Practice\n\nThree problems. No answer key — each says how to check yourself.\n\nTarget: **Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)), credentials `admin` / `password123`.\n\n> Stuck past twenty minutes? The gap is in [TypeScript](/learn/w8/d2/p1) or [Fundamentals](/learn/w8/d2/p2).",
+          "text": "# Week 8, Day 2.4 — Practice\n\nThree problems. No answer key — each says how to check yourself.\n\nTarget: **Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)), credentials `admin` / `password123`.\n\n> Stuck past twenty minutes? The gap is in [Day 2.1](/learn/w8/d2/p1) or [Day 2.2](/learn/w8/d2/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -489,7 +489,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**Which of the four defects from [Fundamentals](/learn/w8/d2/p2) would a user actually notice?** The silent\n`totalprice: null` is the dangerous one — no error, no clue, wrong data. Ranking findings by\nuser impact is most of what makes a bug report worth reading.\n\n**Next:** [Day 3 - TypeScript](/learn/w8/d3/p1) — pulling data straight out of a page.",
+          "text": "## When you're done\n\n**Which of the four defects from Day 2.2 would a user actually notice?** The silent\n`totalprice: null` is the dangerous one — no error, no clue, wrong data. Ranking findings by\nuser impact is most of what makes a bug report worth reading.\n\n**Next:** [Day 3.1](/learn/w8/d3/p1) — pulling data straight out of a page.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -499,7 +499,7 @@
         {
           "number": 1,
           "difficulty": "Beginner",
-          "statement": "**Build.** Find out how this API handles two more kinds of bad input.\n\n1. Send a booking where `bookingdates.checkout` is *before* `checkin`\n2. Send a booking where `totalprice` is negative\n\nFor each: print the status and the whole response body, then write one sentence on whether the\nbehaviour is acceptable.\n\n**Check yourself.** You can state, from evidence, whether each is a defect. \"It returned 200 and\nstored a negative price\" is a finding. \"It seemed fine\" is not.\n\n> **Hint** — print the whole body. One field would have hidden `\"reason\":\"Bad credentials\"` in\n> [Fundamentals](/learn/w8/d2/p2).",
+          "statement": "**Build.** Find out how this API handles two more kinds of bad input.\n\n1. Send a booking where `bookingdates.checkout` is *before* `checkin`\n2. Send a booking where `totalprice` is negative\n\nFor each: print the status and the whole response body, then write one sentence on whether the\nbehaviour is acceptable.\n\n**Check yourself.** You can state, from evidence, whether each is a defect. \"It returned 200 and\nstored a negative price\" is a finding. \"It seemed fine\" is not.\n\n> **Hint** — print the whole body. One field would have hidden `\"reason\":\"Bad credentials\"` in\n> Day 2.2.",
           "stub": "// Problem 1 — your code here.",
           "solution": null
         },
@@ -513,7 +513,7 @@
         {
           "number": 3,
           "difficulty": "Advanced",
-          "statement": "**Build.** Negative coverage on top of the [Day 1 - Implementation](/learn/w8/d1/p3) lesson's `BookingApi` client.\n\n1. Extend the client with a `signInWith(username, password)` that does **not** assume success\n2. Add a `createRaw(body: unknown)` so a test can send deliberately malformed data — the typed\n   `create()` cannot, by design\n3. A fixture supplying the client\n4. Tests covering: bad credentials, a missing field, a wrong type, and an update with an expired\n   or invented token\n\n**Constraints — these are the exercise:**\n\n- **No `expect()` inside the client.** A client that asserts success cannot test failure.\n- **Each test names the defect it documents**, e.g. `\"missing firstname crashes the server (known defect)\"`.\n- Every test must pass **run on its own**.\n\n**Check yourself.** Run three times in a row — all pass every time. Then ask: if the API were\nfixed tomorrow to return `400` instead of `500`, how many tests fail, and is that the right number?\n\n> **Hint** — `createRaw` taking `unknown` rather than `Booking` is the interesting design\n> decision. Think about why the type-safe method should stay type-safe.",
+          "statement": "**Build.** Negative coverage on top of Day 1.3's `BookingApi` client.\n\n1. Extend the client with a `signInWith(username, password)` that does **not** assume success\n2. Add a `createRaw(body: unknown)` so a test can send deliberately malformed data — the typed\n   `create()` cannot, by design\n3. A fixture supplying the client\n4. Tests covering: bad credentials, a missing field, a wrong type, and an update with an expired\n   or invented token\n\n**Constraints — these are the exercise:**\n\n- **No `expect()` inside the client.** A client that asserts success cannot test failure.\n- **Each test names the defect it documents**, e.g. `\"missing firstname crashes the server (known defect)\"`.\n- Every test must pass **run on its own**.\n\n**Check yourself.** Run three times in a row — all pass every time. Then ask: if the API were\nfixed tomorrow to return `400` instead of `500`, how many tests fail, and is that the right number?\n\n> **Hint** — `createRaw` taking `unknown` rather than `Booking` is the interesting design\n> decision. Think about why the type-safe method should stay type-safe.",
           "stub": "// Problem 3 — your code here.",
           "solution": null
         }

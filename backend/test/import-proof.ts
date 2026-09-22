@@ -565,7 +565,7 @@ function main(): void {
         ...p.problems.flatMap((q) => [q.statement, q.solution ?? '']),
       ];
       for (const t of texts) {
-        for (const m of noCode(t).match(/\bDay \d+\.\d+\b/g) ?? []) {
+        for (const m of noCode(t).match(/\bDay \d+\.\d+\b|\[\d+\.\d+\]\(|\[week ?\d+\]\(/g) ?? []) {
           oldRefs.push('w' + d.week + 'd' + d.day + 'p' + p.part + ': ' + m);
         }
       }
@@ -577,7 +577,7 @@ function main(): void {
   // step for solutions at all, so edits to Data/Content/solutions/ never reached the page and
   // 11 of 30 shipped solutions were stale. This is the check that would have caught it.
   const staleSolutions: string[] = [];
-  for (const d of days) {
+  for (const d of days.filter((x) => !x.locked)) {
     const file = path.join(CONTENT, 'solutions', 'w' + d.week + 'd' + d.day + '.json');
     if (!fs.existsSync(file)) continue;
     const src = JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, string>;

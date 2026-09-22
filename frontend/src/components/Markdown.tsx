@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import hljs from 'highlight.js/lib/core';
@@ -76,9 +76,19 @@ function isExecutable(code: string): boolean {
 }
 
 /**
+ * The weeks a learner can open. A lesson link into any other week renders as plain text instead
+ * of an anchor, so a forward reference such as "Week 3 - Day 2 - TypeScript explains every
+ * piece" keeps its meaning without leading to a page the sidebar does not list. It is derived
+ * from the course index, so the link comes back by itself when that week opens. null means
+ * "unknown" (no provider), and then every link renders as a link.
+ */
+export const OpenWeeks = createContext<ReadonlySet<number> | null>(null);
+
+/**
  * Lesson markdown. Two behaviours beyond plain rendering:
  *  - fenced code blocks get a "Load into editor" button
  *  - the importer's /learn/... links are routed in-app rather than reloading the page
+ *  - a /learn/... link into a week that is not open renders as plain text (see OpenWeeks)
  */
 export function Markdown({
   text,
@@ -89,6 +99,7 @@ export function Markdown({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const openWeeks = useContext(OpenWeeks);
 
   useEffect(() => {
     const host = ref.current;
@@ -140,6 +151,18 @@ export function Markdown({
       wrap.append(head, pre);
     }
 
+    if (openWeeks) {
+      for (const a of Array.from(host.querySelectorAll<HTMLAnchorElement>('a[href^="/learn/w"]'))) {
+        const week = Number(/^\/learn\/w(\d+)\//.exec(a.getAttribute('href') ?? '')?.[1]);
+        if (!week || openWeeks.has(week)) continue;
+        const span = document.createElement('span');
+        span.className = 'ref-unopened';
+        span.textContent = a.textContent;
+        span.title = 'Week ' + week + ' is not open yet';
+        a.replaceWith(span);
+      }
+    }
+
     const onClick = (e: MouseEvent): void => {
       const anchor = (e.target as HTMLElement).closest('a');
       const href = anchor?.getAttribute('href');
@@ -149,7 +172,7 @@ export function Markdown({
     };
     host.addEventListener('click', onClick);
     return () => host.removeEventListener('click', onClick);
-  }, [text, onLoadIntoEditor, navigate]);
+  }, [text, onLoadIntoEditor, navigate, openWeeks]);
 
   return <div ref={ref} />;
 }

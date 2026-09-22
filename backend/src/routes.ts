@@ -29,7 +29,13 @@ export const router = Router();
 
 router.get('/course', (_req, res) => {
   try {
-    res.json(courseIndex());
+    // Only open weeks are listed. Weeks 3-8 are written but not ready, and a sidebar of six weeks
+    // marked "soon" made the course look unfinished rather than scoped. The filter keys off
+    // `locked` rather than a week number, so a week reappears on its own the moment it is
+    // unlocked. Nothing is deleted: the content stays on disk, and a direct link to a locked day
+    // still gets the honest locked screen below instead of a 404.
+    const index = courseIndex();
+    res.json({ ...index, weeks: index.weeks.filter((w) => !w.locked) });
   } catch {
     fail(res, 503, 'CONTENT_NOT_IMPORTED', 'Course content has not been imported yet. Run `npm run import`.');
   }

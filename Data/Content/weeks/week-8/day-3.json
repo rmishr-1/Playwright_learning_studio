@@ -15,14 +15,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# TypeScript — TypeScript for reading a table\n\nFour concepts. Today you pull a whole table out of a page and turn it into data you can check.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# Week 8, Day 3.1 — TypeScript for reading a table\n\nFour concepts. Today you pull a whole table out of a page and turn it into data you can check.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | The classic `for` loop | Walk rows by index, and rows inside rows. |\n| 2 | Arrays of arrays | A table *is* rows of cells. |\n| 3 | `.map()` and `.push()` | Turn elements into values. |\n| 4 | Typed functions | Make the scrape reusable instead of a one-off. |\n\nAlready covered — links only: arrays and `forEach` in [Day 2 - TypeScript](/learn/w8/d2/p1); `async`/`await`,\ntemplate literals and destructuring in [Day 1 - TypeScript](/learn/w8/d1/p1).",
+          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | The classic `for` loop | Walk rows by index, and rows inside rows. |\n| 2 | Arrays of arrays | A table *is* rows of cells. |\n| 3 | `.map()` and `.push()` | Turn elements into values. |\n| 4 | Typed functions | Make the scrape reusable instead of a one-off. |\n\nAlready covered — links only: arrays and `forEach` in [Day 2.1](/learn/w8/d2/p1); `async`/`await`,\ntemplate literals and destructuring in [Day 1.1](/learn/w8/d1/p1).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -127,7 +127,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected:** three arrays — one per column.\n\nOne function, three answers. Had `index` been hardcoded you'd have written `columnOfLastNames`,\n`columnOfFirstNames`, `columnOfDues` — which is exactly the duplication [Day 2 - Fundamentals](/learn/w8/d2/p2) warned about,\nin a different costume.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Nested `for` | Outer = rows, inner = cells. Never reuse the counter. |\n| `string[][]` | `table[row][cell]`, both from 0. |\n| `.map()` / `.push()` | Scraped text is always a string — convert it. |\n| Typed functions | A parameter is what makes it reusable. |\n\n**Next:** [Fundamentals - Scraping a real page](/learn/w8/d3/p2)",
+          "text": "**Expected:** three arrays — one per column.\n\nOne function, three answers. Had `index` been hardcoded you'd have written `columnOfLastNames`,\n`columnOfFirstNames`, `columnOfDues` — which is exactly the duplication Day 2.2 warned about,\nin a different costume.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Nested `for` | Outer = rows, inner = cells. Never reuse the counter. |\n| `string[][]` | `table[row][cell]`, both from 0. |\n| `.map()` / `.push()` | Scraped text is always a string — convert it. |\n| Typed functions | A parameter is what makes it reusable. |\n\n**Next:** [Day 3.2 — Scraping a real page](/learn/w8/d3/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -145,7 +145,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Fundamentals — Pulling a whole table out of a page\n\nBy the end you will have read every row of a live web table into an array and checked it —\nusing one function that works on any table you point it at.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.\n\nTarget page: [https://the-internet.herokuapp.com/tables](https://the-internet.herokuapp.com/tables) — two tables holding the same data with different markup.",
+          "text": "# Week 8, Day 3.2 — Pulling a whole table out of a page\n\nBy the end you will have read every row of a live web table into an array and checked it —\nusing one function that works on any table you point it at.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.\n\nTarget page: [https://the-internet.herokuapp.com/tables](https://the-internet.herokuapp.com/tables) — two tables holding the same data with different markup.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -313,7 +313,7 @@
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day3-scrape-tables.spec.ts`\n\n**Expected:** `5 passed`.\n\n## Best practices\n\n- **Inspect first**, then write the selector. `tbody` or not is a real decision.\n- **Normalise whitespace** — HTML is full of newlines you didn't ask for.\n- **Convert types explicitly.** Everything scraped is a string.\n- **Copy before sorting** (`[...arr].sort()`).\n- **Pass the selector in.** A hardcoded one guarantees a second copy of the function.\n- **Prefer locators** unless you need per-row logic.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Row 0 is the header text | selector missed `tbody` | `#table1 tbody tr` |\n| `\"edit\\n     delete\"` | raw HTML whitespace | `.replace(/\\s+/g, \" \").trim()` |\n| `NaN` in a total | forgot to strip `$` | `Number(t.replace(\"$\", \"\"))` |\n| \"Sorted\" always passes | sorted the array in place | `[...arr].sort()` |\n| Empty array, no error | selector matched nothing | check `count()` first |\n| `.map is not a function` | `querySelectorAll` gives a NodeList | wrap in `Array.from(...)` |\n\n**Next:** [Implementation](/learn/w8/d3/p3) — making this a component a whole suite can use.",
+          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day3-scrape-tables.spec.ts`\n\n**Expected:** `5 passed`.\n\n## Best practices\n\n- **Inspect first**, then write the selector. `tbody` or not is a real decision.\n- **Normalise whitespace** — HTML is full of newlines you didn't ask for.\n- **Convert types explicitly.** Everything scraped is a string.\n- **Copy before sorting** (`[...arr].sort()`).\n- **Pass the selector in.** A hardcoded one guarantees a second copy of the function.\n- **Prefer locators** unless you need per-row logic.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Row 0 is the header text | selector missed `tbody` | `#table1 tbody tr` |\n| `\"edit\\n     delete\"` | raw HTML whitespace | `.replace(/\\s+/g, \" \").trim()` |\n| `NaN` in a total | forgot to strip `$` | `Number(t.replace(\"$\", \"\"))` |\n| \"Sorted\" always passes | sorted the array in place | `[...arr].sort()` |\n| Empty array, no error | selector matched nothing | check `count()` first |\n| `.map is not a function` | `querySelectorAll` gives a NodeList | wrap in `Array.from(...)` |\n\n**Next:** [Day 3.3](/learn/w8/d3/p3) — making this a component a whole suite can use.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -331,7 +331,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Implementation — A table reader the whole suite can use\n\nSame `$$eval` call as [Fundamentals](/learn/w8/d3/p2). No new API. What changes is the **shape of what\ncomes back**, and where the function lives.",
+          "text": "# Week 8, Day 3.3 — A table reader the whole suite can use\n\nSame `$$eval` call as [Day 3.2](/learn/w8/d3/p2). No new API. What changes is the **shape of what\ncomes back**, and where the function lives.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -352,7 +352,7 @@
         },
         {
           "type": "markdown",
-          "text": "Now a test reads like a sentence:\n\n```ts\nconst rows = await readTable(page, \"#table1\");\nexpect(rows[0][\"First Name\"]).toBe(\"John\");\nexpect(rows.map((r) => r.Email)).toContain(\"jsmith@gmail.com\");\n```\n\n| Choice | Reason |\n|---|---|\n| Headers read via locator, rows via `$$eval` | headers are 6 strings (locator is clearer); rows need per-cell logic (one round trip) |\n| `Record<string, string>` | keyed by meaning, not position |\n| `cells[i] ?? \"\"` | a short row yields `\"\"`, not `undefined` sneaking into a comparison |\n| Whitespace normalised in both | otherwise `\"Due \"` and `\"Due\"` are different keys — a maddening bug |\n| No `expect()` anywhere | same rule as the [Day 1 - Implementation](/learn/w8/d1/p3) lesson's API client |",
+          "text": "Now a test reads like a sentence:\n\n```ts\nconst rows = await readTable(page, \"#table1\");\nexpect(rows[0][\"First Name\"]).toBe(\"John\");\nexpect(rows.map((r) => r.Email)).toContain(\"jsmith@gmail.com\");\n```\n\n| Choice | Reason |\n|---|---|\n| Headers read via locator, rows via `$$eval` | headers are 6 strings (locator is clearer); rows need per-cell logic (one round trip) |\n| `Record<string, string>` | keyed by meaning, not position |\n| `cells[i] ?? \"\"` | a short row yields `\"\"`, not `undefined` sneaking into a comparison |\n| Whitespace normalised in both | otherwise `\"Due \"` and `\"Due\"` are different keys — a maddening bug |\n| No `expect()` anywhere | same rule as Day 1.3's API client |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -366,7 +366,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When *not* to reach for this\n\nScraping is genuinely rare in testing, and reaching for it by default produces slow, brittle\ntests that assert far more than they mean to.\n\n| Use a plain assertion | Use a table reader |\n|---|---|\n| \"This one row exists\" | \"These 10 rows exist and no others\" |\n| \"The status says Shipped\" | \"Every row's status is Shipped\" |\n| \"The total shows £251\" | \"The total equals the sum of the rows\" |\n\nThe honest summary: `expect(page.getByRole(\"row\")).toHaveCount(4)` beats a scrape whenever it\nanswers the question, because it auto-waits and fails with a clear message. Scrape when the\nexpectation genuinely spans the whole set.\n\n## What a reviewer checks\n\n- **No assertions inside the reader** — it returns data; the test judges it.\n- **No column indexes in tests** — key by header.\n- **Whitespace normalised**, headers and cells alike.\n- **`count()` checked** before trusting an empty result.\n- **A locator would not have done the job** more simply.\n\n**Next:** [Practice](/learn/w8/d3/p4) — your turn.",
+          "text": "## When *not* to reach for this\n\nScraping is genuinely rare in testing, and reaching for it by default produces slow, brittle\ntests that assert far more than they mean to.\n\n| Use a plain assertion | Use a table reader |\n|---|---|\n| \"This one row exists\" | \"These 10 rows exist and no others\" |\n| \"The status says Shipped\" | \"Every row's status is Shipped\" |\n| \"The total shows £251\" | \"The total equals the sum of the rows\" |\n\nThe honest summary: `expect(page.getByRole(\"row\")).toHaveCount(4)` beats a scrape whenever it\nanswers the question, because it auto-waits and fails with a clear message. Scrape when the\nexpectation genuinely spans the whole set.\n\n## What a reviewer checks\n\n- **No assertions inside the reader** — it returns data; the test judges it.\n- **No column indexes in tests** — key by header.\n- **Whitespace normalised**, headers and cells alike.\n- **`count()` checked** before trusting an empty result.\n- **A locator would not have done the job** more simply.\n\n**Next:** [Day 3.4](/learn/w8/d3/p4) — your turn.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -384,7 +384,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Practice — Practice\n\nThree problems. No answer key.\n\nTarget page: [https://the-internet.herokuapp.com/tables](https://the-internet.herokuapp.com/tables) — `#table1` and `#table2`, same data, different markup.\n\n> Stuck past twenty minutes? Back to [TypeScript](/learn/w8/d3/p1) or [Fundamentals](/learn/w8/d3/p2).",
+          "text": "# Week 8, Day 3.4 — Practice\n\nThree problems. No answer key.\n\nTarget page: [https://the-internet.herokuapp.com/tables](https://the-internet.herokuapp.com/tables) — `#table1` and `#table2`, same data, different markup.\n\n> Stuck past twenty minutes? Back to [Day 3.1](/learn/w8/d3/p1) or [Day 3.2](/learn/w8/d3/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null

@@ -248,7 +248,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **What this is** | a preview: the fix shown running for real, with its pieces named |\n| **What this is not** | the hooks lesson. [Week 3 - Day 2 - TypeScript](/learn/w3/d2/p1) and [2.2](/learn/w3/d2/p2) explain every piece properly. |\n| **Why stop here** | you have seen the problem today; the tool that solves it deserves its own lesson, not a footnote |",
+          "text": "| | |\n|---|---|\n| **What this is** | a preview: the fix shown running for real, with its pieces named |\n| **What this is not** | the hooks lesson. [Week 3 - Day 2 - TypeScript](/learn/w3/d2/p1) and [Week 3 - Day 2 - Fundamentals](/learn/w3/d2/p2) explain every piece properly. |\n| **Why stop here** | you have seen the problem today; the tool that solves it deserves its own lesson, not a footnote |",
           "starter": null,
           "variation": null,
           "checkpoint": null
