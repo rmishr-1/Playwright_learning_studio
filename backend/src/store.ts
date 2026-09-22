@@ -167,22 +167,3 @@ export async function recordProgress(update: ProgressUpdate): Promise<Progress> 
   });
 }
 
-/**
- * Sequential progression: a week opens only once every day of the previous week is complete.
- * Week 1 is always open. This is enforced here rather than only in the sidebar, because a
- * learner can otherwise type /learn/w2/d1/p1 straight into the address bar and walk past it.
- *
- * Returns the week that still has to be finished, or null when `week` is open.
- */
-export function blockingWeek(progress: Progress, week: number): number | null {
-  if (week <= 1) return null;
-  const index = courseIndex();
-  for (let w = 1; w < week; w++) {
-    const days = index.weeks.find((x) => x.week === w)?.days ?? [];
-    // A week with no days cannot gate anything - skip rather than deadlock the course.
-    if (days.length === 0) continue;
-    const complete = days.every((d) => progress.progress[dayKey(w, d.day)]?.completed);
-    if (!complete) return w;
-  }
-  return null;
-}

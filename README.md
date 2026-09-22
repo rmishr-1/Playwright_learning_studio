@@ -151,20 +151,20 @@ disappears entirely and the lesson takes the width. A `☰` in the tab bar bring
 locked screens carry their own *Show weeks* button so hiding the list can never strand you on a
 page with no tab bar. The choice is remembered per viewer.
 
-### The course is sequential
+### Any written week is open
 
-A week opens only once **every day of the previous week is complete**. Week 1 is always open.
-This is enforced in `blockingWeek()` on **both** sides — the sidebar greys the week and shows a
-`locked` pill, and `GET /api/course/:week/:day` returns `423 WEEK_NOT_UNLOCKED` against the one
-progress record. The sidebar alone would be a suggestion: the URL is right there in the address
-bar.
+The course is written to be taken in order — each week assumes the one before it — but nothing
+enforces that. Every authored week is open from the start, so you can go straight to the day you
+need, or back to one you already did, without the app deciding you have not earned it.
 
-Two locks exist and they never merge, because they mean different things:
+The one lock left is about whether a week **exists** yet, not whether you have earned it:
 
 | Pill | Meaning | Error code |
 |---|---|---|
 | `soon` | Not written yet (weeks 3–8) | `DAY_LOCKED` |
-| `locked` | Written, but you have not finished the week before it | `WEEK_NOT_UNLOCKED` |
+
+Progress is still recorded — the sidebar ticks days off and counts them per week — it just never
+stands between you and a lesson.
 
 ---
 

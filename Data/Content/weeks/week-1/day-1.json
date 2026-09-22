@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 1.1 — TypeScript check-in: nothing new today\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
+          "text": "# Week 1, Day 1, TypeScript\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -33,7 +33,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 1.2 — Why automation, why Playwright\n\nBy the end of this lesson you will know what automation can and can't do, what makes\nPlaywright different from Selenium, and you will have opened playwright.dev yourself and\nlooked around.\n\n> **No code today.** This is an orientation day — theory and one \"go look at this\" step.\n> Cells start appearing from [Day 2](/learn/w1/d2/p2) onward, once there's an environment to\n> run them in.",
+          "text": "# Week 1, Day 1, Fundamentals — Why automation, why Playwright\n\nBy the end of this lesson you will know what automation can and can't do, what makes\nPlaywright different from Selenium, and you will have opened playwright.dev yourself and\nlooked around.\n\n> **No code today.** This is an orientation day — theory and one \"go look at this\" step.\n> Cells start appearing from [Day 2](/learn/w1/d2/p2) onward, once there's an environment to\n> run them in.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -135,7 +135,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 1.4 — Practice: Why automation, why Playwright\n\nNo code today, and no app to test against yet — so these are reflection and research\nproblems instead of programming ones. Same three tiers as every practice day, adapted to\nwhat you actually have available right now.\n\nWrite your answers as comments in the cells below (or `console.log` them if you want to see\nthem printed — the runner is happy with either).",
+          "text": "# Week 1, Day 1, Practice — Why automation, why Playwright\n\nNo code today, and no app to test against yet — so these are reflection and research\nproblems instead of programming ones. Same three tiers as every practice day, adapted to\nwhat you actually have available right now.\n\nWrite your answers as comments in the cells below (or `console.log` them if you want to see\nthem printed — the runner is happy with either).",
           "starter": null,
           "variation": null,
           "checkpoint": null

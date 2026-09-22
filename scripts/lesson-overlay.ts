@@ -139,6 +139,79 @@ export function applyDerivedLabels(day: CourseDay): CourseDay {
   };
 }
 
+/**
+ * Weeks whose page headings follow the "Week N, Day D, <Tab>" rule. Week 1 only, deliberately:
+ * that is the scope that was asked for, and week 2 still reads "Week 2, Day 1.2 - ...". Add a
+ * week here to bring it in; nothing else needs to change.
+ */
+const ROLE_HEADING_WEEKS: ReadonlySet<number> = new Set([1]);
+
+/** `# Week 1, Day 5.2 - Your first real test`. The dot is what distinguishes it from the rewritten
+ *  form ("Day 5,"), which is what makes rewriting idempotent. */
+const DAY_HEADING = /^#\s+Week\s+(\d+),\s+Day\s+(\d+)\.(\d+)\s*[—-]\s*(.*)$/;
+
+/**
+ * Headings that announce the absence of content rather than naming a concept. These lose their
+ * text entirely and keep only the standard prefix; everything else keeps what it says. Note that
+ * Week 1 Day 5.1 - "Arrow functions, `async`, and reading `import`" - is a real primer on a
+ * TypeScript tab, so matching on the TAB would have thrown that heading away.
+ */
+const PLACEHOLDER_HEADING: readonly RegExp[] = [
+  /typescript check-?in/i,
+  /nothing new today/i,
+  /no new concepts?\b/i,
+  /nothing to primer/i,
+];
+
+function rewriteHeading(text: string, tab: string): string | null {
+  const lines = text.split('\n');
+  const i = lines.findIndex((l) => DAY_HEADING.test(l));
+  if (i === -1) return null;
+
+  const [, week, dayNumber, , rest] = DAY_HEADING.exec(lines[i])!;
+  let content = rest.trim();
+  if (PLACEHOLDER_HEADING.some((p) => p.test(content))) {
+    content = '';
+  } else if (tab === 'Practice') {
+    // "Practice: Codegen and locators" under a tab already called Practice says it twice. Dropping
+    // the prefix promotes what followed the colon to the start of a clause, where the course's own
+    // lower-case ("Practice: environment setup") would now read as a typo - so capitalise it.
+    const stripped = content.replace(/^practice\s*[:—-]\s*/i, '');
+    if (stripped !== content) content = stripped.charAt(0).toUpperCase() + stripped.slice(1);
+  }
+
+  const prefix = '# Week ' + week + ', Day ' + dayNumber + ', ' + tab;
+  lines[i] = content ? prefix + ' — ' + content : prefix;
+  return lines.join('\n');
+}
+
+/**
+ * Standardises each part's page heading on "Week N, Day D, <Tab>", keeping whatever the heading
+ * said about the lesson itself after an em dash.
+ *
+ * Like applyDerivedLabels(), this is a RULE rather than authored text, so it lives here and runs
+ * on every `npm run overlay` - a heading edited into the generated JSON by hand would not survive
+ * the next import. It is idempotent because a rewritten heading no longer carries the "Day D.P"
+ * form the pattern matches.
+ */
+export function applyHeadingFormat(day: CourseDay): CourseDay {
+  if (!ROLE_HEADING_WEEKS.has(day.week)) return day;
+  return {
+    ...day,
+    parts: day.parts.map((part) => {
+      const tab = tabLabel(part.part);
+      return {
+        ...part,
+        blocks: part.blocks.map((b) => {
+          if (b.type !== 'markdown') return b;
+          const rewritten = rewriteHeading(b.text, tab);
+          return rewritten === null ? b : { ...b, text: rewritten };
+        }),
+      };
+    }) as CourseDay['parts'],
+  };
+}
+
 export function loadVariations(contentDir: string, week: number, day: number): Record<string, string> {
   const file = path.join(contentDir, 'variations', 'w' + week + 'd' + day + '.json');
   if (!fs.existsSync(file)) return {};

@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 4.1 — TypeScript check-in: nothing new today\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
+          "text": "# Week 1, Day 4, TypeScript\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -33,7 +33,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 4.2 — Codegen and finding your way around locators\n\nBy the end of this lesson you will know what Codegen and the Inspector actually do, why\nthey reach for `getByRole`/`getByPlaceholder` over old id/xpath/css locators, and why a spec\nfile's name isn't just cosmetic.\n\n> **No new TypeScript today** — locator strings and file naming aren't new language syntax,\n> so there's no Day 4.1. [Day 2](/learn/w1/d2/p2) and [Day 3](/learn/w1/d3/p2) got you set up\n> and running; today is about *finding* what to put inside a test.\n\n> **Mode: explore**, plus one run-it-yourself step. ",
+          "text": "# Week 1, Day 4, Fundamentals — Codegen and finding your way around locators\n\nBy the end of this lesson you will know what Codegen and the Inspector actually do, why\nthey reach for `getByRole`/`getByPlaceholder` over old id/xpath/css locators, and why a spec\nfile's name isn't just cosmetic.\n\n> **No new TypeScript today** — locator strings and file naming aren't new language syntax,\n> so there's no Day 4.1. [Day 2](/learn/w1/d2/p2) and [Day 3](/learn/w1/d3/p2) got you set up\n> and running; today is about *finding* what to put inside a test.\n\n> **Mode: explore**, plus one run-it-yourself step. ",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -116,7 +116,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 4.3 — Proving the `.spec.ts` naming convention\n\nBy the end of this lesson you will have watched Playwright genuinely ignore a test file\nbecause of its name, then watched the same file get picked up the moment you rename it.\n\n> **No new API here either** — this slot is normally \"the same API, inside a framework\", but\n> there's no framework yet. Today it's the same locators from Day 4.2, used to prove a rule\n> about *discovery* rather than to teach a new call.",
+          "text": "# Week 1, Day 4, Implementation — Proving the `.spec.ts` naming convention\n\nBy the end of this lesson you will have watched Playwright genuinely ignore a test file\nbecause of its name, then watched the same file get picked up the moment you rename it.\n\n> **No new API here either** — this slot is normally \"the same API, inside a framework\", but\n> there's no framework yet. Today it's the same locators from Day 4.2, used to prove a rule\n> about *discovery* rather than to teach a new call.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -229,7 +229,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 4.4 — Practice: Codegen and locators\n\nThree problems. The first is genuinely run-it-yourself, like Codegen itself.",
+          "text": "# Week 1, Day 4, Practice — Codegen and locators\n\nThree problems. The first is genuinely run-it-yourself, like Codegen itself.",
           "starter": null,
           "variation": null,
           "checkpoint": null

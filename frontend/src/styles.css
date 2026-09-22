@@ -164,8 +164,9 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   margin-left: 10px; vertical-align: 2px; font-weight: 600;
 }
 .pill.done { background: var(--good-wash); color: var(--good); }
-/* "soon" = not written yet. "locked" = written, but you have not finished the week before it. */
-.pill.gate { background: var(--tint); color: var(--muted); border: 1px solid var(--rule); }
+
+/* The only pill left is "soon" = not written yet. There was a second, "locked", for a week whose
+   predecessor you had not finished; the course no longer gates on that. */
 
 /* ---------------------------------------------------------------- sidebar */
 .sidebar {

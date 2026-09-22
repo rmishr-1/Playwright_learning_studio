@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { config } from './config';
 import { ask, assistantAvailable } from './assistant';
 import { lastFrame, prepareRun, startRun } from './runner';
-import { blockingWeek, concepts, courseDay, courseIndex, readProgress, recordProgress } from './store';
+import { concepts, courseDay, courseIndex, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { AssistantRequest } from '../../shared/contracts/assistant';
@@ -44,16 +44,6 @@ router.get('/course/:week/:day', (req, res) => {
     // A locked day still answers, with its title, so a link into it lands somewhere honest
     // rather than a 404. The SPA renders the locked state from this.
     return fail(res, 423, 'DAY_LOCKED', found.title);
-  }
-
-  const blocking = blockingWeek(readProgress(), week);
-  if (blocking !== null) {
-    return fail(
-      res,
-      423,
-      'WEEK_NOT_UNLOCKED',
-      'Finish Week ' + blocking + ' first — every day in it — and Week ' + week + ' opens.',
-    );
   }
   res.json(found);
 });
