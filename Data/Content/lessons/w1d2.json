@@ -4,69 +4,69 @@
   "day": 2,
   "parts": {
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **Goals** | check Node · open this repo in VS Code · read its real `playwright.config.ts`; what `npm init playwright@latest` writes, and why you must not run it here |\n| **Prerequisites** | nothing but a terminal |\n| **Environment** | here in the editor. The cells read real files on your disk. |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Installing the tools that Playwright needs, and creating your first Playwright project. |\n| **Goals** | Check your Node.js version, set up VS Code, create a project with `npm init playwright@latest`, and recognize the files it creates. |\n| **Prerequisites** | [Day 1 - Fundamentals](/learn/w1/d1/p2), and a computer on which you can install programs. |\n| **Environment** | Your computer's terminal and VS Code, where you run each command in this lesson. |",
       "checkpoints": [
         {
-          "question": "Why does this lesson tell you NOT to run `npm init playwright@latest` in this repo?",
+          "question": "What does the command `npm init playwright@latest` do?",
           "options": [
-            "Because the command only works in an empty folder and would fail",
-            "Because it can overwrite `playwright.config.ts`, and eight weeks of material depend on that shared config",
-            "Because it would reinstall the browsers you already have"
+            "It runs every test in the current folder and shows the results.",
+            "It creates a Playwright project, installs Playwright, and downloads the browsers.",
+            "It updates Node.js and npm to the newest versions available."
           ],
           "answer": 1,
-          "explanation": "This repo is already a set-up Playwright project. Re-scaffolding would rewrite the root config every week's specs rely on. The lesson walks through what the command produces so you recognize the pieces — in this repo's real files, rather than by running it."
+          "explanation": "The command sets up a new project in the current folder. It installs Playwright, downloads the Chromium, Firefox, and WebKit browsers, and writes files such as `playwright.config.ts` and an example test. It runs no tests itself."
         },
         {
-          "question": "You write a new spec into `week1/generated/`. What makes Playwright pick it up, with no registration step?",
+          "question": "In a new project, where does Playwright look for test files?",
           "options": [
-            "Any `.spec.ts` file anywhere is collected automatically",
-            "`testMatch` in the root config, which lists `week*/**/*.spec.ts`",
-            "The `tests/` folder is scanned recursively, and `week1/` sits inside it"
+            "In the `node_modules` folder, where npm installed Playwright",
+            "In the folder that `testDir` names in the configuration file",
+            "In every folder that contains a `package.json` file on your computer"
           ],
           "answer": 1,
-          "explanation": "`testMatch: [\"week*/**/*.spec.ts\", ...]` is the line doing the work — which is exactly why the lesson asks you to find it in the real file. It is also why a helper file must not carry the `.spec.ts` suffix: the same pattern would collect it and try to run it as a test."
+          "explanation": "`testDir: './tests'` in `playwright.config.ts` tells Playwright to look in the `tests` folder. That is why the example test is in `tests/example.spec.ts`."
         },
         {
-          "question": "Weeks later you hit `browserType.launch: Executable doesn't exist`. What most likely happened?",
+          "question": "Weeks later, a test fails with `browserType.launch: Executable doesn't exist`. What is the most likely cause?",
           "options": [
-            "Node is too old for the installed Playwright version",
-            "The browser download was skipped at setup — `npx playwright install` fixes it",
-            "`playwright.config.ts` is missing a `projects` entry for that browser"
+            "Node.js is too old for the installed version of Playwright.",
+            "The browsers were never downloaded, and `npx playwright install` fixes it.",
+            "The configuration file has no `projects` entry for that browser at all."
           ],
           "answer": 1,
-          "explanation": "Playwright drives browser binaries it downloads separately from the npm package. Answering \"no\" to the install prompt, or installing on a machine that never ran it, leaves the package present and the browser missing. It is the one setup mistake that surfaces much later than it is made."
+          "explanation": "Playwright and its browsers are separate downloads. If you answered No to installing the browsers, Playwright is installed but the browsers are missing. Running `npx playwright install` in your project folder downloads them."
         }
       ],
-      "recap": "- Any Node 18+ is fine; the exact numbers on your machine will differ from anyone else's.\n- **Never re-scaffold a repo that already has a config you care about.** This one is already set up.\n- `testMatch` in the root config is why a spec written into `week*/generated/` is found without registering it anywhere.\n- `baseURL` is why every `page.goto(\"/\")` in this course resolves to the banking app.\n- Commit `package.json` and `package-lock.json`; never `node_modules/`.\n- The browsers are a separate download from the npm package — `npx playwright install` if they are missing."
+      "recap": "- **Node.js** runs your tests, and **npm** installs packages such as Playwright. `node -v` and `npm -v` show their versions, and Playwright needs Node.js 20 or later.\n- **VS Code** is the editor you write tests in. Open your project folder in it, and use its integrated terminal.\n- `npm init playwright@latest` creates a project in an empty folder. Answer TypeScript, tests, No, and Yes.\n- `playwright.config.ts` holds the settings for every run. `testDir` tells Playwright where the tests are.\n- Playwright and its browsers are separate downloads. `npx playwright install` downloads missing browsers."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **Goals** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Prerequisites** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Organizing test files into folders, and choosing which files to keep out of Git. |\n| **Goals** | Explain what `testDir` and `testMatch` decide, and which entries belong in `.gitignore` and why. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2), where you created your project and opened its configuration file. |",
       "checkpoints": [
         {
-          "question": "You move off the flat `tests/` folder and split specs into `UI_test/` and `API_test/`. Is setting `testDir` enough?",
+          "question": "You move your tests into `tests/ui` and `tests/api`, and want to run only the UI tests. Which setting selects them?",
           "options": [
-            "Yes — `testDir` points at the root containing both, and the rest is automatic",
-            "No — `testMatch` is what decides which files count as specs once you leave the one default folder",
-            "No — each folder needs its own `playwright.config.ts`"
+            "`testDir`, because it lists every folder that Playwright should search for tests",
+            "`testMatch`, because it decides which file names inside `testDir` count as tests",
+            "`reporter`, because it decides which test results Playwright shows you after a run"
           ],
           "answer": 1,
-          "explanation": "`testDir` says where to start looking; `testMatch` says what counts once you are there. This repo shows the same pair in use, organized by week rather than by test type. Per-folder configs are a real option too, but they are week 3's subject, not a requirement here."
+          "explanation": "`testDir` says where Playwright starts looking. `testMatch` decides which files count as tests once it is there, so a pattern such as `ui/**/*.spec.ts` selects only the UI tests."
         },
         {
-          "question": "Which rule decides whether something belongs in `.gitignore` on a Playwright project?",
+          "question": "Which rule decides whether a file belongs in `.gitignore`?",
           "options": [
-            "If it is large, ignore it",
-            "If a run regenerates it, it does not belong in git",
-            "If it is not TypeScript, ignore it"
+            "If the file is too large to share easily, Git should ignore it.",
+            "If each test run creates it again, Git should ignore it.",
+            "If the file is not written in TypeScript, Git should ignore it."
           ],
           "answer": 1,
-          "explanation": "`node_modules/` comes back from `package.json`, and `test-results/` and `playwright-report/` are rewritten every run. Committing a report once makes every later diff a pile of binary noise — and `git rm -r --cached` is then needed on top of the `.gitignore` entry."
+          "explanation": "`node_modules/` can be installed again from `package.json`, and `test-results/` and `playwright-report/` are written again on every run. Saving them in Git makes the project large, and fills every change with report files."
         }
       ],
-      "recap": "- Group test folders by what they have in common: shared setup, fixtures, tags. Do not group them by the order you wrote them.\n- `testDir` finds the root; `testMatch` decides what is a spec. You usually need both.\n- This course groups by week rather than by test type. The principle is the same.\n- **If a run regenerates it, it does not belong in git**: `node_modules/`, `test-results/`, `playwright-report/`."
+      "recap": "- Give each kind of test its own folder, and group tests by the setup they share.\n- `testDir` tells Playwright where to start looking. `testMatch` decides which files count as tests.\n- A **pattern** such as `**/*.spec.ts` matches many file names at once.\n- **Git** saves the history of a project. **If a run creates a file again each time, it does not belong in Git.**"
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | your real environment, and this repo's real config |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2) for the config · [Implementation](/learn/w1/d2/p3) for the structure |\n| **Environment** | every answer is something you can read off your own machine |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three problems that check your setup and your project's configuration file, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2) and [Implementation](/learn/w1/d2/p3), and the project you created. |\n| **Environment** | Your terminal and VS Code, where you find each answer, and the editor on the right, where you write it. |"
     }
   }
 }

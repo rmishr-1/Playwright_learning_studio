@@ -63,9 +63,10 @@ function main(): void {
       // After applyStudioCopy, which can emit a link label of its own.
       merged = applyDayRefs(merged);
       merged = applySolutions(merged, loadSolutions(CONTENT, week, day));
-      // Before applyOverlay: the cards are placed relative to the body, so the body comes first.
-      merged = applyRewrites(merged, loadRewrites(CONTENT, week, day));
       merged = applyVariations(merged, variations);
+      // After applyVariations, so a rewritten lesson's own your-turn prompts are the ones that ship;
+      // before applyOverlay, because the cards are placed relative to the body.
+      merged = applyRewrites(merged, loadRewrites(CONTENT, week, day));
       if (overlay) merged = applyOverlay(merged, overlay);
       const after = JSON.stringify(CourseDay.parse(merged), null, 2) + '\n';
 

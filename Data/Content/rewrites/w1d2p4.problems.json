@@ -1,0 +1,15 @@
+{
+  "1": {
+    "statement": "**What to build.** A record of the Node.js and npm versions on your computer.\n\n**Where.** Run `node -v` and `npm -v` in your terminal, and write the two version numbers in the\neditor, using the template.\n\n**How you will know it worked.** You wrote down two version numbers from your own computer, and\nthe Node.js version is 20 or higher.",
+    "stub": "// Problem 1: my Node.js and npm versions\n//\n// Node.js version (from node -v):\n//\n// npm version (from npm -v):\n//\n// Is the Node.js version 20 or higher?"
+  },
+  "2": {
+    "statement": "**What to build.** Answers to four questions about your project's configuration file. Open\n`playwright.config.ts` in VS Code and answer from what you see in the file:\n\n1. Which folder does `testDir` name?\n2. Which browsers does `projects` list, not counting lines that start with `//`?\n3. Which reporter does `reporter` name?\n4. Is `baseURL` set, or does its line start with `//`?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Each answer comes from your own `playwright.config.ts`, not from\nthe lesson.",
+    "stub": "// Problem 2: my project's configuration file\n//\n// 1. The folder that testDir names:\n//\n// 2. The browsers in projects:\n//\n// 3. The reporter:\n//\n// 4. Is baseURL set?"
+  },
+  "3": {
+    "difficulty": "Advanced",
+    "statement": "**What to build.** A short plan for a second project. Imagine that you are setting up a new\nPlaywright project for a team tomorrow. Decide these three things, and give a reason for each:\n\n1. Would you keep one `tests` folder, or give each kind of test its own folder?\n2. Would you run every test in all three browsers from the start, or begin with one?\n3. Would you answer **Yes** to the GitHub Actions question this time?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Each decision has a reason, not only a preference.",
+    "stub": "// Problem 3: my plan for a second project\n//\n// 1. One tests folder, or one folder for each kind of test? Why?\n//\n// 2. Three browsers, or one to start with? Why?\n//\n// 3. GitHub Actions: Yes or No? Why?"
+  }
+}

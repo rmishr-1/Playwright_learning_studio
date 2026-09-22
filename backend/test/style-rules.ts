@@ -140,6 +140,7 @@ const ACRONYMS = new Set([
   'CSS', 'XPATH', 'DOM', 'CI', 'GET', 'POST', 'HTML', 'URL', 'API', 'UI', 'E2E', 'JSON',
   'TS', 'JS', 'HR', 'MCQ', 'AND', 'OR', 'NO', 'YES',
   'CLI', 'VS', 'IDE', 'HTTP', 'HTTPS', 'SPA', 'CSV', 'PR', 'QA', 'SDET', 'UAT', 'BDD', 'DRY',
+  'LTS', 'OS', 'API', 'URL', 'XML',
 ]);
 
 export const MAX_WORDS_ERROR = 45;

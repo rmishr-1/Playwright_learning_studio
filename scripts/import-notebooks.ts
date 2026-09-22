@@ -192,13 +192,11 @@ function importDay(week: number, day: number): CourseDay | null {
 
   // Everything the notebooks do not decide, merged through the same functions `npm run overlay`
   // uses - one implementation, so the two paths cannot drift.
-  const withPlaceholder = applyRewrites(
-    applyDayRefs(applyGeneratedPlaceholder(applyRemovedParts(built))),
-    loadRewrites(CONTENT, week, day),
-  );
-  const formatted = applyHeadingFormat(
-    applyVariations(withPlaceholder, loadVariations(CONTENT, week, day)),
-  );
+  // Same order as apply-overlay.ts: variations, then rewrites, so a rewritten lesson's own
+  // your-turn prompts are final; the heading rule runs last and leaves a rewrite's H1 untouched.
+  const withPlaceholder = applyDayRefs(applyGeneratedPlaceholder(applyRemovedParts(built)));
+  const withVariations = applyVariations(withPlaceholder, loadVariations(CONTENT, week, day));
+  const formatted = applyHeadingFormat(applyRewrites(withVariations, loadRewrites(CONTENT, week, day)));
   const overlay = loadOverlay(CONTENT, week, day);
   return overlay ? applyOverlay(formatted, overlay) : formatted;
 }

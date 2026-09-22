@@ -623,7 +623,9 @@ function main(): void {
     if (!d || !p) { staleRewrites.push(file + ' has no matching part'); continue; }
     if (d.locked) { staleRewrites.push(file + ' rewrites a locked week'); continue; }
     const want = splitRewrite(fs.readFileSync(path.join(rewriteDir, file), 'utf-8'));
-    const got = p.blocks.filter((b) => b.type === 'markdown' || b.type === 'problem-ref').map((b) => ({ type: b.type, text: b.text }));
+    const got = p.blocks
+      .filter((b) => b.type === 'markdown' || b.type === 'problem-ref' || b.type === 'your-turn' || b.type === 'example')
+      .map((b) => (b.type === 'your-turn' ? { type: b.type, prompt: b.variation?.prompt ?? '', text: b.text } : { type: b.type, text: b.text }));
     if (JSON.stringify(got) !== JSON.stringify(want)) staleRewrites.push(file);
     const sibling = path.join(rewriteDir, file.replace(/\.md$/, '.problems.json'));
     if (fs.existsSync(sibling)) {
