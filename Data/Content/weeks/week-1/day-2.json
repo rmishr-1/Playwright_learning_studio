@@ -8,14 +8,14 @@
     {
       "part": 1,
       "kind": "generated-prerequisite",
-      "title": "TypeScript check-in: nothing new today",
+      "title": "TypeScript for this lesson",
       "tab_label": "TypeScript",
       "source_notebook": null,
       "has_runnable_code": false,
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 2 - TypeScript\n\nYou write Playwright tests in TypeScript. This tab is where each day covers the language\nfeatures that day's lesson needs.\n\nThe lesson ahead draws only on TypeScript the course has already covered. Continue to\nthe Fundamentals tab.\n\n> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n> functions, `async`, and how to read an `import` line. The days before it are written to be\n> readable without them.\n",
+          "text": "# Week 1 - Day 2 - TypeScript\n",
           "starter": null,
           "variation": null,
           "checkpoint": null

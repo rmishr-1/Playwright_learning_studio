@@ -14,7 +14,7 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { studioise, tabLabel } from './notebook-parse';
+import { placeholderBody, PLACEHOLDER_TITLE, studioise, tabLabel } from './notebook-parse';
 import { LessonOverlay, type OverlayPart } from '../shared/contracts/lesson_overlay';
 import type { ContentBlock, CourseDay, CoursePart } from '../shared/contracts/course_day';
 
@@ -215,6 +215,34 @@ function rewriteHeading(text: string, tab: string, generated: boolean): string |
   const prefix = '# Week ' + week + ' - Day ' + dayNumber + ' - ' + tab;
   lines[i] = content ? prefix + ' - ' + content : prefix;
   return lines.join('\n');
+}
+
+/**
+ * Re-applies the synthesised body of the generated TypeScript part on week 1 days 1-4.
+ *
+ * This part has no notebook behind it, so unlike every other block on the site its text is owned
+ * outright by this repository - which means the overlay can simply rewrite it from
+ * placeholderBody() rather than patching the old wording forward. It is idempotent because it
+ * writes a constant, and self-healing for the same reason: it does not need to recognise what a
+ * checkout currently holds in order to replace it. That is what retired the pair of LEGACY_COPY
+ * entries this part used to need, one per rewording.
+ *
+ * Runs BEFORE applyHeadingFormat, which then normalises the raw heading it writes.
+ */
+export function applyGeneratedPlaceholder(day: CourseDay): CourseDay {
+  return {
+    ...day,
+    parts: day.parts.map((part) => {
+      if (part.kind !== 'generated-prerequisite') return part;
+      return {
+        ...part,
+        title: PLACEHOLDER_TITLE,
+        blocks: part.blocks.map((b, i) =>
+          i === 0 && b.type === 'markdown' ? { ...b, text: placeholderBody(day.week, day.day) } : b,
+        ),
+      };
+    }) as CourseDay['parts'],
+  };
 }
 
 /**

@@ -20,11 +20,14 @@ import {
   parsePractice,
   parseTeaching,
   parseTitle,
+  placeholderBody,
+  PLACEHOLDER_TITLE,
   rewriteLinks,
   tabLabel,
   type RawNotebook,
 } from './notebook-parse';
 import {
+  applyGeneratedPlaceholder,
   applyHeadingFormat,
   applyOverlay,
   applyVariations,
@@ -60,35 +63,27 @@ const WEEK_THEMES: Record<number, string> = {
  * convention yet. Rather than show three tabs on those days and four everywhere else, emit a
  * placeholder for the tab.
  *
- * It opens by saying what the tab is FOR, not what it lacks. "This day introduces no new
- * TypeScript" was the first sentence a new learner ever read, and it assumed they already knew
- * what TypeScript was, that days normally introduce some, and why a page would announce an
- * absence. See docs/STYLE.md.
+ * The body is a heading and nothing else - see placeholderBody() in notebook-parse.ts for why,
+ * and note that the same function is what `npm run overlay` re-applies, so this function and the
+ * shipped tree cannot disagree.
  */
 function placeholderPart(week: number, day: number): CoursePart {
-  const body = [
-    '# Week ' + week + ', Day ' + day + '.1 \u2014 TypeScript for this lesson',
-    '',
-    'You write Playwright tests in TypeScript. This tab is where each day covers the language',
-    "features that day's lesson needs.",
-    '',
-    'The lesson ahead draws only on TypeScript the course has already covered. Continue to',
-    'the Fundamentals tab.',
-    '',
-    '> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow',
-    '> functions, `async`, and how to read an `import` line. The days before it are written to be',
-    '> readable without them.',
-    '',
-  ].join('\n');
-
   return {
     part: 1,
     kind: 'generated-prerequisite',
-    title: 'TypeScript for this lesson',
+    title: PLACEHOLDER_TITLE,
     tab_label: 'TypeScript',
     source_notebook: null,
     has_runnable_code: false,
-    blocks: [{ type: 'markdown', text: body, starter: null, variation: null, checkpoint: null }],
+    blocks: [
+      {
+        type: 'markdown',
+        text: placeholderBody(week, day),
+        starter: null,
+        variation: null,
+        checkpoint: null,
+      },
+    ],
     problems: [],
   };
 }
@@ -199,7 +194,10 @@ function importDay(week: number, day: number): CourseDay | null {
 
   // Everything the notebooks do not decide, merged through the same functions `npm run overlay`
   // uses - one implementation, so the two paths cannot drift.
-  const formatted = applyHeadingFormat(applyVariations(built, loadVariations(CONTENT, week, day)));
+  const withPlaceholder = applyGeneratedPlaceholder(built);
+  const formatted = applyHeadingFormat(
+    applyVariations(withPlaceholder, loadVariations(CONTENT, week, day)),
+  );
   const overlay = loadOverlay(CONTENT, week, day);
   return overlay ? applyOverlay(formatted, overlay) : formatted;
 }

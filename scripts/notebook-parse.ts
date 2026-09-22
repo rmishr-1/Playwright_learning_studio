@@ -93,32 +93,6 @@ const LEGACY_COPY: ReadonlyArray<readonly [RegExp, string]> = [
   [/\*\*Mode: explore\*\*/g, '**Try it here**'],
   [/\*\*Mode: test-runner\*\*/g, '**Follow this one in your own project**'],
   [/\*\*Mode: mixed\.\*\*/g, '**Partly here, partly in your own project.**'],
-  // The generated-prerequisite placeholder, as it was emitted before the language pass. The
-  // rewrite lives in placeholderPart() in import-notebooks.ts, which only runs on a re-import -
-  // and a re-import needs the training repo this checkout does not have. Without this entry the
-  // first screen of the course keeps the sentence the whole pass exists to remove. Matched
-  // loosely on whitespace because the emitted text is hard-wrapped.
-  [
-    /This day introduces no new TypeScript\.\s+The code in the parts that follow uses only what\s+you\s+already have, or is theory with no code at all\.\s*\n\s*\n>\s*The course's TypeScript primers begin at \[Week 1, Day 5\.1\]\(\/learn\/w1\/d5\/p1\), which covers\s*\n>\s*arrow functions, `async`, and how to read an `import` line\. Everything before that point is\s*\n>\s*readable without them\./g,
-    'You write Playwright tests in TypeScript. This tab is where each day covers the language\n' +
-      "features that day's lesson needs.\n" +
-      '\n' +
-      'The lesson ahead draws only on TypeScript the course has already covered. Continue to\n' +
-      'the Fundamentals tab.\n' +
-      '\n' +
-      '> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n' +
-      '> functions, `async`, and how to read an `import` line. The days before it are written to be\n' +
-      '> readable without them.',
-  ],
-  // The interim wording of the placeholder body. It fixed the original negation-first opening
-  // but read as a note to a colleague rather than as course material, so it is retired the same
-  // way its predecessor was: matched here so `npm run overlay` upgrades the committed tree, since
-  // placeholderPart() itself only runs on an import that needs the absent training repo.
-  [
-    /Today's lesson needs nothing new, so you can go straight to it\./g,
-    'The lesson ahead draws only on TypeScript the course has already covered. Continue to\n' +
-      'the Fundamentals tab.',
-  ],
   // "Deno" is the notebook kernel the course was authored against. It is an implementation
   // detail of the old environment and means nothing to a learner reading this in a browser.
   [/\s*\(Deno\)/g, ''],
@@ -146,6 +120,29 @@ export function findSupersededCopy(md: string): string[] {
   if (/\bMode:\s*(?:explore|test-runner|mixed)\b/.test(md)) out.push('a "Mode:" label');
   return out;
 }
+
+/**
+ * The entire body of the synthesised TypeScript part on week 1 days 1-4: a heading, and nothing
+ * else. The authored at-a-glance card that sits directly beneath it already names what is new
+ * today, when the language lessons start and where to go next, so generated prose saying the same
+ * thing in sentences was redundant on the first screen of the course.
+ *
+ * This is the SINGLE source of truth for that body. It is called by placeholderPart() on import
+ * and by applyGeneratedPlaceholder() on every `npm run overlay`, so the shipped text cannot drift
+ * from it. That replaces the LEGACY_COPY pattern for this one part: an old->new entry per
+ * rewording only upgrades text it recognises and the chain has to be revised in step, whereas
+ * rewriting the block wholesale is self-healing whatever a checkout currently holds.
+ *
+ * The heading is emitted in the raw notebook form on purpose. applyHeadingFormat() normalises it
+ * to "# Week N - Day D - TypeScript" straight afterwards, so one rule stays in charge of headings.
+ */
+export function placeholderBody(week: number, day: number): string {
+  return '# Week ' + week + ', Day ' + day + '.1 \u2014 TypeScript for this lesson\n';
+}
+
+/** The `title` that goes with it. Never rendered - the tab bar uses `tab_label` - but it is data
+ *  a re-import would otherwise leave reading "TypeScript check-in: nothing new today". */
+export const PLACEHOLDER_TITLE = 'TypeScript for this lesson';
 
 export function studioise(md: string): string {
   let out = md;

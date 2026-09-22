@@ -88,6 +88,27 @@ function main(): void {
     'Week 1 days 1-4 carry a generated prerequisite part',
     placeholders.every((p) => p?.kind === 'generated-prerequisite'),
   );
+  // The generated part carries a heading and nothing else. Its body was reworded three times
+  // before it was removed altogether, each rewording adding a LEGACY_COPY entry to carry the old
+  // text forward; this check is what those entries were standing in for. The authored at-a-glance
+  // directly beneath it already says what is new today, when the language lessons start and where
+  // to go next, so generated prose repeating that in sentences is what must not come back.
+  const notBare = days
+    .filter((d) => d.parts.some((p) => p.kind === 'generated-prerequisite'))
+    .flatMap((d) =>
+      d.parts
+        .filter((p) => p.kind === 'generated-prerequisite')
+        .flatMap((p) =>
+          p.blocks[0]?.type === 'markdown' && /^#[^\n]*\n*$/.test(p.blocks[0].text)
+            ? []
+            : ['w' + d.week + 'd' + d.day + 'p' + p.part],
+        ),
+    );
+  check(
+    'the generated TypeScript part is its heading and nothing else',
+    notBare.length === 0,
+    notBare.join(' | '),
+  );
   check(
     'Week 1 day 5 has a real prerequisite notebook',
     days.find((d) => d.week === 1 && d.day === 5)!.parts[0].kind === 'prerequisite',

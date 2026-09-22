@@ -15,6 +15,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
   applyDerivedLabels,
+  applyGeneratedPlaceholder,
   applyHeadingFormat,
   applyStudioCopy,
   applyOverlay,
@@ -49,6 +50,8 @@ function main(): void {
       // a day that is already malformed; out, so a merge that produced something invalid fails
       // here rather than in the learner's browser.
       let merged = applyDerivedLabels(CourseDay.parse(JSON.parse(before)));
+      // Before applyHeadingFormat: this writes a raw heading, which that rule then normalises.
+      merged = applyGeneratedPlaceholder(merged);
       merged = applyHeadingFormat(merged);
       merged = applyStudioCopy(merged);
       merged = applyVariations(merged, variations);
