@@ -119,7 +119,8 @@ async function withLock<T>(fn: () => T): Promise<T> {
 
 /**
  * Records that a part was viewed. A part completes on view; a day completes when every part
- * the day actually HAS has been viewed - not a hardcoded four, because Week 1 Day 1 has three.
+ * the day actually HAS has been viewed - not a hardcoded four, because a removed tab or a missing
+ * notebook leaves some days with fewer, and with gaps in the part numbers.
  */
 export async function recordProgress(update: ProgressUpdate): Promise<Progress> {
   return withLock(() => {
@@ -146,7 +147,10 @@ export async function recordProgress(update: ProgressUpdate): Promise<Progress> 
         ? [...prior.attempted_problems, update.attempted_problem].sort((a, b) => a - b)
         : prior.attempted_problems;
 
-    const completed = viewed.length >= partsInDay;
+    // Every part the day HAS must be among those viewed. A count ("viewed.length >= parts") went
+    // wrong once a tab could be removed: someone who had viewed the old part 1 reached 2-of-2 on
+    // Week 1 Day 1 without ever opening Practice.
+    const completed = day ? day.parts.every((p) => viewed.includes(p.part)) : viewed.length >= partsInDay;
 
     const next: Progress = {
       ...current,

@@ -20,6 +20,7 @@ import {
   applyHeadingFormat,
   applyStudioCopy,
   applyOverlay,
+  applyRemovedParts,
   applySolutions,
   applyVariations,
   loadOverlay,
@@ -52,7 +53,7 @@ function main(): void {
       // Parsed through the contract on the way in AND out: in, so a side-car is never merged into
       // a day that is already malformed; out, so a merge that produced something invalid fails
       // here rather than in the learner's browser.
-      let merged = applyDerivedLabels(CourseDay.parse(JSON.parse(before)));
+      let merged = applyRemovedParts(applyDerivedLabels(CourseDay.parse(JSON.parse(before))));
       // Before applyHeadingFormat: this writes a raw heading, which that rule then normalises.
       merged = applyGeneratedPlaceholder(merged);
       merged = applyHeadingFormat(merged);

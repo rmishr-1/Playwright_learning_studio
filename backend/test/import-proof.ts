@@ -10,7 +10,7 @@ import * as path from 'node:path';
 import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
 import { findNotebookisms, findSupersededCopy, findUnresolvedLinks } from '../../scripts/notebook-parse';
-import { applyHeadingFormat, ROLE_HEADING_WEEKS } from '../../scripts/lesson-overlay';
+import { applyHeadingFormat, REMOVED_PARTS, ROLE_HEADING_WEEKS } from '../../scripts/lesson-overlay';
 import { ERROR_RULES, lintExplanationShape, lintProse, type Finding } from './style-rules';
 
 const CONTENT = path.resolve(__dirname, '..', '..', 'Data', 'Content');
@@ -68,25 +68,32 @@ function main(): void {
     days.every((d) => d.parts.every((p) => p.blocks.length > 0 || p.problems.length > 0)),
   );
 
-  // Week 1 Day 1 has no _3 notebook - the one day that is not four parts.
+  // Week 1 Day 1 is the one day that is not four parts: it has no _3 notebook, and its TypeScript
+  // tab is removed because it had no content of its own (REMOVED_PARTS). It opens on Fundamentals.
   const w1d1 = days.find((d) => d.week === 1 && d.day === 1)!;
   check(
-    'Week 1 Day 1 has 3 parts (no _3 notebook exists)',
-    w1d1.parts.length === 3,
-    'got ' + w1d1.parts.length,
+    'Week 1 Day 1 is Fundamentals and Practice only',
+    w1d1.parts.map((p) => p.part).join(',') === '2,4',
+    'got parts ' + w1d1.parts.map((p) => p.part).join(','),
   );
   check(
     'every other day has 4 parts',
     days.filter((d) => !(d.week === 1 && d.day === 1)).every((d) => d.parts.length === 4),
   );
+  // A removed tab stays removed. Parts keep their numbers, so a gap is expected and fine.
+  const resurrected = days.flatMap((d) =>
+    d.parts.filter((p) => REMOVED_PARTS.has('w' + d.week + 'd' + d.day + 'p' + p.part)).map((p) => 'w' + d.week + 'd' + d.day + 'p' + p.part),
+  );
+  check('no removed tab has come back', resurrected.length === 0, resurrected.join(' | '));
 
   console.log('\nWeek 1 generated placeholders');
   const placeholders = days
     .filter((d) => d.week === 1 && d.day <= 4)
-    .map((d) => d.parts.find((p) => p.part === 1));
+    .map((d) => ({ d, p: d.parts.find((p) => p.part === 1) }))
+    .filter(({ d }) => !REMOVED_PARTS.has('w1d' + d.day + 'p1'));
   check(
-    'Week 1 days 1-4 carry a generated prerequisite part',
-    placeholders.every((p) => p?.kind === 'generated-prerequisite'),
+    'Week 1 days 1-4 carry a generated prerequisite part, where the tab is kept',
+    placeholders.every(({ p }) => p?.kind === 'generated-prerequisite'),
   );
   // The generated part carries a heading and nothing else. Its body was reworded three times
   // before it was removed altogether, each rewording adding a LEGACY_COPY entry to carry the old

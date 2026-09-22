@@ -17,6 +17,7 @@ rules are checked and which depend on review.
 
 ## Contents
 
+0. [The course owner's preferences](#0-the-course-owners-preferences)
 1. [Reader and voice](#1-reader-and-voice)
 2. [Lesson structure](#2-lesson-structure)
 3. [Headings](#3-headings)
@@ -31,6 +32,38 @@ rules are checked and which depend on review.
 12. [Enforcement and limits](#12-enforcement-and-limits)
 13. [Reviewer checklist](#13-reviewer-checklist)
 14. [Backlog for generated content](#14-backlog-for-generated-content)
+
+---
+
+## 0. The course owner's preferences
+
+These are decisions the course owner has made while reviewing the course. They take precedence
+over the general guidance in the rest of this playbook, and the sections below have been updated
+to match them.
+
+### Content
+
+| Preference | What it means in practice |
+|---|---|
+| Professional, beginner-friendly language | Every lesson is written for someone opening the course for the first time. Chatty phrasing, slang, and insider shorthand are removed. |
+| Never describe a lesson by what it lacks | "No new TypeScript today", "No code today", and a card row that answers "none" are all removed. State what the lesson *is* about. |
+| Remove a tab that has no content of its own | If a tab lacks content, or its lesson needs none, remove the tab instead of explaining why it is empty. The day opens on its next tab. See [section 2](#tabs-with-no-content-are-removed). |
+| Do not fill a sparse tab with prose that repeats its card | Where a tab is kept but has little content, it is a heading and its card, with nothing in between. |
+| Refer to lessons by their tab names | Write *Fundamentals*, *Day 4 - Fundamentals*, or *Week 1 - Day 5 - TypeScript*. Never write the old notebook numbering, such as "Day 5.2". See [section 7](#referring-to-another-lesson). |
+| Headings use hyphens as separators | `# Week 1 - Day 1 - Fundamentals - Why automation, why Playwright`. Only the structural separators change. Commas inside a subject stay. |
+| Second person throughout | The reader is "you", in explanations as well as instructions. |
+| Contractions sparingly | Allowed, as in the Playwright docs, but not in every sentence. |
+| American spelling | *organize*, *behavior*, *favorite*. |
+| Code examples follow the GeeksforGeeks order | A lead-in ending in a colon, then the code, **Output**, and **Explanation**. See [section 8](#8-code-presentation). |
+
+### Scope and way of working
+
+| Preference | What it means in practice |
+|---|---|
+| Weeks 1 and 2 only | Work on content is limited to weeks 1 and 2. Weeks 3 to 8 are hidden from the course and are not edited. |
+| Review one tab at a time | Content is reviewed tab by tab, starting with Week 1 Day 1. The owner chooses a suggested change or proposes a different one for each section. |
+| Ask when the choice is the owner's | Where a change involves a real choice, ask before making it. |
+| Push directly to `main` | Changes are committed to `main` and pushed. There are no feature branches or pull requests. |
 
 ---
 
@@ -80,9 +113,10 @@ nothing and reads as an apology for the page they have just opened.
 ### Do not restate what a card already says
 
 If the at-a-glance card already names what is new today and where to go next, prose repeating it
-in sentences is not a style problem to fix. It is a paragraph to cut. The TypeScript tab on Week 1
-Days 1 to 4 carries its heading and nothing else for this reason. Its body was reworded three times
-before it became clear that it should be deleted.
+in sentences is not a style problem to fix. It is a paragraph to cut. The TypeScript tabs on Week 1
+Days 2 to 4 carry no generated prose for this reason: a heading, then the card, checkpoint, and
+recap. Their body was reworded three times before it became clear that it should be deleted, and the Day 1 tab was later removed
+altogether (see [section 2](#tabs-with-no-content-are-removed)).
 
 ---
 
@@ -145,6 +179,26 @@ Output → Explanation**. That predictability is its main strength, and this cou
 3. The at-a-glance card
 4. Three problems, each using the fixed labels in section 10
 5. When you are done
+
+### Tabs with no content are removed
+
+A tab that has no content of its own, or whose lesson needs none, is **removed**. It is not kept
+and filled with prose that explains why it is empty. The remaining tabs close up, and the day opens
+on the first tab it still has.
+
+- **Week 1 Day 1 TypeScript was removed on this basis.** Day 1 is an orientation day with no code,
+  so it had nothing to teach about the language. The day now opens on Fundamentals, and its heading
+  reads `Week 1 - Day 1 - Fundamentals - Why automation, why Playwright`.
+- **To remove a tab**, add its key (for example `w1d2p1`) to `REMOVED_PARTS` in
+  `scripts/lesson-overlay.ts`, delete its entry from the lesson card file, and run
+  `npm run overlay`. The importer applies the same list, so a re-import cannot bring the tab back.
+  `npm run verify` fails if a removed tab reappears.
+- **Part numbers are never renumbered.** A part's number decides its tab name (part 1 is always
+  TypeScript, part 2 always Fundamentals) and appears in every lesson URL. Renumbering
+  Fundamentals from 2 to 1 would relabel it "TypeScript" and break every link to it. No part number
+  is visible to the learner, so removing the tab is enough.
+- **Old links still work.** A URL that names a removed tab, such as `/learn/w1/d1/p1`, redirects to
+  the day's first remaining tab.
 
 ### Sections that close a part
 

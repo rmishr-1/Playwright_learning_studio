@@ -218,6 +218,26 @@ function rewriteHeading(text: string, tab: string, generated: boolean): string |
 }
 
 /**
+ * Tabs removed from the course because they carry no content of their own. The standing rule is in
+ * docs/PLAYBOOK.md: a tab that lacks content, or whose lesson needs none, is removed rather than
+ * filled with prose explaining why it is empty, and the day opens on its next tab.
+ *
+ * Part NUMBERS are not renumbered when a tab goes. The number is what derives the tab's role
+ * (tabLabel: 1 is always TypeScript, 2 always Fundamentals) and it is in every lesson URL, so
+ * shifting Fundamentals from 2 to 1 would relabel it "TypeScript" and break every link to it.
+ * Nothing a learner sees shows the number, so removing the tab is enough: the remaining tabs close
+ * up and the day's H1 already reads "Week 1 - Day 1 - Fundamentals".
+ *
+ * Keyed "w<week>d<day>p<part>". Add a key here to remove another tab.
+ */
+export const REMOVED_PARTS: ReadonlySet<string> = new Set(['w1d1p1']);
+
+export function applyRemovedParts(day: CourseDay): CourseDay {
+  const kept = day.parts.filter((p) => !REMOVED_PARTS.has('w' + day.week + 'd' + day.day + 'p' + p.part));
+  return kept.length === day.parts.length ? day : { ...day, parts: kept as CourseDay['parts'] };
+}
+
+/**
  * Re-applies the synthesised body of the generated TypeScript part on week 1 days 1-4.
  *
  * This part has no notebook behind it, so unlike every other block on the site its text is owned

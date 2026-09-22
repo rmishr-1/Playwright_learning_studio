@@ -31,6 +31,7 @@ import {
   applyGeneratedPlaceholder,
   applyHeadingFormat,
   applyOverlay,
+  applyRemovedParts,
   applyVariations,
   loadOverlay,
   loadSolutions,
@@ -189,7 +190,7 @@ function importDay(week: number, day: number): CourseDay | null {
 
   // Everything the notebooks do not decide, merged through the same functions `npm run overlay`
   // uses - one implementation, so the two paths cannot drift.
-  const withPlaceholder = applyDayRefs(applyGeneratedPlaceholder(built));
+  const withPlaceholder = applyDayRefs(applyGeneratedPlaceholder(applyRemovedParts(built)));
   const formatted = applyHeadingFormat(
     applyVariations(withPlaceholder, loadVariations(CONTENT, week, day)),
   );

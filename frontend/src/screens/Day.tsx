@@ -207,9 +207,16 @@ export function Day({
       });
   }, [week, day]);
 
-  // Viewing a part is what completes it, so record on arrival.
+  // Viewing a part is what completes it, so record on arrival. A URL can name a part the day no
+  // longer has - a removed tab, or /p1 from a link that means "the start of this day" - so that is
+  // sent on to the day's first tab instead, with `replace` so Back does not return to it, and
+  // nothing is recorded for a part that does not exist.
   useEffect(() => {
     if (!content) return;
+    if (!content.parts.some((p) => p.part === part)) {
+      navigate('/learn/w' + week + '/d' + day + '/p' + content.parts[0].part, { replace: true });
+      return;
+    }
     recordProgress({ week, day, part })
       .then(setProgress)
       .catch(() => undefined);

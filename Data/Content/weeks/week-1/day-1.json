@@ -6,53 +6,6 @@
   "locked": false,
   "parts": [
     {
-      "part": 1,
-      "kind": "generated-prerequisite",
-      "title": "TypeScript for this lesson",
-      "tab_label": "TypeScript",
-      "source_notebook": null,
-      "has_runnable_code": false,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 1 - Day 1 - TypeScript\n",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **When TypeScript starts** | [Day 5 - TypeScript](/learn/w1/d5/p1), with arrow functions, `async` and `import` |\n| **Then go to** | [Fundamentals](/learn/w1/d1/p2) — why teams automate, and why this tool |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Do you need to know TypeScript before starting this course?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Yes — the first lessons assume it, which is why this tab exists",
-              "No — the primers begin at Day 5 - TypeScript, and everything before that is readable without them",
-              "No, because the course never uses TypeScript at all"
-            ],
-            "answer": 1,
-            "explanation": "The language primers start at [Day 5 - TypeScript](/learn/w1/d5/p1). Days 1 to 4 are orientation, setup, the CLI and Codegen — readable without the language. The course does very much use TypeScript; it just does not open with it."
-          }
-        },
-        {
-          "type": "recap",
-          "text": "Day 1 is orientation, so the language lessons begin later in the week. Continue to [Fundamentals](/learn/w1/d1/p2), which is the lesson itself. Hands-on work starts at [Day 2](/learn/w1/d2/p2), once there is an environment to run it in.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": []
-    },
-    {
       "part": 2,
       "kind": "concept",
       "title": "Why automation, why Playwright",
