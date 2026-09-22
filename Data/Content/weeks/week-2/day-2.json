@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 2.1 — `const`, and how TypeScript decides a variable's type\n\nEvery locator from here on gets assigned to a `const`. This is a full primer on why, and\non the type-inference rule that means you never write `: Locator` by hand.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# Week 2 - Day 2 - TypeScript - `const`, and how TypeScript decides a variable's type\n\nEvery locator from here on gets assigned to a `const`. This is a full primer on why, and\non the type-inference rule that means you never write `: Locator` by hand.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -167,7 +167,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 2.2 — XPath, CSS, and your first real assertions\n\nBy the end of this lesson you will have located an element with both XPath and CSS,\nassigned it to a `const` locator, and written your first real `expect()` assertions\nagainst a real page.",
+          "text": "# Week 2 - Day 2 - Fundamentals - XPath, CSS, and your first real assertions\n\nBy the end of this lesson you will have located an element with both XPath and CSS,\nassigned it to a `const` locator, and written your first real `expect()` assertions\nagainst a real page.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -346,7 +346,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 2.3 — The same assertions, wrapped for reuse\n\nBy the end of this lesson you will have wrapped yesterday's `expect()` calls in one\nfunction two different tests both call, extending [Day 1.3](/learn/w2/d1/p3)'s helper file.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 2.2](/learn/w2/d2/p2).",
+          "text": "# Week 2 - Day 2 - Implementation - The same assertions, wrapped for reuse\n\nBy the end of this lesson you will have wrapped yesterday's `expect()` calls in one\nfunction two different tests both call, extending [Day 1.3](/learn/w2/d1/p3)'s helper file.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 2.2](/learn/w2/d2/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -443,7 +443,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 2.4 — Practice: XPath, CSS, and assertions\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 2.1](/learn/w2/d2/p1) or [Day 2.2](/learn/w2/d2/p2). Go back, re-read, come here again.",
+          "text": "# Week 2 - Day 2 - Practice - XPath, CSS, and assertions\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 2.1](/learn/w2/d2/p1) or [Day 2.2](/learn/w2/d2/p2). Go back, re-read, come here again.",
           "starter": null,
           "variation": null,
           "checkpoint": null

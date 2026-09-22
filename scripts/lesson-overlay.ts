@@ -140,21 +140,36 @@ export function applyDerivedLabels(day: CourseDay): CourseDay {
 }
 
 /**
- * Weeks whose page headings follow the "Week N, Day D, <Tab>" rule. Week 1 only, deliberately:
- * that is the scope that was asked for, and week 2 still reads "Week 2, Day 1.2 - ...". Add a
- * week here to bring it in; nothing else needs to change.
+ * Weeks whose page headings follow the "Week N - Day D - <Tab>" rule. Weeks 1 and 2, which is
+ * every week that is open. Add a week here to bring it in; nothing else needs to change.
  */
-const ROLE_HEADING_WEEKS: ReadonlySet<number> = new Set([1]);
+export const ROLE_HEADING_WEEKS: ReadonlySet<number> = new Set([1, 2]);
 
-/** `# Week 1, Day 5.2 - Your first real test`. The dot is what distinguishes it from the rewritten
- *  form ("Day 5,"), which is what makes rewriting idempotent. */
-const DAY_HEADING = /^#\s+Week\s+(\d+),\s+Day\s+(\d+)\.(\d+)\s*[—-]\s*(.*)$/;
+/**
+ * The two shapes a heading can arrive in, both rewritten to the same output.
+ *
+ * DAY_HEADING is the raw notebook form, `# Week 2, Day 1.2 - From recorder to real code`: the
+ * DOT is what marks it. REWRITTEN_HEADING is the interim comma form this project emitted before
+ * the separator became " - ", `# Week 1, Day 1, Fundamentals - Why automation`. Week 1's
+ * committed tree is entirely in that second form, and the first pattern does not match it - so
+ * without this migration those headings would keep their commas forever, because a re-import
+ * (which is what would otherwise regenerate them) needs a training repo this checkout lacks.
+ *
+ * IDEMPOTENCE, which is what makes this safe to run on every `npm run overlay`: both patterns
+ * require a structural COMMA after "Week N", and the output has none. So neither pattern can
+ * match its own result. Note this anchors on the comma rather than on a dash, which is why a
+ * subject containing a hyphen ("Codegen - run this yourself") cannot confuse it.
+ */
+const DAY_HEADING = /^#\s+Week\s+(\d+),\s+Day\s+(\d+)\.(\d+)\s*[—–-]\s*(.*)$/;
+const REWRITTEN_HEADING =
+  /^#\s+Week\s+(\d+),\s+Day\s+(\d+),\s+(?:TypeScript|Fundamentals|Implementation|Practice)(?:\s*[—-]\s*(.*))?$/;
 
 /**
  * Headings that announce the absence of content rather than naming a concept. These lose their
  * text entirely and keep only the standard prefix; everything else keeps what it says. Note that
  * Week 1 Day 5.1 - "Arrow functions, `async`, and reading `import`" - is a real primer on a
- * TypeScript tab, so matching on the TAB would have thrown that heading away.
+ * TypeScript tab, so matching on the TAB would have thrown that heading away. The same protection
+ * covers week 2's two real primers, on days 2 and 3.
  */
 const PLACEHOLDER_HEADING: readonly RegExp[] = [
   /typescript check-?in/i,
@@ -163,36 +178,56 @@ const PLACEHOLDER_HEADING: readonly RegExp[] = [
   /nothing to primer/i,
 ];
 
-function rewriteHeading(text: string, tab: string): string | null {
+/**
+ * `generated` is true for the placeholder part the importer synthesises on week 1 days 1-4. Its
+ * heading is matched on the part's KIND rather than on its words, because matching words couples
+ * this file to whatever placeholderPart() currently writes - and that coupling had already broken
+ * once: the function was reworded, stopped matching, and a re-import would have produced
+ * "Week 1 - Day 1 - TypeScript - TypeScript for this lesson".
+ */
+function rewriteHeading(text: string, tab: string, generated: boolean): string | null {
   const lines = text.split('\n');
-  const i = lines.findIndex((l) => DAY_HEADING.test(l));
+  const i = lines.findIndex((l) => DAY_HEADING.test(l) || REWRITTEN_HEADING.test(l));
   if (i === -1) return null;
 
-  const [, week, dayNumber, , rest] = DAY_HEADING.exec(lines[i])!;
+  // Either form yields the same three things: the week, the day, and whatever the heading said
+  // about the lesson. The raw form carries a part number as well, which is dropped - the tab
+  // name says which part this is, and saying it twice is what the rule exists to stop.
+  const raw = DAY_HEADING.exec(lines[i]);
+  const [week, dayNumber, rest] = raw
+    ? [raw[1], raw[2], raw[4]]
+    : (([, w, d, r]) => [w, d, r ?? ''])(REWRITTEN_HEADING.exec(lines[i])!);
+
   let content = rest.trim();
-  if (PLACEHOLDER_HEADING.some((p) => p.test(content))) {
+  if (generated || PLACEHOLDER_HEADING.some((p) => p.test(content))) {
     content = '';
-  } else if (tab === 'Practice') {
-    // "Practice: Codegen and locators" under a tab already called Practice says it twice. Dropping
-    // the prefix promotes what followed the colon to the start of a clause, where the course's own
-    // lower-case ("Practice: environment setup") would now read as a typo - so capitalise it.
-    const stripped = content.replace(/^practice\s*[:—-]\s*/i, '');
+  } else {
+    // "Practice: Codegen and locators" under a tab already called Practice says it twice, and so
+    // does "TypeScript - TypeScript for building a unique value". Strip a leading repeat of the
+    // tab's own name, however the course joined it on. Dropping the prefix promotes what followed
+    // to the start of a clause, where the course's own lower-case ("Practice: environment setup")
+    // would now read as a typo - so capitalise it.
+    const stutter = new RegExp('^' + tab + '\\s*(?:[:—-]\\s*|for\\s+)', 'i');
+    const stripped = content.replace(stutter, '');
     if (stripped !== content) content = stripped.charAt(0).toUpperCase() + stripped.slice(1);
   }
 
-  const prefix = '# Week ' + week + ', Day ' + dayNumber + ', ' + tab;
-  lines[i] = content ? prefix + ' — ' + content : prefix;
+  const prefix = '# Week ' + week + ' - Day ' + dayNumber + ' - ' + tab;
+  lines[i] = content ? prefix + ' - ' + content : prefix;
   return lines.join('\n');
 }
 
 /**
- * Standardises each part's page heading on "Week N, Day D, <Tab>", keeping whatever the heading
- * said about the lesson itself after an em dash.
+ * Standardises each part's page heading on "Week N - Day D - <Tab>", keeping whatever the heading
+ * said about the lesson itself after a further " - ".
+ *
+ * Only the STRUCTURAL separators are hyphens. A comma inside the subject is ordinary prose and is
+ * left exactly as written ("Why automation, why Playwright"), and `##`/`###` subheadings are never
+ * touched at all - the pattern requires a single `#` followed by whitespace.
  *
  * Like applyDerivedLabels(), this is a RULE rather than authored text, so it lives here and runs
  * on every `npm run overlay` - a heading edited into the generated JSON by hand would not survive
- * the next import. It is idempotent because a rewritten heading no longer carries the "Day D.P"
- * form the pattern matches.
+ * the next import. See the note on the patterns above for why it is idempotent.
  */
 export function applyHeadingFormat(day: CourseDay): CourseDay {
   if (!ROLE_HEADING_WEEKS.has(day.week)) return day;
@@ -204,7 +239,7 @@ export function applyHeadingFormat(day: CourseDay): CourseDay {
         ...part,
         blocks: part.blocks.map((b) => {
           if (b.type !== 'markdown') return b;
-          const rewritten = rewriteHeading(b.text, tab);
+          const rewritten = rewriteHeading(b.text, tab, part.kind === 'generated-prerequisite');
           return rewritten === null ? b : { ...b, text: rewritten };
         }),
       };

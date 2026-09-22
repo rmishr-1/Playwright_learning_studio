@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 5.1 — TypeScript check-in: nothing new today\n\nDay 5.2 splits one test into several and watches the second one fail. Nothing about that\nneeds new TypeScript — it's the same `test()`/`async ({ page })` shape you've written all\nweek. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 5.2](/learn/w2/d5/p2).",
+          "text": "# Week 2 - Day 5 - TypeScript\n\nDay 5.2 splits one test into several and watches the second one fail. Nothing about that\nneeds new TypeScript — it's the same `test()`/`async ({ page })` shape you've written all\nweek. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 5.2](/learn/w2/d5/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -76,7 +76,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 5.2 — Splitting one long test, and the problem it creates\n\nBy the end of this lesson you will have run one long test, split it into five small\nones, and watched a real failure appear that has nothing to do with a typo — it's\nPlaywright's central design decision showing up for the first time.",
+          "text": "# Week 2 - Day 5 - Fundamentals - Splitting one long test, and the problem it creates\n\nBy the end of this lesson you will have run one long test, split it into five small\nones, and watched a real failure appear that has nothing to do with a typo — it's\nPlaywright's central design decision showing up for the first time.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -241,7 +241,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 5.3 — Preview: the shape of the fix\n\n**This lesson does not teach hooks.** It shows the fix from Day 5.2 running for real,\nnames the pieces, and points you at where each one is actually explained.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Week 2 - Day 5 - Implementation - Preview: the shape of the fix\n\n**This lesson does not teach hooks.** It shows the fix from Day 5.2 running for real,\nnames the pieces, and points you at where each one is actually explained.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -339,7 +339,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 5.4 — Practice: splitting tests, and the isolation problem\n\nThree problems. The third one has no code to write — it's a question, because the real\nhook lesson is week3's job, not this lesson's.\n\nStart in a fresh cell in this lesson. When a problem asks for a spec file, write it\ninto `week2/generated/` and run it with `npx playwright test`.",
+          "text": "# Week 2 - Day 5 - Practice - Splitting tests, and the isolation problem\n\nThree problems. The third one has no code to write — it's a question, because the real\nhook lesson is week3's job, not this lesson's.\n\nStart in a fresh cell in this lesson. When a problem asks for a spec file, write it\ninto `week2/generated/` and run it with `npx playwright test`.",
           "starter": null,
           "variation": null,
           "checkpoint": null

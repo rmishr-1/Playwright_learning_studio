@@ -17,7 +17,7 @@
           "explanation": "The length of the `projects` array multiplies the test count — chromium alone here, three browsers in a fresh scaffold. `retries` only re-runs something that already failed, and `fullyParallel` changes the order and speed, never the count."
         }
       ],
-      "recap": "No new TypeScript today. [Fundamentals](/learn/w1/d4/p2) is Codegen and locators; [Implementation](/learn/w1/d4/p3) proves what the `.spec.ts` suffix really does."
+      "recap": "Today's material is tooling rather than the language. [Fundamentals](/learn/w1/d4/p2) is Codegen and locators; [Implementation](/learn/w1/d4/p3) proves what the `.spec.ts` suffix really does."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea to take away** | locate by what an element *is* to a user, not by where it sits in the markup |",

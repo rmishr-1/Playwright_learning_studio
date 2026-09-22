@@ -103,11 +103,21 @@ const LEGACY_COPY: ReadonlyArray<readonly [RegExp, string]> = [
     'You write Playwright tests in TypeScript. This tab is where each day covers the language\n' +
       "features that day's lesson needs.\n" +
       '\n' +
-      "Today's lesson needs nothing new, so you can go straight to it.\n" +
+      'The lesson ahead draws only on TypeScript the course has already covered. Continue to\n' +
+      'the Fundamentals tab.\n' +
       '\n' +
       '> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n' +
       '> functions, `async`, and how to read an `import` line. The days before it are written to be\n' +
       '> readable without them.',
+  ],
+  // The interim wording of the placeholder body. It fixed the original negation-first opening
+  // but read as a note to a colleague rather than as course material, so it is retired the same
+  // way its predecessor was: matched here so `npm run overlay` upgrades the committed tree, since
+  // placeholderPart() itself only runs on an import that needs the absent training repo.
+  [
+    /Today's lesson needs nothing new, so you can go straight to it\./g,
+    'The lesson ahead draws only on TypeScript the course has already covered. Continue to\n' +
+      'the Fundamentals tab.',
   ],
   // "Deno" is the notebook kernel the course was authored against. It is an implementation
   // detail of the old environment and means nothing to a learner reading this in a browser.

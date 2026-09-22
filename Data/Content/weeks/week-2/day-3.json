@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 3.1 — TypeScript for building a unique value at runtime\n\nBy the end of this lesson you will build a guaranteed-different string on every run\nusing `+` and `Math.random()` — the exact technique [Day 3.2](/learn/w2/d3/p2) uses so two\nruns of the same test never collide.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# Week 2 - Day 3 - TypeScript - Building a unique value at runtime\n\nBy the end of this lesson you will build a guaranteed-different string on every run\nusing `+` and `Math.random()` — the exact technique [Day 3.2](/learn/w2/d3/p2) uses so two\nruns of the same test never collide.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -167,7 +167,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 3.2 — Unique test data and dynamic locators\n\nBy the end of this lesson you will generate a unique value per run, fill it into the\nform, build a runtime XPath that *fails* and understand exactly why, build one that\n*works*, and prove `text()` vs `normalize-space()` on real markup.",
+          "text": "# Week 2 - Day 3 - Fundamentals - Unique test data and dynamic locators\n\nBy the end of this lesson you will generate a unique value per run, fill it into the\nform, build a runtime XPath that *fails* and understand exactly why, build one that\n*works*, and prove `text()` vs `normalize-space()` on real markup.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -399,7 +399,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 3.3 — Unique data and dynamic locators, wrapped for reuse\n\nBy the end of this lesson you will have a `uniqueEmail()` generator and a\n`pickAndCheckGender()` helper that any spec can call, extending the same\n`registration-helpers.ts` file from Days 1 and 2.\n\n> **No new API here on purpose.** Everything below is something you already ran in [Day 3.2](/learn/w2/d3/p2).",
+          "text": "# Week 2 - Day 3 - Implementation - Unique data and dynamic locators, wrapped for reuse\n\nBy the end of this lesson you will have a `uniqueEmail()` generator and a\n`pickAndCheckGender()` helper that any spec can call, extending the same\n`registration-helpers.ts` file from Days 1 and 2.\n\n> **No new API here on purpose.** Everything below is something you already ran in [Day 3.2](/learn/w2/d3/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -495,7 +495,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 3.4 — Practice: unique data and dynamic locators\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 3.1](/learn/w2/d3/p1) or [Day 3.2](/learn/w2/d3/p2). Go back, re-read, come here again.",
+          "text": "# Week 2 - Day 3 - Practice - Unique data and dynamic locators\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 3.1](/learn/w2/d3/p1) or [Day 3.2](/learn/w2/d3/p2). Go back, re-read, come here again.",
           "starter": null,
           "variation": null,
           "checkpoint": null

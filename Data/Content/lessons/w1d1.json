@@ -17,7 +17,7 @@
           "explanation": "The language primers start at [Day 5.1](/learn/w1/d5/p1). Days 1 to 4 are orientation, setup, the CLI and Codegen — readable without the language. The course does very much use TypeScript; it just does not open with it."
         }
       ],
-      "recap": "Nothing to learn on this tab today. Go to [Fundamentals](/learn/w1/d1/p2), which is the actual lesson — and expect no code at all until [Day 2](/learn/w1/d2/p2), when there is an environment to run it in."
+      "recap": "Day 1 is orientation, so the language lessons begin later in the week. Continue to [Fundamentals](/learn/w1/d1/p2), which is the lesson itself. There is no code until [Day 2](/learn/w1/d2/p2), when there is an environment to run it in."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **No code today** | orientation, plus one \"go and look at this\" step |\n| **You'll be able to say** | what automation cannot do · why Playwright over Selenium · where the effort really goes |\n| **Assumes** | nothing at all — this is the first lesson |\n| **The sentence to keep** | automation never finds a defect. It reports pass or fail. |",

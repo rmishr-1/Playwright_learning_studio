@@ -17,7 +17,7 @@
           "explanation": "Playwright drives the app the way a real user does, so a single test exercises every layer beneath it. Unit testing is a different tool's job. The higher up you go the more one test proves — and the more it costs to diagnose when it fails, which is week 7's subject."
         }
       ],
-      "recap": "No new TypeScript today. Everything ahead is setup: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2)."
+      "recap": "Today's work is setup rather than language: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2)."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Where it runs** | here in the editor. The cells read real files on your disk. |\n| **Assumes** | nothing but a terminal |",

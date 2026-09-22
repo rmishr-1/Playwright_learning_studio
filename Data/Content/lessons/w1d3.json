@@ -17,7 +17,7 @@
           "explanation": "The rule is whether a run regenerates it. Reports, traces and `node_modules/` do; the lock file and the config do not — the lock file is committed precisely so everyone installs the same versions."
         }
       ],
-      "recap": "No new TypeScript today. [Fundamentals](/learn/w1/d3/p2) is all CLI, and [Implementation](/learn/w1/d3/p3) is a first read of the config file."
+      "recap": "Today's material is the command line rather than the language. [Fundamentals](/learn/w1/d3/p2) is all CLI, and [Implementation](/learn/w1/d3/p3) is a first read of the config file."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `npx playwright test` · `--headed` · `show-report` |\n| **You'll learn** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Where it runs** | here, though the first cells run real terminal commands |\n| **Watch for** | the test count. This repo runs chromium only, so it is lower than a fresh scaffold's. |",
