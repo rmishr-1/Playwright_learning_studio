@@ -139,6 +139,51 @@
           "starter": null,
           "variation": null,
           "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const square = (n: number) => n * n;` has no `return`. Why does it still return a value?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Arrow functions return their last statement automatically",
+              "A body with no braces is a single expression, and its value is returned implicitly",
+              "`return` is optional everywhere in TypeScript"
+            ],
+            "answer": 1,
+            "explanation": "No braces means the arrow is followed by one expression, and that expression's value is the return value. Add braces and you are back to a normal function body, where `return` is required — a difference that catches people the first time a block-bodied arrow silently returns `undefined`."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "You write an arrow function whose body calls `await page.click(...)` but you leave off `async`. What happens?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "It runs, but the click may not finish before the next line",
+              "A TypeScript compile error — `await` is only valid inside an `async` function",
+              "It runs and silently ignores the `await`"
+            ],
+            "answer": 1,
+            "explanation": "This one fails loudly at compile time rather than misbehaving at run time, which is the good case. Since practically every Playwright action returns a Promise, practically every test body awaits something — which is why practically every test function is `async`."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "In `test(\"name\", async ({ page }) => { ... })`, what is `({ page })` doing?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Declaring a parameter that happens to be called page",
+              "Destructuring just the `page` fixture out of the object of tools Playwright passes in",
+              "Creating a new page object for the test to use"
+            ],
+            "answer": 1,
+            "explanation": "Playwright hands the test one object containing every fixture it could offer — `page`, `browser`, `browserName` and more. Destructuring in the parameter list pulls out only the ones you name, so you write `page` rather than `tools.page` throughout. Nothing is being created here; it is being unpacked."
+          }
         }
       ],
       "problems": []
@@ -154,6 +199,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 5, Fundamentals — Your first real test, and why assertions matter\n\nBy the end of this lesson you will have written and run a real Playwright test, and — this\nis the important part — **watched a test pass when it should have failed**, because it never\nchecked anything. Then you'll fix it and watch it fail correctly.\n\nPrerequisites are in [Day 5.1](/learn/w1/d5/p1). If arrow functions or `async` felt shaky, go\nback — everything below assumes you're comfortable reading `async ({ page }) => {}`.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **You'll watch** | a test pass with the wrong password, because it never checked anything |\n| **Then** | fix it, and watch it fail correctly |\n| **Mode** | test-runner — follow these in your own checkout |\n| **Assumes** | [arrow functions, `async`, destructuring](/learn/w1/d5/p1) |\n| **The week's headline** | a test that only acts and never asserts is a recording, not a test |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -220,7 +272,66 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- Every test needs at least one `expect()` that would actually fail if the feature broke.\n- Prefer asserting the **consequence** (reached the dashboard, saw the user's name) over\n  asserting that an action merely \"didn't throw\" — a `.click()` succeeding proves the button\n  was clickable, not that login worked.\n- Read a passing test with suspicion the first time you write it: what would make this go\n  red? If the answer is \"nothing\", it isn't testing anything yet.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| A test with only actions, no `expect()` | Always green, regardless of whether the feature works | Add an assertion on the actual consequence |\n| Asserting `.toBeVisible()` on something that's always in the DOM | Passes whether or not the real condition happened | Assert on something that genuinely changes (URL, a specific text) |\n| Assuming a wrong-password login throws an error | It doesn't — this app just silently stays put | Assert the *positive* outcome (`toHaveURL(/dashboard/)`), not the absence of a crash |\n\n## What's next\n\n[Day 5.3](/learn/w1/d5/p3) takes this exact login code and gives it a small amount of structure —\na first look at the shape you'll use for the rest of the course.",
+          "text": "## Best practices\n\n- Every test needs at least one `expect()` that would actually fail if the feature broke.\n- Prefer asserting the **consequence** (reached the dashboard, saw the user's name) over\n  asserting that an action merely \"didn't throw\" — a `.click()` succeeding proves the button\n  was clickable, not that login worked.\n- Read a passing test with suspicion the first time you write it: what would make this go\n  red? If the answer is \"nothing\", it isn't testing anything yet.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| A test with only actions, no `expect()` | Always green, regardless of whether the feature works | Add an assertion on the actual consequence |\n| Asserting `.toBeVisible()` on something that's always in the DOM | Passes whether or not the real condition happened | Assert on something that genuinely changes (URL, a specific text) |\n| Assuming a wrong-password login throws an error | It doesn't — this app just silently stays put | Assert the *positive* outcome (`toHaveURL(/dashboard/)`), not the absence of a crash |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Both tests type the same wrong password. Why does the first one report green?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "The app accepted the wrong password, so the login really did succeed",
+              "It contains no `expect()`, so there was nothing that could fail",
+              "Playwright treats a failed login as a warning rather than an error"
+            ],
+            "answer": 1,
+            "explanation": "Login genuinely failed in both tests — verified: this app just stays on the login page, with no error message at all. The first test performed four actions, none of which threw, and reported success. \"Automation never finds a defect\" from [Day 1](/learn/w1/d1/p2) stops being an abstraction right here."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which assertion actually proves the login worked?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`await expect(page.getByRole(\"button\", { name: \"Login\" })).toBeVisible()` before clicking",
+              "`await expect(page).toHaveURL(/dashboard/)` after clicking",
+              "Checking that `.click()` completed without throwing"
+            ],
+            "answer": 1,
+            "explanation": "Assert the **consequence**. A click completing proves the button was clickable, not that anything happened afterwards; asserting the login button is visible proves you are still looking at the login page. The URL changing — or the user's name appearing — is what only a successful login produces."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "What question should you ask of a test you have just written and watched pass?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Does it run fast enough to keep in the suite?",
+              "What would make this go red? If the answer is \"nothing\", it is not testing anything yet.",
+              "Does it cover every element on the page?"
+            ],
+            "answer": 1,
+            "explanation": "A green test is only meaningful if some realistic breakage would turn it red. Reading your own passing test with suspicion is the habit this whole day exists to build — and it is cheapest to apply the moment you write it, not after it has been green through six broken releases."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- **A test with no `expect()` cannot fail for the right reason.** It is a recording of actions.\n- Assert the consequence — the URL, the user's name — not that an action merely did not throw.\n- `expect(page).toHaveURL(...)` auto-retries until it matches or times out, then fails with a real message.\n- This app gives no error on a wrong password: it just stays put. Silence is not success.\n- Ask of every passing test: what would make this go red?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 5.3](/learn/w1/d5/p3) takes this exact login code and gives it a small amount of structure —\na first look at the shape you'll use for the rest of the course.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -239,6 +350,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 5, Implementation — The same login, with a little structure\n\nBy the end of this lesson you will have seen Day 5.2's exact login steps reorganized into a\nsmall class — a first, gentle look at the shape you'll build on for the rest of the course.\n\n> **No new API here on purpose.** `getByPlaceholder`, `getByRole`, `fill`, `click` — all\n> already used in Day 5.2. The only new thing is the structure around them. The repo has no\n> `framework/` folder yet (that comes later), so this class is written **inline in the spec\n> file below** — a shape you're seeing, not a file the repo ships yet.\n\n> This previews something week5 names and covers in full depth as the **Page Object Model** —\n> today, just notice the shape; you don't need the name yet.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New API** | none — the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **What changes** | three repeated locators become a class built once, and one named `signIn` step |\n| **Not yet named** | this is the Page Object Model. Week 5 names it and covers it in full. |\n| **The rule to take away** | a page object never asserts |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -288,6 +406,43 @@
           "checkpoint": null
         },
         {
+          "type": "checkpoint",
+          "text": "Why does `LoginPage` contain no `expect()` at all?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because assertions are not allowed outside a `test()` body",
+              "So it can be reused by tests expecting success AND tests expecting failure — the test decides what should be true",
+              "Because the class runs before the test does"
+            ],
+            "answer": 1,
+            "explanation": "Put the check inside `signIn` and it only suits tests wanting that exact outcome. You then grow `signInAndCheckDashboard`, `signInAndCheckWrongPassword`, one method per outcome. The version that asserts nothing serves both tests in this very lesson — one expecting a dashboard, one expecting to stay put."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "The locators are built once in the constructor and marked `readonly`. What does `readonly` buy?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "It stops a method reassigning a locator by accident",
+              "It makes the locators resolve once and cache the element",
+              "It is required for TypeScript to infer the `Locator` type"
+            ],
+            "answer": 0,
+            "explanation": "It is a compile-time guarantee about the field, nothing more. A locator is a live reference that re-resolves on every use, so `readonly` does not freeze what it points at — only the fact that this field keeps pointing at the same locator."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Three locators repeated across dozens of tests is dozens of edits when the form is redesigned. Build them once.\n- Name a method for what a **user** does (`signIn`), not for the DOM operations inside it.\n- **No assertions in a page object.** It knows how to act; the test decides what should be true.\n- `readonly` guards the field, not the element — a locator still re-resolves every time it is used.\n- You are looking at the Page Object Model. Week 5 gives it its name and its full treatment.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
           "type": "markdown",
           "text": "## What's next\n\n[Day 5.4](/learn/w1/d5/p4) — your turn, with no worked examples to lean on. This closes out\nWeek 1; Week 3 picks up from here with timeouts, hooks, and the real config file in depth.",
           "starter": null,
@@ -308,6 +463,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 5, Practice — Your first test, and the assertions gap\n\nThree problems, capping off the week. No solutions — you'll know you're right because the\nreport will tell you.\n\nWrite specs into `week1/generated/` and run them with `npx playwright test`, same as every\nexample this week.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Three problems** | closing out the week: a test of your own, the assertions gap, then a small page object |\n| **No solutions** | the report tells you whether you are right |\n| **Closes** | week 1 — why automate, setup, the CLI, Codegen, and the assertion that makes a test a test |",
           "starter": null,
           "variation": null,
           "checkpoint": null

@@ -19,6 +19,35 @@
           "starter": null,
           "variation": null,
           "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New syntax today** | none — day 1 is orientation, and there is no code yet to need any |\n| **When TypeScript starts** | [Day 5.1](/learn/w1/d5/p1), with arrow functions, `async` and `import` |\n| **Then go to** | [Fundamentals](/learn/w1/d1/p2) — why teams automate, and why this tool |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Do you need to know TypeScript before starting this course?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Yes — the first lessons assume it, which is why this tab exists",
+              "No — the primers begin at Day 5.1, and everything before that is readable without them",
+              "No, because the course never uses TypeScript at all"
+            ],
+            "answer": 1,
+            "explanation": "The language primers start at [Day 5.1](/learn/w1/d5/p1). Days 1 to 4 are orientation, setup, the CLI and Codegen — readable without the language. The course does very much use TypeScript; it just does not open with it."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "Nothing to learn on this tab today. Go to [Fundamentals](/learn/w1/d1/p2), which is the actual lesson — and expect no code at all until [Day 2](/learn/w1/d2/p2), when there is an environment to run it in.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -34,6 +63,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 1, Fundamentals — Why automation, why Playwright\n\nBy the end of this lesson you will know what automation can and can't do, what makes\nPlaywright different from Selenium, and you will have opened playwright.dev yourself and\nlooked around.\n\n> **No code today.** This is an orientation day — theory and one \"go look at this\" step.\n> Cells start appearing from [Day 2](/learn/w1/d2/p2) onward, once there's an environment to\n> run them in.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **No code today** | orientation, plus one \"go and look at this\" step |\n| **You'll be able to say** | what automation cannot do · why Playwright over Selenium · where the effort really goes |\n| **Assumes** | nothing at all — this is the first lesson |\n| **The sentence to keep** | automation never finds a defect. It reports pass or fail. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -116,6 +152,58 @@
           "checkpoint": null
         },
         {
+          "type": "checkpoint",
+          "text": "Your suite of 500 automated tests runs green overnight. What has it proved?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "That the application has no defects in the areas covered",
+              "That 500 checks a human already wrote came back as expected — nothing about defects nobody wrote a check for",
+              "That no new defects were introduced, though old ones may remain"
+            ],
+            "answer": 1,
+            "explanation": "Automation never *finds* a defect: it reports pass or fail against a check a person wrote in advance, and a person decides whether a failure means a bug. Something visibly broken that nobody thought to check for passes green all night. That is what exploratory manual testing is still for."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Before you can automate a test at all, the lesson says you need two things. Which pair?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "A test runner and a reporting tool",
+              "A known expected result, and a way to identify the object on the page",
+              "A stable environment, and a colleague to review the script"
+            ],
+            "answer": 1,
+            "explanation": "No known expected result means there is nothing to assert. No reliable way to identify the element means you cannot write the step at all. Both are why \"just automate everything\" stalls — pure exploration and one-off checks routinely fail the second one."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "A stakeholder asks you to automate testing of the company's native Android app. Does Playwright fit?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Yes — mobile is one of its listed features",
+              "No — its mobile support is emulation, a desktop browser with a phone viewport and user agent. A native app needs something like Appium.",
+              "Yes, but only on an emulator rather than a real device"
+            ],
+            "answer": 1,
+            "explanation": "Playwright emulates mobile: real device viewports and user agents, in a desktop browser. That is genuinely useful for mobile *web*, and it is not a native app driver. Picking the right tool for the vertical matters more than picking your favourite one."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- **Automation never finds a defect.** It reports pass or fail against checks a person wrote; a person decides what a failure means.\n- Two non-negotiables before automating anything: a known expected result, and an identifiable object.\n- Playwright folds in what Selenium needs extra tooling for — auto-waiting, assertions, a runner, tracing. Selenium is older, not bad.\n- Its home is system-level end-to-end testing, and its mobile support is emulation, not native apps.\n- About half your effort on a real project goes into learning the **application**, not the tool.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
           "type": "markdown",
           "text": "## What's next\n\nNo Day 1.3 — there's no code yet to reorganize into a framework shape. Straight to\n[Day 1.4 — Practice](/learn/w1/d1/p4) for some reflection problems, then [Day 2](/learn/w1/d2/p2)\ngets your environment running.",
           "starter": null,
@@ -136,6 +224,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 1, Practice — Why automation, why Playwright\n\nNo code today, and no app to test against yet — so these are reflection and research\nproblems instead of programming ones. Same three tiers as every practice day, adapted to\nwhat you actually have available right now.\n\nWrite your answers as comments in the cells below (or `console.log` them if you want to see\nthem printed — the runner is happy with either).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **No code today** | three reflection and research problems, since there is no environment yet |\n| **Pulls on** | [Fundamentals](/learn/w1/d1/p2) — and on the playwright.dev tab it asked you to open |\n| **Next** | [Day 2](/learn/w1/d2/p2) turns all of this into a working setup on your machine |",
           "starter": null,
           "variation": null,
           "checkpoint": null

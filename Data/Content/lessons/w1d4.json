@@ -1,0 +1,88 @@
+{
+  "schema": "lesson-overlay/v1",
+  "week": 1,
+  "day": 4,
+  "parts": {
+    "1": {
+      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — locator strings and file names are not language syntax |\n| **You will need** | a real terminal, because Codegen opens two windows of its own |\n| **Then go to** | [Fundamentals](/learn/w1/d4/p2), which is about *finding* what goes inside a test |",
+      "checkpoints": [
+        {
+          "question": "From [Day 3](/learn/w1/d3/p3): which setting in the config decides how many times each test runs?",
+          "options": [
+            "`retries`, which re-runs a failure",
+            "`projects`, because every test runs once per active browser project",
+            "`fullyParallel`, which duplicates tests across workers"
+          ],
+          "answer": 1,
+          "explanation": "The length of the `projects` array multiplies the test count — chromium alone here, three browsers in a fresh scaffold. `retries` only re-runs something that already failed, and `fullyParallel` changes the order and speed, never the count."
+        }
+      ],
+      "recap": "No new TypeScript today. [Fundamentals](/learn/w1/d4/p2) is Codegen and locators; [Implementation](/learn/w1/d4/p3) proves what the `.spec.ts` suffix really does."
+    },
+    "2": {
+      "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea worth keeping** | locate by what an element *is* to a user, not by where it sits in the markup |",
+      "checkpoints": [
+        {
+          "question": "Why does Codegen generate `getByRole(\"button\", { name: \"Login\" })` rather than something like `#ng-x7f2q3`?",
+          "options": [
+            "Because role locators are faster to evaluate",
+            "Because it is tied to what the element is and what it says, which a redesign is far less likely to change",
+            "Because generated ids are not unique enough to match one element"
+          ],
+          "answer": 1,
+          "explanation": "A build tool regenerates `#ng-x7f2q3` on the next deploy and an XPath breaks the moment the layout shifts. Role, label, placeholder and text are what a screen reader — or a human — uses to find something, and that survives the markup being rewritten underneath it."
+        },
+        {
+          "question": "You save a test as `login.ts` instead of `login.spec.ts`. What happens when you run the suite?",
+          "options": [
+            "It fails with an error about the file name",
+            "It is skipped, and reported as skipped",
+            "Nothing at all — the file is never looked at, with no error and no warning"
+          ],
+          "answer": 2,
+          "explanation": "`testMatch` only collects `.spec.ts` (or `.test.ts`). The file sits there, valid and completely invisible. That silence is the danger: a loud failure gets fixed in a minute, and this one can hide a whole test file for weeks. [Implementation](/learn/w1/d4/p3) proves it rather than asking you to take it on trust."
+        },
+        {
+          "question": "How should you treat the code Codegen hands you?",
+          "options": [
+            "As a first draft — take the locators, drop the accidental clicks it also recorded",
+            "As finished code, since it only generates stable locators",
+            "As reference only; retyping it by hand is the point"
+          ],
+          "answer": 0,
+          "explanation": "Codegen records everything you did, including the clicks you did not mean. Its value is the locators it chose for you; the structure around them is yours to write. Pasting a raw recording into a suite is how you end up with tests nobody can read."
+        }
+      ],
+      "recap": "- Prefer `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText`. Let Codegen's defaults be yours.\n- Generated ids and raw XPath encode the markup of the day, and break when it changes.\n- Codegen gives a **draft**: keep the locators, drop the noise.\n- **A missing `.spec.ts` suffix is a silent failure, not a loud one** — the runner simply never looks at the file.\n- On this app the dashboard tiles are `<p>` elements, so `getByRole(\"link\", ...)` finds nothing."
+    },
+    "3": {
+      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — the same locators from [Fundamentals](/learn/w1/d4/p2), used to prove a rule about discovery |\n| **What you'll watch** | a valid test file ignored entirely, then found, purely because of its name |\n| **The tool** | `npx playwright test <dir> --list` — counts what the runner can actually see |",
+      "checkpoints": [
+        {
+          "question": "`--list` reports `Total: 2 tests in 1 file`, but you know there are two test files in that folder. What does that tell you?",
+          "options": [
+            "One file failed to compile and was skipped",
+            "One file is not being collected at all — almost always the `.spec.ts` suffix",
+            "The second file's tests are marked `.skip`"
+          ],
+          "answer": 1,
+          "explanation": "A compile error is loud and a `.skip` still appears in the listing as skipped. A file the pattern never matched contributes nothing — no line, no warning, no count. That is exactly why `--list` is worth running when a file's tests seem to have vanished."
+        },
+        {
+          "question": "Renaming `day4-not-a-spec.ts` to `day4-renamed.spec.ts` took the listing from 2 tests to 3. What changed inside the file?",
+          "options": [
+            "Nothing — the same code, now discovered purely because of the name",
+            "The rename triggered a recompile that fixed an import",
+            "The test was registered with the runner as part of the rename"
+          ],
+          "answer": 0,
+          "explanation": "Not one character of the code changed. Discovery is a filename question, decided by `testMatch` before any of your code is read. There is no registration step anywhere in Playwright — which is convenient right up until a name is wrong."
+        }
+      ],
+      "recap": "- Discovery happens by **filename**, before a line of your code is read.\n- A file that does not match is invisible: no error, no warning, no count.\n- `npx playwright test <dir> --list` is the cheap way to check what the runner can actually see.\n- Never assume \"the file is there, so it must be running\" — when in doubt, list and count."
+    },
+    "4": {
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | the first genuinely needs a terminal, like Codegen itself |\n| **Problem 3** | reproduces the silent-file failure on purpose, so you recognise it later |\n| **Next** | [Day 5](/learn/w1/d5/p1) is the week's capstone — your first real test, and why assertions matter |"
+    }
+  }
+}

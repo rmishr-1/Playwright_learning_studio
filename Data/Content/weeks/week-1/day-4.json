@@ -19,6 +19,35 @@
           "starter": null,
           "variation": null,
           "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New syntax today** | none — locator strings and file names are not language syntax |\n| **You will need** | a real terminal, because Codegen opens two windows of its own |\n| **Then go to** | [Fundamentals](/learn/w1/d4/p2), which is about *finding* what goes inside a test |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "From [Day 3](/learn/w1/d3/p3): which setting in the config decides how many times each test runs?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`retries`, which re-runs a failure",
+              "`projects`, because every test runs once per active browser project",
+              "`fullyParallel`, which duplicates tests across workers"
+            ],
+            "answer": 1,
+            "explanation": "The length of the `projects` array multiplies the test count — chromium alone here, three browsers in a fresh scaffold. `retries` only re-runs something that already failed, and `fullyParallel` changes the order and speed, never the count."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "No new TypeScript today. [Fundamentals](/learn/w1/d4/p2) is Codegen and locators; [Implementation](/learn/w1/d4/p3) proves what the `.spec.ts` suffix really does.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -34,6 +63,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 4, Fundamentals — Codegen and finding your way around locators\n\nBy the end of this lesson you will know what Codegen and the Inspector actually do, why\nthey reach for `getByRole`/`getByPlaceholder` over old id/xpath/css locators, and why a spec\nfile's name isn't just cosmetic.\n\n> **No new TypeScript today** — locator strings and file naming aren't new language syntax,\n> so there's no Day 4.1. [Day 2](/learn/w1/d2/p2) and [Day 3](/learn/w1/d3/p2) got you set up\n> and running; today is about *finding* what to put inside a test.\n\n> **Mode: explore**, plus one run-it-yourself step. ",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea worth keeping** | locate by what an element *is* to a user, not by where it sits in the markup |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -98,7 +134,66 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- Prefer `getByRole`/`getByLabel`/`getByPlaceholder`/`getByText` over `id`/class/xpath — let\n  Codegen's defaults be your defaults too.\n- Use Codegen to get a **first draft**, then clean it up — it records everything you clicked,\n  including accidental clicks.\n- Always name generated specs `*.spec.ts` — a missing suffix is a silent, not a loud, failure.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Wrote a spec file without the `.spec.ts` suffix | `npx playwright test` runs, reports 0 tests changed — the file is just silently absent | Rename it to end in `.spec.ts` |\n| Copied Codegen's raw output verbatim into the suite | Works, but full of one-off clicks and no structure | Treat it as a draft — extract the locators, drop the noise |\n| Reached for `getByRole(\"link\", ...)` on this app's dashboard | Finds nothing | This app's dashboard tiles are `<p>` elements, not `<a>` — noted in `_shared/CONCEPTS.md` |\n\n## What's next\n\n[Day 4.3](/learn/w1/d4/p3) proves the naming-convention rule above for real, by writing a file\nwithout the suffix and watching Playwright ignore it.",
+          "text": "## Best practices\n\n- Prefer `getByRole`/`getByLabel`/`getByPlaceholder`/`getByText` over `id`/class/xpath — let\n  Codegen's defaults be your defaults too.\n- Use Codegen to get a **first draft**, then clean it up — it records everything you clicked,\n  including accidental clicks.\n- Always name generated specs `*.spec.ts` — a missing suffix is a silent, not a loud, failure.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Wrote a spec file without the `.spec.ts` suffix | `npx playwright test` runs, reports 0 tests changed — the file is just silently absent | Rename it to end in `.spec.ts` |\n| Copied Codegen's raw output verbatim into the suite | Works, but full of one-off clicks and no structure | Treat it as a draft — extract the locators, drop the noise |\n| Reached for `getByRole(\"link\", ...)` on this app's dashboard | Finds nothing | This app's dashboard tiles are `<p>` elements, not `<a>` — noted in `_shared/CONCEPTS.md` |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why does Codegen generate `getByRole(\"button\", { name: \"Login\" })` rather than something like `#ng-x7f2q3`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because role locators are faster to evaluate",
+              "Because it is tied to what the element is and what it says, which a redesign is far less likely to change",
+              "Because generated ids are not unique enough to match one element"
+            ],
+            "answer": 1,
+            "explanation": "A build tool regenerates `#ng-x7f2q3` on the next deploy and an XPath breaks the moment the layout shifts. Role, label, placeholder and text are what a screen reader — or a human — uses to find something, and that survives the markup being rewritten underneath it."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "You save a test as `login.ts` instead of `login.spec.ts`. What happens when you run the suite?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "It fails with an error about the file name",
+              "It is skipped, and reported as skipped",
+              "Nothing at all — the file is never looked at, with no error and no warning"
+            ],
+            "answer": 2,
+            "explanation": "`testMatch` only collects `.spec.ts` (or `.test.ts`). The file sits there, valid and completely invisible. That silence is the danger: a loud failure gets fixed in a minute, and this one can hide a whole test file for weeks. [Implementation](/learn/w1/d4/p3) proves it rather than asking you to take it on trust."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "How should you treat the code Codegen hands you?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "As a first draft — take the locators, drop the accidental clicks it also recorded",
+              "As finished code, since it only generates stable locators",
+              "As reference only; retyping it by hand is the point"
+            ],
+            "answer": 0,
+            "explanation": "Codegen records everything you did, including the clicks you did not mean. Its value is the locators it chose for you; the structure around them is yours to write. Pasting a raw recording into a suite is how you end up with tests nobody can read."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Prefer `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText`. Let Codegen's defaults be yours.\n- Generated ids and raw XPath encode the markup of the day, and break when it changes.\n- Codegen gives a **draft**: keep the locators, drop the noise.\n- **A missing `.spec.ts` suffix is a silent failure, not a loud one** — the runner simply never looks at the file.\n- On this app the dashboard tiles are `<p>` elements, so `getByRole(\"link\", ...)` finds nothing.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 4.3](/learn/w1/d4/p3) proves the naming-convention rule above for real, by writing a file\nwithout the suffix and watching Playwright ignore it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -117,6 +212,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 4, Implementation — Proving the `.spec.ts` naming convention\n\nBy the end of this lesson you will have watched Playwright genuinely ignore a test file\nbecause of its name, then watched the same file get picked up the moment you rename it.\n\n> **No new API here either** — this slot is normally \"the same API, inside a framework\", but\n> there's no framework yet. Today it's the same locators from Day 4.2, used to prove a rule\n> about *discovery* rather than to teach a new call.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New API** | none — the same locators from [Fundamentals](/learn/w1/d4/p2), used to prove a rule about discovery |\n| **What you'll watch** | a valid test file ignored entirely, then found, purely because of its name |\n| **The tool** | `npx playwright test <dir> --list` — counts what the runner can actually see |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -211,7 +313,51 @@
         },
         {
           "type": "markdown",
-          "text": "## What a reviewer would look for\n\n- A generated spec file that always ends in `.spec.ts` — never `.ts`, never `.test.js`.\n- No silent assumption that \"the file is there so it must be running\" — when in doubt,\n  `--list` and count.\n\n## What's next\n\n[Day 4.4](/learn/w1/d4/p4) — your turn with Codegen and the naming rule.\n[Day 5](/learn/w1/d5/p1) — your first real test, written by hand, and why an assertion\nmatters.",
+          "text": "## What a reviewer would look for\n\n- A generated spec file that always ends in `.spec.ts` — never `.ts`, never `.test.js`.\n- No silent assumption that \"the file is there so it must be running\" — when in doubt,\n  `--list` and count.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`--list` reports `Total: 2 tests in 1 file`, but you know there are two test files in that folder. What does that tell you?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "One file failed to compile and was skipped",
+              "One file is not being collected at all — almost always the `.spec.ts` suffix",
+              "The second file's tests are marked `.skip`"
+            ],
+            "answer": 1,
+            "explanation": "A compile error is loud and a `.skip` still appears in the listing as skipped. A file the pattern never matched contributes nothing — no line, no warning, no count. That is exactly why `--list` is worth running when a file's tests seem to have vanished."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Renaming `day4-not-a-spec.ts` to `day4-renamed.spec.ts` took the listing from 2 tests to 3. What changed inside the file?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Nothing — the same code, now discovered purely because of the name",
+              "The rename triggered a recompile that fixed an import",
+              "The test was registered with the runner as part of the rename"
+            ],
+            "answer": 0,
+            "explanation": "Not one character of the code changed. Discovery is a filename question, decided by `testMatch` before any of your code is read. There is no registration step anywhere in Playwright — which is convenient right up until a name is wrong."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Discovery happens by **filename**, before a line of your code is read.\n- A file that does not match is invisible: no error, no warning, no count.\n- `npx playwright test <dir> --list` is the cheap way to check what the runner can actually see.\n- Never assume \"the file is there, so it must be running\" — when in doubt, list and count.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 4.4](/learn/w1/d4/p4) — your turn with Codegen and the naming rule.\n[Day 5](/learn/w1/d5/p1) — your first real test, written by hand, and why an assertion\nmatters.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -230,6 +376,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 4, Practice — Codegen and locators\n\nThree problems. The first is genuinely run-it-yourself, like Codegen itself.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Three problems** | the first genuinely needs a terminal, like Codegen itself |\n| **Problem 3** | reproduces the silent-file failure on purpose, so you recognise it later |\n| **Next** | [Day 5](/learn/w1/d5/p1) is the week's capstone — your first real test, and why assertions matter |",
           "starter": null,
           "variation": null,
           "checkpoint": null

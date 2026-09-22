@@ -1,0 +1,88 @@
+{
+  "schema": "lesson-overlay/v1",
+  "week": 1,
+  "day": 2,
+  "parts": {
+    "1": {
+      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — today is npm, the CLI and the editor, not the language |\n| **You will need** | Node 18+ · a terminal · VS Code open on this repo's root |\n| **Then go to** | [Fundamentals](/learn/w1/d2/p2), which gets all three working |",
+      "checkpoints": [
+        {
+          "question": "From [Day 1](/learn/w1/d1/p2): which level of testing is Playwright's home turf?",
+          "options": [
+            "Unit — one function or component in isolation",
+            "System, end to end — driving the whole application as a user would",
+            "Integration only — it cannot reach a full end-to-end flow"
+          ],
+          "answer": 1,
+          "explanation": "Playwright drives the app the way a real user does, so a single test exercises every layer beneath it. Unit testing is a different tool's job. The higher up you go the more one test proves — and the more it costs to diagnose when it fails, which is week 7's subject."
+        }
+      ],
+      "recap": "No new TypeScript today. Everything ahead is setup: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2)."
+    },
+    "2": {
+      "at_a_glance": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Mode** | explore — the cells read real files on your disk |\n| **Assumes** | nothing but a terminal |",
+      "checkpoints": [
+        {
+          "question": "Why does this lesson tell you NOT to run `npm init playwright@latest` in this repo?",
+          "options": [
+            "Because the command only works in an empty folder and would fail",
+            "Because it can overwrite `playwright.config.ts`, and eight weeks of material depend on that shared config",
+            "Because it would reinstall the browsers you already have"
+          ],
+          "answer": 1,
+          "explanation": "This repo is already a set-up Playwright project. Re-scaffolding would rewrite the root config every week's specs rely on. The lesson walks through what the command produces so you recognise the pieces — in this repo's real files, rather than by running it."
+        },
+        {
+          "question": "You write a new spec into `week1/generated/`. What makes Playwright pick it up, with no registration step?",
+          "options": [
+            "Any `.spec.ts` file anywhere is collected automatically",
+            "`testMatch` in the root config, which lists `week*/**/*.spec.ts`",
+            "The `tests/` folder is scanned recursively, and `week1/` sits inside it"
+          ],
+          "answer": 1,
+          "explanation": "`testMatch: [\"week*/**/*.spec.ts\", ...]` is the line doing the work — which is exactly why the lesson asks you to find it in the real file. It is also why a helper file must not carry the `.spec.ts` suffix: the same pattern would collect it and try to run it as a test."
+        },
+        {
+          "question": "Weeks later you hit `browserType.launch: Executable doesn't exist`. What most likely happened?",
+          "options": [
+            "Node is too old for the installed Playwright version",
+            "The browser download was skipped at setup — `npx playwright install` fixes it",
+            "`playwright.config.ts` is missing a `projects` entry for that browser"
+          ],
+          "answer": 1,
+          "explanation": "Playwright drives browser binaries it downloads separately from the npm package. Answering \"no\" to the install prompt, or installing on a machine that never ran it, leaves the package present and the browser missing. It is the one setup mistake that surfaces much later than it is made."
+        }
+      ],
+      "recap": "- Any Node 18+ is fine; the exact numbers on your machine will differ from anyone else's.\n- **Never re-scaffold a repo that already has a config you care about.** This one is already set up.\n- `testMatch` in the root config is why a spec written into `week*/generated/` is found without registering it anywhere.\n- `baseURL` is why every `page.goto(\"/\")` in this course resolves to the banking app.\n- Commit `package.json` and `package-lock.json`; never `node_modules/`.\n- The browsers are a separate download from the npm package — `npx playwright install` if they are missing."
+    },
+    "3": {
+      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — \"advanced\" on a setup day means organising what you already have |\n| **You'll learn** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Builds on** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
+      "checkpoints": [
+        {
+          "question": "You move off the flat `tests/` folder and split specs into `UI_test/` and `API_test/`. Is setting `testDir` enough?",
+          "options": [
+            "Yes — `testDir` points at the root containing both, and the rest is automatic",
+            "No — `testMatch` is what decides which files count as specs once you leave the one default folder",
+            "No — each folder needs its own `playwright.config.ts`"
+          ],
+          "answer": 1,
+          "explanation": "`testDir` says where to start looking; `testMatch` says what counts once you are there. This repo shows the same pair in use, organised by week rather than by test type. Per-folder configs are a real option too, but they are week 3's subject, not a requirement here."
+        },
+        {
+          "question": "Which rule decides whether something belongs in `.gitignore` on a Playwright project?",
+          "options": [
+            "If it is large, ignore it",
+            "If a run regenerates it, it does not belong in git",
+            "If it is not TypeScript, ignore it"
+          ],
+          "answer": 1,
+          "explanation": "`node_modules/` comes back from `package.json`, and `test-results/` and `playwright-report/` are rewritten every run. Committing a report once makes every later diff a pile of binary noise — and `git rm -r --cached` is then needed on top of the `.gitignore` entry."
+        }
+      ],
+      "recap": "- Group test folders by what they have in common — shared setup, fixtures, tags — not by the order you wrote them.\n- `testDir` finds the root; `testMatch` decides what is a spec. You usually need both.\n- This course groups by week rather than by test type. The instinct is identical.\n- **If a run regenerates it, it does not belong in git**: `node_modules/`, `test-results/`, `playwright-report/`."
+    },
+    "4": {
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | your real environment, and this repo's real config |\n| **Nothing to guess** | every answer is something you can read off your own machine |\n| **Pulls on** | [Fundamentals](/learn/w1/d2/p2) for the config · [Implementation](/learn/w1/d2/p3) for the structure |"
+    }
+  }
+}
