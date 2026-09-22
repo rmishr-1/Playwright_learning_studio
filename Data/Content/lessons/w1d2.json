@@ -20,7 +20,7 @@
       "recap": "No new TypeScript today. Everything ahead is setup: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2)."
     },
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Mode** | explore — the cells read real files on your disk |\n| **Assumes** | nothing but a terminal |",
+      "at_a_glance": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Where it runs** | here in the editor. The cells read real files on your disk. |\n| **Assumes** | nothing but a terminal |",
       "checkpoints": [
         {
           "question": "Why does this lesson tell you NOT to run `npm init playwright@latest` in this repo?",
@@ -79,7 +79,7 @@
           "explanation": "`node_modules/` comes back from `package.json`, and `test-results/` and `playwright-report/` are rewritten every run. Committing a report once makes every later diff a pile of binary noise — and `git rm -r --cached` is then needed on top of the `.gitignore` entry."
         }
       ],
-      "recap": "- Group test folders by what they have in common — shared setup, fixtures, tags — not by the order you wrote them.\n- `testDir` finds the root; `testMatch` decides what is a spec. You usually need both.\n- This course groups by week rather than by test type. The instinct is identical.\n- **If a run regenerates it, it does not belong in git**: `node_modules/`, `test-results/`, `playwright-report/`."
+      "recap": "- Group test folders by what they have in common: shared setup, fixtures, tags. Do not group them by the order you wrote them.\n- `testDir` finds the root; `testMatch` decides what is a spec. You usually need both.\n- This course groups by week rather than by test type. The principle is the same.\n- **If a run regenerates it, it does not belong in git**: `node_modules/`, `test-results/`, `playwright-report/`."
     },
     "4": {
       "at_a_glance": "| | |\n|---|---|\n| **Three problems** | your real environment, and this repo's real config |\n| **Nothing to guess** | every answer is something you can read off your own machine |\n| **Pulls on** | [Fundamentals](/learn/w1/d2/p2) for the config · [Implementation](/learn/w1/d2/p3) for the structure |"

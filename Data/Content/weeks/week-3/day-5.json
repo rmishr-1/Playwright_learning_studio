@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 5.1 — TypeScript for the projects array\n\nOne concept, and you have most of it already. Today's config holds a **list** of browsers.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "text": "# Week 3, Day 5.1 — TypeScript for the projects array\n\nOne concept, and you have most of it already. Today's config holds a **list** of browsers.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -89,7 +89,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 5.2 — Running the suite\n\nYour users don't all use Chrome, CI is noisier than your laptop, and your colleagues don't want\nyour settings. By the end of this lesson the same tests run on three browsers, retry when the\nnetwork hiccups, and take their orders from the command line rather than the shared config.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 3, Day 5.2 — Running the suite\n\nYour users don't all use Chrome, CI is noisier than your laptop, and your colleagues don't want\nyour settings. By the end of this lesson the same tests run on three browsers, retry when the\nnetwork hiccups, and take their orders from the command line rather than the shared config.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

@@ -9,11 +9,21 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
-import { findNotebookisms, findUnresolvedLinks } from '../../scripts/notebook-parse';
+import { findNotebookisms, findSupersededCopy, findUnresolvedLinks } from '../../scripts/notebook-parse';
+import { lintExplanationShape, lintProse, type Finding } from './style-rules';
 
 const CONTENT = path.resolve(__dirname, '..', '..', 'Data', 'Content');
 
 let failures = 0;
+let warnings = 0;
+
+/** Advisory only. A warning names something a human should look at, never something that is
+ *  categorically wrong - so it prints and moves on rather than failing the build. */
+function warn(label: string, detail: string): void {
+  warnings++;
+  console.log('  WARN  ' + label + (detail ? ' - ' + detail : ''));
+}
+
 function check(label: string, ok: boolean, detail = ''): void {
   if (ok) {
     console.log('  PASS  ' + label);
@@ -319,6 +329,113 @@ function main(): void {
     filler.length + ' without a variation: ' + [...new Set(filler)].join(' '),
   );
 
+  // Voice and style - the mechanical half of docs/STYLE.md.
+  //
+  // These lint the text this project AUTHORS. Lesson bodies are generated from notebooks that are
+  // not in this checkout, so linting them would fail on text nobody here can edit and would leave
+  // `npm run verify` permanently red. The rules, and their honest limits, are in docs/STYLE.md.
+  console.log('\nVoice and style');
+  const findings: Finding[] = [];
+  const authoredFiles = (dir: string): string[] => {
+    const d = path.join(CONTENT, dir);
+    return fs.existsSync(d) ? fs.readdirSync(d).filter((f) => f.endsWith('.json')).sort() : [];
+  };
+
+  for (const file of authoredFiles('lessons')) {
+    const raw = JSON.parse(fs.readFileSync(path.join(CONTENT, 'lessons', file), 'utf-8')) as {
+      parts: Record<string, {
+        at_a_glance?: string;
+        recap?: string;
+        checkpoints?: { question: string; options: string[]; explanation: string }[];
+      }>;
+    };
+    for (const [partNo, part] of Object.entries(raw.parts)) {
+      const at = 'lessons/' + file + ' p' + partNo;
+      if (part.at_a_glance) findings.push(...lintProse(part.at_a_glance, at + ' at_a_glance'));
+      if (part.recap) findings.push(...lintProse(part.recap, at + ' recap'));
+      (part.checkpoints ?? []).forEach((c, i) => {
+        const cp = at + ' checkpoint ' + (i + 1);
+        findings.push(...lintProse(c.question, cp + ' question'));
+        c.options.forEach((o, j) => findings.push(...lintProse(o, cp + ' option ' + (j + 1))));
+        findings.push(...lintProse(c.explanation, cp + ' explanation'));
+        findings.push(...lintExplanationShape(c.explanation, cp + ' explanation'));
+      });
+    }
+  }
+  for (const file of authoredFiles('variations')) {
+    const raw = JSON.parse(fs.readFileSync(path.join(CONTENT, 'variations', file), 'utf-8')) as Record<string, string>;
+    for (const [key, text] of Object.entries(raw)) {
+      findings.push(...lintProse(text, 'variations/' + file + ' ' + key));
+    }
+  }
+  for (const file of authoredFiles('solutions')) {
+    const raw = JSON.parse(fs.readFileSync(path.join(CONTENT, 'solutions', file), 'utf-8')) as Record<string, string>;
+    for (const [key, text] of Object.entries(raw)) {
+      findings.push(...lintProse(text, 'solutions/' + file + ' problem ' + key));
+    }
+  }
+
+  const errors = findings.filter((f) => f.severity === 'error');
+  const byRule = (rule: string) => errors.filter((f) => f.rule === rule);
+  for (const rule of ['banned-phrase', 'exclamation', 'sentence-length', 'stacked-asides', 'explanation-shape', 'explanation-empty']) {
+    const hits = byRule(rule);
+    check(
+      'authored text passes: ' + rule,
+      hits.length === 0,
+      hits.slice(0, 3).map((f) => f.where + ' ' + f.detail).join(' | '),
+    );
+  }
+  for (const f of findings.filter((x) => x.severity === 'warn').slice(0, 8)) {
+    warn(f.rule, f.where + ' ' + f.detail);
+  }
+
+  // Closes the loop: the text linted above is the text a learner sees. An overlay-typed block in a
+  // day file must be byte-identical to the authored string it came from, which also catches anyone
+  // hand-editing the generated tree.
+  const drifted: string[] = [];
+  for (const d of days) {
+    const file = path.join(CONTENT, 'lessons', 'w' + d.week + 'd' + d.day + '.json');
+    if (!fs.existsSync(file)) continue;
+    const src = JSON.parse(fs.readFileSync(file, 'utf-8')) as {
+      parts: Record<string, { at_a_glance?: string; recap?: string; checkpoints?: { question: string }[] }>;
+    };
+    for (const p of d.parts) {
+      const authoredPart = src.parts[String(p.part)];
+      if (!authoredPart) continue;
+      const shipped = (t: string) => p.blocks.filter((b) => b.type === t).map((b) => b.text);
+      const at = 'w' + d.week + 'd' + d.day + 'p' + p.part;
+      if (authoredPart.at_a_glance && shipped('at-a-glance')[0] !== authoredPart.at_a_glance) {
+        drifted.push(at + ' at-a-glance');
+      }
+      if (authoredPart.recap && shipped('recap')[0] !== authoredPart.recap) drifted.push(at + ' recap');
+      const qs = shipped('checkpoint');
+      (authoredPart.checkpoints ?? []).forEach((c, i) => {
+        if (qs[i] !== c.question) drifted.push(at + ' checkpoint ' + (i + 1));
+      });
+    }
+  }
+  check('every shipped card matches its authored source', drifted.length === 0, drifted.slice(0, 4).join(' | '));
+
+  // The script-level rewrites only run on import or `npm run overlay`. A day file that still
+  // carries the superseded wording is a day nobody re-ran the overlay over - which is how "This
+  // day introduces no new TypeScript" survived its own rewrite and stayed on the first screen of
+  // the course. AVAILABLE days only: locked weeks are revised before they open.
+  const superseded: string[] = [];
+  for (const d of days.filter((x) => !x.locked)) {
+    for (const p of d.parts) {
+      for (const b of p.blocks) {
+        for (const c of findSupersededCopy(b.text)) {
+          superseded.push('w' + d.week + 'd' + d.day + 'p' + p.part + ': ' + c);
+        }
+      }
+    }
+  }
+  check(
+    'no shipped day still carries copy a script has already replaced',
+    superseded.length === 0,
+    superseded.slice(0, 4).join(' | '),
+  );
+
   console.log('\nConcepts');
   const concepts = JSON.parse(
     fs.readFileSync(path.join(CONTENT, 'concepts.json'), 'utf-8'),
@@ -334,7 +451,8 @@ function main(): void {
   );
 
   console.log(
-    '\n' + (failures === 0 ? 'All checks passed.' : failures + ' check(s) FAILED.'),
+    '\n' + (failures === 0 ? 'All checks passed.' : failures + ' check(s) FAILED.') +
+      (warnings > 0 ? '  (' + warnings + ' advisory warning(s))' : ''),
   );
   process.exit(failures === 0 ? 0 : 1);
 }

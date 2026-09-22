@@ -82,7 +82,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 5.2 - Locators that survive\n\nA suite that passed in March fails in June with nobody having touched it. Two causes account for\nmost of it: **whitespace moved**, and **a second element appeared with the same name**.\n\nBoth are demonstrated below on the real app, with the fix measured rather than asserted.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 5, Day 5.2 - Locators that survive\n\nA suite that passed in March fails in June with nobody having touched it. Two causes account for\nmost of it: **whitespace moved**, and **a second element appeared with the same name**.\n\nBoth are demonstrated below on the real app, with the fix measured rather than asserted.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -156,7 +156,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 5.3 - Externalised locators, and their cost\n\nThe next thing teams try after POM: move every selector into a JSON file, so a non-programmer can\nfix one without touching TypeScript.\n\nIt works. It also costs more than people expect, and this lesson measures both.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 5, Day 5.3 - Externalised locators, and their cost\n\nThe next thing teams try after POM: move every selector into a JSON file, so a non-programmer can\nfix one without touching TypeScript.\n\nIt works. It also costs more than people expect, and this lesson measures both.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

@@ -90,7 +90,7 @@
         },
         {
           "type": "markdown",
-          "text": "> **Mode: explore**, with one real spec at the end. ## A new app, on purpose\n\nEvery locator so far worked on a single form. Today's technique — finding one row among\nmany that all look alike — needs an actual table, which none of this course's apps so\nfar have. **OrangeHRM's demo HR system** does, and it's a real, public, shared QA-practice\napp (the same idea as `demoqa.com`, used from [week7](/learn/w7/d1/p1) onward).\n\n| | |\n|---|---|\n| App | `opensource-demo.orangehrmlive.com` |\n| Login | `Admin` / `admin123` |\n| Screens used | Add Employee, Employee List |\n\n**It's shared with everyone using this demo right now.** Every employee this lesson\ncreates gets deleted before the lesson ends — the same rule week7 follows for\n`demoqa.com`.",
+          "text": "> **Try it here**, with one real spec at the end. ## A new app, on purpose\n\nEvery locator so far worked on a single form. Today's technique — finding one row among\nmany that all look alike — needs an actual table, which none of this course's apps so\nfar have. **OrangeHRM's demo HR system** does, and it's a real, public, shared QA-practice\napp (the same idea as `demoqa.com`, used from [week7](/learn/w7/d1/p1) onward).\n\n| | |\n|---|---|\n| App | `opensource-demo.orangehrmlive.com` |\n| Login | `Admin` / `admin123` |\n| Screens used | Add Employee, Employee List |\n\n**It's shared with everyone using this demo right now.** Every employee this lesson\ncreates gets deleted before the lesson ends — the same rule week7 follows for\n`demoqa.com`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -158,7 +158,7 @@
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "await page.goto(`${ORANGE_HRM}/pim/viewEmployeeList`);",
           "variation": {
-            "prompt": "Same row, one axis at a time: print the match count for each stage of the XPath separately — `//div[text()='...']` on its own, then with `/parent::div` appended, then with `/following-sibling::div[last()]`. Watching where the number changes is the `parent::div` gotcha made visible instead of taken on trust."
+            "prompt": "Same row, one axis at a time: print the match count for each stage of the XPath separately — `//div[text()='...']` on its own, then with `/parent::div` appended, then with `/following-sibling::div[last()]`. Watching where the number changes shows you the `parent::div` trap directly, instead of taking it on trust."
           },
           "checkpoint": null
         },
@@ -267,7 +267,7 @@
         },
         {
           "type": "checkpoint",
-          "text": "`//div[text()='Verify12345']/following-sibling::div[last()]` — without the `parent::div` step — returns how many matches?",
+          "text": "Without the `parent::div` step, `//div[text()='Verify12345']/following-sibling::div[last()]` returns how many matches?",
           "starter": null,
           "variation": null,
           "checkpoint": {
@@ -277,7 +277,7 @@
               "2 — it matches the cell and the row"
             ],
             "answer": 1,
-            "explanation": "This is the gotcha the lesson calls out by name. The element holding the text is a wrapper inside the cell, and it has no siblings at all, so stepping sideways from it finds nothing. `/parent::div` first gets you to the real table cell, which does have siblings."
+            "explanation": "This is the trap the lesson calls out by name. The element holding the text is a wrapper inside the cell, and it has no siblings at all, so stepping sideways from it finds nothing. `/parent::div` first gets you to the real table cell, which does have siblings."
           }
         },
         {

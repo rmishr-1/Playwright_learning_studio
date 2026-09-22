@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 3.1 — TypeScript for building a unique value at runtime\n\nBy the end of this lesson you will build a guaranteed-different string on every run\nusing `+` and `Math.random()` — the exact technique [Day 3.2](/learn/w2/d3/p2) uses so two\nruns of the same test never collide.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "text": "# Week 2, Day 3.1 — TypeScript for building a unique value at runtime\n\nBy the end of this lesson you will build a guaranteed-different string on every run\nusing `+` and `Math.random()` — the exact technique [Day 3.2](/learn/w2/d3/p2) uses so two\nruns of the same test never collide.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -181,7 +181,7 @@
         },
         {
           "type": "markdown",
-          "text": "> **Mode: explore**, with one real spec at the end. ",
+          "text": "> **Try it here**, with one real spec at the end. ",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -212,7 +212,7 @@
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
           "variation": {
-            "prompt": "Same idea, a different field: generate a unique phone number — digits only, no `@example.com` on the end — and fill it into the `input[type='tel']` field. Getting this right now makes Problem 3 mostly typing."
+            "prompt": "Same idea, a different field: generate a unique phone number using digits only, with no `@example.com` on the end, and fill it into the `input[type='tel']` field. Getting this right now makes Problem 3 mostly typing."
           },
           "checkpoint": null
         },

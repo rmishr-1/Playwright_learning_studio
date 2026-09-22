@@ -61,7 +61,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 2.2 - What a page object may assert\n\n[Week 5 Day 3](/learn/w5/d3/p2) gave you a rule: **no `expect()` inside a page object.**\nToday that rule gets its exception, and the exception has a sharp edge.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 6, Day 2.2 - What a page object may assert\n\n[Week 5 Day 3](/learn/w5/d3/p2) gave you a rule: **no `expect()` inside a page object.**\nToday that rule gets its exception, and the exception has a sharp edge.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -170,7 +170,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 2.3 - Journeys, and a visual check inside a page object\n\nSame page objects, composed into flows - and one more thing a page class may own.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 6, Day 2.3 - Journeys, and a visual check inside a page object\n\nSame page objects, composed into flows - and one more thing a page class may own.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

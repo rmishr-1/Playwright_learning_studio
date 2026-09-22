@@ -38,7 +38,7 @@
       ]
     },
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll watch** | a test pass with the wrong password, because it never checked anything |\n| **Then** | fix it, and watch it fail correctly |\n| **Mode** | test-runner — follow these in your own checkout |\n| **Assumes** | [arrow functions, `async`, destructuring](/learn/w1/d5/p1) |\n| **The week's headline** | a test that only acts and never asserts is a recording, not a test |",
+      "at_a_glance": "| | |\n|---|---|\n| **You'll watch** | a test pass with the wrong password, because it never checked anything |\n| **Then** | fix it, and watch it fail correctly |\n| **Where it runs** | in your own project. These need the Playwright test runner. |\n| **Assumes** | [arrow functions, `async`, destructuring](/learn/w1/d5/p1) |\n| **The week's headline** | a test that only acts and never asserts is a recording, not a test |",
       "checkpoints": [
         {
           "question": "Both tests type the same wrong password. Why does the first one report green?",
@@ -58,7 +58,7 @@
             "Checking that `.click()` completed without throwing"
           ],
           "answer": 1,
-          "explanation": "Assert the **consequence**. A click completing proves the button was clickable, not that anything happened afterwards; asserting the login button is visible proves you are still looking at the login page. The URL changing — or the user's name appearing — is what only a successful login produces."
+          "explanation": "Assert the **consequence**. A click completing proves the button was clickable, not that anything happened afterwards; asserting the login button is visible proves you are still looking at the login page. Only a successful login changes the URL or makes the user's name appear."
         },
         {
           "question": "What question should you ask of a test you have just written and watched pass?",
@@ -68,10 +68,10 @@
             "Does it cover every element on the page?"
           ],
           "answer": 1,
-          "explanation": "A green test is only meaningful if some realistic breakage would turn it red. Reading your own passing test with suspicion is the habit this whole day exists to build — and it is cheapest to apply the moment you write it, not after it has been green through six broken releases."
+          "explanation": "A green test is only meaningful if some realistic breakage would turn it red. Reading your own passing test with suspicion is the habit this day exists to build. Apply it the moment you write the test, not after it has been green through six broken releases."
         }
       ],
-      "recap": "- **A test with no `expect()` cannot fail for the right reason.** It is a recording of actions.\n- Assert the consequence — the URL, the user's name — not that an action merely did not throw.\n- `expect(page).toHaveURL(...)` auto-retries until it matches or times out, then fails with a real message.\n- This app gives no error on a wrong password: it just stays put. Silence is not success.\n- Ask of every passing test: what would make this go red?"
+      "recap": "- **A test with no `expect()` cannot fail for the right reason.** It is a recording of actions.\n- Assert the consequence, such as the URL or the user's name. Do not settle for an action that merely did not throw.\n- `expect(page).toHaveURL(...)` auto-retries until it matches or times out, then fails with a real message.\n- This app gives no error on a wrong password: it just stays put. Silence is not success.\n- Ask of every passing test: what would make this go red?"
     },
     "3": {
       "at_a_glance": "| | |\n|---|---|\n| **New API** | none — the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **What changes** | three repeated locators become a class built once, and one named `signIn` step |\n| **Not yet named** | this is the Page Object Model. Week 5 names it and covers it in full. |\n| **The rule to take away** | a page object never asserts |",
@@ -94,7 +94,7 @@
             "It is required for TypeScript to infer the `Locator` type"
           ],
           "answer": 0,
-          "explanation": "It is a compile-time guarantee about the field, nothing more. A locator is a live reference that re-resolves on every use, so `readonly` does not freeze what it points at — only the fact that this field keeps pointing at the same locator."
+          "explanation": "It is a compile-time guarantee about the field, nothing more. A locator is a live reference that re-resolves on every use. `readonly` does not freeze what it points at; it only fixes which locator the field holds."
         }
       ],
       "recap": "- Three locators repeated across dozens of tests is dozens of edits when the form is redesigned. Build them once.\n- Name a method for what a **user** does (`signIn`), not for the DOM operations inside it.\n- **No assertions in a page object.** It knows how to act; the test decides what should be true.\n- `readonly` guards the field, not the element — a locator still re-resolves every time it is used.\n- You are looking at the Page Object Model. Week 5 gives it its name and its full treatment."

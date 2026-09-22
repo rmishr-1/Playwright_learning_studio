@@ -82,7 +82,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 3.2 - The Page Object Model\n\nYou built a `LoginPage` class in [week3/day3_2](/learn/w3/d3/p2) because three tests kept\nrepeating the same lines. Today that gets its name - the **Page Object Model** - and, more\nusefully, its **rules**.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 5, Day 3.2 - The Page Object Model\n\nYou built a `LoginPage` class in [week3/day3_2](/learn/w3/d3/p2) because three tests kept\nrepeating the same lines. Today that gets its name - the **Page Object Model** - and, more\nusefully, its **rules**.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

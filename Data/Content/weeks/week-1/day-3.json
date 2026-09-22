@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 3, TypeScript\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
+          "text": "# Week 1, Day 3, TypeScript\n\nYou write Playwright tests in TypeScript. This tab is where each day covers the language\nfeatures that day's lesson needs.\n\nToday's lesson needs nothing new, so you can go straight to it.\n\n> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n> functions, `async`, and how to read an `import` line. The days before it are written to be\n> readable without them.\n",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -62,14 +62,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 3, Fundamentals — Running tests from the CLI\n\nBy the end of this lesson you will have run a real spec from the command line, seen an\nHTML report, and know the difference between `package.json` and `package-lock.json`.\n\n> **No new TypeScript today** — the CLI commands below are shell commands, not language\n> syntax, so there's no Day 3.1. [Day 2](/learn/w1/d2/p2) got your environment ready; this is\n> where you actually use it.\n\n> **Mode: mixed.** The first cells run real terminal commands (like `runSpec` does under the\n> hood); the rest is explore-mode as usual.",
+          "text": "# Week 1, Day 3, Fundamentals — Running tests from the CLI\n\nBy the end of this lesson you will have run a real spec from the command line, seen an\nHTML report, and know the difference between `package.json` and `package-lock.json`.\n\n> **No new TypeScript today** — the CLI commands below are shell commands, not language\n> syntax, so there's no Day 3.1. [Day 2](/learn/w1/d2/p2) got your environment ready; this is\n> where you actually use it.\n\n> **Partly here, partly in your own project.** The first cells run real terminal commands (like `runSpec` does under the\n> hood); the rest is explore-mode as usual.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll use** | `npx playwright test` · `--headed` · `show-report` |\n| **You'll learn** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Mode** | mixed — the first cells run real terminal commands |\n| **Watch for** | the test count. This repo runs chromium only, so it is lower than a fresh scaffold's. |",
+          "text": "| | |\n|---|---|\n| **You'll use** | `npx playwright test` · `--headed` · `show-report` |\n| **You'll learn** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Where it runs** | here, though the first cells run real terminal commands |\n| **Watch for** | the test count. This repo runs chromium only, so it is lower than a fresh scaffold's. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -137,7 +137,7 @@
               "The scaffold counts each `expect()` as a test"
             ],
             "answer": 1,
-            "explanation": "The `projects` array is the multiplier: chromium, firefox and webkit in a fresh scaffold, chromium alone here with the other two commented out. Same mechanism, different project count — which is why checking `projects` before trusting a test count is a habit worth forming."
+            "explanation": "The `projects` array is the multiplier: chromium, firefox and webkit in a fresh scaffold, chromium alone here with the other two commented out. Same mechanism, different project count. Check `projects` before you trust a test count."
           }
         },
         {
@@ -276,7 +276,7 @@
           "variation": null,
           "checkpoint": {
             "options": [
-              "Recording always is expensive, and recording nothing leaves a CI failure you cannot diagnose — on failure is the sweet spot",
+              "Recording every run is expensive, and recording nothing leaves a CI failure you cannot diagnose. Keeping the evidence only on failure balances the two",
               "Playwright cannot record a trace for a passing test",
               "Because artifacts from passing tests would be committed to git"
             ],
@@ -296,7 +296,7 @@
               "Retries are disabled everywhere; the expression is a placeholder"
             ],
             "answer": 1,
-            "explanation": "Locally you want a failure to show itself immediately rather than being papered over by a re-run. CI is the place where an infrastructure blip is worth absorbing. Retries hiding a real flake on your own machine is exactly what this avoids."
+            "explanation": "Locally you want a failure to show itself immediately rather than being hidden by a re-run. CI is the place to absorb an infrastructure problem. Retries hiding a real flake on your own machine is exactly what this avoids."
           }
         },
         {

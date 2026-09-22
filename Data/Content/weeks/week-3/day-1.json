@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 1.1 — TypeScript for configuring the runner\n\nThree small things. Today you edit `playwright.config.ts`, and all three appear in it.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "text": "# Week 3, Day 1.1 — TypeScript for configuring the runner\n\nThree small things. Today you edit `playwright.config.ts`, and all three appear in it.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -131,7 +131,7 @@
         },
         {
           "type": "markdown",
-          "text": "# Week 3, Day 1.2 — Timeouts: what waits, and for how long\n\nBy the end you'll know why a test can hang for 30 seconds, why an assertion gives up after 5,\nand why raising both is usually the wrong fix.\n\nYou'll also measure it yourself rather than taking my word for it.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "text": "# Week 3, Day 1.2 — Timeouts: what waits, and for how long\n\nBy the end you'll know why a test can hang for 30 seconds, why an assertion gives up after 5,\nand why raising both is usually the wrong fix.\n\nYou'll also measure it yourself rather than taking my word for it.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null

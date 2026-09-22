@@ -50,7 +50,7 @@
             "Because the URL is set before the session is created"
           ],
           "answer": 1,
-          "explanation": "Nothing stops an unauthenticated browser loading `/dashboard` here; it just renders without the user's data. Assert on something only a signed-in user could see — the name, an account number — which is the same \"assert something observable\" habit from [Day 2.2](/learn/w2/d2/p2)."
+          "explanation": "Nothing stops an unauthenticated browser loading `/dashboard` here; it just renders without the user's data. Assert on something only a signed-in user could see, such as the name or an account number. That is the same \"assert something observable\" habit from [Day 2.2](/learn/w2/d2/p2)."
         }
       ],
       "recap": "- **Every `test()` gets its own fresh `page`** — a blank tab, no cookies, nothing carried over. That is Playwright's central design decision, not a quirk of this app.\n- The benefit is order-independence and parallelism. The cost is that shared state has to be shared on purpose.\n- Splitting a long test is the moment you first pay that cost, because a continuous story becomes several independent ones.\n- An isolation failure never announces itself — it shows up as a missing element somewhere downstream.\n- Assert on user-specific content, not on a URL, to prove you are signed in.\n- Copy-pasting login into every test works, and stops working once there are more than two or three."

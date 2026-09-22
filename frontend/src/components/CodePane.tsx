@@ -86,9 +86,9 @@ export function CodePane({
         </div>
         <div className="editor-empty">
           <div>
-            <p style={{ margin: '0 0 6px' }}>Nothing to run in this part.</p>
+            <p style={{ margin: '0 0 6px' }}>This part has no code to run.</p>
             <p style={{ margin: 0, fontSize: 12.5 }}>
-              It is written material — no code cells. The editor returns on the next part.
+              It is written material. The editor returns on the next part.
             </p>
           </div>
         </div>
@@ -138,12 +138,12 @@ export function CodePane({
           learner what Run will actually do before they press it. */}
       {!run && (
         <div className="editor-idle">
-          <b>Press ▶ Run</b> to execute this against a real browser — you will see it drive the
-          page live, plus anything you <span className="k">console.log</span>.
+          <b>Press ▶ Run</b> to run this against a real browser. You will see it drive the page
+          live, along with anything you <span className="k">console.log</span>.
           <br />
           <span className="k">launch()</span> <span className="k">show()</span>{' '}
           <span className="k">login()</span> <span className="k">USERS</span>{' '}
-          <span className="k">BASE_URL</span> are already available — no imports needed.
+          <span className="k">BASE_URL</span> are already available, so you do not need to import them.
         </div>
       )}
 

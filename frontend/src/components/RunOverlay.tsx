@@ -133,7 +133,7 @@ export function RunOverlay({ run, onClose }: { run: RunState; onClose: () => voi
           )}
           {run.status === 'timeout' && (
             <pre className="err">
-              {'\nThe run was stopped at the time limit. Did something wait forever — a locator that never matched, or a missing await?'}
+              {'\nThe run was stopped at the time limit. Something may have waited indefinitely, such as a locator that never matched or a missing await.'}
             </pre>
           )}
           {run.result?.error && (

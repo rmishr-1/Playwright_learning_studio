@@ -103,7 +103,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.2 - One suite, two configs\n\nYour suite has 400 tests. Before every deploy you want the 40 that matter, in two minutes. Once\na night you want all 400. Same tests, two different runs.\n\nTwo things get you there: **a tag in the test title** and **a second config file**.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 5, Day 1.2 - One suite, two configs\n\nYour suite has 400 tests. Before every deploy you want the 40 that matter, in two minutes. Once\na night you want all 400. Same tests, two different runs.\n\nTwo things get you there: **a tag in the test title** and **a second config file**.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

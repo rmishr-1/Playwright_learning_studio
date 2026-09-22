@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 2.1 — TypeScript for sharing a value between tests\n\nTwo ideas are new today; a third you already have. Today one test creates something the\nnext test needs, and that's why the value has to survive the trip from a hook into a test.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "text": "# Week 3, Day 2.1 — TypeScript for sharing a value between tests\n\nTwo ideas are new today; a third you already have. Today one test creates something the\nnext test needs, and that's why the value has to survive the trip from a hook into a test.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -110,7 +110,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 2.2 — One login, several tests\n\nSplit a long test into small ones and something surprising happens: each one starts logged\nout. By the end of this lesson you'll know why, and the two different ways to fix it.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "text": "# Week 3, Day 2.2 — One login, several tests\n\nSplit a long test into small ones and something surprising happens: each one starts logged\nout. By the end of this lesson you'll know why, and the two different ways to fix it.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null

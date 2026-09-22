@@ -103,7 +103,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 4.2 - Composing page objects\n\nDay 3's spec opened with three lines of `new`:\n\n```ts\nconst loginPage = new LoginPage(page);\nconst dashboardPage = new DashboardPage(page);\nconst transferPage = new TransferPage(page);\n```\n\nEvery test. Add a fourth page and you edit every test again. Today those disappear.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 5, Day 4.2 - Composing page objects\n\nDay 3's spec opened with three lines of `new`:\n\n```ts\nconst loginPage = new LoginPage(page);\nconst dashboardPage = new DashboardPage(page);\nconst transferPage = new TransferPage(page);\n```\n\nEvery test. Add a fourth page and you edit every test again. Today those disappear.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

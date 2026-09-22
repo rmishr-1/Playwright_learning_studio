@@ -48,7 +48,7 @@
             "It is case-insensitive"
           ],
           "answer": 0,
-          "explanation": "Web assertions retry — 5 seconds by default — which is what makes them safe against a page that has not finished rendering. A plain `if` checks once, right now, and a page that needed another 200ms fails for no real reason. Retrying is also why `expect()` needs the test runner behind it."
+          "explanation": "Web assertions retry for 5 seconds by default, which is what makes them safe against a page that has not finished rendering. A plain `if` checks once, right now, and a page that needed another 200ms fails for no real reason. Retrying is also why `expect()` needs the test runner behind it."
         },
         {
           "question": "The real heading on the page is `\"Automation Demo Site \"` — with a trailing space. Why does `toContainText(\"Automation Demo Site\")` pass anyway?",
