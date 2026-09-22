@@ -3,22 +3,6 @@
   "week": 1,
   "day": 4,
   "parts": {
-    "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **You will need** | a real terminal, because Codegen opens two windows of its own |\n| **Then go to** | [Fundamentals](/learn/w1/d4/p2), which is about *finding* what goes inside a test |",
-      "checkpoints": [
-        {
-          "question": "From [Day 3](/learn/w1/d3/p3): which setting in the config decides how many times each test runs?",
-          "options": [
-            "`retries`, which re-runs a failure",
-            "`projects`, because every test runs once per active browser project",
-            "`fullyParallel`, which duplicates tests across workers"
-          ],
-          "answer": 1,
-          "explanation": "The length of the `projects` array multiplies the test count — chromium alone here, three browsers in a fresh scaffold. `retries` only re-runs something that already failed, and `fullyParallel` changes the order and speed, never the count."
-        }
-      ],
-      "recap": "Today's material is tooling. [Fundamentals](/learn/w1/d4/p2) is Codegen and locators; [Implementation](/learn/w1/d4/p3) proves what the `.spec.ts` suffix really does."
-    },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea to take away** | locate by what an element *is* to a user, not by where it sits in the markup |",
       "checkpoints": [

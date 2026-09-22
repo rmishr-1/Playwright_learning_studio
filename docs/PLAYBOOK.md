@@ -114,9 +114,9 @@ nothing and reads as an apology for the page they have just opened.
 
 If the at-a-glance card already names what is new today and where to go next, prose repeating it
 in sentences is not a style problem to fix. It is a paragraph to cut. The TypeScript tabs on Week 1
-Days 2 to 4 carry no generated prose for this reason: a heading, then the card, checkpoint, and
-recap. Their body was reworded three times before it became clear that it should be deleted, and the Day 1 tab was later removed
-altogether (see [section 2](#tabs-with-no-content-are-removed)).
+Days 1 to 4 show where this leads. Their generated body was reworded three times before it became
+clear that it should be deleted, and the tabs themselves were then removed, because none of those
+days has a language lesson (see [section 2](#tabs-with-no-content-are-removed)).
 
 ---
 
@@ -186,9 +186,9 @@ A tab that has no content of its own, or whose lesson needs none, is **removed**
 and filled with prose that explains why it is empty. The remaining tabs close up, and the day opens
 on the first tab it still has.
 
-- **Week 1 Day 1 TypeScript was removed on this basis.** Day 1 is an orientation day with no code,
-  so it had nothing to teach about the language. The day now opens on Fundamentals, and its heading
-  reads `Week 1 - Day 1 - Fundamentals - Why automation, why Playwright`.
+- **The TypeScript tabs on Week 1 Days 1 to 4 were removed on this basis.** The course's language
+  lessons begin on Day 5, so those four tabs had nothing of their own to teach. Each of those days
+  now opens on Fundamentals. Day 5 keeps its TypeScript tab, because it is a real lesson.
 - **To remove a tab**, add its key (for example `w1d2p1`) to `REMOVED_PARTS` in
   `scripts/lesson-overlay.ts`, delete its entry from the lesson card file, and run
   `npm run overlay`. The importer applies the same list, so a re-import cannot bring the tab back.

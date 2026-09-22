@@ -3,22 +3,6 @@
   "week": 1,
   "day": 2,
   "parts": {
-    "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **You will need** | Node 18+ · a terminal · VS Code open on this repo's root |\n| **Then go to** | [Fundamentals](/learn/w1/d2/p2), which gets all three working |",
-      "checkpoints": [
-        {
-          "question": "From [Day 1](/learn/w1/d1/p2): which level of testing is Playwright designed for?",
-          "options": [
-            "Unit — one function or component in isolation",
-            "System, end to end — driving the whole application as a user would",
-            "Integration only — it cannot reach a full end-to-end flow"
-          ],
-          "answer": 1,
-          "explanation": "Playwright drives the app the way a real user does, so a single test exercises every layer beneath it. Unit testing is a different tool's job. The higher up you go the more one test proves — and the more it costs to diagnose when it fails, which is week 7's subject."
-        }
-      ],
-      "recap": "Today's work is setup: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2)."
-    },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Where it runs** | here in the editor. The cells read real files on your disk. |\n| **Assumes** | nothing but a terminal |",
       "checkpoints": [

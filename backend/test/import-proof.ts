@@ -68,17 +68,21 @@ function main(): void {
     days.every((d) => d.parts.every((p) => p.blocks.length > 0 || p.problems.length > 0)),
   );
 
-  // Week 1 Day 1 is the one day that is not four parts: it has no _3 notebook, and its TypeScript
-  // tab is removed because it had no content of its own (REMOVED_PARTS). It opens on Fundamentals.
-  const w1d1 = days.find((d) => d.week === 1 && d.day === 1)!;
+  // Every day has parts 1-4, less the tabs removed for having no content of their own
+  // (REMOVED_PARTS: the TypeScript tab on Week 1 Days 1-4) and the one notebook that never existed
+  // (Week 1 Day 1 has no _3). Stated as the exact expected list, so a part that goes missing for
+  // any OTHER reason still fails here.
+  const NO_NOTEBOOK = new Set(['w1d1p3']);
+  const wrongParts = days.flatMap((d) => {
+    const key = (n: number) => 'w' + d.week + 'd' + d.day + 'p' + n;
+    const want = [1, 2, 3, 4].filter((n) => !REMOVED_PARTS.has(key(n)) && !NO_NOTEBOOK.has(key(n))).join(',');
+    const got = d.parts.map((p) => p.part).join(',');
+    return got === want ? [] : ['w' + d.week + 'd' + d.day + ' has ' + got + ', expected ' + want];
+  });
+  check('every day has exactly the parts it should', wrongParts.length === 0, wrongParts.slice(0, 4).join(' | '));
   check(
-    'Week 1 Day 1 is Fundamentals and Practice only',
-    w1d1.parts.map((p) => p.part).join(',') === '2,4',
-    'got parts ' + w1d1.parts.map((p) => p.part).join(','),
-  );
-  check(
-    'every other day has 4 parts',
-    days.filter((d) => !(d.week === 1 && d.day === 1)).every((d) => d.parts.length === 4),
+    'Week 1 Days 1-4 open on Fundamentals',
+    days.filter((d) => d.week === 1 && d.day <= 4).every((d) => d.parts[0].tab_label === 'Fundamentals'),
   );
   // A removed tab stays removed. Parts keep their numbers, so a gap is expected and fine.
   const resurrected = days.flatMap((d) =>

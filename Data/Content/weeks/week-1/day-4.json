@@ -6,53 +6,6 @@
   "locked": false,
   "parts": [
     {
-      "part": 1,
-      "kind": "generated-prerequisite",
-      "title": "TypeScript for this lesson",
-      "tab_label": "TypeScript",
-      "source_notebook": null,
-      "has_runnable_code": false,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 1 - Day 4 - TypeScript\n",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You will need** | a real terminal, because Codegen opens two windows of its own |\n| **Then go to** | [Fundamentals](/learn/w1/d4/p2), which is about *finding* what goes inside a test |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "From [Day 3](/learn/w1/d3/p3): which setting in the config decides how many times each test runs?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`retries`, which re-runs a failure",
-              "`projects`, because every test runs once per active browser project",
-              "`fullyParallel`, which duplicates tests across workers"
-            ],
-            "answer": 1,
-            "explanation": "The length of the `projects` array multiplies the test count — chromium alone here, three browsers in a fresh scaffold. `retries` only re-runs something that already failed, and `fullyParallel` changes the order and speed, never the count."
-          }
-        },
-        {
-          "type": "recap",
-          "text": "Today's material is tooling. [Fundamentals](/learn/w1/d4/p2) is Codegen and locators; [Implementation](/learn/w1/d4/p3) proves what the `.spec.ts` suffix really does.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": []
-    },
-    {
       "part": 2,
       "kind": "concept",
       "title": "Codegen and finding your way around locators",

@@ -6,53 +6,6 @@
   "locked": false,
   "parts": [
     {
-      "part": 1,
-      "kind": "generated-prerequisite",
-      "title": "TypeScript for this lesson",
-      "tab_label": "TypeScript",
-      "source_notebook": null,
-      "has_runnable_code": false,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 1 - Day 3 - TypeScript\n",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You will need** | the environment from [Day 2](/learn/w1/d2/p2), and a real terminal |\n| **Then go to** | [Fundamentals](/learn/w1/d3/p2), which runs a spec for the first time |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "From [Day 2](/learn/w1/d2/p3): which of these belongs in `.gitignore` on a Playwright project?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`package-lock.json`, since npm rewrites it",
-              "`playwright-report/`, since every run regenerates it",
-              "`playwright.config.ts`, since it differs per machine"
-            ],
-            "answer": 1,
-            "explanation": "The rule is whether a run regenerates it. Reports, traces and `node_modules/` do; the lock file and the config do not — the lock file is committed precisely so everyone installs the same versions."
-          }
-        },
-        {
-          "type": "recap",
-          "text": "Today's material is the command line. [Fundamentals](/learn/w1/d3/p2) is all CLI, and [Implementation](/learn/w1/d3/p3) is a first read of the config file.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": []
-    },
-    {
       "part": 2,
       "kind": "concept",
       "title": "Running tests from the CLI",

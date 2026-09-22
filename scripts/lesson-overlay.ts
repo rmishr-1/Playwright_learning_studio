@@ -230,7 +230,7 @@ function rewriteHeading(text: string, tab: string, generated: boolean): string |
  *
  * Keyed "w<week>d<day>p<part>". Add a key here to remove another tab.
  */
-export const REMOVED_PARTS: ReadonlySet<string> = new Set(['w1d1p1']);
+export const REMOVED_PARTS: ReadonlySet<string> = new Set(['w1d1p1', 'w1d2p1', 'w1d3p1', 'w1d4p1']);
 
 export function applyRemovedParts(day: CourseDay): CourseDay {
   const kept = day.parts.filter((p) => !REMOVED_PARTS.has('w' + day.week + 'd' + day.day + 'p' + p.part));
