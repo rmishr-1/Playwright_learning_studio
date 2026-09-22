@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 5.1 - Prerequisites check\n\n**No new TypeScript today.** Pipelines are written in YAML or Groovy, not TypeScript - so the\nprerequisite is reading two file formats.\n\n| In play | Taught in |\n|---|---|\n| `Deno.Command`, exit codes | [day3_1](/learn/w6/d3/p1) |\n| `package.json` scripts | [day4_1](/learn/w6/d4/p1) |\n| Objects and nesting | [week3/day1_1](/learn/w3/d1/p1) |\n\n**Next:** [Day 5.2 - Pipelines](/learn/w6/d5/p2)",
+          "text": "# TypeScript - Prerequisites check\n\n**No new TypeScript today.** Pipelines are written in YAML or Groovy, not TypeScript - so the\nprerequisite is reading two file formats.\n\n| In play | Taught in |\n|---|---|\n| `Deno.Command`, exit codes | [day3_1](/learn/w6/d3/p1) |\n| `package.json` scripts | [day4_1](/learn/w6/d4/p1) |\n| Objects and nesting | [week3/day1_1](/learn/w3/d1/p1) |\n\n**Next:** [Fundamentals - Pipelines](/learn/w6/d5/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -43,7 +43,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 5.2 - Pipelines](/learn/w6/d5/p2)",
+          "text": "**Next:** [Fundamentals - Pipelines](/learn/w6/d5/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -61,7 +61,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 5.2 - Pipelines\n\nDay 4's jobs still needed a human to press **Build Now**. A pipeline removes the human: the\ndeveloper's deploy and your tests become one sequence, and yours runs because theirs finished.\n\n> **Mode: read-and-compare.** Jenkins is not installed here, so the Jenkinsfile is **authored,\n> never executed** - and labelled as such. The commands inside it are the ones\n> [day4_2](/learn/w6/d4/p2) ran.",
+          "text": "# Fundamentals - Pipelines\n\nDay 4's jobs still needed a human to press **Build Now**. A pipeline removes the human: the\ndeveloper's deploy and your tests become one sequence, and yours runs because theirs finished.\n\n> **Mode: read-and-compare.** Jenkins is not installed here, so the Jenkinsfile is **authored,\n> never executed** - and labelled as such. The commands inside it are the ones\n> [day4_2](/learn/w6/d4/p2) ran.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -138,7 +138,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Why it is not installed\n\nThat file sits in `week6/generated/`, not `.github/workflows/`. Dropping a workflow into the\nlatter makes it run on **every push** - a decision a lesson should not make for you. To switch it\non:\n\n```bash\ncp week6/generated/day5-github-actions.yml .github/workflows/week6.yml\n```\n\n## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| `sh` on a Windows agent | *Cannot run program sh* |\n| A `tools` block from a Java sample | fails before the first command |\n| `branches: [master]` on a `main` repo | the workflow never triggers |\n| No artefact upload | green or red, and no report either way |\n| `npm install` instead of `npm ci` | versions drift from the lockfile; CI stops being repeatable |\n\n**Next:** [Day 5.3 - How this goes wrong in a real repo](/learn/w6/d5/p3)",
+          "text": "## Why it is not installed\n\nThat file sits in `week6/generated/`, not `.github/workflows/`. Dropping a workflow into the\nlatter makes it run on **every push** - a decision a lesson should not make for you. To switch it\non:\n\n```bash\ncp week6/generated/day5-github-actions.yml .github/workflows/week6.yml\n```\n\n## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| `sh` on a Windows agent | *Cannot run program sh* |\n| A `tools` block from a Java sample | fails before the first command |\n| `branches: [master]` on a `main` repo | the workflow never triggers |\n| No artefact upload | green or red, and no report either way |\n| `npm install` instead of `npm ci` | versions drift from the lockfile; CI stops being repeatable |\n\n**Next:** [Implementation - How this goes wrong in a real repo](/learn/w6/d5/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -156,7 +156,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 5.3 - How this goes wrong in a real repo\n\nThe best worked example of CI rot is in this repository, committed and broken.\n\n## Three workflows nobody runs\n\n`.github/workflows/` holds `ci.yml`, `e2e.yml` and `e2e-sharded.yml`, written for a version of\nthis course that was deleted. Every file they reference is gone.",
+          "text": "# Implementation - How this goes wrong in a real repo\n\nThe best worked example of CI rot is in this repository, committed and broken.\n\n## Three workflows nobody runs\n\n`.github/workflows/` holds `ci.yml`, `e2e.yml` and `e2e-sharded.yml`, written for a version of\nthis course that was deleted. Every file they reference is gone.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -191,7 +191,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Sharding, when one machine is not enough\n\nThe mechanism you would reach for next, and the repo's stale `e2e-sharded.yml` was built around\nit:\n\n```yaml\nstrategy:\n  matrix:\n    shard: [1, 2, 3]\nsteps:\n  - run: npx playwright test --shard=${{ matrix.shard }}/3\n```\n\nThree machines, a third of the tests each, then `npx playwright merge-reports` to get one report.\nThat is the answer to \"the regression suite takes 40 minutes\" - and it needs hosted runners,\nwhich is why it is the argument that usually ends the Jenkins conversation.\n\n**Next:** [Day 5.4 - Practice](/learn/w6/d5/p4)",
+          "text": "## Sharding, when one machine is not enough\n\nThe mechanism you would reach for next, and the repo's stale `e2e-sharded.yml` was built around\nit:\n\n```yaml\nstrategy:\n  matrix:\n    shard: [1, 2, 3]\nsteps:\n  - run: npx playwright test --shard=${{ matrix.shard }}/3\n```\n\nThree machines, a third of the tests each, then `npx playwright merge-reports` to get one report.\nThat is the answer to \"the regression suite takes 40 minutes\" - and it needs hosted runners,\nwhich is why it is the argument that usually ends the Jenkins conversation.\n\n**Next:** [Practice](/learn/w6/d5/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -209,7 +209,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 5.4 - Practice\n\nThe last three close out the week rather than the day.",
+          "text": "# Practice - Practice\n\nThe last three close out the week rather than the day.",
           "starter": null,
           "variation": null,
           "checkpoint": null

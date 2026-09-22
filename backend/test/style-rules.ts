@@ -62,6 +62,9 @@ const INSIDER: ReadonlyArray<readonly [RegExp, string]> = [
   [/\bsource training session\b/i, '"source training session"'],
   [/_shared\//, 'an internal _shared/ path'],
   [/\byesterday\b/i, '"yesterday"'],
+  // The notebook numbering: day 5, notebook 2. The page calls that lesson "Fundamentals", and its
+  // heading calls it "Week 1 - Day 5 - Fundamentals"; "Day 5.2" appears nowhere a learner looks.
+  [/\bDay \d+\.\d+\b/, 'an old "Day N.P" reference (use the tab name; see relabelDayRefs)'],
 ];
 
 /**

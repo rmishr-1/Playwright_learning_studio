@@ -15,14 +15,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 4.1 — TypeScript for conditional skipping\n\nTwo small things. Today you switch tests off — sometimes always, sometimes only on one browser.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# TypeScript — TypeScript for conditional skipping\n\nTwo small things. Today you switch tests off — sometimes always, sometimes only on one browser.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | `===` and booleans | `test.skip(browserName === \"firefox\")` is just a comparison |\n| 2 | Passing a condition as an argument | the skip decision is computed, then handed over |\n\nAlready covered — one link each: objects in [Day 1.1](/learn/w3/d1/p1); `let`/`const` and arrow\nfunctions in [Day 2.1](/learn/w3/d2/p1).",
+          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | `===` and booleans | `test.skip(browserName === \"firefox\")` is just a comparison |\n| 2 | Passing a condition as an argument | the skip decision is computed, then handed over |\n\nAlready covered — one link each: objects in [Day 1 - TypeScript](/learn/w3/d1/p1); `let`/`const` and arrow\nfunctions in [Day 2 - TypeScript](/learn/w3/d2/p1).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -71,7 +71,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected:**\n\n```\nchromium   running\nfirefox    SKIPPED — BUG-1508\nwebkit     running\n```\n\nOne test, three outcomes, decided by a comparison. That is all conditional skipping is.\n\n**Always pass a reason.** A bare `test.skip(true)` in six months is a test nobody can justify\ndeleting or restoring.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `===` | Strict. Never use `==`. |\n| Booleans | `test.skip()` takes the answer, plus a reason. |\n\n**Next:** [Day 4.2 — Skipping and focusing tests](/learn/w3/d4/p2)",
+          "text": "**Expected:**\n\n```\nchromium   running\nfirefox    SKIPPED — BUG-1508\nwebkit     running\n```\n\nOne test, three outcomes, decided by a comparison. That is all conditional skipping is.\n\n**Always pass a reason.** A bare `test.skip(true)` in six months is a test nobody can justify\ndeleting or restoring.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `===` | Strict. Never use `==`. |\n| Booleans | `test.skip()` takes the answer, plus a reason. |\n\n**Next:** [Fundamentals - Skipping and focusing tests](/learn/w3/d4/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -89,7 +89,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 4.2 — Switching tests off, on purpose\n\nA test fails because of a defect you've already logged. You don't want red every run, and you\ndon't want to delete the test. By the end of this lesson you'll know the four ways Playwright\noffers, and which one to reach for.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Fundamentals — Switching tests off, on purpose\n\nA test fails because of a defect you've already logged. You don't want red every run, and you\ndon't want to delete the test. By the end of this lesson you'll know the four ways Playwright\noffers, and which one to reach for.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -159,7 +159,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Always give a reason**, ideally a ticket number.\n- **Prefer conditional over blanket skips** — keep the coverage you can.\n- **Never commit `test.only`.**\n- **Review skips periodically.** A skip from a year ago is either a fixed bug or a dead test.\n- **Prefer `skip` over `fixme`** in new code.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Suite passes but covers almost nothing | a committed `test.only` | remove it; rely on `forbidOnly` in CI |\n| A skip that nobody can explain | no reason given | always pass one |\n| `test.skip()` outside a test | it needs the condition inside the test body | put it as the first line |\n| Conditional skip never fires | only one browser configured | check the config's `projects` |\n| Skipped test still counted as failure | it isn't — that's a misread report | skipped and failed are separate columns |\n\n**Next:** [Day 4.3](/learn/w3/d4/p3) — what skips look like on a real team.",
+          "text": "## Best practices\n\n- **Always give a reason**, ideally a ticket number.\n- **Prefer conditional over blanket skips** — keep the coverage you can.\n- **Never commit `test.only`.**\n- **Review skips periodically.** A skip from a year ago is either a fixed bug or a dead test.\n- **Prefer `skip` over `fixme`** in new code.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Suite passes but covers almost nothing | a committed `test.only` | remove it; rely on `forbidOnly` in CI |\n| A skip that nobody can explain | no reason given | always pass one |\n| `test.skip()` outside a test | it needs the condition inside the test body | put it as the first line |\n| Conditional skip never fires | only one browser configured | check the config's `projects` |\n| Skipped test still counted as failure | it isn't — that's a misread report | skipped and failed are separate columns |\n\n**Next:** [Implementation](/learn/w3/d4/p3) — what skips look like on a real team.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -177,7 +177,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 4.3 — Skips as a managed list\n\nSame `test.skip` as [Day 4.2](/learn/w3/d4/p2). No new API. What changes is treating skips as debt\nwith an owner rather than a switch you flick.",
+          "text": "# Implementation — Skips as a managed list\n\nSame `test.skip` as [Fundamentals](/learn/w3/d4/p2). No new API. What changes is treating skips as debt\nwith an owner rather than a switch you flick.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -205,7 +205,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Where the choice actually lives\n\n| Situation | Reach for |\n|---|---|\n| Defect on one browser | `test.skip(browserName === \"x\", \"TICKET\")` |\n| Feature not deployed to this environment | `test.skip(!!process.env.STAGING, \"…\")` |\n| Test is slow, not broken | `test.slow()` — not a skip |\n| Test is wrong, not the app | fix or delete it — a skip hides your bug |\n| Whole area under rebuild | `test.describe.skip(...)` on the group |\n\nThat fourth row is the one people get wrong. A skip says *the application is broken*. If the\n**test** is broken, skipping it files your mistake under someone else's name.\n\n## What a reviewer checks\n\n- **Every skip has a ticket**, not just prose.\n- **Conditional where possible** — don't discard coverage you could keep.\n- **No `test.only`** anywhere, ever.\n- **`forbidOnly` enabled in CI** (this repo's root config does).\n- **Skips have an age** — if nobody knows when it was added, that's the real problem.\n\n**Next:** [Day 4.4](/learn/w3/d4/p4) — your turn.",
+          "text": "## Where the choice actually lives\n\n| Situation | Reach for |\n|---|---|\n| Defect on one browser | `test.skip(browserName === \"x\", \"TICKET\")` |\n| Feature not deployed to this environment | `test.skip(!!process.env.STAGING, \"…\")` |\n| Test is slow, not broken | `test.slow()` — not a skip |\n| Test is wrong, not the app | fix or delete it — a skip hides your bug |\n| Whole area under rebuild | `test.describe.skip(...)` on the group |\n\nThat fourth row is the one people get wrong. A skip says *the application is broken*. If the\n**test** is broken, skipping it files your mistake under someone else's name.\n\n## What a reviewer checks\n\n- **Every skip has a ticket**, not just prose.\n- **Conditional where possible** — don't discard coverage you could keep.\n- **No `test.only`** anywhere, ever.\n- **`forbidOnly` enabled in CI** (this repo's root config does).\n- **Skips have an age** — if nobody knows when it was added, that's the real problem.\n\n**Next:** [Practice](/learn/w3/d4/p4) — your turn.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -223,7 +223,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 4.4 — Practice\n\nThree problems. No answer key.\n\nApp: `https://test-automation-banking.vercel.app/`. Multi-browser config:\n`week3/generated/day4-browsers.config.ts` (chromium, firefox, webkit — all verified installed).\n\n> Stuck past twenty minutes? Back to [Day 4.1](/learn/w3/d4/p1) or [Day 4.2](/learn/w3/d4/p2).",
+          "text": "# Practice — Practice\n\nThree problems. No answer key.\n\nApp: `https://test-automation-banking.vercel.app/`. Multi-browser config:\n`week3/generated/day4-browsers.config.ts` (chromium, firefox, webkit — all verified installed).\n\n> Stuck past twenty minutes? Back to [TypeScript](/learn/w3/d4/p1) or [Fundamentals](/learn/w3/d4/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -251,7 +251,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**Count your skips and ask who owns each one.** A skip with a ticket has an owner and an end\ndate. A skip without one is a permanent hole in your coverage that the green tick is actively\nhiding from you.\n\n**Next:** [Day 5.1](/learn/w3/d5/p1) — running everything across three browsers, in parallel.",
+          "text": "## When you're done\n\n**Count your skips and ask who owns each one.** A skip with a ticket has an owner and an end\ndate. A skip without one is a permanent hole in your coverage that the green tick is actively\nhiding from you.\n\n**Next:** [Day 5 - TypeScript](/learn/w3/d5/p1) — running everything across three browsers, in parallel.",
           "starter": null,
           "variation": null,
           "checkpoint": null

@@ -14,13 +14,16 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
+  applyDayRefs,
   applyDerivedLabels,
   applyGeneratedPlaceholder,
   applyHeadingFormat,
   applyStudioCopy,
   applyOverlay,
+  applySolutions,
   applyVariations,
   loadOverlay,
+  loadSolutions,
   loadVariations,
 } from './lesson-overlay';
 import { CourseDay } from '../shared/contracts/course_day';
@@ -54,6 +57,9 @@ function main(): void {
       merged = applyGeneratedPlaceholder(merged);
       merged = applyHeadingFormat(merged);
       merged = applyStudioCopy(merged);
+      // After applyStudioCopy, which can emit a link label of its own.
+      merged = applyDayRefs(merged);
+      merged = applySolutions(merged, loadSolutions(CONTENT, week, day));
       merged = applyVariations(merged, variations);
       if (overlay) merged = applyOverlay(merged, overlay);
       const after = JSON.stringify(CourseDay.parse(merged), null, 2) + '\n';

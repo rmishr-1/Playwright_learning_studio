@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 3 - TypeScript - Building a unique value at runtime\n\nBy the end of this lesson you will build a guaranteed-different string on every run\nusing `+` and `Math.random()` — the exact technique [Day 3.2](/learn/w2/d3/p2) uses so two\nruns of the same test never collide.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# Week 2 - Day 3 - TypeScript - Building a unique value at runtime\n\nBy the end of this lesson you will build a guaranteed-different string on every run\nusing `+` and `Math.random()` — the exact technique [Fundamentals](/learn/w2/d3/p2) uses so two\nruns of the same test never collide.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -89,7 +89,7 @@
         },
         {
           "type": "markdown",
-          "text": "## 3. Putting them together\n\n```ts\nconst unique = \"learner\" + Math.random().toString(36).slice(2, 8);\n```\n\nWhere you'll use this next: `\"//input[@value='\" + unique + \"']\"` — Day 3.2 builds an\nXPath string the same way, by concatenating a runtime value into a fixed template.",
+          "text": "## 3. Putting them together\n\n```ts\nconst unique = \"learner\" + Math.random().toString(36).slice(2, 8);\n```\n\nWhere you'll use this next: `\"//input[@value='\" + unique + \"']\"` — [Fundamentals](/learn/w2/d3/p2) builds an\nXPath string the same way, by concatenating a runtime value into a fixed template.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -119,7 +119,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `+` on strings | concatenates; numbers get converted to text first |\n| `Math.random()` | always `0 <= x < 1`; slice/convert it into something readable |\n| Combining them | `\"prefix\" + Math.random().toString(36).slice(2, 8)` — a fresh value every run |\n\n**Next:** [Day 3.2 — Unique test data and dynamic locators](/learn/w2/d3/p2)",
+          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `+` on strings | concatenates; numbers get converted to text first |\n| `Math.random()` | always `0 <= x < 1`; slice/convert it into something readable |\n| Combining them | `\"prefix\" + Math.random().toString(36).slice(2, 8)` — a fresh value every run |\n\n**Next:** [Fundamentals - Unique test data and dynamic locators](/learn/w2/d3/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -188,7 +188,7 @@
         },
         {
           "type": "markdown",
-          "text": "## The problem with re-running the same test\n\n| Rejected approach | Why |\n|---|---|\n| Delete the record after creating it | adds a second failure point — cleanup itself can fail |\n| A file of pre-seeded data | runs out after N runs |\n| `Date.now()` alone | two runs in the same second collide |\n\nThe fix from [Day 3.1](/learn/w2/d3/p1): `\"prefix\" + Math.random().toString(36).slice(2, 8)`\n— different every run, no file to run out of, nothing to clean up.",
+          "text": "## The problem with re-running the same test\n\n| Rejected approach | Why |\n|---|---|\n| Delete the record after creating it | adds a second failure point — cleanup itself can fail |\n| A file of pre-seeded data | runs out after N runs |\n| `Date.now()` alone | two runs in the same second collide |\n\nThe fix from [TypeScript](/learn/w2/d3/p1): `\"prefix\" + Math.random().toString(36).slice(2, 8)`\n— different every run, no file to run out of, nothing to clean up.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -381,7 +381,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Day 3.3](/learn/w2/d3/p3) wraps unique-value generation and the working dynamic locator in a reusable function.",
+          "text": "## What's next\n\n[Implementation](/learn/w2/d3/p3) wraps unique-value generation and the working dynamic locator in a reusable function.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -399,21 +399,21 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 3 - Implementation - Unique data and dynamic locators, wrapped for reuse\n\nBy the end of this lesson you will have a `uniqueEmail()` generator and a\n`pickAndCheckGender()` helper that any spec can call, extending the same\n`registration-helpers.ts` file from Days 1 and 2.\n\n> **No new API here on purpose.** Everything below is something you already ran in [Day 3.2](/learn/w2/d3/p2).",
+          "text": "# Week 2 - Day 3 - Implementation - Unique data and dynamic locators, wrapped for reuse\n\nBy the end of this lesson you will have a `uniqueEmail()` generator and a\n`pickAndCheckGender()` helper that any spec can call, extending the same\n`registration-helpers.ts` file from Days 1 and 2.\n\n> **No new API here on purpose.** Everything below is something you already ran in [Fundamentals](/learn/w2/d3/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Day 3.2](/learn/w2/d3/p2) |\n| **What changes** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Builds on** | the same `registration-helpers.ts` that Days [1.3](/learn/w2/d1/p3) and [2.3](/learn/w2/d2/p3) have been growing |",
+          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d3/p2) |\n| **What changes** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Builds on** | the same `registration-helpers.ts` that Days [1.3](/learn/w2/d1/p3) and [2.3](/learn/w2/d2/p3) have been growing |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The problem with what we wrote yesterday\n\nEvery test that needs a unique value re-writes the same `Math.random()` line; every test\nthat needs a dynamic gender pick re-writes the same XPath-building line. Small lines, but\ncopy-pasted enough times they become the thing that's wrong when the pattern needs to change.\n\n## Same code, with structure around it\n\n| In Day 3.2 you wrote | Here it becomes | Why |\n|---|---|---|\n| `\"learner\" + Math.random()...` inline | `uniqueEmail()` | one function that returns a fresh value; the \"how\" lives in exactly one place |\n| the gender XPath built inline, then `.check()`ed | `pickAndCheckGender(page)` | the working dynamic-locator pattern, reusable without re-deriving it |",
+          "text": "## The problem with what we wrote yesterday\n\nEvery test that needs a unique value re-writes the same `Math.random()` line; every test\nthat needs a dynamic gender pick re-writes the same XPath-building line. Small lines, but\ncopy-pasted enough times they become the thing that's wrong when the pattern needs to change.\n\n## Same code, with structure around it\n\n| In [Fundamentals](/learn/w2/d3/p2) you wrote | Here it becomes | Why |\n|---|---|---|\n| `\"learner\" + Math.random()...` inline | `uniqueEmail()` | one function that returns a fresh value; the \"how\" lives in exactly one place |\n| the gender XPath built inline, then `.check()`ed | `pickAndCheckGender(page)` | the working dynamic-locator pattern, reusable without re-deriving it |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -434,7 +434,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected result:** `2 passed`. Both tests call `uniqueEmail()` independently and get\ndifferent strings — check the traces or add a `console.log` if you want to see both values.\n\n## What a reviewer would look for\n\n- The randomness lives inside `uniqueEmail()`, not copy-pasted into every test.\n- `pickAndCheckGender` returns the choice it made, so a test can log or assert on it instead of guessing.\n- Nothing here duplicates Day 3.2's logic — it's the same lines, moved once.",
+          "text": "**Expected result:** `2 passed`. Both tests call `uniqueEmail()` independently and get\ndifferent strings — check the traces or add a `console.log` if you want to see both values.\n\n## What a reviewer would look for\n\n- The randomness lives inside `uniqueEmail()`, not copy-pasted into every test.\n- `pickAndCheckGender` returns the choice it made, so a test can log or assert on it instead of guessing.\n- Nothing here duplicates the [Fundamentals](/learn/w2/d3/p2) lesson's logic — it's the same lines, moved once.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -470,14 +470,14 @@
         },
         {
           "type": "recap",
-          "text": "- Randomness belongs inside one generator function, not copy-pasted into every test that needs a fresh value.\n- Compute the random value *inside* the function. A module-level `const` would be computed once and shared by every caller.\n- A helper that makes a hidden decision should return it, so failures can say what it chose.\n- These are the same lines from [Day 3.2](/learn/w2/d3/p2), moved once — not rewritten.",
+          "text": "- Randomness belongs inside one generator function, not copy-pasted into every test that needs a fresh value.\n- Compute the random value *inside* the function. A module-level `const` would be computed once and shared by every caller.\n- A helper that makes a hidden decision should return it, so failures can say what it chose.\n- These are the same lines from [Fundamentals](/learn/w2/d3/p2), moved once — not rewritten.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Day 3.4](/learn/w2/d3/p4) — your turn, with no worked examples to lean on.",
+          "text": "## What's next\n\n[Practice](/learn/w2/d3/p4) — your turn, with no worked examples to lean on.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -495,14 +495,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 3 - Practice - Unique data and dynamic locators\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 3.1](/learn/w2/d3/p1) or [Day 3.2](/learn/w2/d3/p2). Go back, re-read, come here again.",
+          "text": "# Week 2 - Day 3 - Practice - Unique data and dynamic locators\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [TypeScript](/learn/w2/d3/p1) or [Fundamentals](/learn/w2/d3/p2). Go back, re-read, come here again.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | a unique value, then a dynamic locator over real `<option>` markup, then a generator of your own |\n| **Pulls on** | [Day 3.1](/learn/w2/d3/p1) for the string building · [Day 3.2](/learn/w2/d3/p2) for which attributes are real |\n| **The question to keep asking** | is this attribute really in the page source, or did a script set it? |",
+          "text": "| | |\n|---|---|\n| **Three problems** | a unique value, then a dynamic locator over real `<option>` markup, then a generator of your own |\n| **Pulls on** | [TypeScript](/learn/w2/d3/p1) for the string building · [Fundamentals](/learn/w2/d3/p2) for which attributes are real |\n| **The question to keep asking** | is this attribute really in the page source, or did a script set it? |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -530,7 +530,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you are done\n\nAsk yourself the Day 3.2 question one more time: for any locator you wrote today, could\nyou swap in a value the site itself generated (not one you typed) and have it still work?\nIf the answer is \"only via `@value`\", check whether that attribute is really live markup\nor something a script set — that's this week's whole lesson in one question.",
+          "text": "## When you are done\n\nAsk yourself the [Fundamentals](/learn/w2/d3/p2) question one more time: for any locator you wrote today, could\nyou swap in a value the site itself generated (not one you typed) and have it still work?\nIf the answer is \"only via `@value`\", check whether that attribute is really live markup\nor something a script set — that's this week's whole lesson in one question.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -542,12 +542,12 @@
           "difficulty": "Beginner",
           "statement": "**What to build.** Generate a unique First Name (e.g. `\"Learner\" + Math.random()...`),\nfill it in, and assert it with `toHaveValue`.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** `npx playwright test` passes, and running it twice in a row fills two different names — check the trace or a `console.log`.",
           "stub": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Problem 1 — your code here.",
-          "solution": "`week2/generated/day3-practice-unique.spec.ts`:\n\n```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"a fresh first name on every run\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  const firstName = \"Learner\" + Math.random().toString(36).slice(2, 8);\n  console.log(\"generated:\", firstName);\n\n  const field = page.getByPlaceholder(\"First Name\");\n  await field.fill(firstName);\n\n  await expect(field).toHaveValue(firstName);\n});\n```\n\nRun it twice and compare the two `generated:` lines — different every time.\n\n**Why the value goes in a variable first.** The temptation is to inline the expression into `fill()`. Do that and the assertion has nothing to compare against: `Math.random()` gives a *different* string the second time you call it, so the test would assert the field holds a value it was never given. Generate once, hold it, use it in both places.\n\n**Why unique data at all.** It is the fix the course chose over the three obvious alternatives — delete-the-record afterwards (leaves the suite broken if it fails mid-way), a file of ten prepared names (runs out on the eleventh run), and a timestamp (collides when two tests start in the same second). A random suffix makes the duplicate check simply unreachable.\n\n> `Math.random().toString(36).slice(2, 8)` gives six alphanumeric characters. `Math.floor(Math.random() * 100000)` is equally fine where the field only accepts digits."
+          "solution": "`week2/generated/day3-practice-unique.spec.ts`:\n\n```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"a fresh first name on every run\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  const firstName = \"Learner\" + Math.random().toString(36).slice(2, 8);\n  console.log(\"generated:\", firstName);\n\n  const field = page.getByPlaceholder(\"First Name\");\n  await field.fill(firstName);\n\n  await expect(field).toHaveValue(firstName);\n});\n```\n\nRun it twice and compare the two `generated:` lines — different every time.\n\n**Why the value goes in a variable first.** The temptation is to inline the expression into `fill()`. Do that and the assertion has nothing to compare against: `Math.random()` gives a *different* string the second time you call it, so the test would assert the field holds a value it was never given. Generate once, hold it, use it in both places.\n\n**Why unique data at all.** The course chose it over three obvious alternatives. Deleting the record afterwards leaves the suite broken whenever a run fails mid-way. A file of ten prepared names runs out on the eleventh run. A timestamp collides when two tests start in the same second. A random suffix makes the duplicate check simply unreachable.\n\n> `Math.random().toString(36).slice(2, 8)` gives six alphanumeric characters. `Math.floor(Math.random() * 100000)` is equally fine where the field only accepts digits."
         },
         {
           "number": 2,
           "difficulty": "Intermediate",
-          "statement": "**What to build.** Read every real `<option>` value out of `#Skills`, pick one at random\nwith `Math.random()`, build a dynamic XPath `//option[@value='...']` from that choice, and\nassert it exists (`toHaveCount(1)`) before selecting it.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** The test passes on repeated runs even though it picks a different skill each time.\n\n> **Hint** — [Day 3.2](/learn/w2/d3/p2) showed exactly this pattern for the gender radios; option `value`s are static markup too.",
+          "statement": "**What to build.** Read every real `<option>` value out of `#Skills`, pick one at random\nwith `Math.random()`, build a dynamic XPath `//option[@value='...']` from that choice, and\nassert it exists (`toHaveCount(1)`) before selecting it.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** The test passes on repeated runs even though it picks a different skill each time.\n\n> **Hint** — [Fundamentals](/learn/w2/d3/p2) showed exactly this pattern for the gender radios; option `value`s are static markup too.",
           "stub": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Problem 2 — your code here.",
           "solution": "```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"pick a real option at random and prove it exists before selecting it\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  // Read the options the page ACTUALLY has - never guess at them.\n  const values = await page.locator(\"#Skills option\").evaluateAll(\n    (options) => options.map((o) => (o as HTMLOptionElement).value),\n  );\n  console.log(\"option count:\", values.length);\n\n  const chosen = values[Math.floor(Math.random() * values.length)];\n  console.log(\"chose:\", chosen);\n\n  // Build the locator from the choice, then prove it before acting on it.\n  const optionXPath = \"//option[@value='\" + chosen + \"']\";\n  await expect(page.locator(\"xpath=\" + optionXPath)).toHaveCount(1);\n\n  await page.locator(\"#Skills\").selectOption(chosen);\n  await expect(page.locator(\"#Skills\")).toHaveValue(chosen);\n});\n```\n\n**The `toHaveCount(1)` step is the whole exercise.** A dynamic locator is a string you built at runtime, and a string you built can be wrong — a stray space, an apostrophe in the value, an option that was not there today. Asserting the count *before* you act turns a confusing \"element not found, waited 30 s\" into an immediate, readable \"expected 1, got 0\".\n\nIt also guards a nastier failure: if your expression accidentally matched **two** options, `selectOption` would quietly take one of them and the test would pass while testing something you did not intend.\n\n**Reading the options rather than hard-coding them** is the other half. `#Skills` carries 78 of them; a list you typed out by hand is wrong the day someone edits the page.\n\n> Run it several times. Different option each run, still passing — that is the property you want from dynamic data."
         },

@@ -14,7 +14,7 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { placeholderBody, PLACEHOLDER_TITLE, studioise, tabLabel } from './notebook-parse';
+import { placeholderBody, PLACEHOLDER_TITLE, relabelDayRefs, studioise, tabLabel } from './notebook-parse';
 import { LessonOverlay, type OverlayPart } from '../shared/contracts/lesson_overlay';
 import type { ContentBlock, CourseDay, CoursePart } from '../shared/contracts/course_day';
 
@@ -289,6 +289,49 @@ export function applyStudioCopy(day: CourseDay): CourseDay {
       blocks: part.blocks.map((b) =>
         b.type === 'markdown' ? { ...b, text: studioise(b.text) } : b,
       ),
+    })) as CourseDay['parts'],
+  };
+}
+
+/** Authored solutions live outside the generated tree so a re-import cannot erase them. */
+export function loadSolutions(contentDir: string, week: number, day: number): Record<string, string> {
+  const file = path.join(contentDir, 'solutions', 'w' + week + 'd' + day + '.json');
+  if (!fs.existsSync(file)) return {};
+  return JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, string>;
+}
+
+/**
+ * Re-merges authored practice solutions into the day file.
+ *
+ * Solutions used to be merged ONLY at import, and `npm run overlay` had no step for them. So an
+ * edit to Data/Content/solutions/ never reached the page: 11 of the 30 shipped week 1-2 solutions
+ * were stale, carrying fixes that had been made, reviewed and committed in the source and never
+ * shown to a learner. This is the same side-car pattern the cards and variations already use.
+ */
+export function applySolutions(day: CourseDay, solutions: Record<string, string>): CourseDay {
+  if (Object.keys(solutions).length === 0) return day;
+  return {
+    ...day,
+    parts: day.parts.map((part) => ({
+      ...part,
+      problems: part.problems.map((q) => ({ ...q, solution: solutions[String(q.number)] ?? q.solution })),
+    })) as CourseDay['parts'],
+  };
+}
+
+/**
+ * Rewrites old "Day 5.2" references in the generated text: markdown blocks and practice problem
+ * statements. Authored cards, variations and solutions are fixed at source instead, because the
+ * overlay must ship them byte-for-byte as written. See relabelDayRefs() for the label format.
+ */
+export function applyDayRefs(day: CourseDay): CourseDay {
+  const fix = (t: string) => relabelDayRefs(t, day.week, day.day);
+  return {
+    ...day,
+    parts: day.parts.map((part) => ({
+      ...part,
+      blocks: part.blocks.map((b) => (b.type === 'markdown' ? { ...b, text: fix(b.text) } : b)),
+      problems: part.problems.map((q) => ({ ...q, statement: fix(q.statement) })),
     })) as CourseDay['parts'],
   };
 }

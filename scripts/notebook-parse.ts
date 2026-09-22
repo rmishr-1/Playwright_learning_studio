@@ -202,6 +202,103 @@ const ABSENCE_BANNERS: ReadonlyArray<readonly [RegExp, string]> = [
   ],
 ];
 
+/**
+ * Rewrites the old "Day 5.2" references into the names the course actually uses. "Day 5.2" was the
+ * notebook numbering - day 5, notebook 2 - and a learner never sees that number anywhere else: the
+ * page calls that lesson "Fundamentals", and the H1 calls it "Week 1 - Day 5 - Fundamentals". So a
+ * reference is written the way the heading it points at is written, shortened by context:
+ *
+ *   same day                  Fundamentals
+ *   same week, another day    Day 4 - Fundamentals
+ *   another week              Week 1 - Day 5 - TypeScript
+ *
+ * A plain-text reference also becomes a link, since its target is known; headings stay plain text.
+ * A possessive ("Day 5.2's version") becomes "the Fundamentals lesson's version", because a tab
+ * name does not take an apostrophe-s gracefully. Code - fenced blocks and inline spans - is never
+ * touched. Idempotent: every output form has lost the "N.P" the patterns require.
+ */
+export function relabelDayRefs(md: string, week: number, day: number): string {
+  const label = (w: number, d: number, p: number): string => {
+    const tab = tabLabel(p as 1 | 2 | 3 | 4);
+    if (w === week && d === day) return tab;
+    if (w === week) return 'Day ' + d + ' - ' + tab;
+    return 'Week ' + w + ' - Day ' + d + ' - ' + tab;
+  };
+  const href = (w: number, d: number, p: number) => '/learn/w' + w + '/d' + d + '/p' + p;
+  const validPart = (p: number) => p >= 1 && p <= 4;
+
+  // A hard-wrapped paragraph continues across lines, so the start of a line - or of a quote line -
+  // is the start of a sentence only if the line before it ended one. Getting this wrong wrote
+  // "This slot usually shows / > The Fundamentals lesson's API" with a capital mid-sentence.
+  const endsSentence = (prev: string): boolean => {
+    const t = prev.replace(/^\s*>\s?/, '').trim();
+    return t === '' || /[.!?:]$/.test(t) || /^#{1,6}\s/.test(t) || t.startsWith('|');
+  };
+  const prose = (line: string, heading: boolean, prevLine: string): string => {
+    let out = line;
+
+    // 1. Links whose label is an old-style reference. The href is the truth about the target, so
+    //    the label is rebuilt from it. A subject after the number ("Day 1.2 - From recorder to
+    //    real code") is kept, unless it only repeats the tab name ("Day 1.4 - Practice").
+    out = out.replace(
+      /\[(?:Week \d+,? )?Day \d+\.\d+(?:\s*[—–-]\s*([^\]]*))?\]\(\/learn\/w(\d+)\/d(\d+)\/p(\d+)\)/g,
+      (m, subject: string | undefined, w: string, d: string, p: string) => {
+        if (!validPart(+p)) return m;
+        const base = label(+w, +d, +p);
+        const tail = subject && subject.trim().toLowerCase() !== tabLabel(+p as 1 | 2 | 3 | 4).toLowerCase()
+          ? ' - ' + subject.trim() : '';
+        return '[' + base + tail + '](' + href(+w, +d, +p) + ')';
+      },
+    );
+
+    // 2. "Day 4.2 and 4.3" - the second number borrows the first one's "Day".
+    out = out.replace(/\bDay (\d+)\.(\d+) and (\d+)\.(\d+)\b/g, 'Day $1.$2 and Day $3.$4');
+
+    // 3 and 4. Plain references, possessive first so its "'s" is consumed with it.
+    const plain = (w: number, d: number, p: number): string =>
+      heading ? label(w, d, p) : '[' + label(w, d, p) + '](' + href(w, d, p) + ')';
+    out = out.replace(
+      /(^|[^\[\w/])(?:Week (\d+),? )?Day (\d+)\.(\d+)['’]s\b/g,
+      (m, pre: string, w: string | undefined, d: string, p: string, offset: number) => {
+        if (!validPart(+p)) return m;
+        const before = out.slice(0, offset) + pre;
+        const atLineStart = /^\s*(>\s*)?$/.test(before);
+        const start = atLineStart
+          ? endsSentence(prevLine)
+          : /([.!?:]\s+|\|\s*|^\s*[-*]\s+|#+\s+)$/.test(before);
+        return pre + (start ? 'The ' : 'the ') + plain(w ? +w : week, +d, +p) + ' lesson’s';
+      },
+    );
+    out = out.replace(
+      /(^|[^\[\w/])(?:Week (\d+),? )?Day (\d+)\.(\d+)\b(?!\]\()/g,
+      (m, pre: string, w: string | undefined, d: string, p: string) =>
+        validPart(+p) ? pre + plain(w ? +w : week, +d, +p) : m,
+    );
+    return out.replace(/lesson’s/g, "lesson's");
+  };
+
+  // Split off fenced code first, then work line by line so headings can be recognised, protecting
+  // inline code spans within each line.
+  return md
+    .split(/(```[\s\S]*?```)/g)
+    .map((chunk, i) =>
+      i % 2 === 1
+        ? chunk
+        : chunk
+            .split('\n')
+            .map((line, k, lines) => {
+              const heading = /^#{1,6}\s/.test(line);
+              const prevLine = k > 0 ? lines[k - 1] : '';
+              return line
+                .split(/(`[^`\n]*`)/g)
+                .map((seg, j) => (j % 2 === 1 ? seg : prose(seg, heading, j === 0 ? prevLine : 'x')))
+                .join('');
+            })
+            .join('\n'),
+    )
+    .join('');
+}
+
 export function placeholderBody(week: number, day: number): string {
   return '# Week ' + week + ', Day ' + day + '.1 \u2014 TypeScript for this lesson\n';
 }
@@ -272,7 +369,7 @@ export function studioise(md: string): string {
   out = out.replace(
     /\[([^\]]*?)week(\d+)\/day(\d+)_(\d+)\.ipynb([^\]]*?)\]/g,
     (_m, pre: string, w: string, d: string, p: string, post: string) =>
-      '[' + pre + 'Week ' + w + ', Day ' + d + '.' + p + post + ']',
+      '[' + pre + 'Week ' + w + ' - Day ' + d + ' - ' + tabLabel(Number(p) as 1 | 2 | 3 | 4) + post + ']',
   );
 
   // "this notebook" reads wrong on a web page. Only touch the bare word, never a path or a

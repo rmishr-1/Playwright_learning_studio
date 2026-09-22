@@ -4,7 +4,7 @@
   "day": 5,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **One new name** | `test.describe`, which uses syntax you already know |\n| **What *is* new** | a fact about how Playwright runs tests, not a language feature |\n| **Then go to** | [Day 5.2](/learn/w2/d5/p2), where that fact breaks a test in front of you |",
+      "at_a_glance": "| | |\n|---|---|\n| **One new name** | `test.describe`, which uses syntax you already know |\n| **What *is* new** | a fact about how Playwright runs tests, not a language feature |\n| **Then go to** | [Fundamentals](/learn/w2/d5/p2), where that fact breaks a test in front of you |",
       "checkpoints": [
         {
           "question": "What is the one new thing Day 5 introduces?",
@@ -17,10 +17,10 @@
           "explanation": "`test.describe` is just a function call wrapped around `test()`s you already know how to write — a new name, not new syntax. The actual lesson is per-test isolation, and today is where you first feel it cost you something."
         }
       ],
-      "recap": "Today changes what you know about the runner: each test starts from a blank tab. Hold that thought going into [Day 5.2](/learn/w2/d5/p2) — it is about to fail a test that has nothing wrong with it."
+      "recap": "Today changes what you know about the runner: each test starts from a blank tab. Hold that thought going into [Fundamentals](/learn/w2/d5/p2) — it is about to fail a test that has nothing wrong with it."
     },
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **You'll watch** | a correct test fail, because of a design decision rather than a bug |\n| **Mode** | test-runner — the studio editor runs library code, so follow these in your own checkout |\n| **Assumes** | [test() and the assertions gap](/learn/w1/d5/p2) · [the page fixture](/learn/w1/d5/p1) |\n| **Today ends unresolved on purpose** | [Day 5.3](/learn/w2/d5/p3) shows the fix's shape; week 3 builds it properly |",
+      "at_a_glance": "| | |\n|---|---|\n| **You'll watch** | a correct test fail, because of a design decision rather than a bug |\n| **Mode** | test-runner — the studio editor runs library code, so follow these in your own checkout |\n| **Assumes** | [test() and the assertions gap](/learn/w1/d5/p2) · [the page fixture](/learn/w1/d5/p1) |\n| **Today ends unresolved on purpose** | [Implementation](/learn/w2/d5/p3) shows the fix's shape; week 3 builds it properly |",
       "checkpoints": [
         {
           "question": "After the split, `test 2` fails with `element(s) not found` on `getByText('Leela')`. What is wrong with `test 2`?",
@@ -50,13 +50,13 @@
             "Because the URL is set before the session is created"
           ],
           "answer": 1,
-          "explanation": "Nothing stops an unauthenticated browser loading `/dashboard` here; it just renders without the user's data. Assert on something only a signed-in user could see, such as the name or an account number. That is the same \"assert something observable\" habit from [Day 2.2](/learn/w2/d2/p2)."
+          "explanation": "Nothing stops an unauthenticated browser loading `/dashboard` here; it just renders without the user's data. Assert on something only a signed-in user could see, such as the name or an account number. That is the same \"assert something observable\" habit from [Day 2 - Fundamentals](/learn/w2/d2/p2)."
         }
       ],
       "recap": "- **Every `test()` gets its own fresh `page`** — a blank tab, no cookies, nothing carried over. That is Playwright's central design decision, not a quirk of this app.\n- The benefit is order-independence and parallelism. The cost is that shared state has to be shared on purpose.\n- Splitting a long test is the moment you first pay that cost, because a continuous story becomes several independent ones.\n- An isolation failure never announces itself — it shows up as a missing element somewhere downstream.\n- Assert on user-specific content, not on a URL, to prove you are signed in.\n- Copy-pasting login into every test works, and stops working once there are more than two or three."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **What this is** | a preview: the fix shown running for real, with its pieces named |\n| **What this is not** | the hooks lesson. [Week 3, Day 2.1](/learn/w3/d2/p1) and [2.2](/learn/w3/d2/p2) explain every piece properly. |\n| **Why stop here** | you have seen the problem today; the tool that solves it deserves its own lesson, not a footnote |",
+      "at_a_glance": "| | |\n|---|---|\n| **What this is** | a preview: the fix shown running for real, with its pieces named |\n| **What this is not** | the hooks lesson. [Week 3 - Day 2 - TypeScript](/learn/w3/d2/p1) and [2.2](/learn/w3/d2/p2) explain every piece properly. |\n| **Why stop here** | you have seen the problem today; the tool that solves it deserves its own lesson, not a footnote |",
       "checkpoints": [
         {
           "question": "Of the five pieces named here, which one runs once before the first test in the group — the place a shared login would go?",

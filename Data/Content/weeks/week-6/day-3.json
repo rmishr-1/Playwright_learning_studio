@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 3.1 - Prerequisites check\n\n**No new TypeScript today.** Git is a tool, not a language feature - so this file is short.\n\n| In play | Taught in |\n|---|---|\n| `async` / `await`, Promises | [week3/day3_1](/learn/w3/d3/p1) |\n| Template literals | no formal primer yet - short recap below |\n| Arrays of objects | [week3/day5_1](/learn/w3/d5/p1) |\n| `for...of` | [week4/day4_1](/learn/w4/d4/p1) |\n\nOne new API - and it is not Playwright.\n\n**Next:** [Day 3.2 - Git, for people who write tests](/learn/w6/d3/p2)",
+          "text": "# TypeScript - Prerequisites check\n\n**No new TypeScript today.** Git is a tool, not a language feature - so this file is short.\n\n| In play | Taught in |\n|---|---|\n| `async` / `await`, Promises | [week3/day3_1](/learn/w3/d3/p1) |\n| Template literals | no formal primer yet - short recap below |\n| Arrays of objects | [week3/day5_1](/learn/w3/d5/p1) |\n| `for...of` | [week4/day4_1](/learn/w4/d4/p1) |\n\nOne new API - and it is not Playwright.\n\n**Next:** [Fundamentals - Git, for people who write tests](/learn/w6/d3/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -85,7 +85,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 3.2 - Git, for people who write tests](/learn/w6/d3/p2)",
+          "text": "**Next:** [Fundamentals - Git, for people who write tests](/learn/w6/d3/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -103,7 +103,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 3.2 - Git, for people who write tests\n\nUntil now your tests have lived on your machine. That is fine until the day someone else needs\nthem, or a CI server does - and a CI server can only run code it can **fetch**.\n\nBy the end of this lesson you will have watched a repository get created, committed, pushed,\npulled, and a push **rejected** - all for real, in a temp folder.\n\n> **Mode: Deno.** No Playwright here. These cells run `git`.",
+          "text": "# Fundamentals - Git, for people who write tests\n\nUntil now your tests have lived on your machine. That is fine until the day someone else needs\nthem, or a CI server does - and a CI server can only run code it can **fetch**.\n\nBy the end of this lesson you will have watched a repository get created, committed, pushed,\npulled, and a push **rejected** - all for real, in a temp folder.\n\n> **Mode: Deno.** No Playwright here. These cells run `git`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -180,7 +180,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| Commit, then assume it is shared | nothing on GitHub; you never pushed |\n| Push without pulling | `! [rejected] (fetch first)` |\n| `git add .` from the wrong folder | half the project committed |\n| `master` when the branch is `main` | `src refspec master does not match any` |\n| Committing `node_modules/` | a huge, unreviewable repo - see [day3_3](/learn/w6/d3/p3) |\n\n**Next:** [Day 3.3 - What a real repo does and never commits](/learn/w6/d3/p3)",
+          "text": "## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| Commit, then assume it is shared | nothing on GitHub; you never pushed |\n| Push without pulling | `! [rejected] (fetch first)` |\n| `git add .` from the wrong folder | half the project committed |\n| `master` when the branch is `main` | `src refspec master does not match any` |\n| Committing `node_modules/` | a huge, unreviewable repo - see [day3_3](/learn/w6/d3/p3) |\n\n**Next:** [Implementation - What a real repo does and never commits](/learn/w6/d3/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -198,7 +198,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 3.3 - What a real repo does, and never commits\n\nSame commands, used the way a team uses them.\n\n## The daily loop\n\n```\ngit pull origin main        <- FIRST. before you write anything\n...write tests...\ngit status                  <- read it; do not skip to add\ngit add -A\ngit commit -m \"add payee validation tests\"\ngit push origin main\n```\n\nPull at the **start**, not just before pushing: you want to write against current code, not\ndiscover a conflict an hour later.",
+          "text": "# Implementation - What a real repo does, and never commits\n\nSame commands, used the way a team uses them.\n\n## The daily loop\n\n```\ngit pull origin main        <- FIRST. before you write anything\n...write tests...\ngit status                  <- read it; do not skip to add\ngit add -A\ngit commit -m \"add payee validation tests\"\ngit push origin main\n```\n\nPull at the **start**, not just before pushing: you want to write against current code, not\ndiscover a conflict an hour later.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -254,7 +254,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Public or private\n\nThe session uses a public repo so anyone can clone it in Jenkins with no credentials. Convenient\nfor learning, wrong at work.\n\n| | Public | Private |\n|---|---|---|\n| Jenkins needs credentials | no | **yes** |\n| Your selectors, URLs, test data are visible | **to everyone** | to your team |\n\n**Next:** [Day 3.4 - Practice](/learn/w6/d3/p4)",
+          "text": "## Public or private\n\nThe session uses a public repo so anyone can clone it in Jenkins with no credentials. Convenient\nfor learning, wrong at work.\n\n| | Public | Private |\n|---|---|---|\n| Jenkins needs credentials | no | **yes** |\n| Your selectors, URLs, test data are visible | **to everyone** | to your team |\n\n**Next:** [Practice](/learn/w6/d3/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -272,7 +272,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 3.4 - Practice\n\n> **Do these in a scratch folder**, the way [day3_2](/learn/w6/d3/p2) does. Do not practise against\n> this repository's real remote.",
+          "text": "# Practice - Practice\n\n> **Do these in a scratch folder**, the way [day3_2](/learn/w6/d3/p2) does. Do not practise against\n> this repository's real remote.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -328,7 +328,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 4.1 - Prerequisites](/learn/w6/d4/p1)",
+          "text": "**Next:** [Day 4 - TypeScript - Prerequisites](/learn/w6/d4/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null

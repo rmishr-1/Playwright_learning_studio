@@ -27,11 +27,13 @@ import {
   type RawNotebook,
 } from './notebook-parse';
 import {
+  applyDayRefs,
   applyGeneratedPlaceholder,
   applyHeadingFormat,
   applyOverlay,
   applyVariations,
   loadOverlay,
+  loadSolutions,
   loadVariations,
 } from './lesson-overlay';
 import type { CourseDay, CoursePart, PracticeProblem } from '../shared/contracts/course_day';
@@ -93,13 +95,6 @@ function readNotebook(file: string): RawNotebook | null {
   return JSON.parse(fs.readFileSync(file, 'utf-8')) as RawNotebook;
 }
 
-/** Authored solutions live outside the generated tree so a re-import cannot erase them. */
-function loadSolutions(week: number, day: number): Record<string, string> {
-  const file = path.join(SOLUTIONS, 'w' + week + 'd' + day + '.json');
-  if (!fs.existsSync(file)) return {};
-  return JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, string>;
-}
-
 function buildPart(
   week: number,
   day: number,
@@ -114,7 +109,7 @@ function buildPart(
     : { ...parseTeaching(nb, week), problems: [] as PracticeProblem[] };
 
   if (isPractice) {
-    const authored = loadSolutions(week, day);
+    const authored = loadSolutions(CONTENT, week, day);
     for (const p of parsed.problems) {
       p.solution = authored[String(p.number)] ?? null;
     }
@@ -194,7 +189,7 @@ function importDay(week: number, day: number): CourseDay | null {
 
   // Everything the notebooks do not decide, merged through the same functions `npm run overlay`
   // uses - one implementation, so the two paths cannot drift.
-  const withPlaceholder = applyGeneratedPlaceholder(built);
+  const withPlaceholder = applyDayRefs(applyGeneratedPlaceholder(built));
   const formatted = applyHeadingFormat(
     applyVariations(withPlaceholder, loadVariations(CONTENT, week, day)),
   );

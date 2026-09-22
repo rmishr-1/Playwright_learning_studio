@@ -15,14 +15,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 5.1 — TypeScript for the projects array\n\nOne concept, and you have most of it already. Today's config holds a **list** of browsers.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# TypeScript — TypeScript for the projects array\n\nOne concept, and you have most of it already. Today's config holds a **list** of browsers.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | Arrays of objects, and spread inside one | `projects: [ { … }, { … } ]` |\n\nAlready covered — links only: objects in [Day 1.1](/learn/w3/d1/p1); `===` in\n[Day 4.1](/learn/w3/d4/p1); `process.env` and ternaries appear again today.",
+          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | Arrays of objects, and spread inside one | `projects: [ { … }, { … } ]` |\n\nAlready covered — links only: objects in [Day 1 - TypeScript](/learn/w3/d1/p1); `===` in\n[Day 4 - TypeScript](/learn/w3/d4/p1); `process.env` and ternaries appear again today.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -71,7 +71,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected:** the preset at 1280×720, `mine` at 1920×1080, and `broken` back at **1280×720**.\n\nThat third line is a real config bug: your override silently does nothing. The spread goes **first**.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `projects: [ … ]` | Length multiplies your whole suite. |\n| `{ ...preset, override }` | Spread first, overrides after. |\n\n**Next:** [Day 5.2 — Running the suite](/learn/w3/d5/p2)",
+          "text": "**Expected:** the preset at 1280×720, `mine` at 1920×1080, and `broken` back at **1280×720**.\n\nThat third line is a real config bug: your override silently does nothing. The spread goes **first**.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `projects: [ … ]` | Length multiplies your whole suite. |\n| `{ ...preset, override }` | Spread first, overrides after. |\n\n**Next:** [Fundamentals - Running the suite](/learn/w3/d5/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -89,7 +89,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 5.2 — Running the suite\n\nYour users don't all use Chrome, CI is noisier than your laptop, and your colleagues don't want\nyour settings. By the end of this lesson the same tests run on three browsers, retry when the\nnetwork hiccups, and take their orders from the command line rather than the shared config.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Fundamentals — Running the suite\n\nYour users don't all use Chrome, CI is noisier than your laptop, and your colleagues don't want\nyour settings. By the end of this lesson the same tests run on three browsers, retry when the\nnetwork hiccups, and take their orders from the command line rather than the shared config.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -124,7 +124,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Workers: how nine runs finish quickly\n\nPlaywright runs tests in parallel across **workers** — separate processes, each with its own\nbrowser.\n\n| Setting | Meaning |\n|---|---|\n| `workers: 3` | three tests at a time |\n| `workers: 1` | one at a time — required for dependent tests ([Day 2.2](/learn/w3/d2/p2)) |\n| `workers: undefined` | about half your CPU cores |\n| `fullyParallel: true` | tests **within** a file may run in parallel too |\n\nCross-browser tests are ideal for parallelism — nothing is shared, so nothing can interfere.\nContrast Day 2's dependent chain, which had to be `serial`.",
+          "text": "## Workers: how nine runs finish quickly\n\nPlaywright runs tests in parallel across **workers** — separate processes, each with its own\nbrowser.\n\n| Setting | Meaning |\n|---|---|\n| `workers: 3` | three tests at a time |\n| `workers: 1` | one at a time — required for dependent tests ([Day 2 - Fundamentals](/learn/w3/d2/p2)) |\n| `workers: undefined` | about half your CPU cores |\n| `fullyParallel: true` | tests **within** a file may run in parallel too |\n\nCross-browser tests are ideal for parallelism — nothing is shared, so nothing can interfere.\nContrast Day 2's dependent chain, which had to be `serial`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -208,7 +208,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Add browsers when you have users on them.** Each one multiplies runtime.\n- **Match workers to cores**, not to ambition.\n- **Retries in CI, not locally.** Two is plenty; three means it's broken.\n- **Read the flaky count every run.** Green with six flaky tests is a warning.\n- **`--project` and `--headed` on the command line**, never committed.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Executable doesn't exist` | that engine isn't installed | `npx playwright install firefox webkit` |\n| Suite 3× slower after adding browsers | that's the multiplication | raise workers, or cut projects |\n| Dependent tests fail with several workers | they need ordering | `mode: \"serial\"` on the group |\n| CI hangs with no output | `headless: false` committed | remove it; use `--headed` |\n| \"flaky\" treated as \"passed\" | it *is* green — but it failed once | investigate; don't ignore it |\n| `Cannot use --browser` | your config defines `projects` | use `--project=<name>` |\n| Viewport override ignored | it came before the spread | spread first ([Day 5.1](/learn/w3/d5/p1)) |\n\n**Next:** [Day 5.3](/learn/w3/d5/p3) — a matrix and a retry policy you can afford.",
+          "text": "## Best practices\n\n- **Add browsers when you have users on them.** Each one multiplies runtime.\n- **Match workers to cores**, not to ambition.\n- **Retries in CI, not locally.** Two is plenty; three means it's broken.\n- **Read the flaky count every run.** Green with six flaky tests is a warning.\n- **`--project` and `--headed` on the command line**, never committed.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Executable doesn't exist` | that engine isn't installed | `npx playwright install firefox webkit` |\n| Suite 3× slower after adding browsers | that's the multiplication | raise workers, or cut projects |\n| Dependent tests fail with several workers | they need ordering | `mode: \"serial\"` on the group |\n| CI hangs with no output | `headless: false` committed | remove it; use `--headed` |\n| \"flaky\" treated as \"passed\" | it *is* green — but it failed once | investigate; don't ignore it |\n| `Cannot use --browser` | your config defines `projects` | use `--project=<name>` |\n| Viewport override ignored | it came before the spread | spread first ([TypeScript](/learn/w3/d5/p1)) |\n\n**Next:** [Implementation](/learn/w3/d5/p3) — a matrix and a retry policy you can afford.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -226,7 +226,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 5.3 — A matrix and a policy you can afford\n\nSame settings as [Day 5.2](/learn/w3/d5/p2). No new API. Two decisions: **which browsers, when** — and\n**what retries do to a team over months.**",
+          "text": "# Implementation — A matrix and a policy you can afford\n\nSame settings as [Fundamentals](/learn/w3/d5/p2). No new API. Two decisions: **which browsers, when** — and\n**what retries do to a team over months.**",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -275,7 +275,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Expressing all of it in config\n\nProjects and retries are just data, so the whole shape can depend on the environment:\n\n```ts\nconst isCI = !!process.env.CI;\nconst isNightly = process.env.SUITE === \"nightly\";\n\nexport default defineConfig({\n  workers: isCI ? 4 : undefined,\n  retries: isCI ? 2 : 0,\n  projects: isCI && !isNightly ? [chromium] : [chromium, firefox, webkit],\n});\n```\n\nOne expression per decision, three situations, nobody editing config before a push. This repo's root\nconfig already does the smaller version for `retries` and `forbidOnly`.\n\n### What else a project can vary\n\nBrowsers are the obvious use, not the only one — a project sets **any** `use` option:\n\n| Varies | Example |\n|---|---|\n| viewport | desktop vs `devices[\"iPhone 13\"]` |\n| locale | `use: { locale: \"de-DE\" }` |\n| environment | `use: { baseURL: stagingUrl }` |\n| auth state | signed-in vs anonymous |\n\n## What a reviewer checks\n\n- **Is the PR matrix affordable?** If people skip CI because it's slow, coverage is zero.\n- **Does the nightly matrix run, and does anyone read it?**\n- **Retries guarded by `CI`**, and ≤ 2.\n- **Someone owns the flaky count.**\n- **`headless: false` not committed**; no commented-out projects in a diff.\n\n**Next:** [Day 5.4](/learn/w3/d5/p4) — your turn.",
+          "text": "## Expressing all of it in config\n\nProjects and retries are just data, so the whole shape can depend on the environment:\n\n```ts\nconst isCI = !!process.env.CI;\nconst isNightly = process.env.SUITE === \"nightly\";\n\nexport default defineConfig({\n  workers: isCI ? 4 : undefined,\n  retries: isCI ? 2 : 0,\n  projects: isCI && !isNightly ? [chromium] : [chromium, firefox, webkit],\n});\n```\n\nOne expression per decision, three situations, nobody editing config before a push. This repo's root\nconfig already does the smaller version for `retries` and `forbidOnly`.\n\n### What else a project can vary\n\nBrowsers are the obvious use, not the only one — a project sets **any** `use` option:\n\n| Varies | Example |\n|---|---|\n| viewport | desktop vs `devices[\"iPhone 13\"]` |\n| locale | `use: { locale: \"de-DE\" }` |\n| environment | `use: { baseURL: stagingUrl }` |\n| auth state | signed-in vs anonymous |\n\n## What a reviewer checks\n\n- **Is the PR matrix affordable?** If people skip CI because it's slow, coverage is zero.\n- **Does the nightly matrix run, and does anyone read it?**\n- **Retries guarded by `CI`**, and ≤ 2.\n- **Someone owns the flaky count.**\n- **`headless: false` not committed**; no commented-out projects in a diff.\n\n**Next:** [Practice](/learn/w3/d5/p4) — your turn.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -293,7 +293,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 5.4 — Practice\n\nThree problems. No answer key.\n\nConfigs to copy: `week3/generated/day4-browsers.config.ts` (three engines) and\n`day5-retries.config.ts` (retries on). All three browsers are installed and verified — chromium 151,\nfirefox 153, webkit 26.\n\n**Do not edit the root `playwright.config.ts`** in any of these.\n\n> Stuck past twenty minutes? Back to [Day 5.2](/learn/w3/d5/p2).",
+          "text": "# Practice — Practice\n\nThree problems. No answer key.\n\nConfigs to copy: `week3/generated/day4-browsers.config.ts` (three engines) and\n`day5-retries.config.ts` (retries on). All three browsers are installed and verified — chromium 151,\nfirefox 153, webkit 26.\n\n**Do not edit the root `playwright.config.ts`** in any of these.\n\n> Stuck past twenty minutes? Back to [Fundamentals](/learn/w3/d5/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -338,7 +338,7 @@
         {
           "number": 2,
           "difficulty": "Intermediate",
-          "statement": "**Build.** Measure a real flake rate instead of guessing.\n\n1. Write a test that fails roughly half the time — e.g. assert on something with a deadline just\n   barely too short\n2. Run with `--repeat-each=20` and **no** retries; count the failures\n3. Run again with `--retries=2`; record the tally\n4. State the measured fail rate, and what retries did to the *reported* result\n\n**Check yourself.** Your two numbers disagree and you can say why in one sentence. That gap is the\nwhole argument of [Day 5.3](/learn/w3/d5/p3).\n\n> **Hint** — don't use randomness; make it timing-based so the flake is real.",
+          "statement": "**Build.** Measure a real flake rate instead of guessing.\n\n1. Write a test that fails roughly half the time — e.g. assert on something with a deadline just\n   barely too short\n2. Run with `--repeat-each=20` and **no** retries; count the failures\n3. Run again with `--retries=2`; record the tally\n4. State the measured fail rate, and what retries did to the *reported* result\n\n**Check yourself.** Your two numbers disagree and you can say why in one sentence. That gap is the\nwhole argument of [Implementation](/learn/w3/d5/p3).\n\n> **Hint** — don't use randomness; make it timing-based so the flake is real.",
           "stub": "// Problem 2 — your code here.",
           "solution": null
         },

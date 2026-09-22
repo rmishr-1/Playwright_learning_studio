@@ -119,7 +119,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `const` | can't reassign the variable; the value it points at can still mutate |\n| Static typing | `tsc` fixes and checks every type before your code runs |\n| Inference | TypeScript reads the type off the assigned value — you rarely annotate |\n\n**Next:** [Day 2.2 — XPath, CSS, and your first real assertions](/learn/w2/d2/p2)",
+          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `const` | can't reassign the variable; the value it points at can still mutate |\n| Static typing | `tsc` fixes and checks every type before your code runs |\n| Inference | TypeScript reads the type off the assigned value — you rarely annotate |\n\n**Next:** [Fundamentals - XPath, CSS, and your first real assertions](/learn/w2/d2/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -188,7 +188,7 @@
         },
         {
           "type": "markdown",
-          "text": "## XPath: absolute vs relative\n\n| | Absolute | Relative |\n|---|---|---|\n| Starts with | `/html/body/div[1]/...` | `//tag[@attribute='value']` |\n| Fragile? | yes — one inserted `<div>` breaks it | no — matches anywhere in the document |\n| Use it | never | when nothing else identifies the element cleanly |\n\nAlways write relative XPath (`//...`). Absolute XPath is shown here only so you recognize\nit and know to avoid it.\n\n## CSS locator syntax, for contrast\n\n| | XPath | CSS |\n|---|---|---|\n| Syntax | `//tag[@attribute='value']` | `tag[attribute='value']` |\n| Prefix | `//` and `@` | neither |\n| Can it go **up** the DOM (parent, ancestor) | yes | no |\n| Can it go **sideways** (sibling) | yes | only \"next sibling\" (`+`) |\n\nPlaywright reaches for `getByRole`/`getByLabel`/`getByPlaceholder` before either of these\n— [Week 1, Day 4.2](/learn/w1/d4/p2) covered why. XPath and CSS are for when\nnothing on the element identifies it cleanly, which is common on older apps like today's.",
+          "text": "## XPath: absolute vs relative\n\n| | Absolute | Relative |\n|---|---|---|\n| Starts with | `/html/body/div[1]/...` | `//tag[@attribute='value']` |\n| Fragile? | yes — one inserted `<div>` breaks it | no — matches anywhere in the document |\n| Use it | never | when nothing else identifies the element cleanly |\n\nAlways write relative XPath (`//...`). Absolute XPath is shown here only so you recognize\nit and know to avoid it.\n\n## CSS locator syntax, for contrast\n\n| | XPath | CSS |\n|---|---|---|\n| Syntax | `//tag[@attribute='value']` | `tag[attribute='value']` |\n| Prefix | `//` and `@` | neither |\n| Can it go **up** the DOM (parent, ancestor) | yes | no |\n| Can it go **sideways** (sibling) | yes | only \"next sibling\" (`+`) |\n\nPlaywright reaches for `getByRole`/`getByLabel`/`getByPlaceholder` before either of these\n— [Week 1 - Day 4 - Fundamentals](/learn/w1/d4/p2) covered why. XPath and CSS are for when\nnothing on the element identifies it cleanly, which is common on older apps like today's.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -218,7 +218,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Assigning a locator to `const`\n\n[Day 2.1](/learn/w2/d2/p1) is the full primer — the one-line version: the locator reference\nis never reassigned, so it's always `const`.",
+          "text": "## Assigning a locator to `const`\n\n[TypeScript](/learn/w2/d2/p1) is the full primer — the one-line version: the locator reference\nis never reassigned, so it's always `const`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -328,7 +328,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Day 2.3](/learn/w2/d2/p3) wraps these assertions in a reusable function, the way Day 1.3 did for actions.",
+          "text": "## What's next\n\n[Implementation](/learn/w2/d2/p3) wraps these assertions in a reusable function, the way [Day 1 - Implementation](/learn/w2/d1/p3) did for actions.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -346,21 +346,21 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 2 - Implementation - The same assertions, wrapped for reuse\n\nBy the end of this lesson you will have wrapped yesterday's `expect()` calls in one\nfunction two different tests both call, extending [Day 1.3](/learn/w2/d1/p3)'s helper file.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 2.2](/learn/w2/d2/p2).",
+          "text": "# Week 2 - Day 2 - Implementation - The same assertions, wrapped for reuse\n\nBy the end of this lesson you will have wrapped yesterday's `expect()` calls in one\nfunction two different tests both call, extending [Day 1 - Implementation](/learn/w2/d1/p3)'s helper file.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Fundamentals](/learn/w2/d2/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Day 2.2](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1.3](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
+          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1 - Implementation](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The problem with what we wrote yesterday\n\nIf three tests each need to confirm the form accepted its data, that's the same three\n`expect()` calls copy-pasted three times — and a renamed field means fixing it in three places.\n\n## Same code, with structure around it\n\n| In Day 2.2 you wrote | Here it becomes | Why |\n|---|---|---|\n| three separate `expect(...)` calls inline in the test | one call: `await expectFormFilledCorrectly(page, email)` | the checks live in one place, reusable by every test that fills this form |\n\n**This is still a function, not a page object.** A real page object (week 3) is a\n`class` that **never** asserts — actions and checks stay separate. The helper below is a\ndifferent, equally common pattern: a **shared assertion helper**, and it's allowed to\nassert because that is its entire job.",
+          "text": "## The problem with what we wrote yesterday\n\nIf three tests each need to confirm the form accepted its data, that's the same three\n`expect()` calls copy-pasted three times — and a renamed field means fixing it in three places.\n\n## Same code, with structure around it\n\n| In [Fundamentals](/learn/w2/d2/p2) you wrote | Here it becomes | Why |\n|---|---|---|\n| three separate `expect(...)` calls inline in the test | one call: `await expectFormFilledCorrectly(page, email)` | the checks live in one place, reusable by every test that fills this form |\n\n**This is still a function, not a page object.** A real page object (week 3) is a\n`class` that **never** asserts — actions and checks stay separate. The helper below is a\ndifferent, equally common pattern: a **shared assertion helper**, and it's allowed to\nassert because that is its entire job.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -425,7 +425,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Day 2.4](/learn/w2/d2/p4) — your turn, with no worked examples to lean on.",
+          "text": "## What's next\n\n[Practice](/learn/w2/d2/p4) — your turn, with no worked examples to lean on.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -443,14 +443,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 2 - Practice - XPath, CSS, and assertions\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 2.1](/learn/w2/d2/p1) or [Day 2.2](/learn/w2/d2/p2). Go back, re-read, come here again.",
+          "text": "# Week 2 - Day 2 - Practice - XPath, CSS, and assertions\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [TypeScript](/learn/w2/d2/p1) or [Fundamentals](/learn/w2/d2/p2). Go back, re-read, come here again.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | XPath by hand, then assertions, then a helper of your own |\n| **Pulls on** | [Day 2.1](/learn/w2/d2/p1) for `const` · [Day 2.2](/learn/w2/d2/p2) for matchers · [Day 2.3](/learn/w2/d2/p3) for the shape |\n| **Watch for** | an assertion that passes for the wrong reason — it is the failure mode this whole day exists to fix |",
+          "text": "| | |\n|---|---|\n| **Three problems** | XPath by hand, then assertions, then a helper of your own |\n| **Pulls on** | [TypeScript](/learn/w2/d2/p1) for `const` · [Fundamentals](/learn/w2/d2/p2) for matchers · [Implementation](/learn/w2/d2/p3) for the shape |\n| **Watch for** | an assertion that passes for the wrong reason — it is the failure mode this whole day exists to fix |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -478,7 +478,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you are done\n\nLook back at your Problem 3 helper and Day 1.3's action helper side by side: two\nfunctions, two jobs, one file. That separation is most of what week 3 formalizes into a\nclass.",
+          "text": "## When you are done\n\nLook back at your Problem 3 helper and the [Day 1 - Implementation](/learn/w2/d1/p3) lesson's action helper side by side: two\nfunctions, two jobs, one file. That separation is most of what week 3 formalizes into a\nclass.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -488,14 +488,14 @@
         {
           "number": 1,
           "difficulty": "Beginner",
-          "statement": "**What to build.** Locate the Refresh button with a relative XPath expression (not CSS,\nnot `getByRole`), assign it to a `const`, and assert its visible text with `toContainText`.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** `npx playwright test` reports `1 passed`.\n\n> **Hint** — the button's own `id` from Day 1.2's probing was `Button1`.",
+          "statement": "**What to build.** Locate the Refresh button with a relative XPath expression (not CSS,\nnot `getByRole`), assign it to a `const`, and assert its visible text with `toContainText`.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** `npx playwright test` reports `1 passed`.\n\n> **Hint** — the button's own `id` from the [Day 1 - Fundamentals](/learn/w2/d1/p2) lesson's probing was `Button1`.",
           "stub": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Problem 1 — your code here.",
-          "solution": "`week2/generated/day2-practice-refresh.spec.ts`:\n\n```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"the Refresh button says what it should\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  // Relative XPath: starts //, anchors on the attribute, not on the tree shape.\n  const refresh = page.locator(\"xpath=//button[@id='Button1']\");\n\n  await expect(refresh).toContainText(\"Refresh\");\n});\n```\n\n```bash\nnpx playwright test week2/generated/day2-practice-refresh.spec.ts\n```\n→ `1 passed`.\n\n**Relative, not absolute.** `//button[@id='Button1']` says *\"a button anywhere with this id\"*. The absolute form — `/html/body/div[2]/div/form/div[13]/div/button` — describes a route through the tree, and one wrapper `<div>` added by a redesign sends it somewhere else. Both find the control today; only one survives a layout change.\n\n**Why `toContainText` rather than `toHaveText`.** `toContainText` is a substring check, so it does not care about surrounding whitespace. This page has a real trailing-space problem — Day 3.2 proves it on the `<h1>` — and `toHaveText` would make you match it exactly.\n\n**And the honest note the hint is pointing at:** XPath here is an *exercise*, not a recommendation. `getByRole('button', { name: 'Refresh' })` is the locator you would actually ship. XPath is the fallback for when nothing better exists — which is exactly the situation on Day 4.2."
+          "solution": "`week2/generated/day2-practice-refresh.spec.ts`:\n\n```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"the Refresh button says what it should\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  // Relative XPath: starts //, anchors on the attribute, not on the tree shape.\n  const refresh = page.locator(\"xpath=//button[@id='Button1']\");\n\n  await expect(refresh).toContainText(\"Refresh\");\n});\n```\n\n```bash\nnpx playwright test week2/generated/day2-practice-refresh.spec.ts\n```\n→ `1 passed`.\n\n**Relative, not absolute.** `//button[@id='Button1']` says *\"a button anywhere with this id\"*. The absolute form, `/html/body/div[2]/div/form/div[13]/div/button`, describes a route through the tree, and one wrapper `<div>` added by a redesign sends it somewhere else. Both find the control today; only one survives a layout change.\n\n**Why `toContainText` rather than `toHaveText`.** `toContainText` is a substring check, so it does not care about surrounding whitespace. This page has a real trailing-space problem, which [Day 3 - Fundamentals](/learn/w2/d3/p2) proves on the `<h1>`, and `toHaveText` would make you match it exactly.\n\n**And the honest note the hint is pointing at:** XPath here is an *exercise*, not a recommendation. `getByRole('button', { name: 'Refresh' })` is the locator you would actually ship. XPath is the fallback for when nothing better exists — which is exactly the situation on [Day 4 - Fundamentals](/learn/w2/d4/p2)."
         },
         {
           "number": 2,
           "difficulty": "Intermediate",
-          "statement": "**What to build.** Fill out the whole registration form (reuse [Day 1.3](/learn/w2/d1/p3)'s\nhelper or write your own), then assert on at least three different field values with\n`toHaveValue`, plus one `toHaveURL` assertion confirming Submit didn't navigate away.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** All assertions pass on the first run — if one is flaky, you likely asserted on something this app doesn't actually guarantee.",
+          "statement": "**What to build.** Fill out the whole registration form (reuse [Day 1 - Implementation](/learn/w2/d1/p3)'s\nhelper or write your own), then assert on at least three different field values with\n`toHaveValue`, plus one `toHaveURL` assertion confirming Submit didn't navigate away.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** All assertions pass on the first run — if one is flaky, you likely asserted on something this app doesn't actually guarantee.",
           "stub": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Problem 2 — your code here.",
           "solution": "```ts\nimport { test, expect } from \"@playwright/test\";\nimport { fillRegistrationForm } from \"./registration-helpers\";\n\ntest(\"the form keeps what it was given, and Submit stays on the page\", async ({ page }) => {\n  const email = \"learner.three@example.com\";\n  await fillRegistrationForm(page, email);\n\n  // Three different fields, three different values.\n  await expect(page.getByPlaceholder(\"First Name\")).toHaveValue(\"Ada\");\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await expect(page.locator(\"textarea\")).toHaveValue(\"123 Analytical Engine Way\");\n\n  await page.locator(\"#submitbtn\").click();\n\n  // This form posts to itself - there is no confirmation page to assert on.\n  await expect(page).toHaveURL(/Register\\.html/);\n});\n```\n\n**`toHaveValue`, not `toHaveText`.** An `<input>` has no text content — its content is the `value` *property*. `toHaveText` on a filled input matches the empty string and the assertion fails in a way that reads like the fill did not happen.\n\n**Why the `toHaveURL` assertion is the interesting one.** The instinct after clicking Submit is to assert on a confirmation message. This app does not produce one: it posts back to `Register.html` and the fields reset. So the honest thing to assert is what actually happens — you are still on the same page. Asserting on a success banner that does not exist gives you a test that fails for the right reason and the wrong cause, and you lose an afternoon to it.\n\nWriting tests against the app you have, rather than the app you assumed, is most of this day."
         },
@@ -504,7 +504,7 @@
           "difficulty": "Advanced",
           "statement": "**What to build.** Add a second assertion helper function to\n`week2/generated/registration-helpers.ts` — for example one that checks a chosen skill\nand country were actually selected — then a spec that imports and calls it.\n\n**Where.** `week2/generated/registration-helpers.ts`, plus a spec in `week2/generated/`.\n\n**How you will know it worked.** The new function contains only `expect()` calls, no\n`.fill()`/`.check()`/`.selectOption()` — keep actions and checks in separate functions.",
           "stub": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Problem 3 — your code here.",
-          "solution": "Add the checker beside the filler in `week2/generated/registration-helpers.ts`:\n\n```ts\nimport type { Page } from \"@playwright/test\";\nimport { expect } from \"@playwright/test\";\n\nexport async function fillRegistrationForm(page: Page, email: string) {\n  /* ... as before ... */\n}\n\nexport async function expectSkillAndCountrySelected(\n  page: Page,\n  skill: string,\n  country: string,\n) {\n  await expect(page.locator(\"#Skills\")).toHaveValue(skill);\n  await expect(page.locator(\"#country\")).toHaveValue(country);\n}\n```\n\nAnd a spec that uses both:\n\n```ts\nimport { test } from \"@playwright/test\";\nimport { fillRegistrationForm, expectSkillAndCountrySelected } from \"./registration-helpers\";\n\ntest(\"the chosen skill and country actually stick\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.four@example.com\");\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n\n  await expectSkillAndCountrySelected(page, \"Java\", \"India\");\n});\n```\n\n**Note where the `expect` lives.** In Week 1 Day 5.3 the rule was that page objects never assert. This helper does — and that is not a contradiction, because it is a different kind of helper. Its *name* says it asserts (`expect...`), so a caller reading the spec knows exactly what it does. The rule that matters is not \"never assert in a helper\"; it is **never hide an assertion inside something that reads like an action**. `fillRegistrationForm` must not assert. `expectSkillAndCountrySelected` must.\n\n> `#country` takes the option **value**, which happens to equal the label here. Where a select's value and label differ, `selectOption({ label: '...' })` is the unambiguous form."
+          "solution": "Add the checker beside the filler in `week2/generated/registration-helpers.ts`:\n\n```ts\nimport type { Page } from \"@playwright/test\";\nimport { expect } from \"@playwright/test\";\n\nexport async function fillRegistrationForm(page: Page, email: string) {\n  /* ... as before ... */\n}\n\nexport async function expectSkillAndCountrySelected(\n  page: Page,\n  skill: string,\n  country: string,\n) {\n  await expect(page.locator(\"#Skills\")).toHaveValue(skill);\n  await expect(page.locator(\"#country\")).toHaveValue(country);\n}\n```\n\nAnd a spec that uses both:\n\n```ts\nimport { test } from \"@playwright/test\";\nimport { fillRegistrationForm, expectSkillAndCountrySelected } from \"./registration-helpers\";\n\ntest(\"the chosen skill and country actually stick\", async ({ page }) => {\n  await fillRegistrationForm(page, \"learner.four@example.com\");\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n\n  await expectSkillAndCountrySelected(page, \"Java\", \"India\");\n});\n```\n\n**Note where the `expect` lives.** In [Week 1 - Day 5 - Implementation](/learn/w1/d5/p3) the rule was that page objects never assert. This helper does — and that is not a contradiction, because it is a different kind of helper. Its *name* says it asserts (`expect...`), so a caller reading the spec knows exactly what it does. The rule that matters is not \"never assert in a helper\"; it is **never hide an assertion inside something that reads like an action**. `fillRegistrationForm` must not assert. `expectSkillAndCountrySelected` must.\n\n> `#country` takes the option **value**, which happens to equal the label here. Where a select's value and label differ, `selectOption({ label: '...' })` is the unambiguous form."
         }
       ]
     }

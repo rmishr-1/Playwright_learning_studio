@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 1.1 — TypeScript for configuring the runner\n\nThree small things. Today you edit `playwright.config.ts`, and all three appear in it.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# TypeScript — TypeScript for configuring the runner\n\nThree small things. Today you edit `playwright.config.ts`, and all three appear in it.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -106,7 +106,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected:** the config object, then the string.\n\nNotebook cells can't use `export`, so the real forms are shown as comments. You'll write the\ngenuine `export default` in Day 3 when you build a shared class.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Objects | The config is one object; groups are nested objects. |\n| `60_000` | Same as `60000`. Milliseconds, always. |\n| `export default` | One per file. How the config reaches Playwright. |\n\n**Next:** [Day 1.2 — Timeouts: what waits, and for how long](/learn/w3/d1/p2)",
+          "text": "**Expected:** the config object, then the string.\n\nNotebook cells can't use `export`, so the real forms are shown as comments. You'll write the\ngenuine `export default` in Day 3 when you build a shared class.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| Objects | The config is one object; groups are nested objects. |\n| `60_000` | Same as `60000`. Milliseconds, always. |\n| `export default` | One per file. How the config reaches Playwright. |\n\n**Next:** [Fundamentals - Timeouts: what waits, and for how long](/learn/w3/d1/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -131,7 +131,7 @@
         },
         {
           "type": "markdown",
-          "text": "# Week 3, Day 1.2 — Timeouts: what waits, and for how long\n\nBy the end you'll know why a test can hang for 30 seconds, why an assertion gives up after 5,\nand why raising both is usually the wrong fix.\n\nYou'll also measure it yourself rather than taking my word for it.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
+          "text": "# Fundamentals — Timeouts: what waits, and for how long\n\nBy the end you'll know why a test can hang for 30 seconds, why an assertion gives up after 5,\nand why raising both is usually the wrong fix.\n\nYou'll also measure it yourself rather than taking my word for it.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -278,7 +278,7 @@
         },
         {
           "type": "markdown",
-          "text": "**When to actually raise them:** the developers have told you the server is slow today and\ncan't fix it yet. That's a real reason. \"The test is flaky\" is not — a longer timeout hides\nthe flake instead of fixing it, and every future failure now takes twice as long to report.\n\nPrefer the narrowest scope that solves it: one assertion, then one test (`test.setTimeout`),\nthen the whole project. Day 1.3 covers those.",
+          "text": "**When to actually raise them:** the developers have told you the server is slow today and\ncan't fix it yet. That's a real reason. \"The test is flaky\" is not — a longer timeout hides\nthe flake instead of fixing it, and every future failure now takes twice as long to report.\n\nPrefer the narrowest scope that solves it: one assertion, then one test (`test.setTimeout`),\nthen the whole project. [Implementation](/learn/w3/d1/p3) covers those.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -306,7 +306,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Never commit `waitForTimeout`.** Wait for a condition, not a clock.\n- **Leave the defaults alone** unless you have a named, temporary reason.\n- **Narrowest scope first** — one assertion beats one test beats the whole project.\n- **Read the error before changing a number.** Strict-mode and timeout failures look similar and need opposite fixes.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Timeout 30000ms exceeded` | locator matches nothing | check the selector, not the timeout |\n| `strict mode violation … 2 elements` | locator matches too much | narrow it |\n| Suite got slower after raising a timeout | failures now take longer | put it back; fix the locator |\n| `expect` still fails at 5s after raising `timeout` | wrong setting | it lives under `expect: { timeout }` |\n| Test passes locally, times out in CI | CI is slower | raise for that project only |\n\n**Next:** [Day 1.3](/learn/w3/d1/p3) — where these settings belong once a suite is real.",
+          "text": "## Best practices\n\n- **Never commit `waitForTimeout`.** Wait for a condition, not a clock.\n- **Leave the defaults alone** unless you have a named, temporary reason.\n- **Narrowest scope first** — one assertion beats one test beats the whole project.\n- **Read the error before changing a number.** Strict-mode and timeout failures look similar and need opposite fixes.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `Timeout 30000ms exceeded` | locator matches nothing | check the selector, not the timeout |\n| `strict mode violation … 2 elements` | locator matches too much | narrow it |\n| Suite got slower after raising a timeout | failures now take longer | put it back; fix the locator |\n| `expect` still fails at 5s after raising `timeout` | wrong setting | it lives under `expect: { timeout }` |\n| Test passes locally, times out in CI | CI is slower | raise for that project only |\n\n**Next:** [Implementation](/learn/w3/d1/p3) — where these settings belong once a suite is real.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -324,7 +324,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 1.3 — Timeouts in a real config\n\nSame settings as [Day 1.2](/learn/w3/d1/p2). No new API. What changes is **scope** — choosing the\nsmallest place a change can live.",
+          "text": "# Implementation — Timeouts in a real config\n\nSame settings as [Fundamentals](/learn/w3/d1/p2). No new API. What changes is **scope** — choosing the\nsmallest place a change can live.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -352,7 +352,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What a framework does instead of waiting\n\nMost timeout increases are a symptom. The underlying cause is nearly always one of these, and\neach has a real fix:\n\n| Symptom | Root cause | Real fix |\n|---|---|---|\n| Waiting for a spinner to clear | asserting on the wrong thing | assert on the *result*, not the spinner |\n| Waiting after a click | racing a navigation | `await expect(page).toHaveURL(...)` |\n| Waiting for data to load | the API is slow | mock it, or seed data via API |\n| Waiting \"just in case\" | no condition in mind | delete the wait; find the condition |\n\nThat last row is the common one. A `waitForTimeout` with no comment is a note saying *\"I did\nnot know what I was waiting for\"* — and it will be copied into the next twenty tests by\nsomeone who assumes it was load-bearing.\n\n## What a reviewer checks\n\n- **No `waitForTimeout` in committed code.** If it's genuinely needed, it carries a comment saying why.\n- **No timeout raised without a reason** recorded next to it.\n- **Global timeouts unchanged** unless the whole environment is slow.\n- **CI differences expressed in config**, not edited by hand before a push.\n- Slow tests marked `test.slow()` rather than the project timeout being raised for all.\n\n**Next:** [Day 1.4](/learn/w3/d1/p4) — your turn.",
+          "text": "## What a framework does instead of waiting\n\nMost timeout increases are a symptom. The underlying cause is nearly always one of these, and\neach has a real fix:\n\n| Symptom | Root cause | Real fix |\n|---|---|---|\n| Waiting for a spinner to clear | asserting on the wrong thing | assert on the *result*, not the spinner |\n| Waiting after a click | racing a navigation | `await expect(page).toHaveURL(...)` |\n| Waiting for data to load | the API is slow | mock it, or seed data via API |\n| Waiting \"just in case\" | no condition in mind | delete the wait; find the condition |\n\nThat last row is the common one. A `waitForTimeout` with no comment is a note saying *\"I did\nnot know what I was waiting for\"* — and it will be copied into the next twenty tests by\nsomeone who assumes it was load-bearing.\n\n## What a reviewer checks\n\n- **No `waitForTimeout` in committed code.** If it's genuinely needed, it carries a comment saying why.\n- **No timeout raised without a reason** recorded next to it.\n- **Global timeouts unchanged** unless the whole environment is slow.\n- **CI differences expressed in config**, not edited by hand before a push.\n- Slow tests marked `test.slow()` rather than the project timeout being raised for all.\n\n**Next:** [Practice](/learn/w3/d1/p4) — your turn.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -370,7 +370,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 1.4 — Practice\n\nThree problems. No answer key — each tells you how to check yourself.\n\nApp: `https://test-automation-banking.vercel.app/`, sign in with Leela (`leela@gmail.com` /\n`Leela@123`) or use the `login()` helper.\n\n> Stuck past twenty minutes? Back to [Day 1.2](/learn/w3/d1/p2).",
+          "text": "# Practice — Practice\n\nThree problems. No answer key — each tells you how to check yourself.\n\nApp: `https://test-automation-banking.vercel.app/`, sign in with Leela (`leela@gmail.com` /\n`Leela@123`) or use the `login()` helper.\n\n> Stuck past twenty minutes? Back to [Fundamentals](/learn/w3/d1/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -398,7 +398,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**Which of your three timeout overrides would still be there in a year?** The per-assertion\none usually survives, because it documents a genuinely slow element. The global one usually\nturns out to be somebody's temporary workaround that nobody dared remove.\n\n**Next:** [Day 2.1](/learn/w3/d2/p1) — sharing one login across several tests.",
+          "text": "## When you're done\n\n**Which of your three timeout overrides would still be there in a year?** The per-assertion\none usually survives, because it documents a genuinely slow element. The global one usually\nturns out to be somebody's temporary workaround that nobody dared remove.\n\n**Next:** [Day 2 - TypeScript](/learn/w3/d2/p1) — sharing one login across several tests.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -415,7 +415,7 @@
         {
           "number": 2,
           "difficulty": "Intermediate",
-          "statement": "**Build.** Prove that a big timeout costs nothing when things work.\n\nSign in and open all four dashboard tiles — `Transaction History`, `Pay Bills`, `Add Payee`,\n`Manage Payee` — each with a **60-second** deadline on the assertion. Time the whole journey.\n\n**Check yourself.** Total runtime is a few seconds, not four minutes. State the total, and\nwrite one sentence explaining to a sceptical colleague why the 60 s didn't slow it down.\n\n> **Hint** — one tile is ambiguous by text. You met it in Day 1.2 Example 4.",
+          "statement": "**Build.** Prove that a big timeout costs nothing when things work.\n\nSign in and open all four dashboard tiles — `Transaction History`, `Pay Bills`, `Add Payee`,\n`Manage Payee` — each with a **60-second** deadline on the assertion. Time the whole journey.\n\n**Check yourself.** Total runtime is a few seconds, not four minutes. State the total, and\nwrite one sentence explaining to a sceptical colleague why the 60 s didn't slow it down.\n\n> **Hint** — one tile is ambiguous by text. You met it in [Fundamentals](/learn/w3/d1/p2) Example 4.",
           "stub": "// Problem 2 — your code here.",
           "solution": null
         },

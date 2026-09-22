@@ -334,7 +334,25 @@ and both "When you're done" and "When you are done".
 | Where the learner types code in the studio | the editor | the cell, lesson cell, here |
 | Running code outside the studio | in your own project | own checkout, run-it-yourself, a real terminal |
 | The result of an example | **Output** | Expected result, Expected, Expected (verified live) |
-| A link to another lesson | [Week 1 - Day 5 - Fundamentals](/learn/w1/d5/p2) in running text; [Fundamentals](/learn/w1/d5/p2) when the lesson is on the same day | Day 5.2, week3/day5, "yesterday" |
+| A reference to another lesson | the name its heading uses, shortened by context (below) | Day 5.2, week3/day5, "yesterday" |
+
+### Referring to another lesson
+
+Refer to a lesson by the name its heading uses, and drop the parts the reader already knows:
+
+| Where the target is | Write | Example |
+|---|---|---|
+| The same day | the tab name | [Fundamentals](/learn/w1/d5/p2) |
+| The same week, another day | Day and tab | [Day 2 - Fundamentals](/learn/w1/d2/p2) |
+| Another week | week, day, and tab | [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1) |
+
+Make every reference a link. For a possessive, write "the [Fundamentals](/learn/w1/d5/p2)
+lesson's version", not "Fundamentals's version". Headings keep plain text, without links.
+
+Never write the old notebook numbering. "Day 5.2" meant day 5, notebook 2. A learner never sees
+that number anywhere else, because the page calls that lesson Fundamentals. `relabelDayRefs()` in
+`scripts/notebook-parse.ts` rewrites old references in generated text on every overlay, and the
+`insider-term` rule fails authored text that contains one.
 
 ### Spelling and punctuation
 
@@ -490,7 +508,7 @@ checked only a hard-coded list of rule names. As a result, a rule could be added
 | `banned-phrase` | The colloquialisms in section 5 |
 | `defines-by-absence` | "no new TypeScript", "no code today", a table row that answers "none", "nothing to learn" |
 | `british-spelling` | *-ise*, *-our*, *-re*, *-ogue*, and doubled *l* forms |
-| `insider-term` | The words in section 11 |
+| `insider-term` | The words in section 11, and old "Day N.P" references |
 | `exclamation` | Any exclamation mark outside code |
 | `sentence-length` | A sentence over 45 words |
 | `stacked-asides` | Two or more em dashes in one sentence |

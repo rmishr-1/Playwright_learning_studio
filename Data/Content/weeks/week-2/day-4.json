@@ -15,21 +15,21 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 4 - TypeScript\n\nDay 4.2's Playwright code — creating, finding, updating, and deleting an employee — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 4.2](/learn/w2/d4/p2).",
+          "text": "# Week 2 - Day 4 - TypeScript\n\nThe [Fundamentals](/learn/w2/d4/p2) lesson's Playwright code — creating, finding, updating, and deleting an employee — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Fundamentals](/learn/w2/d4/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Day 4.2](/learn/w2/d4/p2) |",
+          "text": "| | |\n|---|---|\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Fundamentals](/learn/w2/d4/p2) |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What today's code leans on\n\n| Concept | Status | Where it was taught |\n|---|---|---|\n| `const`, dynamic typing | already covered | [Week 2, Day 2.1](/learn/w2/d2/p1) |\n| `Math.random()` for a unique value | already covered | [Week 2, Day 3.1](/learn/w2/d3/p1) |\n| XPath vs CSS, first real assertions | already covered | [Week 2, Day 2.2](/learn/w2/d2/p2) |\n| `async` functions, arrow functions | already covered | [Week 1, Day 5.1](/learn/w1/d5/p1) |\n| \"structure around it\" = a function, not a class | already covered | [Week 2, Day 1.3](/learn/w2/d1/p3) |\n\nNothing below is new syntax — [Day 4.2](/learn/w2/d4/p2) spends its time on one new\n*locator* technique (the sibling axis), not the language. It just happens to run\nagainst a new app, because that technique needs a real multi-row table to show off —\nmore on that in Day 4.2's first cell.",
+          "text": "## What today's code leans on\n\n| Concept | Status | Where it was taught |\n|---|---|---|\n| `const`, dynamic typing | already covered | [Day 2 - TypeScript](/learn/w2/d2/p1) |\n| `Math.random()` for a unique value | already covered | [Day 3 - TypeScript](/learn/w2/d3/p1) |\n| XPath vs CSS, first real assertions | already covered | [Day 2 - Fundamentals](/learn/w2/d2/p2) |\n| `async` functions, arrow functions | already covered | [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1) |\n| \"structure around it\" = a function, not a class | already covered | [Day 1 - Implementation](/learn/w2/d1/p3) |\n\nNothing below is new syntax — [Fundamentals](/learn/w2/d4/p2) spends its time on one new\n*locator* technique (the sibling axis), not the language. It just happens to run\nagainst a new app, because that technique needs a real multi-row table to show off —\nmore on that in the [Fundamentals](/learn/w2/d4/p2) lesson's first cell.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -51,14 +51,14 @@
         },
         {
           "type": "recap",
-          "text": "Today's code uses `const`, `Math.random()`, XPath and `async`, all from earlier this week. If any row in the table above was a surprise, follow its link before starting [Day 4.2](/learn/w2/d4/p2).",
+          "text": "Today's code uses `const`, `Math.random()`, XPath and `async`, all from earlier this week. If any row in the table above was a surprise, follow its link before starting [Fundamentals](/learn/w2/d4/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Day 4.2 — The sibling axis](/learn/w2/d4/p2) puts everything above to work finding a table\nrow by what it says, not where it sits.",
+          "text": "## What's next\n\n[Fundamentals - The sibling axis](/learn/w2/d4/p2) puts everything above to work finding a table\nrow by what it says, not where it sits.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -118,7 +118,7 @@
         },
         {
           "type": "markdown",
-          "text": "Line by line:\n\n| Line | What it does |\n|---|---|\n| `Math.floor(Math.random() * 100000)` | Day 3.1's technique — a value unlikely to collide with anyone else on this shared demo |\n| `page.getByRole(\"button\", { name: \"Save\" })` | Same role-based locator you've used since Day 1 — new app, same idea |\n| `p.oxd-text--toast-message` | OrangeHRM's toast element — probed live before writing this, one clean match |\n\n**Expected result:** `toast: Successfully Saved`, then the URL ends in\n`viewPersonalDetails/empNumber/<some id>` — the app navigates you straight to the new\nemployee's record. **Keep `lastName` and `idPart` around — every cell below builds on\nthis same employee.**",
+          "text": "Line by line:\n\n| Line | What it does |\n|---|---|\n| `Math.floor(Math.random() * 100000)` | The [Day 3 - TypeScript](/learn/w2/d3/p1) lesson's technique — a value unlikely to collide with anyone else on this shared demo |\n| `page.getByRole(\"button\", { name: \"Save\" })` | Same role-based locator you've used since Day 1 — new app, same idea |\n| `p.oxd-text--toast-message` | OrangeHRM's toast element — probed live before writing this, one clean match |\n\n**Expected result:** `toast: Successfully Saved`, then the URL ends in\n`viewPersonalDetails/empNumber/<some id>` — the app navigates you straight to the new\nemployee's record. **Keep `lastName` and `idPart` around — every cell below builds on\nthis same employee.**",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -304,7 +304,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Day 4.3](/learn/w2/d4/p3) takes this exact code and gives it a small amount of structure.",
+          "text": "## What's next\n\n[Implementation](/learn/w2/d4/p3) takes this exact code and gives it a small amount of structure.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -322,21 +322,21 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 4 - Implementation - The sibling axis, wrapped for reuse\n\nBy the end of this lesson you will have pulled Day 4.2's create/find/delete steps out\nof one long cell and into three functions any test can call.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 4.2](/learn/w2/d4/p2). The only new thing is the structure around it.",
+          "text": "# Week 2 - Day 4 - Implementation - The sibling axis, wrapped for reuse\n\nBy the end of this lesson you will have pulled the [Fundamentals](/learn/w2/d4/p2) lesson's create/find/delete steps out\nof one long cell and into three functions any test can call.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Fundamentals](/learn/w2/d4/p2). The only new thing is the structure around it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Day 4.2](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
+          "text": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The problem with what we wrote yesterday\n\nEvery test that needs to create, find, or delete an employee has to repeat the same\nsibling-axis XPath and the same button clicks. Three uses today, thirty in a real suite —\nand if the app's markup shifts, that is thirty edits, not one.\n\n## Same code, with structure around it\n\n| In Day 4.2 you wrote | Here it becomes | Why |\n|---|---|---|\n| the create steps inline in a cell | `await addEmployee(page, lastName)` | one place to change if the Add Employee form changes |\n| the sibling-axis XPath rebuilt each time | `await findRow(page, term)` | the pattern lives in one place, not re-derived per test |\n| the trash-click-then-confirm steps inline | `await deleteEmployee(page, term)` | reusable cleanup, same as `findRow` underneath |\n\n**This is still a function, not a page object.** A real page object — a `class` that\nnever asserts — is [coming formally in week 3](/learn/w3/d3/p1), the same as Day\n1.3, Day 2.3, and Day 3.3 already told you. Today's version reaches for the same tool\nthose days did: three plain functions.",
+          "text": "## The problem with what we wrote yesterday\n\nEvery test that needs to create, find, or delete an employee has to repeat the same\nsibling-axis XPath and the same button clicks. Three uses today, thirty in a real suite —\nand if the app's markup shifts, that is thirty edits, not one.\n\n## Same code, with structure around it\n\n| In [Fundamentals](/learn/w2/d4/p2) you wrote | Here it becomes | Why |\n|---|---|---|\n| the create steps inline in a cell | `await addEmployee(page, lastName)` | one place to change if the Add Employee form changes |\n| the sibling-axis XPath rebuilt each time | `await findRow(page, term)` | the pattern lives in one place, not re-derived per test |\n| the trash-click-then-confirm steps inline | `await deleteEmployee(page, term)` | reusable cleanup, same as `findRow` underneath |\n\n**This is still a function, not a page object.** A real page object — a `class` that\nnever asserts — is [coming formally in week 3](/learn/w3/d3/p1), the same as Day\n1.3, [Day 2 - Implementation](/learn/w2/d2/p3), and [Day 3 - Implementation](/learn/w2/d3/p3) already told you. Today's version reaches for the same tool\nthose days did: three plain functions.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -350,7 +350,7 @@
         },
         {
           "type": "markdown",
-          "text": "### Why it is shaped this way\n\n| Choice | Reason |\n|---|---|\n| `findRow` returns a `Locator`, doesn't click anything | the caller decides whether that's a pencil click, a trash click, or just a count — one function, several uses |\n| `term: string`, not `lastName: string`, in `findRow`/`deleteEmployee` | Day 4.2 showed the same anchor is sometimes the full name, sometimes just the id — the parameter name says so |\n| No `expect()` anywhere in this file | these functions act and locate; the *test* decides what should be true |\n| Update has no function of its own yet | it's still two field edits and a click in the test — a natural next problem, in [Day 4.4](/learn/w2/d4/p4) |",
+          "text": "### Why it is shaped this way\n\n| Choice | Reason |\n|---|---|\n| `findRow` returns a `Locator`, doesn't click anything | the caller decides whether that's a pencil click, a trash click, or just a count — one function, several uses |\n| `term: string`, not `lastName: string`, in `findRow`/`deleteEmployee` | [Fundamentals](/learn/w2/d4/p2) showed the same anchor is sometimes the full name, sometimes just the id — the parameter name says so |\n| No `expect()` anywhere in this file | these functions act and locate; the *test* decides what should be true |\n| Update has no function of its own yet | it's still two field edits and a click in the test — a natural next problem, in [Practice](/learn/w2/d4/p4) |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -371,7 +371,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected result:** `created: Verify<idPart>`, `updated to: Verify<idPart>Updated`,\n`deleted`, then `rows after delete: 0`. Same outcome as Day 4.2 — the create, update, and\ndelete steps just moved into functions the test calls by name.",
+          "text": "**Expected result:** `created: Verify<idPart>`, `updated to: Verify<idPart>Updated`,\n`deleted`, then `rows after delete: 0`. Same outcome as [Fundamentals](/learn/w2/d4/p2) — the create, update, and\ndelete steps just moved into functions the test calls by name.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -433,7 +433,7 @@
               "Because the helpers run before the test does, when no assertions are allowed yet"
             ],
             "answer": 1,
-            "explanation": "Same separation as [Day 2.3](/learn/w2/d2/p3), from the other side: there the assertion helper was allowed to assert because checking was its whole job. These functions act, so they do not. A helper that both acts and asserts leaves a caller unable to use it for either job alone."
+            "explanation": "Same separation as [Day 2 - Implementation](/learn/w2/d2/p3), from the other side: there the assertion helper was allowed to assert because checking was its whole job. These functions act, so they do not. A helper that both acts and asserts leaves a caller unable to use it for either job alone."
           }
         },
         {
@@ -445,7 +445,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Day 4.4](/learn/w2/d4/p4) — your turn, with no worked examples to lean on.",
+          "text": "## What's next\n\n[Practice](/learn/w2/d4/p4) — your turn, with no worked examples to lean on.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -463,14 +463,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 4 - Practice - The sibling axis\n\nThree problems, getting harder. There is no answer key — that is deliberate. Every\nemployee you create in these problems is on a real, shared, public system: **delete it\nbefore you move on**, using the same sibling-axis pattern from Day 4.2.\n\nStart in a fresh cell in this lesson. When a problem asks for a spec file, write it\ninto `week2/generated/` and run it with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 4.1](/learn/w2/d4/p1) or [Day 4.2](/learn/w2/d4/p2), not in your ability.",
+          "text": "# Week 2 - Day 4 - Practice - The sibling axis\n\nThree problems, getting harder. There is no answer key — that is deliberate. Every\nemployee you create in these problems is on a real, shared, public system: **delete it\nbefore you move on**, using the same sibling-axis pattern from [Fundamentals](/learn/w2/d4/p2).\n\nStart in a fresh cell in this lesson. When a problem asks for a spec file, write it\ninto `week2/generated/` and run it with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [TypeScript](/learn/w2/d4/p1) or [Fundamentals](/learn/w2/d4/p2), not in your ability.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Three problems** | on a live, shared HR system |\n| **Pulls on** | [Day 4.2](/learn/w2/d4/p2) for the axes · [Day 4.3](/learn/w2/d4/p3) for the helper shape |\n| **Non-negotiable** | anything you create, you delete — someone else is using this demo right now |",
+          "text": "| | |\n|---|---|\n| **Three problems** | on a live, shared HR system |\n| **Pulls on** | [Fundamentals](/learn/w2/d4/p2) for the axes · [Implementation](/learn/w2/d4/p3) for the helper shape |\n| **Non-negotiable** | anything you create, you delete — someone else is using this demo right now |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -508,21 +508,21 @@
         {
           "number": 1,
           "difficulty": "Beginner",
-          "statement": "**What to build.** Create an employee with a different unique last name than the ones\nused in Day 4.2 (still `\"Verify\" + a random number` is fine — just a fresh call to\n`Math.random()`). Find its row with the sibling axis, then delete it.\n\n**Where.** A cell in this lesson.\n\n**How you will know it worked.** The \"Successfully Saved\" toast, then the \"Successfully\nDeleted\" toast, then a re-search for that name comes back with 0 rows.\n\n> **Hint** — this is Day 4.2's Example 1 and Example 4, back to back, with no update\n> step in between.",
+          "statement": "**What to build.** Create an employee with a different unique last name than the ones\nused in [Fundamentals](/learn/w2/d4/p2) (still `\"Verify\" + a random number` is fine — just a fresh call to\n`Math.random()`). Find its row with the sibling axis, then delete it.\n\n**Where.** A cell in this lesson.\n\n**How you will know it worked.** The \"Successfully Saved\" toast, then the \"Successfully\nDeleted\" toast, then a re-search for that name comes back with 0 rows.\n\n> **Hint** — this is the [Fundamentals](/learn/w2/d4/p2) lesson's Example 1 and Example 4, back to back, with no update\n> step in between.",
           "stub": "import { addEmployee, findRow, deleteEmployee } from \"./generated/employee-list-helpers.ts\";\n\nconst { browser, page } = await launch();\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\nawait page.goto(`${ORANGE_HRM}/auth/login`);\n\n// Problem 1 — your code here.",
           "solution": "```ts\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\nconst { browser, page } = await launch();\n\nawait page.goto(ORANGE_HRM + \"/auth/login\");\nawait page.getByPlaceholder(\"Username\").fill(\"Admin\");\nawait page.getByPlaceholder(\"Password\").fill(\"admin123\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard/index\");\n\nconst lastName = \"Verify\" + Math.floor(Math.random() * 100000);\nconsole.log(\"creating:\", lastName);\n\nawait page.goto(ORANGE_HRM + \"/pim/addEmployee\");\nawait page.getByPlaceholder(\"First Name\").fill(\"Temp\");\nawait page.getByPlaceholder(\"Last Name\").fill(lastName);\nawait page.getByRole(\"button\", { name: \"Save\" }).click();\nawait page.waitForLoadState(\"networkidle\");\n\n// Find the row by what it SAYS, then step sideways to the actions cell.\nawait page.goto(ORANGE_HRM + \"/pim/viewEmployeeList\");\nawait page.getByPlaceholder(\"Type for hints...\").first().fill(lastName);\nawait page.getByRole(\"button\", { name: \"Search\" }).click();\nawait page.waitForLoadState(\"networkidle\");\n\nconst actionsCell = page.locator(\n  \"xpath=//div[text()='\" + lastName + \"']/parent::div/following-sibling::div[last()]\",\n);\nawait actionsCell.locator(\"i.bi-trash\").click();\nawait page.getByRole(\"button\", { name: \"Yes, Delete\" }).click();\n\nawait show(page);\nawait browser.close();\n```\n\n**Why `parent::div` is in there.** The text node's immediate parent is an inner wrapper that has no siblings of its own, so stepping sideways from it finds nothing. Going up one more level reaches the real table cell, whose siblings are the other cells in that row. Dropping `parent::div` is the single most common way this expression silently matches zero elements.\n\n**Why this beats a column index.** `following-sibling::div[last()]` says *\"the last cell in this row\"* — it keeps working when a column is added. `div[7]` does not.\n\n> This is a live, shared sandbox. If someone else's data collides, a fresh `Math.random()` is the fix — which is exactly why the name is generated rather than fixed."
         },
         {
           "number": 2,
           "difficulty": "Intermediate",
-          "statement": "**What to build.** Create one employee, then update its last name **twice** — once to a\nvalue with \"Round1\" appended, then again to a value with \"Round2\" appended — verifying\neach change actually persisted (reload and check, the way Day 4.2's Example 3 did)\nbefore moving on to the next. Delete it at the end.\n\n**Where.** A cell here, or a spec in `week2/generated/` if you want the real `expect()`.\n\n**How you will know it worked.** Two separate \"value after reload\" checks, each matching\nthe name you just set — not the name from the previous round.",
+          "statement": "**What to build.** Create one employee, then update its last name **twice** — once to a\nvalue with \"Round1\" appended, then again to a value with \"Round2\" appended — verifying\neach change actually persisted (reload and check, the way the [Fundamentals](/learn/w2/d4/p2) lesson's Example 3 did)\nbefore moving on to the next. Delete it at the end.\n\n**Where.** A cell here, or a spec in `week2/generated/` if you want the real `expect()`.\n\n**How you will know it worked.** Two separate \"value after reload\" checks, each matching\nthe name you just set — not the name from the previous round.",
           "stub": "import { addEmployee, findRow, deleteEmployee } from \"./generated/employee-list-helpers.ts\";\n\nconst { browser, page } = await launch();\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\nawait page.goto(`${ORANGE_HRM}/auth/login`);\n\n// Problem 2 — your code here.",
-          "solution": "```ts\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\nconst { browser, page } = await launch();\n\nawait page.goto(ORANGE_HRM + \"/auth/login\");\nawait page.getByPlaceholder(\"Username\").fill(\"Admin\");\nawait page.getByPlaceholder(\"Password\").fill(\"admin123\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard/index\");\n\nconst base = \"Verify\" + Math.floor(Math.random() * 100000);\n\nawait page.goto(ORANGE_HRM + \"/pim/addEmployee\");\nawait page.getByPlaceholder(\"First Name\").fill(\"Temp\");\nawait page.getByPlaceholder(\"Last Name\").fill(base);\nawait page.getByRole(\"button\", { name: \"Save\" }).click();\nawait page.waitForLoadState(\"networkidle\");\n\nasync function findRow(name) {\n  await page.goto(ORANGE_HRM + \"/pim/viewEmployeeList\");\n  await page.getByPlaceholder(\"Type for hints...\").first().fill(name);\n  await page.getByRole(\"button\", { name: \"Search\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n  return page.locator(\n    \"xpath=//div[text()='\" + name + \"']/parent::div/following-sibling::div[last()]\",\n  );\n}\n\nasync function rename(from, to) {\n  const cell = await findRow(from);\n  await cell.locator(\"i.bi-pencil-fill\").click();\n  await page.waitForLoadState(\"networkidle\");\n  const lastNameBox = page.getByPlaceholder(\"Last Name\");\n  await lastNameBox.fill(to);\n  await page.getByRole(\"button\", { name: \"Save\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n\n  // The toast can fire BEFORE the save lands. Reload and check; save again if needed.\n  const check = await findRow(to);\n  if ((await check.count()) === 0) {\n    console.log(\"save had not landed - retrying\", to);\n    await rename(from, to);\n  }\n  console.log(\"confirmed:\", to);\n}\n\nawait rename(base, base + \"Round1\");\nawait rename(base + \"Round1\", base + \"Round2\");\n\nconst finalCell = await findRow(base + \"Round2\");\nawait finalCell.locator(\"i.bi-trash\").click();\nawait page.getByRole(\"button\", { name: \"Yes, Delete\" }).click();\n\nawait show(page);\nawait browser.close();\n```\n\n**The lesson hiding in the verify-after-save step.** This sandbox shows \"Successfully Updated\" a beat before the write has actually landed. A test that trusts the toast passes on a save that has not happened, and then the *second* rename fails while searching for a name that does not exist yet — a failure that points at the wrong line entirely.\n\nReloading and searching for the new value is the only honest confirmation: it asks the server what it stored rather than believing what the UI said.\n\n**This is the difference between waiting for an element and waiting for an outcome.** Playwright's auto-waiting handles the first for free. The second is your job."
+          "solution": "```ts\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\nconst { browser, page } = await launch();\n\nawait page.goto(ORANGE_HRM + \"/auth/login\");\nawait page.getByPlaceholder(\"Username\").fill(\"Admin\");\nawait page.getByPlaceholder(\"Password\").fill(\"admin123\");\nawait page.getByRole(\"button\", { name: \"Login\" }).click();\nawait page.waitForURL(\"**/dashboard/index\");\n\nconst base = \"Verify\" + Math.floor(Math.random() * 100000);\n\nawait page.goto(ORANGE_HRM + \"/pim/addEmployee\");\nawait page.getByPlaceholder(\"First Name\").fill(\"Temp\");\nawait page.getByPlaceholder(\"Last Name\").fill(base);\nawait page.getByRole(\"button\", { name: \"Save\" }).click();\nawait page.waitForLoadState(\"networkidle\");\n\nasync function findRow(name) {\n  await page.goto(ORANGE_HRM + \"/pim/viewEmployeeList\");\n  await page.getByPlaceholder(\"Type for hints...\").first().fill(name);\n  await page.getByRole(\"button\", { name: \"Search\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n  return page.locator(\n    \"xpath=//div[text()='\" + name + \"']/parent::div/following-sibling::div[last()]\",\n  );\n}\n\nasync function rename(from, to) {\n  const cell = await findRow(from);\n  await cell.locator(\"i.bi-pencil-fill\").click();\n  await page.waitForLoadState(\"networkidle\");\n  const lastNameBox = page.getByPlaceholder(\"Last Name\");\n  await lastNameBox.fill(to);\n  await page.getByRole(\"button\", { name: \"Save\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n\n  // The toast can fire BEFORE the save lands. Reload and check; save again if needed.\n  const check = await findRow(to);\n  if ((await check.count()) === 0) {\n    console.log(\"save had not landed - retrying\", to);\n    await rename(from, to);\n  }\n  console.log(\"confirmed:\", to);\n}\n\nawait rename(base, base + \"Round1\");\nawait rename(base + \"Round1\", base + \"Round2\");\n\nconst finalCell = await findRow(base + \"Round2\");\nawait finalCell.locator(\"i.bi-trash\").click();\nawait page.getByRole(\"button\", { name: \"Yes, Delete\" }).click();\n\nawait show(page);\nawait browser.close();\n```\n\n**The lesson hiding in the verify-after-save step.** This sandbox shows \"Successfully Updated\" a beat before the write has actually landed. A test that trusts the toast passes on a save that has not happened, and then the *second* rename fails while searching for a name that does not exist yet — a failure that points at the wrong line entirely.\n\nReloading and searching for the new value is the only honest confirmation: it asks the server what it stored rather than believing what the UI said.\n\n**This is the difference between waiting for an element and waiting for an outcome.** Playwright's auto-waiting handles the first automatically. The second is your job."
         },
         {
           "number": 3,
           "difficulty": "Advanced",
-          "statement": "**What to build.** Extend `week2/generated/employee-list-helpers.ts` (from\n[Day 4.3](/learn/w2/d4/p3)) with a fourth function:\n\n```ts\nexport async function updateLastName(page: Page, oldLastName: string, newLastName: string): Promise<void>\n```\n\nIt should find the row for `oldLastName`, click the pencil, fill in `newLastName`, save,\nand reload to confirm — the same retry pattern Day 4.2 and 4.3 already used, just moved\ninside the function this time. Then write a test in `week2/generated/` that creates an\nemployee, calls `updateLastName`, and deletes it — using **only** the four functions, no\nraw locators in the test itself.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** The test passes, and nothing in it references\n`page.locator(...)` or an XPath directly — only calls to the helper functions.",
+          "statement": "**What to build.** Extend `week2/generated/employee-list-helpers.ts` (from\n[Implementation](/learn/w2/d4/p3)) with a fourth function:\n\n```ts\nexport async function updateLastName(page: Page, oldLastName: string, newLastName: string): Promise<void>\n```\n\nIt should find the row for `oldLastName`, click the pencil, fill in `newLastName`, save,\nand reload to confirm — the same retry pattern [Fundamentals](/learn/w2/d4/p2) and [Implementation](/learn/w2/d4/p3) already used, just moved\ninside the function this time. Then write a test in `week2/generated/` that creates an\nemployee, calls `updateLastName`, and deletes it — using **only** the four functions, no\nraw locators in the test itself.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** The test passes, and nothing in it references\n`page.locator(...)` or an XPath directly — only calls to the helper functions.",
           "stub": "import { addEmployee, findRow, deleteEmployee } from \"./generated/employee-list-helpers.ts\";\n\nconst { browser, page } = await launch();\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\nawait page.goto(`${ORANGE_HRM}/auth/login`);\n\n// Problem 3 — your code here.",
           "solution": "Add the fourth function to `week2/generated/employee-list-helpers.ts`:\n\n```ts\nimport { type Page, expect } from \"@playwright/test\";\n\nconst ORANGE_HRM = \"https://opensource-demo.orangehrmlive.com/web/index.php\";\n\nexport async function updateLastName(\n  page: Page,\n  oldLastName: string,\n  newLastName: string,\n): Promise<void> {\n  const actionsCell = await findEmployeeRow(page, oldLastName);\n  await actionsCell.locator(\"i.bi-pencil-fill\").click();\n  await page.waitForLoadState(\"networkidle\");\n\n  await page.getByPlaceholder(\"Last Name\").fill(newLastName);\n  await page.getByRole(\"button\", { name: \"Save\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n\n  // Confirm against the server, not against the toast - see Day 4.2.\n  await page.goto(ORANGE_HRM + \"/pim/viewEmployeeList\");\n  await page.getByPlaceholder(\"Type for hints...\").first().fill(newLastName);\n  await page.getByRole(\"button\", { name: \"Search\" }).click();\n  await page.waitForLoadState(\"networkidle\");\n\n  await expect(\n    page.locator(\"xpath=//div[text()='\" + newLastName + \"']\"),\n  ).toHaveCount(1);\n}\n```\n\nAnd a spec that uses it end to end:\n\n```ts\nimport { test } from \"@playwright/test\";\nimport { signIn, createEmployee, updateLastName, deleteEmployee } from \"./employee-list-helpers\";\n\ntest(\"an employee can be renamed and the change persists\", async ({ page }) => {\n  const original = \"Verify\" + Math.floor(Math.random() * 100000);\n  const renamed = original + \"Renamed\";\n\n  await signIn(page);\n  await createEmployee(page, \"Temp\", original);\n  await updateLastName(page, original, renamed);\n  await deleteEmployee(page, renamed);\n});\n```\n\n**Read the spec on its own.** It is four English sentences: sign in, create, rename, delete. No XPath, no `waitForLoadState`, no knowledge of which icon class is the pencil. All of that lives in one file, so when OrangeHRM changes its markup exactly one file changes.\n\n**Why the confirmation belongs inside the helper.** Every caller needs it and every caller would forget it. A helper called `updateLastName` that returns before the update has landed is lying about its own name — and the bug it causes surfaces two steps later, somewhere else entirely.\n\n> `employee-list-helpers.ts`, not `.spec.ts`. The runner collects anything with the spec suffix."
         }

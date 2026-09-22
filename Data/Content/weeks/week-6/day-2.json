@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 2.1 - Prerequisites check\n\n**No new TypeScript today.** Today is a design argument, not a language lesson - so this file is\nshort on purpose.\n\n| In play | Taught in |\n|---|---|\n| Classes, `readonly` fields | [week3/day3_1](/learn/w3/d3/p1) |\n| `abstract`, `extends`, `protected` | [week5/day3_1](/learn/w5/d3/p1) |\n| Typed parameters, default parameters | [week3/day3_1](/learn/w3/d3/p1) |\n| `test.beforeEach` | [week3/day2_2](/learn/w3/d2/p2) |\n| Importing across folders | [week5/day4_1](/learn/w5/d4/p1) |\n\nOne small thing *is* new, below.\n\n**Next:** [Day 2.2 - What a page object may assert](/learn/w6/d2/p2)",
+          "text": "# TypeScript - Prerequisites check\n\n**No new TypeScript today.** Today is a design argument, not a language lesson - so this file is\nshort on purpose.\n\n| In play | Taught in |\n|---|---|\n| Classes, `readonly` fields | [week3/day3_1](/learn/w3/d3/p1) |\n| `abstract`, `extends`, `protected` | [week5/day3_1](/learn/w5/d3/p1) |\n| Typed parameters, default parameters | [week3/day3_1](/learn/w3/d3/p1) |\n| `test.beforeEach` | [week3/day2_2](/learn/w3/d2/p2) |\n| Importing across folders | [week5/day4_1](/learn/w5/d4/p1) |\n\nOne small thing *is* new, below.\n\n**Next:** [Fundamentals - What a page object may assert](/learn/w6/d2/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -43,7 +43,7 @@
         },
         {
           "type": "markdown",
-          "text": "`false` on that last line, from one capital letter. That is why it is exported once.\n\n**Next:** [Day 2.2 - What a page object may assert](/learn/w6/d2/p2)",
+          "text": "`false` on that last line, from one capital letter. That is why it is exported once.\n\n**Next:** [Fundamentals - What a page object may assert](/learn/w6/d2/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -61,7 +61,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 2.2 - What a page object may assert\n\n[Week 5 Day 3](/learn/w5/d3/p2) gave you a rule: **no `expect()` inside a page object.**\nToday that rule gets its exception, and the exception has a sharp edge.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Fundamentals - What a page object may assert\n\n[Week 5 Day 3](/learn/w5/d3/p2) gave you a rule: **no `expect()` inside a page object.**\nToday that rule gets its exception, and the exception has a sharp edge.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -152,7 +152,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Common mistakes\n\n| Mistake | Consequence |\n|---|---|\n| Asserting test-specific text in the class | the class serves one test and blocks the rest |\n| Assuming a message is invariant | Step 2 exists to check; do it before moving the assertion in |\n| `ignoreHTTPSErrors` for a cipher error | it cannot help; you lose an hour before reading the error code |\n| One combined method on a two-button screen | half the tests you need become unwritable |\n\n**Next:** [Day 2.3 - Journeys, and a visual check inside a page object](/learn/w6/d2/p3)",
+          "text": "## Common mistakes\n\n| Mistake | Consequence |\n|---|---|\n| Asserting test-specific text in the class | the class serves one test and blocks the rest |\n| Assuming a message is invariant | Step 2 exists to check; do it before moving the assertion in |\n| `ignoreHTTPSErrors` for a cipher error | it cannot help; you lose an hour before reading the error code |\n| One combined method on a two-button screen | half the tests you need become unwritable |\n\n**Next:** [Implementation - Journeys, and a visual check inside a page object](/learn/w6/d2/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -170,7 +170,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 2.3 - Journeys, and a visual check inside a page object\n\nSame page objects, composed into flows - and one more thing a page class may own.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Implementation - Journeys, and a visual check inside a page object\n\nSame page objects, composed into flows - and one more thing a page class may own.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -240,7 +240,7 @@
         },
         {
           "type": "markdown",
-          "text": "## So what may a page class own?\n\n| Owns | Example |\n|---|---|\n| Locators | `errorBanner` |\n| Actions named for people | `login()`, `resetForm()` |\n| **Invariant** assertions | `assertRefused()`, `assertReset()` |\n| A visual baseline for its own chrome | `snapshotErrorBanner()` |\n| Nothing that varies per test | not the name a test typed, not a row count it chose |\n\n## POM and externalised locators\n\n[Week 5 Day 5.3](/learn/w5/d5/p3) weighed moving selectors into JSON and concluded a page\nclass already gives you one-place-to-edit, plus autocomplete and a compiler. The session reaches\nthe same verdict from the other direction: *with page objects you do not externalise, because the\npage object already is the one place.* Doing both means two.\n\n**Next:** [Day 2.4 - Practice](/learn/w6/d2/p4)",
+          "text": "## So what may a page class own?\n\n| Owns | Example |\n|---|---|\n| Locators | `errorBanner` |\n| Actions named for people | `login()`, `resetForm()` |\n| **Invariant** assertions | `assertRefused()`, `assertReset()` |\n| A visual baseline for its own chrome | `snapshotErrorBanner()` |\n| Nothing that varies per test | not the name a test typed, not a row count it chose |\n\n## POM and externalised locators\n\n[Week 5 - Day 5 - Implementation](/learn/w5/d5/p3) weighed moving selectors into JSON and concluded a page\nclass already gives you one-place-to-edit, plus autocomplete and a compiler. The session reaches\nthe same verdict from the other direction: *with page objects you do not externalise, because the\npage object already is the one place.* Doing both means two.\n\n**Next:** [Practice](/learn/w6/d2/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -258,7 +258,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 2.4 - Practice\n\nCopy before editing, so the Day 2.2 and 2.3 cells keep running.",
+          "text": "# Practice - Practice\n\nCopy before editing, so the [Fundamentals](/learn/w6/d2/p2) and [Implementation](/learn/w6/d2/p3) cells keep running.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -321,7 +321,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 3.1 - Prerequisites](/learn/w6/d3/p1)",
+          "text": "**Next:** [Day 3 - TypeScript - Prerequisites](/learn/w6/d3/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null

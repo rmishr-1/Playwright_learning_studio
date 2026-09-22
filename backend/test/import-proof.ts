@@ -552,6 +552,44 @@ function main(): void {
       }
     }
   }
+  // "Day 5.2" is notebook numbering the learner never sees anywhere else. relabelDayRefs() turns it
+  // into the tab name the page actually uses; this proves nothing on an open day still carries the
+  // old form - in lesson prose, problem statements or solutions. Code is excluded: a comment such
+  // as "// Day 5.2" inside an example is left alone deliberately.
+  const noCode = (t: string) => t.replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]*`/g, '');
+  const oldRefs: string[] = [];
+  for (const d of days.filter((x) => !x.locked)) {
+    for (const p of d.parts) {
+      const texts = [
+        ...p.blocks.filter((b) => b.type === 'markdown').map((b) => b.text),
+        ...p.problems.flatMap((q) => [q.statement, q.solution ?? '']),
+      ];
+      for (const t of texts) {
+        for (const m of noCode(t).match(/\bDay \d+\.\d+\b/g) ?? []) {
+          oldRefs.push('w' + d.week + 'd' + d.day + 'p' + p.part + ': ' + m);
+        }
+      }
+    }
+  }
+  check('no open day refers to a lesson as "Day N.P"', oldRefs.length === 0, oldRefs.slice(0, 5).join(' | '));
+
+  // The same byte-for-byte guarantee the cards have, for solutions. There used to be no overlay
+  // step for solutions at all, so edits to Data/Content/solutions/ never reached the page and
+  // 11 of 30 shipped solutions were stale. This is the check that would have caught it.
+  const staleSolutions: string[] = [];
+  for (const d of days) {
+    const file = path.join(CONTENT, 'solutions', 'w' + d.week + 'd' + d.day + '.json');
+    if (!fs.existsSync(file)) continue;
+    const src = JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, string>;
+    for (const p of d.parts) {
+      for (const q of p.problems) {
+        const want = src[String(q.number)];
+        if (want !== undefined && q.solution !== want) staleSolutions.push('w' + d.week + 'd' + d.day + ' problem ' + q.number);
+      }
+    }
+  }
+  check('every shipped solution matches its authored source', staleSolutions.length === 0, staleSolutions.slice(0, 5).join(' | '));
+
   check(
     'no shipped day still carries copy a script has already replaced',
     superseded.length === 0,

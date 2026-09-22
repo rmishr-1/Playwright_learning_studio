@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 2.1 - Prerequisites check\n\nToday you write a function Playwright runs **once**, before any test. One new TypeScript idea,\ntwo Node ideas you have met.\n\n| Concept | Taught in |\n|---|---|\n| `async` / `await`, Promises | [week3/day3_1](/learn/w3/d3/p1) |\n| `import path from \"node:path\"` | [week4/day4_1](/learn/w4/d4/p1) |\n| Type-only imports | [week3/day3_1](/learn/w3/d3/p1) |\n| `export default` a **function** | extends [week3/day1_1](/learn/w3/d1/p1) - below |\n\n**Next:** [Day 2.2 - Logging in once](/learn/w5/d2/p2)",
+          "text": "# TypeScript - Prerequisites check\n\nToday you write a function Playwright runs **once**, before any test. One new TypeScript idea,\ntwo Node ideas you have met.\n\n| Concept | Taught in |\n|---|---|\n| `async` / `await`, Promises | [week3/day3_1](/learn/w3/d3/p1) |\n| `import path from \"node:path\"` | [week4/day4_1](/learn/w4/d4/p1) |\n| Type-only imports | [week3/day3_1](/learn/w3/d3/p1) |\n| `export default` a **function** | extends [week3/day1_1](/learn/w3/d1/p1) - below |\n\n**Next:** [Fundamentals - Logging in once](/learn/w5/d2/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -64,7 +64,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Concept 3 - the `FullConfig` type\n\nYour setup function receives the resolved config. You rarely need it, but typing the parameter\ndocuments that it exists:\n\n```ts\nimport { type FullConfig } from \"@playwright/test\";\n\nexport default async function globalSetup(_config: FullConfig): Promise<void> { ... }\n```\n\nThe leading underscore in `_config` is the convention for *deliberately unused*, and it stops\nsome lint rules from complaining.\n\n**Next:** [Day 2.2 - Logging in once](/learn/w5/d2/p2)",
+          "text": "## Concept 3 - the `FullConfig` type\n\nYour setup function receives the resolved config. You rarely need it, but typing the parameter\ndocuments that it exists:\n\n```ts\nimport { type FullConfig } from \"@playwright/test\";\n\nexport default async function globalSetup(_config: FullConfig): Promise<void> { ... }\n```\n\nThe leading underscore in `_config` is the convention for *deliberately unused*, and it stops\nsome lint rules from complaining.\n\n**Next:** [Fundamentals - Logging in once](/learn/w5/d2/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -82,7 +82,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 2.2 - Logging in once\n\nEvery test in Week 3 signed in first. Six tests, six sign-ins, six times the same three seconds\nspent proving something you already proved.\n\nToday: sign in **once**, save the session to a file, hand that file to every test.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Fundamentals - Logging in once\n\nEvery test in Week 3 signed in first. Six tests, six sign-ins, six times the same three seconds\nspent proving something you already proved.\n\nToday: sign in **once**, save the session to a file, hand that file to every test.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -159,7 +159,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When *not* to do this\n\n| Situation | Why storage state hurts |\n|---|---|\n| Testing the login form itself | you would be skipping the thing under test |\n| Tests need different roles | one shared file means one shared user - save one per role |\n| Sessions expire in minutes | the file goes stale mid-run; refresh per file instead |\n| Tests mutate the user's data | they now interfere with each other through the shared account |\n\nThat last row is the one that bites. Isolation you got for free from a fresh browser does **not**\nextend to a shared server-side account.\n\n**Next:** [Day 2.3 - How a real repo does it](/learn/w5/d2/p3)",
+          "text": "## When *not* to do this\n\n| Situation | Why storage state hurts |\n|---|---|\n| Testing the login form itself | you would be skipping the thing under test |\n| Tests need different roles | one shared file means one shared user - save one per role |\n| Sessions expire in minutes | the file goes stale mid-run; refresh per file instead |\n| Tests mutate the user's data | they now interfere with each other through the shared account |\n\nThat last row is the one that bites. Isolation you got for free from a fresh browser does **not**\nextend to a shared server-side account.\n\n**Next:** [Implementation - How a real repo does it](/learn/w5/d2/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -177,7 +177,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 2.3 - How a real repo does it\n\nSame `storageState`, same saved file - arranged so setup failures are visible and each role gets\nits own session.\n\n## The problem with `globalSetup`: it is invisible when it breaks\n\n`globalSetup` runs outside the reporter. No trace, no retry, no line in the HTML report. When the\nlogin page changes, your whole suite fails with a message about a missing file.\n\nThe fix: make setup **a test**, in its own project.",
+          "text": "# Implementation - How a real repo does it\n\nSame `storageState`, same saved file - arranged so setup failures are visible and each role gets\nits own session.\n\n## The problem with `globalSetup`: it is invisible when it breaks\n\n`globalSetup` runs outside the reporter. No trace, no retry, no line in the HTML report. When the\nlogin page changes, your whole suite fails with a message about a missing file.\n\nThe fix: make setup **a test**, in its own project.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -219,7 +219,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Keeping it from rotting\n\n| Risk | What a real repo does |\n|---|---|\n| File committed by accident | `.auth/` in `.gitignore`; check with `git check-ignore -v <path>` |\n| Stale session | regenerate every run; never cache between CI jobs |\n| Setup passes but saves nothing | assert *after* login and *before* saving |\n| Shared account, mutating tests | one account per worker, or read-only tests only |\n\n**Next:** [Day 2.4 - Practice](/learn/w5/d2/p4)",
+          "text": "## Keeping it from rotting\n\n| Risk | What a real repo does |\n|---|---|\n| File committed by accident | `.auth/` in `.gitignore`; check with `git check-ignore -v <path>` |\n| Stale session | regenerate every run; never cache between CI jobs |\n| Setup passes but saves nothing | assert *after* login and *before* saving |\n| Shared account, mutating tests | one account per worker, or read-only tests only |\n\n**Next:** [Practice](/learn/w5/d2/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -237,7 +237,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 2.4 - Practice\n\nWork in `week5/generated/`. Copy the three Day 2 files to new names first.\n\nEverything here uses `saucedemo.com`, whose usernames are listed on its own login page.",
+          "text": "# Practice - Practice\n\nWork in `week5/generated/`. Copy the three Day 2 files to new names first.\n\nEverything here uses `saucedemo.com`, whose usernames are listed on its own login page.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -293,7 +293,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 3.1 - Prerequisites](/learn/w5/d3/p1)",
+          "text": "**Next:** [Day 3 - TypeScript - Prerequisites](/learn/w5/d3/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null

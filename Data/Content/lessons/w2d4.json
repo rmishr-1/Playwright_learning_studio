@@ -4,7 +4,7 @@
   "day": 4,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Day 4.2](/learn/w2/d4/p2) |",
+      "at_a_glance": "| | |\n|---|---|\n| **What *is* new** | one locator technique, the sibling axis — and a new app, because it needs a real table |\n| **Then go to** | [Fundamentals](/learn/w2/d4/p2) |",
       "checkpoints": [
         {
           "question": "Day 4 switches to OrangeHRM's demo HR system instead of the registration form used all week. Why?",
@@ -17,7 +17,7 @@
           "explanation": "The app changed to fit the technique, not the other way round. It is also a shared public sandbox, which is why every employee the lesson creates gets deleted before the lesson ends."
         }
       ],
-      "recap": "Today's code uses `const`, `Math.random()`, XPath and `async`, all from earlier this week. If any row in the table above was a surprise, follow its link before starting [Day 4.2](/learn/w2/d4/p2)."
+      "recap": "Today's code uses `const`, `Math.random()`, XPath and `async`, all from earlier this week. If any row in the table above was a surprise, follow its link before starting [Fundamentals](/learn/w2/d4/p2)."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `parent::` · `following-sibling::` · `[last()]` · `contains()` |\n| **On** | OrangeHRM's demo HR system — a **shared public sandbox**, so everything created here is deleted again |\n| **Assumes** | [XPath syntax](/learn/w2/d2/p2) · [Math.random() for unique data](/learn/w2/d3/p1) |\n| **The idea worth keeping** | anchor on text you know, then walk sideways — never count columns |",
@@ -56,7 +56,7 @@
       "recap": "- **Anchor on text you know, then walk sideways.** Position is the one thing about a table you can rely on changing.\n- `/parent::div` before `following-sibling::` — the text's immediate parent is a wrapper, not the cell.\n- `[last()]` over a guessed offset: it survives a column being added.\n- `contains()` once you cannot be certain the visible text has not changed underneath you — and anchor on the part that cannot change, like the random id.\n- **Verify a write by reading the record back**, not by trusting a success toast.\n- On a shared sandbox, every create is paired with a delete. Prove the delete with a count of 0, not with the toast."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line ran in [Day 4.2](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
+      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d4/p2) |\n| **What changes** | create, find and delete each become a function; the long cell becomes three calls |\n| **The design decision** | `findRow` locates and returns — it never clicks. The caller decides what happens next. |",
       "checkpoints": [
         {
           "question": "`findRow` returns a `Locator` and clicks nothing. What does that buy?",
@@ -76,13 +76,13 @@
             "Because the helpers run before the test does, when no assertions are allowed yet"
           ],
           "answer": 1,
-          "explanation": "Same separation as [Day 2.3](/learn/w2/d2/p3), from the other side: there the assertion helper was allowed to assert because checking was its whole job. These functions act, so they do not. A helper that both acts and asserts leaves a caller unable to use it for either job alone."
+          "explanation": "Same separation as [Day 2 - Implementation](/learn/w2/d2/p3), from the other side: there the assertion helper was allowed to assert because checking was its whole job. These functions act, so they do not. A helper that both acts and asserts leaves a caller unable to use it for either job alone."
         }
       ],
       "recap": "- Three uses today is thirty in a real suite — and a markup change is then thirty edits.\n- A locator function should hand back the locator, not decide what to do with it.\n- Name the parameter for what it really is: `term`, not `lastName`, because sometimes the anchor is just the id.\n- Helpers act and locate; tests assert. Keep the two on opposite sides of the file boundary.\n- The random id, not a fixed name, is what makes any of this safe to run twice in a row."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | on a live, shared HR system |\n| **Pulls on** | [Day 4.2](/learn/w2/d4/p2) for the axes · [Day 4.3](/learn/w2/d4/p3) for the helper shape |\n| **Non-negotiable** | anything you create, you delete — someone else is using this demo right now |"
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | on a live, shared HR system |\n| **Pulls on** | [Fundamentals](/learn/w2/d4/p2) for the axes · [Implementation](/learn/w2/d4/p3) for the helper shape |\n| **Non-negotiable** | anything you create, you delete — someone else is using this demo right now |"
     }
   }
 }

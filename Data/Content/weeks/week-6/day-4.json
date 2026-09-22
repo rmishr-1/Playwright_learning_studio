@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 4.1 - Prerequisites check\n\n**No new TypeScript today.** Jenkins runs commands; it does not care what language wrote them.\n\n| In play | Taught in |\n|---|---|\n| `Deno.Command`, exit codes | [day3_1](/learn/w6/d3/p1) |\n| Objects as config | [week3/day1_1](/learn/w3/d1/p1) |\n| `package.json` scripts | [week5/day1_3](/learn/w5/d1/p3) |\n\nThe one idea worth five minutes is not syntax - it is that **`package.json` is an interface**.\n\n**Next:** [Day 4.2 - Jenkins](/learn/w6/d4/p2)",
+          "text": "# TypeScript - Prerequisites check\n\n**No new TypeScript today.** Jenkins runs commands; it does not care what language wrote them.\n\n| In play | Taught in |\n|---|---|\n| `Deno.Command`, exit codes | [day3_1](/learn/w6/d3/p1) |\n| Objects as config | [week3/day1_1](/learn/w3/d1/p1) |\n| `package.json` scripts | [week5/day1_3](/learn/w5/d1/p3) |\n\nThe one idea worth five minutes is not syntax - it is that **`package.json` is an interface**.\n\n**Next:** [Fundamentals - Jenkins](/learn/w6/d4/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -43,7 +43,7 @@
         },
         {
           "type": "markdown",
-          "text": "The last three were added for this week. `test:smoke` and `test:regression` point at the two\nconfigs from [week5/day1_2](/learn/w5/d1/p2) - so the suites you built there are now\ncallable by name, which is exactly what a CI job needs.\n\n**Next:** [Day 4.2 - Jenkins](/learn/w6/d4/p2)",
+          "text": "The last three were added for this week. `test:smoke` and `test:regression` point at the two\nconfigs from [week5/day1_2](/learn/w5/d1/p2) - so the suites you built there are now\ncallable by name, which is exactly what a CI job needs.\n\n**Next:** [Fundamentals - Jenkins](/learn/w6/d4/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -61,7 +61,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 4.2 - Jenkins\n\nSo far every test run has started with you typing a command. That does not survive contact with a\nteam: someone is on holiday, someone deploys at 11pm, someone forgets.\n\nJenkins is a server that runs your command instead.\n\n> **Mode: read-and-do.** Jenkins is a web UI, so unlike everything else in this course **these\n> steps are not executed by a cell.** The *commands* Jenkins runs are - at the bottom of this\n> lesson.",
+          "text": "# Fundamentals - Jenkins\n\nSo far every test run has started with you typing a command. That does not survive contact with a\nteam: someone is on holiday, someone deploys at 11pm, someone forgets.\n\nJenkins is a server that runs your command instead.\n\n> **Mode: read-and-do.** Jenkins is a web UI, so unlike everything else in this course **these\n> steps are not executed by a cell.** The *commands* Jenkins runs are - at the bottom of this\n> lesson.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -145,7 +145,7 @@
         },
         {
           "type": "markdown",
-          "text": "## A faster loop than either\n\nBefore reaching for CI to run one test: the **Playwright VS Code extension** puts a green arrow\nin the gutter next to every `test()` and `describe()`. Click it and that test runs.\n\n| Want to run | Use |\n|---|---|\n| One test, while writing it | the gutter arrow |\n| The suite, before pushing | `npm run test:smoke` |\n| The suite, on every push, without being asked | Jenkins - or [day5_2](/learn/w6/d5/p2) |\n\n## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| No custom workspace on a local job | `package.json` not found |\n| `npm ci` left in the build step forever | every build reinstalls; minutes wasted |\n| `headless: false` in the config | CI has no display; the run hangs or crashes |\n| `*/master` when the branch is `main` | Jenkins clones, finds nothing to build |\n| Encoding the config in the Jenkins job | the next config change needs a Jenkins login |\n\n**Next:** [Day 4.3 - Naming your suites](/learn/w6/d4/p3)",
+          "text": "## A faster loop than either\n\nBefore reaching for CI to run one test: the **Playwright VS Code extension** puts a green arrow\nin the gutter next to every `test()` and `describe()`. Click it and that test runs.\n\n| Want to run | Use |\n|---|---|\n| One test, while writing it | the gutter arrow |\n| The suite, before pushing | `npm run test:smoke` |\n| The suite, on every push, without being asked | Jenkins - or [day5_2](/learn/w6/d5/p2) |\n\n## Common mistakes\n\n| Mistake | Symptom |\n|---|---|\n| No custom workspace on a local job | `package.json` not found |\n| `npm ci` left in the build step forever | every build reinstalls; minutes wasted |\n| `headless: false` in the config | CI has no display; the run hangs or crashes |\n| `*/master` when the branch is `main` | Jenkins clones, finds nothing to build |\n| Encoding the config in the Jenkins job | the next config change needs a Jenkins login |\n\n**Next:** [Implementation - Naming your suites](/learn/w6/d4/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -163,7 +163,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 4.3 - Naming your suites\n\nSame `npm run`, arranged so the CI job never changes again.\n\n## The payoff from week 5\n\n[Week 5 Day 1](/learn/w5/d1/p2) built two configs over one spec and asked you to trust that\nit mattered. This is why:\n\n```json\n\"test:smoke\":      \"playwright test -c week5/generated/day1-smoke.config.ts\",\n\"test:regression\": \"playwright test -c week5/generated/day1-regression.config.ts\"\n```\n\n| Jenkins job | Batch command | Runs |\n|---|---|---|\n| `playwright_smoke` | `npm run test:smoke` | **2** tests |\n| `playwright_regression` | `npm run test:regression` | **4** tests |\n\nTwo jobs, two one-word commands, and neither knows what a config is.",
+          "text": "# Implementation - Naming your suites\n\nSame `npm run`, arranged so the CI job never changes again.\n\n## The payoff from week 5\n\n[Week 5 Day 1](/learn/w5/d1/p2) built two configs over one spec and asked you to trust that\nit mattered. This is why:\n\n```json\n\"test:smoke\":      \"playwright test -c week5/generated/day1-smoke.config.ts\",\n\"test:regression\": \"playwright test -c week5/generated/day1-regression.config.ts\"\n```\n\n| Jenkins job | Batch command | Runs |\n|---|---|---|\n| `playwright_smoke` | `npm run test:smoke` | **2** tests |\n| `playwright_regression` | `npm run test:regression` | **4** tests |\n\nTwo jobs, two one-word commands, and neither knows what a config is.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -198,7 +198,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Jenkins on your laptop is not CI\n\nThe session is candid about this, and it is worth being blunt:\n\n| | Jenkins on your machine | A hosted runner |\n|---|---|---|\n| Who can reach it | you | the team |\n| Runs when your laptop is shut | no | yes |\n| Parallel machines | one | as many as you pay for |\n| Who patches it | **you** | them |\n\nA local Jenkins is a **rehearsal**. It teaches the model - job, workspace, build step, console\noutput, exit code - and that model transfers unchanged to [day5_2](/learn/w6/d5/p2).\n\n## Headless, always\n\nJenkins has no screen. `headless: false` committed to a config is the classic way to make a suite\nthat passes locally and hangs in CI - see [week3/day5_2](/learn/w3/d5/p2).\n\n**Next:** [Day 4.4 - Practice](/learn/w6/d4/p4)",
+          "text": "## Jenkins on your laptop is not CI\n\nThe session is candid about this, and it is worth being blunt:\n\n| | Jenkins on your machine | A hosted runner |\n|---|---|---|\n| Who can reach it | you | the team |\n| Runs when your laptop is shut | no | yes |\n| Parallel machines | one | as many as you pay for |\n| Who patches it | **you** | them |\n\nA local Jenkins is a **rehearsal**. It teaches the model - job, workspace, build step, console\noutput, exit code - and that model transfers unchanged to [day5_2](/learn/w6/d5/p2).\n\n## Headless, always\n\nJenkins has no screen. `headless: false` committed to a config is the classic way to make a suite\nthat passes locally and hangs in CI - see [week3/day5_2](/learn/w3/d5/p2).\n\n**Next:** [Practice](/learn/w6/d4/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -216,7 +216,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 6, Day 4.4 - Practice\n\nProblems 1-5 need Jenkins installed. If you have not got it yet, 6 and 7 do not.",
+          "text": "# Practice - Practice\n\nProblems 1-5 need Jenkins installed. If you have not got it yet, 6 and 7 do not.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -272,7 +272,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 5.1 - Prerequisites](/learn/w6/d5/p1)",
+          "text": "**Next:** [Day 5 - TypeScript - Prerequisites](/learn/w6/d5/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null

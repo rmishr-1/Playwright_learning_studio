@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 4.1 — TypeScript for data-driven tests\n\nSeven small things. Today one test body runs against many rows, read from a file — and by the end of\nthe day, from three different kinds of file.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# TypeScript — TypeScript for data-driven tests\n\nSeven small things. Today one test body runs against many rows, read from a file — and by the end of\nthe day, from three different kinds of file.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -127,7 +127,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected:** two `function` lines, `LoginCases -> {\"rows\":6}`, the sheet list, a joined path (with\n`\\` on Windows) and the hand-built one showing a doubled separator.\n\n`workbook.Sheets.first` would look for a sheet literally named `\"first\"` and find nothing — giving\n`undefined` rather than an error.\n\n`__dirname` isn't available in lesson cells (they use `REPO_ROOT`), but it's the right tool in a real\nspec, and it's what today's specs use.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `for...of` | Default for arrays. `for...in` gives string keys. |\n| `readFileSync` | Returns **text**. Pass `\"utf-8\"`. |\n| `JSON.parse` | Read and parse fail differently. |\n| final `else` | Must **throw** — a data typo can't be allowed to pass. |\n| `import * as X` | Needs `npm install` first. |\n| `obj[key]` | When the key is a variable. |\n| `path.join(__dirname, …)` | Relative to the file, not the shell. |\n\n**Next:** [Day 4.2 — One test, many rows](/learn/w4/d4/p2)",
+          "text": "**Expected:** two `function` lines, `LoginCases -> {\"rows\":6}`, the sheet list, a joined path (with\n`\\` on Windows) and the hand-built one showing a doubled separator.\n\n`workbook.Sheets.first` would look for a sheet literally named `\"first\"` and find nothing — giving\n`undefined` rather than an error.\n\n`__dirname` isn't available in lesson cells (they use `REPO_ROOT`), but it's the right tool in a real\nspec, and it's what today's specs use.\n\n## Recap\n\n| Concept | Remember |\n|---|---|\n| `for...of` | Default for arrays. `for...in` gives string keys. |\n| `readFileSync` | Returns **text**. Pass `\"utf-8\"`. |\n| `JSON.parse` | Read and parse fail differently. |\n| final `else` | Must **throw** — a data typo can't be allowed to pass. |\n| `import * as X` | Needs `npm install` first. |\n| `obj[key]` | When the key is a variable. |\n| `path.join(__dirname, …)` | Relative to the file, not the shell. |\n\n**Next:** [Fundamentals - One test, many rows](/learn/w4/d4/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -145,7 +145,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 4.2 — One test, many rows\n\nYour customer hands you twenty username/password pairs and asks whether they all work. By the end of\nthis lesson you answer that without writing twenty tests — and handle rows that are *supposed* to\nfail.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
+          "text": "# Fundamentals — One test, many rows\n\nYour customer hands you twenty username/password pairs and asks whether they all work. By the end of\nthis lesson you answer that without writing twenty tests — and handle rows that are *supposed* to\nfail.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -250,7 +250,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Only for multiple rows.** One fixed value belongs in a helper.\n- **Assert against the data**, never a repeated literal.\n- **Return to the starting state** at the end of each row.\n- **Loop outside `test()`** so each row is its own reported test.\n- **Every row carries an expected result**, and the final `else` throws.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Row 1 passes, row 2 times out | didn't return to the start state | log out / navigate back |\n| `raw.users is undefined` | forgot `JSON.parse` | parse the text first |\n| `ENOENT` | wrong path | use `REPO_ROOT`, or `import` the JSON |\n| `Unexpected token` in JSON | trailing comma or single quotes | double quotes, no trailing commas |\n| One test result for twenty rows | loop is inside `test()` | move it outside |\n| A data typo produces a green run | no final `else` | make it throw |\n\n**Next:** [Day 4.3](/learn/w4/d4/p3) — when the data lives in a spreadsheet.",
+          "text": "## Best practices\n\n- **Only for multiple rows.** One fixed value belongs in a helper.\n- **Assert against the data**, never a repeated literal.\n- **Return to the starting state** at the end of each row.\n- **Loop outside `test()`** so each row is its own reported test.\n- **Every row carries an expected result**, and the final `else` throws.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| Row 1 passes, row 2 times out | didn't return to the start state | log out / navigate back |\n| `raw.users is undefined` | forgot `JSON.parse` | parse the text first |\n| `ENOENT` | wrong path | use `REPO_ROOT`, or `import` the JSON |\n| `Unexpected token` in JSON | trailing comma or single quotes | double quotes, no trailing commas |\n| One test result for twenty rows | loop is inside `test()` | move it outside |\n| A data typo produces a green run | no final `else` | make it throw |\n\n**Next:** [Implementation](/learn/w4/d4/p3) — when the data lives in a spreadsheet.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -268,7 +268,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 4.3 — When the data lives somewhere else\n\nSame loop, same assertions as [Day 4.2](/learn/w4/d4/p2). What changes is **where the rows come from** —\nbecause on a real project you rarely get to choose JSON.",
+          "text": "# Implementation — When the data lives somewhere else\n\nSame loop, same assertions as [Fundamentals](/learn/w4/d4/p2). What changes is **where the rows come from** —\nbecause on a real project you rarely get to choose JSON.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -366,14 +366,14 @@
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week4/generated/day4-excel-csv.spec.ts`\n\n**Expected:** `14 passed` — 6 cases × 2 sources, plus 2 tests proving the sources agree.\n\nThe cell writes the **CSV** but not the `.xlsx`: a spreadsheet is binary and can't be embedded in a\ntext cell. It's already in `week4/generated/`, and Day 4.4 has you build one.\n\nThe spec's most important line isn't about file formats at all:\n\n```ts\nconst email = testCase.email.trim();\n```\n\nThat's the blank-cell gotcha, handled. Without it TC04 types a space, the Login button enables, and\nthe test fails asserting `toBeDisabled()` — for a reason with nothing to do with the application.",
+          "text": "> ▶ **Run it yourself:** `npx playwright test week4/generated/day4-excel-csv.spec.ts`\n\n**Expected:** `14 passed` — 6 cases × 2 sources, plus 2 tests proving the sources agree.\n\nThe cell writes the **CSV** but not the `.xlsx`: a spreadsheet is binary and can't be embedded in a\ntext cell. It's already in `week4/generated/`, and [Practice](/learn/w4/d4/p4) has you build one.\n\nThe spec's most important line isn't about file formats at all:\n\n```ts\nconst email = testCase.email.trim();\n```\n\nThat's the blank-cell gotcha, handled. Without it TC04 types a space, the Login button enables, and\nthe test fails asserting `toBeDisabled()` — for a reason with nothing to do with the application.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Test data is not always safe to commit\n\nA file of usernames and passwords is a file of credentials, whatever you call it.\n\n| Data | Commit it? |\n|---|---|\n| Demo credentials for a public sandbox | yes — this repo does, deliberately |\n| Real usernames for a staging environment | **no** — env vars or a secret store |\n| Customer names, emails, card numbers | **never** |\n| Generated fixtures | yes, and regenerate rather than hand-edit |\n\nGit keeps history: committing a credential and deleting it next commit does not remove it.\n\n## What a reviewer checks\n\n- **Is Excel earning its cost?** If nobody outside the team edits it, CSV is strictly better.\n- **Is the data reviewable?** A binary diff in a pull request is a red flag.\n- **Any real credentials** in a committed data file?\n- **`.trim()` on spreadsheet values**, and `columns: true` on CSV.\n- **Dependencies audited** — `fixAvailable: false` deserves a conversation, not a shrug.\n\n**Next:** [Day 4.4](/learn/w4/d4/p4) — your turn.",
+          "text": "## Test data is not always safe to commit\n\nA file of usernames and passwords is a file of credentials, whatever you call it.\n\n| Data | Commit it? |\n|---|---|\n| Demo credentials for a public sandbox | yes — this repo does, deliberately |\n| Real usernames for a staging environment | **no** — env vars or a secret store |\n| Customer names, emails, card numbers | **never** |\n| Generated fixtures | yes, and regenerate rather than hand-edit |\n\nGit keeps history: committing a credential and deleting it next commit does not remove it.\n\n## What a reviewer checks\n\n- **Is Excel earning its cost?** If nobody outside the team edits it, CSV is strictly better.\n- **Is the data reviewable?** A binary diff in a pull request is a red flag.\n- **Any real credentials** in a committed data file?\n- **`.trim()` on spreadsheet values**, and `columns: true` on CSV.\n- **Dependencies audited** — `fixAvailable: false` deserves a conversation, not a shrug.\n\n**Next:** [Practice](/learn/w4/d4/p4) — your turn.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -391,7 +391,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 4.4 — Practice\n\nThree problems. No answer key.\n\nFiles to copy the shape from: `week4/generated/day4-users.json`, `day4-login-cases.json`,\n`day4-excel-csv.csv` and `.xlsx`.\n\nVerified login behaviour: valid → `/dashboard` with the name visible; wrong credentials → stays on\nlogin with **no message**; any blank field → Login button **disabled**.\n\n> Stuck past twenty minutes? Back to [Day 4.1](/learn/w4/d4/p1) or [Day 4.2](/learn/w4/d4/p2).",
+          "text": "# Practice — Practice\n\nThree problems. No answer key.\n\nFiles to copy the shape from: `week4/generated/day4-users.json`, `day4-login-cases.json`,\n`day4-excel-csv.csv` and `.xlsx`.\n\nVerified login behaviour: valid → `/dashboard` with the name visible; wrong credentials → stays on\nlogin with **no message**; any blank field → Login button **disabled**.\n\n> Stuck past twenty minutes? Back to [TypeScript](/learn/w4/d4/p1) or [Fundamentals](/learn/w4/d4/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -419,7 +419,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**Your equality test is the useful one.** When three sources hold the same data, the bug is almost\nnever parsing — it's that someone edited one file and forgot the others. A test comparing the sources\ncatches that in seconds.\n\n**And the misspelling check matters most.** A data-driven suite where a typo in the data produces a\ngreen run is the most dangerous shape in this course — it looks like coverage and isn't.\n\n**Next:** [Day 5.1](/learn/w4/d5/p1) — testing what a page *looks* like.",
+          "text": "## When you're done\n\n**Your equality test is the useful one.** When three sources hold the same data, the bug is almost\nnever parsing — it's that someone edited one file and forgot the others. A test comparing the sources\ncatches that in seconds.\n\n**And the misspelling check matters most.** A data-driven suite where a typo in the data produces a\ngreen run is the most dangerous shape in this course — it looks like coverage and isn't.\n\n**Next:** [Day 5 - TypeScript](/learn/w4/d5/p1) — testing what a page *looks* like.",
           "starter": null,
           "variation": null,
           "checkpoint": null

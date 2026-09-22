@@ -64,7 +64,7 @@
       "recap": "- Relative XPath (`//tag[@attr='v']`) always; absolute XPath never.\n- XPath can go up and sideways in the DOM; CSS can only go down and to the next sibling. That is the one real reason to reach for XPath.\n- `expect()` **retries**; a plain `if` checks once. That is the whole difference, and it only works inside the test runner.\n- `toContainText` for a fragment, `toHaveText` only when you know the exact string. Text matchers normalize whitespace.\n- Assert something observable. \"It didn't throw\" is not an assertion."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line ran in [Day 2.2](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1.3](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
+      "at_a_glance": "| | |\n|---|---|\n| **The API** | every line ran in [Fundamentals](/learn/w2/d2/p2) |\n| **What changes** | three repeated `expect()` calls become one `expectFormFilledCorrectly(page, email)` |\n| **Builds on** | [Day 1 - Implementation](/learn/w2/d1/p3)'s helper file, which now holds an action helper *and* a check helper |",
       "checkpoints": [
         {
           "question": "A page object must never assert. So why is `expectFormFilledCorrectly` allowed to be nothing but `expect()` calls?",
@@ -90,7 +90,7 @@
       "recap": "- Copy-pasted `expect()` calls are the same problem as copy-pasted actions, with the same fix: put them in one function.\n- Name a checker for what it checks (`expectFormFilledCorrectly`), so a reader can tell at the call site that nothing is being *done* to the page.\n- Keep actions and checks in separate functions. Week 3 formalises that split into a class; the discipline is identical today."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | XPath by hand, then assertions, then a helper of your own |\n| **Pulls on** | [Day 2.1](/learn/w2/d2/p1) for `const` · [Day 2.2](/learn/w2/d2/p2) for matchers · [Day 2.3](/learn/w2/d2/p3) for the shape |\n| **Watch for** | an assertion that passes for the wrong reason — it is the failure mode this whole day exists to fix |"
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | XPath by hand, then assertions, then a helper of your own |\n| **Pulls on** | [TypeScript](/learn/w2/d2/p1) for `const` · [Fundamentals](/learn/w2/d2/p2) for matchers · [Implementation](/learn/w2/d2/p3) for the shape |\n| **Watch for** | an assertion that passes for the wrong reason — it is the failure mode this whole day exists to fix |"
     }
   }
 }

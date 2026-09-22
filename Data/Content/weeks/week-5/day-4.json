@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 4.1 - Prerequisites check\n\nToday every page class becomes a fixture. That needs one type-level tool you have not used yet.\n\n| Concept | Taught in |\n|---|---|\n| `test.extend` with fixtures | [week3/day3_3](/learn/w3/d3/p3) |\n| Classes, `extends` | [day3_1](/learn/w5/d3/p1) |\n| A `type` alias for an object | new - below |\n| Re-exporting (`export { x }`) | new - below |\n| Dynamic `import()` | new - below |\n\n**Next:** [Day 4.2 - Composing page objects](/learn/w5/d4/p2)",
+          "text": "# TypeScript - Prerequisites check\n\nToday every page class becomes a fixture. That needs one type-level tool you have not used yet.\n\n| Concept | Taught in |\n|---|---|\n| `test.extend` with fixtures | [week3/day3_3](/learn/w3/d3/p3) |\n| Classes, `extends` | [day3_1](/learn/w5/d3/p1) |\n| A `type` alias for an object | new - below |\n| Re-exporting (`export { x }`) | new - below |\n| Dynamic `import()` | new - below |\n\n**Next:** [Fundamentals - Composing page objects](/learn/w5/d4/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -85,7 +85,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 4.2 - Composing page objects](/learn/w5/d4/p2)",
+          "text": "**Next:** [Fundamentals - Composing page objects](/learn/w5/d4/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -103,7 +103,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 4.2 - Composing page objects\n\nDay 3's spec opened with three lines of `new`:\n\n```ts\nconst loginPage = new LoginPage(page);\nconst dashboardPage = new DashboardPage(page);\nconst transferPage = new TransferPage(page);\n```\n\nEvery test. Add a fourth page and you edit every test again. Today those disappear.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Fundamentals - Composing page objects\n\nDay 3's spec opened with three lines of `new`:\n\n```ts\nconst loginPage = new LoginPage(page);\nconst dashboardPage = new DashboardPage(page);\nconst transferPage = new TransferPage(page);\n```\n\nEvery test. Add a fourth page and you edit every test again. Today those disappear.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -194,7 +194,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 4.3 - How a real repo scales it](/learn/w5/d4/p3)",
+          "text": "**Next:** [Implementation - How a real repo scales it](/learn/w5/d4/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -212,7 +212,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 4.3 - How a real repo scales it\n\nSame `test.extend`, same page classes - at 300 tests.\n\n## The fixtures file is a bottleneck\n\nEvery spec imports it, so every page class it names gets loaded - even for a test that uses one.\nTwo ways teams handle it:\n\n| Approach | Trade |\n|---|---|\n| One `fixtures/test.ts` with every page | simplest; slowest to load, and one merge-conflict hotspot |\n| One fixtures file per area, all extending a shared base | more files, no hotspot |\n\nSplitting by area:\n\n```ts\n// fixtures/base.ts        - things every area needs\nexport const test = base.extend<Core>({ ... });\n\n// fixtures/payments.ts    - extends it again\nimport { test as coreTest } from \"./base\";\nexport const test = coreTest.extend<PaymentPages>({ ... });\n```\n\n`extend` returns a new `test`, so chaining is the intended use.",
+          "text": "# Implementation - How a real repo scales it\n\nSame `test.extend`, same page classes - at 300 tests.\n\n## The fixtures file is a bottleneck\n\nEvery spec imports it, so every page class it names gets loaded - even for a test that uses one.\nTwo ways teams handle it:\n\n| Approach | Trade |\n|---|---|\n| One `fixtures/test.ts` with every page | simplest; slowest to load, and one merge-conflict hotspot |\n| One fixtures file per area, all extending a shared base | more files, no hotspot |\n\nSplitting by area:\n\n```ts\n// fixtures/base.ts        - things every area needs\nexport const test = base.extend<Core>({ ... });\n\n// fixtures/payments.ts    - extends it again\nimport { test as coreTest } from \"./base\";\nexport const test = coreTest.extend<PaymentPages>({ ... });\n```\n\n`extend` returns a new `test`, so chaining is the intended use.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -247,7 +247,7 @@
         },
         {
           "type": "markdown",
-          "text": "## What actually keeps a big POM suite alive\n\n| Practice | Why |\n|---|---|\n| One class per page, one file per class | you can find things by name |\n| Inheritance one level deep; compose the rest | see [day3_3](/learn/w5/d3/p3) |\n| No `expect` in `pages/` | rule 3 |\n| Fixtures for construction, not for logic | a fixture doing five things is a hidden `beforeEach` |\n| A lint rule banning raw selectors in `specs/` | catches the hole before review does |\n\n**Next:** [Day 4.4 - Practice](/learn/w5/d4/p4)",
+          "text": "## What actually keeps a big POM suite alive\n\n| Practice | Why |\n|---|---|\n| One class per page, one file per class | you can find things by name |\n| Inheritance one level deep; compose the rest | see [day3_3](/learn/w5/d3/p3) |\n| No `expect` in `pages/` | rule 3 |\n| Fixtures for construction, not for logic | a fixture doing five things is a hidden `beforeEach` |\n| A lint rule banning raw selectors in `specs/` | catches the hole before review does |\n\n**Next:** [Practice](/learn/w5/d4/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -265,7 +265,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 4.4 - Practice\n\nWork in `week5/generated/`. Copy `pages/test.ts` to `pages/mytest.ts` and extend that, so the\nDay 4.2 cells keep running.",
+          "text": "# Practice - Practice\n\nWork in `week5/generated/`. Copy `pages/test.ts` to `pages/mytest.ts` and extend that, so the\n[Fundamentals](/learn/w5/d4/p2) cells keep running.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -321,7 +321,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 5.1 - Prerequisites](/learn/w5/d5/p1)",
+          "text": "**Next:** [Day 5 - TypeScript - Prerequisites](/learn/w5/d5/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -331,7 +331,7 @@
         {
           "number": 1,
           "difficulty": null,
-          "statement": "**Add a fixture**\nAdd your `PayBillsPage` from Day 3.4 to a copy of the fixtures module, and use it in a spec.\n\n**Right when:** the spec never writes `new`, and passes.",
+          "statement": "**Add a fixture**\nAdd your `PayBillsPage` from [Day 3 - Practice](/learn/w5/d3/p4) to a copy of the fixtures module, and use it in a spec.\n\n**Right when:** the spec never writes `new`, and passes.",
           "stub": "// Your work here.",
           "solution": null
         },
@@ -345,7 +345,7 @@
         {
           "number": 3,
           "difficulty": null,
-          "statement": "**A signedIn fixture**\nWrite the `signedIn` fixture from Day 4.2 Step 6. Use it to rewrite two tests.\n\n**Right when:** both pass and neither mentions `signIn()`.",
+          "statement": "**A signedIn fixture**\nWrite the `signedIn` fixture from [Fundamentals](/learn/w5/d4/p2) Step 6. Use it to rewrite two tests.\n\n**Right when:** both pass and neither mentions `signIn()`.",
           "stub": "// Your work here.",
           "solution": null
         },
@@ -366,7 +366,7 @@
         {
           "number": 6,
           "difficulty": null,
-          "statement": "**An auto fixture that fails the run**\nWrite the `failOnConsoleError` fixture from Day 4.3. Then add a test that triggers a console\nerror with `page.evaluate(() => console.error(\"boom\"))`.\n\n**Right when:** that test fails, no other test does, and no test file mentions the fixture.",
+          "statement": "**An auto fixture that fails the run**\nWrite the `failOnConsoleError` fixture from [Implementation](/learn/w5/d4/p3). Then add a test that triggers a console\nerror with `page.evaluate(() => console.error(\"boom\"))`.\n\n**Right when:** that test fails, no other test does, and no test file mentions the fixture.",
           "stub": "// Your work here.",
           "solution": null
         },

@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.1 — TypeScript for API testing\n\nSix concepts, six runnable cells. Everything tomorrow's API tests are built from.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.\n>\n> **`Identifier 'x' has already been declared`?** Cells share one workspace, so re-running",
+          "text": "# TypeScript — TypeScript for API testing\n\nSix concepts, six runnable cells. Everything tomorrow's API tests are built from.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.\n>\n> **`Identifier 'x' has already been declared`?** Cells share one workspace, so re-running",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -197,7 +197,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `let` vs `const` | Filled in later → `let`, declared outside. |\n| Template literals | `` `token=${token}` `` for runtime values. |\n| Objects | Numbers and booleans go unquoted. |\n| Nested access | `undefined` blames an *earlier* dot — print the object. |\n| `async` / `await` | Two per call: response, then `.json()`. |\n| Destructuring | `{ request }` is a test asking for tools. |\n\n**Next:** [Day 1.2 — Testing an API end to end](/learn/w8/d1/p2)",
+          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `let` vs `const` | Filled in later → `let`, declared outside. |\n| Template literals | `` `token=${token}` `` for runtime values. |\n| Objects | Numbers and booleans go unquoted. |\n| Nested access | `undefined` blames an *earlier* dot — print the object. |\n| `async` / `await` | Two per call: response, then `.json()`. |\n| Destructuring | `{ request }` is a test asking for tools. |\n\n**Next:** [Fundamentals - Testing an API end to end](/learn/w8/d1/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -215,7 +215,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.2 — Testing an API end to end\n\nYou'll log into a real API, create a booking, read it back, get refused without a token,\nupdate it two ways, delete it, and prove it's gone. **No browser. About five seconds.**\nThe same journey clicked through a UI takes closer to thirty.\n\nPrerequisites: [Day 1.1](/learn/w8/d1/p1).\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
+          "text": "# Fundamentals — Testing an API end to end\n\nYou'll log into a real API, create a booking, read it back, get refused without a token,\nupdate it two ways, delete it, and prove it's gone. **No browser. About five seconds.**\nThe same journey clicked through a UI takes closer to thirty.\n\nPrerequisites: [TypeScript](/learn/w8/d1/p1).\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -313,7 +313,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `200`, and the booking — but look at the shape.\n\n- **Create** wrapped it: `createdBody.booking.firstname`\n- **Read** doesn't: `fetchedBody.firstname`\n\nSame data, two shapes, one API. Assume they match and you get `Cannot read properties of\nundefined` — the Day 1.1 error. Same fix: print the body, then write the path.\n\nThe URL uses backticks because the id is only known at runtime.",
+          "text": "**Expected:** `200`, and the booking — but look at the shape.\n\n- **Create** wrapped it: `createdBody.booking.firstname`\n- **Read** doesn't: `fetchedBody.firstname`\n\nSame data, two shapes, one API. Assume they match and you get `Cannot read properties of\nundefined` — the [TypeScript](/learn/w8/d1/p1) error. Same fix: print the body, then write the path.\n\nThe URL uses backticks because the id is only known at runtime.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -418,7 +418,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Now the real thing: a spec file\n\nCells remember things between runs. A test can't — it must set itself up.\n\nGetting the token is a **prerequisite**, not the thing under test, so it goes in `beforeAll`\nand lands in a `let` at the top of the file. Exactly the Day 1.1 situation.\n\nThe cell below writes a real spec to disk and runs it with genuine `npx playwright test`.",
+          "text": "## Now the real thing: a spec file\n\nCells remember things between runs. A test can't — it must set itself up.\n\nGetting the token is a **prerequisite**, not the thing under test, so it goes in `beforeAll`\nand lands in a `let` at the top of the file. Exactly the [TypeScript](/learn/w8/d1/p1) situation.\n\nThe cell below writes a real spec to disk and runs it with genuine `npx playwright test`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -432,14 +432,14 @@
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day1-booking-flow.spec.ts`\n\n**Expected:** `6 passed`, ~5 seconds.\n\nTwo things changed by moving into the runner:\n\n- **`expect()` replaced `console.log()`.** You judged the output; now the test judges it.\n  That's the whole difference between exploring and testing.\n- **`test.describe.configure({ mode: \"serial\" })`.** Each step uses the previous step's\n  booking, and Playwright runs tests in parallel by default. Being explicit about the\n  dependency is honest; hoping the order works out is how flaky suites start.\n\nNeeding serial mode is a smell, though. A test that makes its own data can run alone, in any\norder. Day 1.3 shows that version.",
+          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day1-booking-flow.spec.ts`\n\n**Expected:** `6 passed`, ~5 seconds.\n\nTwo things changed by moving into the runner:\n\n- **`expect()` replaced `console.log()`.** You judged the output; now the test judges it.\n  That's the whole difference between exploring and testing.\n- **`test.describe.configure({ mode: \"serial\" })`.** Each step uses the previous step's\n  booking, and Playwright runs tests in parallel by default. Being explicit about the\n  dependency is honest; hoping the order works out is how flaky suites start.\n\nNeeding serial mode is a smell, though. A test that makes its own data can run alone, in any\norder. [Implementation](/learn/w8/d1/p3) shows that version.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- **Make your own data**, and use the id you got back.\n- **Fetch tokens at runtime.** Never paste one into a file.\n- **Assert more than the status code.** `200` only means the server answered.\n- **Verify deletes.** A delete isn't proven by its own status code.\n- **Base URL in one place**, so the suite can point at staging.\n- **Print the body when confused** — faster than reasoning about it.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `No tests found` | wrong path or filename | copy the path, don't type it |\n| `Cannot read properties of undefined` | an earlier dot is wrong | print the whole body |\n| `403` / \"bad credential\" | missing token, or right token in the wrong header | check `Cookie` vs `Authorization` |\n| `Promise { <pending> }` | missing `await` | two per call |\n| passes alone, fails in the suite | tests sharing data | make each test create its own |\n| `Cannot assign to 'token'` | `const token` inside the hook | drop the `const` |\n\n**Next:** [Day 1.3](/learn/w8/d1/p3) — the same code, organised so the 60th test isn't a\ncopy-paste of the 6th.",
+          "text": "## Best practices\n\n- **Make your own data**, and use the id you got back.\n- **Fetch tokens at runtime.** Never paste one into a file.\n- **Assert more than the status code.** `200` only means the server answered.\n- **Verify deletes.** A delete isn't proven by its own status code.\n- **Base URL in one place**, so the suite can point at staging.\n- **Print the body when confused** — faster than reasoning about it.\n\n## Common mistakes\n\n| You see | Usually means | Fix |\n|---|---|---|\n| `No tests found` | wrong path or filename | copy the path, don't type it |\n| `Cannot read properties of undefined` | an earlier dot is wrong | print the whole body |\n| `403` / \"bad credential\" | missing token, or right token in the wrong header | check `Cookie` vs `Authorization` |\n| `Promise { <pending> }` | missing `await` | two per call |\n| passes alone, fails in the suite | tests sharing data | make each test create its own |\n| `Cannot assign to 'token'` | `const token` inside the hook | drop the `const` |\n\n**Next:** [Implementation](/learn/w8/d1/p3) — the same code, organised so the 60th test isn't a\ncopy-paste of the 6th.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -457,7 +457,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.3 — The same calls, the way a project writes them\n\nEvery method here is one you ran in [Day 1.2](/learn/w8/d1/p2). **No new API.** The only new\nthing is the structure around it — much easier to absorb when the code is already familiar.",
+          "text": "# Implementation — The same calls, the way a project writes them\n\nEvery method here is one you ran in [Fundamentals](/learn/w8/d1/p2). **No new API.** The only new\nthing is the structure around it — much easier to absorb when the code is already familiar.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -478,7 +478,7 @@
         },
         {
           "type": "markdown",
-          "text": "**The base URL scores 1.** You already did that one right — it's a `const` at the top, so\nmoving to staging is a single edit. Good instinct; keep it.\n\nThe other two are the friction:\n\n- The **endpoint path** is rebuilt in every test. Each one has to get the URL right.\n- The **auth header** is spelled out once per authenticated call. The day this API moves to\n  bearer tokens, that's an edit in every one of them — and missing one gives you a 403 you'll\n  spend an afternoon on.\n\nThere's a subtler cost too: *every test knows the token travels in a cookie.* That's a fact\nabout how the API works, and it has leaked into code that only wants to **use** the API.\n\nThe fix is the page-object idea applied to an API: **put the knowledge of how the API works\nin one place; let tests describe what should be true.**\n\n| Day 1.2 | Here | Why |\n|---|---|---|\n| `api.put(`${BASE}/booking/${id}`, …)` | `api.update(id, changes)` | the URL is built in one place |\n| `` Cookie: `token=${token}` `` in each call | `this.authHeaders()` | one line to change |\n| `beforeAll` in every spec file | an `api` fixture | requested by name, not copy-pasted |\n| `let token` visible file-wide | `private token` | no test can corrupt it |\n| `expect()` mixed into the flow | `expect()` only in tests | client asks, test judges |",
+          "text": "**The base URL scores 1.** You already did that one right — it's a `const` at the top, so\nmoving to staging is a single edit. Good instinct; keep it.\n\nThe other two are the friction:\n\n- The **endpoint path** is rebuilt in every test. Each one has to get the URL right.\n- The **auth header** is spelled out once per authenticated call. The day this API moves to\n  bearer tokens, that's an edit in every one of them — and missing one gives you a 403 you'll\n  spend an afternoon on.\n\nThere's a subtler cost too: *every test knows the token travels in a cookie.* That's a fact\nabout how the API works, and it has leaked into code that only wants to **use** the API.\n\nThe fix is the page-object idea applied to an API: **put the knowledge of how the API works\nin one place; let tests describe what should be true.**\n\n| [Fundamentals](/learn/w8/d1/p2) | Here | Why |\n|---|---|---|\n| `api.put(`${BASE}/booking/${id}`, …)` | `api.update(id, changes)` | the URL is built in one place |\n| `` Cookie: `token=${token}` `` in each call | `this.authHeaders()` | one line to change |\n| `beforeAll` in every spec file | an `api` fixture | requested by name, not copy-pasted |\n| `let token` visible file-wide | `private token` | no test can corrupt it |\n| `expect()` mixed into the flow | `expect()` only in tests | client asks, test judges |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -534,7 +534,7 @@
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day1-api-client.spec.ts`\n\n**Expected:** `2 passed`, ~3 seconds.\n\nRead what the test says now:\n\n```ts\nconst created = await api.create(sample);\nexpect(created.status()).toBe(200);\nconst patched = await api.update(id, { firstname: \"Grace\" });\n```\n\nNo URLs, no headers, no token — a description of behaviour. If this API moved to bearer\ntokens tomorrow, the test wouldn't change at all. Only `authHeaders()` would.\n\nThese tests also **don't need `mode: \"serial\"`**. Each makes its own booking, so they're\nindependent and run in parallel. The structure didn't just tidy the code — it removed a\nreal constraint.\n\n## What a reviewer checks\n\n- No `expect()` in the client — the most common first-review comment\n- No hardcoded ids; every id read back from a create\n- No token in the source\n- Base URL in one place, ideally from config or an env var\n- Method names describing intent\n- **Every test able to run alone** — otherwise it's the one that fails in CI at 3am\n\n**Next:** [Day 1.4](/learn/w8/d1/p4) — your turn, no worked examples.",
+          "text": "> ▶ **Run it yourself:** `npx playwright test week8/generated/day1-api-client.spec.ts`\n\n**Expected:** `2 passed`, ~3 seconds.\n\nRead what the test says now:\n\n```ts\nconst created = await api.create(sample);\nexpect(created.status()).toBe(200);\nconst patched = await api.update(id, { firstname: \"Grace\" });\n```\n\nNo URLs, no headers, no token — a description of behaviour. If this API moved to bearer\ntokens tomorrow, the test wouldn't change at all. Only `authHeaders()` would.\n\nThese tests also **don't need `mode: \"serial\"`**. Each makes its own booking, so they're\nindependent and run in parallel. The structure didn't just tidy the code — it removed a\nreal constraint.\n\n## What a reviewer checks\n\n- No `expect()` in the client — the most common first-review comment\n- No hardcoded ids; every id read back from a create\n- No token in the source\n- Base URL in one place, ideally from config or an env var\n- Method names describing intent\n- **Every test able to run alone** — otherwise it's the one that fails in CI at 3am\n\n**Next:** [Practice](/learn/w8/d1/p4) — your turn, no worked examples.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -552,7 +552,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.4 — Practice\n\nThree problems, getting harder. No answer key — each one tells you how to check yourself.\n\nTarget: **Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)). Credentials `admin` /\n`password123`.\n\nWork in the cells below, or write a spec into `week8/generated/`. Problem 3 expects a spec.\n\n> Stuck past twenty minutes? The gap is in [Day 1.1](/learn/w8/d1/p1) or\n> [Day 1.2](/learn/w8/d1/p2), not in your ability.",
+          "text": "# Practice — Practice\n\nThree problems, getting harder. No answer key — each one tells you how to check yourself.\n\nTarget: **Restful Booker** — `https://restful-booker.herokuapp.com`\n([docs](https://restful-booker.herokuapp.com/apidoc/index.html)). Credentials `admin` /\n`password123`.\n\nWork in the cells below, or write a spec into `week8/generated/`. Problem 3 expects a spec.\n\n> Stuck past twenty minutes? The gap is in [TypeScript](/learn/w8/d1/p1) or\n> [Fundamentals](/learn/w8/d1/p2), not in your ability.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -580,7 +580,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\n**If this API switched to a bearer token tomorrow, how many lines would you change?**\n\nOne means you understood Day 1.3. More means look at where the header gets built — Day 1.2's\nversion needed four.\n\n**Could two people run your Problem 3 test at the same time?** That's the difference between\na test that works and a test that works in CI.\n\n**Next:** Day 2 — what to do when the API under test is down, checking a response's *shape*\nrather than its values, and chaining calls where one booking feeds the next.",
+          "text": "## When you're done\n\n**If this API switched to a bearer token tomorrow, how many lines would you change?**\n\nOne means you understood [Implementation](/learn/w8/d1/p3). More means look at where the header gets built — the [Fundamentals](/learn/w8/d1/p2) lesson's\nversion needed four.\n\n**Could two people run your Problem 3 test at the same time?** That's the difference between\na test that works and a test that works in CI.\n\n**Next:** Day 2 — what to do when the API under test is down, checking a response's *shape*\nrather than its values, and chaining calls where one booking feeds the next.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -604,7 +604,7 @@
         {
           "number": 3,
           "difficulty": "Advanced",
-          "statement": "**Build.** Your own client and fixture — not a copy of Day 1.3's.\n\nRestful Booker has an endpoint Day 1.3 never touched: `GET /booking` returns every booking\nid, and accepts filters like `?firstname=Jim`.\n\n1. A `BookingApi` class with `signIn()`, `create()`, `read()`, `remove()` and a new\n   `search(filters)` for the filtered list\n2. A fixture so a test can write `async ({ api }) => {}` and get a signed-in client\n3. A test that: creates a booking with a distinctive first name, searches for that name,\n   confirms the new id is in the results, deletes it, confirms the id is gone\n\n**Where.** A spec in `week8/generated/`.\n\n**Constraints — these are the exercise:**\n\n- **No `expect()` inside the class**\n- **No hardcoded ids** — every id read back from a create\n- The test must pass **run on its own**, in any order\n\n**Check yourself.** It passes, then passes twice more in a row. A test that only passes the\nfirst time is leaning on data it left behind.\n\n> **Hint** — pick a genuinely distinctive first name. This is a public API and other people\n> are using it; `Jim` will match hundreds of bookings that aren't yours.",
+          "statement": "**Build.** Your own client and fixture — not a copy of the [Implementation](/learn/w8/d1/p3) lesson's.\n\nRestful Booker has an endpoint [Implementation](/learn/w8/d1/p3) never touched: `GET /booking` returns every booking\nid, and accepts filters like `?firstname=Jim`.\n\n1. A `BookingApi` class with `signIn()`, `create()`, `read()`, `remove()` and a new\n   `search(filters)` for the filtered list\n2. A fixture so a test can write `async ({ api }) => {}` and get a signed-in client\n3. A test that: creates a booking with a distinctive first name, searches for that name,\n   confirms the new id is in the results, deletes it, confirms the id is gone\n\n**Where.** A spec in `week8/generated/`.\n\n**Constraints — these are the exercise:**\n\n- **No `expect()` inside the class**\n- **No hardcoded ids** — every id read back from a create\n- The test must pass **run on its own**, in any order\n\n**Check yourself.** It passes, then passes twice more in a row. A test that only passes the\nfirst time is leaning on data it left behind.\n\n> **Hint** — pick a genuinely distinctive first name. This is a public API and other people\n> are using it; `Jim` will match hundreds of bookings that aren't yours.",
           "stub": "// Problem 3 — your code here.",
           "solution": null
         }

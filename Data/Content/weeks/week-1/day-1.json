@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **When TypeScript starts** | [Day 5.1](/learn/w1/d5/p1), with arrow functions, `async` and `import` |\n| **Then go to** | [Fundamentals](/learn/w1/d1/p2) — why teams automate, and why this tool |",
+          "text": "| | |\n|---|---|\n| **When TypeScript starts** | [Day 5 - TypeScript](/learn/w1/d5/p1), with arrow functions, `async` and `import` |\n| **Then go to** | [Fundamentals](/learn/w1/d1/p2) — why teams automate, and why this tool |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -35,11 +35,11 @@
           "checkpoint": {
             "options": [
               "Yes — the first lessons assume it, which is why this tab exists",
-              "No — the primers begin at Day 5.1, and everything before that is readable without them",
+              "No — the primers begin at Day 5 - TypeScript, and everything before that is readable without them",
               "No, because the course never uses TypeScript at all"
             ],
             "answer": 1,
-            "explanation": "The language primers start at [Day 5.1](/learn/w1/d5/p1). Days 1 to 4 are orientation, setup, the CLI and Codegen — readable without the language. The course does very much use TypeScript; it just does not open with it."
+            "explanation": "The language primers start at [Day 5 - TypeScript](/learn/w1/d5/p1). Days 1 to 4 are orientation, setup, the CLI and Codegen — readable without the language. The course does very much use TypeScript; it just does not open with it."
           }
         },
         {
@@ -146,7 +146,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Hands-on: go look at the tool\n\nOpen a real browser tab and look around.\n\n1. Open **https://playwright.dev**\n2. Read the homepage tagline and the three feature callouts.\n3. Open **Docs → Writing tests** and skim it — you'll recognize the shape (`test(...)`,\n   `expect(...)`) once you write your own on Day 5.\n4. Note one thing on the site that wasn't mentioned in this lesson — you'll need it for\n   Day 1.4.",
+          "text": "## Hands-on: go look at the tool\n\nOpen a real browser tab and look around.\n\n1. Open **https://playwright.dev**\n2. Read the homepage tagline and the three feature callouts.\n3. Open **Docs → Writing tests** and skim it — you'll recognize the shape (`test(...)`,\n   `expect(...)`) once you write your own on Day 5.\n4. Note one thing on the site that wasn't mentioned in this lesson — you'll need it for\n   [Practice](/learn/w1/d1/p4).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -270,14 +270,14 @@
           "difficulty": "Beginner",
           "statement": "**What to do.** Pick one manual test you've personally run by hand (in any app, past job, or\nthis course's banking app if you've poked at it already). Write two sentences: could\nPlaywright automate it, and what *object* would you need to identify on the page to do so?\n\n**How you'll know it worked.** You named a concrete object (a button, a field, a label) —\nnot just \"the login page\" in the abstract. If you can't name one, that's worth noticing: it\nmight mean the test isn't automatable yet, per today's thumb rule.",
           "stub": "// Your turn — jot your answer here as a comment, or a console.log if you want\n// to see it printed. There's no code to run today, only thinking to do.",
-          "solution": "**A model answer — yours will name a different test, and that is the point.**\n\n> *Manual test:* logging in to the banking app with a valid email and password and checking the dashboard appears.\n>\n> *Could Playwright automate it?* Yes. It has a known expected result (the dashboard loads and shows my name) and every step acts on something identifiable on the page.\n>\n> *The object I would need to identify:* the **Login button** — specifically `getByRole('button', { name: 'Login' })`. I would also need the two placeholder-labelled inputs, `Enter Email` and `Enter Password`.\n\n**What makes an answer good here** is naming a concrete control — a button, a field, a label — rather than \"the login page\". If you could not name one, that is the honest signal this lesson was pointing at: a step no human can describe as *\"click this specific thing\"* is a step automation cannot perform either.\n\nA weak answer says \"automate the login page\". A strong one says \"click the button whose accessible name is Login\"."
+          "solution": "**A model answer — yours will name a different test, and that is the point.**\n\n> *Manual test:* logging in to the banking app with a valid email and password and checking the dashboard appears.\n>\n> *Could Playwright automate it?* Yes. It has a known expected result (the dashboard loads and shows my name) and every step acts on something identifiable on the page.\n>\n> *The object I would need to identify:* the **Login button** — specifically `getByRole('button', { name: 'Login' })`. I would also need the two placeholder-labeled inputs, `Enter Email` and `Enter Password`.\n\n**What makes an answer good here** is naming a concrete control, such as a button, a field or a label, rather than \"the login page\". If you could not name one, that is the honest signal this lesson was pointing at: a step no human can describe as *\"click this specific thing\"* is a step automation cannot perform either.\n\nA weak answer says \"automate the login page\". A strong one says \"click the button whose accessible name is Login\"."
         },
         {
           "number": 2,
           "difficulty": "Intermediate",
           "statement": "**What to do.** Open https://playwright.dev again and find **three features** it mentions\nthat this lesson didn't cover. For each one, write one sentence on what it's for.\n\n**How you'll know it worked.** Three genuinely different features (not three rewordings of\n\"auto-wait\"), each with a one-line explanation in your own words.\n\n> **Hint** — check the homepage feature grid, the sidebar under \"Guides\", and the \"Tools\"\n> section if the site has one. Codegen and the Inspector don't count — those are already in\n> today's lesson.",
           "stub": "// Your turn — jot your answer here as a comment, or a console.log if you want\n// to see it printed. There's no code to run today, only thinking to do.",
-          "solution": "**A model answer.** Three features the lesson did not cover, taken from the feature grid, the Guides sidebar, and the Tools menu on [playwright.dev](https://playwright.dev):\n\n1. **Trace Viewer** — records a run as a time-travelling trace: DOM snapshot, network, console and the action log for every step. It is how you debug a failure that only happens in CI, after the fact.\n2. **Test Retries** — re-runs a failed test a configured number of times before reporting it failed, so a genuinely flaky test is visible as flaky rather than as a hard failure. You meet this properly in Week 3.\n3. **API Testing** — Playwright can send HTTP requests directly through `request`, with no browser at all, which is how you set up state quickly instead of clicking through the UI to reach it.\n\nOther good picks: **Component testing**, **Visual comparisons**, **Mobile emulation**, **Codegen**, **UI Mode**, **Parallelism and sharding**.\n\n**What makes an answer good** is that the three are genuinely different capabilities, each in your own words. Three rewordings of auto-waiting is one feature, not three."
+          "solution": "**A model answer.** Three features the lesson did not cover, taken from the feature grid, the Guides sidebar, and the Tools menu on [playwright.dev](https://playwright.dev):\n\n1. **Trace Viewer** — records a run as a time-traveling trace: DOM snapshot, network, console and the action log for every step. It is how you debug a failure that only happens in CI, after the fact.\n2. **Test Retries** — re-runs a failed test a configured number of times before reporting it failed, so a genuinely flaky test is visible as flaky rather than as a hard failure. You meet this properly in Week 3.\n3. **API Testing** — Playwright can send HTTP requests directly through `request`, with no browser at all, which is how you set up state quickly instead of clicking through the UI to reach it.\n\nOther good picks: **Component testing**, **Visual comparisons**, **Mobile emulation**, **Codegen**, **UI Mode**, **Parallelism and sharding**.\n\n**What makes an answer good** is that the three are genuinely different capabilities, each in your own words. Three rewordings of auto-waiting is one feature, not three."
         },
         {
           "number": 3,

@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.1 - Prerequisites check\n\nToday is about **config files**, so the TypeScript is small: one regular expression literal and\none shallow-copy trap.\n\n| Concept | What it looks like | Taught in |\n|---|---|---|\n| Typed object export | `export default defineConfig({ ... })` | [week3/day1_1](/learn/w3/d1/p1) |\n| Spread with override | `{ ...base, retries: 0 }` | [week3/day5_1](/learn/w3/d5/p1) |\n| Array of strings | `testMatch: [\"a.spec.ts\"]` | [week3/day5_1](/learn/w3/d5/p1) |\n| Regex literal | `/@smoke/` | new - below |\n\n**Next:** [Day 1.2 - One suite, two configs](/learn/w5/d1/p2)",
+          "text": "# TypeScript - Prerequisites check\n\nToday is about **config files**, so the TypeScript is small: one regular expression literal and\none shallow-copy trap.\n\n| Concept | What it looks like | Taught in |\n|---|---|---|\n| Typed object export | `export default defineConfig({ ... })` | [week3/day1_1](/learn/w3/d1/p1) |\n| Spread with override | `{ ...base, retries: 0 }` | [week3/day5_1](/learn/w3/d5/p1) |\n| Array of strings | `testMatch: [\"a.spec.ts\"]` | [week3/day5_1](/learn/w3/d5/p1) |\n| Regex literal | `/@smoke/` | new - below |\n\n**Next:** [Fundamentals - One suite, two configs](/learn/w5/d1/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -85,7 +85,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 1.2 - One suite, two configs](/learn/w5/d1/p2)",
+          "text": "**Next:** [Fundamentals - One suite, two configs](/learn/w5/d1/p2)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -103,7 +103,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.2 - One suite, two configs\n\nYour suite has 400 tests. Before every deploy you want the 40 that matter, in two minutes. Once\na night you want all 400. Same tests, two different runs.\n\nTwo things get you there: **a tag in the test title** and **a second config file**.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "# Fundamentals - One suite, two configs\n\nYour suite has 400 tests. Before every deploy you want the 40 that matter, in two minutes. Once\na night you want all 400. Same tests, two different runs.\n\nTwo things get you there: **a tag in the test title** and **a second config file**.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -229,7 +229,7 @@
         },
         {
           "type": "markdown",
-          "text": "| Setting | Config | Command line | Result | Rule |\n|---|---|---|---|---|\n| `grep` | `/@smoke/` | `--grep @regression` | **0 tests** | combined - must match both |\n| `workers` | `3` | `--workers=1` | 1 worker | overridden |\n| `retries` | `2` | `--retries=0` | 1 attempt, no retry | overridden |\n\nRemember it as: **plain values are overridden; filters are added to.** Every row above was\nchecked by running it - including the first, which is why this lesson does not say \"the flag\nalways wins\".\n\nThe practical consequence: to run a different lane, point at a different config. Do not try to\n`--grep` your way out of one.\n\n**Next:** [Day 1.3 - How a real repo lays this out](/learn/w5/d1/p3)",
+          "text": "| Setting | Config | Command line | Result | Rule |\n|---|---|---|---|---|\n| `grep` | `/@smoke/` | `--grep @regression` | **0 tests** | combined - must match both |\n| `workers` | `3` | `--workers=1` | 1 worker | overridden |\n| `retries` | `2` | `--retries=0` | 1 attempt, no retry | overridden |\n\nRemember it as: **plain values are overridden; filters are added to.** Every row above was\nchecked by running it - including the first, which is why this lesson does not say \"the flag\nalways wins\".\n\nThe practical consequence: to run a different lane, point at a different config. Do not try to\n`--grep` your way out of one.\n\n**Next:** [Implementation - How a real repo lays this out](/learn/w5/d1/p3)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -247,7 +247,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.3 - How a real repo lays this out\n\nSame `grep`, same `testMatch`, same `--grep` - arranged the way a team actually keeps them.\n\n## The layout\n\n```\nplaywright.config.ts          <- shared settings, the one source of truth\nconfig/\n  smoke.config.ts             <- imports the base, overrides 3 things\n  regression.config.ts\n  ci.config.ts\npackage.json                  <- names each run so nobody types flags\n```",
+          "text": "# Implementation - How a real repo lays this out\n\nSame `grep`, same `testMatch`, same `--grep` - arranged the way a team actually keeps them.\n\n## The layout\n\n```\nplaywright.config.ts          <- shared settings, the one source of truth\nconfig/\n  smoke.config.ts             <- imports the base, overrides 3 things\n  regression.config.ts\n  ci.config.ts\npackage.json                  <- names each run so nobody types flags\n```",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -289,7 +289,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Playwright's built-in `tag` option\n\nNewer Playwright takes tags as data rather than title text:\n\n```ts\ntest(\"sign in works\", { tag: [\"@smoke\"] }, async ({ page }) => { ... });\n```\n\n`--grep @smoke` finds both forms.\n\n| | in the title | `tag:` option |\n|---|---|---|\n| Survives a title reword | no | **yes** |\n| Visible in the report | yes | yes |\n| Found by `--grep` | yes | yes |\n| What most existing suites use | **yes** | not yet |\n\nWrite new tests with `tag:`; expect to read both.\n\n**Next:** [Day 1.4 - Practice](/learn/w5/d1/p4)",
+          "text": "## Playwright's built-in `tag` option\n\nNewer Playwright takes tags as data rather than title text:\n\n```ts\ntest(\"sign in works\", { tag: [\"@smoke\"] }, async ({ page }) => { ... });\n```\n\n`--grep @smoke` finds both forms.\n\n| | in the title | `tag:` option |\n|---|---|---|\n| Survives a title reword | no | **yes** |\n| Visible in the report | yes | yes |\n| Found by `--grep` | yes | yes |\n| What most existing suites use | **yes** | not yet |\n\nWrite new tests with `tag:`; expect to read both.\n\n**Next:** [Practice](/learn/w5/d1/p4)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -307,7 +307,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 5, Day 1.4 - Practice\n\nNo solutions here. Each problem says how to know you got it right.\n\nWork in `week5/generated/`. Copy `day1-tagged.spec.ts` to a new name first so you can always get\nback to something that ran.",
+          "text": "# Practice - Practice\n\nNo solutions here. Each problem says how to know you got it right.\n\nWork in `week5/generated/`. Copy `day1-tagged.spec.ts` to a new name first so you can always get\nback to something that ran.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -363,7 +363,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Next:** [Day 2.1 - Prerequisites](/learn/w5/d2/p1)",
+          "text": "**Next:** [Day 2 - TypeScript - Prerequisites](/learn/w5/d2/p1)",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -408,7 +408,7 @@
         {
           "number": 6,
           "difficulty": null,
-          "statement": "**Break it on purpose**\nRename a tag to `@smoketest` in one test, leaving `grep: /@smoke/` alone. Predict the count,\nthen run.\n\n**Right when:** you predicted correctly and can explain it using Day 1.1, concept 1.",
+          "statement": "**Break it on purpose**\nRename a tag to `@smoketest` in one test, leaving `grep: /@smoke/` alone. Predict the count,\nthen run.\n\n**Right when:** you predicted correctly and can explain it using [TypeScript](/learn/w5/d1/p1), concept 1.",
           "stub": "// Your work here.",
           "solution": null
         },
