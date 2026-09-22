@@ -4,7 +4,6 @@ import { z } from 'zod';
 export const ErrorCode = z.enum([
   'DAY_NOT_FOUND',
   'DAY_LOCKED',
-  'WEEK_NOT_UNLOCKED',
   'PART_NOT_FOUND',
   'CONTENT_NOT_IMPORTED',
   'CODE_REQUIRED',

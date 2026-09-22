@@ -26,38 +26,6 @@ await page.goto(BASE_URL);
 await show(page);
 `;
 
-/**
- * Sequential progression, mirroring blockingWeek() on the server: a week opens only once
- * every day of the previous week is complete. Returns the week still to finish, or null.
- */
-function blockingWeek(index: CourseIndex, progress: Progress | null, week: number): number | null {
-  if (week <= 1) return null;
-  if (!progress) return week - 1;
-  for (let w = 1; w < week; w++) {
-    const days = index.weeks.find((x) => x.week === w)?.days ?? [];
-    if (days.length === 0) continue;
-    if (!days.every((d) => progress.progress['w' + w + 'd' + d.day]?.completed)) return w;
-  }
-  return null;
-}
-
-/** The first day not yet completed - where "continue" should send you. */
-function firstUnfinishedDay(
-  index: CourseIndex | null,
-  progress: Progress | null,
-): { week: number; day: number } {
-  if (!index) return { week: 1, day: 1 };
-  for (const w of index.weeks) {
-    if (w.locked) continue;
-    for (const d of w.days) {
-      if (!progress?.progress['w' + w.week + 'd' + d.day]?.completed) {
-        return { week: w.week, day: d.day };
-      }
-    }
-  }
-  return { week: 1, day: 1 };
-}
-
 function Sidebar({
   index,
   progress,
@@ -122,10 +90,6 @@ function Sidebar({
         const done = w.days.filter(
           (d) => progress?.progress['w' + w.week + 'd' + d.day]?.completed,
         ).length;
-        // Two different reasons a week can be shut: not written yet, or not earned yet.
-        // They say different things to the learner, so they are never merged.
-        const gatedBy = w.locked ? null : blockingWeek(index, progress, w.week);
-        const gated = gatedBy !== null;
         return (
         <div className="wk" key={w.week}>
           <button
@@ -138,11 +102,6 @@ function Sidebar({
             </span>
             <span>Week {w.week}</span>
             {w.locked && <span className="pill">soon</span>}
-            {gated && (
-              <span className="pill gate" title={'Finish Week ' + gatedBy + ' first'}>
-                locked
-              </span>
-            )}
             <span className="spacer" />
             {/* A collapsed week still has to show whether it is finished. */}
             {!w.locked && (
@@ -158,12 +117,12 @@ function Sidebar({
               return (
                 <li key={d.day}>
                   <a
-                    href={d.locked || gated ? undefined : '/learn/w' + w.week + '/d' + d.day + '/p1'}
-                    className={(on ? 'on' : '') + (d.locked || gated ? ' locked' : '')}
-                    title={gated ? 'Finish Week ' + gatedBy + ' to unlock this' : d.title}
+                    href={d.locked ? undefined : '/learn/w' + w.week + '/d' + d.day + '/p1'}
+                    className={(on ? 'on' : '') + (d.locked ? ' locked' : '')}
+                    title={d.title}
                     onClick={(e) => {
                       e.preventDefault();
-                      if (!d.locked && !gated) navigate('/learn/w' + w.week + '/d' + d.day + '/p1');
+                      if (!d.locked) navigate('/learn/w' + w.week + '/d' + d.day + '/p1');
                     }}
                   >
                     <span className="tick">{done ? '✓' : ''}</span>
@@ -211,7 +170,6 @@ export function Day({
   const [index, setIndex] = useState<CourseIndex | null>(null);
   const [content, setContent] = useState<CourseDay | null>(null);
   const [locked, setLocked] = useState<string | null>(null);
-  const [gated, setGated] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [code, setCode] = useState(STARTER);
   const [run, setRun] = useState<RunState | null>(null);
@@ -245,12 +203,10 @@ export function Day({
     setContent(null);
     setLocked(null);
     setError('');
-    setGated(null);
     getDay(week, day)
       .then(setContent)
       .catch((e: unknown) => {
         if (e instanceof ApiError && e.code === 'DAY_LOCKED') setLocked(e.message);
-        else if (e instanceof ApiError && e.code === 'WEEK_NOT_UNLOCKED') setGated(e.message);
         else setError((e as Error).message);
       });
   }, [week, day]);
@@ -351,42 +307,6 @@ export function Day({
   }
 
   if (error) return <div className="centered"><div className="notice">{error}</div></div>;
-
-  if (gated !== null) {
-    return (
-      <div className="body">
-        {index && weeksShown && (
-          <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} />
-        )}
-        <div className="centered">
-          {!weeksShown && (
-            <p style={{ margin: '0 0 14px' }}>
-              <button className="btn ghost small" onClick={() => setWeeksShown(true)}>
-                ☰ Show weeks
-              </button>
-            </p>
-          )}
-          <h1>Week {week} is not open yet</h1>
-          <div className="notice" style={{ marginTop: 14 }}>{gated}</div>
-          <p className="muted" style={{ fontSize: 14, marginTop: 16 }}>
-            The course is sequential on purpose — each week is written assuming you did the one
-            before it. A day counts as done once you have opened all of its parts.
-          </p>
-          <p style={{ marginTop: 20 }}>
-            <button
-              className="btn"
-              onClick={() => {
-                const next = firstUnfinishedDay(index, progress);
-                navigate('/learn/w' + next.week + '/d' + next.day + '/p1');
-              }}
-            >
-              Go to where you left off
-            </button>
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   if (locked !== null) {
     return (
