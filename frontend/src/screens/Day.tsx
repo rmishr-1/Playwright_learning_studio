@@ -146,9 +146,17 @@ function Sidebar({
 
 export function Day({
   appTheme,
+  chromeShown,
+  onSetChromeShown,
 }: {
   /** The editor starts on the page theme, and can then be overridden on its own. */
   appTheme: 'light' | 'dark';
+  /**
+   * The week list and the masthead collapse together, so this is owned by App (which renders the
+   * masthead) rather than here. Everything below treats it as "is the week list showing".
+   */
+  chromeShown: boolean;
+  onSetChromeShown: (shown: boolean) => void;
 }) {
   // Drives the sidebar ticks and the gating. There is only the one record - see api/client.ts.
   const [progress, setProgress] = useState<Progress | null>(null);
@@ -175,23 +183,11 @@ export function Day({
   const [run, setRun] = useState<RunState | null>(null);
   const [running, setRunning] = useState(false);
   const [split, setSplit] = useState(52);
-  // Whether the week list is showing. Remembered per viewer - someone who works with it
-  // hidden should not have to hide it again on every day.
-  const [weeksShown, setWeeksShown] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('studio.weeks_hidden') !== '1';
-    } catch {
-      return true;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('studio.weeks_hidden', weeksShown ? '0' : '1');
-    } catch {
-      // Remembering it is a convenience, never a requirement.
-    }
-  }, [weeksShown]);
+  // Whether the week list is showing - App owns it, because the masthead collapses with it and
+  // is rendered there. Remembered per viewer, so someone who works with it hidden does not have
+  // to hide it again on every day.
+  const weeksShown = chromeShown;
+  const setWeeksShown = onSetChromeShown;
   const problemRef = useRef<number | null>(null);
   const draggingRef = useRef(false);
 
@@ -358,7 +354,7 @@ export function Day({
             onLoadIntoEditor={loadIntoEditor}
             onStartProblem={startProblem}
             weeksShown={weeksShown}
-            onToggleWeeks={() => setWeeksShown((shown) => !shown)}
+            onToggleWeeks={() => setWeeksShown(!weeksShown)}
           />
         </div>
         <div className="gutter" onMouseDown={() => (draggingRef.current = true)} />

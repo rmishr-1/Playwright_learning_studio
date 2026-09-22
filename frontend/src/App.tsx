@@ -5,6 +5,9 @@ import { RunView } from './screens/RunView';
 import { getMyProgress } from './api/client';
 
 const THEME_KEY = 'studio.theme';
+/** Named for the week list, which is what it used to hide on its own. It now governs the
+ *  masthead as well; the key is kept so nobody's saved preference resets. */
+const CHROME_KEY = 'studio.weeks_hidden';
 
 type Theme = 'light' | 'dark';
 
@@ -14,6 +17,14 @@ function readTheme(): Theme {
     return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
   } catch {
     return 'light';
+  }
+}
+
+function readChromeShown(): boolean {
+  try {
+    return localStorage.getItem(CHROME_KEY) !== '1';
+  } catch {
+    return true;
   }
 }
 
@@ -38,6 +49,12 @@ function Home() {
  */
 export function App() {
   const [theme, setTheme] = useState<Theme>(readTheme);
+  /**
+   * One switch for the reading chrome: the week list and the masthead collapse together, because
+   * both exist to tell you where you are rather than to teach you anything. It lives here rather
+   * than in Day because the masthead is rendered here.
+   */
+  const [chromeShown, setChromeShown] = useState<boolean>(readChromeShown);
   const location = useLocation();
   // The detached window opened by RunOverlay's Detach button (see the comment there): its own
   // small window, no masthead, no theme toggle, nothing but the live view it was popped out to
@@ -54,6 +71,14 @@ export function App() {
     }
   }, [theme]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(CHROME_KEY, chromeShown ? '0' : '1');
+    } catch {
+      // Remembering it is a convenience, never a requirement.
+    }
+  }, [chromeShown]);
+
   if (detached) {
     return (
       <Routes>
@@ -64,16 +89,29 @@ export function App() {
 
   return (
     <div className="app">
-      <header className="masthead">
-        <Link to="/learn/w1/d1/p1" className="brand" style={{ color: 'inherit', textDecoration: 'none' }}>
-          Beginner to Advanced: Playwright Fundamentals
-        </Link>
-      </header>
+      {/* Hidden only on a lesson, because the tab bar's toggle is the way back and only a lesson
+          has one. Collapsing it anywhere else would strand the masthead with nothing to restore it. */}
+      {(chromeShown || !location.pathname.startsWith('/learn/')) && (
+        <header className="masthead">
+          <Link to="/learn/w1/d1/p1" className="brand" style={{ color: 'inherit', textDecoration: 'none' }}>
+            Beginner to Advanced: Playwright Fundamentals
+          </Link>
+        </header>
+      )}
 
       <Routes>
         {/* React Router v6 params must be a WHOLE segment, so the w/d/p prefixes travel
             inside the param and Day parses them off. */}
-        <Route path="/learn/:week/:day/:part" element={<Day appTheme={theme} />} />
+        <Route
+          path="/learn/:week/:day/:part"
+          element={
+            <Day
+              appTheme={theme}
+              chromeShown={chromeShown}
+              onSetChromeShown={setChromeShown}
+            />
+          }
+        />
         <Route path="/learn/:week/:day" element={<Navigate to="p1" replace />} />
         <Route path="*" element={<Home />} />
       </Routes>

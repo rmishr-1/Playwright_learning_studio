@@ -148,14 +148,15 @@ export function TheoryPane({
       <div className="tabbar">
         {/* A toggle, and always present. It used to render only while the week list was hidden,
             which removed the control at exactly the moment it was needed to close it again -
-            leaving no way back except picking a day you did not want. */}
+            leaving no way back except picking a day you did not want. It now collapses the
+            masthead with the week list, so this is the only control that restores either. */}
         {onToggleWeeks && (
           <button
             className="show-weeks"
             onClick={onToggleWeeks}
             aria-expanded={weeksShown ?? false}
-            aria-label={weeksShown ? 'Hide the week list' : 'Show the week list'}
-            title={weeksShown ? 'Hide the week list' : 'Show the week list'}
+            aria-label={weeksShown ? 'Hide the week list and title bar' : 'Show the week list and title bar'}
+            title={weeksShown ? 'Hide the week list and title bar' : 'Show the week list and title bar'}
           >
             ☰
           </button>
