@@ -229,43 +229,44 @@ function main(): void {
     d5p1.blocks[0].text.includes('Arrow functions'),
   );
 
-  // The authored lesson overlays. Week 2 is the authored week; weeks 1 and 3-8 have no overlay
+  // The authored lesson overlays. Weeks 1 and 2 are the authored weeks; 3-8 have no overlay
   // yet, and the checks below are written so that stays a difference in coverage, not a failure.
   console.log('\nLesson overlays');
-  const w2 = days.filter((d) => d.week === 2);
-  const w2parts = w2.flatMap((d) => d.parts.map((p) => ({ d, p })));
+  const AUTHORED_WEEKS = [1, 2];
+  const authored = days.filter((d) => AUTHORED_WEEKS.includes(d.week));
+  const authoredParts = authored.flatMap((d) => d.parts.map((p) => ({ d, p })));
   const countOf = (p: CourseDay['parts'][number], t: string) =>
     p.blocks.filter((b) => b.type === t).length;
 
   check(
-    'every week 2 part opens with an at-a-glance or already had its own summary',
-    w2parts.every(({ p }) => countOf(p, 'at-a-glance') === 1 || countOf(p, 'checkpoint') > 0),
-    w2parts
+    'every authored part opens with an at-a-glance or already had its own summary',
+    authoredParts.every(({ p }) => countOf(p, 'at-a-glance') === 1 || countOf(p, 'checkpoint') > 0),
+    authoredParts
       .filter(({ p }) => countOf(p, 'at-a-glance') !== 1 && countOf(p, 'checkpoint') === 0)
-      .map(({ d, p }) => 'w2d' + d.day + 'p' + p.part)
+      .map(({ d, p }) => 'w' + d.week + 'd' + d.day + 'p' + p.part)
       .join(' '),
   );
   check(
     'no part carries more than one at-a-glance or recap - re-applying an overlay must not stack',
-    w2parts.every(({ p }) => countOf(p, 'at-a-glance') <= 1 && countOf(p, 'recap') <= 1),
-    w2parts
+    authoredParts.every(({ p }) => countOf(p, 'at-a-glance') <= 1 && countOf(p, 'recap') <= 1),
+    authoredParts
       .filter(({ p }) => countOf(p, 'at-a-glance') > 1 || countOf(p, 'recap') > 1)
-      .map(({ d, p }) => 'w2d' + d.day + 'p' + p.part)
+      .map(({ d, p }) => 'w' + d.week + 'd' + d.day + 'p' + p.part)
       .join(' '),
   );
   check(
-    'every week 2 concept part has retrieval checkpoints',
-    w2parts.filter(({ p }) => p.kind === 'concept').every(({ p }) => countOf(p, 'checkpoint') >= 2),
-    w2parts
+    'every authored concept part has retrieval checkpoints',
+    authoredParts.filter(({ p }) => p.kind === 'concept').every(({ p }) => countOf(p, 'checkpoint') >= 2),
+    authoredParts
       .filter(({ p }) => p.kind === 'concept' && countOf(p, 'checkpoint') < 2)
-      .map(({ d, p }) => 'w2d' + d.day + 'p' + p.part)
+      .map(({ d, p }) => 'w' + d.week + 'd' + d.day + 'p' + p.part)
       .join(' '),
   );
 
   // An at-a-glance below the fold is not at a glance.
   check(
     'an at-a-glance sits directly after the part heading',
-    w2parts.every(({ p }) => {
+    authoredParts.every(({ p }) => {
       const at = p.blocks.findIndex((b) => b.type === 'at-a-glance');
       return at === -1 || at <= 1;
     }),
@@ -273,17 +274,17 @@ function main(): void {
   // The closing sections belong before the pointer to the next lesson, not after it.
   check(
     'checkpoints and recap come before any "What\'s next"',
-    w2parts.every(({ p }) => {
+    authoredParts.every(({ p }) => {
       const next = p.blocks.findIndex((b) => b.type === 'markdown' && /^##\s+What's next/im.test(b.text));
       if (next === -1) return true;
       return p.blocks.every((b, i) => !(i > next && (b.type === 'checkpoint' || b.type === 'recap')));
     }),
-    w2parts
+    authoredParts
       .filter(({ p }) => {
         const next = p.blocks.findIndex((b) => b.type === 'markdown' && /^##\s+What's next/im.test(b.text));
         return next !== -1 && p.blocks.some((b, i) => i > next && (b.type === 'checkpoint' || b.type === 'recap'));
       })
-      .map(({ d, p }) => 'w2d' + d.day + 'p' + p.part)
+      .map(({ d, p }) => 'w' + d.week + 'd' + d.day + 'p' + p.part)
       .join(' '),
   );
 
@@ -305,15 +306,15 @@ function main(): void {
   }
   check('every checkpoint is answerable', badCheckpoints.length === 0, badCheckpoints.slice(0, 5).join(' | '));
 
-  // The defect this whole pass existed to fix: 22 of week 2's your-turn blocks were the same
+  // The defect this whole pass existed to fix: week 2's your-turn blocks were all the same
   // "retype the example above from memory" string, which is a prompt for nobody in particular.
-  const filler = w2parts.flatMap(({ d, p }) =>
+  const filler = authoredParts.flatMap(({ d, p }) =>
     p.blocks
       .filter((b) => b.type === 'your-turn' && !b.variation)
-      .map(() => 'w2d' + d.day + 'p' + p.part),
+      .map(() => 'w' + d.week + 'd' + d.day + 'p' + p.part),
   );
   check(
-    'no week 2 your-turn is left on the generic prompt',
+    'no authored your-turn is left on the generic prompt',
     filler.length === 0,
     filler.length + ' without a variation: ' + [...new Set(filler)].join(' '),
   );

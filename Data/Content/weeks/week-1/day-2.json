@@ -19,6 +19,35 @@
           "starter": null,
           "variation": null,
           "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New syntax today** | none — today is npm, the CLI and the editor, not the language |\n| **You will need** | Node 18+ · a terminal · VS Code open on this repo's root |\n| **Then go to** | [Fundamentals](/learn/w1/d2/p2), which gets all three working |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "From [Day 1](/learn/w1/d1/p2): which level of testing is Playwright's home turf?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Unit — one function or component in isolation",
+              "System, end to end — driving the whole application as a user would",
+              "Integration only — it cannot reach a full end-to-end flow"
+            ],
+            "answer": 1,
+            "explanation": "Playwright drives the app the way a real user does, so a single test exercises every layer beneath it. Unit testing is a different tool's job. The higher up you go the more one test proves — and the more it costs to diagnose when it fails, which is week 7's subject."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "No new TypeScript today. Everything ahead is setup: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -34,6 +63,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 2, Fundamentals — Environment setup & your first Playwright project\n\nBy the end of this lesson you will have checked your own Node install, know what\n`npm init playwright@latest` actually produces, and have opened this repo's real\n`playwright.config.ts` to recognize the pieces in it.\n\n> **No new TypeScript today.** This is npm/CLI/editor setup, not language syntax — nothing\n> to primer, so there's no Day 2.1. [Day 1.2](/learn/w1/d1/p2) covered the why; this is the\n> how.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Mode** | explore — the cells read real files on your disk |\n| **Assumes** | nothing but a terminal |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -151,7 +187,66 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- Never run `npm init playwright@latest` inside a repo that already has a config you care\n  about — it can overwrite `playwright.config.ts`.\n- Commit `package.json` and `package-lock.json`. Never commit `node_modules/` (it's already\n  in `.gitignore`).\n- Trust the workspace once, and VS Code stops asking.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Ran `npm init playwright@latest` in this shared repo | Root config gets overwritten, other weeks break | Don't — this repo is already initialized |\n| Didn't trust the workspace | Extensions/tasks silently don't run | File → the trust prompt, or **View → Command Palette → \"Trust Workspace\"** |\n| Forgot `--with-deps` / skipped the browser-install prompt | `browserType.launch: Executable doesn't exist` later | Re-run `npx playwright install` |\n\n## What's next\n\n[Day 2.3](/learn/w1/d2/p3) looks at how a real project organizes its test folders and config —\nbeyond the one flat `tests/` folder a fresh scaffold gives you.",
+          "text": "## Best practices\n\n- Never run `npm init playwright@latest` inside a repo that already has a config you care\n  about — it can overwrite `playwright.config.ts`.\n- Commit `package.json` and `package-lock.json`. Never commit `node_modules/` (it's already\n  in `.gitignore`).\n- Trust the workspace once, and VS Code stops asking.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Ran `npm init playwright@latest` in this shared repo | Root config gets overwritten, other weeks break | Don't — this repo is already initialized |\n| Didn't trust the workspace | Extensions/tasks silently don't run | File → the trust prompt, or **View → Command Palette → \"Trust Workspace\"** |\n| Forgot `--with-deps` / skipped the browser-install prompt | `browserType.launch: Executable doesn't exist` later | Re-run `npx playwright install` |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why does this lesson tell you NOT to run `npm init playwright@latest` in this repo?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Because the command only works in an empty folder and would fail",
+              "Because it can overwrite `playwright.config.ts`, and eight weeks of material depend on that shared config",
+              "Because it would reinstall the browsers you already have"
+            ],
+            "answer": 1,
+            "explanation": "This repo is already a set-up Playwright project. Re-scaffolding would rewrite the root config every week's specs rely on. The lesson walks through what the command produces so you recognise the pieces — in this repo's real files, rather than by running it."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "You write a new spec into `week1/generated/`. What makes Playwright pick it up, with no registration step?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Any `.spec.ts` file anywhere is collected automatically",
+              "`testMatch` in the root config, which lists `week*/**/*.spec.ts`",
+              "The `tests/` folder is scanned recursively, and `week1/` sits inside it"
+            ],
+            "answer": 1,
+            "explanation": "`testMatch: [\"week*/**/*.spec.ts\", ...]` is the line doing the work — which is exactly why the lesson asks you to find it in the real file. It is also why a helper file must not carry the `.spec.ts` suffix: the same pattern would collect it and try to run it as a test."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Weeks later you hit `browserType.launch: Executable doesn't exist`. What most likely happened?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Node is too old for the installed Playwright version",
+              "The browser download was skipped at setup — `npx playwright install` fixes it",
+              "`playwright.config.ts` is missing a `projects` entry for that browser"
+            ],
+            "answer": 1,
+            "explanation": "Playwright drives browser binaries it downloads separately from the npm package. Answering \"no\" to the install prompt, or installing on a machine that never ran it, leaves the package present and the browser missing. It is the one setup mistake that surfaces much later than it is made."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Any Node 18+ is fine; the exact numbers on your machine will differ from anyone else's.\n- **Never re-scaffold a repo that already has a config you care about.** This one is already set up.\n- `testMatch` in the root config is why a spec written into `week*/generated/` is found without registering it anywhere.\n- `baseURL` is why every `page.goto(\"/\")` in this course resolves to the banking app.\n- Commit `package.json` and `package-lock.json`; never `node_modules/`.\n- The browsers are a separate download from the npm package — `npx playwright install` if they are missing.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 2.3](/learn/w1/d2/p3) looks at how a real project organizes its test folders and config —\nbeyond the one flat `tests/` folder a fresh scaffold gives you.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -170,6 +265,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 2, Implementation — Organizing a real project's folders and config\n\nBy the end of this lesson you will understand how `testDir` and folder-per-test-type\nconventions turn a flat scaffold into something a whole team can navigate, and what actually\nneeds to be in `.gitignore` for a Playwright project.\n\n> No new API here — \"advanced\" for a setup day means organizing what Day 2.2 gave you\n> sensibly, not new Playwright calls.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **New API** | none — \"advanced\" on a setup day means organising what you already have |\n| **You'll learn** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Builds on** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -243,7 +345,51 @@
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- Group test folders by what they share (setup, fixtures, tags) — not by creation order.\n- Keep `testDir`/`testMatch` in the config, not scattered CLI flags every run needs to repeat.\n- `.gitignore` anything a run regenerates: reports, traces, screenshots, `node_modules/`.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Committed `test-results/` or `playwright-report/` once | Repo size balloons, diffs are noisy binary reports | Add to `.gitignore`, then `git rm -r --cached` the committed copy |\n| Two unrelated test types dumped in one folder | Can't run \"just API tests\" without fragile `--grep` | Split by folder, matched via `testMatch` |\n\n## What's next\n\n[Day 2.4 — Practice](/learn/w1/d2/p4) checks your own setup and has you read this repo's real\nconfig more closely. [Day 3](/learn/w1/d3/p2) covers actually *running* tests from the CLI.",
+          "text": "## Best practices\n\n- Group test folders by what they share (setup, fixtures, tags) — not by creation order.\n- Keep `testDir`/`testMatch` in the config, not scattered CLI flags every run needs to repeat.\n- `.gitignore` anything a run regenerates: reports, traces, screenshots, `node_modules/`.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Committed `test-results/` or `playwright-report/` once | Repo size balloons, diffs are noisy binary reports | Add to `.gitignore`, then `git rm -r --cached` the committed copy |\n| Two unrelated test types dumped in one folder | Can't run \"just API tests\" without fragile `--grep` | Split by folder, matched via `testMatch` |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You move off the flat `tests/` folder and split specs into `UI_test/` and `API_test/`. Is setting `testDir` enough?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Yes — `testDir` points at the root containing both, and the rest is automatic",
+              "No — `testMatch` is what decides which files count as specs once you leave the one default folder",
+              "No — each folder needs its own `playwright.config.ts`"
+            ],
+            "answer": 1,
+            "explanation": "`testDir` says where to start looking; `testMatch` says what counts once you are there. This repo shows the same pair in use, organised by week rather than by test type. Per-folder configs are a real option too, but they are week 3's subject, not a requirement here."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which rule decides whether something belongs in `.gitignore` on a Playwright project?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "If it is large, ignore it",
+              "If a run regenerates it, it does not belong in git",
+              "If it is not TypeScript, ignore it"
+            ],
+            "answer": 1,
+            "explanation": "`node_modules/` comes back from `package.json`, and `test-results/` and `playwright-report/` are rewritten every run. Committing a report once makes every later diff a pile of binary noise — and `git rm -r --cached` is then needed on top of the `.gitignore` entry."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- Group test folders by what they have in common — shared setup, fixtures, tags — not by the order you wrote them.\n- `testDir` finds the root; `testMatch` decides what is a spec. You usually need both.\n- This course groups by week rather than by test type. The instinct is identical.\n- **If a run regenerates it, it does not belong in git**: `node_modules/`, `test-results/`, `playwright-report/`.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Day 2.4 — Practice](/learn/w1/d2/p4) checks your own setup and has you read this repo's real\nconfig more closely. [Day 3](/learn/w1/d3/p2) covers actually *running* tests from the CLI.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -262,6 +408,13 @@
         {
           "type": "markdown",
           "text": "# Week 1, Day 2, Practice — Environment setup\n\nThree problems. The first two use your real environment and this repo's real config — no\nguessing needed, everything here is something you can check.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Three problems** | your real environment, and this repo's real config |\n| **Nothing to guess** | every answer is something you can read off your own machine |\n| **Pulls on** | [Fundamentals](/learn/w1/d2/p2) for the config · [Implementation](/learn/w1/d2/p3) for the structure |",
           "starter": null,
           "variation": null,
           "checkpoint": null

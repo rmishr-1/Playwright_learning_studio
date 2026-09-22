@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Day } from './screens/Day';
 import { RunView } from './screens/RunView';
 import { getMyProgress } from './api/client';
 
 const THEME_KEY = 'studio.theme';
+/**
+ * A NEW key, not the old studio.weeks_hidden: the default flipped to closed when the course title
+ * moved onto the tab row, and reusing the key would have left anyone who had once opened the week
+ * list arriving with it open and no title showing.
+ */
+const WEEKS_KEY = 'studio.weeks_open';
 
 type Theme = 'light' | 'dark';
 
@@ -14,6 +20,15 @@ function readTheme(): Theme {
     return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
   } catch {
     return 'light';
+  }
+}
+
+/** Closed on a first visit: you arrive on the lesson, with the course title on the tab row. */
+function readWeeksOpen(): boolean {
+  try {
+    return localStorage.getItem(WEEKS_KEY) === '1';
+  } catch {
+    return false;
   }
 }
 
@@ -38,13 +53,18 @@ function Home() {
  */
 export function App() {
   const [theme, setTheme] = useState<Theme>(readTheme);
+  /**
+   * The week list and the course title trade places: the title sits on the tab row while the list
+   * is closed, and the list replaces it when opened. Both say where you are rather than teaching
+   * anything, so only one is ever worth the space. Owned here because it outlives any one day.
+   */
+  const [weeksOpen, setWeeksOpen] = useState<boolean>(readWeeksOpen);
   const location = useLocation();
   // The detached window opened by RunOverlay's Detach button (see the comment there): its own
-  // small window, no masthead, no theme toggle, nothing but the live view it was popped out to
-  // show.
+  // small window, no theme toggle, nothing but the live view it was popped out to show.
   const detached = location.pathname.startsWith('/run/');
 
-  // The theme lives on <html> so it covers the masthead and every screen, not just the shell.
+  // The theme lives on <html> so it covers every screen, not just the shell.
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     try {
@@ -53,6 +73,14 @@ export function App() {
       // Remembering it is a convenience, never a requirement.
     }
   }, [theme]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(WEEKS_KEY, weeksOpen ? '1' : '0');
+    } catch {
+      // Remembering it is a convenience, never a requirement.
+    }
+  }, [weeksOpen]);
 
   if (detached) {
     return (
@@ -64,16 +92,18 @@ export function App() {
 
   return (
     <div className="app">
-      <header className="masthead">
-        <Link to="/learn/w1/d1/p1" className="brand" style={{ color: 'inherit', textDecoration: 'none' }}>
-          Beginner to Advanced: Playwright Fundamentals
-        </Link>
-      </header>
-
+      {/* No masthead of its own any more. On a lesson the course title rides the tab row, where it
+          costs no vertical space and trades places with the week list; every other route is a
+          redirect that renders for a moment, so a title bar there would only flash. */}
       <Routes>
         {/* React Router v6 params must be a WHOLE segment, so the w/d/p prefixes travel
             inside the param and Day parses them off. */}
-        <Route path="/learn/:week/:day/:part" element={<Day appTheme={theme} />} />
+        <Route
+          path="/learn/:week/:day/:part"
+          element={
+            <Day appTheme={theme} weeksOpen={weeksOpen} onSetWeeksOpen={setWeeksOpen} />
+          }
+        />
         <Route path="/learn/:week/:day" element={<Navigate to="p1" replace />} />
         <Route path="*" element={<Home />} />
       </Routes>

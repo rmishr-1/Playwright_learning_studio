@@ -1,0 +1,88 @@
+{
+  "schema": "lesson-overlay/v1",
+  "week": 1,
+  "day": 3,
+  "parts": {
+    "1": {
+      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — today's commands are shell, not language |\n| **You will need** | the environment from [Day 2](/learn/w1/d2/p2), and a real terminal |\n| **Then go to** | [Fundamentals](/learn/w1/d3/p2), which runs a spec for the first time |",
+      "checkpoints": [
+        {
+          "question": "From [Day 2](/learn/w1/d2/p3): which of these belongs in `.gitignore` on a Playwright project?",
+          "options": [
+            "`package-lock.json`, since npm rewrites it",
+            "`playwright-report/`, since every run regenerates it",
+            "`playwright.config.ts`, since it differs per machine"
+          ],
+          "answer": 1,
+          "explanation": "The rule is whether a run regenerates it. Reports, traces and `node_modules/` do; the lock file and the config do not — the lock file is committed precisely so everyone installs the same versions."
+        }
+      ],
+      "recap": "No new TypeScript today. [Fundamentals](/learn/w1/d3/p2) is all CLI, and [Implementation](/learn/w1/d3/p3) is a first read of the config file."
+    },
+    "2": {
+      "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `npx playwright test` · `--headed` · `show-report` |\n| **You'll learn** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Mode** | mixed — the first cells run real terminal commands |\n| **Watch for** | the test count. This repo runs chromium only, so it is lower than a fresh scaffold's. |",
+      "checkpoints": [
+        {
+          "question": "Two tests run here and report `2 passed`. The same two tests on a fresh `npm init playwright@latest` scaffold report `6 passed`. Why?",
+          "options": [
+            "The scaffold retries each test twice by default",
+            "A fresh scaffold has three browser projects active, and every test runs once per project",
+            "The scaffold counts each `expect()` as a test"
+          ],
+          "answer": 1,
+          "explanation": "The `projects` array is the multiplier: chromium, firefox and webkit in a fresh scaffold, chromium alone here with the other two commented out. Same mechanism, different project count — which is why checking `projects` before trusting a test count is a habit worth forming."
+        },
+        {
+          "question": "Which file do you never edit by hand, and why?",
+          "options": [
+            "`package.json` — npm owns it, and hand edits are overwritten",
+            "`package-lock.json` — npm writes it, and hand edits make installs drift from what you tested",
+            "Both are generated and neither should be edited"
+          ],
+          "answer": 1,
+          "explanation": "`package.json` is yours: you declare dependencies and scripts in it. The lock file records the exact resolved version of everything underneath, which is what makes a teammate's install or a CI install match yours. You commit it; you do not write it."
+        },
+        {
+          "question": "A run behaved unexpectedly and the terminal output does not explain it. What does the lesson reach for?",
+          "options": [
+            "`npx playwright show-report`, for the trace and screenshot the terminal cannot show",
+            "Re-running with `--headed` until it reproduces",
+            "Adding `console.log` through the spec"
+          ],
+          "answer": 0,
+          "explanation": "The HTML report carries the trace, screenshot and video that a line of terminal output cannot. `--headed` is for watching a run live, which is useful but different — and the report is already there after any run, with no re-run needed."
+        }
+      ],
+      "recap": "- `npx` runs the locally installed CLI out of `node_modules/.bin`, so nothing needs installing globally.\n- `package.json` is yours to edit; `package-lock.json` is npm's to write and yours to commit.\n- Run one spec file while writing it; run the suite before you call it done.\n- `--headed` to watch it happen, `show-report` to see what already happened.\n- **The `projects` array multiplies your test count.** Check it before being surprised by a number."
+    },
+    "3": {
+      "at_a_glance": "| | |\n|---|---|\n| **Deliberately shallow** | recognise every setting; master none of them yet |\n| **Covered properly later** | timeouts in week 3 day 1 · `projects`, `workers`, `retries` in week 3 day 5 |\n| **The one to remember today** | `retain-on-failure` — keep the evidence only when something went wrong |",
+      "checkpoints": [
+        {
+          "question": "`trace`, `screenshot` and `video` are all set to keep artifacts only on failure. Why not simply record everything?",
+          "options": [
+            "Recording always is expensive, and recording nothing leaves a CI failure you cannot diagnose — on failure is the sweet spot",
+            "Playwright cannot record a trace for a passing test",
+            "Because artifacts from passing tests would be committed to git"
+          ],
+          "answer": 0,
+          "explanation": "All three settings share one shape, which makes it a single decision rather than three. The cost is real on a big suite, and the evidence is only ever wanted for the runs that went wrong. `--trace on` forces a recording for one run when you do want it."
+        },
+        {
+          "question": "`retries` is set to `process.env.CI ? 2 : 0`. What does that mean when you run locally?",
+          "options": [
+            "Two retries, the same as CI",
+            "No retries at all — a failure is reported the first time it happens",
+            "Retries are disabled everywhere; the expression is a placeholder"
+          ],
+          "answer": 1,
+          "explanation": "Locally you want a failure to show itself immediately rather than being papered over by a re-run. CI is the place where an infrastructure blip is worth absorbing. Retries hiding a real flake on your own machine is exactly what this avoids."
+        }
+      ],
+      "recap": "- `testDir`/`testMatch` find the specs; `projects` decides which browsers, and multiplies the count.\n- `use` holds what every test gets by default — `baseURL` is why `page.goto(\"/\")` works.\n- `retain-on-failure` for trace, screenshot and video: one decision, three settings.\n- `retries` on in CI, off locally. `forbidOnly` stops a stray `.only` passing CI on one test.\n- Today is recognition, not mastery. Week 3 takes the same file apart with measurements."
+    },
+    "4": {
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | the real CLI and the real config, nothing invented |\n| **Problem 1 wants a terminal** | run it yourself with `--headed`, not through the studio's runner |\n| **Pulls on** | [Fundamentals](/learn/w1/d3/p2) for the commands · [Implementation](/learn/w1/d3/p3) for the settings |"
+    }
+  }
+}
