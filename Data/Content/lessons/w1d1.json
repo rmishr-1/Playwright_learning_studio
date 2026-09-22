@@ -40,7 +40,7 @@
             "A stable environment, and a colleague to review the script"
           ],
           "answer": 1,
-          "explanation": "No known expected result means there is nothing to assert. No reliable way to identify the element means you cannot write the step at all. Both are why \"just automate everything\" stalls — pure exploration and one-off checks routinely fail the second one."
+          "explanation": "No known expected result means there is nothing to assert. No reliable way to identify the element means you cannot write the step at all. Both are why \"automate everything\" runs into trouble quickly. Pure exploration and one-off checks routinely fail the second test."
         },
         {
           "question": "A stakeholder asks you to automate testing of the company's native Android app. Does Playwright fit?",

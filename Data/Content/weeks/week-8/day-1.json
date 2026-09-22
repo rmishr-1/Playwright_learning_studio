@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.1 — TypeScript for API testing\n\nSix concepts, six runnable cells. Everything tomorrow's API tests are built from.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.\n>\n> **`Identifier 'x' has already been declared`?** Cells share one workspace, so re-running",
+          "text": "# Week 8, Day 1.1 — TypeScript for API testing\n\nSix concepts, six runnable cells. Everything tomorrow's API tests are built from.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.\n>\n> **`Identifier 'x' has already been declared`?** Cells share one workspace, so re-running",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -215,7 +215,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 8, Day 1.2 — Testing an API end to end\n\nYou'll log into a real API, create a booking, read it back, get refused without a token,\nupdate it two ways, delete it, and prove it's gone. **No browser. About five seconds.**\nThe same journey clicked through a UI takes closer to thirty.\n\nPrerequisites: [Day 1.1](/learn/w8/d1/p1).\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "text": "# Week 8, Day 1.2 — Testing an API end to end\n\nYou'll log into a real API, create a booking, read it back, get refused without a token,\nupdate it two ways, delete it, and prove it's gone. **No browser. About five seconds.**\nThe same journey clicked through a UI takes closer to thirty.\n\nPrerequisites: [Day 1.1](/learn/w8/d1/p1).\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null

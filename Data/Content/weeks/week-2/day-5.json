@@ -90,7 +90,7 @@
         },
         {
           "type": "markdown",
-          "text": "> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.\n\n## One test, five things\n\nA test that logs in, views transaction history, pays a bill, checks billing history, and\nlogs out reads fine — until it fails. When it does, the failure just says \"this test\nfailed\"; you're left guessing which of the five steps broke.\n\nThere's also a harder ceiling: **every Playwright test has a default budget of 30\nseconds.** Each extra real step — a navigation, a slow render — eats into that budget,\nand a test doing five things is five times more likely to bump into it than a test doing\none.",
+          "text": "> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.\n\n## One test, five things\n\nA test that logs in, views transaction history, pays a bill, checks billing history, and\nlogs out reads fine — until it fails. When it does, the failure just says \"this test\nfailed\"; you're left guessing which of the five steps broke.\n\nThere's also a harder ceiling: **every Playwright test has a default budget of 30\nseconds.** Each extra real step — a navigation, a slow render — eats into that budget,\nand a test doing five things is five times more likely to bump into it than a test doing\none.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -211,7 +211,7 @@
               "Because the URL is set before the session is created"
             ],
             "answer": 1,
-            "explanation": "Nothing stops an unauthenticated browser loading `/dashboard` here; it just renders without the user's data. Assert on something only a signed-in user could see — the name, an account number — which is the same \"assert something observable\" habit from [Day 2.2](/learn/w2/d2/p2)."
+            "explanation": "Nothing stops an unauthenticated browser loading `/dashboard` here; it just renders without the user's data. Assert on something only a signed-in user could see, such as the name or an account number. That is the same \"assert something observable\" habit from [Day 2.2](/learn/w2/d2/p2)."
           }
         },
         {
@@ -241,7 +241,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 5.3 — Preview: the shape of the fix\n\n**This lesson does not teach hooks.** It shows the fix from Day 5.2 running for real,\nnames the pieces, and points you at where each one is actually explained.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 2, Day 5.3 — Preview: the shape of the fix\n\n**This lesson does not teach hooks.** It shows the fix from Day 5.2 running for real,\nnames the pieces, and points you at where each one is actually explained.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

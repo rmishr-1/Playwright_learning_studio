@@ -86,12 +86,12 @@ export function Assistant({
       <div className="log" ref={logRef}>
         {turns.length === 0 && (
           <p className="hint">
-            I can see this day’s four parts and how far you’ve got. Ask me to explain something,
-            or to unpick an error you’ve pasted.
+            I can see this day’s lessons and your progress through them. Ask me to explain
+            something, or to help with an error you have pasted.
             <br />
             <br />
-            On the practice problems I’ll give hints, not answers — the Reveal solution button is
-            there when you want the worked version.
+            On the practice problems I give hints rather than answers. Use the Reveal solution
+            button when you want the worked version.
           </p>
         )}
         {turns.map((t, i) =>

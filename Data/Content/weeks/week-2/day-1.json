@@ -90,7 +90,7 @@
         },
         {
           "type": "markdown",
-          "text": "> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "text": "> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -158,7 +158,7 @@
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
           "variation": {
-            "prompt": "Same two methods, different controls: check the OTHER gender radio — read its `value` off the page rather than guessing what it is spelled — and add the Hockey checkbox alongside Cricket. The lesson only verified the ids for Cricket and Movies, so Hockey's is yours to find."
+            "prompt": "Same two methods, different controls: check the other gender radio, reading its `value` off the page rather than guessing the spelling, and add the Hockey checkbox alongside Cricket. The lesson only verified the ids for Cricket and Movies, so Hockey's is yours to find."
           },
           "checkpoint": null
         },
@@ -188,7 +188,7 @@
           "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
           "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
           "variation": {
-            "prompt": "Same method, different picks: select a skill other than Java by its label, and a country other than India. Then point `.selectOption()` at `#countries` — the dead `Country*` field — and read the timeout it gives you before it gives up."
+            "prompt": "Same method, different picks: select a skill other than Java by its label, and a country other than India. Then point `.selectOption()` at `#countries`, the dead `Country*` field, and read the timeout it gives you before it gives up."
           },
           "checkpoint": null
         },

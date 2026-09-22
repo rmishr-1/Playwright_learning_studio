@@ -106,7 +106,7 @@ function Problem({
       {/* No solution authored yet means NO button, rather than a button that disappoints. */}
       {!problem.solution && (
         <p className="no-solution">
-          No worked solution for this one yet — the problem statement says how you will know it
+          No worked solution for this one yet. The problem statement tells you how to know it
           worked.
         </p>
       )}

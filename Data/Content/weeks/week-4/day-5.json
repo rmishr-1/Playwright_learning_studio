@@ -33,7 +33,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 5.2 — Testing what a page looks like\n\nEvery assertion so far checked *text, URLs or counts*. None would notice if the login button turned\nbright orange, moved 200 pixels left, or vanished behind a banner.\n\nBy the end of this lesson Playwright compares screenshots pixel by pixel — and you'll know why this\nis the most abandoned kind of test in the industry.\n\n> **Mode: test-runner, own config.** Two reasons the visual spec doesn't join the default suite: on the\n> first run there is **no baseline**, so it fails by design while creating one; and baselines are\n> **platform-specific**. A default suite that goes red on a clean checkout is useless, so this lives\n> under `week4/generated/day5-visual.config.ts`.",
+          "text": "# Week 4, Day 5.2 — Testing what a page looks like\n\nEvery assertion so far checked *text, URLs or counts*. None would notice if the login button turned\nbright orange, moved 200 pixels left, or vanished behind a banner.\n\nBy the end of this lesson Playwright compares screenshots pixel by pixel — and you'll know why this\nis the most abandoned kind of test in the industry.\n\n> **Follow this one in your own project, which needs its own config.** Two reasons the visual spec doesn't join the default suite: on the\n> first run there is **no baseline**, so it fails by design while creating one; and baselines are\n> **platform-specific**. A default suite that goes red on a clean checkout is useless, so this lives\n> under `week4/generated/day5-visual.config.ts`.",
           "starter": null,
           "variation": null,
           "checkpoint": null

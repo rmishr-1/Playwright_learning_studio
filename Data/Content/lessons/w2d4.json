@@ -33,14 +33,14 @@
           "explanation": "`.nth(7)` commits to wherever Actions happens to sit today — one added, hidden or reordered column and every locator built that way breaks at once. `[last()]` commits only to \"the last cell in this row\", which stays true. Same instinct as reaching for \"the last one\" instead of \"the fourth one\" whenever the length is not fixed."
         },
         {
-          "question": "`//div[text()='Verify12345']/following-sibling::div[last()]` — without the `parent::div` step — returns how many matches?",
+          "question": "Without the `parent::div` step, `//div[text()='Verify12345']/following-sibling::div[last()]` returns how many matches?",
           "options": [
             "1 — it is the same row either way",
             "0 — the text sits in an inner wrapper div that has no siblings; the real cells are one level up",
             "2 — it matches the cell and the row"
           ],
           "answer": 1,
-          "explanation": "This is the gotcha the lesson calls out by name. The element holding the text is a wrapper inside the cell, and it has no siblings at all, so stepping sideways from it finds nothing. `/parent::div` first gets you to the real table cell, which does have siblings."
+          "explanation": "This is the trap the lesson calls out by name. The element holding the text is a wrapper inside the cell, and it has no siblings at all, so stepping sideways from it finds nothing. `/parent::div` first gets you to the real table cell, which does have siblings."
         },
         {
           "question": "The app shows \"Successfully Updated\". What does the lesson do before believing the rename landed?",

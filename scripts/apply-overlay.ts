@@ -16,6 +16,7 @@ import * as path from 'node:path';
 import {
   applyDerivedLabels,
   applyHeadingFormat,
+  applyStudioCopy,
   applyOverlay,
   applyVariations,
   loadOverlay,
@@ -49,6 +50,7 @@ function main(): void {
       // here rather than in the learner's browser.
       let merged = applyDerivedLabels(CourseDay.parse(JSON.parse(before)));
       merged = applyHeadingFormat(merged);
+      merged = applyStudioCopy(merged);
       merged = applyVariations(merged, variations);
       if (overlay) merged = applyOverlay(merged, overlay);
       const after = JSON.stringify(CourseDay.parse(merged), null, 2) + '\n';

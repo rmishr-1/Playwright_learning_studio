@@ -66,6 +66,77 @@ export function findUnresolvedLinks(md: string): string[] {
  * something impossible. This rewrites the environment-specific bits, and nothing else:
  * the teaching is left exactly as the author wrote it.
  */
+/**
+ * Wording this project emitted before the language pass, mapped to what it says now. Applied by
+ * studioise(), which runs both at import and over the already-generated tree via
+ * `npm run overlay` - so a copy change reaches learners without a re-import.
+ */
+const LEGACY_COPY: ReadonlyArray<readonly [RegExp, string]> = [
+  [
+    /> \*\*Every Run starts fresh\.\*\* The studio executes your code in a new process each time, so nothing is left over between runs\./g,
+    '> **Every run starts fresh.** Each time you press Run, your code starts from a clean ' +
+      'slate. Nothing from a previous run is still in memory.',
+  ],
+  [/\bthe runner is happy with either\b/g, 'either form will run'],
+  // Compound labels the course author wrote by hand. Replaced whole, because swapping only the
+  // "Mode:" part of them would leave "**Try it here + run-it-yourself.**".
+  [
+    /\*\*Mode: explore \+ run-it-yourself\.\*\*/g,
+    '**Partly here, partly in your own project.**',
+  ],
+  [
+    /\*\*Mode: test-runner, own config\.\*\*/g,
+    '**Follow this one in your own project, which needs its own config.**',
+  ],
+  // The remaining variants read "**Mode: explore**, with one real spec at the end." - the label is
+  // boilerplate, the clause after it is the author's note about THIS lesson. Swap the label only.
+  [/\*\*Mode: explore\*\*/g, '**Try it here**'],
+  [/\*\*Mode: test-runner\*\*/g, '**Follow this one in your own project**'],
+  [/\*\*Mode: mixed\.\*\*/g, '**Partly here, partly in your own project.**'],
+  // The generated-prerequisite placeholder, as it was emitted before the language pass. The
+  // rewrite lives in placeholderPart() in import-notebooks.ts, which only runs on a re-import -
+  // and a re-import needs the training repo this checkout does not have. Without this entry the
+  // first screen of the course keeps the sentence the whole pass exists to remove. Matched
+  // loosely on whitespace because the emitted text is hard-wrapped.
+  [
+    /This day introduces no new TypeScript\.\s+The code in the parts that follow uses only what\s+you\s+already have, or is theory with no code at all\.\s*\n\s*\n>\s*The course's TypeScript primers begin at \[Week 1, Day 5\.1\]\(\/learn\/w1\/d5\/p1\), which covers\s*\n>\s*arrow functions, `async`, and how to read an `import` line\. Everything before that point is\s*\n>\s*readable without them\./g,
+    'You write Playwright tests in TypeScript. This tab is where each day covers the language\n' +
+      "features that day's lesson needs.\n" +
+      '\n' +
+      "Today's lesson needs nothing new, so you can go straight to it.\n" +
+      '\n' +
+      '> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n' +
+      '> functions, `async`, and how to read an `import` line. The days before it are written to be\n' +
+      '> readable without them.',
+  ],
+  // "Deno" is the notebook kernel the course was authored against. It is an implementation
+  // detail of the old environment and means nothing to a learner reading this in a browser.
+  [/\s*\(Deno\)/g, ''],
+];
+
+/**
+ * Still carrying a "Mode:" label: week 4's "read-and-compare", week 6's "read-and-do" and
+ * "Mode: Deno". Those weeks are locked and unreleased, and their prose is expected to be
+ * revised before they open, so they are deliberately left rather than churned now.
+ * docs/STYLE.md records them as work for whoever opens those weeks.
+ */
+
+/**
+ * Copy that studioise() is supposed to have upgraded already. Used by import-proof to prove the
+ * shipped days carry no superseded wording: the rewrites live in scripts, which only run on
+ * import or `npm run overlay`, so without this check a day file can silently keep old text that
+ * nobody sees again until a learner does.
+ */
+export function findSupersededCopy(md: string): string[] {
+  const out: string[] = [];
+  for (const [was] of LEGACY_COPY) {
+    const m = md.match(new RegExp(was.source, was.flags.replace('g', '') + 'g'));
+    if (m) out.push(m[0].slice(0, 60).replace(/\s+/g, ' '));
+  }
+  if (/\bMode:\s*(?:explore|test-runner|mixed)\b/.test(md)) out.push('a "Mode:" label');
+  return out;
+}
+
 export function studioise(md: string): string {
   let out = md;
 
@@ -75,17 +146,17 @@ export function studioise(md: string): string {
   // Replacing only the first line leaves a dangling "> Playwright library directly ...".
   out = out.replace(
     /^>[^\n]*\*\*Mode: explore\.\*\*[^\n]*(?:\n>[^\n]*)*/gm,
-    '> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and ' +
-      'shows you what happened.',
+    '> **Try it here.** Write code in the editor on the right and press Run. Your code drives a ' +
+      'real browser, and the results appear beside it.',
   );
   out = out.replace(
     /^>[^\n]*\*\*Mode: test-runner\.\*\*[^\n]*(?:\n>[^\n]*)*/gm,
-    '> **Mode: test-runner.** This part is about running specs with the Playwright test runner. ' +
-      'The studio editor runs library code, so follow these along in your own checkout.',
+    '> **Follow this one in your own project.** These examples are run by the Playwright test ' +
+      'runner, which the editor here does not provide. Copy them into your own checkout to run them.',
   );
   // Any surviving mention of the Jupyter kernel.
   out = out.replace(/Kernel must say \*\*Deno\*\*(?: \(top-right\))?\.?\s*/g, '');
-  out = out.replace(/\bthe Deno kernel is happy to run either\b/g, 'the runner is happy with either');
+  out = out.replace(/\bthe Deno kernel is happy to run either\b/g, 'either form will run');
 
   // The "restart the kernel when a const is already declared" callouts. In the studio every
   // Run is a fresh process, so the advice is not just impossible - the problem cannot occur.
@@ -102,12 +173,19 @@ export function studioise(md: string): string {
         if (noted) return [];
         noted = true;
         return [
-          '> **Every Run starts fresh.** The studio executes your code in a new process each ' +
-            'time, so nothing is left over between runs.',
+          '> **Every run starts fresh.** Each time you press Run, your code starts from a clean ' +
+            'slate. Nothing from a previous run is still in memory.',
         ];
       })
       .join('\n');
   }
+
+  // Copy this project itself emitted in an earlier pass, upgraded to the current wording.
+  // The two callouts above are already caught by their own patterns, because those match on
+  // text the replacement removes. These two are not, so without this the old phrasing would
+  // survive in every day file until someone re-imported from the notebooks - which needs the
+  // training repo. See docs/STYLE.md.
+  for (const [was, now] of LEGACY_COPY) out = out.replace(was, now);
 
   // Link LABELS still reading like file paths: [week3/day2_1.ipynb](/learn/w3/d2/p1).
   // The href was rewritten; without this the learner still sees a filename.

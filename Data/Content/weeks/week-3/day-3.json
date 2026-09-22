@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 3.1 — TypeScript for a shared class\n\nFour concepts. Today you move the login out of every script into one class, and these are what\nthat class is made of.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "text": "# Week 3, Day 3.1 — TypeScript for a shared class\n\nFour concepts. Today you move the login out of every script into one class, and these are what\nthat class is made of.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -145,7 +145,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 3, Day 3.2 — Your first shared class\n\nLogin appears in every spec you've written. By the end of this lesson it appears **once**, and\nchanging it is a one-line edit instead of a search across the suite.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "text": "# Week 3, Day 3.2 — Your first shared class\n\nLogin appears in every spec you've written. By the end of this lesson it appears **once**, and\nchanging it is a one-line edit instead of a search across the suite.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null

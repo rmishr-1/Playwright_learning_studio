@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 4.1 — TypeScript for data-driven tests\n\nSeven small things. Today one test body runs against many rows, read from a file — and by the end of\nthe day, from three different kinds of file.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "text": "# Week 4, Day 4.1 — TypeScript for data-driven tests\n\nSeven small things. Today one test body runs against many rows, read from a file — and by the end of\nthe day, from three different kinds of file.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -145,7 +145,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 4, Day 4.2 — One test, many rows\n\nYour customer hands you twenty username/password pairs and asks whether they all work. By the end of\nthis lesson you answer that without writing twenty tests — and handle rows that are *supposed* to\nfail.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "text": "# Week 4, Day 4.2 — One test, many rows\n\nYour customer hands you twenty username/password pairs and asks whether they all work. By the end of\nthis lesson you answer that without writing twenty tests — and handle rows that are *supposed* to\nfail.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null

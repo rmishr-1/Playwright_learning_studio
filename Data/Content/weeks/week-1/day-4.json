@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 4, TypeScript\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
+          "text": "# Week 1, Day 4, TypeScript\n\nYou write Playwright tests in TypeScript. This tab is where each day covers the language\nfeatures that day's lesson needs.\n\nToday's lesson needs nothing new, so you can go straight to it.\n\n> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n> functions, `async`, and how to read an `import` line. The days before it are written to be\n> readable without them.\n",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -62,14 +62,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 4, Fundamentals — Codegen and finding your way around locators\n\nBy the end of this lesson you will know what Codegen and the Inspector actually do, why\nthey reach for `getByRole`/`getByPlaceholder` over old id/xpath/css locators, and why a spec\nfile's name isn't just cosmetic.\n\n> **No new TypeScript today** — locator strings and file naming aren't new language syntax,\n> so there's no Day 4.1. [Day 2](/learn/w1/d2/p2) and [Day 3](/learn/w1/d3/p2) got you set up\n> and running; today is about *finding* what to put inside a test.\n\n> **Mode: explore**, plus one run-it-yourself step. ",
+          "text": "# Week 1, Day 4, Fundamentals — Codegen and finding your way around locators\n\nBy the end of this lesson you will know what Codegen and the Inspector actually do, why\nthey reach for `getByRole`/`getByPlaceholder` over old id/xpath/css locators, and why a spec\nfile's name isn't just cosmetic.\n\n> **No new TypeScript today** — locator strings and file naming aren't new language syntax,\n> so there's no Day 4.1. [Day 2](/learn/w1/d2/p2) and [Day 3](/learn/w1/d3/p2) got you set up\n> and running; today is about *finding* what to put inside a test.\n\n> **Try it here**, plus one run-it-yourself step. ",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea worth keeping** | locate by what an element *is* to a user, not by where it sits in the markup |",
+          "text": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea to take away** | locate by what an element *is* to a user, not by where it sits in the markup |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -151,7 +151,7 @@
               "Because generated ids are not unique enough to match one element"
             ],
             "answer": 1,
-            "explanation": "A build tool regenerates `#ng-x7f2q3` on the next deploy and an XPath breaks the moment the layout shifts. Role, label, placeholder and text are what a screen reader — or a human — uses to find something, and that survives the markup being rewritten underneath it."
+            "explanation": "A build tool regenerates `#ng-x7f2q3` on the next deploy and an XPath breaks the moment the layout shifts. Role, label, placeholder and text are what a screen reader or a human uses to find something, and that survives the markup being rewritten underneath it."
           }
         },
         {
@@ -330,7 +330,7 @@
               "The second file's tests are marked `.skip`"
             ],
             "answer": 1,
-            "explanation": "A compile error is loud and a `.skip` still appears in the listing as skipped. A file the pattern never matched contributes nothing — no line, no warning, no count. That is exactly why `--list` is worth running when a file's tests seem to have vanished."
+            "explanation": "A compile error is loud and a `.skip` still appears in the listing as skipped. A file the pattern never matched contributes nothing — no line, no warning, no count. Run `--list` whenever a file's tests seem to have vanished."
           }
         },
         {

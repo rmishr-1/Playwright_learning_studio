@@ -82,7 +82,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 7, Day 4.2 - One response feeds the next request\n\nTo update something you need its id. To delete it you need its id. **The server invents the id**,\nso you cannot write it down in advance - you have to create the thing, catch the id, and carry it\nforward.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 7, Day 4.2 - One response feeds the next request\n\nTo update something you need its id. To delete it you need its id. **The server invents the id**,\nso you cannot write it down in advance - you have to create the thing, catch the id, and carry it\nforward.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

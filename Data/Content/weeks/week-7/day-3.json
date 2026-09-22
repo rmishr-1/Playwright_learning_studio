@@ -82,7 +82,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 7, Day 3.2 - Your first API tests\n\nBy the end of this lesson you will have read a collection, read one item, checked a negative\ncase, created a user and fetched a token - with **no browser launched at all**.\n\n> **Mode: test-runner.** This part is about running specs with the Playwright test runner. The studio editor runs library code, so follow these along in your own checkout.",
+          "text": "# Week 7, Day 3.2 - Your first API tests\n\nBy the end of this lesson you will have read a collection, read one item, checked a negative\ncase, created a user and fetched a token - with **no browser launched at all**.\n\n> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
           "starter": null,
           "variation": null,
           "checkpoint": null

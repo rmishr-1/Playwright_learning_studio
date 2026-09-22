@@ -89,7 +89,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 7, Day 2.2 - What an API is\n\nSix weeks of this course drove a browser. Today the browser goes away and you talk to the server\ndirectly - which is faster, earlier, and how most testing work is actually heading.\n\n> **Mode: mixed.** Explore cells use `fetch`; one cell writes and runs a real spec.",
+          "text": "# Week 7, Day 2.2 - What an API is\n\nSix weeks of this course drove a browser. Today the browser goes away and you talk to the server\ndirectly - which is faster, earlier, and how most testing work is actually heading.\n\n> **Partly here, partly in your own project.** Explore cells use `fetch`; one cell writes and runs a real spec.",
           "starter": null,
           "variation": null,
           "checkpoint": null

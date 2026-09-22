@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 2.1 — `const`, and how TypeScript decides a variable's type\n\nEvery locator from here on gets assigned to a `const`. This is a full primer on why, and\non the type-inference rule that means you never write `: Locator` by hand.\n\n> **Every Run starts fresh.** The studio executes your code in a new process each time, so nothing is left over between runs.",
+          "text": "# Week 2, Day 2.1 — `const`, and how TypeScript decides a variable's type\n\nEvery locator from here on gets assigned to a `const`. This is a full primer on why, and\non the type-inference rule that means you never write `: Locator` by hand.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -181,7 +181,7 @@
         },
         {
           "type": "markdown",
-          "text": "> **Mode: mixed.** Locator syntax is explored live (Deno). Real `expect()` assertions —\n> `toContainText`, `toHaveValue`, `toHaveURL` — only retry inside the test runner, so\n> those get written to a spec, same as every day so far.",
+          "text": "> **Partly here, partly in your own project.** Locator syntax is explored live. Real `expect()` assertions —\n> `toContainText`, `toHaveValue`, `toHaveURL` — only retry inside the test runner, so\n> those get written to a spec, same as every day so far.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -301,7 +301,7 @@
               "It is case-insensitive"
             ],
             "answer": 0,
-            "explanation": "Web assertions retry — 5 seconds by default — which is what makes them safe against a page that has not finished rendering. A plain `if` checks once, right now, and a page that needed another 200ms fails for no real reason. Retrying is also why `expect()` needs the test runner behind it."
+            "explanation": "Web assertions retry for 5 seconds by default, which is what makes them safe against a page that has not finished rendering. A plain `if` checks once, right now, and a page that needed another 200ms fails for no real reason. Retrying is also why `expect()` needs the test runner behind it."
           }
         },
         {

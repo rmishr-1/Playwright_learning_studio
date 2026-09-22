@@ -49,7 +49,7 @@ const WEEK_THEMES: Record<number, string> = {
   2: 'Actions on a form, XPath and CSS, assertions, unique test data, and the sibling axis',
   3: 'Config in depth, hooks, classes, and the page object shape',
   4: 'Data-driven tests, fixtures, and external test data',
-  5: 'The page object model named, projects, workers and retries',
+  5: 'The Page Object Model, projects, workers and retries',
   6: 'Visual testing, reporting and evidence capture',
   7: 'CI, parallelism and flakiness',
   8: 'API testing and the testing pyramid',
@@ -58,17 +58,24 @@ const WEEK_THEMES: Record<number, string> = {
 /**
  * Week 1 days 1-4 have no _1 notebook: the course had not started its TypeScript-primer
  * convention yet. Rather than show three tabs on those days and four everywhere else, emit a
- * placeholder that says plainly that no new TypeScript is introduced.
+ * placeholder for the tab.
+ *
+ * It opens by saying what the tab is FOR, not what it lacks. "This day introduces no new
+ * TypeScript" was the first sentence a new learner ever read, and it assumed they already knew
+ * what TypeScript was, that days normally introduce some, and why a page would announce an
+ * absence. See docs/STYLE.md.
  */
 function placeholderPart(week: number, day: number): CoursePart {
   const body = [
-    '# Week ' + week + ', Day ' + day + '.1 \u2014 TypeScript check-in: nothing new today',
+    '# Week ' + week + ', Day ' + day + '.1 \u2014 TypeScript for this lesson',
     '',
-    'This day introduces no new TypeScript. The code in the parts that follow uses only what you',
-    'already have, or is theory with no code at all.',
+    'You write Playwright tests in TypeScript. This tab is where each day covers the language',
+    "features that day's lesson needs.",
     '',
-    "> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers",
-    '> arrow functions, `async`, and how to read an `import` line. Everything before that point is',
+    "Today's lesson needs nothing new, so you can go straight to it.",
+    '',
+    '> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow',
+    '> functions, `async`, and how to read an `import` line. The days before it are written to be',
     '> readable without them.',
     '',
   ].join('\n');
@@ -76,7 +83,7 @@ function placeholderPart(week: number, day: number): CoursePart {
   return {
     part: 1,
     kind: 'generated-prerequisite',
-    title: 'TypeScript check-in: nothing new today',
+    title: 'TypeScript for this lesson',
     tab_label: 'TypeScript',
     source_notebook: null,
     has_runnable_code: false,
@@ -124,7 +131,7 @@ function buildPart(
     tab_label: tabLabel(part),
     source_notebook: notebookPath,
     // A part with no example blocks and no problem stubs has nothing to run. Week 1 Day 1.2 is
-    // 13 markdown cells and zero code; the "nothing new today" check-ins are the same shape.
+    // 13 markdown cells and zero code; a TypeScript tab with no new language to cover is the same.
     has_runnable_code:
       parsed.blocks.some((b) => b.type === 'example' || b.type === 'your-turn') ||
       parsed.problems.length > 0,

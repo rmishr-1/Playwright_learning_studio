@@ -14,7 +14,7 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { tabLabel } from './notebook-parse';
+import { studioise, tabLabel } from './notebook-parse';
 import { LessonOverlay, type OverlayPart } from '../shared/contracts/lesson_overlay';
 import type { ContentBlock, CourseDay, CoursePart } from '../shared/contracts/course_day';
 
@@ -209,6 +209,24 @@ export function applyHeadingFormat(day: CourseDay): CourseDay {
         }),
       };
     }) as CourseDay['parts'],
+  };
+}
+
+/**
+ * Re-runs studioise() over the generated prose. It normally runs at import, so a change to the
+ * studio's own wording would otherwise reach only whoever can re-import from the 147 notebooks.
+ * studioise() is idempotent - each replacement removes the text its own pattern matches - so
+ * running it again here is safe, and it upgrades copy this project emitted in an earlier pass.
+ */
+export function applyStudioCopy(day: CourseDay): CourseDay {
+  return {
+    ...day,
+    parts: day.parts.map((part) => ({
+      ...part,
+      blocks: part.blocks.map((b) =>
+        b.type === 'markdown' ? { ...b, text: studioise(b.text) } : b,
+      ),
+    })) as CourseDay['parts'],
   };
 }
 
