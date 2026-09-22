@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 2.1 — TypeScript check-in: nothing new today\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
+          "text": "# Week 1, Day 2, TypeScript\n\nThis day introduces no new TypeScript. The code in the parts that follow uses only what you\nalready have, or is theory with no code at all.\n\n> The course's TypeScript primers begin at [Week 1, Day 5.1](/learn/w1/d5/p1), which covers\n> arrow functions, `async`, and how to read an `import` line. Everything before that point is\n> readable without them.\n",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -33,7 +33,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 2.2 — Environment setup & your first Playwright project\n\nBy the end of this lesson you will have checked your own Node install, know what\n`npm init playwright@latest` actually produces, and have opened this repo's real\n`playwright.config.ts` to recognize the pieces in it.\n\n> **No new TypeScript today.** This is npm/CLI/editor setup, not language syntax — nothing\n> to primer, so there's no Day 2.1. [Day 1.2](/learn/w1/d1/p2) covered the why; this is the\n> how.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
+          "text": "# Week 1, Day 2, Fundamentals — Environment setup & your first Playwright project\n\nBy the end of this lesson you will have checked your own Node install, know what\n`npm init playwright@latest` actually produces, and have opened this repo's real\n`playwright.config.ts` to recognize the pieces in it.\n\n> **No new TypeScript today.** This is npm/CLI/editor setup, not language syntax — nothing\n> to primer, so there's no Day 2.1. [Day 1.2](/learn/w1/d1/p2) covered the why; this is the\n> how.\n\n> **Mode: explore.** Write code in the editor and press Run — it drives a real browser and shows you what happened.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -169,7 +169,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 2.3 — Organizing a real project's folders and config\n\nBy the end of this lesson you will understand how `testDir` and folder-per-test-type\nconventions turn a flat scaffold into something a whole team can navigate, and what actually\nneeds to be in `.gitignore` for a Playwright project.\n\n> No new API here — \"advanced\" for a setup day means organizing what Day 2.2 gave you\n> sensibly, not new Playwright calls.",
+          "text": "# Week 1, Day 2, Implementation — Organizing a real project's folders and config\n\nBy the end of this lesson you will understand how `testDir` and folder-per-test-type\nconventions turn a flat scaffold into something a whole team can navigate, and what actually\nneeds to be in `.gitignore` for a Playwright project.\n\n> No new API here — \"advanced\" for a setup day means organizing what Day 2.2 gave you\n> sensibly, not new Playwright calls.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -261,7 +261,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 2.4 — Practice: environment setup\n\nThree problems. The first two use your real environment and this repo's real config — no\nguessing needed, everything here is something you can check.",
+          "text": "# Week 1, Day 2, Practice — Environment setup\n\nThree problems. The first two use your real environment and this repo's real config — no\nguessing needed, everything here is something you can check.",
           "starter": null,
           "variation": null,
           "checkpoint": null

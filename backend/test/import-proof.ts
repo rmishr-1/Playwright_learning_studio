@@ -200,6 +200,35 @@ function main(): void {
     mislabelled.slice(0, 5).join(' | '),
   );
 
+  // Week 1's page headings are standardised on "Week 1, Day D, <Tab>", with whatever the heading
+  // said about the lesson kept after an em dash. Placeholder headings ("TypeScript check-in:
+  // nothing new today") keep only the prefix. Week 1 only, by request - week 2 still reads
+  // "Week 2, Day 1.2 - ...", so this asserts nothing about it.
+  const HEADING = /^# Week 1, Day [1-5], (TypeScript|Fundamentals|Implementation|Practice)( — \S.*)?$/;
+  const badHeadings: string[] = [];
+  for (const d of days.filter((x) => x.week === 1)) {
+    for (const p of d.parts) {
+      const opening = p.blocks.find((b) => b.type === 'markdown' && b.text.trimStart().startsWith('# '));
+      const line = opening?.text.split('\n').find((l) => l.startsWith('# '));
+      if (!line) {
+        badHeadings.push('w1d' + d.day + 'p' + p.part + ' has no heading');
+      } else if (!HEADING.test(line)) {
+        badHeadings.push('w1d' + d.day + 'p' + p.part + ': ' + line);
+      }
+    }
+  }
+  check(
+    'every week 1 heading follows "Week 1, Day D, <Tab>"',
+    badHeadings.length === 0,
+    badHeadings.slice(0, 4).join(' | '),
+  );
+  // The rule must not throw away a real primer just because it sits on a TypeScript tab.
+  const d5p1 = days.find((d) => d.week === 1 && d.day === 5)!.parts.find((p) => p.part === 1)!;
+  check(
+    'a real primer keeps its subject (w1d5p1 is not a placeholder)',
+    d5p1.blocks[0].text.includes('Arrow functions'),
+  );
+
   // The authored lesson overlays. Week 2 is the authored week; weeks 1 and 3-8 have no overlay
   // yet, and the checks below are written so that stays a difference in coverage, not a failure.
   console.log('\nLesson overlays');

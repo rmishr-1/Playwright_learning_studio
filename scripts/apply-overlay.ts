@@ -13,7 +13,14 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { applyDerivedLabels, applyOverlay, applyVariations, loadOverlay, loadVariations } from './lesson-overlay';
+import {
+  applyDerivedLabels,
+  applyHeadingFormat,
+  applyOverlay,
+  applyVariations,
+  loadOverlay,
+  loadVariations,
+} from './lesson-overlay';
 import { CourseDay } from '../shared/contracts/course_day';
 
 const CONTENT = path.resolve(__dirname, '..', 'Data', 'Content');
@@ -41,6 +48,7 @@ function main(): void {
       // a day that is already malformed; out, so a merge that produced something invalid fails
       // here rather than in the learner's browser.
       let merged = applyDerivedLabels(CourseDay.parse(JSON.parse(before)));
+      merged = applyHeadingFormat(merged);
       merged = applyVariations(merged, variations);
       if (overlay) merged = applyOverlay(merged, overlay);
       const after = JSON.stringify(CourseDay.parse(merged), null, 2) + '\n';

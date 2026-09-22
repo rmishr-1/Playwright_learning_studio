@@ -24,7 +24,13 @@ import {
   tabLabel,
   type RawNotebook,
 } from './notebook-parse';
-import { applyOverlay, applyVariations, loadOverlay, loadVariations } from './lesson-overlay';
+import {
+  applyHeadingFormat,
+  applyOverlay,
+  applyVariations,
+  loadOverlay,
+  loadVariations,
+} from './lesson-overlay';
 import type { CourseDay, CoursePart, PracticeProblem } from '../shared/contracts/course_day';
 import type { CourseIndex, IndexWeek } from '../shared/contracts/course_index';
 import type { PartNumber } from '../shared/contracts/common';
@@ -183,11 +189,11 @@ function importDay(week: number, day: number): CourseDay | null {
     parts: parts as CourseDay['parts'],
   };
 
-  // The two authored side-cars that apply to a whole day, merged through the same functions
-  // `npm run overlay` uses - one implementation, so the two paths cannot drift.
-  const withVariations = applyVariations(built, loadVariations(CONTENT, week, day));
+  // Everything the notebooks do not decide, merged through the same functions `npm run overlay`
+  // uses - one implementation, so the two paths cannot drift.
+  const formatted = applyHeadingFormat(applyVariations(built, loadVariations(CONTENT, week, day)));
   const overlay = loadOverlay(CONTENT, week, day);
-  return overlay ? applyOverlay(withVariations, overlay) : withVariations;
+  return overlay ? applyOverlay(formatted, overlay) : formatted;
 }
 
 /**
