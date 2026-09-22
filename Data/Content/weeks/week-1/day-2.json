@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New syntax today** | none — today is npm, the CLI and the editor, not the language |\n| **You will need** | Node 18+ · a terminal · VS Code open on this repo's root |\n| **Then go to** | [Fundamentals](/learn/w1/d2/p2), which gets all three working |",
+          "text": "| | |\n|---|---|\n| **You will need** | Node 18+ · a terminal · VS Code open on this repo's root |\n| **Then go to** | [Fundamentals](/learn/w1/d2/p2), which gets all three working |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -44,7 +44,7 @@
         },
         {
           "type": "recap",
-          "text": "Today's work is setup rather than language: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2).",
+          "text": "Today's work is setup: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -62,7 +62,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 2 - Fundamentals - Environment setup & your first Playwright project\n\nBy the end of this lesson you will have checked your own Node install, know what\n`npm init playwright@latest` actually produces, and have opened this repo's real\n`playwright.config.ts` to recognize the pieces in it.\n\n> **No new TypeScript today.** This is npm/CLI/editor setup, not language syntax — nothing\n> to primer, so there's no Day 2.1. [Day 1.2](/learn/w1/d1/p2) covered the why; this is the\n> how.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
+          "text": "# Week 1 - Day 2 - Fundamentals - Environment setup & your first Playwright project\n\nBy the end of this lesson you will have checked your own Node install, know what\n`npm init playwright@latest` actually produces, and have opened this repo's real\n`playwright.config.ts` to recognize the pieces in it.\n\n> **Setup, not syntax.** [Day 1](/learn/w1/d1/p2) covered why teams automate. This is the how.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -264,14 +264,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 2 - Implementation - Organizing a real project's folders and config\n\nBy the end of this lesson you will understand how `testDir` and folder-per-test-type\nconventions turn a flat scaffold into something a whole team can navigate, and what actually\nneeds to be in `.gitignore` for a Playwright project.\n\n> No new API here — \"advanced\" for a setup day means organizing what Day 2.2 gave you\n> sensibly, not new Playwright calls.",
+          "text": "# Week 1 - Day 2 - Implementation - Organizing a real project's folders and config\n\nBy the end of this lesson you will understand how `testDir` and folder-per-test-type\nconventions turn a flat scaffold into something a whole team can navigate, and what actually\nneeds to be in `.gitignore` for a Playwright project.\n\n> **Organising what you already have.** \"Advanced\" on a setup day means arranging the\n> scaffold from [Day 2](/learn/w1/d2/p2) so a team can navigate it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New API** | none — \"advanced\" on a setup day means organising what you already have |\n| **You'll learn** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Builds on** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
+          "text": "| | |\n|---|---|\n| **You'll learn** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Builds on** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
           "starter": null,
           "variation": null,
           "checkpoint": null

@@ -4,7 +4,7 @@
   "day": 2,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — today is npm, the CLI and the editor, not the language |\n| **You will need** | Node 18+ · a terminal · VS Code open on this repo's root |\n| **Then go to** | [Fundamentals](/learn/w1/d2/p2), which gets all three working |",
+      "at_a_glance": "| | |\n|---|---|\n| **You will need** | Node 18+ · a terminal · VS Code open on this repo's root |\n| **Then go to** | [Fundamentals](/learn/w1/d2/p2), which gets all three working |",
       "checkpoints": [
         {
           "question": "From [Day 1](/learn/w1/d1/p2): which level of testing is Playwright's home turf?",
@@ -17,7 +17,7 @@
           "explanation": "Playwright drives the app the way a real user does, so a single test exercises every layer beneath it. Unit testing is a different tool's job. The higher up you go the more one test proves — and the more it costs to diagnose when it fails, which is week 7's subject."
         }
       ],
-      "recap": "Today's work is setup rather than language: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2)."
+      "recap": "Today's work is setup: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2)."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll do** | check Node · open this repo in VS Code · read its real `playwright.config.ts` |\n| **You'll learn** | what `npm init playwright@latest` writes, and why you must not run it here |\n| **Where it runs** | here in the editor. The cells read real files on your disk. |\n| **Assumes** | nothing but a terminal |",
@@ -56,7 +56,7 @@
       "recap": "- Any Node 18+ is fine; the exact numbers on your machine will differ from anyone else's.\n- **Never re-scaffold a repo that already has a config you care about.** This one is already set up.\n- `testMatch` in the root config is why a spec written into `week*/generated/` is found without registering it anywhere.\n- `baseURL` is why every `page.goto(\"/\")` in this course resolves to the banking app.\n- Commit `package.json` and `package-lock.json`; never `node_modules/`.\n- The browsers are a separate download from the npm package — `npx playwright install` if they are missing."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — \"advanced\" on a setup day means organising what you already have |\n| **You'll learn** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Builds on** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
+      "at_a_glance": "| | |\n|---|---|\n| **You'll learn** | how `testDir` and `testMatch` shape a project, and what belongs in `.gitignore` |\n| **Builds on** | the real config you opened in [Fundamentals](/learn/w1/d2/p2) |",
       "checkpoints": [
         {
           "question": "You move off the flat `tests/` folder and split specs into `UI_test/` and `API_test/`. Is setting `testDir` enough?",

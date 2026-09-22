@@ -22,7 +22,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New syntax today** | none — today's commands are shell, not language |\n| **You will need** | the environment from [Day 2](/learn/w1/d2/p2), and a real terminal |\n| **Then go to** | [Fundamentals](/learn/w1/d3/p2), which runs a spec for the first time |",
+          "text": "| | |\n|---|---|\n| **You will need** | the environment from [Day 2](/learn/w1/d2/p2), and a real terminal |\n| **Then go to** | [Fundamentals](/learn/w1/d3/p2), which runs a spec for the first time |",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -44,7 +44,7 @@
         },
         {
           "type": "recap",
-          "text": "Today's material is the command line rather than the language. [Fundamentals](/learn/w1/d3/p2) is all CLI, and [Implementation](/learn/w1/d3/p3) is a first read of the config file.",
+          "text": "Today's material is the command line. [Fundamentals](/learn/w1/d3/p2) is all CLI, and [Implementation](/learn/w1/d3/p3) is a first read of the config file.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -62,7 +62,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 3 - Fundamentals - Running tests from the CLI\n\nBy the end of this lesson you will have run a real spec from the command line, seen an\nHTML report, and know the difference between `package.json` and `package-lock.json`.\n\n> **No new TypeScript today** — the CLI commands below are shell commands, not language\n> syntax, so there's no Day 3.1. [Day 2](/learn/w1/d2/p2) got your environment ready; this is\n> where you actually use it.\n\n> **Partly here, partly in your own project.** The first cells run real terminal commands (like `runSpec` does under the\n> hood); the rest is explore-mode as usual.",
+          "text": "# Week 1 - Day 3 - Fundamentals - Running tests from the CLI\n\nBy the end of this lesson you will have run a real spec from the command line, seen an\nHTML report, and know the difference between `package.json` and `package-lock.json`.\n\n> **Shell commands, not language syntax.** [Day 2](/learn/w1/d2/p2) got your environment\n> ready. This is where you actually use it.\n\n> **Partly here, partly in your own project.** The first cells run real terminal commands (like `runSpec` does under the\n> hood); the rest is explore-mode as usual.",
           "starter": null,
           "variation": null,
           "checkpoint": null

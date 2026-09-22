@@ -28,6 +28,21 @@ const BANNED: ReadonlyArray<readonly [RegExp, string]> = [
   [/\bstuff\b/i, 'stuff'],
 ];
 
+/**
+ * Sentences that define a lesson by what it does NOT contain: "No new TypeScript today",
+ * "New API | none", "No code today". A first-time reader has not been told what a normal day
+ * contains, so an absence tells them nothing, and it reads as an apology for the page they just
+ * opened. Say what the lesson IS about instead - the at-a-glance card has a row for it either
+ * way, so this costs nothing but the framing.
+ */
+const ABSENCE: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\bno new (typescript|api|code|syntax|concepts?)\b/i, '"no new ..."'],
+  [/\bno code (today|here)\b/i, '"no code today"'],
+  [/\|\s*none\s*[\u2014-]/i, 'a table row answering "none"'],
+  [/\bnothing to learn\b/i, '"nothing to learn"'],
+  [/\brather than (the )?language\b/i, '"rather than language"'],
+];
+
 /** Acronyms that are legitimately upper-case, so the shouting check does not flag them. */
 const ACRONYMS = new Set([
   'CSS', 'XPATH', 'DOM', 'CI', 'GET', 'POST', 'HTML', 'URL', 'API', 'UI', 'E2E', 'JSON',
@@ -94,6 +109,9 @@ export function lintProse(text: string, where: string): Finding[] {
   // wherever it appears, and a cell has no business carrying an exclamation mark either.
   for (const [re, name] of BANNED) {
     if (re.test(clean)) err('banned-phrase', `"${name}"`);
+  }
+  for (const [re, name] of ABSENCE) {
+    if (re.test(clean)) err('defines-by-absence', name);
   }
   if (/!/.test(clean.replace(/\bCODE\b/g, ''))) err('exclamation', 'contains "!"');
 

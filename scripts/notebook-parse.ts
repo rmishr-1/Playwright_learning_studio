@@ -136,6 +136,72 @@ export function findSupersededCopy(md: string): string[] {
  * The heading is emitted in the raw notebook form on purpose. applyHeadingFormat() normalises it
  * to "# Week N - Day D - TypeScript" straight afterwards, so one rule stays in charge of headings.
  */
+/**
+ * Banners that open a lesson by naming what it does NOT contain: "No new TypeScript today",
+ * "No new API here", "No code today". They read as an apology for the page a learner has just
+ * opened, and a first-time reader has not yet been told what a normal day contains, so the
+ * absence means nothing to them. Each is replaced by the half of it that says something - where
+ * the course has got to, and what this lesson does - or dropped where the at-a-glance card
+ * directly beneath already carries that.
+ *
+ * These are notebook-derived, so they cannot be fixed at source from this checkout. They are
+ * matched whole, blockquote run and all, because replacing only the first line would leave the
+ * continuation lines dangling as a quote with no opening.
+ */
+const ABSENCE_BANNERS: ReadonlyArray<readonly [RegExp, string]> = [
+  [
+    /> \*\*No code today\.\*\* This is an orientation day — theory and one "go look at this" step\.\s*\n> Cells start appearing from \[Day 2\]\(\/learn\/w1\/d2\/p2\) onward, once there's an environment to\s*\n> run them in\./g,
+    "> **An orientation day.** Theory, plus one \"go and look at this\" step. The hands-on work\n" +
+      "> starts at [Day 2](/learn/w1/d2/p2), once there is an environment to run it in.",
+  ],
+  [
+    /> \*\*No new TypeScript today\.\*\* This is npm\/CLI\/editor setup, not language syntax — nothing\s*\n> to primer, so there's no Day 2\.1\. \[Day 1\.2\]\(\/learn\/w1\/d1\/p2\) covered the why; this is the\s*\n> how\./g,
+    '> **Setup, not syntax.** [Day 1](/learn/w1/d1/p2) covered why teams automate. This is the how.',
+  ],
+  [
+    /> No new API here — "advanced" for a setup day means organizing what Day 2\.2 gave you\s*\n> sensibly, not new Playwright calls\./g,
+    '> **Organising what you already have.** "Advanced" on a setup day means arranging the\n' +
+      '> scaffold from [Day 2](/learn/w1/d2/p2) so a team can navigate it.',
+  ],
+  [
+    /> \*\*No new TypeScript today\*\* — the CLI commands below are shell commands, not language\s*\n> syntax, so there's no Day 3\.1\. \[Day 2\]\(\/learn\/w1\/d2\/p2\) got your environment ready; this is\s*\n> where you actually use it\./g,
+    '> **Shell commands, not language syntax.** [Day 2](/learn/w1/d2/p2) got your environment\n' +
+      '> ready. This is where you actually use it.',
+  ],
+  [
+    /> \*\*No new TypeScript today\*\* — locator strings and file naming aren't new language syntax,\s*\n> so there's no Day 4\.1\. \[Day 2\]\(\/learn\/w1\/d2\/p2\) and \[Day 3\]\(\/learn\/w1\/d3\/p2\) got you set up\s*\n> and running; today is about \*finding\* what to put inside a test\./g,
+    '> **Finding what goes inside a test.** [Day 2](/learn/w1/d2/p2) and [Day 3](/learn/w1/d3/p2)\n' +
+      '> got you set up and running. Today is about locating the controls to act on.',
+  ],
+  [
+    /> \*\*No new API here either\*\* — this slot is normally "the same API, inside a framework", but\s*\n> there's no framework yet\. Today it's the same locators from Day 4\.2, used to prove a rule\s*\n> about \*discovery\* rather than to teach a new call\./g,
+    '> **The same locators, a different point.** Today uses the locators from\n' +
+      '> [Fundamentals](/learn/w1/d4/p2) to prove a rule about *discovery*: which files the runner\n' +
+      '> will even look at.',
+  ],
+  [
+    /> \*\*No new API here on purpose\.\*\* `getByPlaceholder`, `getByRole`, `fill`, `click` — all\s*\n> already used in Day 5\.2\. The only new thing is the structure around them\. The repo has no\s*\n> `framework\/` folder yet \(that comes later\), so this class is written \*\*inline in the spec\s*\n> file below\*\* — a shape you're seeing, not a file the repo ships yet\./g,
+    '> **The same calls, a new shape.** `getByPlaceholder`, `getByRole`, `fill` and `click` all\n' +
+      '> come from [Fundamentals](/learn/w1/d5/p2); the structure around them is what is new. The\n' +
+      '> class is written **inline in the spec file below**, as a shape to recognise rather than a\n' +
+      '> file the repo ships.',
+  ],
+  // Three the same reflex, in running prose rather than a banner.
+  [
+    /No code cell for this one — open a real browser tab and look around\./g,
+    'Open a real browser tab and look around.',
+  ],
+  [
+    /No Day 1\.3 — there's no code yet to reorganize into a framework shape\. Straight to\s*\n\[Day 1\.4 — Practice\]\(\/learn\/w1\/d1\/p4\) for some reflection problems, then \[Day 2\]\(\/learn\/w1\/d2\/p2\)\s*\ngets your environment running\./g,
+    'Go to [Practice](/learn/w1/d1/p4) for some reflection problems, then\n' +
+      '[Day 2](/learn/w1/d2/p2) gets your environment running.',
+  ],
+  [
+    /No code today, and no app to test against yet — so these are reflection and research\s*\nproblems instead of programming ones\. Same three tiers as every practice day, adapted to\s*\nwhat you actually have available right now\./g,
+    'Three reflection and research problems, in the same three tiers as every practice day.',
+  ],
+];
+
 export function placeholderBody(week: number, day: number): string {
   return '# Week ' + week + ', Day ' + day + '.1 \u2014 TypeScript for this lesson\n';
 }
@@ -193,6 +259,7 @@ export function studioise(md: string): string {
   // survive in every day file until someone re-imported from the notebooks - which needs the
   // training repo. See docs/STYLE.md.
   for (const [was, now] of LEGACY_COPY) out = out.replace(was, now);
+  for (const [was, now] of ABSENCE_BANNERS) out = out.replace(was, now);
 
   // Link LABELS still reading like file paths: [week3/day2_1.ipynb](/learn/w3/d2/p1).
   // The href was rewritten; without this the learner still sees a filename.

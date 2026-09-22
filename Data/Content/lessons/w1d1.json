@@ -4,7 +4,7 @@
   "day": 1,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — day 1 is orientation, and there is no code yet to need any |\n| **When TypeScript starts** | [Day 5.1](/learn/w1/d5/p1), with arrow functions, `async` and `import` |\n| **Then go to** | [Fundamentals](/learn/w1/d1/p2) — why teams automate, and why this tool |",
+      "at_a_glance": "| | |\n|---|---|\n| **When TypeScript starts** | [Day 5.1](/learn/w1/d5/p1), with arrow functions, `async` and `import` |\n| **Then go to** | [Fundamentals](/learn/w1/d1/p2) — why teams automate, and why this tool |",
       "checkpoints": [
         {
           "question": "Do you need to know TypeScript before starting this course?",
@@ -17,10 +17,10 @@
           "explanation": "The language primers start at [Day 5.1](/learn/w1/d5/p1). Days 1 to 4 are orientation, setup, the CLI and Codegen — readable without the language. The course does very much use TypeScript; it just does not open with it."
         }
       ],
-      "recap": "Day 1 is orientation, so the language lessons begin later in the week. Continue to [Fundamentals](/learn/w1/d1/p2), which is the lesson itself. There is no code until [Day 2](/learn/w1/d2/p2), when there is an environment to run it in."
+      "recap": "Day 1 is orientation, so the language lessons begin later in the week. Continue to [Fundamentals](/learn/w1/d1/p2), which is the lesson itself. Hands-on work starts at [Day 2](/learn/w1/d2/p2), once there is an environment to run it in."
     },
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **No code today** | orientation, plus one \"go and look at this\" step |\n| **You'll be able to say** | what automation cannot do · why Playwright over Selenium · where the effort really goes |\n| **Assumes** | nothing at all — this is the first lesson |\n| **The sentence to keep** | automation never finds a defect. It reports pass or fail. |",
+      "at_a_glance": "| | |\n|---|---|\n| **Today's shape** | orientation, plus one \"go and look at this\" step |\n| **You'll be able to say** | what automation cannot do · why Playwright over Selenium · where the effort really goes |\n| **Assumes** | nothing at all — this is the first lesson |\n| **The sentence to keep** | automation never finds a defect. It reports pass or fail. |",
       "checkpoints": [
         {
           "question": "Your suite of 500 automated tests runs green overnight. What has it proved?",
@@ -56,7 +56,7 @@
       "recap": "- **Automation never finds a defect.** It reports pass or fail against checks a person wrote; a person decides what a failure means.\n- Two non-negotiables before automating anything: a known expected result, and an identifiable object.\n- Playwright folds in what Selenium needs extra tooling for — auto-waiting, assertions, a runner, tracing. Selenium is older, not bad.\n- Its home is system-level end-to-end testing, and its mobile support is emulation, not native apps.\n- About half your effort on a real project goes into learning the **application**, not the tool."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **No code today** | three reflection and research problems, since there is no environment yet |\n| **Pulls on** | [Fundamentals](/learn/w1/d1/p2) — and on the playwright.dev tab it asked you to open |\n| **Next** | [Day 2](/learn/w1/d2/p2) turns all of this into a working setup on your machine |"
+      "at_a_glance": "| | |\n|---|---|\n| **What you'll do** | three reflection and research problems |\n| **Pulls on** | [Fundamentals](/learn/w1/d1/p2) — and on the playwright.dev tab it asked you to open |\n| **Next** | [Day 2](/learn/w1/d2/p2) turns all of this into a working setup on your machine |"
     }
   }
 }

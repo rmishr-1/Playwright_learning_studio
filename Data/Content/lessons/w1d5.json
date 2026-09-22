@@ -74,7 +74,7 @@
       "recap": "- **A test with no `expect()` cannot fail for the right reason.** It is a recording of actions.\n- Assert the consequence, such as the URL or the user's name. Do not settle for an action that merely did not throw.\n- `expect(page).toHaveURL(...)` auto-retries until it matches or times out, then fails with a real message.\n- This app gives no error on a wrong password: it just stays put. Silence is not success.\n- Ask of every passing test: what would make this go red?"
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **What changes** | three repeated locators become a class built once, and one named `signIn` step |\n| **Not yet named** | this is the Page Object Model. Week 5 names it and covers it in full. |\n| **The rule to take away** | a page object never asserts |",
+      "at_a_glance": "| | |\n|---|---|\n| **The API** | the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **What changes** | three repeated locators become a class built once, and one named `signIn` step |\n| **Not yet named** | this is the Page Object Model. Week 5 names it and covers it in full. |\n| **The rule to take away** | a page object never asserts |",
       "checkpoints": [
         {
           "question": "Why does `LoginPage` contain no `expect()` at all?",

@@ -349,14 +349,14 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 5 - Implementation - The same login, with a little structure\n\nBy the end of this lesson you will have seen Day 5.2's exact login steps reorganized into a\nsmall class — a first, gentle look at the shape you'll build on for the rest of the course.\n\n> **No new API here on purpose.** `getByPlaceholder`, `getByRole`, `fill`, `click` — all\n> already used in Day 5.2. The only new thing is the structure around them. The repo has no\n> `framework/` folder yet (that comes later), so this class is written **inline in the spec\n> file below** — a shape you're seeing, not a file the repo ships yet.\n\n> This previews something week5 names and covers in full depth as the **Page Object Model** —\n> today, just notice the shape; you don't need the name yet.",
+          "text": "# Week 1 - Day 5 - Implementation - The same login, with a little structure\n\nBy the end of this lesson you will have seen Day 5.2's exact login steps reorganized into a\nsmall class — a first, gentle look at the shape you'll build on for the rest of the course.\n\n> **The same calls, a new shape.** `getByPlaceholder`, `getByRole`, `fill` and `click` all\n> come from [Fundamentals](/learn/w1/d5/p2); the structure around them is what is new. The\n> class is written **inline in the spec file below**, as a shape to recognise rather than a\n> file the repo ships.\n\n> This previews something week5 names and covers in full depth as the **Page Object Model** —\n> today, just notice the shape; you don't need the name yet.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **New API** | none — the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **What changes** | three repeated locators become a class built once, and one named `signIn` step |\n| **Not yet named** | this is the Page Object Model. Week 5 names it and covers it in full. |\n| **The rule to take away** | a page object never asserts |",
+          "text": "| | |\n|---|---|\n| **The API** | the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **What changes** | three repeated locators become a class built once, and one named `signIn` step |\n| **Not yet named** | this is the Page Object Model. Week 5 names it and covers it in full. |\n| **The rule to take away** | a page object never asserts |",
           "starter": null,
           "variation": null,
           "checkpoint": null

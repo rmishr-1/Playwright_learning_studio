@@ -4,7 +4,7 @@
   "day": 4,
   "parts": {
     "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **New syntax today** | none — locator strings and file names are not language syntax |\n| **You will need** | a real terminal, because Codegen opens two windows of its own |\n| **Then go to** | [Fundamentals](/learn/w1/d4/p2), which is about *finding* what goes inside a test |",
+      "at_a_glance": "| | |\n|---|---|\n| **You will need** | a real terminal, because Codegen opens two windows of its own |\n| **Then go to** | [Fundamentals](/learn/w1/d4/p2), which is about *finding* what goes inside a test |",
       "checkpoints": [
         {
           "question": "From [Day 3](/learn/w1/d3/p3): which setting in the config decides how many times each test runs?",
@@ -17,7 +17,7 @@
           "explanation": "The length of the `projects` array multiplies the test count — chromium alone here, three browsers in a fresh scaffold. `retries` only re-runs something that already failed, and `fullyParallel` changes the order and speed, never the count."
         }
       ],
-      "recap": "Today's material is tooling rather than the language. [Fundamentals](/learn/w1/d4/p2) is Codegen and locators; [Implementation](/learn/w1/d4/p3) proves what the `.spec.ts` suffix really does."
+      "recap": "Today's material is tooling. [Fundamentals](/learn/w1/d4/p2) is Codegen and locators; [Implementation](/learn/w1/d4/p3) proves what the `.spec.ts` suffix really does."
     },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **You'll use** | `getByRole` · `getByPlaceholder` · Codegen and the Inspector |\n| **On** | the course's banking app, signed in as Leela |\n| **Run it yourself** | Codegen opens two real windows — there is no way to fake that in a lesson cell |\n| **The idea to take away** | locate by what an element *is* to a user, not by where it sits in the markup |",
@@ -56,7 +56,7 @@
       "recap": "- Prefer `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText`. Let Codegen's defaults be yours.\n- Generated ids and raw XPath encode the markup of the day, and break when it changes.\n- Codegen gives a **draft**: keep the locators, drop the noise.\n- **A missing `.spec.ts` suffix is a silent failure, not a loud one** — the runner simply never looks at the file.\n- On this app the dashboard tiles are `<p>` elements, so `getByRole(\"link\", ...)` finds nothing."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — the same locators from [Fundamentals](/learn/w1/d4/p2), used to prove a rule about discovery |\n| **What you'll watch** | a valid test file ignored entirely, then found, purely because of its name |\n| **The tool** | `npx playwright test <dir> --list` — counts what the runner can actually see |",
+      "at_a_glance": "| | |\n|---|---|\n| **The API** | the same locators from [Fundamentals](/learn/w1/d4/p2), used to prove a rule about discovery |\n| **What you'll watch** | a valid test file ignored entirely, then found, purely because of its name |\n| **The tool** | `npx playwright test <dir> --list` — counts what the runner can actually see |",
       "checkpoints": [
         {
           "question": "`--list` reports `Total: 2 tests in 1 file`, but you know there are two test files in that folder. What does that tell you?",
