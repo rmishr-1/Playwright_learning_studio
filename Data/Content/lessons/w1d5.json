@@ -1,0 +1,106 @@
+{
+  "schema": "lesson-overlay/v1",
+  "week": 1,
+  "day": 5,
+  "parts": {
+    "1": {
+      "checkpoints": [
+        {
+          "question": "`const square = (n: number) => n * n;` has no `return`. Why does it still return a value?",
+          "options": [
+            "Arrow functions return their last statement automatically",
+            "A body with no braces is a single expression, and its value is returned implicitly",
+            "`return` is optional everywhere in TypeScript"
+          ],
+          "answer": 1,
+          "explanation": "No braces means the arrow is followed by one expression, and that expression's value is the return value. Add braces and you are back to a normal function body, where `return` is required — a difference that catches people the first time a block-bodied arrow silently returns `undefined`."
+        },
+        {
+          "question": "You write an arrow function whose body calls `await page.click(...)` but you leave off `async`. What happens?",
+          "options": [
+            "It runs, but the click may not finish before the next line",
+            "A TypeScript compile error — `await` is only valid inside an `async` function",
+            "It runs and silently ignores the `await`"
+          ],
+          "answer": 1,
+          "explanation": "This one fails loudly at compile time rather than misbehaving at run time, which is the good case. Since practically every Playwright action returns a Promise, practically every test body awaits something — which is why practically every test function is `async`."
+        },
+        {
+          "question": "In `test(\"name\", async ({ page }) => { ... })`, what is `({ page })` doing?",
+          "options": [
+            "Declaring a parameter that happens to be called page",
+            "Destructuring just the `page` fixture out of the object of tools Playwright passes in",
+            "Creating a new page object for the test to use"
+          ],
+          "answer": 1,
+          "explanation": "Playwright hands the test one object containing every fixture it could offer — `page`, `browser`, `browserName` and more. Destructuring in the parameter list pulls out only the ones you name, so you write `page` rather than `tools.page` throughout. Nothing is being created here; it is being unpacked."
+        }
+      ]
+    },
+    "2": {
+      "at_a_glance": "| | |\n|---|---|\n| **You'll watch** | a test pass with the wrong password, because it never checked anything |\n| **Then** | fix it, and watch it fail correctly |\n| **Mode** | test-runner — follow these in your own checkout |\n| **Assumes** | [arrow functions, `async`, destructuring](/learn/w1/d5/p1) |\n| **The week's headline** | a test that only acts and never asserts is a recording, not a test |",
+      "checkpoints": [
+        {
+          "question": "Both tests type the same wrong password. Why does the first one report green?",
+          "options": [
+            "The app accepted the wrong password, so the login really did succeed",
+            "It contains no `expect()`, so there was nothing that could fail",
+            "Playwright treats a failed login as a warning rather than an error"
+          ],
+          "answer": 1,
+          "explanation": "Login genuinely failed in both tests — verified: this app just stays on the login page, with no error message at all. The first test performed four actions, none of which threw, and reported success. \"Automation never finds a defect\" from [Day 1](/learn/w1/d1/p2) stops being an abstraction right here."
+        },
+        {
+          "question": "Which assertion actually proves the login worked?",
+          "options": [
+            "`await expect(page.getByRole(\"button\", { name: \"Login\" })).toBeVisible()` before clicking",
+            "`await expect(page).toHaveURL(/dashboard/)` after clicking",
+            "Checking that `.click()` completed without throwing"
+          ],
+          "answer": 1,
+          "explanation": "Assert the **consequence**. A click completing proves the button was clickable, not that anything happened afterwards; asserting the login button is visible proves you are still looking at the login page. The URL changing — or the user's name appearing — is what only a successful login produces."
+        },
+        {
+          "question": "What question should you ask of a test you have just written and watched pass?",
+          "options": [
+            "Does it run fast enough to keep in the suite?",
+            "What would make this go red? If the answer is \"nothing\", it is not testing anything yet.",
+            "Does it cover every element on the page?"
+          ],
+          "answer": 1,
+          "explanation": "A green test is only meaningful if some realistic breakage would turn it red. Reading your own passing test with suspicion is the habit this whole day exists to build — and it is cheapest to apply the moment you write it, not after it has been green through six broken releases."
+        }
+      ],
+      "recap": "- **A test with no `expect()` cannot fail for the right reason.** It is a recording of actions.\n- Assert the consequence — the URL, the user's name — not that an action merely did not throw.\n- `expect(page).toHaveURL(...)` auto-retries until it matches or times out, then fails with a real message.\n- This app gives no error on a wrong password: it just stays put. Silence is not success.\n- Ask of every passing test: what would make this go red?"
+    },
+    "3": {
+      "at_a_glance": "| | |\n|---|---|\n| **New API** | none — the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **What changes** | three repeated locators become a class built once, and one named `signIn` step |\n| **Not yet named** | this is the Page Object Model. Week 5 names it and covers it in full. |\n| **The rule to take away** | a page object never asserts |",
+      "checkpoints": [
+        {
+          "question": "Why does `LoginPage` contain no `expect()` at all?",
+          "options": [
+            "Because assertions are not allowed outside a `test()` body",
+            "So it can be reused by tests expecting success AND tests expecting failure — the test decides what should be true",
+            "Because the class runs before the test does"
+          ],
+          "answer": 1,
+          "explanation": "Put the check inside `signIn` and it only suits tests wanting that exact outcome. You then grow `signInAndCheckDashboard`, `signInAndCheckWrongPassword`, one method per outcome. The version that asserts nothing serves both tests in this very lesson — one expecting a dashboard, one expecting to stay put."
+        },
+        {
+          "question": "The locators are built once in the constructor and marked `readonly`. What does `readonly` buy?",
+          "options": [
+            "It stops a method reassigning a locator by accident",
+            "It makes the locators resolve once and cache the element",
+            "It is required for TypeScript to infer the `Locator` type"
+          ],
+          "answer": 0,
+          "explanation": "It is a compile-time guarantee about the field, nothing more. A locator is a live reference that re-resolves on every use, so `readonly` does not freeze what it points at — only the fact that this field keeps pointing at the same locator."
+        }
+      ],
+      "recap": "- Three locators repeated across dozens of tests is dozens of edits when the form is redesigned. Build them once.\n- Name a method for what a **user** does (`signIn`), not for the DOM operations inside it.\n- **No assertions in a page object.** It knows how to act; the test decides what should be true.\n- `readonly` guards the field, not the element — a locator still re-resolves every time it is used.\n- You are looking at the Page Object Model. Week 5 gives it its name and its full treatment."
+    },
+    "4": {
+      "at_a_glance": "| | |\n|---|---|\n| **Three problems** | closing out the week: a test of your own, the assertions gap, then a small page object |\n| **No solutions** | the report tells you whether you are right |\n| **Closes** | week 1 — why automate, setup, the CLI, Codegen, and the assertion that makes a test a test |"
+    }
+  }
+}

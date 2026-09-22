@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Markdown } from './Markdown';
 import type { ContentBlock, CoursePart, PracticeProblem } from '../../../shared/contracts/course_day';
 
@@ -148,17 +149,30 @@ export function TheoryPane({
       <div className="tabbar">
         {/* A toggle, and always present. It used to render only while the week list was hidden,
             which removed the control at exactly the moment it was needed to close it again -
-            leaving no way back except picking a day you did not want. */}
+            leaving no way back except picking a day you did not want. It now swaps the course
+            title for the week list, so it is the only control that brings either one back. */}
         {onToggleWeeks && (
           <button
             className="show-weeks"
             onClick={onToggleWeeks}
             aria-expanded={weeksShown ?? false}
-            aria-label={weeksShown ? 'Hide the week list' : 'Show the week list'}
-            title={weeksShown ? 'Hide the week list' : 'Show the week list'}
+            aria-label={weeksShown ? 'Close the week list' : 'Open the week list'}
+            title={weeksShown ? 'Close the week list' : 'Open the week list'}
           >
             ☰
           </button>
+        )}
+        {/* The course title, where the masthead used to be a bar of its own. It shows only while
+            the week list is closed: open, the list says where you are, and two answers to the
+            same question would just crowd the tabs. */}
+        {onToggleWeeks && !weeksShown && (
+          <Link
+            to="/learn/w1/d1/p1"
+            className="studio-title"
+            title="Beginner to Advanced: Playwright Fundamentals"
+          >
+            Beginner to Advanced: Playwright Fundamentals
+          </Link>
         )}
         {parts.map((p) => (
           <button key={p.part} className={p.part === part.part ? 'on' : ''} onClick={() => onSelect(p.part)}>
