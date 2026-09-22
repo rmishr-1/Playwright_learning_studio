@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Day } from './screens/Day';
 import { RunView } from './screens/RunView';
 import { getMyProgress } from './api/client';
 
 const THEME_KEY = 'studio.theme';
-/** Named for the week list, which is what it used to hide on its own. It now governs the
- *  masthead as well; the key is kept so nobody's saved preference resets. */
-const CHROME_KEY = 'studio.weeks_hidden';
+/**
+ * A NEW key, not the old studio.weeks_hidden: the default flipped to closed when the course title
+ * moved onto the tab row, and reusing the key would have left anyone who had once opened the week
+ * list arriving with it open and no title showing.
+ */
+const WEEKS_KEY = 'studio.weeks_open';
 
 type Theme = 'light' | 'dark';
 
@@ -20,11 +23,12 @@ function readTheme(): Theme {
   }
 }
 
-function readChromeShown(): boolean {
+/** Closed on a first visit: you arrive on the lesson, with the course title on the tab row. */
+function readWeeksOpen(): boolean {
   try {
-    return localStorage.getItem(CHROME_KEY) !== '1';
+    return localStorage.getItem(WEEKS_KEY) === '1';
   } catch {
-    return true;
+    return false;
   }
 }
 
@@ -50,18 +54,17 @@ function Home() {
 export function App() {
   const [theme, setTheme] = useState<Theme>(readTheme);
   /**
-   * One switch for the reading chrome: the week list and the masthead collapse together, because
-   * both exist to tell you where you are rather than to teach you anything. It lives here rather
-   * than in Day because the masthead is rendered here.
+   * The week list and the course title trade places: the title sits on the tab row while the list
+   * is closed, and the list replaces it when opened. Both say where you are rather than teaching
+   * anything, so only one is ever worth the space. Owned here because it outlives any one day.
    */
-  const [chromeShown, setChromeShown] = useState<boolean>(readChromeShown);
+  const [weeksOpen, setWeeksOpen] = useState<boolean>(readWeeksOpen);
   const location = useLocation();
   // The detached window opened by RunOverlay's Detach button (see the comment there): its own
-  // small window, no masthead, no theme toggle, nothing but the live view it was popped out to
-  // show.
+  // small window, no theme toggle, nothing but the live view it was popped out to show.
   const detached = location.pathname.startsWith('/run/');
 
-  // The theme lives on <html> so it covers the masthead and every screen, not just the shell.
+  // The theme lives on <html> so it covers every screen, not just the shell.
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     try {
@@ -73,11 +76,11 @@ export function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(CHROME_KEY, chromeShown ? '0' : '1');
+      localStorage.setItem(WEEKS_KEY, weeksOpen ? '1' : '0');
     } catch {
       // Remembering it is a convenience, never a requirement.
     }
-  }, [chromeShown]);
+  }, [weeksOpen]);
 
   if (detached) {
     return (
@@ -89,27 +92,16 @@ export function App() {
 
   return (
     <div className="app">
-      {/* Hidden only on a lesson, because the tab bar's toggle is the way back and only a lesson
-          has one. Collapsing it anywhere else would strand the masthead with nothing to restore it. */}
-      {(chromeShown || !location.pathname.startsWith('/learn/')) && (
-        <header className="masthead">
-          <Link to="/learn/w1/d1/p1" className="brand" style={{ color: 'inherit', textDecoration: 'none' }}>
-            Beginner to Advanced: Playwright Fundamentals
-          </Link>
-        </header>
-      )}
-
+      {/* No masthead of its own any more. On a lesson the course title rides the tab row, where it
+          costs no vertical space and trades places with the week list; every other route is a
+          redirect that renders for a moment, so a title bar there would only flash. */}
       <Routes>
         {/* React Router v6 params must be a WHOLE segment, so the w/d/p prefixes travel
             inside the param and Day parses them off. */}
         <Route
           path="/learn/:week/:day/:part"
           element={
-            <Day
-              appTheme={theme}
-              chromeShown={chromeShown}
-              onSetChromeShown={setChromeShown}
-            />
+            <Day appTheme={theme} weeksOpen={weeksOpen} onSetWeeksOpen={setWeeksOpen} />
           }
         />
         <Route path="/learn/:week/:day" element={<Navigate to="p1" replace />} />

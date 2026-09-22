@@ -101,20 +101,8 @@ body { font-family: var(--sans); color: var(--graphite); background: var(--page)
 a { color: var(--accent); }
 button { font: inherit; cursor: pointer; }
 
-/* ---------------------------------------------------------------- masthead */
-.masthead {
-  background: var(--ink); color: #eef1f7;
-  padding: 0 20px; height: 50px; display: flex; align-items: center; gap: 18px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-}
-/* The course name is long, so the brand drops the mono uppercase treatment the rest of the
-   masthead uses - at that tracking it would wrap onto two lines on a laptop. */
-.masthead .brand {
-  font-family: var(--serif); font-size: 16px; font-weight: 600; color: #fff;
-  letter-spacing: 0; text-transform: none; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; min-width: 0;
-}
-.masthead .spacer { flex: 1; }
+/* The masthead was a 50px navy bar carrying the course title. The title now rides the tab row
+   (.tabbar .studio-title), so the bar and its brand styles are gone rather than left unused. */
 
 /* ---------------------------------------------------------------- shells */
 .app { height: 100%; display: flex; flex-direction: column; }
@@ -274,6 +262,20 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .tabbar .show-weeks:hover { color: var(--accent); }
 .tabbar .show-weeks[aria-expanded='true'] { color: var(--heading); background: var(--rule-soft); }
+
+/* The course title, on the tab row rather than in a bar of its own. It is the brand voice, so it
+   keeps the serif the masthead used, and a rule separates it from the tabs - which are controls,
+   where this is a label. `flex: 0 1 auto` with min-width 0 lets it give up width to the tabs and
+   ellipsis rather than pushing them off the row on a narrow pane. */
+.tabbar .studio-title {
+  font-family: var(--serif); font-size: 13.5px; font-weight: 600; color: var(--heading);
+  text-decoration: none; align-self: center; padding: 0 11px 0 3px; margin-right: 5px;
+  border-right: 1px solid var(--rule);
+  /* Yields all its width to the tabs before clipping them - they are the controls, this is a
+     label. The full name is on hover, and widening the lesson pane shows more of it. */
+  flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tabbar .studio-title:hover { color: var(--accent); }
 
 /* Centred: on a wide pane, left-aligned text left a large empty column to its right. */
 .lesson { padding: 26px 34px 90px; max-width: 74ch; margin: 0 auto; }

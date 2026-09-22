@@ -146,17 +146,17 @@ function Sidebar({
 
 export function Day({
   appTheme,
-  chromeShown,
-  onSetChromeShown,
+  weeksOpen,
+  onSetWeeksOpen,
 }: {
   /** The editor starts on the page theme, and can then be overridden on its own. */
   appTheme: 'light' | 'dark';
   /**
-   * The week list and the masthead collapse together, so this is owned by App (which renders the
-   * masthead) rather than here. Everything below treats it as "is the week list showing".
+   * Owned by App, because it outlives any one day. The week list and the course title trade
+   * places: closed, the title sits on the tab row; open, the list takes that space instead.
    */
-  chromeShown: boolean;
-  onSetChromeShown: (shown: boolean) => void;
+  weeksOpen: boolean;
+  onSetWeeksOpen: (open: boolean) => void;
 }) {
   // Drives the sidebar ticks and the gating. There is only the one record - see api/client.ts.
   const [progress, setProgress] = useState<Progress | null>(null);
@@ -183,11 +183,10 @@ export function Day({
   const [run, setRun] = useState<RunState | null>(null);
   const [running, setRunning] = useState(false);
   const [split, setSplit] = useState(52);
-  // Whether the week list is showing - App owns it, because the masthead collapses with it and
-  // is rendered there. Remembered per viewer, so someone who works with it hidden does not have
-  // to hide it again on every day.
-  const weeksShown = chromeShown;
-  const setWeeksShown = onSetChromeShown;
+  // Remembered per viewer, so someone who works with the list open does not have to open it again
+  // on every day.
+  const weeksShown = weeksOpen;
+  const setWeeksShown = onSetWeeksOpen;
   const problemRef = useRef<number | null>(null);
   const draggingRef = useRef(false);
 
