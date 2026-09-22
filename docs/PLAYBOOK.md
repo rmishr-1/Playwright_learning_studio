@@ -60,6 +60,8 @@ to match them.
 | No "Next" row on a card | The tab bar and the week menu already show where to go next, so a card never repeats it. |
 | Explain the course's own conventions on first use | A beginner has not seen a practice page before. The first one explains the Beginner, Intermediate, and Advanced levels, the editor, and `//` comments, instead of referring to them as if they were known. |
 | Code examples follow the GeeksforGeeks order | A lead-in ending in a colon, then the code, **Output**, and **Explanation**. See [section 8](#8-code-presentation). |
+| The learner works in their own project | The learner has no copy of the course's training repository. From Week 1 - Day 2 - Fundamentals on, they create a project with `npm init playwright@latest`, and every lesson that needs the test runner uses that project, its `tests` folder, and its integrated terminal in VS Code. Code that runs in the studio uses the editor's helpers (`launch()`, `show()`, `BASE_URL`, `USERS`). |
+| Every fact is checked against a real run | Command output, file contents, and the behavior of the banking website are copied from a real run, not written from memory. For example, a wrong password shows the message *Please Enter Valid Credentials*. |
 
 ### Scope and way of working
 
@@ -483,6 +485,8 @@ steps, in the same order.
    `// Create a locator.`
 3. **Output**: a bold label, then the result in its own block. This follows GeeksforGeeks. For a
    test, the output is the test runner's result or the error message.
+   Tag the block ` ```output `, so that the studio never offers it as code to run. A folder
+   listing or file contents that are not code use ` ```text `.
 4. **Explanation**: a bold label, then full sentences that say *why*, not only *what*.
 
 ### A worked example
@@ -497,7 +501,7 @@ await page.getByPlaceholder('Email').fill('ada@example.com');
 
 **Output**
 
-```
+```output
 1 passed (1.2s)
 ```
 

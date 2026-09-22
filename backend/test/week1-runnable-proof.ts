@@ -112,7 +112,7 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n${snippets.length - bad.length}/${snippets.length} runnable fences run clean.`);
-  console.log(`${skipped.length} fences correctly show "Run this in your own checkout" instead of a button:`);
+  console.log(`${skipped.length} fences correctly show "Run this in your own project" instead of a button:`);
   for (const s of skipped) console.log(`  - ${s.where}`);
 
   if (bad.length) {

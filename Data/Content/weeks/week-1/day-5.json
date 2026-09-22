@@ -15,175 +15,152 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 5 - TypeScript - Arrow functions, `async`, and reading `import`\n\nBy the end of this lesson you'll be comfortable writing an arrow function, know exactly\nwhen to put `async` in front of one, be able to read `({ page }) => { ... }`, and be able to\nread a single `import` line — everything today's Playwright code (and every test you'll ever\nwrite in this course) needs from the language before you meet the Playwright API itself.\n\n> **This lesson is TypeScript only.** No browsers, no Playwright. That starts in\n> [Fundamentals](/learn/w1/d5/p2) — and this is the **first time in the whole course** you'll see\n> arrow functions and `async`, so take it slowly; everything later builds on it.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# Week 1 - Day 5 - TypeScript - Arrow functions, `async`, and reading `import`\n\nEvery Playwright test is written in **TypeScript**, a programming language that adds types to\nJavaScript. This lesson teaches the parts of TypeScript that every test uses. By the end of it, you\nwill be able to:\n\n- store a value in a variable, and print it\n- write a function, and an arrow function\n- explain what `async` and `await` do\n- read the first two lines of every test file",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Focus** | The parts of TypeScript that every Playwright test uses. |\n| **Goals** | Store and print values, write functions and arrow functions, explain `async` and `await`, and read an `import` line. |\n| **Tools** | `const`, arrow functions, `async` and `await`, destructuring, and `import`. |\n| **Environment** | The editor on the right. The Console tab shows what your code prints. |\n| **Key takeaway** | Put `await` before every step that takes time, inside a function marked `async`. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What today needs\n\n| # | Concept | Where it shows up in every Playwright test |\n|---|---|---|\n| 1 | Arrow functions | The function passed to `test(...)` |\n| 2 | `async` arrow functions | Almost every Playwright action needs `await`, so almost every test function is `async` |\n| 3 | Destructuring in a parameter list | `async ({ page }) => {}` — how a test receives its tools |\n| 4 | `import { x } from \"package\"` | The line at the top of every spec file |",
+          "text": "## How to run the examples\n\nSelect **Load into editor** on an example, then select **Run**. The **Console** tab below the editor\nshows everything that the code prints. Each run starts from the beginning, so a value from an earlier\nrun is never kept.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## 1. Arrow functions\n\n**What it is.** A function written inline, without the `function` keyword. `(parameters) =>\nexpression` — if the body is a single expression, it's returned automatically, no `return`\nneeded.\n\n**Why it exists.** It's shorter to write and to read than `function(...) {...}` for the small,\none-off functions you pass *into* something else — which is exactly what a test is: a\nfunction you hand to `test(...)`.\n\n**Syntax**\n\n```ts\nconst name = (param1, param2) => expression;          // implicit return\nconst name = (param1, param2) => { /* ...; return x; */ };  // block body, explicit return\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "// Single expression — no braces, no `return`, the value after => is returned automatically.\nconst square = (n: number) => n * n;\nconsole.log(square(5));\n\n// Block body — braces mean you write `return` yourself, same as a normal function.\nconst greet = (name: string) => {\n  const message = `hello, ${name}`;\n  return message;\n};\nconsole.log(greet(\"Leela\"));",
+          "text": "## Values, variables, and `console.log`\n\nA **value** is a piece of data, such as the number `25` or the text `'Leela'`. A piece of text is\ncalled a **string**, and it is written between quotes. A **variable** is a name that holds a value.\nYou create one with `const`, which means that the name always holds the same value.\n\nIn TypeScript, you can also state the **type** of a variable, meaning the kind of value it holds.\n`: string` means text, and `: number` means a number. `console.log` prints a value in the Console\ntab.\n\nThe example below creates two variables and prints them:\n\n```ts\nconst name: string = 'Leela';\nconst age: number = 30;\n\nconsole.log(name);\nconsole.log(age + 1);\nconsole.log(`Hello, ${name}`);\n```\n\n**Output**\n\n```output\nLeela\n31\nHello, Leela\n```\n\n**Explanation:** `age + 1` is calculated before it is printed, so the Console shows `31`. The last\nstring is written between backticks (`` ` ``) instead of quotes. A string in backticks can include\nthe value of a variable with `${...}`, so `${name}` becomes `Leela`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "Line by line:\n\n| Line | What it does |\n|---|---|\n| `(n: number) => n * n` | Takes `n`, returns `n * n` — no braces, no `return` keyword, it's implied |\n| `(name: string) => { ... }` | Braces switch it to a normal function body — now `return` is required |\n\n**Expected result:** `25`, then `hello, Leela`.\n\n**Challenge:** write a one-line arrow function `double` that returns `n * 2`, with no braces.",
+          "text": "## Functions and arrow functions\n\nA **function** is a named set of steps that you can run as often as you need. A function can take\n**parameters**, which are the values you give it, and it can **return** a result. Running a function\nis also called **calling** it.\n\nAn **arrow function** is a short way to write a function, with `=>` between the parameters and the\nsteps. Every test that you write is an arrow function.\n\nThe example below creates two arrow functions and calls them:\n\n```ts\n// One step, without braces: the result is returned automatically.\nconst square = (n: number) => n * n;\n\n// Several steps, inside braces: you write return yourself.\nconst greet = (name: string) => {\n  const message = `Hello, ${name}`;\n  return message;\n};\n\nconsole.log(square(5));\nconsole.log(greet('Leela'));\n```\n\n**Output**\n\n```output\n25\nHello, Leela\n```\n\n**Explanation:** `square` takes one parameter, `n`, and returns `n * n`. Without braces, the result of\nthe single step after `=>` is returned automatically. `greet` has braces, because it has more than one\nstep, so it needs the word `return` to give back its result. Without `return`, it would give back\nnothing.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "text": "// Write cube here, without braces.\n\n// Write farewell here, inside braces, with return.\n\n// Print cube(3) and farewell('Katy').",
           "starter": null,
           "variation": {
-            "prompt": "Same two shapes, different logic: write a single-expression arrow that cubes a number, and a block-body arrow that builds a farewell message from a name."
+            "prompt": "Write two arrow functions of your own. The first, cube, returns a number multiplied by itself three times, without braces. The second, farewell, takes a name and returns a goodbye message, inside braces. Print the result of each."
           },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## 2. `async` arrow functions\n\n**What it is.** The same arrow function, with `async` in front. An `async` function always\nreturns a Promise, and lets you use `await` inside its body to pause until another Promise\nsettles.\n\n**Why it exists.** JavaScript doesn't block while something slow happens (a network request, a\nbrowser action, a timer) — it moves on and comes back when the result is ready. `await` is how\nyou say \"pause *this* function specifically until that result arrives\", without freezing the\nwhole program. Every Playwright action (`click`, `fill`, `goto`, `waitFor`...) returns a\nPromise, which is exactly why Playwright code is full of `await`, and why the function\ncontaining it must be `async`.\n\n**Syntax**\n\n```ts\nconst name = async (param) => {\n  const result = await somethingSlow(param);\n  return result;\n};\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "// A stand-in for something slow — a real Playwright action works the same way underneath.\nconst wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));\n\nconst slowGreet = async (name: string) => {\n  await wait(200);                      // pauses here, doesn't block anything else\n  return `hello (after a pause), ${name}`;\n};\n\nconsole.log(await slowGreet(\"Katy\"));   // top-level await, only works in a notebook cell",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "**Expected result:** a ~200ms pause, then `hello (after a pause), Katy`.\n\n**The rule to remember:** if the body of your arrow function uses `await`, the function\n*must* be declared `async` — leaving it off is a TypeScript compile error, not a silent bug.\nFor Playwright code, the body almost always awaits something, so the function is almost\nalways `async`.\n\n**Challenge:** remove `async`/`await` from `slowGreet` and read the compiler's complaint\nbefore putting them back.",
+          "text": "## `async` and `await`\n\nSome steps take time to finish, such as opening a web page or selecting a button. A function that\nstarts such a step returns a **Promise**, which is a value that stands for a result that is not ready\nyet. Every Playwright action, such as `goto`, `fill`, and `click`, returns a Promise.\n\n`await` tells the code to wait until a Promise is ready before it goes on to the next line. You can use\n`await` only inside a function marked `async`. In the editor, you can also use `await` outside a\nfunction, as the examples in [Day 4 - Fundamentals](/learn/w1/d4/p2) did.\n\nThe example below waits one second before it returns a greeting:\n\n```ts\n// wait() returns a Promise that is ready after the given number of milliseconds.\nconst wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));\n\nconst slowGreet = async (name: string) => {\n  await wait(1000);\n  return `Hello, ${name}`;\n};\n\nconsole.log('Before');\nconsole.log(await slowGreet('Katy'));\nconsole.log(slowGreet('Katy'));\nconsole.log('After');\n```\n\n**Output**\n\n```output\nBefore\nHello, Katy\nPromise { <pending> }\nAfter\n```\n\n**Explanation:** You do not need to know how `wait` is built. It stands for any step that takes time,\nas Playwright's actions do. The second line waits for `slowGreet`, so it prints the greeting after one\nsecond. The third line calls `slowGreet` without `await`, so it prints the Promise itself, which is\nstill `<pending>`, meaning not ready. A Playwright action without `await` behaves in the same way: the\nnext line starts before the action has finished.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "text": "const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));\n\n// Write slowGoodbye here, marked async, with await inside it.\n\n// Print the result of slowGoodbye('Leela'), with await.",
           "starter": null,
           "variation": {
-            "prompt": "Same pattern, a different message: write your own wait-based async function that pauses, then returns a goodbye message instead of a greeting."
+            "prompt": "Write an async arrow function named slowGoodbye. It waits half a second with wait(500), then returns a goodbye message for the name it is given. Print its result with await."
           },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## 3. Destructuring in the parameter list\n\n**What it is.** Instead of naming the whole object a function receives, you can pull specific\nfields straight out of it in the parameter list itself: `({ field1, field2 }) => {}`.\n\n**Why it exists.** Playwright hands your test function an object full of tools (\"fixtures\") —\n`page`, `browser`, `browserName`, and more. Destructuring lets you ask for only the one or two\nyou actually need, by name, instead of writing `tools.page` everywhere.\n\n**Syntax**\n\n```ts\nconst name = ({ field }: { field: Type }) => { /* use field directly */ };\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "const describeUser = ({ name, email }: { name: string; email: string }) =>\n  `${name} <${email}>`;\n\nconsole.log(describeUser({ name: \"Leela\", email: \"leela@gmail.com\" }));\n\n// This is the exact shape Playwright uses to hand a test its tools.\nconst showFixtures = ({ page, browserName }: { page: string; browserName: string }) =>\n  `page=${page}, browser=${browserName}`;\n\nconsole.log(showFixtures({ page: \"a Page object\", browserName: \"chromium\" }));",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "**Expected result:** `Leela <leela@gmail.com>`, then `page=a Page object, browser=chromium`.\n\n### Where you'll see this in Playwright code\n\nEvery single test you write in this course starts like this:\n\n```ts\ntest(\"some name\", async ({ page }) => {\n  // page is destructured straight out of the object Playwright hands in\n});\n```\n\n`async` because the body will `await` Playwright actions. `({ page })` because destructuring\npulls just the `page` fixture out of everything Playwright could offer. You'll type this exact\nshape in [Fundamentals](/learn/w1/d5/p2).",
+          "text": "## Objects and destructuring\n\nAn **object** groups several named values together, between braces. Each named value is a\n**property**. You read a property with a dot, so `user.name` is the `name` property of `user`.\n\n**Destructuring** takes properties out of an object by name. You can destructure in the parameters of\na function, by writing the names you need between braces.\n\nThe example below destructures a user in the parameters of a function:\n\n```ts\nconst user = { name: 'Leela', email: 'leela@gmail.com' };\nconsole.log(user.name);\n\n// Take name and email out of the object that the function receives.\nconst describeUser = ({ name, email }: { name: string; email: string }) =>\n  `${name} <${email}>`;\n\nconsole.log(describeUser(user));\n```\n\n**Output**\n\n```output\nLeela\nLeela <leela@gmail.com>\n```\n\n**Explanation:** `user` is an object with two properties. `describeUser` receives the whole object,\nand `{ name, email }` takes out the two properties it needs, so the function can use `name` instead of\n`user.name`. The part after the colon, `{ name: string; email: string }`, is the type of the object:\nit says which properties the object has, and what kind of value each one holds.\n\nEvery test uses this shape. Playwright gives each test an object of tools, called **fixtures**, and\nthe test takes out the one it needs, which is usually `page`:\n\n```ts\ntest('the login page opens', async ({ page }) => {\n  // Use page here.\n});\n```\n\nThe test is an arrow function. It is marked `async` because it uses `await` for Playwright's actions,\nand `({ page })` takes the `page` fixture out of the object that Playwright gives it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "text": "// Write describePlace here, with { city, country } in its parameters.\n\n// Print describePlace({ city: 'Hyderabad', country: 'India' }).",
           "starter": null,
           "variation": {
-            "prompt": "Same destructured-parameter shape, different fields: write a one-line arrow that takes `{ city, country }` and returns a formatted \"city, country\" string."
+            "prompt": "Write a one-line arrow function named describePlace. It destructures city and country from the object it receives, and returns them as one string, such as 'Hyderabad, India'. Call it and print the result."
           },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## 4. Reading `import { x } from \"package\"`\n\n**What it is.** A line that pulls named values out of another file or package. `{ test }`\nmeans \"give me specifically the thing named `test` that this package exports\" — not the whole\npackage, just that one piece (a **named import**).\n\nYou don't need a full lecture on JavaScript modules to read one import line — just enough to\nrecognize the shape:\n\n```ts\nimport { test } from \"@playwright/test\";\n```\n\nThis says: \"from the `@playwright/test` package, give me the thing it exports named `test`.\"\nThat's the `test(...)` function every spec file calls.\n\n> One thing to flag: this exact line only works inside a real `.spec.ts` file run by\n> `npx playwright test` — not in an explore-mode lesson cell like this one. You've already\n> seen why in the \"Mode\" banners on Days 2–4: `@playwright/test` only exists inside the real\n> test-runner process. So this line is shown here to read, not to run.",
+          "text": "## Reading `import`\n\nA **package** is code that someone else wrote and published, and that npm installs in your project.\nYou met `package.json`, which lists your project's packages, in\n[Day 3 - Fundamentals](/learn/w1/d3/p2). An `import` line takes named values out of a package, so\nthat your file can use them.\n\nEvery test file in your project starts with this line:\n\n```ts\nimport { test, expect } from '@playwright/test';\n```\n\n**Explanation:** The line takes two values, `test` and `expect`, out of the package\n`@playwright/test`. `test` creates a test, and `expect` checks a result.\n[Fundamentals](/learn/w1/d5/p2) uses both. The editor here provides `launch()` and `show()` for you,\nso you write this line only in the test files in your own project.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": null,
-          "variation": {
-            "prompt": "Same shape again, applied to Playwright: write a one-line arrow that takes `{ page, isMobile }` and returns a string describing them, the way `showFixtures` did for `page`/`browserName`."
-          },
-          "checkpoint": null
-        },
-        {
           "type": "markdown",
-          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `(x) => expr` | Inline function; no braces means the value is returned automatically |\n| `async (x) => { await ... }` | Required whenever the body awaits something — which, for Playwright, is always |\n| `({ page }) => {}` | Pulls just the `page` fixture out of everything Playwright offers — the shape of every test |\n| `import { test } from \"@playwright/test\"` | Named import — one specific export, from one specific package |\n\n**Next:** [Fundamentals - Your first real test](/learn/w1/d5/p2)",
+          "text": "## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Used braces without `return` | The function gives back `undefined`, which means no value | Add `return`, or remove the braces for a single step. |\n| Left out `await` before a step that takes time | A `Promise { <pending> }`, or the next step runs too early | Put `await` before the step. |\n| Used `await` in a function without `async` | An error saying that `await` is only allowed in async functions | Put `async` before the parameters of the function. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "`const square = (n: number) => n * n;` has no `return`. Why does it still return a value?",
+          "text": "`const square = (n: number) => n * n;` contains no `return`. Why does it still return a value?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Arrow functions return their last statement automatically",
-              "A body with no braces is a single expression, and its value is returned implicitly",
-              "`return` is optional everywhere in TypeScript"
+              "An arrow function always returns the value of the last line inside it.",
+              "Without braces, the single step after `=>` is returned.",
+              "TypeScript adds a `return` to every function that does not have one."
             ],
             "answer": 1,
-            "explanation": "No braces means the arrow is followed by one expression, and that expression's value is the return value. Add braces and you are back to a normal function body, where `return` is required — a difference that catches people the first time a block-bodied arrow silently returns `undefined`."
+            "explanation": "An arrow function without braces has exactly one step, and its value is returned automatically. With braces, you must write `return` yourself, or the function gives back `undefined`."
           }
         },
         {
           "type": "checkpoint",
-          "text": "You write an arrow function whose body calls `await page.click(...)` but you leave off `async`. What happens?",
+          "text": "You write `console.log(slowGreet('Katy'))` without `await`. What does the Console show?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "It runs, but the click may not finish before the next line",
-              "A TypeScript compile error — `await` is only valid inside an `async` function",
-              "It runs and silently ignores the `await`"
+              "The greeting, printed after the function has finished waiting for one second",
+              "An error, because `await` is always required before calling an async function",
+              "`Promise { <pending> }`, because the result is not ready yet"
             ],
-            "answer": 1,
-            "explanation": "This one fails loudly at compile time rather than misbehaving at run time, which is the good case. Since practically every Playwright action returns a Promise, practically every test body awaits something — which is why practically every test function is `async`."
+            "answer": 2,
+            "explanation": "An async function returns a Promise at once. Without `await`, the code prints the Promise itself, before its result is ready. With `await`, the code waits for the result, and prints the greeting."
           }
         },
         {
           "type": "checkpoint",
-          "text": "In `test(\"name\", async ({ page }) => { ... })`, what is `({ page })` doing?",
+          "text": "In `test('name', async ({ page }) => { ... })`, what does `({ page })` do?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Declaring a parameter that happens to be called page",
-              "Destructuring just the `page` fixture out of the object of tools Playwright passes in",
-              "Creating a new page object for the test to use"
+              "It takes the `page` fixture out of the object Playwright gives it.",
+              "It opens a new browser tab for the test, and gives that tab the name `page`.",
+              "It declares an empty variable named `page`, which the test fills in later on."
             ],
-            "answer": 1,
-            "explanation": "Playwright hands the test one object containing every fixture it could offer — `page`, `browser`, `browserName` and more. Destructuring in the parameter list pulls out only the ones you name, so you write `page` rather than `tools.page` throughout. Nothing is being created here; it is being unpacked."
+            "answer": 0,
+            "explanation": "Playwright gives every test one object that holds its fixtures. Destructuring in the parameters takes out the fixtures that you name, so you write `page` instead of a longer name."
           }
+        },
+        {
+          "type": "recap",
+          "text": "- `const` creates a variable, and `console.log` prints a value.\n- An arrow function without braces returns its value. With braces, it needs `return`.\n- A **Promise** stands for a result that is not ready yet. `await` waits for it, inside an `async` function.\n- **Destructuring** takes properties out of an object by name, as `({ page })` does in every test.\n- `import { test, expect } from '@playwright/test'` starts every test file in your project.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Fundamentals](/learn/w1/d5/p2) uses these parts of the language to write your first real test, with\na check that decides whether the test passes.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -198,140 +175,124 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 5 - Fundamentals - Your first real test, and why assertions matter\n\nBy the end of this lesson you will have written and run a real Playwright test, and — this\nis the important part — **watched a test pass when it should have failed**, because it never\nchecked anything. Then you'll fix it and watch it fail correctly.\n\nPrerequisites are in [TypeScript](/learn/w1/d5/p1). If arrow functions or `async` felt shaky, go\nback — everything below assumes you're comfortable reading `async ({ page }) => {}`.",
+          "text": "# Week 1 - Day 5 - Fundamentals - Your first real test, and why assertions matter\n\nIn [Day 1 - Fundamentals](/learn/w1/d1/p2), you read that automation reports only whether a test\npassed or failed, against a check that a person wrote. In this lesson, you see what happens when a\ntest has no check: it passes even when the feature does not work. Then you add a check, and watch the\ntest fail as it should.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Goals** | Watch a test pass with the wrong password because it checks nothing, then fix it and watch it fail correctly. |\n| **Prerequisites** | [arrow functions, `async`, destructuring](/learn/w1/d5/p1) |\n| **Environment** | in your own project. These need the Playwright test runner. |\n| **Key takeaway** | a test that only acts and never asserts is a recording, not a test |",
+          "text": "| | |\n|---|---|\n| **Focus** | Your first real test, and why a test needs an assertion. |\n| **Goals** | Watch a test pass with a wrong password because it checks nothing, then add an assertion and watch the test fail. |\n| **Prerequisites** | [Day 5 - TypeScript](/learn/w1/d5/p1), for arrow functions, `async`, and `import`. |\n| **Tools** | `test`, `expect`, `toHaveURL`, and `toBeVisible`. |\n| **Environment** | The editor on the right for the first example, then your own project for the real tests. |\n| **Key takeaway** | A test without an assertion passes whether or not the feature works. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "> **Follow this one in your own project.** These examples are run by the Playwright test runner, which the editor here does not provide. Copy them into your own checkout to run them.",
+          "text": "## What a test looks like\n\nEvery test file in your project follows the same shape:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('a name that describes what the test proves', async ({ page }) => {\n  // The steps of the test, using page.\n});\n```\n\n| Piece | What it does |\n|---|---|\n| `import { test, expect } from '@playwright/test'` | Takes `test` and `expect` out of the Playwright package |\n| `test('a name ...', ...)` | Creates one test. The name appears in the terminal and in the report. |\n| `async ({ page }) => { ... }` | The steps of the test, as an async arrow function that takes out the `page` fixture |\n| `page` | A browser tab, which opens fresh for every test |\n\n[Day 5 - TypeScript](/learn/w1/d5/p1) explains each of these parts of the language.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Anatomy of a Playwright test\n\n```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"a name describing what this proves\", async ({ page }) => {\n  // steps, using `page`\n});\n```\n\n| Piece | What it is |\n|---|---|\n| `import { test, expect } from \"@playwright/test\"` | Named imports — the two functions every spec needs ([TypeScript](/learn/w1/d5/p1), section 4) |\n| `test(\"name\", fn)` | Registers one test; the name is what shows up in the report |\n| `async ({ page }) => {}` | The test body — `page` is destructured out of Playwright's fixtures ([TypeScript](/learn/w1/d5/p1), section 3) |\n| `page` | A real, isolated browser tab — every action on it returns a Promise, so you `await` it |\n\nThat's the whole shape. Everything else in this course is what you put *inside* the function.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Example — log in, and watch it \"pass\" even though it shouldn't\n\n**Objective:** write the login flow from Day 4 as a real test — but deliberately leave out any\nassertion — and use a **wrong password**. Watch what the report says.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week1/generated/day5-assertions-gap.spec.ts\";\n\nawait writeProjectFile(specPath, `\n// Week 1, Day 5 — the assertions gap. Both tests log in with the SAME wrong\n// password. Only one of them actually checks anything.\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"logs in with a wrong password — and nothing checks the outcome\", async ({ page }) => {\n  await page.goto(\"/\");\n  await page.getByPlaceholder(\"Enter Email\").fill(\"leela@gmail.com\");\n  await page.getByPlaceholder(\"Enter Password\").fill(\"ThisIsWrong123!\");\n  await page.getByRole(\"button\", { name: \"Login\" }).click();\n  // No expect() at all. Whatever happened, this test reports green.\n});\n\ntest(\"logs in with a wrong password — and this time we check\", async ({ page }) => {\n  await page.goto(\"/\");\n  await page.getByPlaceholder(\"Enter Email\").fill(\"leela@gmail.com\");\n  await page.getByPlaceholder(\"Enter Password\").fill(\"ThisIsWrong123!\");\n  await page.getByRole(\"button\", { name: \"Login\" }).click();\n  await expect(page).toHaveURL(/dashboard/, { timeout: 5000 });\n});\n`.trim());\n\nawait runSpec(specPath);",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "> ▶ **Run it yourself too:** `npx playwright test week1/generated/day5-assertions-gap.spec.ts`\n\n**Expected result:** the first test reports as **passed**, and the second **fails** with a\nreal Playwright error (`expect(page).toHaveURL(expected) failed`). Overall: `1 failed`,\n`1 passed`.\n\nRead that first result again. Both tests typed the *exact same wrong password*. Login\ngenuinely did not succeed in either case — the banking app just silently stays on the login\npage with no error message (verified: correct email + wrong password → no redirect, no\nmessage at all). The first test still reports green, because **automation never finds a\ndefect — it only reports pass or fail against a check a human wrote** ([Day 1 - Fundamentals](/learn/w1/d1/p2)). No check was\nwritten, so there was nothing to fail.\n\nThis is the single most important lesson of the week: a Playwright test that only performs\nactions and never asserts is not testing anything. It's a recording.",
+          "text": "## Example: Sign in with a wrong password\n\nAn **assertion** is a check that compares what happened with what should have happened. If\nthe two differ, the assertion fails, and so does the test.\n\nThe example below signs in with a wrong password, and contains no assertion. Select\n**Load into editor**, then select **Run**:\n\n```ts\nconst { browser, page } = await launch();\nawait page.goto(BASE_URL);\n\n// The email is correct, but the password is wrong.\nawait page.getByPlaceholder('Enter Email').fill('leela@gmail.com');\nawait page.getByPlaceholder('Enter Password').fill('WrongPassword1');\nawait page.getByRole('button', { name: 'Login' }).click();\n\nawait show(page);\nawait browser.close();\n```\n\n**Output**\n\nThe run finishes without an error. The screenshot shows the login page again, with the message\n**Please Enter Valid Credentials** above the form.\n\n**Explanation:** The sign-in failed, and the website said so. The code still finished without an\nerror, because each step did what it was asked to do: it filled in two fields and selected a button.\nNothing in the code checked what happened next.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "text": "const { browser, page } = await launch();\nawait page.goto(BASE_URL);\n\nawait page.getByPlaceholder('Enter Email').fill('leela@gmail.com');\nawait page.getByPlaceholder('Enter Password').fill('WrongPassword1');\nawait page.getByRole('button', { name: 'Login' }).click();\n\n// Wait for the dashboard here, for up to five seconds.\n\nawait show(page);\nawait browser.close();",
           "starter": null,
           "variation": {
-            "prompt": "Same gap, Katy's credentials: write the two-test spec again, but log in as Katy with a wrong password instead of Leela."
+            "prompt": "Add a step that fails when the sign-in fails. After the click, add await page.waitForURL('**/dashboard', { timeout: 5000 }). This waits up to five seconds for the dashboard to open, and stops the code with an error if it does not. Run the code, and read the error in the Console tab. Then change the password to Leela@123, and run it again."
           },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Fixing it\n\nThe second test above already has the fix: a real assertion.\n\n```ts\nawait expect(page).toHaveURL(/dashboard/, { timeout: 5000 });\n```\n\n`expect(page).toHaveURL(...)` is Playwright's **auto-retrying** assertion — it polls until the\nURL matches or the timeout elapses, then fails loudly with a real error message (not a silent\n\"nothing happened\") if it never does. That's the whole difference between the two tests\nabove: one performs actions, the other performs actions *and checks a consequence*.\n\nAn equally valid fix, using this app's real signed-in-user locator:\n\n```ts\nawait expect(page.getByText(\"Leela\")).toBeVisible();\n```\n\nEither one turns \"did something happen\" into \"did the *right* thing happen\".",
+          "text": "## Write the same test in your project\n\nNow write the sign-in as two real tests, in your own project. The first test has no assertion, and\nthe second has one. In the `tests` folder, create a file named `login.spec.ts`, and paste this code\ninto it:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('a wrong password, with no check', async ({ page }) => {\n  await page.goto('https://test-automation-banking.vercel.app/');\n  await page.getByPlaceholder('Enter Email').fill('leela@gmail.com');\n  await page.getByPlaceholder('Enter Password').fill('WrongPassword1');\n  await page.getByRole('button', { name: 'Login' }).click();\n});\n\ntest('a wrong password, with a check', async ({ page }) => {\n  await page.goto('https://test-automation-banking.vercel.app/');\n  await page.getByPlaceholder('Enter Email').fill('leela@gmail.com');\n  await page.getByPlaceholder('Enter Password').fill('WrongPassword1');\n  await page.getByRole('button', { name: 'Login' }).click();\n  await expect(page).toHaveURL(/dashboard/);\n});\n```\n\nIn the integrated terminal, run the new file in Chromium only:\n\n```bash\nnpx playwright test tests/login.spec.ts --project=chromium\n```\n\n**Output**\n\n```output\nRunning 2 tests using 2 workers\n\n  1) [chromium] › tests/login.spec.ts:10:5 › a wrong password, with a check\n\n    Error: expect(page).toHaveURL(expected) failed\n\n    Expected pattern: /dashboard/\n    Received string:  \"https://test-automation-banking.vercel.app/\"\n    Timeout: 5000ms\n\n  1 failed\n    [chromium] › tests/login.spec.ts:10:5 › a wrong password, with a check\n  1 passed (8.1s)\n```\n\n**Explanation:** Both tests typed the same wrong password, and the sign-in failed in both. The first\ntest passed anyway, because it checked nothing. The second test failed, because its assertion expected\nan address containing `dashboard`, and received the address of the login page. The output shows both\nthe expected value and the received value, which tells you what went wrong. In your terminal, the\nerror also shows the line of the test that failed, with a `>` next to it. Because a test failed,\nPlaywright also opens the report in your browser. Press **Ctrl+C** in the terminal to close it. Your\ntime and your number of workers may be different.",
           "starter": null,
           "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": null,
-          "variation": {
-            "prompt": "Same gap, a different missing assertion: this time, the second test should check the page URL stays on the login page instead of checking for the dashboard redirect."
-          },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- Every test needs at least one `expect()` that would actually fail if the feature broke.\n- Prefer asserting the **consequence** (reached the dashboard, saw the user's name) over\n  asserting that an action merely \"didn't throw\" — a `.click()` succeeding proves the button\n  was clickable, not that login worked.\n- Read a passing test with suspicion the first time you write it: what would make this go\n  red? If the answer is \"nothing\", it isn't testing anything yet.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| A test with only actions, no `expect()` | Always green, regardless of whether the feature works | Add an assertion on the actual consequence |\n| Asserting `.toBeVisible()` on something that's always in the DOM | Passes whether or not the real condition happened | Assert on something that genuinely changes (URL, a specific text) |\n| Assuming a wrong-password login throws an error | It doesn't — this app just silently stays put | Assert the *positive* outcome (`toHaveURL(/dashboard/)`), not the absence of a crash |",
+          "text": "## How the assertion works\n\nThe line that makes the difference is:\n\n```ts\nawait expect(page).toHaveURL(/dashboard/);\n```\n\n`expect(page)` says what to check, and `toHaveURL` says what it should be. `/dashboard/` is a\n**regular expression**, a pattern for text, which here means \"an address that contains `dashboard`\".\n\nPlaywright's assertions **retry automatically**. `toHaveURL` checks the address again and again, for\nup to five seconds, until it matches. If it still does not match after five seconds, the assertion\nfails. This means that the assertion also works when the dashboard takes a moment to open.\n\nA good assertion checks the **result** of the steps, not only that the steps ran. For a correct\npassword, both of these assertions check a result:\n\n```ts\nawait expect(page).toHaveURL(/dashboard/);\nawait expect(page.getByText('Leela')).toBeVisible();\n```\n\nThe first checks that the dashboard opened, and the second checks that it shows the user's name. For\na wrong password, the result to check is the message:\n\n```ts\nawait expect(page.getByText('Please Enter Valid Credentials')).toBeVisible();\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Best practices\n\n- Give every test at least one assertion that fails when the feature does not work.\n- Check the result of the steps, such as the page that opens or the text that appears.\n- Watch every new test fail once. Change one value, such as the password, and confirm that the test\n  fails. A test that you have never seen fail may not be checking anything.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Wrote a test with no assertion | The test always passes, whether or not the feature works | Add an assertion that checks the result. |\n| Checked something that is always on the page | The test passes, even when the steps did not work | Check something that appears only after the steps work, such as the dashboard address. |\n| Left out `await` before `expect` | The test can finish before the check is done | Put `await` before every `expect` that checks the page. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "Both tests type the same wrong password. Why does the first one report green?",
+          "text": "Both tests type the same wrong password. Why does the first one pass?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "The app accepted the wrong password, so the login really did succeed",
-              "It contains no `expect()`, so there was nothing that could fail",
-              "Playwright treats a failed login as a warning rather than an error"
+              "The website accepted the wrong password, so the sign-in worked.",
+              "The test has no assertion, so nothing in it could fail.",
+              "Playwright reports a failed sign-in as a warning, not a failure."
             ],
             "answer": 1,
-            "explanation": "Login genuinely failed in both tests — verified: this app just stays on the login page, with no error message at all. The first test performed four actions, none of which threw, and reported success. \"Automation never finds a defect\" from [Day 1](/learn/w1/d1/p2) stops being an abstraction right here."
+            "explanation": "The sign-in failed in both tests, and the website showed an error message. The first test filled in two fields and selected a button, and each of those steps worked. Nothing checked the result, so the test passed."
           }
         },
         {
           "type": "checkpoint",
-          "text": "Which assertion actually proves the login worked?",
+          "text": "Which assertion proves that a correct password signed the user in?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "`await expect(page.getByRole(\"button\", { name: \"Login\" })).toBeVisible()` before clicking",
-              "`await expect(page).toHaveURL(/dashboard/)` after clicking",
-              "Checking that `.click()` completed without throwing"
+              "`await expect(page.getByRole('button', { name: 'Login' })).toBeVisible()`",
+              "`await expect(page).toHaveURL(/dashboard/)`, after the click",
+              "A check that `click()` finished without an error"
             ],
             "answer": 1,
-            "explanation": "Assert the **consequence**. A click completing proves the button was clickable, not that anything happened afterwards; asserting the login button is visible proves you are still looking at the login page. Only a successful login changes the URL or makes the user's name appear."
+            "explanation": "Only a successful sign-in opens the dashboard. The Login button is visible before any sign-in, so checking it proves nothing. A click that finishes proves only that the button could be selected."
           }
         },
         {
           "type": "checkpoint",
-          "text": "What question should you ask of a test you have just written and watched pass?",
+          "text": "You have written a new test, and it passes. What should you do next?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Does it run fast enough to keep in the suite?",
-              "What would make this go red? If the answer is \"nothing\", it is not testing anything yet.",
-              "Does it cover every element on the page?"
+              "Keep it as it is, because a passing test needs no changes.",
+              "Run it several more times, to be sure that it passes every time.",
+              "Change one value, such as the password, and confirm that it fails."
             ],
-            "answer": 1,
-            "explanation": "A green test is only meaningful if some realistic breakage would turn it red. Reading your own passing test with suspicion is the habit this day exists to build. Apply it the moment you write the test, not after it has been green through six broken releases."
+            "answer": 2,
+            "explanation": "A test is useful only if it fails when the feature does not work. Changing one value and watching the test fail proves that its assertions check something."
           }
         },
         {
           "type": "recap",
-          "text": "- **A test with no `expect()` cannot fail for the right reason.** It is a recording of actions.\n- Assert the consequence, such as the URL or the user's name. Do not settle for an action that merely did not throw.\n- `expect(page).toHaveURL(...)` auto-retries until it matches or times out, then fails with a real message.\n- This app gives no error on a wrong password: it just stays put. Silence is not success.\n- Ask of every passing test: what would make this go red?",
+          "text": "- An **assertion** compares what happened with what should have happened, and fails the test if they differ.\n- A test without an assertion passes whether or not the feature works.\n- Check the result of the steps, such as the dashboard address or the user's name.\n- Playwright's assertions retry for up to five seconds before they fail.\n- Watch every new test fail once, to prove that it checks something.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Implementation](/learn/w1/d5/p3) takes this exact login code and gives it a small amount of structure —\na first look at the shape you'll use for the rest of the course.",
+          "text": "## What's next\n\n[Implementation](/learn/w1/d5/p3) takes these sign-in steps, and places them in one piece of code\nthat every test can use.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -349,102 +310,109 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 5 - Implementation - The same login, with a little structure\n\nBy the end of this lesson you will have seen the [Fundamentals](/learn/w1/d5/p2) lesson's exact login steps reorganized into a\nsmall class — a first, gentle look at the shape you'll build on for the rest of the course.\n\n> **The same calls, a new shape.** `getByPlaceholder`, `getByRole`, `fill` and `click` all\n> come from [Fundamentals](/learn/w1/d5/p2); the structure around them is what is new. The\n> class is written **inline in the spec file below**, as a shape to recognise rather than a\n> file the repo ships.\n\n> This previews something week5 names and covers in full depth as the **Page Object Model** —\n> today, just notice the shape; you don't need the name yet.",
+          "text": "# Week 1 - Day 5 - Implementation - The same login, with a little structure\n\nBoth tests in [Fundamentals](/learn/w1/d5/p2) repeat the same sign-in steps. In this lesson, you place\nthose steps in one piece of code, called a **page object**, which every test can use. You do every\nstep in VS Code and in its integrated terminal, in your own project.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | three repeated locators become a class built once, and one named `signIn` step |\n| **Tools** | the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **Scope** | This structure is the Page Object Model. Week 5 names it and covers it in full. |\n| **Key takeaway** | a page object never asserts |",
+          "text": "| | |\n|---|---|\n| **Focus** | Writing the sign-in steps once, in a page object that every test can use. |\n| **Goals** | Explain what a class, a constructor, and a method are, and use one page object in two tests that expect opposite results. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d5/p2), where you wrote the sign-in tests. |\n| **Tools** | A class with `constructor`, `readonly`, and `this`, and `new` to make an object from it. |\n| **Environment** | VS Code and its integrated terminal, in your project folder, then the editor on the right. |\n| **Scope** | This lesson introduces page objects. Week 5 covers the Page Object Model in full. |\n| **Key takeaway** | A page object performs the steps, and the test makes the assertions. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The problem with the Fundamentals lesson's version\n\nBoth tests in [Fundamentals](/learn/w1/d5/p2) repeat the same three lines — find the email box, find the password\nbox, find the login button — before doing anything different. In a real suite with dozens of\nlogin-adjacent tests, that's dozens of copies of the same three locators. Redesign the login\nform, and you're editing every single test.",
+          "text": "## Why repeated steps are a problem\n\nImagine fifty tests that each find the email field with `page.getByPlaceholder('Enter Email')`. If\nthe website changes the placeholder text, you have to change the same line in fifty places. If the\nline is written once, in one place, you change it once.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Same code, with structure around it\n\n| In [Fundamentals](/learn/w1/d5/p2) you wrote | Here it becomes | Why |\n|---|---|---|\n| `page.getByPlaceholder(\"Enter Email\")` (typed fresh in every test) | `this.emailBox` (built once, in the constructor) | One place to update if the form changes |\n| `await page.getByPlaceholder(\"Enter Email\").fill(email)` then 2 more lines | `await loginPage.signIn(email, password)` | The *steps* to log in are named once, as one action |\n| A test that both logs in and could check the result inline | The class contains **no `expect()`** — the test still decides what's true | Reusable by tests expecting success *and* tests expecting failure |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week1/generated/day5-login-page-shape.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test, expect, type Locator, type Page } from \"@playwright/test\";\n\n// The same login flow from day5_2, given a name and some structure.\n// No assertions in here — the page object exposes locators and one action;\n// the test below decides what should be true.\nclass LoginPage {\n  readonly page: Page;\n  readonly emailBox: Locator;\n  readonly passwordBox: Locator;\n  readonly loginButton: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.emailBox = page.getByPlaceholder(\"Enter Email\");\n    this.passwordBox = page.getByPlaceholder(\"Enter Password\");\n    this.loginButton = page.getByRole(\"button\", { name: \"Login\" });\n  }\n\n  async signIn(email: string, password: string) {\n    await this.page.goto(\"/\");\n    await this.emailBox.fill(email);\n    await this.passwordBox.fill(password);\n    await this.loginButton.click();\n  }\n}\n\ntest(\"LoginPage.signIn with valid credentials reaches the dashboard\", async ({ page }) => {\n  const loginPage = new LoginPage(page);\n  await loginPage.signIn(\"leela@gmail.com\", \"Leela@123\");\n  await expect(page).toHaveURL(/dashboard/);\n  await expect(page.getByText(\"Leela\")).toBeVisible();\n});\n\ntest(\"LoginPage.signIn with a wrong password stays on the login page\", async ({ page }) => {\n  const loginPage = new LoginPage(page);\n  await loginPage.signIn(\"leela@gmail.com\", \"WrongPassword1!\");\n  await expect(page.getByPlaceholder(\"Enter Email\")).toBeVisible();\n  await expect(page).not.toHaveURL(/dashboard/);\n});\n`.trim());\n\nawait runSpec(specPath);",
+          "text": "## Classes, in brief\n\nA **class** is a template for an object. It lists the properties that each object made from it has,\nand the functions that it can run. A function that belongs to a class is called a **method**. Four\nwords appear in every class that this course uses:\n\n| Word | What it means |\n|---|---|\n| `constructor` | A method that runs once, when an object is made from the class. It sets the properties. |\n| `this` | The object itself, inside its own methods. `this.page` is the object's `page` property. |\n| `new` | Makes an object from a class, as in `new LoginPage(page)`. |\n| `readonly` | Marks a property that is set once in the constructor, and never changed afterwards. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself too:**\n> `npx playwright test week1/generated/day5-login-page-shape.spec.ts`\n\n**Expected result:** `2 passed` — one test proves the class works for a correct login, the\nother proves it works (i.e. correctly stays put) for a wrong password. Same class, both\noutcomes — because it doesn't decide what \"correct\" means; the tests do.",
+          "text": "## Step 1: Create the test file\n\nIn the `tests` folder, create a file named `login-page.spec.ts`, and paste this code into it:\n\n```ts\nimport { test, expect, type Locator, type Page } from '@playwright/test';\n\n// The sign-in steps, written once. The class checks nothing: the tests decide what is correct.\nclass LoginPage {\n  readonly page: Page;\n  readonly emailField: Locator;\n  readonly passwordField: Locator;\n  readonly loginButton: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.emailField = page.getByPlaceholder('Enter Email');\n    this.passwordField = page.getByPlaceholder('Enter Password');\n    this.loginButton = page.getByRole('button', { name: 'Login' });\n  }\n\n  async signIn(email: string, password: string) {\n    await this.page.goto('https://test-automation-banking.vercel.app/');\n    await this.emailField.fill(email);\n    await this.passwordField.fill(password);\n    await this.loginButton.click();\n  }\n}\n\ntest('a correct password opens the dashboard', async ({ page }) => {\n  const loginPage = new LoginPage(page);\n  await loginPage.signIn('leela@gmail.com', 'Leela@123');\n  await expect(page).toHaveURL(/dashboard/);\n  await expect(page.getByText('Leela')).toBeVisible();\n});\n\ntest('a wrong password shows an error message', async ({ page }) => {\n  const loginPage = new LoginPage(page);\n  await loginPage.signIn('leela@gmail.com', 'WrongPassword1');\n  await expect(page.getByText('Please Enter Valid Credentials')).toBeVisible();\n});\n```\n\n**Explanation:** `Page` and `Locator` are the types of a browser tab and of a locator. The word\n`type` in the `import` line means that the file uses them only as types. The constructor finds the\nthree elements once, and stores each locator in a property. `signIn` is a method that performs the\nsign-in steps with the email and password it is given. Each test makes its own `LoginPage` with\n`new`, calls `signIn`, and then makes its own assertions.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 2: Run the tests\n\nIn the integrated terminal, run:\n\n```bash\nnpx playwright test tests/login-page.spec.ts --project=chromium\n```\n\n**Output**\n\n```output\nRunning 2 tests using 2 workers\n  2 passed (7.4s)\n```\n\n**Explanation:** Both tests used the same `signIn` method, and both passed. One test expected the\ndashboard, and the other expected the error message. Your time and your number of workers may be\ndifferent.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Why the class contains no assertions\n\nThe class performs the steps, and the tests decide what the correct result is. That is why one class\nserves both tests here, although they expect opposite results. If `signIn` checked for the dashboard\nitself, the second test could not use it, because a wrong password never opens the dashboard.\n\nA class like this one is called a page object, and a set of page objects for a website follows the\n**Page Object Model**. Week 5 covers it in full.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "text": "class LoginPage {\n  readonly page;\n\n  constructor(page) {\n    this.page = page;\n  }\n\n  async signIn(email, password) {\n    await this.page.goto(BASE_URL);\n    await this.page.getByPlaceholder('Enter Email').fill(email);\n    await this.page.getByPlaceholder('Enter Password').fill(password);\n    await this.page.getByRole('button', { name: 'Login' }).click();\n  }\n}\n\nconst { browser, page } = await launch();\n\n// Make a LoginPage, and sign in as Katy.\n\n// Wait for the dashboard, then show a screenshot.\n\nawait browser.close();",
           "starter": null,
           "variation": {
-            "prompt": "Same class, Katy's login: reuse `LoginPage.signIn`, but prove it for Katy's credentials instead of Leela's."
+            "prompt": "Use the same kind of class in the editor, to sign in as Katy. The template contains the class, without its types. Make a LoginPage with new, sign in with USERS[1].email and USERS[1].password, wait for the dashboard with page.waitForURL('**/dashboard'), and show a screenshot."
           },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Why it's shaped this way\n\n| Choice | Reason |\n|---|---|\n| Locators built once in the constructor, marked `readonly` | One place to change when the app is redesigned; `readonly` stops a method reassigning one by accident |\n| A method named `signIn`, not `fillFormAndClick` | Reads like something a *user* does, not a list of DOM operations |\n| **No `expect()` anywhere inside the class** | The class only knows how to act on the page — it has no opinion on what should be true. That's the test's job. |\n\n## The one rule worth memorizing: no assertions in a page object\n\nIt's tempting to put the check inside `signIn` — you already have `page` right there. Resist\nit. The moment a page object asserts something, it can only be reused by tests that want\n*that exact* assertion — and you end up with `signIn`, `signInAndCheckDashboard`,\n`signInAndCheckWrongPassword`, one method per outcome. The version above that asserts nothing\nis reusable by every test in this lesson, and every test you'll write for the rest of the\ncourse.\n\nThis is also one of the few design questions that comes up in interviews, so being able to\nexplain *why*, not just recite the rule, is worth more than the rule itself.",
+          "text": "## What a reviewer looks for\n\n- Each locator is written once, in the constructor of the page object.\n- Methods are named for what a user does, such as `signIn`.\n- The page object performs steps, and the tests make every assertion.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "Why does `LoginPage` contain no `expect()` at all?",
+          "text": "Why does `LoginPage` contain no assertions?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Because assertions are not allowed outside a `test()` body",
-              "So it can be reused by tests expecting success AND tests expecting failure — the test decides what should be true",
-              "Because the class runs before the test does"
+              "Assertions can be written only inside a test, never inside a class.",
+              "So that tests expecting different results can all use the same class.",
+              "Because the class runs before Playwright has opened the page."
             ],
             "answer": 1,
-            "explanation": "Put the check inside `signIn` and it only suits tests wanting that exact outcome. You then grow `signInAndCheckDashboard`, `signInAndCheckWrongPassword`, one method per outcome. The version that asserts nothing serves both tests in this very lesson — one expecting a dashboard, one expecting to stay put."
+            "explanation": "One test expects the dashboard, and the other expects an error message. If `signIn` checked for the dashboard itself, the second test could not use it. The class performs the steps, and each test decides what the correct result is."
           }
         },
         {
           "type": "checkpoint",
-          "text": "The locators are built once in the constructor and marked `readonly`. What does `readonly` buy?",
+          "text": "The website changes the placeholder of its email field. How many lines do you change?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "It stops a method reassigning a locator by accident",
-              "It makes the locators resolve once and cache the element",
-              "It is required for TypeScript to infer the `Locator` type"
+              "One line, in the constructor of `LoginPage`",
+              "One line in each test that signs in",
+              "Every line that calls `signIn`"
             ],
             "answer": 0,
-            "explanation": "It is a compile-time guarantee about the field, nothing more. A locator is a live reference that re-resolves on every use. `readonly` does not freeze what it points at; it only fixes which locator the field holds."
+            "explanation": "The constructor is the only place that finds the email field. Every test uses `signIn`, and `signIn` uses the locator that the constructor stored, so one change updates every test."
           }
         },
         {
           "type": "recap",
-          "text": "- Three locators repeated across dozens of tests is dozens of edits when the form is redesigned. Build them once.\n- Name a method for what a **user** does (`signIn`), not for the DOM operations inside it.\n- **No assertions in a page object.** It knows how to act; the test decides what should be true.\n- `readonly` guards the field, not the element — a locator still re-resolves every time it is used.\n- You are looking at the Page Object Model. Week 5 gives it its name and its full treatment.",
+          "text": "- A **class** is a template for objects. Its **constructor** sets the properties, and its **methods** perform steps.\n- A **page object** finds the elements of one page once, and names the steps, such as `signIn`.\n- A page object contains no assertions. The tests decide what the correct result is.\n- When the website changes, you update the page object, not every test.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Practice](/learn/w1/d5/p4) — your turn, with no worked examples to lean on. This closes out\nWeek 1; Week 3 picks up from here with timeouts, hooks, and the real config file in depth.",
+          "text": "## What's next\n\n[Practice](/learn/w1/d5/p4) has you write a test of your own, see the missing-assertion problem for\nyourself, and build a small page object.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -462,14 +430,21 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 5 - Practice - Your first test, and the assertions gap\n\nThree problems, capping off the week. No solutions — you'll know you're right because the\nreport will tell you.\n\nWrite specs into `week1/generated/` and run them with `npx playwright test`, same as every\nexample this week.",
+          "text": "# Week 1 - Day 5 - Practice - Your first test, and the assertions gap\n\nThese three problems use the test shape and the assertions from [Fundamentals](/learn/w1/d5/p2), and\nthe page object from [Implementation](/learn/w1/d5/p3). You write and run each test in your own\nproject.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | Three problems that close the week: a test of your own, the assertions gap, and a small page object. The test report tells you whether each answer is correct. |\n| **Scope** | These problems close Week 1, which covered why teams automate, setup, the CLI, Codegen, and the assertion that makes a test a test. |",
+          "text": "| | |\n|---|---|\n| **Focus** | Three problems about your first tests, from Beginner level to Advanced, to complete Week 1. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d5/p2) for assertions, and [Implementation](/learn/w1/d5/p3) for page objects. |\n| **Environment** | Your own project for the tests, and the editor on the right for your answers. |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## How to answer\n\nSelect **Start this in the editor** to open a template for a problem, and write your answer on the\nlines that start with `//`. Select **Reveal solution** to compare it with a model answer.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -497,7 +472,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\nYou've now written a real test, watched it lie to you, fixed it, and given it a first bit of\nstructure. That's the whole arc of this week. Week 3 picks up from here — timeouts, hooks and\nisolation, and the config file in real depth.",
+          "text": "## When you are done\n\nYou have now completed Week 1. You can explain why teams automate tests, set up a project, run tests\nand read their results, find elements with locators, and write a test whose assertion decides whether\nit passes. [Week 2 - Day 1 - Fundamentals](/learn/w2/d1/p2) continues from here.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -507,23 +482,23 @@
         {
           "number": 1,
           "difficulty": "Beginner",
-          "statement": "**What to build.** Write the login test from [Fundamentals](/learn/w1/d5/p2) again, from memory, for a **different**\ndemo user — Katy (`katy@gmail.com` / `Katy@12354`) or Jyosthna (`jyosthna@gmail.com` /\n`Jyos@123`). Use a real `expect()` this time, from the start.\n\n**Where.** `week1/generated/day5-practice-login.spec.ts`.\n\n**How you'll know it worked.** `1 passed`, and the test would genuinely fail if you typed the\nwrong password — try that once on purpose to confirm.\n\n> **Hint** — `_shared/deno-helpers.ts` has all three users in `USERS`, in case you want to\n> check the exact spelling rather than retyping from memory.",
-          "stub": "// Problem 1 — your code here.",
-          "solution": "`week1/generated/day5-practice-login.spec.ts`:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('Katy can sign in', async ({ page }) => {\n  await page.goto('https://test-automation-banking.vercel.app/');\n  await page.getByPlaceholder('Enter Email').fill('katy@gmail.com');\n  await page.getByPlaceholder('Enter Password').fill('Katy@12354');\n  await page.getByRole('button', { name: 'Login' }).click();\n\n  // The assertion is the test. Without it this passes on a wrong password.\n  await expect(page).toHaveURL(/dashboard/);\n  await expect(page.getByText('Katy')).toBeVisible();\n});\n```\n\n```bash\nnpx playwright test week1/generated/day5-practice-login.spec.ts\n```\n\n**Now do the part that matters.** Change the password to something wrong and run it again. You want `1 failed` — and you want to read *how* it failed: `expect(page).toHaveURL` timed out waiting for the URL to match, because the app never left the login screen.\n\nA test you have never seen fail is a test you have no reason to trust. Proving it can fail costs one run.\n\n> `getByText('Katy')` without `exact: true` matches the greeting whether it renders as `Katy` or `Welcome, Katy` — deliberate, and worth keeping."
+          "statement": "**What to build.** A test that signs in as Katy, with assertions from the start. Katy's email is\n`katy@gmail.com`, and her password is `Katy@12354`. In the `tests` folder, create\n`practice-login.spec.ts`, write the test, and run it. Then change the password to a wrong one, run\nthe test again, and read how it fails.\n\n**Where.** In VS Code and its integrated terminal. Copy your test and the two results into the\neditor, using the template.\n\n**How you will know it worked.** The first run reports `1 passed`, and the run with the wrong\npassword reports `1 failed`.\n\n**Hint.** Start from the second test in [Fundamentals](/learn/w1/d5/p2), and check both the address\nand the user's name.",
+          "stub": "// Problem 1: Katy signs in\n//\n// My test:\n//\n// Result with the correct password:\n//\n// Result with a wrong password, and the error it showed:",
+          "solution": "**A model answer.** `tests/practice-login.spec.ts`:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('Katy can sign in', async ({ page }) => {\n  await page.goto('https://test-automation-banking.vercel.app/');\n  await page.getByPlaceholder('Enter Email').fill('katy@gmail.com');\n  await page.getByPlaceholder('Enter Password').fill('Katy@12354');\n  await page.getByRole('button', { name: 'Login' }).click();\n\n  await expect(page).toHaveURL(/dashboard/);\n  await expect(page.getByText('Katy')).toBeVisible();\n});\n```\n\nRun it with `npx playwright test tests/practice-login.spec.ts --project=chromium`:\n\n```ts\n// Result with the correct password: 1 passed\n//\n// Result with a wrong password, and the error it showed:\n//   1 failed. The error said that expect(page).toHaveURL failed:\n//   the expected pattern was /dashboard/, and the received address\n//   was the login page.\n```\n\n**Why this problem matters.** A test that you have never seen fail may not be checking anything. Changing the password proves that your assertions notice when the sign-in does not work."
         },
         {
           "number": 2,
           "difficulty": "Intermediate",
-          "statement": "**What to build.** Recreate the [Fundamentals](/learn/w1/d5/p2) lesson's exact demonstration from scratch: one test that logs in\nwith a wrong password and asserts **nothing** (confirm it passes), then add a real\n`expect(page).toHaveURL(/dashboard/)` to the *same* test and re-run it (confirm it now\nfails). Write one sentence on what changed in the report between the two runs.\n\n**Where.** `week1/generated/day5-practice-gap.spec.ts`, edited and re-run once.\n\n**How you'll know it worked.** You personally watched the exact same test go from\n`1 passed` to `1 failed` by adding one line — not just read that it does.",
-          "stub": "// Problem 2 — your code here. Run it once without the assertion, note the result,\n// add the assertion, run it again, note the result.",
-          "solution": "**This is a two-run exercise — the value is in the difference between them.**\n\n`week1/generated/day5-practice-gap.spec.ts`, run 1 — no assertion at all:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('login with a wrong password', async ({ page }) => {\n  await page.goto('https://test-automation-banking.vercel.app/');\n  await page.getByPlaceholder('Enter Email').fill('leela@gmail.com');\n  await page.getByPlaceholder('Enter Password').fill('definitely-wrong');\n  await page.getByRole('button', { name: 'Login' }).click();\n  // Nothing asserted. Every line above \"worked\".\n});\n```\n\n`npx playwright test week1/generated/day5-practice-gap.spec.ts` → **`1 passed`**, in green, on a login that did not happen.\n\nNow add one line to the *same* test and re-run:\n\n```ts\n  await expect(page).toHaveURL(/dashboard/);\n```\n\n→ **`1 failed`**.\n\n**One sentence on what changed:**\n\n> Nothing changed about the application or the steps. The login failed identically both times. What changed is that the second run *checked* the outcome. The report went from a green tick meaning \"no line threw\" to a red failure meaning \"the user did not get in\".\n\n**The lesson.** A Playwright action only asserts that it could *perform* the action. `fill` succeeded, `click` succeeded — neither has any opinion about whether logging in worked. Without `expect`, a suite can be fully green while the product is broken. That is the assertions gap, and it is the most expensive habit to acquire late."
+          "statement": "**What to build.** The missing-assertion problem from [Fundamentals](/learn/w1/d5/p2), from the\nbeginning. In the `tests` folder, create `practice-gap.spec.ts`, with one test that signs in as\nLeela with a wrong password and has no assertion. Run it. Then add\n`await expect(page).toHaveURL(/dashboard/);` as the last line of the same test, and run it again.\n\n**Where.** In VS Code and its integrated terminal. Write the two results, and one sentence about\nwhat changed, in the editor, using the template.\n\n**How you will know it worked.** The same test reported `1 passed` the first time and `1 failed` the\nsecond time.",
+          "stub": "// Problem 2: the missing assertion\n//\n// Result without the assertion:\n//\n// Result with the assertion:\n//\n// What changed between the two runs:",
+          "solution": "**A model answer.** `tests/practice-gap.spec.ts`, before the assertion is added:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\ntest('a wrong password', async ({ page }) => {\n  await page.goto('https://test-automation-banking.vercel.app/');\n  await page.getByPlaceholder('Enter Email').fill('leela@gmail.com');\n  await page.getByPlaceholder('Enter Password').fill('WrongPassword1');\n  await page.getByRole('button', { name: 'Login' }).click();\n});\n```\n\nThe notes in the template:\n\n```ts\n// Result without the assertion: 1 passed\n//\n// Result with the assertion: 1 failed\n//\n// What changed between the two runs:\n//   The website and the steps were the same, and the sign-in failed both\n//   times. Only the second run checked the result, so only the second\n//   run reported the failure.\n```\n\n**Why this problem matters.** An action such as `click` proves only that the step could be performed. It says nothing about whether the sign-in worked. Without an assertion, every test can pass while the website is broken."
         },
         {
           "number": 3,
           "difficulty": "Advanced",
-          "statement": "**What to build.** A tiny two-method page object: `signIn(email, password)` (like the [Implementation](/learn/w1/d5/p3) lesson's\n`LoginPage`) plus a second method that reads and returns the signed-in user's name (using\n`page.getByText(name)` — no `exact: true`, per `_shared/CONCEPTS.md`). Then write a test that\nuses the class and asserts on its return value — **no locator should appear in the test file\nitself**, only inside the class.\n\n**Where.** `week1/generated/day5-practice-pageobject.spec.ts`.\n\n**How you'll know it worked.** `1 passed`, and re-reading your test file, every `page.getBy...`\ncall lives inside the class, not the test.",
-          "stub": "// Problem 3 — your code here.",
-          "solution": "Two files. The class owns every locator; the test owns none.\n\n`week1/generated/login-page.ts`:\n\n```ts\nimport { type Page } from '@playwright/test';\n\nexport class LoginPage {\n  constructor(private readonly page: Page) {}\n\n  async signIn(email: string, password: string): Promise<void> {\n    await this.page.goto('https://test-automation-banking.vercel.app/');\n    await this.page.getByPlaceholder('Enter Email').fill(email);\n    await this.page.getByPlaceholder('Enter Password').fill(password);\n    await this.page.getByRole('button', { name: 'Login' }).click();\n  }\n\n  async signedInName(name: string): Promise<string> {\n    // No exact: true - the greeting may render as \"Welcome, Leela\".\n    return (await this.page.getByText(name).innerText()).trim();\n  }\n}\n```\n\n`week1/generated/day5-practice-pom.spec.ts`:\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { LoginPage } from './login-page';\n\ntest('the signed-in user is the one who signed in', async ({ page }) => {\n  const login = new LoginPage(page);\n  await login.signIn('leela@gmail.com', 'Leela@123');\n\n  const greeting = await login.signedInName('Leela');\n  expect(greeting).toContain('Leela');\n});\n```\n\n**Two things to check in your own version.**\n\n**No locator appears in the spec.** Not one `getByRole`, not one CSS selector. If the app's login markup changes, exactly one file changes — and it is not the test.\n\n**The assertion stayed in the test.** `signedInName` *returns* a value; it does not assert on it. That is the rule the course holds to throughout: page objects do things and report what they found, tests decide whether that is right. A class that asserts internally is a class you cannot reuse in a test that expects the other outcome.\n\n> The filename matters: `login-page.ts`, **not** `login-page.spec.ts`. Give a helper a spec suffix and the runner will try to execute it as a test file — the trap you proved on [Day 4 - Implementation](/learn/w1/d4/p3).\n>\n> This is a page object in all but name. Week 5 names it."
+          "statement": "**What to build.** A page object in a file of its own, and a test that uses it. In the `tests`\nfolder:\n\n1. Create `login-page.ts`, with a `LoginPage` class that has two methods. `signIn(email, password)`\n   performs the sign-in steps, as in [Implementation](/learn/w1/d5/p3). `signedInName(name)` returns\n   the text of the element that shows the user's name, with\n   `await this.page.getByText(name).innerText()`.\n2. Start the class with `export`, so that another file can import it.\n3. Create `practice-page-object.spec.ts`, with one test that imports `LoginPage` from\n   `'./login-page'`, signs in as Leela, and checks that `signedInName('Leela')` returns `'Leela'`.\n\n**Where.** In VS Code and its integrated terminal. Copy both files into the editor, using the\ntemplate.\n\n**How you will know it worked.** The test reports `1 passed`, and every locator is in\n`login-page.ts`, not in the test file.\n\n**Hint.** Name the page object file `login-page.ts`, without `.spec`. [Day 4 - Implementation](/learn/w1/d4/p3)\nexplains why that matters.",
+          "stub": "// Problem 3: a page object in its own file\n//\n// tests/login-page.ts:\n//\n// tests/practice-page-object.spec.ts:\n//\n// Why login-page.ts does not end in .spec.ts:",
+          "solution": "**A model answer.** `tests/login-page.ts`:\n\n```ts\nimport { type Page } from '@playwright/test';\n\nexport class LoginPage {\n  readonly page: Page;\n\n  constructor(page: Page) {\n    this.page = page;\n  }\n\n  async signIn(email: string, password: string) {\n    await this.page.goto('https://test-automation-banking.vercel.app/');\n    await this.page.getByPlaceholder('Enter Email').fill(email);\n    await this.page.getByPlaceholder('Enter Password').fill(password);\n    await this.page.getByRole('button', { name: 'Login' }).click();\n  }\n\n  async signedInName(name: string) {\n    return await this.page.getByText(name).innerText();\n  }\n}\n```\n\n`tests/practice-page-object.spec.ts`:\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { LoginPage } from './login-page';\n\ntest('the dashboard shows the name of the user who signed in', async ({ page }) => {\n  const loginPage = new LoginPage(page);\n  await loginPage.signIn('leela@gmail.com', 'Leela@123');\n  await expect(page).toHaveURL(/dashboard/);\n\n  const name = await loginPage.signedInName('Leela');\n  expect(name).toBe('Leela');\n});\n```\n\n**Why `login-page.ts` does not end in `.spec.ts`.** Playwright runs every file whose name ends in `.spec.ts` as a test file. The page object contains no tests, so it must not match that pattern.\n\n**What to check in your own answer.** The test file contains no locators: they are all in `login-page.ts`. The page object returns the name, and the test makes the assertion. `expect(name).toBe('Leela')` has no `await`, because `name` is already a string, not the page, so there is nothing to wait for."
         }
       ]
     }

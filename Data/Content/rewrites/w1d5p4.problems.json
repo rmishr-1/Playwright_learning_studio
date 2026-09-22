@@ -1,0 +1,15 @@
+{
+  "1": {
+    "statement": "**What to build.** A test that signs in as Katy, with assertions from the start. Katy's email is\n`katy@gmail.com`, and her password is `Katy@12354`. In the `tests` folder, create\n`practice-login.spec.ts`, write the test, and run it. Then change the password to a wrong one, run\nthe test again, and read how it fails.\n\n**Where.** In VS Code and its integrated terminal. Copy your test and the two results into the\neditor, using the template.\n\n**How you will know it worked.** The first run reports `1 passed`, and the run with the wrong\npassword reports `1 failed`.\n\n**Hint.** Start from the second test in [Fundamentals](/learn/w1/d5/p2), and check both the address\nand the user's name.",
+    "stub": "// Problem 1: Katy signs in\n//\n// My test:\n//\n// Result with the correct password:\n//\n// Result with a wrong password, and the error it showed:"
+  },
+  "2": {
+    "statement": "**What to build.** The missing-assertion problem from [Fundamentals](/learn/w1/d5/p2), from the\nbeginning. In the `tests` folder, create `practice-gap.spec.ts`, with one test that signs in as\nLeela with a wrong password and has no assertion. Run it. Then add\n`await expect(page).toHaveURL(/dashboard/);` as the last line of the same test, and run it again.\n\n**Where.** In VS Code and its integrated terminal. Write the two results, and one sentence about\nwhat changed, in the editor, using the template.\n\n**How you will know it worked.** The same test reported `1 passed` the first time and `1 failed` the\nsecond time.",
+    "stub": "// Problem 2: the missing assertion\n//\n// Result without the assertion:\n//\n// Result with the assertion:\n//\n// What changed between the two runs:"
+  },
+  "3": {
+    "difficulty": "Advanced",
+    "statement": "**What to build.** A page object in a file of its own, and a test that uses it. In the `tests`\nfolder:\n\n1. Create `login-page.ts`, with a `LoginPage` class that has two methods. `signIn(email, password)`\n   performs the sign-in steps, as in [Implementation](/learn/w1/d5/p3). `signedInName(name)` returns\n   the text of the element that shows the user's name, with\n   `await this.page.getByText(name).innerText()`.\n2. Start the class with `export`, so that another file can import it.\n3. Create `practice-page-object.spec.ts`, with one test that imports `LoginPage` from\n   `'./login-page'`, signs in as Leela, and checks that `signedInName('Leela')` returns `'Leela'`.\n\n**Where.** In VS Code and its integrated terminal. Copy both files into the editor, using the\ntemplate.\n\n**How you will know it worked.** The test reports `1 passed`, and every locator is in\n`login-page.ts`, not in the test file.\n\n**Hint.** Name the page object file `login-page.ts`, without `.spec`. [Day 4 - Implementation](/learn/w1/d4/p3)\nexplains why that matters.",
+    "stub": "// Problem 3: a page object in its own file\n//\n// tests/login-page.ts:\n//\n// tests/practice-page-object.spec.ts:\n//\n// Why login-page.ts does not end in .spec.ts:"
+  }
+}

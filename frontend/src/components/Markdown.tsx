@@ -142,7 +142,7 @@ export function Markdown({
           head.append(
             Object.assign(document.createElement('span'), {
               className: 'not-runnable',
-              textContent: 'Run this in your own checkout',
+              textContent: 'Run this in your own project',
             }),
           );
         }

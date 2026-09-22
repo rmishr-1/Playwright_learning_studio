@@ -332,7 +332,7 @@ export function studioise(md: string): string {
   out = out.replace(
     /^>[^\n]*\*\*Mode: test-runner\.\*\*[^\n]*(?:\n>[^\n]*)*/gm,
     '> **Follow this one in your own project.** These examples are run by the Playwright test ' +
-      'runner, which the editor here does not provide. Copy them into your own checkout to run them.',
+      'runner, which the editor here does not provide. Copy them into your own project to run them.',
   );
   // Any surviving mention of the Jupyter kernel.
   // [ \t]* rather than \s*: the old \s* also ate the newlines after the phrase, which glued the

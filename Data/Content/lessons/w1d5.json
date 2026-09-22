@@ -1,106 +1,108 @@
 {
-  "schema": "lesson-overlay/v1",
-  "week": 1,
-  "day": 5,
-  "parts": {
-    "1": {
-      "checkpoints": [
-        {
-          "question": "`const square = (n: number) => n * n;` has no `return`. Why does it still return a value?",
-          "options": [
-            "Arrow functions return their last statement automatically",
-            "A body with no braces is a single expression, and its value is returned implicitly",
-            "`return` is optional everywhere in TypeScript"
-          ],
-          "answer": 1,
-          "explanation": "No braces means the arrow is followed by one expression, and that expression's value is the return value. Add braces and you are back to a normal function body, where `return` is required — a difference that catches people the first time a block-bodied arrow silently returns `undefined`."
-        },
-        {
-          "question": "You write an arrow function whose body calls `await page.click(...)` but you leave off `async`. What happens?",
-          "options": [
-            "It runs, but the click may not finish before the next line",
-            "A TypeScript compile error — `await` is only valid inside an `async` function",
-            "It runs and silently ignores the `await`"
-          ],
-          "answer": 1,
-          "explanation": "This one fails loudly at compile time rather than misbehaving at run time, which is the good case. Since practically every Playwright action returns a Promise, practically every test body awaits something — which is why practically every test function is `async`."
-        },
-        {
-          "question": "In `test(\"name\", async ({ page }) => { ... })`, what is `({ page })` doing?",
-          "options": [
-            "Declaring a parameter that happens to be called page",
-            "Destructuring just the `page` fixture out of the object of tools Playwright passes in",
-            "Creating a new page object for the test to use"
-          ],
-          "answer": 1,
-          "explanation": "Playwright hands the test one object containing every fixture it could offer — `page`, `browser`, `browserName` and more. Destructuring in the parameter list pulls out only the ones you name, so you write `page` rather than `tools.page` throughout. Nothing is being created here; it is being unpacked."
-        }
-      ]
+ "schema": "lesson-overlay/v1",
+ "week": 1,
+ "day": 5,
+ "parts": {
+  "1": {
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | The parts of TypeScript that every Playwright test uses. |\n| **Goals** | Store and print values, write functions and arrow functions, explain `async` and `await`, and read an `import` line. |\n| **Tools** | `const`, arrow functions, `async` and `await`, destructuring, and `import`. |\n| **Environment** | The editor on the right. The Console tab shows what your code prints. |\n| **Key takeaway** | Put `await` before every step that takes time, inside a function marked `async`. |",
+   "checkpoints": [
+    {
+     "question": "`const square = (n: number) => n * n;` contains no `return`. Why does it still return a value?",
+     "options": [
+      "An arrow function always returns the value of the last line inside it.",
+      "Without braces, the single step after `=>` is returned.",
+      "TypeScript adds a `return` to every function that does not have one."
+     ],
+     "answer": 1,
+     "explanation": "An arrow function without braces has exactly one step, and its value is returned automatically. With braces, you must write `return` yourself, or the function gives back `undefined`."
     },
-    "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **Goals** | Watch a test pass with the wrong password because it checks nothing, then fix it and watch it fail correctly. |\n| **Prerequisites** | [arrow functions, `async`, destructuring](/learn/w1/d5/p1) |\n| **Environment** | in your own project. These need the Playwright test runner. |\n| **Key takeaway** | a test that only acts and never asserts is a recording, not a test |",
-      "checkpoints": [
-        {
-          "question": "Both tests type the same wrong password. Why does the first one report green?",
-          "options": [
-            "The app accepted the wrong password, so the login really did succeed",
-            "It contains no `expect()`, so there was nothing that could fail",
-            "Playwright treats a failed login as a warning rather than an error"
-          ],
-          "answer": 1,
-          "explanation": "Login genuinely failed in both tests — verified: this app just stays on the login page, with no error message at all. The first test performed four actions, none of which threw, and reported success. \"Automation never finds a defect\" from [Day 1](/learn/w1/d1/p2) stops being an abstraction right here."
-        },
-        {
-          "question": "Which assertion actually proves the login worked?",
-          "options": [
-            "`await expect(page.getByRole(\"button\", { name: \"Login\" })).toBeVisible()` before clicking",
-            "`await expect(page).toHaveURL(/dashboard/)` after clicking",
-            "Checking that `.click()` completed without throwing"
-          ],
-          "answer": 1,
-          "explanation": "Assert the **consequence**. A click completing proves the button was clickable, not that anything happened afterwards; asserting the login button is visible proves you are still looking at the login page. Only a successful login changes the URL or makes the user's name appear."
-        },
-        {
-          "question": "What question should you ask of a test you have just written and watched pass?",
-          "options": [
-            "Does it run fast enough to keep in the suite?",
-            "What would make this go red? If the answer is \"nothing\", it is not testing anything yet.",
-            "Does it cover every element on the page?"
-          ],
-          "answer": 1,
-          "explanation": "A green test is only meaningful if some realistic breakage would turn it red. Reading your own passing test with suspicion is the habit this day exists to build. Apply it the moment you write the test, not after it has been green through six broken releases."
-        }
-      ],
-      "recap": "- **A test with no `expect()` cannot fail for the right reason.** It is a recording of actions.\n- Assert the consequence, such as the URL or the user's name. Do not settle for an action that merely did not throw.\n- `expect(page).toHaveURL(...)` auto-retries until it matches or times out, then fails with a real message.\n- This app gives no error on a wrong password: it just stays put. Silence is not success.\n- Ask of every passing test: what would make this go red?"
+    {
+     "question": "You write `console.log(slowGreet('Katy'))` without `await`. What does the Console show?",
+     "options": [
+      "The greeting, printed after the function has finished waiting for one second",
+      "An error, because `await` is always required before calling an async function",
+      "`Promise { <pending> }`, because the result is not ready yet"
+     ],
+     "answer": 2,
+     "explanation": "An async function returns a Promise at once. Without `await`, the code prints the Promise itself, before its result is ready. With `await`, the code waits for the result, and prints the greeting."
     },
-    "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | three repeated locators become a class built once, and one named `signIn` step |\n| **Tools** | the same locators and actions from [Fundamentals](/learn/w1/d5/p2) |\n| **Scope** | This structure is the Page Object Model. Week 5 names it and covers it in full. |\n| **Key takeaway** | a page object never asserts |",
-      "checkpoints": [
-        {
-          "question": "Why does `LoginPage` contain no `expect()` at all?",
-          "options": [
-            "Because assertions are not allowed outside a `test()` body",
-            "So it can be reused by tests expecting success AND tests expecting failure — the test decides what should be true",
-            "Because the class runs before the test does"
-          ],
-          "answer": 1,
-          "explanation": "Put the check inside `signIn` and it only suits tests wanting that exact outcome. You then grow `signInAndCheckDashboard`, `signInAndCheckWrongPassword`, one method per outcome. The version that asserts nothing serves both tests in this very lesson — one expecting a dashboard, one expecting to stay put."
-        },
-        {
-          "question": "The locators are built once in the constructor and marked `readonly`. What does `readonly` buy?",
-          "options": [
-            "It stops a method reassigning a locator by accident",
-            "It makes the locators resolve once and cache the element",
-            "It is required for TypeScript to infer the `Locator` type"
-          ],
-          "answer": 0,
-          "explanation": "It is a compile-time guarantee about the field, nothing more. A locator is a live reference that re-resolves on every use. `readonly` does not freeze what it points at; it only fixes which locator the field holds."
-        }
-      ],
-      "recap": "- Three locators repeated across dozens of tests is dozens of edits when the form is redesigned. Build them once.\n- Name a method for what a **user** does (`signIn`), not for the DOM operations inside it.\n- **No assertions in a page object.** It knows how to act; the test decides what should be true.\n- `readonly` guards the field, not the element — a locator still re-resolves every time it is used.\n- You are looking at the Page Object Model. Week 5 gives it its name and its full treatment."
-    },
-    "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three problems that close the week: a test of your own, the assertions gap, and a small page object. The test report tells you whether each answer is correct. |\n| **Scope** | These problems close Week 1, which covered why teams automate, setup, the CLI, Codegen, and the assertion that makes a test a test. |"
+    {
+     "question": "In `test('name', async ({ page }) => { ... })`, what does `({ page })` do?",
+     "options": [
+      "It takes the `page` fixture out of the object Playwright gives it.",
+      "It opens a new browser tab for the test, and gives that tab the name `page`.",
+      "It declares an empty variable named `page`, which the test fills in later on."
+     ],
+     "answer": 0,
+     "explanation": "Playwright gives every test one object that holds its fixtures. Destructuring in the parameters takes out the fixtures that you name, so you write `page` instead of a longer name."
     }
+   ],
+   "recap": "- `const` creates a variable, and `console.log` prints a value.\n- An arrow function without braces returns its value. With braces, it needs `return`.\n- A **Promise** stands for a result that is not ready yet. `await` waits for it, inside an `async` function.\n- **Destructuring** takes properties out of an object by name, as `({ page })` does in every test.\n- `import { test, expect } from '@playwright/test'` starts every test file in your project."
+  },
+  "2": {
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | Your first real test, and why a test needs an assertion. |\n| **Goals** | Watch a test pass with a wrong password because it checks nothing, then add an assertion and watch the test fail. |\n| **Prerequisites** | [Day 5 - TypeScript](/learn/w1/d5/p1), for arrow functions, `async`, and `import`. |\n| **Tools** | `test`, `expect`, `toHaveURL`, and `toBeVisible`. |\n| **Environment** | The editor on the right for the first example, then your own project for the real tests. |\n| **Key takeaway** | A test without an assertion passes whether or not the feature works. |",
+   "checkpoints": [
+    {
+     "question": "Both tests type the same wrong password. Why does the first one pass?",
+     "options": [
+      "The website accepted the wrong password, so the sign-in worked.",
+      "The test has no assertion, so nothing in it could fail.",
+      "Playwright reports a failed sign-in as a warning, not a failure."
+     ],
+     "answer": 1,
+     "explanation": "The sign-in failed in both tests, and the website showed an error message. The first test filled in two fields and selected a button, and each of those steps worked. Nothing checked the result, so the test passed."
+    },
+    {
+     "question": "Which assertion proves that a correct password signed the user in?",
+     "options": [
+      "`await expect(page.getByRole('button', { name: 'Login' })).toBeVisible()`",
+      "`await expect(page).toHaveURL(/dashboard/)`, after the click",
+      "A check that `click()` finished without an error"
+     ],
+     "answer": 1,
+     "explanation": "Only a successful sign-in opens the dashboard. The Login button is visible before any sign-in, so checking it proves nothing. A click that finishes proves only that the button could be selected."
+    },
+    {
+     "question": "You have written a new test, and it passes. What should you do next?",
+     "options": [
+      "Keep it as it is, because a passing test needs no changes.",
+      "Run it several more times, to be sure that it passes every time.",
+      "Change one value, such as the password, and confirm that it fails."
+     ],
+     "answer": 2,
+     "explanation": "A test is useful only if it fails when the feature does not work. Changing one value and watching the test fail proves that its assertions check something."
+    }
+   ],
+   "recap": "- An **assertion** compares what happened with what should have happened, and fails the test if they differ.\n- A test without an assertion passes whether or not the feature works.\n- Check the result of the steps, such as the dashboard address or the user's name.\n- Playwright's assertions retry for up to five seconds before they fail.\n- Watch every new test fail once, to prove that it checks something."
+  },
+  "3": {
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | Writing the sign-in steps once, in a page object that every test can use. |\n| **Goals** | Explain what a class, a constructor, and a method are, and use one page object in two tests that expect opposite results. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d5/p2), where you wrote the sign-in tests. |\n| **Tools** | A class with `constructor`, `readonly`, and `this`, and `new` to make an object from it. |\n| **Environment** | VS Code and its integrated terminal, in your project folder, then the editor on the right. |\n| **Scope** | This lesson introduces page objects. Week 5 covers the Page Object Model in full. |\n| **Key takeaway** | A page object performs the steps, and the test makes the assertions. |",
+   "checkpoints": [
+    {
+     "question": "Why does `LoginPage` contain no assertions?",
+     "options": [
+      "Assertions can be written only inside a test, never inside a class.",
+      "So that tests expecting different results can all use the same class.",
+      "Because the class runs before Playwright has opened the page."
+     ],
+     "answer": 1,
+     "explanation": "One test expects the dashboard, and the other expects an error message. If `signIn` checked for the dashboard itself, the second test could not use it. The class performs the steps, and each test decides what the correct result is."
+    },
+    {
+     "question": "The website changes the placeholder of its email field. How many lines do you change?",
+     "options": [
+      "One line, in the constructor of `LoginPage`",
+      "One line in each test that signs in",
+      "Every line that calls `signIn`"
+     ],
+     "answer": 0,
+     "explanation": "The constructor is the only place that finds the email field. Every test uses `signIn`, and `signIn` uses the locator that the constructor stored, so one change updates every test."
+    }
+   ],
+   "recap": "- A **class** is a template for objects. Its **constructor** sets the properties, and its **methods** perform steps.\n- A **page object** finds the elements of one page once, and names the steps, such as `signIn`.\n- A page object contains no assertions. The tests decide what the correct result is.\n- When the website changes, you update the page object, not every test."
+  },
+  "4": {
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three problems about your first tests, from Beginner level to Advanced, to complete Week 1. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d5/p2) for assertions, and [Implementation](/learn/w1/d5/p3) for page objects. |\n| **Environment** | Your own project for the tests, and the editor on the right for your answers. |"
   }
+ }
 }
