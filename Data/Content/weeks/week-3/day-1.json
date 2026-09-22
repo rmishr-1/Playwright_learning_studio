@@ -21,6 +21,13 @@
           "checkpoint": null
         },
         {
+          "type": "your-turn",
+          "text": "",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
           "type": "markdown",
           "text": "| # | Concept | Where it shows up today |\n|---|---|---|\n| 1 | Objects, and objects inside objects | the config *is* one big object |\n| 2 | Numeric separators (`60_000`) | timeouts in milliseconds |\n| 3 | `export default` | how the config hands itself to Playwright |",
           "starter": null,

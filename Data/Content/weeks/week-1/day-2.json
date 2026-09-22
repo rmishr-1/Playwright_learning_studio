@@ -204,7 +204,7 @@
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "text": "",
           "starter": null,
           "variation": {
             "prompt": "Same idea, one more shape: as plain data, write what a config would look like if it only ever ran files under a single `smoke/` folder."
