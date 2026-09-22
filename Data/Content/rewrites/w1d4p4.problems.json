@@ -1,0 +1,15 @@
+{
+  "1": {
+    "statement": "**What to build.** A record of the locators that Codegen writes for you. In the integrated\nterminal in your project, run:\n\n```bash\nnpx playwright codegen https://test-automation-banking.vercel.app/\n```\n\nSign in with the email `leela@gmail.com` and the password `Leela@123`, then select the\n**Payments** tile. Copy the lines that the Inspector shows into the template.\n\n**Where.** Codegen runs from your terminal. Write your answer in the editor, using the template.\n\n**How you will know it worked.** Every line in your answer was copied from the Inspector, not\ntyped from memory.",
+    "stub": "// Problem 1: the locators Codegen wrote\n//\n// 1. The line for the email field:\n//\n// 2. The line for the password field:\n//\n// 3. The line for the Login button:\n//\n// 4. The line for the Payments tile:\n//\n// 5. Which kind of locator did Codegen choose most often?"
+  },
+  "2": {
+    "statement": "**What to build.** A short explanation of why `page.getByRole('button', { name: 'Login' })`\nkeeps working after a redesign, when `#ng-x7f2q3` or `//div[3]/button[1]` may not. A\n**redesign** is a change to how a page looks and how its markup is arranged. Name one change\nthat a redesign often makes, and say how it affects each of the three locators.\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Your answer names a specific change, such as a new container\naround the button, rather than saying only that the page changed.",
+    "stub": "// Problem 2: why some locators survive a redesign\n//\n// The change a redesign makes:\n//\n// What happens to #ng-x7f2q3:\n//\n// What happens to //div[3]/button[1]:\n//\n// What happens to getByRole('button', { name: 'Login' }):"
+  },
+  "3": {
+    "difficulty": "Advanced",
+    "statement": "**What to build.** The experiment from [Implementation](/learn/w1/d4/p3), repeated from the\nbeginning with a test that you write yourself. In your project:\n\n1. In the `tests` folder, create `practice-broken.ts`, with one test that opens the banking\n   website and checks that the Login button is visible.\n2. Run `npx playwright test --list`, and note the total.\n3. Rename the file to `practice-broken.spec.ts`, run the same command, and note the total again.\n4. Delete the file.\n\n**Where.** In VS Code and its integrated terminal. Write your test and the two totals in the\neditor, using the template.\n\n**How you will know it worked.** The total changed between the two runs, and you saw it change\nin your own terminal.",
+    "stub": "// Problem 3: the naming rule, repeated\n//\n// My test:\n//\n// Total before the rename:\n//\n// Total after the rename:\n//\n// Why the total changed:"
+  }
+}
