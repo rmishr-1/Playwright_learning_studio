@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 1 - Fundamentals - Why automation, why Playwright\n\nBy the end of this lesson you will know what automation can and can't do, what makes\nPlaywright different from Selenium, and you will have opened playwright.dev yourself and\nlooked around.\n\n> **An orientation day.** Theory, plus one \"go and look at this\" step. The hands-on work\n> starts at [Day 2](/learn/w1/d2/p2), once there is an environment to run it in.",
+          "text": "# Week 1 - Day 1 - Fundamentals - Why automation, why Playwright\n\nSoftware testing means checking that an application works the way it should. This lesson explains\nwhat testing is, how automated testing differs from testing by hand, and why this course uses a\ntool called Playwright.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -29,136 +29,115 @@
         },
         {
           "type": "markdown",
-          "text": "## Manual testing vs. automation\n\nA human runs a test once and *judges* the result. A script runs the same steps and only\n*reports* pass or fail — it never decides whether a failure is actually a bug.\n\n| | Manual testing | Automated testing |\n|---|---|---|\n| Who judges the result | A person, every time | Nobody — it only compares against what you told it to expect |\n| Finds a defect? | Yes — a human can notice something is *wrong* even if nobody wrote a check for it | **No.** It can only report pass/fail against a check a human already wrote |\n| Good at | Exploring, first-time coverage, \"does this feel right\" | Repetition, regression, running the same 500 checks every night |\n| Cost per run | High (a person's time) | Near zero once written |\n\n**The one sentence to remember:** automation never finds a defect — it reports pass or fail,\nand a human interprets a failure as a defect (or not).",
+          "text": "## What software testing is\n\nAn **application** is a program that people use, such as a banking website or a shopping app.\nBefore an application is released, someone must check that it works. That work is called\n**software testing**.\n\nA tester works from a **test case**: a list of steps, and the result those steps should produce.\nThe result the steps should produce is the **expected result**. The result you see when you follow\nthe steps is the **actual result**. When the two are different, the tester has found a **bug**,\nwhich is also called a **defect**.\n\n| Part of a test case | Example |\n|---|---|\n| Steps | Open the login page, enter a valid email and password, and select **Login**. |\n| Expected result | The account dashboard opens. |\n| Actual result | An error message appears. |\n| Outcome | The actual result is different from the expected result, so this is a bug. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The thumb rule of automation\n\nBefore you automate anything, you need two things:\n\n1. A **known expected result** — you must already know what \"correct\" looks like.\n2. The ability to **identify the object** — find the element on the page reliably enough to\n   act on it or read from it.\n\nNo expected result → you can't write an assertion. Can't identify the object → you can't\nwrite the step at all. Both are non-negotiable, and both are why \"just automate everything\"\nruns into trouble fast — plenty of testing (pure exploration, \"does this feel right\",\none-off checks) fails the second test the moment there's nothing stable to grab onto.",
+          "text": "## Manual testing and automated testing\n\nIn **manual testing**, a person follows the steps of a test case and decides whether the result\nis correct.\n\nIn **automated testing**, a program follows the same steps. A program that runs a test is called a\n**test script**, or a test for short. You write the script once, and it can then run the test as\noften as you need.\n\n| | Manual testing | Automated testing |\n|---|---|---|\n| Who follows the steps | A person | A test script |\n| Who decides whether the result is correct | The person, using their judgment | The script only compares the actual result with the expected result it was given. |\n| Can it notice a problem that nobody planned to check? | Yes. A person can see that something looks wrong. | No. It checks only what it was told to check. |\n| Best suited to | Exploring a new feature for the first time | Repeating the same checks many times, for example every night |\n| Cost of each run | High, because it uses a person's time | Very low, once the script is written |\n\nThis leads to the most important idea in this lesson. **Automation does not find bugs.** It\nreports whether each check **passed** or **failed**. When a check fails, a person investigates and\ndecides whether the failure is a bug.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Why Playwright over Selenium\n\n| | Selenium | Playwright |\n|---|---|---|\n| Architecture | Talks to the browser over WebDriver (an extra hop, extra process) | Talks to the browser directly over its own protocol |\n| Lines of code for a typical flow | More — waits, driver setup, and assertions are usually separate libraries | Fewer — auto-waiting and assertions are built in |\n| Waiting for elements | You write explicit/implicit waits yourself | Auto-waits before every action |\n| Assertions | Needs a separate library (e.g. Chai, JUnit assertions) | Built in (`expect`) |\n| Test runner | Needs a separate one (JUnit, TestNG, Mocha…) | Built in |\n| Reporting, tracing, video | Bolted on from other tools | Built in |\n\nNone of this means Selenium is bad — it's older and still widely used. Playwright was built\nlater, learned from where Selenium needed extra tooling, and folded that tooling in.",
+          "text": "## What you need before you automate a test\n\nYou need two things before you can automate a test:\n\n1. **A known expected result.** You must know what the correct result looks like. Otherwise, the\n   script has nothing to compare the actual result with.\n2. **A way to find the element.** An **element** is one item on a web page, such as a button, a\n   text field, or a link. Testers also call it an **object**. The script must be able to find the\n   element reliably every time, so that it can click it, type into it, or read it.\n\nIf either one is missing, the test cannot be automated. This is why some testing, such as exploring\na new feature without a fixed goal, stays manual.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Playwright isn't the only automation tool — know the neighbourhood\n\nDifferent testing verticals reach for different tools. Picking the right one for the job\nmatters more than picking your favourite one.\n\n| Vertical | What it tests | Example tools |\n|---|---|---|\n| UI / E2E | The app through a real browser, like a user | **Playwright**, Selenium, Cypress |\n| API | Requests and responses, no browser at all | Postman, RestAssured, Playwright's `request` fixture |\n| Performance / load | How the app behaves under many simultaneous users | JMeter, k6, Gatling |\n| Mobile | Native and mobile-web apps on real or emulated devices | Appium, Playwright (mobile *emulation*, not native apps) |\n| BDD | Business-readable scenarios wrapped around any of the above | Cucumber, SpecFlow |\n\nPlaywright's mobile support is **emulation** (a desktop browser pretending to be a phone\nviewport/UA) — for a real native app you'd reach for Appium instead.",
+          "text": "## What Playwright is\n\n**Playwright** is a free, open-source tool, made by Microsoft, for the automated testing of web\napplications. **Open-source** means that anyone can read and use its code.\n\nPlaywright controls a **web browser**, the program you use to visit websites, in the same way a\nperson does. It opens pages, clicks buttons, and types text. Because it uses the application the way\na user does, from the first step of a task to the last, Playwright is called an **end-to-end\ntesting** tool. An end-to-end test checks a complete task, such as signing in and viewing an\naccount balance.\n\nPlaywright works with the three main browser engines. A **browser engine** is the part of a browser\nthat displays web pages.\n\n| Engine | Used by |\n|---|---|\n| Chromium | Google Chrome and Microsoft Edge |\n| Firefox | Mozilla Firefox |\n| WebKit | Apple Safari |\n\nYou write Playwright tests in a programming language. This course uses **TypeScript**, and the\nTypeScript lessons begin in [Day 5 - TypeScript](/learn/w1/d5/p1). Playwright also supports\nJavaScript, Python, Java, and C#.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The SDET role\n\nA **Software Development Engineer in Test** is expected to be an all-rounder: comfortable\nreading application code, writing real code (not just recording scripts), and reasoning about\narchitecture — not only clicking through a UI. Playwright leans into this; it expects you to\nwrite TypeScript/JavaScript, not just point-and-click.",
+          "text": "## Why teams choose Playwright\n\nBefore Playwright, many teams used **Selenium**, an older testing tool that is still widely used.\nWith Selenium, teams usually add several other tools to build a complete setup. Playwright includes\nthose tools itself:\n\n| Feature | What it does |\n|---|---|\n| Automatic waiting | A web page can take a moment to load. Playwright waits for each element to be ready before it clicks or types, so you do not need to add waits yourself. |\n| Assertions | An **assertion** is a check that compares the actual result with the expected result. Playwright includes its own assertions. |\n| Test runner | A **test runner** is the program that starts your tests and reports which passed and which failed. Playwright includes one. |\n| Screenshots and video | When a test fails, Playwright can save screenshots and a video, so that you can see what happened. |\n| Codegen | **Codegen** records your clicks in a browser and writes the matching test code. You use it in [Day 4 - Fundamentals](/learn/w1/d4/p2). |\n\nSelenium remains a good choice for many teams. Playwright is newer, and it was designed to include\nthe tools that teams had to add to Selenium separately.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Where Playwright fits in the testing pyramid\n\nPlaywright is an **end-to-end (E2E) tool** — it drives the app the way a real user would,\nwhich means it can exercise every layer underneath, not just one.\n\n| Level | What's being checked | Can Playwright reach it? |\n|---|---|---|\n| Unit | One function/component in isolation | Not really its job — that's a unit-test framework |\n| Integration | Multiple components/services working together | Yes, indirectly — an E2E flow touches integrated pieces |\n| System | The whole application, end to end | **Yes — this is Playwright's home turf** |\n| UAT (User Acceptance) | Does the finished feature do what the business asked for | Yes — the same E2E flows double as acceptance checks |\n\nThe higher up you go, the more a single test proves — and the more it costs to run and to\ndiagnose when it fails. Week 7 covers the testing pyramid and its cost trade-offs properly;\ntoday's takeaway is just: Playwright's natural home is system-level, end-to-end testing.",
+          "text": "## Other kinds of testing tools\n\nPlaywright tests applications through a web browser. Other kinds of testing need other tools. Each\nkind of testing is also called a testing **vertical**.\n\n| Kind of testing | What it checks | Example tools |\n|---|---|---|\n| Web interface (UI) | The application in a browser, the way a user sees it | Playwright, Selenium, Cypress |\n| API | The requests and responses that programs exchange, without a browser. An **API** is the way one program asks another for data. | Postman, REST Assured, Playwright |\n| Performance | How the application behaves when many people use it at the same time | JMeter, k6, Gatling |\n| Mobile apps | Apps that people install on a phone | Appium |\n\nPlaywright can make a desktop browser imitate a phone screen. This is called **mobile emulation**.\nIt is useful for testing websites on phone-sized screens, but it does not test apps that are\ninstalled on a phone. For those, testers use a mobile testing tool such as Appium.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What Playwright actually ships with\n\n| Feature | What it means for you |\n|---|---|\n| Cross-browser | Chromium, Firefox, WebKit — one API for all three |\n| Cross-language | TypeScript/JavaScript, Python, Java, .NET |\n| Cross-platform | Windows, macOS, Linux, and CI runners |\n| Mobile emulation | Real device viewports and user agents, in a desktop browser |\n| Auto-wait | Actions wait for the element to be actionable before running |\n| Built-in assertions | `expect()`, with auto-retry |\n| Built-in test runner | `@playwright/test` — no separate JUnit/Mocha needed |\n| Tracing, video, screenshots | Captured automatically on failure, replayable after the fact |\n| Codegen | Records your clicks and generates locator code |\n| Inspector | Step through a test live, pick locators interactively |\n\nYou'll meet Codegen and the Inspector for real in [Day 4](/learn/w1/d4/p2), and traces/video in\nweek4.",
+          "text": "## Where the effort goes\n\nLearning a testing tool is only part of the work. On a typical project, the effort divides roughly\nlike this:\n\n| Share of the effort | Spent on |\n|---|---|\n| About half | Learning the application: what it does, how people use it, and what the correct result is for each task |\n| About half | Three skills together: the programming language, finding elements reliably, and organizing the steps and checks of each test |\n\nKnowing the application matters as much as knowing the tool.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## \"Looks right\" is also a bug category\n\nNot every defect is a wrong value or a broken click. A button rendered 4 pixels off, a font\nthat didn't load, a layout that breaks at a certain screen width — none of these throw an\nerror, but they're still bugs. This is **visual / \"look and feel\" testing**, and it needs its\nown approach (screenshot comparison) because a normal assertion can't see it. Week 4 covers\nthis with `toHaveScreenshot()`.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Where automation effort actually goes\n\nRoughly, on a real project:\n\n| Share of effort | Goes to |\n|---|---|\n| ~50% | Learning the **application** itself — its flows, its data, what \"correct\" means for this specific app |\n| ~50%, split further into: | |\n| — Language | Being comfortable enough in TypeScript to express what you mean |\n| — Object identification | Finding stable locators |\n| — Logic | Structuring the test itself — assertions, flow, reuse |\n\nThe takeaway: automation skill alone doesn't make you productive on a new project. Knowing\nthe app matters as much as knowing the tool.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Two things you'll hear a lot, coming up\n\n- JavaScript runs **asynchronously** — a script doesn't necessarily execute top to bottom\n  and wait for each line, the way Java/Selenium code does. That's *why* Playwright code is\n  full of `await`. Day 5 of this week is a full primer — nothing more to do with it today.\n- **TypeScript is a superset of JavaScript** — every valid JavaScript file is also valid\n  TypeScript, plus TypeScript adds optional type checking on top. The full JavaScript-vs-\n  TypeScript \"language day\" lives later in the course, at week7/day1_1 — for now just\n  recognize the name.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Hands-on: go look at the tool\n\nOpen a real browser tab and look around.\n\n1. Open **https://playwright.dev**\n2. Read the homepage tagline and the three feature callouts.\n3. Open **Docs → Writing tests** and skim it — you'll recognize the shape (`test(...)`,\n   `expect(...)`) once you write your own on Day 5.\n4. Note one thing on the site that wasn't mentioned in this lesson — you'll need it for\n   [Practice](/learn/w1/d1/p4).",
+          "text": "## Explore the Playwright website\n\nOpen a new browser tab and follow these steps:\n\n1. Go to **https://playwright.dev**.\n2. Read the short description at the top of the home page, and the three features listed below it.\n3. Select **Docs**, then **Writing tests**, and read the page quickly. The code on that page makes\n   more sense after [Day 5 - Fundamentals](/learn/w1/d5/p2), where you write your first test.\n4. Write down one thing on the site that this lesson did not mention. You need it for\n   [Practice](/learn/w1/d1/p4).",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "Your suite of 500 automated tests runs green overnight. What has it proved?",
+          "text": "An automated test script runs 500 checks every night, and all of them pass. What does this tell you?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "That the application has no defects in the areas covered",
-              "That 500 checks a human already wrote came back as expected — nothing about defects nobody wrote a check for",
-              "That no new defects were introduced, though old ones may remain"
+              "The application has no bugs in the areas that the checks cover.",
+              "The 500 checks that a person wrote produced their expected results.",
+              "No new bugs have appeared in the application since the last run."
             ],
             "answer": 1,
-            "explanation": "Automation never *finds* a defect: it reports pass or fail against a check a person wrote in advance, and a person decides whether a failure means a bug. Something visibly broken that nobody thought to check for passes green all night. That is what exploratory manual testing is still for."
+            "explanation": "Automation does not find bugs. Each check compares the actual result with an expected result that a person wrote in advance. A problem that nobody wrote a check for still passes, which is why people continue to test by hand as well."
           }
         },
         {
           "type": "checkpoint",
-          "text": "Before you can automate a test at all, the lesson says you need two things. Which pair?",
+          "text": "According to this lesson, which two things do you need before you can automate a test?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "A test runner and a reporting tool",
-              "A known expected result, and a way to identify the object on the page",
-              "A stable environment, and a colleague to review the script"
+              "A test runner, a report, and a tool that records video",
+              "A known expected result and a way to find the element",
+              "A fast computer and a colleague to review your script"
             ],
             "answer": 1,
-            "explanation": "No known expected result means there is nothing to assert. No reliable way to identify the element means you cannot write the step at all. Both are why \"automate everything\" runs into trouble quickly. Pure exploration and one-off checks routinely fail the second test."
+            "explanation": "Without a known expected result, the script has nothing to compare the actual result with. Without a reliable way to find the element, the script cannot click it, type into it, or read it. If either one is missing, the test stays manual."
           }
         },
         {
           "type": "checkpoint",
-          "text": "A stakeholder asks you to automate testing of the company's native Android app. Does Playwright fit?",
+          "text": "Your manager asks you to automate tests for the company's Android app, which people install on their phones. Is Playwright the right tool?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Yes — mobile is one of its listed features",
-              "No — its mobile support is emulation, a desktop browser with a phone viewport and user agent. A native app needs something like Appium.",
-              "Yes, but only on an emulator rather than a real device"
+              "Yes, because mobile support is one of the features Playwright lists.",
+              "No. Playwright imitates phone screens in a browser and cannot test installed apps.",
+              "Yes, but only on an emulator on your computer, not on a real phone."
             ],
             "answer": 1,
-            "explanation": "Playwright emulates mobile: real device viewports and user agents, in a desktop browser. That is genuinely useful for mobile *web*, and it is not a native app driver. Picking the right tool for the vertical matters more than picking your favorite one."
+            "explanation": "Playwright's mobile support is mobile emulation: a desktop browser imitates a phone screen. This is useful for testing websites on phone-sized screens. An app installed on a phone needs a mobile testing tool such as Appium."
           }
         },
         {
           "type": "recap",
-          "text": "- **Automation never finds a defect.** It reports pass or fail against checks a person wrote; a person decides what a failure means.\n- Two non-negotiables before automating anything: a known expected result, and an identifiable object.\n- Playwright folds in what Selenium needs extra tooling for — auto-waiting, assertions, a runner, tracing. Selenium is older, not bad.\n- Its home is system-level end-to-end testing, and its mobile support is emulation, not native apps.\n- About half your effort on a real project goes into learning the **application**, not the tool.",
+          "text": "- **Software testing** checks that an application works as expected. A bug is a difference between the expected result and the actual result.\n- **Automation does not find bugs.** It reports whether each check passed or failed, and a person decides what a failure means.\n- Before you automate a test, you need a known expected result and a way to find the element.\n- **Playwright** is a free, open-source tool that tests web applications through a browser, from the first step of a task to the last.\n- About half of the effort on a project goes into learning the application. The other half goes into the language, finding elements, and organizing each test.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\nGo to [Practice](/learn/w1/d1/p4) for some reflection problems, then\n[Day 2](/learn/w1/d2/p2) gets your environment running.",
+          "text": "## What's next\n\nContinue to [Practice](/learn/w1/d1/p4) for three short problems. In\n[Day 2 - Fundamentals](/learn/w1/d2/p2), you set up your computer so that you can write and run\ntests.",
           "starter": null,
           "variation": null,
           "checkpoint": null

@@ -313,6 +313,67 @@ export function applyStudioCopy(day: CourseDay): CourseDay {
   };
 }
 
+/**
+ * Authored replacements for a whole lesson body, one markdown file per part:
+ * Data/Content/rewrites/w<week>d<day>p<part>.md. The file is split into blocks at each `## `
+ * heading, and those blocks replace every generated markdown block of the part.
+ *
+ * This exists because lesson bodies come from notebooks that are not in this checkout, so a
+ * rewrite written into the day file would be lost at the next import. A body rewritten for a
+ * complete beginner is authored text like the cards, and is linted and drift-checked like them.
+ *
+ * The cards are not part of the file. applyOverlay() still places the at-a-glance directly after
+ * the H1, and the checkpoints and recap before `## What's next`, so the file only needs to open
+ * with the H1 and end with a What's next section.
+ */
+export function loadRewrites(contentDir: string, week: number, day: number): Map<number, string[]> {
+  const out = new Map<number, string[]>();
+  const dir = path.join(contentDir, 'rewrites');
+  if (!fs.existsSync(dir)) return out;
+  for (const f of fs.readdirSync(dir)) {
+    const m = /^w(\d+)d(\d+)p(\d)\.md$/.exec(f);
+    if (!m || +m[1] !== week || +m[2] !== day) continue;
+    out.set(+m[3], splitRewrite(fs.readFileSync(path.join(dir, f), 'utf-8')));
+  }
+  return out;
+}
+
+/** One block per `## ` section, with the H1 and its opening paragraphs as the first block. */
+export function splitRewrite(md: string): string[] {
+  return md
+    .replace(/\r\n/g, '\n')
+    .split(/\n(?=## )/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+}
+
+/** Block types a whole-body rewrite would silently delete if it replaced the part wholesale. */
+const GENERATED_NON_PROSE = new Set(['example', 'your-turn', 'problem-ref']);
+
+export function applyRewrites(day: CourseDay, rewrites: Map<number, string[]>): CourseDay {
+  if (day.locked || rewrites.size === 0) return day;
+  return {
+    ...day,
+    parts: day.parts.map((part) => {
+      const body = rewrites.get(part.part);
+      if (!body) return part;
+      // A lesson with code examples cannot be replaced wholesale: the examples, and the
+      // your-turn prompts and practice problems anchored among them, would disappear. That needs
+      // placeholders in the rewrite file, and is built when the review first reaches such a part.
+      const code = part.blocks.find((b) => GENERATED_NON_PROSE.has(b.type));
+      if (code) {
+        throw new Error(
+          'w' + day.week + 'd' + day.day + 'p' + part.part + ' has a generated "' + code.type +
+            '" block, which a whole-body rewrite would delete. Rewrites support prose-only parts.',
+        );
+      }
+      const kept = part.blocks.filter((b) => b.type !== 'markdown');
+      const prose = body.map((text) => ({ type: 'markdown' as const, text, starter: null, variation: null, checkpoint: null }));
+      return { ...part, blocks: [...prose, ...kept] };
+    }) as CourseDay['parts'],
+  };
+}
+
 /** Authored solutions live outside the generated tree so a re-import cannot erase them. */
 export function loadSolutions(contentDir: string, week: number, day: number): Record<string, string> {
   const file = path.join(contentDir, 'solutions', 'w' + week + 'd' + day + '.json');

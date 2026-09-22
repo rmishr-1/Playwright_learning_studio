@@ -21,9 +21,11 @@ import {
   applyStudioCopy,
   applyOverlay,
   applyRemovedParts,
+  applyRewrites,
   applySolutions,
   applyVariations,
   loadOverlay,
+  loadRewrites,
   loadSolutions,
   loadVariations,
 } from './lesson-overlay';
@@ -61,6 +63,8 @@ function main(): void {
       // After applyStudioCopy, which can emit a link label of its own.
       merged = applyDayRefs(merged);
       merged = applySolutions(merged, loadSolutions(CONTENT, week, day));
+      // Before applyOverlay: the cards are placed relative to the body, so the body comes first.
+      merged = applyRewrites(merged, loadRewrites(CONTENT, week, day));
       merged = applyVariations(merged, variations);
       if (overlay) merged = applyOverlay(merged, overlay);
       const after = JSON.stringify(CourseDay.parse(merged), null, 2) + '\n';

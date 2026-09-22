@@ -45,6 +45,8 @@ to match them.
 
 | Preference | What it means in practice |
 |---|---|
+| The reader is a complete beginner | New to testing and to coding. Explain what a test, a bug, and a browser are before any tool is named. See [section 1](#who-you-are-writing-for). |
+| Every technical term is explained where it first appears | Bold the term once and explain it in plain words in the same sentence. A glossary is not a substitute. |
 | Professional, beginner-friendly language | Every lesson is written for someone opening the course for the first time. Chatty phrasing, slang, and insider shorthand are removed. |
 | Never describe a lesson by what it lacks | "No new TypeScript today", "No code today", and a card row that answers "none" are all removed. State what the lesson *is* about. |
 | Remove a tab that has no content of its own | If a tab lacks content, or its lesson needs none, remove the tab instead of explaining why it is empty. The day opens on its next tab. See [section 2](#tabs-with-no-content-are-removed). |
@@ -72,9 +74,19 @@ to match them.
 
 ### Who you are writing for
 
-The reader is a working tester or developer who has not used Playwright before. They are new to
-this tool, not to their job. Write for someone who is competent and short of time, and who reads
-closely.
+The reader is a **complete beginner**: someone who is new to software testing and new to writing
+code. Do not assume they know what a test case, a bug, a browser engine, or a programming language
+is. Explain each idea in plain words before you build on it, and introduce a tool only after the
+reader knows what problem it solves.
+
+Explain every technical term where it first appears. Bold it once, and give its meaning in plain
+words in the same sentence or the next one:
+
+> A **test runner** is the program that starts your tests and reports which passed and which failed.
+
+Do not explain a tool by comparing it with another tool the reader has not met. "Playwright
+auto-waits, unlike Selenium's explicit waits" means nothing to a beginner. Describe what the tool
+does first, then introduce the comparison if it helps.
 
 ### Address the reader as "you", throughout
 
@@ -132,7 +144,9 @@ Output → Explanation**. That predictability is its main strength, and this cou
 1. **The H1 heading.** See [Headings](#3-headings) for the format.
 2. **A one-sentence definition or thesis**, stated as *X is Y* or *X does Y*. All seven reference
    sites open this way.
-3. **"By the end of this lesson, you will…"**, which lists three to six concrete outcomes.
+3. **"By the end of this lesson, you will…"**, which lists three to six concrete outcomes. Leave
+   this list out when the card's **Goals** row already states them, because the owner's rule is not
+   to restate what a card says.
 4. **The at-a-glance card.**
 5. **One banner at most**, placed directly after the card. A banner tells the reader where the code
    runs (for example, "Try it here" or "Follow this one in your own project").
@@ -639,6 +653,24 @@ TypeScript today" banners were removed from Week 1.
 One check links the linted text to the shipped text: every block that comes from an overlay must be
 byte-identical to its authored source. This proves that the text the linter checked is the text the
 learner sees.
+
+### Rewriting a whole lesson body
+
+A lesson whose generated text is rewritten by hand stores the new body in
+`Data/Content/rewrites/w<week>d<day>p<part>.md`. The file opens with the H1, ends with
+`## What's next`, and is split into blocks at each `## ` heading. `applyRewrites()` in
+`scripts/lesson-overlay.ts` replaces the part's generated markdown with those blocks on every
+overlay and import, and `applyOverlay()` then places the cards around them as usual.
+
+- The file is authored text, so every rule in this section applies to it, and `verify` fails if
+  the shipped lesson differs from it by a single character.
+- It cannot replace a part that contains code examples, your-turn prompts, or practice problems.
+  The step refuses rather than deleting them. Support for those parts is added when the review
+  first reaches one.
+- Week 1 Day 1 Fundamentals is the first lesson rewritten this way, for a complete beginner. It went
+  from 12 sections to 8, and from 33 em dashes to none. It is clean under every rule, where the old
+  text had 3 errors and 5 warnings. Its word count barely changed (1,422 to 1,339), because
+  explaining each term costs the words that trimming saved.
 
 ### What no linter can check
 

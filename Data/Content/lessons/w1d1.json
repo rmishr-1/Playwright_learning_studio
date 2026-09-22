@@ -7,37 +7,37 @@
       "at_a_glance": "| | |\n|---|---|\n| **Focus** | An orientation to test automation, with one guided look at the Playwright website. |\n| **Goals** | Explain what automation cannot do, why teams choose Playwright over Selenium, and where automation effort is spent. |\n| **Prerequisites** | No prior knowledge is required. This is the first lesson in the course. |\n| **Key takeaway** | Automation does not find defects. It reports whether each check passed or failed. |",
       "checkpoints": [
         {
-          "question": "Your suite of 500 automated tests runs green overnight. What has it proved?",
+          "question": "An automated test script runs 500 checks every night, and all of them pass. What does this tell you?",
           "options": [
-            "That the application has no defects in the areas covered",
-            "That 500 checks a human already wrote came back as expected — nothing about defects nobody wrote a check for",
-            "That no new defects were introduced, though old ones may remain"
+            "The application has no bugs in the areas that the checks cover.",
+            "The 500 checks that a person wrote produced their expected results.",
+            "No new bugs have appeared in the application since the last run."
           ],
           "answer": 1,
-          "explanation": "Automation never *finds* a defect: it reports pass or fail against a check a person wrote in advance, and a person decides whether a failure means a bug. Something visibly broken that nobody thought to check for passes green all night. That is what exploratory manual testing is still for."
+          "explanation": "Automation does not find bugs. Each check compares the actual result with an expected result that a person wrote in advance. A problem that nobody wrote a check for still passes, which is why people continue to test by hand as well."
         },
         {
-          "question": "Before you can automate a test at all, the lesson says you need two things. Which pair?",
+          "question": "According to this lesson, which two things do you need before you can automate a test?",
           "options": [
-            "A test runner and a reporting tool",
-            "A known expected result, and a way to identify the object on the page",
-            "A stable environment, and a colleague to review the script"
+            "A test runner, a report, and a tool that records video",
+            "A known expected result and a way to find the element",
+            "A fast computer and a colleague to review your script"
           ],
           "answer": 1,
-          "explanation": "No known expected result means there is nothing to assert. No reliable way to identify the element means you cannot write the step at all. Both are why \"automate everything\" runs into trouble quickly. Pure exploration and one-off checks routinely fail the second test."
+          "explanation": "Without a known expected result, the script has nothing to compare the actual result with. Without a reliable way to find the element, the script cannot click it, type into it, or read it. If either one is missing, the test stays manual."
         },
         {
-          "question": "A stakeholder asks you to automate testing of the company's native Android app. Does Playwright fit?",
+          "question": "Your manager asks you to automate tests for the company's Android app, which people install on their phones. Is Playwright the right tool?",
           "options": [
-            "Yes — mobile is one of its listed features",
-            "No — its mobile support is emulation, a desktop browser with a phone viewport and user agent. A native app needs something like Appium.",
-            "Yes, but only on an emulator rather than a real device"
+            "Yes, because mobile support is one of the features Playwright lists.",
+            "No. Playwright imitates phone screens in a browser and cannot test installed apps.",
+            "Yes, but only on an emulator on your computer, not on a real phone."
           ],
           "answer": 1,
-          "explanation": "Playwright emulates mobile: real device viewports and user agents, in a desktop browser. That is genuinely useful for mobile *web*, and it is not a native app driver. Picking the right tool for the vertical matters more than picking your favorite one."
+          "explanation": "Playwright's mobile support is mobile emulation: a desktop browser imitates a phone screen. This is useful for testing websites on phone-sized screens. An app installed on a phone needs a mobile testing tool such as Appium."
         }
       ],
-      "recap": "- **Automation never finds a defect.** It reports pass or fail against checks a person wrote; a person decides what a failure means.\n- Two non-negotiables before automating anything: a known expected result, and an identifiable object.\n- Playwright folds in what Selenium needs extra tooling for — auto-waiting, assertions, a runner, tracing. Selenium is older, not bad.\n- Its home is system-level end-to-end testing, and its mobile support is emulation, not native apps.\n- About half your effort on a real project goes into learning the **application**, not the tool."
+      "recap": "- **Software testing** checks that an application works as expected. A bug is a difference between the expected result and the actual result.\n- **Automation does not find bugs.** It reports whether each check passed or failed, and a person decides what a failure means.\n- Before you automate a test, you need a known expected result and a way to find the element.\n- **Playwright** is a free, open-source tool that tests web applications through a browser, from the first step of a task to the last.\n- About half of the effort on a project goes into learning the application. The other half goes into the language, finding elements, and organizing each test."
     },
     "4": {
       "at_a_glance": "| | |\n|---|---|\n| **Focus** | three reflection and research problems |\n| **Prerequisites** | [Fundamentals](/learn/w1/d1/p2) — and on the playwright.dev tab it asked you to open |\n| **Next** | [Day 2](/learn/w1/d2/p2) turns all of this into a working setup on your machine |"

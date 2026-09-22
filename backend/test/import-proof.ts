@@ -10,7 +10,7 @@ import * as path from 'node:path';
 import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
 import { findNotebookisms, findSupersededCopy, findUnresolvedLinks } from '../../scripts/notebook-parse';
-import { applyHeadingFormat, REMOVED_PARTS, ROLE_HEADING_WEEKS } from '../../scripts/lesson-overlay';
+import { applyHeadingFormat, REMOVED_PARTS, ROLE_HEADING_WEEKS, splitRewrite } from '../../scripts/lesson-overlay';
 import { ERROR_RULES, lintCardLabels, lintExplanationShape, lintProse, type Finding } from './style-rules';
 
 const CONTENT = path.resolve(__dirname, '..', '..', 'Data', 'Content');
@@ -505,6 +505,13 @@ function main(): void {
   // announced as enforced while 11 violations passed. The list below is for reporting only: every
   // known rule gets a PASS line so the output shows what was checked, and any rule not on it is
   // still reported and still fails.
+  // Lesson bodies rewritten by hand are authored text too, and are held to every rule.
+  const rewriteDir = path.join(CONTENT, 'rewrites');
+  const rewriteFiles = fs.existsSync(rewriteDir) ? fs.readdirSync(rewriteDir).filter((f) => f.endsWith('.md')).sort() : [];
+  for (const file of rewriteFiles) {
+    findings.push(...lintProse(fs.readFileSync(path.join(rewriteDir, file), 'utf-8'), 'rewrites/' + file));
+  }
+
   const errors = findings.filter((f) => f.severity === 'error');
   const errorRules = [...new Set([...ERROR_RULES, ...errors.map((f) => f.rule)])];
   for (const rule of errorRules) {
@@ -602,6 +609,20 @@ function main(): void {
       }
     }
   }
+  const staleRewrites: string[] = [];
+  for (const file of rewriteFiles) {
+    const m = /^w(\d+)d(\d+)p(\d)\.md$/.exec(file);
+    if (!m) { staleRewrites.push(file + ' is not named w<W>d<D>p<P>.md'); continue; }
+    const d = days.find((x) => x.week === +m[1] && x.day === +m[2]);
+    const p = d?.parts.find((x) => x.part === +m[3]);
+    if (!d || !p) { staleRewrites.push(file + ' has no matching part'); continue; }
+    if (d.locked) { staleRewrites.push(file + ' rewrites a locked week'); continue; }
+    const want = splitRewrite(fs.readFileSync(path.join(rewriteDir, file), 'utf-8'));
+    const got = p.blocks.filter((b) => b.type === 'markdown').map((b) => b.text);
+    if (JSON.stringify(got) !== JSON.stringify(want)) staleRewrites.push(file);
+  }
+  check('every rewritten lesson ships exactly its authored text', staleRewrites.length === 0, staleRewrites.join(' | '));
+
   check('every shipped solution matches its authored source', staleSolutions.length === 0, staleSolutions.slice(0, 5).join(' | '));
 
   check(
