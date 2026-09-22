@@ -17,16 +17,23 @@ rule the whole pass came from. The first screen of the course used to open with:
 > already have, or is theory with no code at all.
 
 A first-time reader has not yet been told what TypeScript is, that days normally do introduce
-some, or why a lesson would announce an absence. The page defines itself by a missing thing.
-It now reads:
+some, or why a lesson would announce an absence. The page defines itself by a missing thing. The
+same reflex ran through the recap cards on those days:
 
-> You write Playwright tests in TypeScript. This tab is where each day covers the language
-> features that day's lesson needs.
->
-> Today's lesson needs nothing new, so you can go straight to it.
+| Before | After |
+|---|---|
+| No new TypeScript today. Everything ahead is setup: Node, VS Code, and what `npm init playwright@latest` produces. | Today's work is setup rather than language: Node, VS Code, and what `npm init playwright@latest` produces. |
+| Nothing to learn on this tab today. | Day 1 is orientation, so the language lessons begin later in the week. |
 
-Three sentences, in the order a newcomer needs them: what the language is for, what this tab
-does, what to do now.
+Each rewrite leads with what the day *is* about. Neither opens by naming an absence, and neither
+needs the reader to already know what a normal day looks like.
+
+**Do not write a sentence a card already carries.** The sentence above went through three
+rewordings before the better answer became obvious: delete it. The TypeScript tab on week 1 days
+1-4 now carries its heading and nothing else, because the at-a-glance card directly beneath it
+already names what is new today, when the language lessons start and where to go next. Prose that
+restates a card is not a style problem to fix, it is a paragraph to cut. `npm run verify` enforces
+that this particular one stays cut.
 
 **One idea per sentence.** The habit this course had was a main clause with a second clause
 bolted on after an em dash, and sometimes a third inside brackets. Two asides in one sentence
@@ -107,10 +114,10 @@ from 147 notebooks in a training repository this checkout does not contain, and 
 edit turns `npm run verify` permanently red, and a check everyone ignores is worse than no
 check.**
 
-Note that filtering the *merged* day files by block type would be the obvious way to do this,
-and it is wrong: the placeholder text quoted above ships as a plain `markdown` block, and
-`studioise()` injects its banners inside notebook-derived markdown. A type filter misses the
-exact sentence that prompted this work. Lint the sources.
+Note that filtering the *merged* day files by block type would be the obvious way to do this, and
+it is wrong: `studioise()` injects its banners *inside* notebook-derived markdown blocks, so a
+type filter reads them as untouchable generated prose when they are in fact this repository's own
+words. The sentence that prompted this whole pass shipped the same way. Lint the sources.
 
 One check closes the loop between the two: **every overlay-typed block in a shipped day file
 must be byte-identical to its authored source.** That proves the text the linter measured is
