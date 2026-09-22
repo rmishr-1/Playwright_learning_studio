@@ -10,6 +10,7 @@ import * as path from 'node:path';
 import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
 import { findNotebookisms, findSupersededCopy, findUnresolvedLinks } from '../../scripts/notebook-parse';
+import { applyHeadingFormat, ROLE_HEADING_WEEKS } from '../../scripts/lesson-overlay';
 import { lintExplanationShape, lintProse, type Finding } from './style-rules';
 
 const CONTENT = path.resolve(__dirname, '..', '..', 'Data', 'Content');
@@ -210,33 +211,121 @@ function main(): void {
     mislabelled.slice(0, 5).join(' | '),
   );
 
-  // Week 1's page headings are standardised on "Week 1, Day D, <Tab>", with whatever the heading
-  // said about the lesson kept after an em dash. Placeholder headings ("TypeScript check-in:
-  // nothing new today") keep only the prefix. Week 1 only, by request - week 2 still reads
-  // "Week 2, Day 1.2 - ...", so this asserts nothing about it.
-  const HEADING = /^# Week 1, Day [1-5], (TypeScript|Fundamentals|Implementation|Practice)( — \S.*)?$/;
+  // Page headings are standardised on "Week N - Day D - <Tab>", with whatever the heading said
+  // about the lesson kept after a further " - ". Placeholder headings ("TypeScript check-in:
+  // nothing new today") keep only the prefix. Both open weeks, since a rule that applies to one
+  // week is not a rule.
+  const roleWeeks = [...ROLE_HEADING_WEEKS].sort((a, b) => a - b);
+  const HEADING = new RegExp(
+    '^# Week (?:' + roleWeeks.join('|') + ') - Day [1-5] - ' +
+      '(?:TypeScript|Fundamentals|Implementation|Practice)(?: - \\S.*)?$',
+  );
   const badHeadings: string[] = [];
-  for (const d of days.filter((x) => x.week === 1)) {
+  for (const d of days.filter((x) => ROLE_HEADING_WEEKS.has(x.week))) {
     for (const p of d.parts) {
+      // Both halves trim: the block test used to trimStart while the line search did not, so a
+      // block with leading whitespace was reported as having no heading at all.
       const opening = p.blocks.find((b) => b.type === 'markdown' && b.text.trimStart().startsWith('# '));
-      const line = opening?.text.split('\n').find((l) => l.startsWith('# '));
+      const line = opening?.text.split('\n').map((l) => l.trim()).find((l) => l.startsWith('# '));
       if (!line) {
-        badHeadings.push('w1d' + d.day + 'p' + p.part + ' has no heading');
+        badHeadings.push('w' + d.week + 'd' + d.day + 'p' + p.part + ' has no heading');
       } else if (!HEADING.test(line)) {
-        badHeadings.push('w1d' + d.day + 'p' + p.part + ': ' + line);
+        badHeadings.push('w' + d.week + 'd' + d.day + 'p' + p.part + ': ' + line);
       }
     }
   }
   check(
-    'every week 1 heading follows "Week 1, Day D, <Tab>"',
+    'every heading in an open week follows "Week N - Day D - <Tab>"',
     badHeadings.length === 0,
     badHeadings.slice(0, 4).join(' | '),
   );
-  // The rule must not throw away a real primer just because it sits on a TypeScript tab.
-  const d5p1 = days.find((d) => d.week === 1 && d.day === 5)!.parts.find((p) => p.part === 1)!;
+
+  // The separator is the point of the rule, so assert it directly rather than trusting the shape
+  // regex above to imply it. A comma left in the PREFIX means a heading the transform did not
+  // reach; a comma in the SUBJECT is ordinary prose and must survive untouched, which is why this
+  // only inspects the text up to the tab name.
+  const commaPrefixes = days
+    .filter((x) => ROLE_HEADING_WEEKS.has(x.week))
+    .flatMap((d) =>
+      d.parts.flatMap((p) => {
+        const line = p.blocks
+          .find((b) => b.type === 'markdown' && b.text.trimStart().startsWith('# '))
+          ?.text.split('\n')
+          .find((l) => l.startsWith('# '));
+        const prefix = line?.split(/ - (?!.* - )/)[0] ?? line ?? '';
+        const upToTab = line?.match(/^# .*?(TypeScript|Fundamentals|Implementation|Practice)/)?.[0] ?? prefix;
+        return upToTab.includes(',') ? ['w' + d.week + 'd' + d.day + 'p' + p.part + ': ' + line] : [];
+      }),
+    );
   check(
-    'a real primer keeps its subject (w1d5p1 is not a placeholder)',
-    d5p1.blocks[0].text.includes('Arrow functions'),
+    'no heading prefix still separates with a comma',
+    commaPrefixes.length === 0,
+    commaPrefixes.slice(0, 4).join(' | '),
+  );
+
+  // The transform runs on every `npm run overlay`, which launcher.bat runs at startup - so if it
+  // is not idempotent the headings drift a little further every time anyone opens the app, and the
+  // drift gets committed by the next push. The committed tree being a FIXED POINT is the strongest
+  // cheap statement of that: f(committed) === committed implies f(f(raw)) === f(raw), and it also
+  // catches the other failure mode, which is that somebody changed the rule and never re-ran the
+  // overlay. That is the gap findSupersededCopy closes for prose and nothing closed for headings.
+  const notFixed = days.flatMap((d) =>
+    JSON.stringify(applyHeadingFormat(d)) === JSON.stringify(d) ? [] : ['w' + d.week + 'd' + d.day],
+  );
+  check(
+    'the committed tree is a fixed point of the heading rule',
+    notFixed.length === 0,
+    notFixed.slice(0, 5).join(' | '),
+  );
+
+  // "TypeScript - TypeScript for building a unique value" reads as a stutter, and there are two
+  // independent ways to produce one: a generated placeholder whose subject repeats the tab, and a
+  // real primer that happens to open with the tab's own name. One pattern catches both.
+  const STUTTER = /^# Week \d+ - Day \d+ - (TypeScript|Fundamentals|Implementation|Practice) - \1\b/i;
+  const stutters = days
+    .filter((x) => ROLE_HEADING_WEEKS.has(x.week))
+    .flatMap((d) =>
+      d.parts.flatMap((p) => {
+        const line = p.blocks[0]?.text.split('\n').find((l) => l.startsWith('# ')) ?? '';
+        return STUTTER.test(line) ? ['w' + d.week + 'd' + d.day + 'p' + p.part + ': ' + line] : [];
+      }),
+    );
+  check('no heading repeats its own tab name', stutters.length === 0, stutters.slice(0, 4).join(' | '));
+
+  // An at-a-glance is placed relative to block 0 being the H1. That holds throughout weeks 1-2,
+  // but w3d1p2's H1 sits at block 1 - so when week 3 joins the rule, the card would be inserted
+  // ABOVE the heading and the existing "at <= 1" check would still pass. Fail here first.
+  const headingNotFirst = days
+    .filter((x) => ROLE_HEADING_WEEKS.has(x.week))
+    .flatMap((d) =>
+      d.parts.flatMap((p) =>
+        p.blocks[0]?.type === 'markdown' && p.blocks[0].text.trimStart().startsWith('# ')
+          ? []
+          : ['w' + d.week + 'd' + d.day + 'p' + p.part],
+      ),
+    );
+  check(
+    'every part in an open week opens on its heading',
+    headingNotFirst.length === 0,
+    headingNotFirst.slice(0, 4).join(' | '),
+  );
+
+  // The rule must not throw away a real primer just because it sits on a TypeScript tab. Three of
+  // them exist across the open weeks, and each would be destroyed by a rule that keyed off the tab
+  // rather than off what the heading actually says.
+  const primers: ReadonlyArray<readonly [number, number, string]> = [
+    [1, 5, 'Arrow functions'],
+    [2, 2, 'how TypeScript decides'],
+    [2, 3, 'Building a unique value'],
+  ];
+  const lostPrimers = primers.flatMap(([week, day, subject]) => {
+    const p1 = days.find((d) => d.week === week && d.day === day)?.parts.find((p) => p.part === 1);
+    return p1?.blocks[0].text.includes(subject) ? [] : ['w' + week + 'd' + day + 'p1 lost "' + subject + '"'];
+  });
+  check(
+    'a real primer keeps its subject, on every TypeScript tab that has one',
+    lostPrimers.length === 0,
+    lostPrimers.join(' | '),
   );
 
   // The authored lesson overlays. Weeks 1 and 2 are the authored weeks; 3-8 have no overlay

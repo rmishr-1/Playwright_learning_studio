@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 2, TypeScript\n\nYou write Playwright tests in TypeScript. This tab is where each day covers the language\nfeatures that day's lesson needs.\n\nToday's lesson needs nothing new, so you can go straight to it.\n\n> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n> functions, `async`, and how to read an `import` line. The days before it are written to be\n> readable without them.\n",
+          "text": "# Week 1 - Day 2 - TypeScript\n\nYou write Playwright tests in TypeScript. This tab is where each day covers the language\nfeatures that day's lesson needs.\n\nThe lesson ahead draws only on TypeScript the course has already covered. Continue to\nthe Fundamentals tab.\n\n> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n> functions, `async`, and how to read an `import` line. The days before it are written to be\n> readable without them.\n",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -44,7 +44,7 @@
         },
         {
           "type": "recap",
-          "text": "No new TypeScript today. Everything ahead is setup: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2).",
+          "text": "Today's work is setup rather than language: Node, VS Code, and what `npm init playwright@latest` produces. Start at [Fundamentals](/learn/w1/d2/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -62,7 +62,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 2, Fundamentals — Environment setup & your first Playwright project\n\nBy the end of this lesson you will have checked your own Node install, know what\n`npm init playwright@latest` actually produces, and have opened this repo's real\n`playwright.config.ts` to recognize the pieces in it.\n\n> **No new TypeScript today.** This is npm/CLI/editor setup, not language syntax — nothing\n> to primer, so there's no Day 2.1. [Day 1.2](/learn/w1/d1/p2) covered the why; this is the\n> how.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
+          "text": "# Week 1 - Day 2 - Fundamentals - Environment setup & your first Playwright project\n\nBy the end of this lesson you will have checked your own Node install, know what\n`npm init playwright@latest` actually produces, and have opened this repo's real\n`playwright.config.ts` to recognize the pieces in it.\n\n> **No new TypeScript today.** This is npm/CLI/editor setup, not language syntax — nothing\n> to primer, so there's no Day 2.1. [Day 1.2](/learn/w1/d1/p2) covered the why; this is the\n> how.\n\n> **Try it here.** Write code in the editor on the right and press Run. Your code drives a real browser, and the results appear beside it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -264,7 +264,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 2, Implementation — Organizing a real project's folders and config\n\nBy the end of this lesson you will understand how `testDir` and folder-per-test-type\nconventions turn a flat scaffold into something a whole team can navigate, and what actually\nneeds to be in `.gitignore` for a Playwright project.\n\n> No new API here — \"advanced\" for a setup day means organizing what Day 2.2 gave you\n> sensibly, not new Playwright calls.",
+          "text": "# Week 1 - Day 2 - Implementation - Organizing a real project's folders and config\n\nBy the end of this lesson you will understand how `testDir` and folder-per-test-type\nconventions turn a flat scaffold into something a whole team can navigate, and what actually\nneeds to be in `.gitignore` for a Playwright project.\n\n> No new API here — \"advanced\" for a setup day means organizing what Day 2.2 gave you\n> sensibly, not new Playwright calls.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -407,7 +407,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 2, Practice — Environment setup\n\nThree problems. The first two use your real environment and this repo's real config — no\nguessing needed, everything here is something you can check.",
+          "text": "# Week 1 - Day 2 - Practice - Environment setup\n\nThree problems. The first two use your real environment and this repo's real config — no\nguessing needed, everything here is something you can check.",
           "starter": null,
           "variation": null,
           "checkpoint": null

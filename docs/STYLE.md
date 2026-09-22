@@ -51,6 +51,42 @@ read as notes to a colleague, not as course material. "gotcha" became "trap".
 process each time" means nothing to someone on day one; what they need to know is that nothing
 carries over from the previous run.
 
+## Page headings
+
+Every part's H1, in every open week, follows one shape:
+
+```
+# Week 1 - Day 1 - TypeScript
+# Week 1 - Day 1 - Fundamentals - Why automation, why Playwright
+# Week 2 - Day 3 - TypeScript - Building a unique value at runtime
+```
+
+`Week N - Day D - <Tab>`, then the lesson's own subject after a further ` - `. The tab name says
+which part this is, so the part number is dropped: `Day 1.2` became `Day 1 - Fundamentals`.
+
+Three rules about what does **not** change:
+
+1. **Only structural separators are hyphens.** A comma inside the subject is ordinary English and
+   stays: `Why automation, why Playwright`, not `Why automation - why Playwright`.
+2. **`##` and `###` subheadings are never touched**, commas and all. The pattern requires a single
+   `#` followed by whitespace, so they are immune by construction rather than by a guard someone
+   could remove.
+3. **A heading never repeats its tab name.** `Practice: actions on a form` under a tab already
+   called Practice, and `TypeScript for building a unique value` under one called TypeScript, both
+   lose the repeat and capitalise what follows.
+
+A heading that only announces an absence (`TypeScript check-in: nothing new today`) keeps the
+prefix and loses its subject entirely. That decision is made on what the heading *says*, plus the
+part's `kind` for the generated placeholder — never on which tab it sits on, because Week 1 Day 5
+and Week 2 Days 2 and 3 are real language primers sitting on TypeScript tabs, and a tab-based rule
+would have destroyed all three.
+
+The rule lives in `applyHeadingFormat()` in `scripts/lesson-overlay.ts` and runs on every
+`npm run overlay`. It accepts both the raw notebook form and the older comma form, and emits a form
+neither pattern matches — which is what makes it safe to run at every app start. `npm run verify`
+proves the committed tree is a fixed point of it, so a rule change that nobody re-ran the overlay
+for fails the build rather than shipping half-applied.
+
 ## What `npm run verify` checks
 
 The linter lives in `backend/test/style-rules.ts` as pure functions and is run from

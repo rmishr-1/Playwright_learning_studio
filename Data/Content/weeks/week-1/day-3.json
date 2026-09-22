@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 3, TypeScript\n\nYou write Playwright tests in TypeScript. This tab is where each day covers the language\nfeatures that day's lesson needs.\n\nToday's lesson needs nothing new, so you can go straight to it.\n\n> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n> functions, `async`, and how to read an `import` line. The days before it are written to be\n> readable without them.\n",
+          "text": "# Week 1 - Day 3 - TypeScript\n\nYou write Playwright tests in TypeScript. This tab is where each day covers the language\nfeatures that day's lesson needs.\n\nThe lesson ahead draws only on TypeScript the course has already covered. Continue to\nthe Fundamentals tab.\n\n> The language lessons begin at [Week 1, Day 5](/learn/w1/d5/p1), which covers arrow\n> functions, `async`, and how to read an `import` line. The days before it are written to be\n> readable without them.\n",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -44,7 +44,7 @@
         },
         {
           "type": "recap",
-          "text": "No new TypeScript today. [Fundamentals](/learn/w1/d3/p2) is all CLI, and [Implementation](/learn/w1/d3/p3) is a first read of the config file.",
+          "text": "Today's material is the command line rather than the language. [Fundamentals](/learn/w1/d3/p2) is all CLI, and [Implementation](/learn/w1/d3/p3) is a first read of the config file.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -62,7 +62,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 3, Fundamentals — Running tests from the CLI\n\nBy the end of this lesson you will have run a real spec from the command line, seen an\nHTML report, and know the difference between `package.json` and `package-lock.json`.\n\n> **No new TypeScript today** — the CLI commands below are shell commands, not language\n> syntax, so there's no Day 3.1. [Day 2](/learn/w1/d2/p2) got your environment ready; this is\n> where you actually use it.\n\n> **Partly here, partly in your own project.** The first cells run real terminal commands (like `runSpec` does under the\n> hood); the rest is explore-mode as usual.",
+          "text": "# Week 1 - Day 3 - Fundamentals - Running tests from the CLI\n\nBy the end of this lesson you will have run a real spec from the command line, seen an\nHTML report, and know the difference between `package.json` and `package-lock.json`.\n\n> **No new TypeScript today** — the CLI commands below are shell commands, not language\n> syntax, so there's no Day 3.1. [Day 2](/learn/w1/d2/p2) got your environment ready; this is\n> where you actually use it.\n\n> **Partly here, partly in your own project.** The first cells run real terminal commands (like `runSpec` does under the\n> hood); the rest is explore-mode as usual.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -197,7 +197,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 3, Implementation — A first look inside `playwright.config.ts`\n\nBy the end of this lesson you will recognize every top-level setting in this repo's real\nconfig file and roughly what it does — not master any of them yet.\n\n> **This is deliberately shallow, and that's flagged on purpose.** This slot usually shows\n> Day 3.2's API wrapped in framework structure — but there's no framework yet, and this\n> config file gets much deeper, dedicated treatment later: **week3/day1** covers timeouts in\n> the config, and **week3/day5** covers `projects`/`workers`/`retries` properly, with\n> measurements. Today is just: here's what's in the file, and roughly what each piece is for.",
+          "text": "# Week 1 - Day 3 - Implementation - A first look inside `playwright.config.ts`\n\nBy the end of this lesson you will recognize every top-level setting in this repo's real\nconfig file and roughly what it does — not master any of them yet.\n\n> **This is deliberately shallow, and that's flagged on purpose.** This slot usually shows\n> Day 3.2's API wrapped in framework structure — but there's no framework yet, and this\n> config file gets much deeper, dedicated treatment later: **week3/day1** covers timeouts in\n> the config, and **week3/day5** covers `projects`/`workers`/`retries` properly, with\n> measurements. Today is just: here's what's in the file, and roughly what each piece is for.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -326,7 +326,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 3, Practice — Running tests & the config file\n\nThree problems, using the real CLI and the real config — nothing invented.",
+          "text": "# Week 1 - Day 3 - Practice - Running tests & the config file\n\nThree problems, using the real CLI and the real config — nothing invented.",
           "starter": null,
           "variation": null,
           "checkpoint": null

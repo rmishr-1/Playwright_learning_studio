@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 5, TypeScript — Arrow functions, `async`, and reading `import`\n\nBy the end of this lesson you'll be comfortable writing an arrow function, know exactly\nwhen to put `async` in front of one, be able to read `({ page }) => { ... }`, and be able to\nread a single `import` line — everything today's Playwright code (and every test you'll ever\nwrite in this course) needs from the language before you meet the Playwright API itself.\n\n> **This lesson is TypeScript only.** No browsers, no Playwright. That starts in\n> [Day 5.2](/learn/w1/d5/p2) — and this is the **first time in the whole course** you'll see\n> arrow functions and `async`, so take it slowly; everything later builds on it.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# Week 1 - Day 5 - TypeScript - Arrow functions, `async`, and reading `import`\n\nBy the end of this lesson you'll be comfortable writing an arrow function, know exactly\nwhen to put `async` in front of one, be able to read `({ page }) => { ... }`, and be able to\nread a single `import` line — everything today's Playwright code (and every test you'll ever\nwrite in this course) needs from the language before you meet the Playwright API itself.\n\n> **This lesson is TypeScript only.** No browsers, no Playwright. That starts in\n> [Day 5.2](/learn/w1/d5/p2) — and this is the **first time in the whole course** you'll see\n> arrow functions and `async`, so take it slowly; everything later builds on it.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -198,7 +198,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 5, Fundamentals — Your first real test, and why assertions matter\n\nBy the end of this lesson you will have written and run a real Playwright test, and — this\nis the important part — **watched a test pass when it should have failed**, because it never\nchecked anything. Then you'll fix it and watch it fail correctly.\n\nPrerequisites are in [Day 5.1](/learn/w1/d5/p1). If arrow functions or `async` felt shaky, go\nback — everything below assumes you're comfortable reading `async ({ page }) => {}`.",
+          "text": "# Week 1 - Day 5 - Fundamentals - Your first real test, and why assertions matter\n\nBy the end of this lesson you will have written and run a real Playwright test, and — this\nis the important part — **watched a test pass when it should have failed**, because it never\nchecked anything. Then you'll fix it and watch it fail correctly.\n\nPrerequisites are in [Day 5.1](/learn/w1/d5/p1). If arrow functions or `async` felt shaky, go\nback — everything below assumes you're comfortable reading `async ({ page }) => {}`.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -349,7 +349,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 5, Implementation — The same login, with a little structure\n\nBy the end of this lesson you will have seen Day 5.2's exact login steps reorganized into a\nsmall class — a first, gentle look at the shape you'll build on for the rest of the course.\n\n> **No new API here on purpose.** `getByPlaceholder`, `getByRole`, `fill`, `click` — all\n> already used in Day 5.2. The only new thing is the structure around them. The repo has no\n> `framework/` folder yet (that comes later), so this class is written **inline in the spec\n> file below** — a shape you're seeing, not a file the repo ships yet.\n\n> This previews something week5 names and covers in full depth as the **Page Object Model** —\n> today, just notice the shape; you don't need the name yet.",
+          "text": "# Week 1 - Day 5 - Implementation - The same login, with a little structure\n\nBy the end of this lesson you will have seen Day 5.2's exact login steps reorganized into a\nsmall class — a first, gentle look at the shape you'll build on for the rest of the course.\n\n> **No new API here on purpose.** `getByPlaceholder`, `getByRole`, `fill`, `click` — all\n> already used in Day 5.2. The only new thing is the structure around them. The repo has no\n> `framework/` folder yet (that comes later), so this class is written **inline in the spec\n> file below** — a shape you're seeing, not a file the repo ships yet.\n\n> This previews something week5 names and covers in full depth as the **Page Object Model** —\n> today, just notice the shape; you don't need the name yet.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -462,7 +462,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1, Day 5, Practice — Your first test, and the assertions gap\n\nThree problems, capping off the week. No solutions — you'll know you're right because the\nreport will tell you.\n\nWrite specs into `week1/generated/` and run them with `npx playwright test`, same as every\nexample this week.",
+          "text": "# Week 1 - Day 5 - Practice - Your first test, and the assertions gap\n\nThree problems, capping off the week. No solutions — you'll know you're right because the\nreport will tell you.\n\nWrite specs into `week1/generated/` and run them with `npx playwright test`, same as every\nexample this week.",
           "starter": null,
           "variation": null,
           "checkpoint": null

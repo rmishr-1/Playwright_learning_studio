@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 4.1 — TypeScript check-in: nothing new today\n\nDay 4.2's Playwright code — creating, finding, updating, and deleting an employee — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 4.2](/learn/w2/d4/p2).",
+          "text": "# Week 2 - Day 4 - TypeScript\n\nDay 4.2's Playwright code — creating, finding, updating, and deleting an employee — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 4.2](/learn/w2/d4/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -76,7 +76,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 4.2 — The sibling axis: finding a row by what it says\n\nBy the end of this lesson you will have created a real employee on a live HR system,\nfound its row by the name you gave it (not by counting columns), updated it, verified\nthe change for real, and deleted it — cleaning up after yourself the whole way.",
+          "text": "# Week 2 - Day 4 - Fundamentals - The sibling axis: finding a row by what it says\n\nBy the end of this lesson you will have created a real employee on a live HR system,\nfound its row by the name you gave it (not by counting columns), updated it, verified\nthe change for real, and deleted it — cleaning up after yourself the whole way.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -322,7 +322,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 4.3 — The sibling axis, wrapped for reuse\n\nBy the end of this lesson you will have pulled Day 4.2's create/find/delete steps out\nof one long cell and into three functions any test can call.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 4.2](/learn/w2/d4/p2). The only new thing is the structure around it.",
+          "text": "# Week 2 - Day 4 - Implementation - The sibling axis, wrapped for reuse\n\nBy the end of this lesson you will have pulled Day 4.2's create/find/delete steps out\nof one long cell and into three functions any test can call.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 4.2](/learn/w2/d4/p2). The only new thing is the structure around it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -463,7 +463,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 4.4 — Practice: the sibling axis\n\nThree problems, getting harder. There is no answer key — that is deliberate. Every\nemployee you create in these problems is on a real, shared, public system: **delete it\nbefore you move on**, using the same sibling-axis pattern from Day 4.2.\n\nStart in a fresh cell in this lesson. When a problem asks for a spec file, write it\ninto `week2/generated/` and run it with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 4.1](/learn/w2/d4/p1) or [Day 4.2](/learn/w2/d4/p2), not in your ability.",
+          "text": "# Week 2 - Day 4 - Practice - The sibling axis\n\nThree problems, getting harder. There is no answer key — that is deliberate. Every\nemployee you create in these problems is on a real, shared, public system: **delete it\nbefore you move on**, using the same sibling-axis pattern from Day 4.2.\n\nStart in a fresh cell in this lesson. When a problem asks for a spec file, write it\ninto `week2/generated/` and run it with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 4.1](/learn/w2/d4/p1) or [Day 4.2](/learn/w2/d4/p2), not in your ability.",
           "starter": null,
           "variation": null,
           "checkpoint": null

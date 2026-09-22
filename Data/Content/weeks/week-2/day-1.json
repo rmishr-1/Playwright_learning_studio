@@ -15,7 +15,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 1.1 — TypeScript check-in: nothing new today\n\nDay 1.2's Playwright code — filling fields, checking boxes, picking from dropdowns — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 1.2](/learn/w2/d1/p2).",
+          "text": "# Week 2 - Day 1 - TypeScript\n\nDay 1.2's Playwright code — filling fields, checking boxes, picking from dropdowns — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Day 1.2](/learn/w2/d1/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -76,7 +76,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 1.2 — From recorder to real code: actions on a form\n\nBy the end of this lesson you will have hand-written the locators for a full\nregistration form — text fields, a radio button, checkboxes, a dropdown, and a country\npicker — and filled and submitted it without Codegen recording a single line.",
+          "text": "# Week 2 - Day 1 - Fundamentals - From recorder to real code: actions on a form\n\nBy the end of this lesson you will have hand-written the locators for a full\nregistration form — text fields, a radio button, checkboxes, a dropdown, and a country\npicker — and filled and submitted it without Codegen recording a single line.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -286,7 +286,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 1.3 — The same actions, the way a real project writes them\n\nBy the end of this lesson you will have pulled yesterday's fill/check/select steps out\nof one test and into a single reusable function two different tests both call.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 1.2](/learn/w2/d1/p2). The only new thing is the structure around it.",
+          "text": "# Week 2 - Day 1 - Implementation - The same actions, the way a real project writes them\n\nBy the end of this lesson you will have pulled yesterday's fill/check/select steps out\nof one test and into a single reusable function two different tests both call.\n\n> **No new API here on purpose.** Everything below is something you already ran in\n> [Day 1.2](/learn/w2/d1/p2). The only new thing is the structure around it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -397,7 +397,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2, Day 1.4 — Practice: actions on a form\n\nThree problems, getting harder. No answer key — you learn this by getting it wrong and\nreading the error message.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 1.2](/learn/w2/d1/p2) or [Day 1.3](/learn/w2/d1/p3), not in your ability. Go back, re-read, come here again.",
+          "text": "# Week 2 - Day 1 - Practice - Actions on a form\n\nThree problems, getting harder. No answer key — you learn this by getting it wrong and\nreading the error message.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [Day 1.2](/learn/w2/d1/p2) or [Day 1.3](/learn/w2/d1/p3), not in your ability. Go back, re-read, come here again.",
           "starter": null,
           "variation": null,
           "checkpoint": null

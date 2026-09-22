@@ -317,7 +317,7 @@ export function Day({
               </button>
             </p>
           )}
-          <h1>Week {week}, Day {day}</h1>
+          <h1>Week {week} - Day {day}</h1>
           <p className="muted" style={{ fontSize: 16 }}>{locked}</p>
           <div className="notice" style={{ marginTop: 18 }}>
             This day is written but not open yet. Weeks 1 and 2 are ready today; the rest unlock as
