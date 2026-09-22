@@ -1,0 +1,15 @@
+{
+  "1": {
+    "statement": "**What to build.** A short record of three test runs. In your project, run these commands one\nafter another, and note what you see after each:\n\n1. `npx playwright test --project=chromium --headed`\n2. `npx playwright test`\n3. `npx playwright show-report`\n\n**Where.** Run the commands in the integrated terminal in VS Code, and write your notes in the\neditor, using the template.\n\n**How you will know it worked.** You saw a Chromium window open and close, the second run\nreported six passed tests, and the report opened in your browser.",
+    "stub": "// Problem 1: three test runs\n//\n// 1. With --project=chromium --headed, what did you see?\n//\n// 2. How many tests passed without any options, and why that number?\n//\n// 3. What does the report show for each test?"
+  },
+  "2": {
+    "statement": "**What to build.** Answers to three questions about your project's configuration file. Open\n`playwright.config.ts` in VS Code and answer from what you see in the file:\n\n1. What value does `retries` have when you run tests on your computer?\n2. What value does `trace` have in the `use` block?\n3. How many projects are active, not counting lines that are comments?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Each answer comes from a line in your own file that you can\npoint to.",
+    "stub": "// Problem 2: my configuration file\n//\n// 1. retries on my computer:\n//\n// 2. trace:\n//\n// 3. Active projects:"
+  },
+  "3": {
+    "difficulty": "Advanced",
+    "statement": "**What to build.** The first version of a configuration file for a new project, with a reason\nfor each choice. Imagine that a team asks you to set up a new project tomorrow. Decide:\n\n1. Which browsers would you start with in `projects`?\n2. What would you set `retries` to, on your computer and on a CI server?\n3. What would you set `trace`, `screenshot`, and `video` to in the `use` block?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Every choice has a one-line reason, not only a preference.",
+    "stub": "// Problem 3: my first configuration for a new project\n//\n// 1. Browsers in projects, and why:\n//\n// 2. retries, and why:\n//\n// 3. trace, screenshot, and video, and why:"
+  }
+}

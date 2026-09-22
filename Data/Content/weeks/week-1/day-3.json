@@ -15,124 +15,122 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 3 - Fundamentals - Running tests from the CLI\n\nBy the end of this lesson you will have run a real spec from the command line, seen an\nHTML report, and know the difference between `package.json` and `package-lock.json`.\n\n> **Shell commands, not language syntax.** [Day 2](/learn/w1/d2/p2) got your environment\n> ready. This is where you actually use it.\n\n> **Partly here, partly in your own project.** The first cells run real terminal commands (like `runSpec` does under the\n> hood); the rest is explore-mode as usual.",
+          "text": "# Week 1 - Day 3 - Fundamentals - Running tests from the CLI\n\nThe **command line**, often shortened to **CLI**, means typing commands in a terminal instead of\nselecting buttons in a window. In this lesson, you run the example tests in your project from the\ncommand line, read the results, and open the report that Playwright creates.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Goals** | `package.json` vs `package-lock.json`, and how to read a run's output |\n| **Tools** | `npx playwright test` · `--headed` · `show-report` |\n| **Environment** | here, though the first cells run real terminal commands |\n| **Key takeaway** | Check the test count. This repo runs Chromium only, so the count is lower than a fresh scaffold's. |",
+          "text": "| | |\n|---|---|\n| **Focus** | Running your project's tests from the command line, and reading the results and the report. |\n| **Goals** | Run every test or only some of them, explain why two tests produce six results, and describe what `package.json` and `package-lock.json` hold. |\n| **Prerequisites** | The project that you created in [Day 2 - Fundamentals](/learn/w1/d2/p2). |\n| **Tools** | `npx playwright test`, the options `--project` and `--headed`, and `npx playwright show-report`. |\n| **Environment** | The integrated terminal in VS Code, in your project folder. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## `package.json` vs `package-lock.json`\n\n| File | What it holds | Do you edit it? |\n|---|---|---|\n| `package.json` | Your project's declared dependencies (version *ranges*), plus scripts like `npm test` | Yes — by hand, or via `npm install <pkg>` |\n| `package-lock.json` | The *exact* resolved version of every dependency (and their dependencies), for a reproducible install | No — npm writes it; you just commit it |\n\n`npm install` reads `package.json`, resolves versions, and writes/updates\n`package-lock.json`. Committing the lock file is what guarantees your teammate — or CI —\ninstalls the exact same versions you tested against.",
+          "text": "## The example test file\n\nThe project that you created in [Day 2 - Fundamentals](/learn/w1/d2/p2) contains one test file,\n`tests/example.spec.ts`. Open it in VS Code. It contains two tests:\n\n| Test name | What it checks |\n|---|---|\n| `has title` | The Playwright website opens, and its title contains the word \"Playwright\". |\n| `get started link` | Selecting the **Get started** link opens a page with the heading \"Installation\". |\n\nYou do not need to understand the code in the file yet. You write your first test yourself in\n[Day 5 - Fundamentals](/learn/w1/d5/p2).",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Running tests\n\n```bash\nnpx playwright test                                    # run everything testMatch finds\nnpx playwright test week1/generated/day3-smoke.spec.ts  # run just this file\nnpx playwright test --headed                            # watch the browser while it runs\nnpx playwright show-report                               # open the last HTML report\n```\n\n`npx` runs the locally-installed `playwright` CLI (the one in `node_modules/.bin`) without\nneeding it installed globally.",
+          "text": "## Running every test\n\nTo run every test in the project, open the integrated terminal in VS Code and run:\n\n```bash\nnpx playwright test\n```\n\n**Output**\n\n```\nRunning 6 tests using 2 workers\n  6 passed (2.4s)\n```\n\n**Explanation:** **npx** is a tool that comes with npm. It runs a program that is installed in your\nproject, here Playwright's test runner. The file has two tests, but the output reports six, because\nyour configuration file lists three browsers in `projects`. Playwright runs every test once in each\nbrowser: two tests in three browsers make six runs. A **worker** is one copy of the test runner, and\nPlaywright uses several at the same time to finish sooner. The number of workers and the time will\nbe different on your computer.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Example — run a real spec and read the output\n\nThere's no default example spec in this repo (a *fresh* `npm init playwright@latest` scaffold\nships one, but this shared repo doesn't keep one lying around) — so the cell below writes a\nsmall, real smoke spec against the banking app, then runs it exactly the way `npx playwright\ntest` would from your terminal.\n\n**Objective:** run a real spec via the CLI and read a real pass/fail report.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week1/generated/day3-smoke.spec.ts\";\n\nawait writeProjectFile(specPath, `\n// Week 1, Day 3 — a trivial smoke spec, written just to give the CLI commands\n// (npx playwright test, --headed, show-report) something real to run against.\nimport { test, expect } from \"@playwright/test\";\nimport { loginAs } from \"../../_shared/test-helpers\";\n\ntest.describe(\"Day 3 smoke\", () => {\n  test(\"the login page loads with an email field\", async ({ page }) => {\n    await page.goto(\"/\");\n    await expect(page.getByPlaceholder(\"Enter Email\")).toBeVisible();\n  });\n\n  test(\"valid credentials reach the dashboard\", async ({ page }) => {\n    await loginAs(page);\n    await expect(page).toHaveURL(/dashboard/);\n  });\n});\n`.trim());\n\nawait runSpec(specPath);",
+          "text": "## Running some of the tests\n\nYou rarely need to run every test while you work on one of them. These commands run fewer:\n\n| Command | What it runs |\n|---|---|\n| `npx playwright test tests/example.spec.ts` | Only the tests in one file |\n| `npx playwright test --project=chromium` | Every test, but only in Chromium |\n| `npx playwright test --headed` | Every test, with the browser windows visible |\n\nThe text after the command, such as `--project=chromium`, is called an **option**. Options change\nwhat a command does. Without `--headed`, Playwright runs the browsers **headless**: they work\nnormally but do not appear on the screen, which is faster.\n\nTo run only the Chromium tests, run:\n\n```bash\nnpx playwright test --project=chromium\n```\n\n**Output**\n\n```\nRunning 2 tests using 2 workers\n  2 passed (697ms)\n```\n\n**Explanation:** With one browser selected, each test runs once, so the output reports two tests.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself too**, exactly as you would on a real project:\n> `npx playwright test week1/generated/day3-smoke.spec.ts`\n> Try `--headed` once to watch it, then `npx playwright show-report` to open the HTML report.\n\n**Expected result:** `2 passed`.\n\nA note on the number: a *fresh* `npm init playwright@latest` scaffold runs every test against\n**three** browser projects (chromium, firefox, webkit), so two tests there would report\n`6 passed`. This repo's config runs **chromium only** by default (you saw the commented-out\n`firefox`/`webkit` lines on [Day 2 - Fundamentals](/learn/w1/d2/p2)) — so two tests here means `2 passed`, not 6. Same\nmechanism, different project count. Week 3 Day 5 covers turning the other browsers back on.",
+          "text": "## Opening the report\n\nYour configuration file sets `reporter: 'html'`, so every run also creates a report as a web page.\nTo open the report of the last run, run:\n\n```bash\nnpx playwright show-report\n```\n\n**Explanation:** The report opens in your browser. It lists every test and its result. Select a\ntest to see each step that it performed. When a test fails, the report is the best place to find\nout what happened, because it shows more than the terminal can.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "type": "markdown",
+          "text": "## package.json and package-lock.json\n\nYour project contains two files that record its packages. A **dependency** is a package that your\nproject needs in order to work, such as Playwright.\n\n| File | What it holds | Do you edit it? |\n|---|---|---|\n| `package.json` | The packages your project depends on, and the range of versions that each one may use | Yes. npm updates it when you install a package, and you can also edit it. |\n| `package-lock.json` | The exact version of every package that npm installed, including the packages those packages depend on | No. npm writes it for you. |\n\nThe dependencies section of `package.json` looks similar to this:\n\n```json\n\"devDependencies\": {\n  \"@playwright/test\": \"^1.63.0\",\n  \"@types/node\": \"^24.3.0\"\n}\n```\n\nThe `^` before a version number means \"this version, or any later version with the same first\nnumber\". The lock file records exactly which version npm chose. When a teammate runs\n`npm install`, the lock file ensures that they install the same versions as you.",
           "starter": null,
-          "variation": {
-            "prompt": "Same flow, a different check: write a spec that, after logging in, confirms the Payments tile is visible - not just that the login page loads."
-          },
+          "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- Commit `package.json` **and** `package-lock.json` together, every time either changes.\n- Prefer running one spec file while you're actively writing it (`npx playwright test\n  path/to.spec.ts`); run the whole suite before you're done.\n- `show-report` after any run that surprised you — the HTML report has the trace/screenshot\n  a line of terminal output can't show.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Expecting \"6 passed\" like a fresh scaffold | Only chromium runs here — fewer results than you expected | Check `projects` in the config before assuming a browser count |\n| Editing `package-lock.json` by hand | Installs drift, confusing \"works on my machine\" bugs | Never hand-edit it — let `npm install` write it |\n| Forgetting `--headed` is a flag, not a default | Every run is headless and you can't see what's happening | Add `--headed` when you want to watch |",
+          "text": "## Best practices\n\n- While you work on one test, run only its file. Run every test before you finish.\n- Open the report whenever a result surprises you.\n- Save `package.json` and `package-lock.json` together whenever either one changes.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Ran the command outside the project folder | A question about installing a package, or `Error: No tests found` | Answer **No**, open the project folder in VS Code, and run the command in its integrated terminal. |\n| Expected two results from two tests | The output reports six | Each test runs once per browser in `projects`. Use `--project=chromium` to run one browser. |\n| Edited `package-lock.json` by hand | Teammates install different versions | Let npm write the file. Run `npm install` to update it. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "Two tests run here and report `2 passed`. The same two tests on a fresh `npm init playwright@latest` scaffold report `6 passed`. Why?",
+          "text": "Your example file contains two tests, but `npx playwright test` reports `6 passed`. Why?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "The scaffold retries each test twice by default",
-              "A fresh scaffold has three browser projects active, and every test runs once per project",
-              "The scaffold counts each `expect()` as a test"
+              "Playwright runs every test three times by default, to be sure of the result.",
+              "The configuration file lists three browsers, and each test runs once in each.",
+              "Playwright counts every check inside a test as a separate test in the output."
             ],
             "answer": 1,
-            "explanation": "The `projects` array is the multiplier: chromium, firefox and webkit in a fresh scaffold, chromium alone here with the other two commented out. Same mechanism, different project count. Check `projects` before you trust a test count."
+            "explanation": "`projects` lists Chromium, Firefox, and WebKit, and Playwright runs every test once per project. Two tests in three browsers make six runs. With `--project=chromium`, the same two tests report `2 passed`."
           }
         },
         {
           "type": "checkpoint",
-          "text": "Which file do you never edit by hand, and why?",
+          "text": "Which of these two files do you never edit by hand, and why?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "`package.json` — npm owns it, and hand edits are overwritten",
-              "`package-lock.json` — npm writes it, and hand edits make installs drift from what you tested",
-              "Both are generated and neither should be edited"
+              "`package.json`, because npm replaces any change that you make to it",
+              "`package-lock.json`, because npm writes it to record exact versions",
+              "Both files, because npm creates them and owns everything inside them"
             ],
             "answer": 1,
-            "explanation": "`package.json` is yours: you declare dependencies and scripts in it. The lock file records the exact resolved version of everything underneath, which is what makes a teammate's install or a CI install match yours. You commit it; you do not write it."
+            "explanation": "`package.json` is yours: it lists the packages your project needs. `package-lock.json` records the exact version of every installed package, so that a teammate installs the same versions. npm writes the lock file, and you save it with your project."
           }
         },
         {
           "type": "checkpoint",
-          "text": "A run behaved unexpectedly and the terminal output does not explain it. What does the lesson reach for?",
+          "text": "A test result surprises you, and the terminal output does not explain it. What should you open?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "`npx playwright show-report`, for the trace and screenshot the terminal cannot show",
-              "Re-running with `--headed` until it reproduces",
-              "Adding `console.log` through the spec"
+              "The report, with `npx playwright show-report`",
+              "The configuration file, to change the `reporter` setting",
+              "The `node_modules` folder, to check that Playwright is installed"
             ],
             "answer": 0,
-            "explanation": "The HTML report carries the trace, screenshot and video that a line of terminal output cannot. `--headed` is for watching a run live, which is useful but different — and the report is already there after any run, with no re-run needed."
+            "explanation": "The report shows every test and each of its steps, which is more than the terminal can show. It is created after every run, so you can open it without running the tests again."
           }
         },
         {
           "type": "recap",
-          "text": "- `npx` runs the locally installed CLI out of `node_modules/.bin`, so nothing needs installing globally.\n- `package.json` is yours to edit; `package-lock.json` is npm's to write and yours to commit.\n- Run one spec file while writing it; run the suite before you call it done.\n- `--headed` to watch it happen, `show-report` to see what already happened.\n- **The `projects` array multiplies your test count.** Check it before being surprised by a number.",
+          "text": "- The **command line** means typing commands in a terminal. `npx playwright test` runs every test in the project.\n- Every test runs once in each browser that `projects` lists, so two tests in three browsers report six results.\n- Options such as `--project=chromium` and `--headed` change what a command runs and how.\n- `npx playwright show-report` opens the report of the last run in your browser.\n- `package.json` lists your dependencies. npm writes `package-lock.json` to record their exact versions.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Implementation](/learn/w1/d3/p3) takes a first, deliberately shallow look inside `playwright.config.ts`\nitself.",
+          "text": "## What's next\n\n[Implementation](/learn/w1/d3/p3) goes through every setting in your configuration file.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -150,118 +148,118 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 3 - Implementation - A first look inside `playwright.config.ts`\n\nBy the end of this lesson you will recognize every top-level setting in this repo's real\nconfig file and roughly what it does — not master any of them yet.\n\n> **This is deliberately shallow, and that's flagged on purpose.** This slot usually shows\n> the [Fundamentals](/learn/w1/d3/p2) lesson's API wrapped in framework structure — but there's no framework yet, and this\n> config file gets much deeper, dedicated treatment later: **week3/day1** covers timeouts in\n> the config, and **week3/day5** covers `projects`/`workers`/`retries` properly, with\n> measurements. Today is just: here's what's in the file, and roughly what each piece is for.",
+          "text": "# Week 1 - Day 3 - Implementation - A first look inside `playwright.config.ts`\n\nIn [Day 2 - Fundamentals](/learn/w1/d2/p2), you saw three settings in your configuration file. This\nlesson goes through all the others, so that you recognize each one when you open the file. Later\nlessons explain the most important settings in depth.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Scope** | Recognize every setting, without mastering any of them yet. Timeouts are covered in Week 3 - Day 1, and `projects`, `workers`, and `retries` in Week 3 - Day 5. |\n| **Key takeaway** | `retain-on-failure` — keep the evidence only when something went wrong |",
+          "text": "| | |\n|---|---|\n| **Focus** | Every setting in your project's configuration file, and what each one does. |\n| **Goals** | Recognize each setting in `playwright.config.ts`, and explain `retries`, `trace`, and `projects`. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d3/p2), where you ran the tests in your project. |\n| **Scope** | This lesson helps you recognize each setting. Timeouts are covered in Week 3 - Day 1, and `projects`, `workers`, and `retries` in depth in Week 3 - Day 5. |\n| **Key takeaway** | Record evidence of every run, and keep it only when a test fails. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The whole file, section by section\n\nOpen `playwright.config.ts` at the repo root. Here's what each top-level key is for:\n\n| Setting | What you saw in this repo's file | Roughly means |\n|---|---|---|\n| `testDir` / `testMatch` | `\"./\"` and `[\"week*/**/*.spec.ts\", ...]` | Where to look for spec files (you read this on [Day 2 - Fundamentals](/learn/w1/d2/p2)) |\n| `fullyParallel` | `true` | Run tests in the same file in parallel, not just across files |\n| `forbidOnly` | `!!process.env.CI` | In CI, refuse to run if anyone left a `.only` in a spec |\n| `retries` | `process.env.CI ? 2 : 0` | Re-run a failed test this many times before calling it failed — locally: never |\n| `reporter` | `[[\"html\", ...], [\"list\"]]` | Two reporters at once: an HTML report file, and live output in the terminal |\n| `use` | see below | Shared settings every test gets, unless overridden |\n| `projects` | one entry per browser | Which browser(s) each test runs against |",
+          "text": "## Two ideas the file depends on\n\nSeveral settings mention **CI**, which stands for **continuous integration**: a server that runs\nevery test automatically, for example each time someone changes the code. GitHub Actions, which you\ndeclined in [Day 2 - Fundamentals](/learn/w1/d2/p2), is one such service.\n\nThe expression `process.env.CI` checks whether the tests are running on a CI server. It is true on\nmost CI servers and false on your computer. A setting written as `process.env.CI ? 2 : 0` therefore\nmeans \"2 on a CI server, and 0 on your computer\". The `?` and `:` choose between the two values.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The `use` block\n\n| Setting | Value here | What it does |\n|---|---|---|\n| `baseURL` | the banking app's URL | Lets a test write `page.goto(\"/\")` instead of the full URL |\n| `trace` | `\"retain-on-failure\"` | Records a full trace (DOM snapshots, network, console) — but only keeps it if the test fails |\n| `screenshot` | `\"only-on-failure\"` | Same idea, for a screenshot |\n| `video` | `\"retain-on-failure\"` | Same idea, for a video recording |\n\n`retain-on-failure` is the setting worth remembering as \"the recommended default\" — recording\neverything, always, is expensive; recording nothing means a CI failure you can't diagnose.\nKeeping evidence **only when something went wrong** is the sweet spot.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "// The use block, as plain data, so the shape is visible without opening the file.\nconst useBlock = {\n  baseURL: \"https://test-automation-banking.vercel.app\",\n  trace: \"retain-on-failure\",\n  screenshot: \"only-on-failure\",\n  video: \"retain-on-failure\",\n};\nconsole.log(JSON.stringify(useBlock, null, 2));",
+          "text": "## The settings, one by one\n\nOpen `playwright.config.ts` in VS Code. The lines that start with `//`, or sit between `/*` and\n`*/`, are comments. The settings are:\n\n| Setting | Value in your file | What it does |\n|---|---|---|\n| `testDir` | `'./tests'` | The folder where Playwright looks for test files |\n| `fullyParallel` | `true` | Runs the tests inside one file at the same time, instead of one after another |\n| `forbidOnly` | `!!process.env.CI` | On a CI server, stops the run if a test was marked to run on its own with `test.only` |\n| `retries` | `process.env.CI ? 2 : 0` | How many times Playwright runs a failed test again before reporting it as failed |\n| `workers` | `process.env.CI ? 1 : undefined` | How many workers run tests at the same time. `undefined` lets Playwright choose. |\n| `reporter` | `'html'` | The kind of report that Playwright creates after each run |\n| `use` | see the next section | Settings that every test uses |\n| `projects` | three browsers | The browsers that every test runs in |\n\n`retries` is 0 on your computer on purpose. When a test fails while you are writing it, you want to\nsee the failure at once, not have it hidden by a second attempt.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected result:** the object printed with four keys. Notice all three artifact settings\n(`trace`/`screenshot`/`video`) use the same \"only keep it on failure\" shape — that's a\npattern, not three separate decisions.",
+          "text": "## The use block\n\nThe `use` block holds settings that every test receives. In a new project it contains two:\n\n| Setting | Value in your file | What it does |\n|---|---|---|\n| `baseURL` | a commented-out line | The address that short page addresses start from. With `baseURL` set to the banking website, a test can open `'/'` instead of the full address. |\n| `trace` | `'on-first-retry'` | When to record a **trace**: a step-by-step recording of a test, with a snapshot of the page at each step |\n\n`'on-first-retry'` records a trace only when Playwright runs a failed test again. Because `retries`\nis 0 on your computer, this means that a failed test on your computer leaves no trace behind.\n\nMany teams change this, so that a failure always leaves evidence. The example below shows a `use`\nblock with the settings that keep a trace, a screenshot, and a video only when a test fails. It\nwrites the block as plain data and prints it:\n\n```ts\nconst useBlock = {\n  baseURL: 'https://test-automation-banking.vercel.app',\n  trace: 'retain-on-failure',\n  screenshot: 'only-on-failure',\n  video: 'retain-on-failure',\n};\n\nconsole.log(JSON.stringify(useBlock, null, 2));\n```\n\n**Output**\n\n```\n{\n  \"baseURL\": \"https://test-automation-banking.vercel.app\",\n  \"trace\": \"retain-on-failure\",\n  \"screenshot\": \"only-on-failure\",\n  \"video\": \"retain-on-failure\"\n}\n```\n\n**Explanation:** The three recording settings follow one rule: record the run, and keep the\nrecording only if the test fails. Recording every run wastes disk space, and recording nothing\nleaves a failure that you cannot investigate. `JSON.stringify(useBlock, null, 2)` prints the object\nacross several lines, indented by two spaces.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "text": "// Copy the useBlock object from the example, add headless: false to it,\n// and print it with console.log and JSON.stringify.",
           "starter": null,
           "variation": {
-            "prompt": "Same idea, a different field: as plain data, write what the `use` block would look like with `headless: false` added to it."
+            "prompt": "Add the setting headless: false to the use block, and print it again. With this setting, the browser window appears while a test runs, as with the --headed option."
           },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## `projects`\n\n```ts\nprojects: [\n  { name: \"chromium\", use: { ...devices[\"Desktop Chrome\"] } },\n  // { name: \"firefox\", use: { ...devices[\"Desktop Firefox\"] } },\n  // { name: \"webkit\", use: { ...devices[\"Desktop Safari\"] } },\n],\n```\n\nOne entry per browser you want to test against. Each test in your suite runs once per\nactive project — which is exactly why the [Fundamentals](/learn/w1/d3/p2) lesson's two tests only ran twice: one project\n(chromium) is active, the other two are commented out.\n\n**We'll go much deeper on `projects` — plus `workers` and `retries` — in week3/day5**, with\nmeasured test counts and real cross-browser runs. For today, just recognize that the array's\n*length* is what multiplies your test count.",
+          "text": "## projects\n\nThe `projects` setting lists the browsers:\n\n```ts\nprojects: [\n  { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n  { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n  { name: 'webkit', use: { ...devices['Desktop Safari'] } },\n],\n```\n\nEvery test runs once in each project. This is why the two tests in `example.spec.ts` produced six\nresults in [Fundamentals](/learn/w1/d3/p2). The file also contains projects for mobile browsers,\nMicrosoft Edge, and Google Chrome, but their lines are comments, so Playwright ignores them.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
+          "text": "// Write an array with one project, { name: 'chromium' },\n// then print how many projects it contains with console.log(projects.length).",
           "starter": null,
           "variation": {
-            "prompt": "Same idea, a different field again: this time add a `retries` value alongside the existing options, as plain data."
+            "prompt": "Write the projects setting as plain data with Chromium only, and print how many projects it lists. Use the length of the array."
           },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Best practices\n\n- Read `projects` before you're surprised by a test count — it's the single biggest\n  multiplier in any report.\n- Leave `retries` at 0 locally; let CI (`process.env.CI`) be the only place it turns on.\n- Don't touch `trace`/`screenshot`/`video` settings without a reason — `retain-on-failure` is\n  the default worth keeping.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Assumed all 3 browsers run | Confused by a lower test count than expected | Check which `projects` entries are actually uncommented |\n| Thought `trace: \"retain-on-failure\"` records every run | Missing traces on a passing test you wanted to inspect | It's by design — force one with `--trace on` for a single run if you need it |\n| Looked for `workers` and didn't find it here | Assumed it wasn't configurable | It's a real setting, just not set in this file — Playwright picks a sensible default. week3/day5 covers it. |",
+          "text": "## Best practices\n\n- Before you trust a test count, check how many browsers `projects` lists.\n- Keep `retries` at 0 on your computer, so that a failure shows itself at once.\n- Keep a trace, a screenshot, and a video for failed tests, so that every failure leaves evidence.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Expected a trace for a test that failed on your computer | The report has no trace | With `trace: 'on-first-retry'` and `retries` at 0, no trace is kept. Set `trace` to `'retain-on-failure'`. |\n| Expected a trace for a test that passed | The report has no trace | `'retain-on-failure'` keeps traces of failed tests only. For one run, add the option `--trace on`. |\n| Looked for a `baseURL` value | The line starts with `//` | It is a comment, so `baseURL` is not set. Remove the `//` and set the address to use it. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "`trace`, `screenshot` and `video` are all set to keep artifacts only on failure. Why not simply record everything?",
+          "text": "Why do many teams set `trace`, `screenshot`, and `video` to keep recordings only when a test fails?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Recording every run is expensive, and recording nothing leaves a CI failure you cannot diagnose. Keeping the evidence only on failure balances the two",
-              "Playwright cannot record a trace for a passing test",
-              "Because artifacts from passing tests would be committed to git"
+              "Because Playwright cannot record a test that passes",
+              "Because it leaves evidence for every failure without filling the disk",
+              "Because recordings of passing tests would be saved in Git automatically"
             ],
-            "answer": 0,
-            "explanation": "All three settings share one shape, which makes it a single decision rather than three. The cost is real on a big suite, and the evidence is only ever wanted for the runs that went wrong. `--trace on` forces a recording for one run when you do want it."
+            "answer": 1,
+            "explanation": "Recording every run fills the disk with files that nobody opens, and recording nothing leaves a failure that you cannot investigate. Keeping recordings only for failures gives you evidence exactly when you need it."
           }
         },
         {
           "type": "checkpoint",
-          "text": "`retries` is set to `process.env.CI ? 2 : 0`. What does that mean when you run locally?",
+          "text": "`retries` is set to `process.env.CI ? 2 : 0`. What happens when a test fails on your computer?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Two retries, the same as CI",
-              "No retries at all — a failure is reported the first time it happens",
-              "Retries are disabled everywhere; the expression is a placeholder"
+              "Playwright runs it two more times, as it does on a CI server.",
+              "Playwright reports the failure at once, without running the test again.",
+              "Playwright skips the test on your computer and runs it only on a CI server."
             ],
             "answer": 1,
-            "explanation": "Locally you want a failure to show itself immediately rather than being hidden by a re-run. CI is the place to absorb an infrastructure problem. Retries hiding a real flake on your own machine is exactly what this avoids."
+            "explanation": "On your computer, `process.env.CI` is not set, so `retries` is 0. You see a failure the first time it happens, which is what you want while you write a test. A CI server runs a failed test up to two more times, which absorbs short network problems."
           }
         },
         {
           "type": "recap",
-          "text": "- `testDir`/`testMatch` find the specs; `projects` decides which browsers, and multiplies the count.\n- `use` holds what every test gets by default — `baseURL` is why `page.goto(\"/\")` works.\n- `retain-on-failure` for trace, screenshot and video: one decision, three settings.\n- `retries` on in CI, off locally. `forbidOnly` stops a stray `.only` passing CI on one test.\n- Today is recognition, not mastery. Week 3 takes the same file apart with measurements.",
+          "text": "- **CI**, or continuous integration, is a server that runs tests automatically. `process.env.CI` is true there and false on your computer.\n- `retries` is 0 on your computer and 2 on a CI server, so a failure on your computer shows itself at once.\n- The `use` block holds settings that every test receives. `baseURL` lets a test open short addresses such as `'/'`.\n- A **trace** is a step-by-step recording of a test. Keep traces, screenshots, and videos only for failed tests.\n- Every test runs once in each project that `projects` lists.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Practice](/learn/w1/d3/p4) — practice reading this config for real.\n[Day 4](/learn/w1/d4/p2) — Codegen and finding locators the right way.",
+          "text": "## What's next\n\n[Practice](/learn/w1/d3/p4) has you run the tests yourself and read your own configuration file.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -279,14 +277,21 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 1 - Day 3 - Practice - Running tests & the config file\n\nThree problems, using the real CLI and the real config — nothing invented.",
+          "text": "# Week 1 - Day 3 - Practice - Running tests & the config file\n\nThese three problems use the commands from [Fundamentals](/learn/w1/d3/p2) and the settings from\n[Implementation](/learn/w1/d3/p3). You run each command in your own project.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | the real CLI and the real config, nothing invented |\n| **Prerequisites** | [Fundamentals](/learn/w1/d3/p2) for the commands · [Implementation](/learn/w1/d3/p3) for the settings |\n| **Environment** | Run Problem 1 yourself with `--headed`, in your own project rather than the studio's test runner. |",
+          "text": "| | |\n|---|---|\n| **Focus** | Three problems about running tests and reading your configuration file, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d3/p2) for the commands, and [Implementation](/learn/w1/d3/p3) for the settings. |\n| **Environment** | The integrated terminal in VS Code for the commands, and the editor on the right for your answers. |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## How to answer\n\nSelect **Start this in the editor** to open a template for a problem, and write your answer on the\nlines that start with `//`. Select **Reveal solution** to compare it with a model answer.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -314,7 +319,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you're done\n\nYou can now run a suite, read its report, and recognize every top-level setting in the\nconfig. [Day 4](/learn/w1/d4/p2) is where you learn to *find* the locators that go inside a\ntest, using Codegen.",
+          "text": "## When you are done\n\nYou can now run tests, read their results and their report, and recognize every setting in your\nconfiguration file. In [Day 4 - Fundamentals](/learn/w1/d4/p2), you learn how to find the elements\nthat a test acts on.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -324,23 +329,23 @@
         {
           "number": 1,
           "difficulty": "Beginner",
-          "statement": "**What to build.** Run `week1/generated/day3-smoke.spec.ts` yourself from a real terminal\n(not through `runSpec`) with `--headed`, and watch the browser open. Then run\n`npx playwright show-report` and find the two test results in the HTML report.\n\n**Where.** Your terminal (VS Code's integrated terminal is fine).\n\n**How you'll know it worked.** You saw a real Chromium window open and close, and the HTML\nreport opened in your browser showing 2 passed tests.",
-          "stub": "// Problem 1 — no code needed here; do this in your terminal, then note what you saw.",
-          "solution": "**This one is done in your own terminal** — the studio's Run button drives the Playwright *library*, not the test runner, so there is no headed window to watch here.\n\n```bash\nnpx playwright test week1/generated/day3-smoke.spec.ts --headed\n```\n```bash\nnpx playwright show-report\n```\n\n**What you should have seen**\n\n- A real Chromium window opening, driving the app at visible speed, and closing again. `--headed` is the flag; without it the same run happens invisibly.\n- `npx playwright show-report` opening `playwright-report/index.html` in your browser, with both test results listed, each expandable to its step-by-step log.\n\n**Why the lesson asks.** Two things become concrete the first time you watch it: the browser really is being driven rather than simulated, and the HTML report is generated on *every* run, not only on failure. From here on, \"what actually happened\" is a report you open, not a guess.\n\n> If the window flashed past too quickly, add `--slow-mo=500` — but reach for the trace, not slow-mo, once you are debugging a real failure."
+          "statement": "**What to build.** A short record of three test runs. In your project, run these commands one\nafter another, and note what you see after each:\n\n1. `npx playwright test --project=chromium --headed`\n2. `npx playwright test`\n3. `npx playwright show-report`\n\n**Where.** Run the commands in the integrated terminal in VS Code, and write your notes in the\neditor, using the template.\n\n**How you will know it worked.** You saw a Chromium window open and close, the second run\nreported six passed tests, and the report opened in your browser.",
+          "stub": "// Problem 1: three test runs\n//\n// 1. With --project=chromium --headed, what did you see?\n//\n// 2. How many tests passed without any options, and why that number?\n//\n// 3. What does the report show for each test?",
+          "solution": "**A model answer.** Your times and worker counts will be different.\n\n```ts\n// Problem 1: three test runs\n//\n// 1. With --project=chromium --headed, what did you see?\n//    Chromium windows opened, showed the Playwright website, and closed.\n//    The output said: 2 passed.\n//\n// 2. How many tests passed without any options, and why that number?\n//    6 passed. The file has two tests, and projects lists three browsers,\n//    so each test ran three times.\n//\n// 3. What does the report show for each test?\n//    Its name, the browser, whether it passed, and how long it took.\n//    Selecting a test shows each of its steps.\n```\n\n**Why this problem matters.** Watching a headed run shows that Playwright controls a real browser. The count of six shows that `projects` multiplies every test. The report is created after every run, so it is always there when you need it."
         },
         {
           "number": 2,
           "difficulty": "Intermediate",
-          "statement": "**What to build.** Open this repo's real `playwright.config.ts` and answer, from what's\nactually in the file:\n\n1. What does `retries` evaluate to when you run locally (not in CI)?\n2. Name the three `use` settings that are all set to `\"retain-on-failure\"` or\n   `\"only-on-failure\"`.\n3. How many `projects` entries are active (uncommented) right now?\n\n**Where.** A cell in this lesson, as comments.\n\n**How you'll know it worked.** All three answers match the actual file, not the [Implementation](/learn/w1/d3/p3) lesson's summary\nof it.",
-          "stub": "// Problem 2 — your answers here.",
-          "solution": "**A model answer.** Read them out of the file rather than from memory.\n\n> 1. **`retries`** — the generated config reads `retries: process.env.CI ? 2 : 0`, so locally it evaluates to **0**. A failure on your machine is a failure, immediately; only CI gets a second and third attempt. That asymmetry is deliberate — retries hide flakiness, and you want it visible while you are writing.\n> 2. **The three evidence settings in `use`** — `trace`, `screenshot` and `video`. In the course repo they are set to retain or capture only on failure, so a green run leaves nothing behind and a red one leaves everything you need.\n> 3. **Active `projects`** — **one**: `chromium`. Firefox and WebKit are in the file but commented out.\n\n**What makes an answer good** is that each came from a line you can point at. The `retries` one especially: plenty of people assume retries are on everywhere and are then surprised that CI is greener than their laptop.\n\n> Needs the training repo on your own machine."
+          "statement": "**What to build.** Answers to three questions about your project's configuration file. Open\n`playwright.config.ts` in VS Code and answer from what you see in the file:\n\n1. What value does `retries` have when you run tests on your computer?\n2. What value does `trace` have in the `use` block?\n3. How many projects are active, not counting lines that are comments?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Each answer comes from a line in your own file that you can\npoint to.",
+          "stub": "// Problem 2: my configuration file\n//\n// 1. retries on my computer:\n//\n// 2. trace:\n//\n// 3. Active projects:",
+          "solution": "**A model answer**, for a project created with `npm init playwright@latest`:\n\n> 1. **`retries`** is `process.env.CI ? 2 : 0`. On your computer, `process.env.CI` is not set, so the value is **0**: a failed test is reported the first time it fails.\n> 2. **`trace`** is `'on-first-retry'`. A trace is recorded only when Playwright runs a failed test again, which does not happen on your computer while `retries` is 0.\n> 3. **Three projects** are active: `chromium`, `firefox`, and `webkit`. The mobile and branded browser projects are comments.\n\n**What makes a good answer** is that each value comes from a line you can point to. Many people assume that retries are always on, and are then surprised when a CI server reports fewer failures than their own computer."
         },
         {
           "number": 3,
           "difficulty": "Reflection",
-          "statement": "There's no framework-shaped code yet for a true advanced problem, so instead: imagine you're\nhanded a **brand-new, empty project** tomorrow. Using what you now know about `projects`,\n`retries`, and the `use` block, write down the config choices you'd start with and why —\nwould you turn on all three browsers immediately, or start with one? Would you leave\n`retries: 0` locally? What would you set `trace`/`screenshot`/`video` to?\n\n**Where.** A cell in this lesson, as comments — no code to run.\n\n**How you'll know it worked.** Every choice has a one-line reason attached, not just a\npreference.",
-          "stub": "// Problem 3 — your reflection here.",
-          "solution": "**A model answer.** A defensible starting config for a brand-new suite, with the reasoning attached:\n\n```ts\nexport default defineConfig({\n  testDir: './tests',\n  retries: process.env.CI ? 2 : 0,\n  workers: process.env.CI ? 2 : undefined,\n  use: {\n    baseURL: process.env.BASE_URL ?? 'https://staging.example.com',\n    trace: 'retain-on-failure',\n    screenshot: 'only-on-failure',\n    video: 'retain-on-failure',\n  },\n  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],\n});\n```\n\n> **One browser to begin with.** Chromium only. Cross-browser coverage matters, but on a suite that is two weeks old nearly every failure is your own bug, and three browsers means triaging each one three times.\n>\n> **`retries: 0` locally, 2 in CI.** Keep flakiness in your face while you are writing; absorb genuine infrastructure blips on the shared runner. A test that only passes on the second attempt is information, and CI records that.\n>\n> **Evidence on failure only.** Traces and videos on every green run are gigabytes of artefacts nobody opens.\n>\n> **`baseURL` from the environment.** The one setting guaranteed to differ between your machine, staging and CI. Hard-coding it is the first thing you will regret.\n\n**The shape of a good answer** is that every line has a reason. You revisit all of this properly in Week 3 — timeouts on Day 1, projects and workers on Day 5."
+          "statement": "**What to build.** The first version of a configuration file for a new project, with a reason\nfor each choice. Imagine that a team asks you to set up a new project tomorrow. Decide:\n\n1. Which browsers would you start with in `projects`?\n2. What would you set `retries` to, on your computer and on a CI server?\n3. What would you set `trace`, `screenshot`, and `video` to in the `use` block?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Every choice has a one-line reason, not only a preference.",
+          "stub": "// Problem 3: my first configuration for a new project\n//\n// 1. Browsers in projects, and why:\n//\n// 2. retries, and why:\n//\n// 3. trace, screenshot, and video, and why:",
+          "solution": "**A model answer.** There is no single correct configuration, but every choice needs a reason:\n\n```ts\nexport default defineConfig({\n  testDir: './tests',\n  retries: process.env.CI ? 2 : 0,\n  use: {\n    baseURL: 'https://test-automation-banking.vercel.app',\n    trace: 'retain-on-failure',\n    screenshot: 'only-on-failure',\n    video: 'retain-on-failure',\n  },\n  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],\n});\n```\n\n> **Chromium only, to start with.** In a new project, most failures are mistakes in the tests themselves. Running them in three browsers means investigating each failure three times. Add Firefox and WebKit once the tests are stable.\n>\n> **`retries` at 0 on your computer and 2 on a CI server.** On your computer, you want to see every failure at once. On a CI server, a retry absorbs a short network problem that has nothing to do with the application.\n>\n> **Evidence only for failures.** A trace, a screenshot, and a video of every passing test fill the disk with files that nobody opens. Keeping them for failures means that every failure can be investigated.\n\n**What makes a good answer** is a reason for every line. The course covers these settings in depth in Week 3."
         }
       ]
     }
