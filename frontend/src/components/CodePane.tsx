@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { RunOverlay, type RunState } from './RunOverlay';
+import { RunOverlay, type OverlayRequest, type RunState } from './RunOverlay';
+import { isSpecFile } from './Markdown';
 import { conceptHighlight } from '../lib/conceptHighlight';
 
 const LANGUAGES = [
@@ -45,6 +46,17 @@ export function CodePane({
   appTheme: 'dark' | 'light';
 }) {
   const [theme, setTheme] = useState<'dark' | 'light'>(readTheme);
+  // The Terminal keeps the overlay open without a Run. The nonce re-selects its tab when the
+  // overlay is already open on another one.
+  const [terminalOpen, setTerminalOpen] = useState(false);
+  const [request, setRequest] = useState<OverlayRequest | null>(null);
+  const openTerminal = (command?: string): void => {
+    setTerminalOpen(true);
+    setRequest({ tab: 'terminal', nonce: Date.now(), command });
+  };
+  // A spec file cannot run in the Run button's harness, and the Terminal is how it runs in a
+  // real project, so Run hands it to the Terminal instead of failing on the import line.
+  const run_ = (): void => (isSpecFile(code) ? openTerminal('npx playwright test') : onRun());
 
   // Two toggles exist - the page one bottom-left and this one - so they must not fight.
   // Changing the page theme resets the editor to match; the editor toggle then deviates.
@@ -111,7 +123,10 @@ export function CodePane({
         </select>
         <span className="spacer" />
         {toggle}
-        <button className="run-btn" onClick={onRun} disabled={running}>
+        <button className="term-btn" onClick={() => openTerminal()} title="Open the Terminal, to run npx playwright test on this code">
+          &gt;_ Terminal
+        </button>
+        <button className="run-btn" onClick={run_} disabled={running}>
           {running ? 'Running…' : '▶ Run'}
         </button>
       </div>
@@ -136,7 +151,7 @@ export function CodePane({
 
       {/* Fills what was otherwise a large dead area below a few lines of code, and tells the
           learner what Run will actually do before they press it. */}
-      {!run && (
+      {!run && !terminalOpen && (
         <div className="editor-idle">
           <b>Select ▶ Run</b> to run this code. If it opens a browser, you see a screenshot of the
           page. Anything it prints with <span className="k">console.log</span> appears in the Console tab.
@@ -144,10 +159,23 @@ export function CodePane({
           <span className="k">launch()</span> <span className="k">show()</span>{' '}
           <span className="k">USERS</span> <span className="k">BASE_URL</span> are already
           available, so you do not need to import them.
+          <br />
+          <b>Select &gt;_ Terminal</b> to run a spec file with <span className="k">npx playwright test</span>,
+          as in your own project.
         </div>
       )}
 
-      {run && <RunOverlay run={run} onClose={onCloseRun} />}
+      {(run || terminalOpen) && (
+        <RunOverlay
+          run={run}
+          code={code}
+          request={request}
+          onClose={() => {
+            setTerminalOpen(false);
+            onCloseRun();
+          }}
+        />
+      )}
     </div>
   );
 }

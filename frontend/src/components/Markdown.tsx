@@ -76,6 +76,15 @@ function isExecutable(code: string): boolean {
 }
 
 /**
+ * A whole spec file: it imports from @playwright/test and calls test(). The Run button cannot take
+ * it, but the Terminal can, with `npx playwright test`, so it is offered to the editor too.
+ * A config file imports from the same package but has no test(), so it is not one.
+ */
+export function isSpecFile(code: string): boolean {
+  return /^\s*import\s[^;]*from\s+["']@playwright\/test["']/m.test(code) && /\btest\s*(\.\w+\s*)?\(/.test(code);
+}
+
+/**
  * The weeks a learner can open. A lesson link into any other week renders as plain text instead
  * of an anchor, so a forward reference such as "Week 3 - Day 2 - TypeScript explains every
  * piece" keeps its meaning without leading to a page the sidebar does not list. It is derived
@@ -138,6 +147,18 @@ export function Markdown({
           btn.textContent = 'Load into editor';
           btn.onclick = () => onLoadIntoEditor(code);
           head.append(btn);
+        } else if (isSpecFile(code)) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = 'Load into editor';
+          btn.onclick = () => onLoadIntoEditor(code);
+          head.append(
+            Object.assign(document.createElement('span'), {
+              className: 'not-runnable',
+              textContent: 'Run it with npx playwright test in the Terminal',
+            }),
+            btn,
+          );
         } else {
           head.append(
             Object.assign(document.createElement('span'), {

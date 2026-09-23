@@ -63,7 +63,11 @@ export function lastFrame(runId: string): { frame: string | null; status: string
   return { frame: s.lastFrame, status: s.status };
 }
 
-function emit(runId: string, event: RunStreamEvent): void {
+/**
+ * Pushes one event down a run's stream. Exported for the Terminal, which reuses the same stream
+ * (and the same WebSocket route) for its output and its live browser frames.
+ */
+export function emit(runId: string, event: RunStreamEvent): void {
   const s = streams.get(runId);
   if (!s) return;
   if (event.event === 'frame') s.lastFrame = event.data;
@@ -74,6 +78,14 @@ function emit(runId: string, event: RunStreamEvent): void {
     return;
   }
   for (const l of s.listeners) l(event);
+}
+
+/**
+ * Lets a stream go once its command has finished and its last events have had time to reach the
+ * client. The Terminal calls this; a Run cleans up its own stream when its process closes.
+ */
+export function retireStream(runId: string, afterMs = 60_000): void {
+  setTimeout(() => streams.delete(runId), afterMs);
 }
 
 /**

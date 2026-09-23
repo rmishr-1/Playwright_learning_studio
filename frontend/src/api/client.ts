@@ -92,6 +92,19 @@ export function openRunStream(runId: string, onEvent: (e: RunStreamEvent) => voi
   return () => ws.close();
 }
 
+// ---------------------------------------------------------------- terminal
+
+/**
+ * Starts one Terminal command on the editor's code. Call prepareRun() and openRunStream() first:
+ * the command's output, its live browser frames and its `exit` all arrive on that stream.
+ */
+export const runTerminal = (runId: string, command: string, code: string): Promise<{ ok: boolean }> =>
+  call('/terminal', { method: 'POST', body: JSON.stringify({ run_id: runId, command, code }) });
+
+/** Ctrl+C for the command started with `runId`. */
+export const stopTerminal = (runId: string): Promise<{ stopped: boolean }> =>
+  call('/terminal/' + runId + '/stop', { method: 'POST' });
+
 // ---------------------------------------------------------------- assistant
 
 /** SSE, so not fetch-based JSON. Returns a cancel function. */

@@ -4,3 +4,6 @@ Data/Progress/
 Data/Config/*.json
 !Data/Config/*.example.json
 .run-scratch/
+
+# The Terminal's Playwright project (backend/src/terminal/workspace.ts). Regenerated on every command.
+Data/Workspace/

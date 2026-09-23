@@ -445,6 +445,13 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .run-btn:hover { filter: brightness(1.1); }
 .run-btn:disabled { background: var(--good); opacity: .5; cursor: default; }
+/* Opens the run overlay on its Terminal tab. Quieter than Run, which stays the main action. */
+.term-btn {
+  font-family: var(--mono); font-size: 12px; padding: 6px 11px; margin-right: 6px;
+  border-radius: 8px; border: 1px solid var(--ed-border, #333b4a); background: transparent;
+  color: var(--ed-text, #dbe2ee); cursor: pointer;
+}
+.term-btn:hover { border-color: var(--accent); }
 
 .editor-body { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; }
 .editor-body > * { flex: 1; min-width: 0; }
@@ -499,6 +506,7 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 .overlay .status.running { background: #1f3352; color: #93b8fb; }
 .overlay .status.ok { background: #14351f; color: #6ee7a0; }
 .overlay .status.error, .overlay .status.timeout, .overlay .status.blocked { background: #3d1b1b; color: #fca5a5; }
+.overlay .status.stopped { background: #3a3218; color: #fcd34d; }
 .overlay .expand { color: #8e99ad; background: none; border: none; font-size: 15px; padding: 4px 9px; }
 .overlay .expand:hover { color: #fff; }
 .overlay .close { color: #8e99ad; background: none; border: none; font-size: 18px; padding: 4px 9px; }
@@ -507,6 +515,10 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 .overlay .view.browser { display: flex; align-items: center; justify-content: center; background: #05070a; }
 .overlay .view.browser img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .overlay .view.console { padding: 12px 15px; }
+/* xterm.js sizes itself to this box, so it must not scroll or pad unevenly itself. */
+.overlay .view.terminal { padding: 8px 4px 4px 12px; overflow: hidden; background: #12161e; border-radius: 0 0 11px 11px; }
+.overlay .view.terminal .xterm { height: 100%; }
+.overlay .view.terminal .xterm-viewport { background: #12161e !important; }
 .overlay pre {
   margin: 0; font-family: var(--mono); font-size: 12px; line-height: 1.6;
   color: #dbe2ee; white-space: pre-wrap; word-break: break-word;

@@ -1,8 +1,10 @@
-import { Router, type Request, type Response } from 'express';
+import express, { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { config } from './config';
 import { ask, assistantAvailable } from './assistant';
 import { lastFrame, prepareRun, startRun } from './runner';
+import { receiveFrame, startCommand, stopCommand } from './terminal';
+import { REPORT_DIR } from './terminal/workspace';
 import { concepts, courseDay, courseIndex, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
@@ -114,6 +116,44 @@ router.post('/run/prepare', (_req, res) => res.json({ run_id: prepareRun() }));
 router.get('/run/:run_id/last-frame', (req, res) => {
   res.json(lastFrame(req.params.run_id) ?? { frame: null, status: null });
 });
+
+// ---------------------------------------------------------------- terminal
+
+const TerminalRequest = z.object({
+  /** Minted by POST /api/run/prepare, so the output streams over the same WebSocket as a Run. */
+  run_id: z.string().uuid(),
+  command: z.string().min(1).max(2_000),
+  /** The editor's code, which the command saves as a spec file before it runs. */
+  code: z.string().max(64_000),
+});
+
+/** Starts one Terminal command. Its output, and its outcome, arrive on the run's stream. */
+router.post('/terminal', (req, res) => {
+  let parsed;
+  try {
+    parsed = TerminalRequest.parse(req.body);
+  } catch (e) {
+    return badRequest(res, 'CODE_REQUIRED', e);
+  }
+  startCommand(parsed.run_id, parsed.command, parsed.code);
+  res.json({ ok: true });
+});
+
+/** Ctrl+C in the Terminal. */
+router.post('/terminal/:run_id/stop', (req, res) => res.json({ stopped: stopCommand(req.params.run_id) }));
+
+/**
+ * Live-view frames from the Workspace's test wrapper, which runs inside the test runner on this
+ * same computer. Only a loopback caller is accepted, and only for the command that is running.
+ */
+router.post('/terminal/:run_id/frame', (req, res) => {
+  const from = req.socket.remoteAddress ?? '';
+  if (!/^(::1|127\.|::ffff:127\.)/.test(from)) return res.status(403).end();
+  res.status(receiveFrame(req.params.run_id, req.body ?? {}) ? 204 : 410).end();
+});
+
+/** The HTML report of the last Terminal command, opened by `npx playwright show-report`. */
+router.use('/terminal/report', express.static(REPORT_DIR));
 
 // ---------------------------------------------------------------- assistant
 

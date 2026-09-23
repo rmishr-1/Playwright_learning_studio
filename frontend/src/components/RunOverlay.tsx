@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RunResult, RunStatus } from '../../../shared/contracts/run';
+import { TerminalView } from './TerminalView';
 
 export type RunState = {
   status: RunStatus | 'running';
@@ -17,6 +18,7 @@ const STATUS_TEXT: Record<string, string> = {
   timeout: 'timed out',
   blocked: 'blocked',
   queued_out: 'queue full',
+  stopped: 'stopped',
 };
 
 /**
@@ -36,24 +38,60 @@ function detach(runId: string, onClose: () => void): void {
   onClose();
 }
 
+export type OverlayTab = 'browser' | 'console' | 'terminal';
+/** Shows a tab; with `command`, also types that command into the Terminal and runs it. */
+export type OverlayRequest = { tab: OverlayTab; nonce: number; command?: string };
+
+/** Terminal command status, shown in the same chip as a Run's. */
+type TermStatus = 'running' | 'ok' | 'error' | 'stopped' | null;
+
 /**
- * Floats over the editor while a run is in flight; dismissible, so the editor gets its full
- * height back. Two views: the live browser and the console.
+ * Floats over the editor while a run is in flight, or while the Terminal is open; dismissible,
+ * so the editor gets its full height back. Three views: the live browser, the console of the
+ * last Run, and the Terminal. The Browser tab shows whichever started last, a Run or a Terminal
+ * command.
  */
-export function RunOverlay({ run, onClose }: { run: RunState; onClose: () => void }) {
-  const [tab, setTab] = useState<'browser' | 'console'>('browser');
+export function RunOverlay({
+  run,
+  code,
+  request,
+  onClose,
+}: {
+  run: RunState | null;
+  /** The editor's code, which Terminal commands run. */
+  code: string;
+  /** Asks the overlay to show a tab, such as the Terminal button in the editor's toolbar. */
+  request: OverlayRequest | null;
+  onClose: () => void;
+}) {
+  const [tab, setTab] = useState<OverlayTab>(request?.tab ?? 'browser');
+  const [source, setSource] = useState<'run' | 'terminal'>(run ? 'run' : 'terminal');
+  const [termFrame, setTermFrame] = useState<string | null>(null);
+  const [termStatus, setTermStatus] = useState<TermStatus>(null);
+
+  useEffect(() => {
+    if (request) setTab(request.tab);
+  }, [request]);
+
+  // A new Run takes over the Browser tab.
+  useEffect(() => {
+    if (run?.status === 'running') {
+      setSource('run');
+      setTab('browser');
+    }
+  }, [run?.status, run?.run_id]);
   const [height, setHeight] = useState(58);
   const dragging = useRef(false);
   const logRef = useRef<HTMLDivElement>(null);
 
   // An error is the thing the learner needs to read, so surface it without a click.
   useEffect(() => {
-    if (run.result && run.result.status !== 'ok') setTab('console');
-  }, [run.result]);
+    if (run?.result && run.result.status !== 'ok') setTab('console');
+  }, [run?.result]);
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
-  }, [run.lines.length]);
+  }, [run?.lines.length]);
 
   useEffect(() => {
     const move = (e: MouseEvent): void => {
@@ -75,8 +113,11 @@ export function RunOverlay({ run, onClose }: { run: RunState; onClose: () => voi
     };
   }, []);
 
-  const shot = run.result?.screenshot ?? null;
-  const image = run.frame ?? shot;
+  const shot = run?.result?.screenshot ?? null;
+  const image = source === 'terminal' ? termFrame : (run?.frame ?? shot);
+  // The chip describes whatever the showing tab belongs to.
+  const showTerminal = tab === 'terminal' || (tab === 'browser' && source === 'terminal') || !run;
+  const chip = showTerminal ? termStatus : run.status;
 
   return (
     <div className="overlay" style={{ height: height + '%' }}>
@@ -88,14 +129,17 @@ export function RunOverlay({ run, onClose }: { run: RunState; onClose: () => voi
         <button className={tab === 'console' ? 'on' : ''} onClick={() => setTab('console')}>
           Console
         </button>
+        <button className={tab === 'terminal' ? 'on' : ''} onClick={() => setTab('terminal')}>
+          Terminal
+        </button>
         <span className="spacer" />
-        <span className={'status ' + run.status}>{STATUS_TEXT[run.status] ?? run.status}</span>
-        {run.result && (
+        {chip && <span className={'status ' + chip}>{STATUS_TEXT[chip] ?? chip}</span>}
+        {!showTerminal && run?.result && (
           <span className="status" style={{ color: '#8a94a6' }}>
             {run.result.duration_ms} ms
           </span>
         )}
-        {run.run_id && (
+        {!showTerminal && run?.run_id && (
           <button
             className="expand"
             onClick={() => detach(run.run_id!, onClose)}
@@ -109,15 +153,39 @@ export function RunOverlay({ run, onClose }: { run: RunState; onClose: () => voi
         </button>
       </div>
 
-      {tab === 'browser' ? (
+      {/* Kept mounted while another tab shows, so its history and a running command survive. */}
+      <TerminalView
+        code={code}
+        active={tab === 'terminal'}
+        autorun={request?.command ? { command: request.command, nonce: request.nonce } : null}
+        onStart={() => {
+          setSource('terminal');
+          setTermFrame(null);
+          setTermStatus('running');
+        }}
+        onFrame={setTermFrame}
+        onEnd={(exitCode) => setTermStatus(exitCode === 0 ? 'ok' : exitCode === 130 ? 'stopped' : 'error')}
+      />
+
+      {tab === 'terminal' ? null : tab === 'browser' ? (
         <div className="view browser">
           {image ? (
             <img src={'data:image/jpeg;base64,' + image} alt="The browser being driven by your code" />
           ) : (
             <span className="waiting">
-              {run.status === 'running' ? 'Waiting for the browser…' : 'This run never opened a page.'}
+              {source === 'terminal'
+                ? termStatus === 'running'
+                  ? 'Waiting for the browser…'
+                  : 'Run npx playwright test in the Terminal tab to see the browser here.'
+                : run?.status === 'running'
+                  ? 'Waiting for the browser…'
+                  : 'This run never opened a page.'}
             </span>
           )}
+        </div>
+      ) : !run ? (
+        <div className="view console">
+          <span className="waiting">Select ▶ Run to see what your code prints. Terminal output appears in the Terminal tab.</span>
         </div>
       ) : (
         <div className="view console" ref={logRef}>

@@ -22,6 +22,11 @@ export type StudioConfig = {
     /** How many runs may execute at once before further requests are refused. */
     max_concurrent: number;
     /**
+     * Hard wall-clock ceiling on one Terminal command. Longer than a Run's, because the test
+     * runner starts browsers, may retry, and a learner may run several tests at once.
+     */
+    terminal_timeout_ms: number;
+    /**
      * Origins the browser may navigate to. Fail-closed: an empty list blocks every navigation
      * rather than allowing everything.
      */
@@ -38,6 +43,7 @@ const DEFAULTS: StudioConfig = {
   run: {
     timeout_ms: 30_000,
     max_concurrent: 3,
+    terminal_timeout_ms: 300_000,
     allowed_origins: [
       'https://test-automation-banking.vercel.app',
       'https://demo.automationtesting.in',

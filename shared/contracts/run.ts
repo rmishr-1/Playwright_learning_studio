@@ -44,6 +44,11 @@ export const RunStreamEvent = z.discriminatedUnion('event', [
   z.object({ event: z.literal('frame'), data: z.string(), width: z.number(), height: z.number() }),
   z.object({ event: z.literal('stdout'), text: z.string() }),
   z.object({ event: z.literal('ended'), status: RunStatus }),
+  // Terminal only. `data` is a raw chunk of the test runner's output, ANSI colors included, so
+  // it is written to the terminal as it arrives rather than split into lines.
+  z.object({ event: z.literal('term'), data: z.string() }),
+  // Terminal only: the command finished. `open_url` is set by `npx playwright show-report`.
+  z.object({ event: z.literal('exit'), code: z.number().int().nullable(), open_url: z.string().optional() }),
 ]);
 
 export type RunRequest = z.infer<typeof RunRequest>;

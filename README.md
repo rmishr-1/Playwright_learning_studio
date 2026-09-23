@@ -111,6 +111,32 @@ than seeing a screenshot afterwards. If screencast will not attach, the run stil
 `import { launch, show } from "../_shared/deno-helpers.ts"` line is rewritten on the way in, so an
 example copied straight out of the lesson runs unchanged.
 
+### The Terminal
+
+The overlay's **Terminal** tab (also opened by **>_ Terminal** in the editor toolbar) runs real
+Playwright commands on the code in the editor: `npx playwright test` with its common options
+(`--list`, `--headed`, `--project`, `-g`, `--workers`, `--retries`, `--trace`, `--reporter`), and
+`npx playwright show-report`. Type `help` for the list. Everything else is refused with a message,
+and a line is never handed to a shell: `backend/src/terminal/commands.ts` splits it into words and
+checks every option.
+
+- **One folder.** Every command works in `Data/Workspace/` (ignored by Git), a small Playwright
+  project laid out like the learner's own: `package.json`, `playwright.config.ts`, `tests/`,
+  `test-results/`, `playwright-report/`. The tests folder holds only the file the current command
+  runs. The editor is saved as `tests/editor.spec.ts`, or under the name the command gives, so
+  `npx playwright test tests/login.spec.ts` and the lessons' wrongly named `tests/not-a-spec.ts` both
+  behave exactly as the lessons say.
+- **Live view.** `tsconfig.json` in the workspace maps `@playwright/test` to a small wrapper
+  (`.studio/test.ts`) that screencasts each Chromium page and posts the frames to the backend, so
+  the Browser tab shows the test as it runs. The same wrapper applies the Run button's navigation
+  allowlist.
+- **Output** streams with its colors over the same WebSocket a Run uses. **Ctrl+C** stops the
+  command, with its workers and browsers. A command is stopped at `terminal_timeout_ms` (5 minutes
+  by default), and one command runs at a time.
+- **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
+  block in a lesson offers **Load into editor** for this.
+- The workspace runs Chromium only, because `setup.bat` installs only Chromium.
+
 ### It executes arbitrary user-supplied code
 
 That is the feature, not an oversight. The guards are load-bearing:
@@ -121,6 +147,8 @@ That is the feature, not an oversight. The guards are load-bearing:
 - a concurrency cap, so one learner cannot exhaust the box
 - a per-run scratch directory, removed afterwards
 - the child's environment is stripped of anything matching `ANTHROPIC|API_KEY|TOKEN|SECRET|PASSWORD`
+- the Terminal accepts Playwright commands only, never through a shell, and applies the same
+  allowlist, timeout, and environment stripping
 
 **This is sized for an internal training tool on a trusted network.** Do not put it on the public
 internet without a container per run: process isolation alone does not contain code running as
