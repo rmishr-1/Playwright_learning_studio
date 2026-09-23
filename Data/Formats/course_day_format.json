@@ -200,8 +200,8 @@
                         "value": ""
                     },
                     "stub": {
-                        "_comment": "What 'Start this in the editor' loads: the exercise's starter code, or a comment template.",
-                        "value": ""
+                        "_comment": "What 'Start this in the editor' loads, for a code exercise only: its starter code, the code its prompt gives to fix, the file it says to copy, the lesson file it names, or a comment naming a new file. null for a written, predict or terminal exercise, and for a code exercise whose file the studio cannot run (such as playwright.config.ts); the button is then absent.",
+                        "value": null
                     },
                     "hints": {
                         "_comment": "Revealed one at a time.",

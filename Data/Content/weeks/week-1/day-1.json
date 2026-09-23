@@ -1199,7 +1199,7 @@
           "title": "Convert a manual test case",
           "kind": "written",
           "statement": "Convert this manual test case into an **action / assertion** table like the one in lesson I1.\n\n**TC-205 — Search for a product**\n1. Open `https://shop.example.com`\n2. Type `wireless mouse` in the search box\n3. Press Enter\n4. Expected: the results heading says `Results for \"wireless mouse\"`\n5. Expected: at least one product card is shown\n6. Click the first product\n7. Expected: the product page shows an **Add to cart** button\n\nFor every row write: the manual step, whether it is an **Action** or an **Assertion**, and the plain-English Playwright step (e.g. *click the button named \"Add to cart\"*).",
-          "stub": "// Write your answer here.\n",
+          "stub": null,
           "hints": [
             "Steps that *do* something are actions; steps that *check* something are assertions.",
             "Describe elements the way a user would: \"the search box\", \"the heading\", \"the button named …\"."
@@ -1214,7 +1214,7 @@
           "title": "Choose the right tool",
           "kind": "written",
           "statement": "For each scenario, say whether Playwright is a good fit and **why** (one or two sentences each).\n\n1. A travel website must work on Chrome, Firefox and Safari. The team writes TypeScript.\n2. A bank wants to automate its native iOS app from the App Store.\n3. A company has 3,000 stable Selenium + Java tests and a team of Java experts. The tests work well.\n4. An e-commerce site's checkout tests keep failing randomly because pages load at different speeds.\n5. A test must check that when an admin approves a leave request, the employee (in another session) sees \"Approved\".",
-          "stub": "// Write your answer here.\n",
+          "stub": null,
           "hints": [],
           "file": null,
           "run": null,
@@ -1226,7 +1226,7 @@
           "title": "Explain Playwright to your manager",
           "kind": "written",
           "statement": "Your manager has never heard of Playwright. Write **4–6 sentences** explaining:\n- what it is,\n- how it controls browsers (in simple words),\n- two benefits for the team,\n- one limitation.",
-          "stub": "// Write your answer here.\n",
+          "stub": null,
           "hints": [],
           "file": null,
           "run": null,
@@ -1238,7 +1238,7 @@
           "title": "Predict the test count",
           "kind": "predict",
           "statement": "The configuration has the projects **chromium** and **firefox** only. The folder `tests/` contains:\n- `login.spec.ts` with 3 tests\n- `search.spec.ts` with 2 tests\n\nHow many test runs will `npx playwright test` report? And how many with `npx playwright test --project=firefox`?\n\n```text\nprojects: chromium, firefox\nlogin.spec.ts  → 3 tests\nsearch.spec.ts → 2 tests\n```",
-          "stub": "// Your prediction, and why:\n",
+          "stub": null,
           "hints": [],
           "file": null,
           "run": null,
@@ -1250,7 +1250,7 @@
           "title": "Break the auto-wait demo on purpose",
           "kind": "code",
           "statement": "Open `tests/day1/auto-wait.spec.ts`.\n\n1. Change the button's text in the page from `Pay now` to `Pay` (inside the `<script>`), **but leave the test looking for `Pay now`**. Run the test.\n2. Read the error message. What is Playwright waiting for, and for how long?\n3. Fix the test so it looks for the correct button name, and run it again.",
-          "stub": "// Break the auto-wait demo on purpose\n// Save this as tests/day1/auto-wait.spec.ts\n",
+          "stub": "import { test, expect } from '@playwright/test';\n\n// A tiny practice page. The \"Pay now\" button is added 2 seconds after the page loads.\nconst checkoutPage = `\n  <h1>Checkout</h1>\n  <p id=\"status\">Loading payment options…</p>\n  <script>\n    setTimeout(() => {\n      document.getElementById('status').textContent = 'Ready to pay';\n      const button = document.createElement('button');\n      button.textContent = 'Pay now';\n      button.onclick = () => {\n        document.getElementById('status').textContent = 'Payment successful';\n      };\n      document.body.appendChild(button);\n    }, 2000);\n  </script>\n`;\n\ntest('Playwright waits for the Pay now button by itself', async ({ page }) => {\n  // Load the practice page into the browser tab\n  await page.setContent(checkoutPage);\n\n  // Click the button — it does not exist yet! Playwright waits until it appears.\n  await page.getByRole('button', { name: 'Pay now' }).click();\n\n  // Check the result — this assertion also retries automatically\n  await expect(page.locator('#status')).toHaveText('Payment successful');\n});\n",
           "hints": [
             "The error message quotes the exact locator it was waiting for.",
             "The default time limit for one test is 30 seconds."

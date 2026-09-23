@@ -1548,7 +1548,7 @@
           "title": "Predict — loop with conditions",
           "kind": "predict",
           "statement": "What does this print?\n\n```ts\nconst statuses = [200, 301, 404, 500];\nfor (const code of statuses) {\n  if (code >= 500) {\n    console.log(code, 'server');\n    break;\n  } else if (code >= 400) {\n    console.log(code, 'client');\n    continue;\n  }\n  console.log(code, 'ok');\n}\n```",
-          "stub": "// Your prediction, and why:\n",
+          "stub": null,
           "hints": [],
           "file": null,
           "run": null,
@@ -1560,7 +1560,7 @@
           "title": "Predict — async order",
           "kind": "predict",
           "statement": "In which order are the letters printed?\n\n```ts\nconst wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));\n\nasync function step(letter: string, ms: number) {\n  await wait(ms);\n  console.log(letter);\n}\n\nasync function main() {\n  console.log('A');\n  step('B', 200);          // no await!\n  await step('C', 100);\n  console.log('D');\n  await wait(200);\n}\nmain();\n```",
-          "stub": "// Your prediction, and why:\n",
+          "stub": null,
           "hints": [],
           "file": null,
           "run": null,
@@ -1572,7 +1572,7 @@
           "title": "Predict — scope",
           "kind": "predict",
           "statement": "Which line does the type checker reject, and why?\n\n```ts\nconst suite = 'Login';\nfor (let i = 0; i < 2; i++) {\n  const title = `${suite} test ${i}`;\n  console.log(title);\n}\nconsole.log(title);\n```",
-          "stub": "// Your prediction, and why:\n",
+          "stub": null,
           "hints": [],
           "file": null,
           "run": null,
@@ -1584,7 +1584,7 @@
           "title": "Test-run reporter",
           "kind": "code",
           "statement": "Create `day4/reporter.ts`. Given\n```ts\nconst results: string[] = ['pass', 'fail', 'pass', 'skip', 'pass', 'fail'];\n```\nuse **one `for...of` loop** and **`if / else if / else`** to count passes, failures and skips, then print:\n```\nPassed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL\n```\nThe verdict is `PASS` only when there are **no** failures (use a ternary).",
-          "stub": "// Test-run reporter\n// Save this as ts-basics/day4/reporter.ts\n",
+          "stub": "const results: string[] = ['pass', 'fail', 'pass', 'skip', 'pass', 'fail'];\n",
           "hints": [
             "Create three `let` counters starting at 0 before the loop.",
             "`const verdict = failed === 0 ? 'PASS' : 'FAIL';`"
@@ -1614,7 +1614,7 @@
           "title": "Find the failed tests",
           "kind": "code",
           "statement": "Create `day4/failed.ts` with this data:\n```ts\ninterface TestResult { title: string; status: 'passed' | 'failed' | 'skipped'; durationMs: number; }\nconst run: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'cart updates', status: 'passed', durationMs: 900 },\n  { title: 'checkout completes', status: 'failed', durationMs: 30000 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n```\n1. Use `filter` to get only the failed tests.\n2. Use `map` to get their titles.\n3. Write an **arrow function** `slowest(results: TestResult[]): TestResult` that loops over the list and returns the test with the largest `durationMs`.\n4. Print:\n```\nFailed (2): search works, checkout completes\nSlowest: checkout completes (30s)\n```",
-          "stub": "// Find the failed tests\n// Save this as ts-basics/day4/failed.ts\n",
+          "stub": "interface TestResult { title: string; status: 'passed' | 'failed' | 'skipped'; durationMs: number; }\nconst run: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'cart updates', status: 'passed', durationMs: 900 },\n  { title: 'checkout completes', status: 'failed', durationMs: 30000 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n",
           "hints": [
             "`run.filter((r) => r.status === 'failed')`",
             "In `slowest`, start with `let max = results[0];` and replace it whenever you find a longer duration."
@@ -1645,7 +1645,7 @@
           "title": "Challenge: upgrade the mini runner",
           "kind": "code",
           "statement": "Copy `day4/mini-runner.ts` to `day4/mini-runner-v2.ts` and add three features that Playwright Test also has:\n\n1. `beforeEach(fn)` — registers **one** async function that runs before **every** test (store it in a variable).\n2. `test.skip`-style skipping: a function `skip(title, body)` that registers a test which is **not run** and is reported as `- title (skipped)`.\n3. A summary line: `2 passed, 1 failed, 1 skipped`.\n\nUse these tests:\n```ts\nlet cart: number[] = [];\nbeforeEach(async () => { cart = []; });            // fresh cart for every test\ntest('adds one item', async () => { cart.push(499); expectEqual(cart.length, 1); });\ntest('cart starts empty', async () => { expectEqual(cart.length, 0); });\nskip('applies coupon', async () => { expectEqual(1, 2); });\ntest('total is right', async () => { cart.push(100, 200); expectEqual(cart.length, 3); });\n```\nExpected output:\n```\n  ✓ adds one item\n  ✓ cart starts empty\n  - applies coupon (skipped)\n  ✘ total is right\n      Expected 3 but received 2\n\n  2 passed, 1 failed, 1 skipped\n```\nNotice how `beforeEach` gives each test a clean cart — the same idea as Playwright's fresh page per test.",
-          "stub": "// Challenge: upgrade the mini runner\n// Save this as ts-basics/day4/mini-runner-v2.ts\n",
+          "stub": "let cart: number[] = [];\nbeforeEach(async () => { cart = []; });            // fresh cart for every test\ntest('adds one item', async () => { cart.push(499); expectEqual(cart.length, 1); });\ntest('cart starts empty', async () => { expectEqual(cart.length, 0); });\nskip('applies coupon', async () => { expectEqual(1, 2); });\ntest('total is right', async () => { cart.push(100, 200); expectEqual(cart.length, 3); });\n",
           "hints": [
             "Add a `skipped: boolean` property to `RegisteredTest`.",
             "Store the hook: `let beforeEachHook: TestFunction | undefined;` and call it with `if (beforeEachHook) { await beforeEachHook(); }`.",

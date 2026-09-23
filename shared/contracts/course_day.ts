@@ -117,8 +117,12 @@ export const PracticeProblem = z.object({
   kind: z.enum(['code', 'terminal', 'written', 'predict']).default('code'),
   /** Markdown: what to do. */
   statement: z.string(),
-  /** What "Start this in the editor" loads. */
-  stub: z.string(),
+  /**
+   * What "Start this in the editor" loads. null for an exercise the editor cannot help with: one
+   * answered in words or in the Terminal, or one whose file the studio cannot run. The button is
+   * then absent.
+   */
+  stub: z.string().nullable(),
   /** Hints, revealed one at a time. */
   hints: z.array(z.string()).default([]),
   /** The file the exercise's code belongs to, relative to the learner's project folder. */

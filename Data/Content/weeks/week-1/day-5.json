@@ -1194,7 +1194,7 @@
           "title": "Four bugs, one test file",
           "kind": "code",
           "statement": "This file has **four** bugs. Some make tests fail, some make them unreliable, one breaks CI. Find and fix them all, then save the fixed version as `tests/day5/bugs.spec.ts` and run it.\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest.beforeAll(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\ntest.only('wrong password shows an error', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  page.getByRole('button', { name: 'Sign in' }).click();\n  expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n```",
-          "stub": "// Four bugs, one test file\n// Save this as tests/day5/bugs.spec.ts\n",
+          "stub": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest.beforeAll(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\ntest.only('wrong password shows an error', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  page.getByRole('button', { name: 'Sign in' }).click();\n  expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n",
           "hints": [
             "Which fixtures are available in beforeAll?",
             "Which lines talk to the browser but have no `await`?",
@@ -1225,7 +1225,7 @@
           "title": "Data-driven sign-in errors",
           "kind": "code",
           "statement": "Use a **loop** (Day 4!) to create one test per row of test data. Create `tests/day5/login-data.spec.ts`:\n\n```ts\nconst invalidLogins = [\n  { email: '', password: '', message: 'Please enter your email and password' },\n  { email: 'student@qa.academy', password: '', message: 'Please enter your email and password' },\n  { email: 'nobody@qa.academy', password: 'Learn@123', message: 'Invalid email or password' },\n  { email: 'student@qa.academy', password: 'learn@123', message: 'Invalid email or password' },\n];\n```\n\nFor each row, register a test titled like `rejects \"nobody@qa.academy\" / \"Learn@123\"` that fills the fields, clicks **Sign in** and checks the alert text. Put all tests inside `test.describe('Invalid sign-in')` with a `beforeEach` that loads the page.\n\nRun with `--project=chromium` — you should see **4** tests.",
-          "stub": "// Data-driven sign-in errors\n// Save this as tests/day5/login-data.spec.ts\n",
+          "stub": "const invalidLogins = [\n  { email: '', password: '', message: 'Please enter your email and password' },\n  { email: 'student@qa.academy', password: '', message: 'Please enter your email and password' },\n  { email: 'nobody@qa.academy', password: 'Learn@123', message: 'Invalid email or password' },\n  { email: 'student@qa.academy', password: 'learn@123', message: 'Invalid email or password' },\n];\n",
           "hints": [
             "Put `for (const data of invalidLogins) { test(`rejects ...`, async ({ page }) => { … }); }` inside the describe.",
             "Test titles must be unique — including the email and password makes them unique.",
@@ -1241,7 +1241,7 @@
           "title": "Run exactly what you need",
           "kind": "terminal",
           "statement": "Write (and run) the command for each:\n\n1. Only the `@smoke` tests in `tests/day5`, Chromium only.\n2. Every test in `tests/day5` **except** `@smoke`, one worker, Firefox only.\n3. Only tests with `dashboard` in the title, with the browser visible.\n4. List all tests in `tests/day5/login.spec.ts` for WebKit without running them.\n5. Re-run only the tests that failed last time, then open the HTML report.",
-          "stub": "# Write one command per line.\n",
+          "stub": null,
           "hints": [],
           "file": null,
           "run": null,

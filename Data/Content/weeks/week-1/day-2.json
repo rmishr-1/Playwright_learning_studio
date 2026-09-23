@@ -1336,7 +1336,7 @@
           "title": "Write the command",
           "kind": "terminal",
           "statement": "Write the single command for each situation (run them to check):\n\n1. Run every test, only in WebKit.\n2. Run only `tests/example.spec.ts`, in Chromium, with the browser visible.\n3. Run only tests whose title contains `link`, in all browsers.\n4. Show which tests would run in Firefox without running them.\n5. Re-run only the tests that failed in the previous run.",
-          "stub": "# Write one command per line.\n",
+          "stub": null,
           "hints": [
             "`--project=<name>` picks a browser project.",
             "`-g` filters by title; `--list` lists; `--last-failed` re-runs failures."
@@ -1351,7 +1351,7 @@
           "title": "Troubleshooting desk",
           "kind": "written",
           "statement": "A colleague sends you these problems. What is the most likely cause and fix for each?\n\n1. `npx: command not found`\n2. `Error: No tests found` — their file is `tests/Login.ts`.\n3. `browserType.launch: Executable doesn't exist at …/ms-playwright/chromium-…` right after upgrading Playwright.\n4. They ran `npm test` in their home folder and got `Missing script: \"test\"`.\n5. After a failing run, the terminal shows `Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.` and won't accept commands.",
-          "stub": "// Write your answer here.\n",
+          "stub": null,
           "hints": [],
           "file": null,
           "run": null,
@@ -1363,7 +1363,7 @@
           "title": "Customise the config",
           "kind": "code",
           "statement": "Edit `playwright.config.ts` so that:\n\n1. Only **chromium** and **firefox** projects remain (remove or comment out webkit).\n2. Failed tests are retried **once** locally and **twice** on CI.\n3. Tests run **headed** by default (hint: `headless: false` inside `use`).\n\nThen run `npx playwright test --list` and check that only 4 runs are listed (2 tests × 2 projects). Afterwards, set `headless` back (or remove the line) so tests run headless again.",
-          "stub": "// Customise the config\n// Save this as playwright.config.ts\n",
+          "stub": null,
           "hints": [
             "`retries` uses the same `process.env.CI ? a : b` pattern that is already there — just change the numbers.",
             "Projects are objects inside the `projects: [ … ]` list. Put `//` in front of lines to comment them out."
@@ -1378,7 +1378,7 @@
           "title": "Your own copy of the example",
           "kind": "code",
           "statement": "Create `tests/day2/my-first.spec.ts` by **copying** `tests/example.spec.ts`, then change it so that:\n\n1. The first test is called `docs page has title` and checks that the title contains `Playwright`.\n2. The second test is called `get started opens installation` (same steps as before).\n3. Add a comment above every line describing the step in your own words.\n\nRun only your new file in Chromium: `npx playwright test tests/day2 --project=chromium`.",
-          "stub": "// Your own copy of the example\n// Save this as tests/day2/my-first.spec.ts\n",
+          "stub": "import { test, expect } from '@playwright/test';\n\ntest('has title', async ({ page }) => {\n  await page.goto('https://playwright.dev/');\n\n  // Expect a title \"to contain\" a substring.\n  await expect(page).toHaveTitle(/Playwright/);\n});\n\ntest('get started link', async ({ page }) => {\n  await page.goto('https://playwright.dev/');\n\n  // Click the get started link.\n  await page.getByRole('link', { name: 'Get started' }).click();\n\n  // Expects page to have a heading with the name of Installation.\n  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();\n});\n",
           "hints": [
             "Only the text inside `test('…'` changes for the names.",
             "Comments start with `//`."
@@ -1393,7 +1393,7 @@
           "title": "Record a test with Codegen (own computer)",
           "kind": "terminal",
           "statement": "On your own computer, run `npx playwright codegen https://playwright.dev`.\n\n1. In the browser that opens, click **Docs**, then use the search box to search for `locators`.\n2. Watch the Playwright Inspector window write code as you click.\n3. Copy the generated code into `tests/day2/recorded.spec.ts` and run it.\n4. Write down two things in the generated code you *don't* understand yet — you'll recognise them by the end of Day 5.",
-          "stub": "# Write one command per line.\n",
+          "stub": null,
           "hints": [
             "Close the Codegen browser window when you're finished recording.",
             "Codegen code often needs small clean-ups; that's normal."

@@ -162,9 +162,13 @@ function Problem({
         </ol>
       )}
       <div className="actions">
-        <button className="btn small" onClick={() => onStart(problem.stub, problem.number, meta)}>
-          Start this in the editor
-        </button>
+        {/* Only where the editor helps: an answer in words, a prediction, or commands for the
+            Terminal has no stub, and then no button. */}
+        {problem.stub !== null && (
+          <button className="btn small" onClick={() => onStart(problem.stub!, problem.number, meta)}>
+            Start this in the editor
+          </button>
+        )}
         {hints < problem.hints.length && (
           <button className="btn small ghost" onClick={() => setHints(hints + 1)}>
             {hints === 0 ? 'Show a hint' : 'Show another hint'}

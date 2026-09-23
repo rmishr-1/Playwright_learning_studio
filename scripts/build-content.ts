@@ -110,7 +110,33 @@ function quiz(b: SrcBlock, where: string): ContentBlock {
   });
 }
 
-function exercise(b: SrcBlock, number: number, where: string): PracticeProblem {
+/**
+ * What "Start this in the editor" loads for a code exercise, or null when the editor cannot help.
+ *
+ * - null when the exercise's file is one the studio's Terminal cannot save or run, such as
+ *   playwright.config.ts, which the studio writes itself. Only files under tests/ and ts-basics/
+ *   can be saved.
+ * - The exercise's own starter code, when it has some.
+ * - The code in the prompt, when the prompt gives some to fix ("This file has four bugs").
+ * - The file the prompt says to start by copying ("by copying `tests/example.spec.ts`").
+ * - The file itself, when it is already a lesson file ("Open `tests/day1/auto-wait.spec.ts`").
+ *   Loading anything else would replace that lesson file when the learner runs it.
+ * - Otherwise a comment naming the file, for an exercise that writes a new file from scratch.
+ */
+function starterFor(b: SrcBlock, file: string | null, title: string, files: Record<string, string>): string | null {
+  if (file && !/^(tests|ts-basics)\//.test(file)) return null;
+  const starter = str(b, 'starter');
+  if (starter) return starter;
+  const prompt = str(b, 'prompt') ?? '';
+  const inPrompt = /```(?:ts|typescript)\n([\s\S]*?)\n```/.exec(prompt);
+  if (inPrompt) return inPrompt[1] + '\n';
+  const copied = /\bcopying\*{0,2}\s+`([\w./-]+)`/.exec(prompt);
+  if (copied && files[copied[1]]) return files[copied[1]];
+  if (file && files[file]) return files[file];
+  return '// ' + title + (file ? '\n// Save this as ' + file : '') + '\n';
+}
+
+function exercise(b: SrcBlock, number: number, where: string, files: Record<string, string>): PracticeProblem {
   const kind = str(b, 'exerciseType') ?? 'code';
   if (kind !== 'code' && kind !== 'terminal' && kind !== 'written' && kind !== 'predict') {
     fail(where, 'unknown exercise type ' + kind);
@@ -120,15 +146,15 @@ function exercise(b: SrcBlock, number: number, where: string): PracticeProblem {
   const title = str(b, 'title') ?? null;
   let statement = str(b, 'prompt') ?? fail(where, 'exercise ' + String(b.id) + ' has no prompt');
 
-  let stub: string;
+  // Only a code exercise gets "Start this in the editor" (see starterFor). An answer in words, a
+  // prediction, or commands for the Terminal need no editor, so the button is left out.
+  let stub: string | null = null;
   let solution: string | null;
   if (kind === 'predict') {
     const code = str(b, 'code');
     if (code) statement += '\n\n' + fence(str(b, 'codeLanguage') ?? 'ts', code);
-    stub = '// Your prediction, and why:\n';
     solution = str(b, 'answer') ?? null;
   } else if (kind === 'written') {
-    stub = '// Write your answer here.\n';
     const model = str(b, 'modelAnswer');
     const rubric = b.rubric as string[] | undefined;
     solution = model ?? null;
@@ -136,11 +162,10 @@ function exercise(b: SrcBlock, number: number, where: string): PracticeProblem {
       solution += '\n\n**What a good answer includes**\n\n' + rubric.map((r) => '- ' + r).join('\n');
     }
   } else if (kind === 'terminal') {
-    stub = '# Write one command per line.\n';
     const s = str(b, 'solution');
     solution = s ? fence('bash', s) : null;
   } else {
-    stub = str(b, 'starter') ?? '// ' + (title ?? 'Exercise ' + number) + (file ? '\n// Save this as ' + file : '') + '\n';
+    stub = starterFor(b, file, title ?? 'Exercise ' + number, files);
     const s = str(b, 'solution');
     const expected = str(b, 'expectedOutput');
     solution = s ? fence(languageOf(file ?? undefined), s) : null;
@@ -214,7 +239,7 @@ function atAGlance(d: SrcDay): string {
   return rows.join('\n').trim();
 }
 
-function convertDay(d: SrcDay): CourseDay {
+function convertDay(d: SrcDay, files: Record<string, string>): CourseDay {
   const at = 'week ' + d.week + ' day ' + d.day;
   let exerciseNo = 0;
   const parts = d.sections.map((s): CoursePart => {
@@ -228,7 +253,7 @@ function convertDay(d: SrcDay): CourseDay {
         const where = at + ' ' + lesson.id;
         if (b.type === 'exercise') {
           exerciseNo++;
-          problems.push(exercise(b, exerciseNo, where));
+          problems.push(exercise(b, exerciseNo, where, files));
           blocks.push(block('problem-ref', String(exerciseNo)));
           continue;
         }
@@ -343,7 +368,9 @@ function main(): void {
       .readdirSync(json)
       .filter((n) => /^day\d+\.json$/.test(n))
       .sort((a, b) => Number(a.slice(3, -5)) - Number(b.slice(3, -5)));
-    const days = dayFiles.map((f) => convertDay(JSON.parse(fs.readFileSync(path.join(json, f), 'utf-8')) as SrcDay));
+    // The files an exercise can start from: the lesson files, and those every workspace starts with.
+    const known = { ...readTree(path.join(SOURCE, 'workspace'), (rel) => rel === 'README.md'), ...lessonFiles };
+    const days = dayFiles.map((f) => convertDay(JSON.parse(fs.readFileSync(path.join(json, f), 'utf-8')) as SrcDay, known));
     for (const day of days) {
       if (day.week !== week.week) fail(dir, 'day ' + day.day + ' says week ' + day.week);
       out.push({ file: path.join(CONTENT, 'weeks', 'week-' + day.week, 'day-' + day.day + '.json'), day });
