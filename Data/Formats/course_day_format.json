@@ -1,5 +1,5 @@
 {
-    "_comment": "Data/Content/weeks/week-<n>/day-<n>.json - ONE day of the course, built by `npm run build:content` from the course source in Data/Source/week-<n>/. Never edit it by hand: edit the source and rebuild. A day has UP TO 4 parts, and nothing downstream may assume four.",
+    "_comment": "Data/Content/weeks/week-<n>/day-<n>.json - ONE day of the course, built by `npm run build:content` from the course package in Data/Source/course/. Never edit it by hand: edit the source and rebuild. A day has UP TO 4 parts, and nothing downstream may assume four.",
     "schema": {
         "value": "course-day/v2"
     },
@@ -7,6 +7,11 @@
         "value": 1
     },
     "day": {
+        "value": 1,
+        "_comment": "The day's position within its week, 1-5. The page's address uses it: /learn/w2/d1."
+    },
+    "number": {
+        "_comment": "The day's number across the whole course (Week 2 starts on Day 6). The lessons and their file names count this way, so the page shows it.",
         "value": 1
     },
     "title": {
@@ -59,6 +64,7 @@
                             "terminal",
                             "callout",
                             "diagram",
+                            "reference",
                             "example",
                             "your-turn",
                             "problem-ref",
@@ -69,7 +75,7 @@
                         "value": "markdown"
                     },
                     "text": {
-                        "_comment": "Markdown for markdown, callout, at-a-glance and recap; source code for code, example and your-turn; the commands, one per line, for terminal; mermaid source for diagram; the question for checkpoint; the exercise number as a string for problem-ref.",
+                        "_comment": "Markdown for markdown, callout, at-a-glance and recap; source code for code, example and your-turn; the commands, one per line, for terminal; mermaid source for diagram; markdown for reference; the question for checkpoint; the exercise number as a string for problem-ref.",
                         "value": ""
                     },
                     "starter": {
@@ -159,6 +165,10 @@
                         "title": {
                             "value": null
                         },
+                        "value": null
+                    },
+                    "title": {
+                        "_comment": "reference ONLY: the title shown while the full table or list is collapsed. null for every other block type.",
                         "value": null
                     }
                 },

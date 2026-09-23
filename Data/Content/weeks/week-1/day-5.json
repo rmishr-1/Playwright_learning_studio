@@ -2,7 +2,8 @@
   "schema": "course-day/v2",
   "week": 1,
   "day": 5,
-  "title": "Playwright Test Runner Basics",
+  "number": 5,
+  "title": "TypeScript I: Your First Program, Variables & Operators",
   "locked": false,
   "workspace": "project",
   "parts": [
@@ -20,87 +21,199 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "at-a-glance",
-          "text": "**Playwright Test Runner Basics**\n\n*Write, organise, filter, run and debug real Playwright tests — then build your Week 1 mini-project*\n\n**Time:** 3.5–4 hours\n\n**Where you work:** pw-course/tests/day5/\n\n**By the end of the day you can:**\n\n- Explain every part of a Playwright test — import, test(), title, async callback, fixtures, await, expect\n- Use the built-in fixtures `page`, `context`, `browser`, `browserName` and `request`\n- Find elements with user-facing locators and perform basic actions (click, fill, check, selectOption, press)\n- Write web-first assertions and generic assertions, and know which ones need `await`\n- Group tests with `test.describe` and share setup with `beforeEach`, `afterEach`, `beforeAll`, `afterAll`\n- Control tests with `test.only`, `test.skip`, `test.fixme` and tags, and filter them from the CLI\n- Explain how the runner discovers, parallelises, times out, retries and reports tests\n- Debug a failing test from its error output and the HTML report\n\n**From earlier days:**\n\n- Day 2: the pw-course project, running tests, playwright.config.ts\n- Day 4: functions, callbacks, arrow functions, destructuring, async/await, import/export",
+          "text": "**TypeScript I: Your First Program, Variables & Operators**\n\n*Just enough programming to read Playwright tests — running and checking a file, storing values, simple data types and operators*\n\n**Time:** 2.5–3 hours\n\n**Where you work:** pw-course/ts-basics/ (you create it today)\n\n**By the end of the day you can:**\n\n- Run a TypeScript file with Node.js and type-check it with the TypeScript compiler\n- Explain the difference between JavaScript and TypeScript and why Playwright uses TypeScript\n- Declare variables with `let` and `const` (and know why to avoid `var`)\n- Use string, number, boolean, null and undefined with type annotations and inference\n- Use arithmetic, assignment, comparison, logical, ternary and nullish operators correctly\n- Read TypeScript error messages and fix type errors\n\n**From earlier days:**\n\n- Day 3–4: the terminal, npm, the pw-course project",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## P1 · Checklist before you start\n\nYou're ready for today if you can tick all of these. If not, revisit the lesson in brackets.\n\n- [ ] I can open the terminal in `pw-course` and run `npx playwright test --project=chromium` (Day 2 · I4–I6)\n- [ ] My `playwright.config.ts` uses `reporter: [['list'], ['html', { open: 'never' }]]` (Day 2 · I5)\n- [ ] I can read `async ({ page }) => { … }` as \"an async arrow function that destructures `page`\" (Day 4 · F3–F4)\n- [ ] I know why every browser action needs `await` (Day 4 · F5)\n- [ ] I can import a named export from another file (Day 4 · F6)\n\n## P2 · HTML roles — how Playwright \"sees\" a page\n\nPlaywright's recommended way to find elements is the way **users and assistive technologies** (screen readers) see them: by **role** and **accessible name**.\n\nMost HTML elements have a built-in role:\n\n| HTML | Role | Accessible name comes from… |\n|---|---|---|\n| `<button>Sign in</button>` | `button` | its text → \"Sign in\" |\n| `<a href=\"/help\">Help</a>` | `link` | its text → \"Help\" |\n| `<h1>Dashboard</h1>` (also h2–h6) | `heading` | its text → \"Dashboard\" |\n| `<input type=\"text\">` / `type=\"email\"` with a `<label>` | `textbox` | its label → e.g. \"Email\" |\n| `<input type=\"checkbox\">` | `checkbox` | its label → e.g. \"Remember me\" |\n| `<select>` | `combobox` | its label → e.g. \"Course\" |\n| `<ul>` / `<li>` | `list` / `listitem` | — |\n| `<p role=\"alert\">` | `alert` | its text |\n\nSo `page.getByRole('button', { name: 'Sign in' })` means: *the button whose accessible name is \"Sign in\"* — exactly how you'd describe it in a manual test case.",
+          "text": "## P1 · What a program is\n\nA **program** is a list of instructions (called **statements**) that the computer runs **from top to bottom**, one after another — exactly like the steps in a test case.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "console.log('Step 1: open the login page');   // prints a line of text\nconsole.log('Step 2: enter the username');\nconsole.log('Step 3: click Log in');",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Five rules to know before you write any code:\n\n| Rule | Example |\n|---|---|\n| **`console.log(…)` prints** something to the console/terminal | `console.log('Hello')` |\n| **Text goes in quotes** — single `'…'`, double `\"…\"` or backticks `` `…` `` | `'Log in'`, `\"Log in\"` |\n| **Comments** are notes for humans; the computer ignores them | `// one line` and `/* several lines */` |\n| **Semicolons** `;` end a statement (optional in most cases, but we use them for clarity) | `console.log('Hi');` |\n| **Case matters** — `Console.log` is not `console.log` | `userName` ≠ `username` |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
-          "text": "A **password** input (`type=\"password\"`) has no ARIA role, so `getByRole('textbox')` won't find it — find it by its label instead: `page.getByLabel('Password')`.",
+          "text": "Copying code from Word, PDFs or chat apps can turn `'` into curly quotes `‘ ’`. Code needs straight quotes. If you see a strange \"Invalid character\" error, retype the quotes.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "warning",
+            "title": "Straight quotes only"
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P2 · Set up your TypeScript playground\n\nYou'll practise TypeScript in a small separate folder inside your course project, called `ts-basics`. Run these commands from the `pw-course` folder:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "mkdir ts-basics\ncd ts-basics\nnpm init -y\nnpm pkg set type=module\nnpm pkg set scripts.check=\"tsc --noEmit --strict --target esnext --module nodenext --allowImportingTsExtensions --ignoreConfig\"\nnpm install -D typescript\nmkdir day5 day6 day7 day8",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "What these do:\n\n| Command | Purpose |\n|---|---|\n| `npm init -y` | Creates a `package.json` for the playground (`-y` = accept all defaults) |\n| `npm pkg set type=module` | Uses modern `import`/`export` syntax (needed on Day 8) |\n| `npm pkg set scripts.check=…` | Adds a `check` shortcut that runs the TypeScript **type checker** in strict mode (`--ignoreConfig` makes it check just the file you name, even if a `tsconfig.json` exists higher up) |\n| `npm install -D typescript` | Installs the TypeScript compiler (`tsc`) |\n\nFrom now on, for every `.ts` file you'll do two things:\n\n| You want to… | Command (inside `ts-basics`) |\n|---|---|\n| **Run** the file and see its output | `node day5/hello.ts` |\n| **Check** the file for type errors | `npm run check -- day5/hello.ts` |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Modern Node.js (22.18 and newer, 24, 26) can run TypeScript directly: it simply **removes the type annotations** and runs the JavaScript that's left. It does **not** check your types — that's the job of `npm run check` (the TypeScript compiler). On older Node 22 versions, use `node --experimental-strip-types day5/hello.ts`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
           "callout": {
             "variant": "note",
-            "title": null
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which locator finds `<a href=\"/pricing\">See pricing</a>`?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`page.getByRole('button', { name: 'See pricing' })`",
-              "`page.getByRole('link', { name: 'See pricing' })`",
-              "`page.getByRole('heading', { name: 'pricing' })`",
-              "`page.getByLabel('See pricing')`"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "An `<a href>` element has the role `link`, and its accessible name is its text."
+            "title": "Why can Node run `.ts` files?"
           },
-          "code": null,
-          "callout": null
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## P3 · Today's practice website\n\nReal websites change, go down, or need a VPN — not ideal for learning. Today you'll test two small **practice pages** that live inside your project as HTML text, and load them with `page.setContent(html)` instead of `page.goto(url)`. Everything you learn works the same on real sites.\n\nCreate the file `tests/day5/practice-pages.ts`. It's a normal module (Day 4!) that **exports** two HTML strings. Because its name doesn't end in `.spec.ts`, Playwright won't treat it as a test file.",
+          "text": "Create your first file, `day5/hello.ts`:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "// Practice web pages for Day 5.\n// Each constant holds the HTML of one page. Tests load it with: await page.setContent(loginPage);\n\n// ---------------------------------------------------------------------------\n// Page 1: QA Academy sign-in\n//   Valid user:   student@qa.academy / Learn@123  → \"Signing in…\" then (0.8 s later) the Dashboard\n//   Empty fields: \"Please enter your email and password\"\n//   Wrong login:  \"Invalid email or password\"\n// ---------------------------------------------------------------------------\nexport const loginPage = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>QA Academy - Sign in</title></head>\n<body>\n  <h1>Sign in to QA Academy</h1>\n  <form id=\"login-form\">\n    <label for=\"email\">Email</label>\n    <input id=\"email\" type=\"email\" placeholder=\"you@example.com\">\n\n    <label for=\"password\">Password</label>\n    <input id=\"password\" type=\"password\" placeholder=\"Your password\">\n\n    <label><input id=\"remember\" type=\"checkbox\"> Remember me</label>\n\n    <button type=\"submit\">Sign in</button>\n  </form>\n  <p id=\"message\" role=\"alert\" data-testid=\"login-message\"></p>\n\n  <script>\n    const form = document.getElementById('login-form');\n    const message = document.getElementById('message');\n\n    form.addEventListener('submit', (event) => {\n      event.preventDefault();\n      const email = document.getElementById('email').value.trim();\n      const password = document.getElementById('password').value;\n\n      if (email === '' || password === '') {\n        message.textContent = 'Please enter your email and password';\n      } else if (email === 'student@qa.academy' && password === 'Learn@123') {\n        message.textContent = 'Signing in…';\n        setTimeout(showDashboard, 800);          // pretend the server is slow\n      } else {\n        message.textContent = 'Invalid email or password';\n      }\n    });\n\n    function showDashboard() {\n      document.title = 'QA Academy - Dashboard';\n      document.body.innerHTML =\n        '<h1>Dashboard</h1>' +\n        '<p>Welcome back, Student!</p>' +\n        '<ul><li>Week 1 - Fundamentals</li><li>Week 2 - Locators</li><li>Week 3 - Page Objects</li></ul>' +\n        '<button id=\"logout\">Log out</button>';\n      document.getElementById('logout').addEventListener('click', () => {\n        document.title = 'QA Academy - Signed out';\n        document.body.innerHTML = '<h1>Signed out</h1><p>See you soon!</p>';\n      });\n    }\n  </script>\n</body>\n</html>\n`;\n\n// ---------------------------------------------------------------------------\n// Page 2: QA Academy course enrolment (used in the Practice mini-project)\n// ---------------------------------------------------------------------------\nexport const enrolPage = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>QA Academy - Enrol</title></head>\n<body>\n  <h1>Enrol in a course</h1>\n  <form id=\"enrol-form\">\n    <label for=\"name\">Full name</label>\n    <input id=\"name\" placeholder=\"e.g. Asha Verma\">\n\n    <label for=\"enrol-email\">Email</label>\n    <input id=\"enrol-email\" type=\"text\" placeholder=\"you@example.com\">\n\n    <label for=\"course\">Course</label>\n    <select id=\"course\">\n      <option value=\"\">-- choose a course --</option>\n      <option value=\"pw\">Playwright Basics</option>\n      <option value=\"api\">API Testing</option>\n      <option value=\"perf\">Performance Testing</option>\n    </select>\n\n    <label><input id=\"terms\" type=\"checkbox\"> I accept the terms</label>\n\n    <button type=\"submit\" disabled>Enrol now</button>\n  </form>\n  <p data-testid=\"seats\">Seats left: 12</p>\n  <p id=\"result\" role=\"status\"></p>\n\n  <script>\n    let seats = 12;\n    const terms = document.getElementById('terms');\n    const submit = document.querySelector('button[type=submit]');\n    const result = document.getElementById('result');\n\n    // The Enrol button is enabled only while the terms box is ticked\n    terms.addEventListener('change', () => {\n      submit.disabled = !terms.checked;\n    });\n\n    document.getElementById('enrol-form').addEventListener('submit', (event) => {\n      event.preventDefault();\n      const name = document.getElementById('name').value.trim();\n      const email = document.getElementById('enrol-email').value.trim();\n      const course = document.getElementById('course');\n\n      if (name === '') { result.textContent = 'Name is required'; return; }\n      if (!email.includes('@')) { result.textContent = 'Enter a valid email'; return; }\n      if (course.value === '') { result.textContent = 'Please choose a course'; return; }\n\n      seats = seats - 1;\n      document.querySelector('[data-testid=seats]').textContent = 'Seats left: ' + seats;\n      const courseName = course.options[course.selectedIndex].text;\n      const firstName = name.split(' ')[0];\n      result.textContent = 'Thanks, ' + firstName + '! You are enrolled in ' + courseName + '.';\n    });\n  </script>\n</body>\n</html>\n`;",
+          "text": "// My first TypeScript program\nconst course: string = 'Playwright with TypeScript';\nconsole.log('Welcome to ' + course + '!');",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "tests/day5/practice-pages.ts",
-            "run": null,
+            "file": "ts-basics/day5/hello.ts",
+            "run": "node day5/hello.ts",
             "mode": "editor",
             "expect_error": false,
             "network": false
           },
-          "callout": null
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "node day5/hello.ts\nnpm run check -- day5/hello.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nWelcome to Playwright with TypeScript!\n```\n\nThe `check` command prints nothing when there are **no errors** — silence is success.\n\n## P3 · How to read an error message\n\nErrors are normal. Professionals see dozens a day. Here's one — change `hello.ts` so the course is a number:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const course: string = 2026;   // a number stored where a string is expected\nconsole.log(course);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day5/broken.ts",
+            "run": "npm run check -- day5/broken.ts",
+            "mode": "editor",
+            "expect_error": true,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm run check -- day5/broken.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nday5/broken.ts(1,7): error TS2322: Type 'number' is not assignable to type 'string'.\n```\n\n| Part | Meaning |\n|---|---|\n| `day5/broken.ts` | The file |\n| `(1,7)` | Line 1, character 7 |\n| `TS2322` | The error code (searchable online) |\n| `Type 'number' is not assignable to type 'string'` | The explanation: you put a number where a string belongs |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
-          "text": "Read the comments at the top of each page like a requirements document. Your tests will check each rule — just as you'd derive manual test cases from requirements.",
+          "text": "Treat an error message like a bug report: **where** (file, line), **what** (the message), then investigate. Read it slowly — it usually tells you exactly what's wrong.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -108,7 +221,8 @@
           "callout": {
             "variant": "tester",
             "title": null
-          }
+          },
+          "title": null
         }
       ],
       "problems": []
@@ -122,16 +236,37 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 5 · Fundamentals\n\n\n\n## F1 · Anatomy of a Playwright test",
+          "text": "# Day 5 · Fundamentals\n\n\n\n## F1 · JavaScript vs TypeScript\n\n**JavaScript (JS)** is the programming language of the web. Every browser runs it, and Node.js runs it outside the browser. Playwright itself is used from JavaScript/TypeScript.\n\n**TypeScript (TS)** is JavaScript **plus types**. It was created by Microsoft (first released in 2012) and is a **superset** of JavaScript: every valid JavaScript program is also valid TypeScript. TypeScript adds a way to say *what kind of value* each thing holds — text, number, true/false, list… — so mistakes are caught **before** the code runs.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "diagram",
+          "text": "flowchart LR\n  TS[\"your-test.ts<br/>(TypeScript: JS + types)\"] -- \"type-check<br/>(tsc / VS Code)\" --> OK{\"errors?\"}\n  OK -- \"no\" --> JS[\"JavaScript<br/>(types removed)\"]\n  OK -- \"yes\" --> FIX[\"fix the code\"]\n  JS --> RUN[\"runs in Node.js<br/>or the browser\"]",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Static vs dynamic typing\n\nJavaScript is **dynamically typed** — a variable can hold a string now and a number later, and nobody complains until something breaks while the program is running. TypeScript is **statically typed** — once a variable is a string it must stay a string, and the editor warns you immediately.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "import { test, expect } from '@playwright/test';          // 1. import the tools\n\ntest('valid user can sign in', async ({ page }) => {      // 2. test(title, async callback)\n  await page.setContent(loginPage);                        // 3. ARRANGE — get to the start state\n  await page.getByLabel('Email').fill('student@qa.academy');   // 4. ACT — do what a user does\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page.getByRole('heading')).toHaveText('Dashboard');   // 5. ASSERT — check the result\n});",
+          "text": "// JavaScript: allowed, bug discovered later (maybe in production)\nlet retries = 'three';\nretries = 3;\n\n// TypeScript: the editor flags it instantly\nlet timeout: number = 30000;\ntimeout = 'thirty seconds';   // ❌ Type 'string' is not assignable to type 'number'",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -143,209 +278,117 @@
             "expect_error": false,
             "network": false
           },
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "| Part | Meaning |\n|---|---|\n| `import { test, expect } from '@playwright/test'` | Bring in the test-declaring function and the assertion function |\n| `test('valid user can sign in', …)` | Register a test with a **title** that reads like a test-case name |\n| `async ({ page }) => { … }` | The test body: an **async** callback. Playwright calls it and passes **fixtures**; we destructure `page` |\n| `await page.…` | Each browser step returns a Promise — `await` it |\n| `await expect(…).toHaveText(…)` | An **assertion** — the expected result |\n\nThe **Arrange → Act → Assert** pattern (also called *Given / When / Then*) keeps tests readable: set up, perform the action, check the outcome.",
+          "text": "### Why TypeScript for test automation?\n\n| Benefit | What it means for you |\n|---|---|\n| **Catches mistakes early** | Typos and wrong values are underlined in red *before* you run a 10-minute suite |\n| **Autocomplete** | Type `page.` and VS Code lists every Playwright action — `click`, `fill`, `goto`… |\n| **Readable** | `function login(user: string, password: string)` documents itself |\n| **Default in Playwright** | `npm init playwright@latest` picks TypeScript by default; most Playwright examples are TypeScript |\n\nDrawbacks: a little more to type, and types are one more concept to learn. For test suites that grow to hundreds of tests, the benefits win.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
-          "text": "Write titles as behaviour: `'shows an error for a wrong password'`, not `'test2'`. The title is what you'll read in reports at 2 a.m. when something breaks.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "tip",
-            "title": "Good test titles"
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "Why is the test body written as `async ({ page }) => { … }`?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`async` makes the test run faster",
-              "It's an async callback, so it can use `await`; Playwright passes a fixtures object and `{ page }` destructures the page from it",
-              "`page` is a global variable that must be declared this way",
-              "It's required by the TypeScript compiler for all functions"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "The callback must be `async` to use `await`, and `{ page }` picks the page fixture out of the object Playwright passes in."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F2 · Fixtures: tools the runner hands you\n\n**Fixtures** are ready-made objects that Playwright creates **before** your test and cleans up **after** it. You ask for them by name in the callback's parameters.\n\n| Fixture | What you get | Typical use |\n|---|---|---|\n| `page` | A fresh tab in a fresh context | 95% of UI tests |\n| `context` | The browser context that `page` belongs to | Open a second tab, set cookies/permissions |\n| `browser` | The shared browser instance | Create extra contexts (multi-user tests), `beforeAll` |\n| `browserName` | `'chromium'`, `'firefox'` or `'webkit'` | Browser-specific skips or expectations |\n| `request` | An API client — no browser needed | API tests, creating test data via API |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "code",
-          "text": "test('fixtures demo', async ({ page, context, browserName }) => {\n  console.log(`Running on ${browserName}`);\n  const secondTab = await context.newPage();   // another tab in the SAME context as page\n  // …\n});",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "Playwright only creates the fixtures you ask for — and because each test gets its **own** `page` and `context`, tests are isolated from each other (Day 1 · F3).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "A test must check that an admin and a customer see different menus at the same time. Which fixture helps you create two separate sessions?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`browserName`",
-              "`browser` — to create two new contexts",
-              "`request`",
-              "Two `page` fixtures in the same test"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`browser.newContext()` twice gives two isolated sessions (admin and customer) in one test — like Day 1's contexts demo."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F3 · Finding elements and acting on them\n\nWeek 2 is all about locators. For now, learn the core set.\n\n### Getting to a page\n\n| Method | Use |\n|---|---|\n| `await page.goto('https://shop.example.com/login')` | Open a URL (with `baseURL` in the config you can write `page.goto('/login')`) |\n| `await page.setContent(html)` | Load HTML directly — used for today's practice pages |\n| `await page.title()` / `page.url()` | Read the current title / URL |\n\n### Locators — \"how to find the element\"\n\nPrefer them in this order (user-facing first):\n\n| Locator | Finds… | Example |\n|---|---|---|\n| `getByRole(role, { name })` | By role + accessible name | `page.getByRole('button', { name: 'Sign in' })` |\n| `getByLabel(text)` | Form field by its label | `page.getByLabel('Email')` |\n| `getByPlaceholder(text)` | Input by placeholder | `page.getByPlaceholder('you@example.com')` |\n| `getByText(text)` | Element by visible text | `page.getByText('Welcome back')` |\n| `getByTestId(id)` | By `data-testid` attribute | `page.getByTestId('login-message')` |\n| `locator(css)` | By CSS selector (fallback) | `page.locator('#email')` |\n\nText matching is **case-insensitive and matches part of the text** by default: `getByText('welcome')` finds \"Welcome back, Student!\". Add `{ exact: true }` for an exact match.\n\nA locator is a **recipe**, not the element itself: creating it doesn't touch the page (so no `await`). The search happens when you act or assert — and that's when auto-waiting kicks in.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "code",
-          "text": "const signIn = page.getByRole('button', { name: 'Sign in' });   // just a recipe — no await\nawait signIn.click();                                             // now it finds, waits, clicks",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "### Actions\n\n| Action | Example |\n|---|---|\n| Click | `await page.getByRole('button', { name: 'Sign in' }).click()` |\n| Type into a field (replaces its value) | `await page.getByLabel('Email').fill('student@qa.academy')` |\n| Press a key | `await page.getByLabel('Password').press('Enter')` |\n| Tick / untick a checkbox | `await page.getByLabel('Remember me').check()` / `.uncheck()` |\n| Choose from a `<select>` | `await page.getByLabel('Course').selectOption('API Testing')` |\n| Clear a field | `await page.getByLabel('Email').clear()` |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which line needs NO `await`?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`page.getByLabel('Email').fill('a@b.com')`",
-              "`const email = page.getByLabel('Email')`",
-              "`page.getByRole('button', { name: 'Save' }).click()`",
-              "`page.setContent(html)`"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Creating a locator only describes how to find the element — it doesn't talk to the browser yet. Actions like fill, click and setContent do, so they're awaited."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F4 · Assertions with `expect`\n\n### Web-first assertions — auto-retrying (use `await`!)\n\nThese keep checking the page until the condition is true or the timeout expires (**5 seconds** by default):\n\n| Assertion | Passes when… |\n|---|---|\n| `await expect(locator).toBeVisible()` | the element is visible |\n| `await expect(locator).toBeHidden()` | it's hidden or doesn't exist |\n| `await expect(locator).toHaveText('Dashboard')` | its text **equals** this (regex allowed: `/Dash/`) |\n| `await expect(locator).toContainText('Welcome')` | its text **contains** this |\n| `await expect(locator).toHaveValue('a@b.com')` | an input's current value is this |\n| `await expect(locator).toBeChecked()` | a checkbox/radio is ticked |\n| `await expect(locator).toBeEnabled()` / `.toBeDisabled()` | the element is (not) enabled |\n| `await expect(locator).toHaveCount(3)` | the locator matches exactly 3 elements |\n| `await expect(locator).toHaveAttribute('type', 'email')` | an attribute has this value |\n| `await expect(page).toHaveTitle(/Dashboard/)` | the tab title matches |\n| `await expect(page).toHaveURL(/dashboard/)` | the URL matches |\n\nAdd `.not` to invert: `await expect(page.getByRole('alert')).not.toBeEmpty()`, `await expect(button).not.toBeVisible()`.\n\n### Generic assertions — check a plain value once (no `await`)\n\nFor values you already have in a variable — no retrying:\n\n| Assertion | Example |\n|---|---|\n| `toBe` (strict equal, like `===`) | `expect(total).toBe(3)` |\n| `toEqual` (same content — for objects/arrays) | `expect(tags).toEqual(['@smoke', '@login'])` |\n| `toContain` | `expect(title).toContain('Academy')` |\n| `toBeTruthy` / `toBeFalsy` | `expect(isVisible).toBeTruthy()` |\n| `toBeGreaterThan` / `toBeLessThan` | `expect(price).toBeGreaterThan(0)` |\n| `toHaveLength` | `expect(items).toHaveLength(3)` |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "code",
-          "text": "// ❌ Flaky: reads the text ONCE, maybe before the page updated\nconst text = await page.getByRole('alert').textContent();\nexpect(text).toBe('Invalid email or password');\n\n// ✅ Reliable: retries until the text matches (up to 5 s)\nawait expect(page.getByRole('alert')).toHaveText('Invalid email or password');",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null
-        },
-        {
-          "type": "callout",
-          "text": "Prefer **web-first** assertions for anything on the page. Use generic assertions only for plain values (numbers you calculated, arrays, API data).",
+          "text": "When you run `npx playwright test`, Playwright converts your `.ts` files to JavaScript on the fly and runs them — **without** checking types (so your tests start fast). Type errors are shown by **VS Code** (red underlines) and by running `npx tsc --noEmit`. Always fix the red underlines!",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
           "callout": {
             "variant": "warning",
-            "title": null
-          }
+            "title": "Important: Playwright runs TypeScript, but does not type-check it"
+          },
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "You can add a custom message that appears in the report when the assertion fails:",
+          "text": "### See the compiler in action (optional)\n\nThe classic TypeScript workflow is: compile `.ts` → `.js`, then run the `.js`. Try it once:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx tsc day5/hello.ts --target esnext --ignoreConfig\nnode day5/hello.js",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Open the new `day5/hello.js` — it's the same code **with the `: string` removed**. That's all \"compiling\" TypeScript mostly does. You can delete `hello.js` afterwards.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which statement about TypeScript is TRUE?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "TypeScript is a completely different language from JavaScript",
+              "Every valid JavaScript program is also valid TypeScript; TypeScript adds types on top",
+              "Browsers run TypeScript directly without any conversion",
+              "TypeScript was created by Google"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "TypeScript is a superset of JavaScript made by Microsoft. Browsers run JavaScript, so types are removed (compiled away) before code runs."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "When you run `npx playwright test`, Playwright stops and refuses to run if your test file has a type error.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "True",
+              "False"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "truefalse",
+            "explanation": "Playwright strips the types and runs the JavaScript without type-checking. The type error may still cause a failure at runtime — or silently do the wrong thing. Use VS Code's red underlines or `npx tsc --noEmit` to catch type errors."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F2 · Variables: `let`, `const` (and why not `var`)\n\nA **variable** is a named box that stores a value so you can use it later.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "await expect(page.getByRole('heading'), 'user should land on the dashboard').toHaveText('Dashboard');",
+          "text": "const siteUrl = 'https://shop.example.com';   // create a box called siteUrl and put a URL in it\nlet attempts = 0;                              // a box whose value will change\nattempts = attempts + 1;                       // put a new value in the box",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -357,168 +400,72 @@
             "expect_error": false,
             "network": false
           },
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "After clicking \"Sign in\" with a wrong password, the page's script shows \"Invalid email or password\" — on a slow machine this can take a moment. Which assertion is reliable?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`expect(await page.getByRole('alert').textContent()).toBe('Invalid email or password')`",
-              "`await expect(page.getByRole('alert')).toHaveText('Invalid email or password')`",
-              "`expect(page.getByRole('alert')).toHaveText('Invalid email or password')` without await",
-              "`page.waitForTimeout(800)` then a generic toBe"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "The web-first assertion retries until it matches. Option A reads the text once (maybe too early). Option C forgets await. Fixed waits (D) are slow and still flaky."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "What's the difference between `toHaveText('Welcome')` and `toContainText('Welcome')`?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "None",
-              "`toHaveText` needs the whole text to match; `toContainText` passes if 'Welcome' appears anywhere in it",
-              "`toContainText` is case-sensitive, `toHaveText` isn't",
-              "`toHaveText` only works on headings"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "For \"Welcome back, Student!\", `toContainText('Welcome')` passes but `toHaveText('Welcome')` fails (with a plain string, toHaveText compares the full text)."
-          },
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## F5 · Grouping tests and sharing setup: `describe` and hooks\n\n### `test.describe` — a group (like a test suite / folder in a test-management tool)",
+          "text": "### The three keywords\n\n| Keyword | Can you change the value later? | Use it when… |\n|---|---|---|\n| `const` | ❌ No — \"constant\" | The value should never be replaced (URLs, test data, locators). **Use by default.** |\n| `let` | ✅ Yes | The value must change (counters, results that update) |\n| `var` | ✅ Yes | **Avoid** — the old way (before 2015). It has confusing scoping rules and lets you redeclare the same name by accident |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "test.describe('Sign in page', () => {\n  test('valid user reaches the dashboard', async ({ page }) => { /* … */ });\n  test('wrong password shows an error', async ({ page }) => { /* … */ });\n});",
+          "text": "// const: a value that never changes\nconst baseUrl = 'https://shop.example.com';\n\n// let: a value that will change\nlet loginAttempts = 0;\nloginAttempts = loginAttempts + 1;   // first attempt\nloginAttempts = loginAttempts + 1;   // second attempt\n\nconsole.log('Testing', baseUrl);\nconsole.log('Login attempts:', loginAttempts);\n\n// Uncomment the next line and run `npm run check -- day5/variables.ts`:\n// baseUrl = 'https://other.example.com';   // ❌ Cannot assign to 'baseUrl' because it is a constant",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
+            "file": "ts-basics/day5/variables.ts",
+            "run": "node day5/variables.ts",
+            "mode": "editor",
             "expect_error": false,
             "network": false
           },
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "Report titles include the group: `Sign in page › wrong password shows an error`. Groups can be nested.\n\n### Hooks — run code around tests\n\n| Hook | Runs | Gets `page`? | Typical use |\n|---|---|---|---|\n| `test.beforeEach` | before **each** test in the file/group | ✅ yes | open the page, log in |\n| `test.afterEach` | after **each** test | ✅ yes | extra clean-up, logging |\n| `test.beforeAll` | **once** before all tests in the file/group (per worker) | ❌ no — use `browser` | expensive one-time setup, e.g. create test data via API |\n| `test.afterAll` | **once** after all tests (per worker) | ❌ no | delete test data |",
+          "text": "```output\nTesting https://shop.example.com\nLogin attempts: 2\n```",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "diagram",
-          "text": "flowchart TD\n  BA[\"beforeAll (once)\"] --> BE1[\"beforeEach\"] --> T1[\"test 1\"] --> AE1[\"afterEach\"]\n  AE1 --> BE2[\"beforeEach\"] --> T2[\"test 2\"] --> AE2[\"afterEach\"]\n  AE2 --> AA[\"afterAll (once)\"]",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "Hooks declared **inside** a `describe` apply only to tests in that group; hooks at the top of the file apply to every test in the file.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
-          "text": "With parallel workers, each worker process runs its **own** `beforeAll`/`afterAll` for the tests it receives. Don't rely on `beforeAll` to share state between tests — each test should be able to run on its own.",
+          "text": "`console.log` can print several things separated by commas — it adds a space between them.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
           "callout": {
             "variant": "note",
-            "title": "\"Per worker\""
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "A file has `beforeAll`, `beforeEach` and 3 tests, all run by ONE worker. How many times does each hook run?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "beforeAll 3, beforeEach 3",
-              "beforeAll 1, beforeEach 3",
-              "beforeAll 1, beforeEach 1",
-              "beforeAll 3, beforeEach 1"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "beforeAll runs once per worker for the file; beforeEach runs before every test."
+            "title": null
           },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Why does `test.beforeAll(async ({ page }) => { … })` throw an error?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "beforeAll cannot be async",
-              "The `page` fixture is created per test, so it isn't available in beforeAll — use `browser` instead",
-              "beforeAll must be inside a describe",
-              "Hooks can't receive fixtures at all"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`page` belongs to a single test. `beforeAll` runs outside any single test, so it can only use worker-level fixtures such as `browser`."
-          },
-          "code": null,
-          "callout": null
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## F6 · Controlling which tests run: annotations and tags\n\n| Annotation | Effect |\n|---|---|\n| `test.only('…', …)` | Run **only** this test (and other `.only` tests). Handy while writing — never commit it! |\n| `test.skip('…', …)` | Don't run this test; report it as skipped |\n| `test.skip(condition, 'reason')` *(inside a test)* | Skip only when the condition is true, e.g. `test.skip(browserName === 'webkit', 'Feature not supported in Safari yet')` |\n| `test.fixme('…', …)` | Skip because the **test** needs fixing (marks it as \"fixme\" in the report) |\n| `test.fail()` *(inside a test)* | \"This test is expected to fail\" (known bug) — it passes when it fails, and alerts you when it starts passing |\n| `test.slow()` *(inside a test)* | Triple the timeout for this test |\n\nThe config line `forbidOnly: !!process.env.CI` makes CI **fail** if someone left a `test.only` in the code — otherwise CI would silently run only one test.\n\n### Tags\n\nTags label tests so you can run subsets such as smoke or regression packs:",
+          "text": "### Declaring now, assigning later",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "test('valid user reaches the dashboard', { tag: '@smoke' }, async ({ page }) => { /* … */ });\n\ntest('remember-me box can be ticked', { tag: ['@regression', '@login'] }, async ({ page }) => { /* … */ });\n\ntest.describe('Enrolment', { tag: '@enrol' }, () => { /* every test inside gets @enrol */ });",
+          "text": "let testResult: string;       // declared with a type, no value yet\ntestResult = 'passed';        // assigned later",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -530,94 +477,521 @@
             "expect_error": false,
             "network": false
           },
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "(Tags written inside the title, like `'login works @smoke'`, also work.)",
+          "text": "A `const` must get its value immediately: `const x;` is an error.\n\n### Naming rules\n\n| ✅ Allowed | ❌ Not allowed |\n|---|---|\n| `userName`, `user_name`, `$price`, `_temp`, `test2` | `2test` (can't start with a digit) |\n| Letters, digits, `_`, `$` | `user-name` (no hyphens), `user name` (no spaces) |\n| | `let`, `const`, `class`, `return` … (reserved words) |\n\n**Convention:** use **camelCase** — first word lowercase, each next word capitalised: `loginButton`, `maxRetryCount`, `isLoggedIn`. Choose names that explain the value: `expectedTitle` beats `t`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test --grep @smoke            # only tests tagged @smoke\nnpx playwright test --grep-invert @slow      # everything EXCEPT @slow\nnpx playwright test --grep \"@smoke|@login\"   # @smoke OR @login",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "A teammate pushed code with `test.only` still in it. What happens on CI with the generated config?",
+          "text": "Which declaration will cause an error?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "CI runs only that one test and reports success",
-              "CI fails the run, because `forbidOnly` is true when the CI variable is set",
-              "CI ignores `.only`",
-              "CI deletes the test"
+              "`let count = 1; count = 2;`",
+              "`const url = 'https://a.com'; url = 'https://b.com';`",
+              "`let name: string; name = 'Asha';`",
+              "`const maxRetries = 3;`"
             ],
             "answers": [
               1
             ],
             "kind": "single",
-            "explanation": "`forbidOnly: !!process.env.CI` turns a leftover `.only` into a failure on CI, protecting the full suite from being silently skipped."
+            "explanation": "A `const` cannot be reassigned. Use `let` if the value must change."
           },
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F7 · What the runner does when you press Run",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "diagram",
-          "text": "flowchart LR\n  A[\"1. Load config<br/>playwright.config.ts\"] --> B[\"2. Discover tests<br/>*.spec.ts in testDir\"]\n  B --> C[\"3. Multiply by projects<br/>(chromium, firefox, webkit)\"]\n  C --> D[\"4. Distribute to workers<br/>(parallel processes)\"]\n  D --> E[\"5. For each test:<br/>fixtures → hooks → body → teardown\"]\n  E --> F[\"6. Retry failures<br/>(if retries > 0)\"]\n  F --> G[\"7. Report<br/>list, html…\"]",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "### Timeouts to remember\n\n| Timeout | Default | Change it with |\n|---|---|---|\n| Whole test — the body plus `beforeEach` hooks and fixture setup | **30 s** | `timeout` in the config, `--timeout=60000`, or `test.setTimeout(60000)` |\n| Each web-first assertion (`expect`) | **5 s** | `expect: { timeout: 10000 }` in the config, or `{ timeout: 10000 }` on one assertion |\n| Each action (`click`, `fill`…) | no separate limit — bounded by the test timeout | `use: { actionTimeout: 10000 }` |\n\n### Results you can get\n\n| Status | Meaning |\n|---|---|\n| ✓ **passed** | Everything worked |\n| ✘ **failed** | An action/assertion failed or timed out |\n| **flaky** | Failed first, then **passed on retry** — investigate! |\n| **skipped** | Skipped by `test.skip` / `test.fixme` |\n\nWhen any test fails, the command ends with a non-zero **exit code** — that's how CI knows the build is red.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "With `retries: 1`, a test fails on the first attempt and passes on the retry. How is it reported?",
+          "text": "Which are valid AND follow the camelCase convention? (Select all that apply)",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "passed",
-              "failed",
-              "flaky",
-              "skipped"
+              "`loginButton`",
+              "`login-button`",
+              "`expectedPageTitle`",
+              "`2ndUser`"
+            ],
+            "answers": [
+              0,
+              2
+            ],
+            "kind": "multiple",
+            "explanation": "Hyphens aren't allowed in names, and names can't start with a digit. `loginButton` and `expectedPageTitle` are valid camelCase."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F3 · Primitive data types\n\nA **data type** says what kind of value something is. TypeScript's everyday **primitive** (simple) types:\n\n| Type | Examples | Used in testing for… |\n|---|---|---|\n| `string` | `'Asha'`, `\"Log in\"`, `` `Hello ${name}` `` | URLs, usernames, expected text |\n| `number` | `42`, `3.14`, `-7`, `30000` | Counts, prices, timeouts (ms) |\n| `boolean` | `true`, `false` | Is the checkbox ticked? Did the test pass? |\n| `undefined` | `undefined` | \"No value has been given yet\" |\n| `null` | `null` | \"Intentionally empty\" |\n\n(There are also `bigint` for huge whole numbers and `symbol` for unique ids — you won't need them for testing.)\n\n### Type annotations vs type inference\n\nYou can **annotate** a type with `: type` after the name — or let TypeScript **infer** (work out) the type from the value:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "let username: string = 'asha';   // annotation: explicitly says \"string\"\nlet password = 'Secret@123';     // inference: TypeScript sees a string, so password is a string\n\npassword = 12345;                // ❌ error — TypeScript inferred string",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Rule of thumb: when you give a value immediately, inference is enough. Annotate when you declare without a value, and for function parameters (Day 7).\n\n### Strings in detail",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const firstName: string = 'Asha';\nconst product = \"Wireless Mouse\";\n\n// Template literal: backticks + ${ } to insert values into text\nconst greeting = `Hello, ${firstName}! You added ${product} to the cart.`;\nconsole.log(greeting);\n\n// Useful string tools\nconsole.log(product.length);              // number of characters\nconsole.log(product.toUpperCase());       // WIRELESS MOUSE\nconsole.log(product.includes('Mouse'));   // does it contain \"Mouse\"?\nconsole.log('  padded  '.trim());         // remove spaces at both ends",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day5/strings.ts",
+            "run": "node day5/strings.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nHello, Asha! You added Wireless Mouse to the cart.\n14\nWIRELESS MOUSE\ntrue\npadded\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Template literals (backticks) are everywhere in Playwright tests — for building URLs (`` `${baseUrl}/login` ``) and expected messages (`` `Welcome, ${user}` ``).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Numbers\n\nTypeScript has **one** number type for whole numbers and decimals. Timeouts in Playwright are numbers in **milliseconds**: `5000` = 5 seconds.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const price = 499.99;\nconst quantity = 2;\nconst timeoutMs = 30_000;   // underscores make big numbers readable (same as 30000)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### null vs undefined",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "let couponCode: string | undefined;   // not set yet → undefined\nconsole.log(couponCode);              // undefined\n\nlet middleName: string | null = null; // deliberately \"no middle name\"",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "`undefined` usually means *\"not set (yet)\"*; `null` means *\"set to nothing on purpose\"*. You'll see both when a value may be missing.\n\n### Checking a type at runtime: `typeof`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "console.log(typeof 'hello');   // \"string\"\nconsole.log(typeof 42);        // \"number\"\nconsole.log(typeof true);      // \"boolean\"",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does this print? `` const user = 'Ravi'; console.log(`Welcome back, ${user}!`); ``",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`Welcome back, ${user}!`",
+              "`Welcome back, Ravi!`",
+              "`Welcome back, user!`",
+              "An error"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Inside backticks, `${ }` inserts the value of the expression — here the value of `user`."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`let isVisible = true;` — what type does TypeScript infer for isVisible?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "string",
+              "number",
+              "boolean",
+              "any"
             ],
             "answers": [
               2
             ],
             "kind": "single",
-            "explanation": "Passing only on retry means the result isn't consistent. Playwright marks it flaky so you can investigate the root cause."
+            "explanation": "`true` and `false` are boolean values, so TypeScript infers `boolean`."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F4 · Operators\n\n**Operators** are symbols that do something with values: calculate, compare, combine.\n\n### Arithmetic\n\n| Operator | Meaning | Example | Result |\n|---|---|---|---|\n| `+` | add (also joins strings) | `5 + 2` | `7` |\n| `-` | subtract | `5 - 2` | `3` |\n| `*` | multiply | `5 * 2` | `10` |\n| `/` | divide | `5 / 2` | `2.5` |\n| `%` | remainder (modulo) | `5 % 2` | `1` |\n| `**` | power | `5 ** 2` | `25` |\n\n### Assignment and increment\n\n| Operator | Same as |\n|---|---|\n| `x = 5` | put 5 in x |\n| `x += 2` | `x = x + 2` |\n| `x -= 2` | `x = x - 2` |\n| `x *= 2` | `x = x * 2` |\n| `x++` | `x = x + 1` |\n| `x--` | `x = x - 1` |\n\n### Comparison — always produce `true` or `false`\n\n| Operator | Meaning |\n|---|---|\n| `===` | equal (value **and** type) — **use this** |\n| `!==` | not equal (value or type) — **use this** |\n| `==` / `!=` | \"loose\" equal / not equal — converts types first. **Avoid** |\n| `>` `<` `>=` `<=` | greater, less, greater-or-equal, less-or-equal |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const expectedCount: number = 3;   // e.g. how many items we expect in the cart\nconst actualCount: number = 3;     // e.g. how many items the page shows\nconst fromTextBox = '3';           // text from an input box is always a string!\n\nconsole.log(actualCount === expectedCount);    // same value, same type\nconsole.log(actualCount > 5);\nconsole.log(actualCount !== 0);\n\n// Why we avoid == : it converts types behind your back\nconsole.log(fromTextBox == (actualCount as any));    // loose: '3' becomes 3 → true\nconsole.log(fromTextBox === (actualCount as any));   // strict: string vs number → false",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day5/comparison.ts",
+            "run": "node day5/comparison.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\ntrue\nfalse\ntrue\ntrue\nfalse\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "The `as any` above only exists to let TypeScript compile this deliberately bad comparison. In real code, TypeScript would stop you from comparing a string with a number — one more reason to love it.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Logical — combine true/false values\n\n| Operator | Name | Result is `true` when… |\n|---|---|---|\n| `&&` | AND | **both** sides are true |\n| `\\|\\|` | OR | **at least one** side is true |\n| `!` | NOT | flips true ↔ false |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const isLoggedIn = true;\nconst hasItemsInCart = false;\n\nconsole.log(isLoggedIn && hasItemsInCart);   // false — both needed\nconsole.log(isLoggedIn || hasItemsInCart);   // true  — one is enough\nconsole.log(!isLoggedIn);                    // false — flipped",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### `+` with strings — joining text",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "console.log('Order ' + 1045);   // \"Order 1045\"  — number is turned into text\nconsole.log(5 + '5');           // \"55\"          — careful: text wins!\nconsole.log(5 + 5);             // 10",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Ternary — a one-line if/else\n\n`condition ? valueIfTrue : valueIfFalse`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const failedTests = 0;\nconst status = failedTests === 0 ? 'PASS' : 'FAIL';   // \"PASS\"",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "This is exactly what you saw in `playwright.config.ts` on Day 4: `retries: process.env.CI ? 2 : 0`.\n\n### Nullish coalescing `??` and optional chaining `?.`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// ?? gives a fallback when the left side is null or undefined\nconst envUrl: string | undefined = undefined;\nconst url = envUrl ?? 'http://localhost:3000';   // \"http://localhost:3000\"\n\n// ?. reads a property only if the object exists (otherwise gives undefined, no crash)\ntype Order = { coupon?: { code: string } };\nconst order: Order = {};\nconsole.log(order.coupon?.code);   // undefined — no error",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Order of operations\n\n`*` and `/` happen before `+` and `-`, just like in maths: `2 + 3 * 4` is `14`. When in doubt, add parentheses: `(2 + 3) * 4` is `20`.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `console.log(10 % 3);` print?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "3.33",
+              "3",
+              "1",
+              "30"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "`%` gives the remainder: 10 ÷ 3 = 3 remainder 1."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `console.log('2' + 2);` print?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "4",
+              "22",
+              "An error",
+              "NaN"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "When one side of `+` is a string, `+` joins text. '2' + 2 becomes '22'."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const passed = 8; const total = 10;` — what is `passed === total ? 'All green' : 'Some failed'`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "'All green'",
+              "'Some failed'",
+              "true",
+              "false"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "8 === 10 is false, so the ternary returns the value after the colon."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why should you prefer `===` over `==`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`===` is faster to type",
+              "`===` compares value AND type without converting, so `'5' === 5` is false — no surprises",
+              "`==` doesn't work in TypeScript",
+              "They are exactly the same"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`==` converts types before comparing (`'5' == 5` is true), which hides bugs. `===` is strict and predictable."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
         }
       ],
       "problems": []
@@ -631,278 +1005,99 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 5 · Implementation\n\n\n\n## I1 · Your first test from scratch\n\nMake sure `tests/day5/practice-pages.ts` exists (Prerequisites · P3). Now create `tests/day5/first.spec.ts`:",
+          "text": "# Day 5 · Implementation\n\n\n\n## I1 · Build expected messages with strings\n\nTests constantly build **expected text**: welcome messages, error messages, URLs. Let's practise with strings, template literals and a few string methods.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';   // our practice page (no .ts needed in test files)\n\ntest('valid user can sign in', async ({ page }) => {\n  // Arrange: open the sign-in page\n  await page.setContent(loginPage);\n  await expect(page).toHaveTitle('QA Academy - Sign in');\n\n  // Act: sign in like a user would\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n\n  // Assert: the dashboard appears (after ~0.8 s — Playwright waits for it)\n  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n  await expect(page.getByText('Welcome back')).toBeVisible();\n  await expect(page).toHaveTitle(/Dashboard/);\n});",
+          "text": "// Test data\nconst firstName: string = 'Meera';\nconst lastName: string = 'Iyer';\nconst email: string = '  Meera.Iyer@Example.com  ';   // typed with extra spaces and capitals\nconst itemsInCart: number = 3;\n\n// Build the values a test would check\nconst fullName = `${firstName} ${lastName}`;\nconst cleanEmail = email.trim().toLowerCase();         // what a good app should store\nconst welcome = `Welcome back, ${firstName}!`;\nconst cartLabel = `Cart (${itemsInCart})`;\nconst profileUrl = `https://shop.example.com/users/${cleanEmail}`;\n\nconsole.log(welcome);\nconsole.log(cartLabel);\nconsole.log(`Full name has ${fullName.length} characters`);\nconsole.log(`Clean email: ${cleanEmail}`);\nconsole.log(`Profile URL: ${profileUrl}`);\nconsole.log(`Email looks valid: ${cleanEmail.includes('@')}`);",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "tests/day5/first.spec.ts",
-            "run": "npx playwright test tests/day5/first.spec.ts --project=chromium --headed",
+            "file": "ts-basics/day5/messages.ts",
+            "run": "node day5/messages.ts",
             "mode": "editor",
             "expect_error": false,
             "network": false
           },
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "terminal",
-          "text": "npx playwright test tests/day5/first.spec.ts --project=chromium --headed",
+          "text": "node day5/messages.ts\nnpm run check -- day5/messages.ts",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "```output\nRunning 1 test using 1 worker\n\n  ✓  1 [chromium] › tests/day5/first.spec.ts:4:5 › valid user can sign in (1.2s)\n\n  1 passed (1.9s)\n```\n\nWatch the browser pane: the form fills in, \"Signing in…\" shows briefly, then the Dashboard appears.\n\n**Try it:** change `'Learn@123'` to `'learn@123'` (lowercase L) and run again. Read the error — which line failed, what was expected, what was received? Then change it back.\n\n## I2 · A complete suite with `describe`, `beforeEach` and tags\n\nNow test **every rule** of the sign-in page. Opening the page is the same for every test, so it moves into `beforeEach`.",
+          "text": "```output\nWelcome back, Meera!\nCart (3)\nFull name has 10 characters\nClean email: meera.iyer@example.com\nProfile URL: https://shop.example.com/users/meera.iyer@example.com\nEmail looks valid: true\n```\n\n**Try it:** change `itemsInCart` to `0` and make the cart label print `Cart (empty)` when there are no items. (Hint: you'll need the ternary operator from lesson F4: `` itemsInCart === 0 ? 'Cart (empty)' : `Cart (${itemsInCart})` ``.)\n\n## I2 · Calculate test-run metrics\n\nUse arithmetic, comparison, logical and ternary operators to summarise a test run — the kind of numbers you'd put in a test-summary report.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest.describe('Sign in page', () => {\n  // Runs before EACH test in this group: every test starts on a fresh sign-in page\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(loginPage);\n  });\n\n  test('shows the sign-in form', { tag: '@smoke' }, async ({ page }) => {\n    await expect(page.getByRole('heading', { name: 'Sign in to QA Academy' })).toBeVisible();\n    await expect(page.getByLabel('Email')).toBeEmpty();\n    await expect(page.getByPlaceholder('you@example.com')).toHaveAttribute('type', 'email');\n    await expect(page.getByRole('button', { name: 'Sign in' })).toBeEnabled();\n  });\n\n  test('valid user reaches the dashboard', { tag: '@smoke' }, async ({ page }) => {\n    await page.getByLabel('Email').fill('student@qa.academy');\n    await page.getByLabel('Password').fill('Learn@123');\n    await page.getByRole('button', { name: 'Sign in' }).click();\n\n    await expect(page.getByRole('alert')).toHaveText('Signing in…');\n    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n    await expect(page.getByRole('listitem')).toHaveCount(3);   // three course weeks listed\n  });\n\n  test('wrong password shows an error', { tag: '@regression' }, async ({ page }) => {\n    await page.getByLabel('Email').fill('student@qa.academy');\n    await page.getByLabel('Password').fill('wrong-password');\n    await page.getByRole('button', { name: 'Sign in' }).click();\n\n    await expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeHidden();\n  });\n\n  test('empty form shows a validation message', { tag: '@regression' }, async ({ page }) => {\n    await page.getByRole('button', { name: 'Sign in' }).click();\n    await expect(page.getByTestId('login-message')).toHaveText('Please enter your email and password');\n  });\n\n  test('pressing Enter submits the form', { tag: '@regression' }, async ({ page }) => {\n    await page.getByLabel('Email').fill('student@qa.academy');\n    await page.getByLabel('Password').fill('Learn@123');\n    await page.getByLabel('Password').press('Enter');   // keyboard instead of mouse\n    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n  });\n\n  test('remember-me can be ticked and unticked', { tag: '@regression' }, async ({ page }) => {\n    const rememberMe = page.getByRole('checkbox', { name: 'Remember me' });   // a locator in a variable\n    await expect(rememberMe).not.toBeChecked();\n    await rememberMe.check();\n    await expect(rememberMe).toBeChecked();\n    await rememberMe.uncheck();\n    await expect(rememberMe).not.toBeChecked();\n  });\n});",
+          "text": "// Results from a test run (typed as number: in real life they come from a report)\nconst total: number = 48;\nconst passed: number = 42;\nconst failed: number = 4;\nconst skipped = total - passed - failed;       // whatever is left over\n\n// Percentages\nconst passRate = (passed / total) * 100;       // brackets first, then × 100\nconst passRateText = passRate.toFixed(1);      // round to 1 decimal place → a string\n\n// Decisions\nconst allPassed = failed === 0;\nconst releaseReady = passRate >= 90 && failed <= 5;   // both rules must be true\nconst status = allPassed ? '✅ GREEN' : '❌ RED';\n\nconsole.log(`Total: ${total} | Passed: ${passed} | Failed: ${failed} | Skipped: ${skipped}`);\nconsole.log(`Pass rate: ${passRateText}%`);\nconsole.log(`Status: ${status}`);\nconsole.log(`Ready for release? ${releaseReady}`);",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "tests/day5/login.spec.ts",
-            "run": "npx playwright test tests/day5/login.spec.ts --project=chromium",
+            "file": "ts-basics/day5/metrics.ts",
+            "run": "node day5/metrics.ts",
             "mode": "editor",
             "expect_error": false,
             "network": false
           },
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test tests/day5/login.spec.ts --project=chromium",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "```output\nRunning 6 tests using 4 workers\n\n  ✓  1 [chromium] › tests/day5/login.spec.ts:10:7 › Sign in page › shows the sign-in form @smoke (240ms)\n  ✓  2 [chromium] › tests/day5/login.spec.ts:27:7 › Sign in page › wrong password shows an error @regression (260ms)\n  ✓  3 [chromium] › tests/day5/login.spec.ts:36:7 › Sign in page › empty form shows a validation message @regression (180ms)\n  ✓  4 [chromium] › tests/day5/login.spec.ts:17:7 › Sign in page › valid user reaches the dashboard @smoke (1.1s)\n  ✓  5 [chromium] › tests/day5/login.spec.ts:41:7 › Sign in page › pressing Enter submits the form @regression (1.0s)\n  ✓  6 [chromium] › tests/day5/login.spec.ts:48:7 › Sign in page › remember-me can be ticked and unticked @regression (150ms)\n\n  6 passed (2.4s)\n```\n\nNotice: `fullyParallel: true` lets tests from the same file run at the same time, so they may finish in a different order each run. That's fine — every test is independent thanks to `beforeEach` and fresh pages.",
+          "text": "```output\nTotal: 48 | Passed: 42 | Failed: 4 | Skipped: 2\nPass rate: 87.5%\nStatus: ❌ RED\nReady for release? false\n```\n\n**Try it:** change `passed` to `44` and `failed` to `2`. Predict the four lines *before* you run it.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "Why is `await page.setContent(loginPage)` in `beforeEach` and not in a `beforeAll`?",
+          "text": "With passed = 44, failed = 2, total = 48, what is `releaseReady`? (Pass rate ≈ 91.7%)",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "`beforeAll` is slower",
-              "`beforeAll` can't use the `page` fixture, and every test needs its own fresh page anyway",
-              "`beforeEach` runs only once",
-              "There is no difference"
+              "true — the pass rate is at least 90 AND failures are at most 5",
+              "false — some tests failed",
+              "true — because failed is not 0",
+              "An error"
             ],
             "answers": [
-              1
+              0
             ],
             "kind": "single",
-            "explanation": "Each test gets its own new page, so opening the practice page must happen per test — in beforeEach, which also has access to `page`."
+            "explanation": "91.7 >= 90 is true and 2 <= 5 is true; true && true is true."
           },
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## I3 · Filter, list, tag and skip\n\nRun subsets of your suite:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "# only smoke tests\nnpx playwright test tests/day5 --grep @smoke --project=chromium\n# everything except smoke tests\nnpx playwright test tests/day5 --grep-invert @smoke --project=chromium\n# titles containing \"error\"\nnpx playwright test tests/day5 -g \"error\" --project=chromium\n# what would run in ALL browsers, without running it\nnpx playwright test tests/day5/login.spec.ts --list",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nListing tests:\n  [chromium] › day5/login.spec.ts:10:7 › Sign in page › shows the sign-in form @smoke\n  [chromium] › day5/login.spec.ts:17:7 › Sign in page › valid user reaches the dashboard @smoke\n  …\n  [webkit] › day5/login.spec.ts:48:7 › Sign in page › remember-me can be ticked and unticked @regression\nTotal: 18 tests in 1 file\n```\n\n6 tests × 3 projects = 18.\n\nNow try the annotations. Create `tests/day5/annotations.spec.ts`:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "code",
-          "text": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest('runs everywhere', async ({ page }) => {\n  await page.setContent(loginPage);\n  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();\n});\n\ntest('skipped on WebKit only', async ({ page, browserName }) => {\n  // Conditional skip: imagine a known Safari-only issue\n  test.skip(browserName === 'webkit', 'Known Safari issue BUG-123');\n  await page.setContent(loginPage);\n  await expect(page.getByLabel('Remember me')).not.toBeChecked();\n});\n\ntest.skip('password reset link', async ({ page }) => {\n  // Not built yet — skipped for everyone\n});\n\ntest.fixme('sign in with Google', async ({ page }) => {\n  // The test itself needs work — shows as \"fixme\" in the report\n});",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "tests/day5/annotations.spec.ts",
-            "run": "npx playwright test tests/day5/annotations.spec.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test tests/day5/annotations.spec.ts",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nRunning 12 tests using 4 workers\n\n  ✓   1 [chromium] › tests/day5/annotations.spec.ts:4:5 › runs everywhere (210ms)\n  ✓   2 [chromium] › tests/day5/annotations.spec.ts:9:5 › skipped on WebKit only (190ms)\n  -   3 [chromium] › tests/day5/annotations.spec.ts:16:6 › password reset link\n  -   4 [chromium] › tests/day5/annotations.spec.ts:20:6 › sign in with Google\n  ✓   5 [firefox] › tests/day5/annotations.spec.ts:4:5 › runs everywhere (520ms)\n  …\n  -  11 [webkit] › tests/day5/annotations.spec.ts:9:5 › skipped on WebKit only\n  …\n\n  7 skipped\n  5 passed (3.1s)\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "callout",
-          "text": "Change one `test(` to `test.only(` and run the file — only that test runs. Remove `.only` before you commit: on CI it fails the whole run (`forbidOnly`).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "tip",
-            "title": "`test.only` while you work"
-          }
-        },
-        {
-          "type": "markdown",
-          "text": "## I4 · See the hooks run in order",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "code",
-          "text": "import { test, expect } from '@playwright/test';\n\ntest.beforeAll(async () => {\n  console.log('beforeAll  → once, before the tests');\n});\n\ntest.beforeEach(async ({ page }) => {\n  console.log('beforeEach → before each test');\n  await page.setContent('<h1>Hooks demo</h1>');\n});\n\ntest.afterEach(async () => {\n  console.log('afterEach  → after each test');\n});\n\ntest.afterAll(async () => {\n  console.log('afterAll   → once, after the tests');\n});\n\ntest('first test', async ({ page }) => {\n  console.log('test body  → first test');\n  await expect(page.getByRole('heading')).toHaveText('Hooks demo');\n});\n\ntest('second test', async ({ page }) => {\n  console.log('test body  → second test');\n  await expect(page.getByRole('heading')).toBeVisible();\n});",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "tests/day5/hooks.spec.ts",
-            "run": "npx playwright test tests/day5/hooks.spec.ts --project=chromium --workers=1",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "`--workers=1` makes the tests run one after another so the order is easy to read:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test tests/day5/hooks.spec.ts --project=chromium --workers=1",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nRunning 2 tests using 1 worker\n\nbeforeAll  → once, before the tests\nbeforeEach → before each test\ntest body  → first test\nafterEach  → after each test\n  ✓  1 [chromium] › tests/day5/hooks.spec.ts:20:5 › first test (160ms)\nbeforeEach → before each test\ntest body  → second test\nafterEach  → after each test\nafterAll   → once, after the tests\n  ✓  2 [chromium] › tests/day5/hooks.spec.ts:25:5 › second test (40ms)\n\n  2 passed (900ms)\n```\n\n**Try it:** run the same command **without** `--workers=1`. If Playwright starts two or more workers (the default is half your CPU cores), each worker runs its own `beforeAll` and `afterAll` — you'll see them printed more than once.\n\n## I5 · Debug a failing test\n\nCreate a test with two deliberate mistakes:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "code",
-          "text": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest('wrong expected text', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  // Mistake 1: the real message is \"Please enter your email and password\"\n  await expect(page.getByRole('alert')).toHaveText('Email is required');\n});\n\ntest('element that does not exist', async ({ page }) => {\n  test.setTimeout(5000);   // fail faster than the default 30 s while we practise\n  await page.setContent(loginPage);\n  // Mistake 2: there is no \"Log in\" button — it's called \"Sign in\"\n  await page.getByRole('button', { name: 'Log in' }).click();\n});",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "tests/day5/broken.spec.ts",
-            "run": "npx playwright test tests/day5/broken.spec.ts --project=chromium",
-            "mode": "editor",
-            "expect_error": true,
-            "network": false
-          },
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test tests/day5/broken.spec.ts --project=chromium",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\n  1) [chromium] › tests/day5/broken.spec.ts:4:5 › wrong expected text ─────────────\n\n    Error: expect(locator).toHaveText(expected) failed\n\n    Locator:  getByRole('alert')\n    Expected: \"Email is required\"\n    Received: \"Please enter your email and password\"\n    Timeout:  5000ms\n\n       6 |   await page.getByRole('button', { name: 'Sign in' }).click();\n       7 |   // Mistake 1: the real message is \"Please enter your email and password\"\n    >  8 |   await expect(page.getByRole('alert')).toHaveText('Email is required');\n         |                                         ^\n\n  2) [chromium] › tests/day5/broken.spec.ts:11:5 › element that does not exist ──────\n\n    Test timeout of 5000ms exceeded.\n\n    Error: locator.click: Test timeout of 5000ms exceeded.\n    Call log:\n      - waiting for getByRole('button', { name: 'Log in' })\n\n      14 |   // Mistake 2: there is no \"Log in\" button — it's called \"Sign in\"\n    > 15 |   await page.getByRole('button', { name: 'Log in' }).click();\n         |                                                      ^\n\n  2 failed\n```\n\nTwo very different failures:\n\n| Failure | Clue in the output | Typical cause |\n|---|---|---|\n| **Assertion failed** | `Expected: …` vs `Received: …` | Wrong expectation — or a real bug in the app |\n| **Timeout waiting for an element** | `waiting for getByRole('button', { name: 'Log in' })` | Wrong locator, element never appears, or appears too late |\n\n### Your debugging toolbox\n\n| Tool | Command | Best for |\n|---|---|---|\n| Error output | *(always shown)* | First look: which line, expected vs received |\n| HTML report | `npx playwright show-report` | Browsing failures, steps and timings; screenshots/traces when enabled |\n| Headed mode | `--headed` | Watching what really happens |\n| Inspector | `npx playwright test tests/day5/broken.spec.ts --debug` | Stepping through one action at a time |\n| UI Mode | `npx playwright test --ui` | Watch mode, time-travel through each step |\n\nFix both mistakes (`'Please enter your email and password'` and `'Sign in'`), remove the `test.setTimeout` line, and run again until it's green.\n\n## I6 · Read the HTML report",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test tests/day5 --project=chromium\nnpx playwright show-report",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "In the report:\n\n1. Use the filters at the top (**Passed / Failed / Flaky / Skipped**) and the search box — try typing `@smoke`.\n2. Click a test to see every step (`setContent`, `fill`, `click`, `expect …`) with its duration.\n3. Failed tests show the same error as the terminal, plus attachments when screenshots or traces are enabled in the config.\n\nPress `Ctrl + C` in the terminal to stop the report server when you're done.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         }
       ],
       "problems": []
@@ -921,186 +1116,127 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "Which file names will Playwright pick up as tests in `tests/`? (Choose the best answer)",
+          "text": "Which keyword should you use by default for a variable whose value never changes?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Any .ts file",
-              "Files ending in .spec.ts or .test.ts",
-              "Only example.spec.ts",
-              "Files that start with \"test\""
+              "var",
+              "let",
+              "const",
+              "static"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "Use `const` by default and switch to `let` only when the value must change. Avoid `var`."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What is the type of `30000` in `const timeout = 30000;`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "string",
+              "number",
+              "boolean",
+              "time"
             ],
             "answers": [
               1
             ],
             "kind": "single",
-            "explanation": "That's why `practice-pages.ts` is treated as a normal module, not a test file."
+            "explanation": "It's a number (30,000 milliseconds = 30 seconds)."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "Which assertion checks that an input field contains the text the user typed?",
+          "text": "What does `console.log(typeof 'false');` print?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "`toHaveText`",
-              "`toHaveValue`",
-              "`toContainText`",
-              "`toHaveTitle`"
+              "boolean",
+              "string",
+              "false",
+              "undefined"
             ],
             "answers": [
               1
             ],
             "kind": "single",
-            "explanation": "An input's typed content is its *value*, not its text. Use `await expect(locator).toHaveValue('…')`."
+            "explanation": "'false' is in quotes, so it's a string that happens to contain the word false."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "What is the default timeout for a whole test, and for one web-first assertion?",
+          "text": "What does `true && !false` evaluate to?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "5 s and 30 s",
-              "30 s and 5 s",
-              "60 s and 10 s",
-              "No limit for both"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "A test may take up to 30 s (its body plus beforeEach hooks and fixture setup; afterEach and beforeAll/afterAll get their own limit of the same length). Each expect retries for up to 5 s."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which of these are valid ways to tag a test as @smoke? (Select all that apply)",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`test('login works', { tag: '@smoke' }, async ({ page }) => {…})`",
-              "`test('login works @smoke', async ({ page }) => {…})`",
-              "`test.smoke('login works', async ({ page }) => {…})`",
-              "`test.describe('Login', { tag: '@smoke' }, () => {…})` around the test"
-            ],
-            "answers": [
-              0,
-              1,
-              3
-            ],
-            "kind": "multiple",
-            "explanation": "Tags go in the details object, in the title, or on a describe (applies to every test inside). There is no `test.smoke`."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "`test.skip(browserName === 'firefox', 'Upload not supported')` is written inside a test. When is the test skipped?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Always",
-              "Only when it runs in the firefox project",
-              "Never — skip must be outside the test",
-              "Only on CI"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "The conditional form of `test.skip` skips only when the condition is true."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "`getByText('welcome')` — does it match an element with the text \"Welcome back, Student!\"?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "No — it's case-sensitive and needs the whole text",
-              "Yes — by default text matching is case-insensitive and matches a substring",
-              "{'Only if you add `{ exact': 'true }`'}",
-              "Only inside a describe"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Default text matching is case-insensitive and partial. `{ exact: true }` makes it case-sensitive and whole-string."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "You run `npx playwright test --grep @smoke --project=firefox`. Two files contain 3 and 4 tests; 2 tests in total are tagged @smoke. How many test runs?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "2",
-              "6",
-              "7",
-              "21"
+              "true",
+              "false",
+              "An error"
             ],
             "answers": [
               0
             ],
             "kind": "single",
-            "explanation": "Only the 2 @smoke tests are selected, and only one project runs: 2 × 1 = 2."
+            "explanation": "`!false` is true, and true && true is true."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "What is the MAIN purpose of `beforeEach` in a Playwright test file?",
+          "text": "`const port = process.env.PORT ?? '3000';` — if PORT is not set (undefined), what is port?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "To run the tests faster",
-              "To put shared setup (like opening the page) in one place so every test starts from the same state",
-              "To share a single page between all tests",
-              "To skip tests"
+              "undefined",
+              "'3000'",
+              "null",
+              "An empty string"
             ],
             "answers": [
               1
             ],
             "kind": "single",
-            "explanation": "It removes repetition and guarantees each test begins from a known state — while each test still gets its own fresh page."
+            "explanation": "`??` returns the right-hand fallback when the left side is null or undefined."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## Spot the bug",
+          "text": "## Predict the output",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "problem-ref",
@@ -1109,16 +1245,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Exercises",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "problem-ref",
@@ -1127,7 +1255,18 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Exercises",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
         },
         {
           "type": "problem-ref",
@@ -1136,7 +1275,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "problem-ref",
@@ -1145,124 +1285,88 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## Week 1 mini-project · Test the enrolment page",
+          "text": "## Reflection\n\n1. Explain in one sentence the difference between *running* a `.ts` file with Node and *checking* it with `tsc`.\n2. When do you choose `let` instead of `const`?\n3. Why is `'5' === 5` false, and why is that a good thing?",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "5",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Week 1 wrap-up\n\nYou started the week as a manual tester. You can now:\n\n- ✅ Explain Playwright's architecture and why it reduces flaky tests\n- ✅ Create a Playwright project and explain every file in it\n- ✅ Read and write TypeScript: variables, types, operators, conditions, loops, functions, async/await, modules\n- ✅ Write, organise, tag, filter, run and debug Playwright tests\n- ✅ Turn written requirements into an automated test suite",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
-          "text": "**Locators in depth** (role, text, CSS, XPath, filtering, chaining, strictness), **actions** (hover, drag-and-drop, uploads, dialogs, frames), more **assertions**, and your first **Page Object Model** — moving the \"how\" out of your tests into `pages/`.",
+          "text": "Lists and records: arrays, tuples and objects — the way you'll store test data — plus union and literal types and why `any` is a trap.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
           "callout": {
             "variant": "tip",
-            "title": "Coming up in Week 2"
-          }
+            "title": "Coming up on Day 6"
+          },
+          "title": null
         }
       ],
       "problems": [
         {
           "number": 1,
-          "difficulty": "Medium",
-          "title": "Four bugs, one test file",
-          "kind": "code",
-          "statement": "This file has **four** bugs. Some make tests fail, some make them unreliable, one breaks CI. Find and fix them all, then save the fixed version as `tests/day5/bugs.spec.ts` and run it.\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest.beforeAll(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\ntest.only('wrong password shows an error', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  page.getByRole('button', { name: 'Sign in' }).click();\n  expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n```",
-          "stub": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest.beforeAll(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\ntest.only('wrong password shows an error', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  page.getByRole('button', { name: 'Sign in' }).click();\n  expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n",
-          "hints": [
-            "Which fixtures are available in beforeAll?",
-            "Which lines talk to the browser but have no `await`?",
-            "What does `forbidOnly` do on CI?"
-          ],
-          "file": "tests/day5/bugs.spec.ts",
-          "run": "npx playwright test tests/day5/bugs.spec.ts --project=chromium",
-          "solution": "```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\n// Bug 1: beforeAll can't use `page` → use beforeEach (and remove the duplicate setContent in the test)\ntest.beforeEach(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\n// Bug 2: test.only would fail CI (forbidOnly) and hide all other tests → plain test()\ntest('wrong password shows an error', async ({ page }) => {\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  // Bug 3: missing await on the click\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  // Bug 4: missing await on the web-first assertion\n  await expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n```"
-        },
-        {
-          "number": 2,
           "difficulty": "Easy",
-          "title": "Test the log-out flow",
-          "kind": "code",
-          "statement": "Create `tests/day5/logout.spec.ts` with one test, `user can log out`:\n\n1. Sign in as `student@qa.academy` / `Learn@123`.\n2. Wait for the Dashboard heading.\n3. Click **Log out**.\n4. Assert the heading **Signed out** is visible, the text **See you soon!** is visible, and the title contains `Signed out`.",
-          "stub": "// Test the log-out flow\n// Save this as tests/day5/logout.spec.ts\n",
-          "hints": [
-            "`page.getByRole('button', { name: 'Log out' })`",
-            "`await expect(page).toHaveTitle(/Signed out/)`"
-          ],
-          "file": "tests/day5/logout.spec.ts",
-          "run": "npx playwright test tests/day5/logout.spec.ts --project=chromium --headed",
-          "solution": "```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest('user can log out', async ({ page }) => {\n  // Sign in\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n\n  // Log out\n  await page.getByRole('button', { name: 'Log out' }).click();\n\n  // Check the signed-out page\n  await expect(page.getByRole('heading', { name: 'Signed out' })).toBeVisible();\n  await expect(page.getByText('See you soon!')).toBeVisible();\n  await expect(page).toHaveTitle(/Signed out/);\n});\n```"
-        },
-        {
-          "number": 3,
-          "difficulty": "Medium",
-          "title": "Data-driven sign-in errors",
-          "kind": "code",
-          "statement": "Use a **loop** (Day 4!) to create one test per row of test data. Create `tests/day5/login-data.spec.ts`:\n\n```ts\nconst invalidLogins = [\n  { email: '', password: '', message: 'Please enter your email and password' },\n  { email: 'student@qa.academy', password: '', message: 'Please enter your email and password' },\n  { email: 'nobody@qa.academy', password: 'Learn@123', message: 'Invalid email or password' },\n  { email: 'student@qa.academy', password: 'learn@123', message: 'Invalid email or password' },\n];\n```\n\nFor each row, register a test titled like `rejects \"nobody@qa.academy\" / \"Learn@123\"` that fills the fields, clicks **Sign in** and checks the alert text. Put all tests inside `test.describe('Invalid sign-in')` with a `beforeEach` that loads the page.\n\nRun with `--project=chromium` — you should see **4** tests.",
-          "stub": "const invalidLogins = [\n  { email: '', password: '', message: 'Please enter your email and password' },\n  { email: 'student@qa.academy', password: '', message: 'Please enter your email and password' },\n  { email: 'nobody@qa.academy', password: 'Learn@123', message: 'Invalid email or password' },\n  { email: 'student@qa.academy', password: 'learn@123', message: 'Invalid email or password' },\n];\n",
-          "hints": [
-            "Put `for (const data of invalidLogins) { test(`rejects ...`, async ({ page }) => { … }); }` inside the describe.",
-            "Test titles must be unique — including the email and password makes them unique.",
-            "`fill('')` is fine for empty fields."
-          ],
-          "file": "tests/day5/login-data.spec.ts",
-          "run": "npx playwright test tests/day5/login-data.spec.ts --project=chromium",
-          "solution": "```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\n// Test data: one row = one test\nconst invalidLogins = [\n  { email: '', password: '', message: 'Please enter your email and password' },\n  { email: 'student@qa.academy', password: '', message: 'Please enter your email and password' },\n  { email: 'nobody@qa.academy', password: 'Learn@123', message: 'Invalid email or password' },\n  { email: 'student@qa.academy', password: 'learn@123', message: 'Invalid email or password' },\n];\n\ntest.describe('Invalid sign-in', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(loginPage);\n  });\n\n  // Create one test per data row\n  for (const data of invalidLogins) {\n    test(`rejects \"${data.email}\" / \"${data.password}\"`, async ({ page }) => {\n      await page.getByLabel('Email').fill(data.email);\n      await page.getByLabel('Password').fill(data.password);\n      await page.getByRole('button', { name: 'Sign in' }).click();\n      await expect(page.getByRole('alert')).toHaveText(data.message);\n    });\n  }\n});\n```"
-        },
-        {
-          "number": 4,
-          "difficulty": "Easy",
-          "title": "Run exactly what you need",
-          "kind": "terminal",
-          "statement": "Write (and run) the command for each:\n\n1. Only the `@smoke` tests in `tests/day5`, Chromium only.\n2. Every test in `tests/day5` **except** `@smoke`, one worker, Firefox only.\n3. Only tests with `dashboard` in the title, with the browser visible.\n4. List all tests in `tests/day5/login.spec.ts` for WebKit without running them.\n5. Re-run only the tests that failed last time, then open the HTML report.",
+          "title": "Predict — strings and numbers",
+          "kind": "predict",
+          "statement": "Without running it, write down the four lines this program prints. Then run it to check.\n\n```ts\nconst a = 10;\nconst b = '10';\nconsole.log(a + 5);\nconsole.log(b + 5);\nconsole.log(a === Number(b));\nconsole.log(`${a} items`);\n```",
           "stub": null,
           "hints": [],
           "file": null,
           "run": null,
-          "solution": "```bash\nnpx playwright test tests/day5 --grep @smoke --project=chromium\nnpx playwright test tests/day5 --grep-invert @smoke --workers=1 --project=firefox\nnpx playwright test -g \"dashboard\" --headed\nnpx playwright test tests/day5/login.spec.ts --project=webkit --list\nnpx playwright test --last-failed\nnpx playwright show-report\n```"
+          "solution": "15\n105\ntrue\n10 items\n\n`b + 5` joins text ('10' + 5 → '105'). `Number(b)` converts the string '10' to the number 10, so the strict comparison is true."
         },
         {
-          "number": 5,
-          "difficulty": "Challenge",
-          "title": "Mini-project: automate the QA Academy enrolment page",
+          "number": 2,
+          "difficulty": "Easy",
+          "title": "Predict — let and const",
+          "kind": "predict",
+          "statement": "What is printed? Is there any line the type checker would reject?\n\n```ts\nlet count = 1;\ncount += 4;\ncount--;\nconst label = count > 3 ? 'many' : 'few';\nconsole.log(count, label);\n```",
+          "stub": null,
+          "hints": [],
+          "file": null,
+          "run": null,
+          "solution": "`4 many`\n\ncount: 1 → 5 (after `+= 4`) → 4 (after `--`). 4 > 3 is true, so label is 'many'. No errors — `count` uses `let`, so it may change."
+        },
+        {
+          "number": 3,
+          "difficulty": "Medium",
+          "title": "Shopping-cart calculator",
           "kind": "code",
-          "statement": "You've received these requirements for the **enrolment page** (`enrolPage` in `practice-pages.ts`). Like a manual tester, first list your test cases — then automate them in `tests/day5/enrol.spec.ts`.\n\n**Requirements**\n- **R1** The page title is `QA Academy - Enrol` and the heading is `Enrol in a course`.\n- **R2** The **Enrol now** button is **disabled** until *I accept the terms* is ticked, and disabled again when it is unticked.\n- **R3** Submitting without a name shows `Name is required`.\n- **R4** An email without `@` shows `Enter a valid email`.\n- **R5** Submitting without choosing a course shows `Please choose a course`.\n- **R6** A valid enrolment (name `Asha Verma`, email `asha@example.com`, course **API Testing**) shows `Thanks, Asha! You are enrolled in API Testing.`\n- **R7** After a successful enrolment, `Seats left` goes from **12** to **11**.\n\n**Your suite must**\n- use `test.describe('Enrolment page', …)` and a `beforeEach` that loads the page,\n- have at least **7** tests (one per requirement — R6 and R7 may share one test if you prefer 6),\n- tag R1 and R6 with `@smoke`, the rest with `@regression`,\n- use user-facing locators (`getByRole`, `getByLabel`, `getByTestId`) and web-first assertions only,\n- pass on **chromium** and **firefox**.\n\nThen run:\n```\nnpx playwright test tests/day5/enrol.spec.ts --project=chromium --project=firefox\nnpx playwright test tests/day5/enrol.spec.ts --grep @smoke\nnpx playwright show-report\n```",
-          "stub": "// Mini-project: automate the QA Academy enrolment page\n// Save this as tests/day5/enrol.spec.ts\n",
+          "statement": "Create `day5/cart.ts`. A cart has: unit price **1299**, quantity **3**, discount **10%**, and shipping **99** that is **free when the discounted subtotal is 3000 or more**.\n\nCalculate and print:\n```\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```\nUse `const` for the inputs, arithmetic operators for the maths, a **ternary** for shipping and `toFixed(2)` for the final line.",
+          "stub": "// Shopping-cart calculator\n// Save this as ts-basics/day5/cart.ts\n",
           "hints": [
-            "The course dropdown has the label Course: `page.getByLabel('Course').selectOption('API Testing')` (by visible text or by value 'api').",
-            "The seats text has a test id: `page.getByTestId('seats')`.",
-            "To test R3–R5 the Enrol button must be enabled — tick the terms box first.",
-            "Write a small helper function inside the file (e.g. `fillForm(page, name, email, course)`) to avoid repeating the same fills. Its `page` parameter can be typed with `import { type Page } from '@playwright/test'`."
+            "discount = subtotal × discountPercent / 100",
+            "`const shipping = afterDiscount >= 3000 ? 0 : 99;`"
           ],
-          "file": "tests/day5/enrol.spec.ts",
-          "run": "npx playwright test tests/day5/enrol.spec.ts --project=chromium --project=firefox",
-          "solution": "```ts\nimport { test, expect, type Page } from '@playwright/test';\nimport { enrolPage } from './practice-pages';\n\n// Helper: fill the form (empty strings leave a field blank) and accept the terms\nasync function fillForm(page: Page, name: string, email: string, course: string): Promise<void> {\n  await page.getByLabel('Full name').fill(name);\n  await page.getByLabel('Email').fill(email);\n  if (course !== '') {\n    await page.getByLabel('Course').selectOption(course);\n  }\n  await page.getByLabel('I accept the terms').check();\n}\n\ntest.describe('Enrolment page', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(enrolPage);\n  });\n\n  test('R1: shows the correct title and heading', { tag: '@smoke' }, async ({ page }) => {\n    await expect(page).toHaveTitle('QA Academy - Enrol');\n    await expect(page.getByRole('heading', { name: 'Enrol in a course' })).toBeVisible();\n  });\n\n  test('R2: Enrol button follows the terms checkbox', { tag: '@regression' }, async ({ page }) => {\n    const enrol = page.getByRole('button', { name: 'Enrol now' });\n    const terms = page.getByLabel('I accept the terms');\n    await expect(enrol).toBeDisabled();\n    await terms.check();\n    await expect(enrol).toBeEnabled();\n    await terms.uncheck();\n    await expect(enrol).toBeDisabled();\n  });\n\n  test('R3: name is required', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, '', 'asha@example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Name is required');\n  });\n\n  test('R4: email must contain @', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha.example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Enter a valid email');\n  });\n\n  test('R5: a course must be chosen', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha@example.com', '');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Please choose a course');\n  });\n\n  test('R6: valid enrolment shows a confirmation', { tag: '@smoke' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha@example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Thanks, Asha! You are enrolled in API Testing.');\n  });\n\n  test('R7: seats left goes down by one', { tag: '@regression' }, async ({ page }) => {\n    await expect(page.getByTestId('seats')).toHaveText('Seats left: 12');\n    await fillForm(page, 'Asha Verma', 'asha@example.com', 'Playwright Basics');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByTestId('seats')).toHaveText('Seats left: 11');\n  });\n});\n```"
+          "file": "ts-basics/day5/cart.ts",
+          "run": "node day5/cart.ts",
+          "solution": "```ts\n// Inputs\nconst unitPrice = 1299;\nconst quantity = 3;\nconst discountPercent = 10;\n\n// Calculations\nconst subtotal = unitPrice * quantity;                      // 3897\nconst discount = (subtotal * discountPercent) / 100;        // 389.7\nconst afterDiscount = subtotal - discount;                  // 3507.3\nconst shipping = afterDiscount >= 3000 ? 0 : 99;            // free above 3000\nconst totalToPay = afterDiscount + shipping;\n\n// Output\nconsole.log(`Subtotal: ${subtotal}`);\nconsole.log(`Discount: ${discount}`);\nconsole.log(`After discount: ${afterDiscount}`);\nconsole.log(`Shipping: ${shipping}`);\nconsole.log(`Total to pay: ${totalToPay.toFixed(2)}`);\n```\n\n**Output**\n\n```output\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```"
+        },
+        {
+          "number": 4,
+          "difficulty": "Medium",
+          "title": "Fix the config-style code",
+          "kind": "code",
+          "statement": "The file below mimics settings from `playwright.config.ts`, but has **four** type errors. Save it as `day5/settings.ts`, run `npm run check -- day5/settings.ts`, and fix every error so that it checks cleanly and prints:\n```\nRetries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000\n```\n(Assume the `isCI` variable is `false`.)",
+          "stub": "const isCI: boolean = 'false';\nconst retries: number = isCI ? 2 : '0';\nconst workers: number = isCI ? 1 : 4;\nconst headless: boolean = 'true';\nlet baseURL: string | undefined;\nconst finalUrl: number = baseURL ?? 'http://localhost:3000';\nconsole.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${finalUrl}`);",
+          "hints": [
+            "Booleans are written without quotes.",
+            "Both sides of the ternary should be numbers for `retries`.",
+            "What type does `baseURL ?? 'http://…'` produce?"
+          ],
+          "file": "ts-basics/day5/settings.ts",
+          "run": "node day5/settings.ts",
+          "solution": "```ts\nconst isCI: boolean = false;                              // fix 1: boolean, not text\nconst retries: number = isCI ? 2 : 0;                     // fix 2: number on both sides\nconst workers: number = isCI ? 1 : 4;\nconst headless: boolean = true;                           // fix 3: boolean, not text\nlet baseURL: string | undefined;\nconst finalUrl: string = baseURL ?? 'http://localhost:3000';   // fix 4: the result is a string\nconsole.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${finalUrl}`);\n```\n\n**Output**\n\n```output\nRetries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000\n```"
         }
       ]
     }

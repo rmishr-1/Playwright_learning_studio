@@ -426,6 +426,16 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .diagram svg { max-width: 100%; height: auto; }
 
+/* A reference table kept out of the way until wanted. */
+.reference { margin: 16px 0; border: 1px solid var(--rule); border-radius: 10px; background: var(--paper); }
+.reference > summary {
+  cursor: pointer; padding: 10px 14px; font-weight: 600; color: var(--heading); font-size: 14.5px;
+  list-style-position: inside;
+}
+.reference > summary:hover { color: var(--accent); }
+.reference[open] > summary { border-bottom: 1px solid var(--rule); }
+.reference > div { padding: 2px 14px 6px; overflow-x: auto; }
+
 /* Retrieval check. Formative and never scored (registry invariant 9) - which is why it is a
    plain card and not a graded widget: nothing here is recorded or gated on. */
 .checkpoint {

@@ -1,0 +1,605 @@
+{
+  "schemaVersion": "1.0",
+  "day": 1,
+  "week": 1,
+  "title": "From Manual Testing to Automation",
+  "subtitle": "What automation is for, how a web page is built, what Playwright is — and your first automated test run, before any theory",
+  "estimatedTime": "2–2.5 hours",
+  "topics": [
+    "Introduction to Playwright",
+    "Manual testing vs automation",
+    "HTML, the DOM and browsers"
+  ],
+  "objectives": [
+    "Explain what test automation is and which manual tests are worth automating",
+    "Describe how a web page is built (HTML, elements, attributes, the DOM) in simple words",
+    "Name the three browser engines Playwright supports and explain headed vs headless",
+    "Say what Playwright is and what comes in the box",
+    "Run pre-built demo tests, watch auto-waiting happen and read the result in the terminal"
+  ],
+  "prerequisitesFromEarlierDays": [],
+  "workspace": "Pre-loaded demo workspace (you install your own on Day 3)",
+  "sections": [
+    {
+      "id": "prerequisites",
+      "title": "Prerequisites",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d1-prerequisites-1",
+          "title": "P1 · Manual testing vs test automation",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "You already know how to test software. You read a requirement, write test cases, open the application, click through the steps and compare what you see with what you expected.\n\n**Test automation** means writing those same steps as a script so that a computer can repeat them — fast, the same way every time, as often as you like.\n\n| | Manual testing | Automated testing |\n|---|---|---|\n| Who performs the steps | A human tester | A script run by a tool |\n| Speed | Minutes per test case | Seconds per test case |\n| Repeating the same test 100 times | Tiring and error-prone | Easy — same result every time |\n| Finding *new*, unexpected problems | Excellent (human judgement) | Weak — only checks what it was told |\n| Cost | Low to start, high over time | Higher to start, low over time |"
+            },
+            {
+              "type": "callout",
+              "variant": "tester",
+              "content": "Automation takes over the *repetitive checking* (e.g. the 200 regression test cases you run before every release). That frees you for exploratory testing, usability checks and edge cases — work that needs a human brain. The best automation engineers are former manual testers, because they already know **what** to test.",
+              "title": "Automation does not replace you"
+            },
+            {
+              "type": "markdown",
+              "content": "### What is worth automating?\n\nGood candidates:\n\n- **Regression tests** — features that already work and must keep working after every change\n- **Smoke tests** — the \"is the app alive?\" checks after every deployment (login, home page, search)\n- **Data-heavy tests** — the same form tested with 50 different inputs\n- **Cross-browser checks** — the same flow on Chrome, Firefox and Safari\n\nPoor candidates:\n\n- Features that change every week (the script breaks every week)\n- One-time tests you will never run again\n- \"Does this *look* nice?\" judgements\n- Exploratory testing"
+            },
+            {
+              "type": "quiz",
+              "id": "d1-p1-q1",
+              "quizType": "multiple",
+              "question": "Your team releases every two weeks. Which of these are GOOD candidates for automation? (Select all that apply)",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "Login with valid and invalid credentials, checked before every release"
+                },
+                {
+                  "id": "b",
+                  "text": "Checking whether the new banner design \"feels modern\""
+                },
+                {
+                  "id": "c",
+                  "text": "Registration form tested with 40 combinations of input data"
+                },
+                {
+                  "id": "d",
+                  "text": "A one-time data migration check that will never be repeated"
+                }
+              ],
+              "correct": [
+                "a",
+                "c"
+              ],
+              "explanation": "Repeated checks (login before every release) and data-driven checks (40 input combinations) give the best return. Visual \"feel\" needs human judgement, and a one-time check is not worth scripting."
+            }
+          ]
+        },
+        {
+          "id": "d1-prerequisites-2",
+          "title": "P2 · How a web page is built",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Playwright controls web pages, so you need a basic picture of what a web page is made of. You do **not** need to be a web developer.\n\n### Step 1 — The browser asks, the server answers\n\nWhen you type a URL such as `https://shop.example.com/login` and press Enter:\n\n1. The browser sends a **request** to the server at `shop.example.com`\n2. The server sends back a **response** — mostly an **HTML** document\n3. The browser reads the HTML and draws (renders) the page you see\n\n### Step 2 — HTML is made of elements\n\nHTML describes *what is on the page* using **tags**. Here is a tiny login page:"
+            },
+            {
+              "type": "code",
+              "language": "html",
+              "content": "<h1>Welcome back</h1>\n\n<label for=\"email\">Email</label>\n<input id=\"email\" type=\"email\" placeholder=\"you@example.com\">\n\n<label for=\"password\">Password</label>\n<input id=\"password\" type=\"password\">\n\n<button class=\"btn-primary\">Log in</button>\n<a href=\"/forgot\">Forgot password?</a>",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "| Piece | Example | What it means |\n|---|---|---|\n| **Tag / element** | `<button>…</button>` | A thing on the page: button, input, link, heading |\n| **Text** | `Log in` | What the user reads |\n| **Attribute** | `id=\"email\"`, `type=\"password\"`, `class=\"btn-primary\"` | Extra information about the element |\n| **id** | `id=\"email\"` | A (usually) unique name for one element |\n| **class** | `class=\"btn-primary\"` | A style group — many elements can share it |\n\n### Step 3 — The DOM is the live tree\n\nWhen the browser reads the HTML it builds the **DOM (Document Object Model)** — a live, tree-shaped copy of the page in memory. JavaScript on the page can change the DOM at any time (show a popup, add a row to a table, display \"Login failed\")."
+            },
+            {
+              "type": "diagram",
+              "format": "mermaid",
+              "content": "flowchart TD\n  doc[document] --> html[html]\n  html --> body[body]\n  body --> h1[\"h1: Welcome back\"]\n  body --> email[\"input#email\"]\n  body --> pwd[\"input#password\"]\n  body --> btn[\"button: Log in\"]\n  body --> link[\"a: Forgot password?\"]"
+            },
+            {
+              "type": "markdown",
+              "content": "Automation tools like Playwright find elements in this tree (for example \"the **button** whose text is **Log in**\") and act on them, just as you would with a mouse and keyboard."
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "Right-click any element on a web page and choose **Inspect**. The Developer Tools panel opens and highlights that element in the DOM. This is the single most useful habit for an automation tester.",
+              "title": "Try it in any browser"
+            },
+            {
+              "type": "quiz",
+              "id": "d1-p2-q1",
+              "quizType": "single",
+              "question": "In `<input id=\"email\" type=\"email\" placeholder=\"you@example.com\">`, what is `placeholder`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "A tag"
+                },
+                {
+                  "id": "b",
+                  "text": "An attribute"
+                },
+                {
+                  "id": "c",
+                  "text": "The visible text of a button"
+                },
+                {
+                  "id": "d",
+                  "text": "The DOM"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`input` is the tag (element). `id`, `type` and `placeholder` are attributes — extra information about that element."
+            },
+            {
+              "type": "quiz",
+              "id": "d1-p2-q2",
+              "quizType": "truefalse",
+              "question": "The DOM can change after the page has loaded — for example when an error message appears after you click \"Log in\".",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "True"
+                },
+                {
+                  "id": "b",
+                  "text": "False"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "explanation": "The DOM is live. JavaScript adds, removes and changes elements all the time. This is exactly why automation tools must be good at *waiting* for elements — a key Playwright strength."
+            }
+          ]
+        },
+        {
+          "id": "d1-prerequisites-3",
+          "title": "P3 · Browsers, engines, headed and headless",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Every browser has an **engine** that turns HTML into the page you see. There are three main engine families today:\n\n| Engine | Browsers built on it | Playwright name |\n|---|---|---|\n| **Chromium** (Blink) | Google Chrome, Microsoft Edge, Opera, Brave | `chromium` |\n| **Gecko** | Mozilla Firefox | `firefox` |\n| **WebKit** | Apple Safari (Mac, iPhone, iPad) | `webkit` |\n\nIf your app works in one browser of each family, it will very likely work in all the browsers built on that family. That is why Playwright ships exactly these three: **Chromium, Firefox and WebKit**.\n\n### Headed vs headless\n\n- **Headed** — the browser window is visible on screen. Great for learning and debugging.\n- **Headless** — the browser runs *without* a visible window. Faster, and the normal way to run tests on build servers (CI).\n\nSame browser, same behaviour — the only difference is whether a window is drawn."
+            },
+            {
+              "type": "quiz",
+              "id": "d1-p3-q1",
+              "quizType": "single",
+              "question": "A user reports a bug that only happens on iPhone Safari. Which Playwright browser would you use to reproduce it?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "chromium"
+                },
+                {
+                  "id": "b",
+                  "text": "firefox"
+                },
+                {
+                  "id": "c",
+                  "text": "webkit"
+                }
+              ],
+              "correct": [
+                "c"
+              ],
+              "explanation": "Safari (desktop and iOS) is built on the WebKit engine, so `webkit` is the closest match."
+            }
+          ]
+        },
+        {
+          "id": "d1-prerequisites-4",
+          "title": "P4 · Words you will hear all course",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "| Term | Plain-English meaning |\n|---|---|\n| **Script** | A file of instructions a computer runs |\n| **Framework** | A ready-made structure + tools you build your tests inside |\n| **Library** | A package of ready-made code you call from your own code |\n| **Test runner** | The program that finds your tests, runs them and reports pass/fail |\n| **Assertion** | An automated \"expected result\" check, e.g. *the title should be \"Dashboard\"* |\n| **Locator** | The way a test finds an element, e.g. *the button named \"Log in\"* |\n| **Flaky test** | A test that sometimes passes and sometimes fails without any code change — usually a timing problem |\n| **CI (Continuous Integration)** | A server that automatically runs your tests whenever developers push code |\n| **Node.js** | The program that runs JavaScript/TypeScript outside a browser (you install it on Day 3) |\n| **TypeScript** | JavaScript + types. The language we write Playwright tests in (Days 5–8) |"
+            },
+            {
+              "type": "callout",
+              "variant": "tester",
+              "content": "A manual test case has **steps** and **expected results**. In automation, steps become **actions** (click, fill, go to URL) and expected results become **assertions**. You already think this way.",
+              "title": "Test case → automated test"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fundamentals",
+      "title": "Fundamentals",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d1-fundamentals-1",
+          "title": "F1 · What is Playwright?",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "**Playwright** is a free, open-source framework for testing web applications end-to-end. It opens real browsers, performs the actions a user would perform, and checks the results.\n\nKey facts:\n\n- Created by **Microsoft**, first released in **January 2020**, open source (Apache 2.0 licence)\n- Built by engineers who had earlier created **Puppeteer** (Google's Chrome automation library) — Playwright extends that idea to *all* major browser engines\n- Works with **Chromium, Firefox and WebKit** on **Windows, macOS and Linux**, headed or headless, locally or in CI\n- Can **emulate mobile devices** (screen size, touch, user agent) for Chrome on Android and Mobile Safari\n- Available in **JavaScript/TypeScript, Python, Java and .NET (C#)** — in this course we use **TypeScript**\n\n### Two parts: the library and the test runner\n\nWhen people say \"Playwright\" they usually mean **Playwright Test** — the package `@playwright/test`. It bundles everything you need in one install:\n\n| Part | What it does |\n|---|---|\n| **Browser automation** | Launch browsers, open pages, click, type, navigate |\n| **Test runner** | Finds test files, runs them (in parallel), retries, times out slow tests |\n| **Assertions** (`expect`) | Checks results, with automatic re-trying |\n| **Fixtures** | Gives every test a fresh, ready-to-use browser page |\n| **Reporters** | Terminal output and an interactive HTML report |\n| **Tools** | Codegen (records your clicks as code), UI Mode, Trace Viewer, Inspector |"
+            },
+            {
+              "type": "callout",
+              "variant": "note",
+              "content": "With older tools (e.g. Selenium in JavaScript) you had to combine several packages yourself: a browser driver, a test runner such as Mocha or Jest, an assertion library and a reporting plugin. Playwright Test ships all of these together, already wired up."
+            },
+            {
+              "type": "quiz",
+              "id": "d1-f1-q1",
+              "quizType": "single",
+              "question": "Which package gives you Playwright's test runner, assertions and fixtures together?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`playwright-browser`"
+                },
+                {
+                  "id": "b",
+                  "text": "`@playwright/test`"
+                },
+                {
+                  "id": "c",
+                  "text": "`selenium-webdriver`"
+                },
+                {
+                  "id": "d",
+                  "text": "`puppeteer`"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`@playwright/test` (\"Playwright Test\") bundles the runner, `expect` assertions, fixtures and reporters. It is what `npm init playwright@latest` installs on Day 3."
+            }
+          ]
+        },
+        {
+          "id": "d1-fundamentals-2",
+          "title": "F2 · See auto-waiting before you study it",
+          "blocks": [
+            {
+              "type": "callout",
+              "variant": "platform",
+              "content": "Days 1–2 run before learners install anything. Pre-load a workspace that already has Playwright installed (`npm init playwright@latest`, config from `platform/playwright.config.ts`) and the demo files `tests/day1/auto-wait.spec.ts`, `tests/day1/dom-tour.spec.ts`, `tests/day2/contexts.spec.ts` and `tests/day2/browsers.spec.ts`."
+            },
+            {
+              "type": "markdown",
+              "content": "Before any more theory, watch Playwright's most important feature in action. Your workspace already contains a demo test. It opens a practice \"Checkout\" page where the **Pay now** button only appears **2 seconds** after the page loads — just like a real page waiting for a payment service.\n\nThe test does **not** contain any \"wait 2 seconds\" instruction. Watch what happens."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\n\n// A tiny practice page. The \"Pay now\" button is added 2 seconds after the page loads.\nconst checkoutPage = `\n  <h1>Checkout</h1>\n  <p id=\"status\">Loading payment options…</p>\n  <script>\n    setTimeout(() => {\n      document.getElementById('status').textContent = 'Ready to pay';\n      const button = document.createElement('button');\n      button.textContent = 'Pay now';\n      button.onclick = () => {\n        document.getElementById('status').textContent = 'Payment successful';\n      };\n      document.body.appendChild(button);\n    }, 2000);\n  </script>\n`;\n\ntest('Playwright waits for the Pay now button by itself', async ({ page }) => {\n  // Load the practice page into the browser tab\n  await page.setContent(checkoutPage);\n\n  // Click the button — it does not exist yet! Playwright waits until it appears.\n  await page.getByRole('button', { name: 'Pay now' }).click();\n\n  // Check the result — this assertion also retries automatically\n  await expect(page.locator('#status')).toHaveText('Payment successful');\n});",
+              "mode": "editor",
+              "file": "tests/day1/auto-wait.spec.ts",
+              "run": "npx playwright test tests/day1/auto-wait.spec.ts --project=chromium --headed"
+            },
+            {
+              "type": "markdown",
+              "content": "Press **Run** (or type the command in the terminal):"
+            },
+            {
+              "type": "terminal",
+              "shell": "bash",
+              "commands": [
+                "npx playwright test tests/day1/auto-wait.spec.ts --project=chromium --headed"
+              ]
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "Running 1 test using 1 worker\n\n  ✓  1 [chromium] › tests/day1/auto-wait.spec.ts:20:5 › Playwright waits for the Pay now button by itself (2.3s)\n\n  1 passed (3.1s)"
+            },
+            {
+              "type": "markdown",
+              "content": "**What to observe**\n\n1. In the browser pane you see \"Loading payment options…\" for about 2 seconds.\n2. The button appears, is clicked immediately, and the text changes to \"Payment successful\".\n3. The test took a little over 2 seconds — Playwright waited *exactly as long as needed*, not a fixed amount.\n\n### Experiment\n\nIn the editor, change `2000` (2 seconds) to `8000` and run again. The test still passes — the default *action* wait is generous. Now change it to `40000` (40 seconds) and run once more: the test fails after 30 seconds with a **timeout** message, because Playwright Test's default time limit for a whole test is 30 seconds. Change it back to `2000` when you're done."
+            },
+            {
+              "type": "quiz",
+              "id": "d1-i2-q1",
+              "quizType": "single",
+              "question": "The demo test passed even though the button appeared 2 seconds late. Why?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "The test contains a hidden 2-second sleep"
+                },
+                {
+                  "id": "b",
+                  "text": "Playwright auto-waits for the element to be ready before clicking"
+                },
+                {
+                  "id": "c",
+                  "text": "The browser loads pages faster in headed mode"
+                },
+                {
+                  "id": "d",
+                  "text": "`setContent` waits 5 seconds for every page"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "Playwright's actions auto-wait until the element exists, is visible, stable and enabled. It clicked as soon as the button was ready."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "implementation",
+      "title": "Implementation",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d1-implementation-1",
+          "title": "I1 · Turn a manual test case into automation steps",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Before writing any code, automation engineers translate a manual test case into **actions** and **assertions**. Let's do it for a real-world example.\n\n**Manual test case TC-101 — Successful login**\n\n| # | Step | Expected result |\n|---|---|---|\n| 1 | Open `https://shop.example.com/login` | Login page shows heading \"Welcome back\" |\n| 2 | Enter `asha@example.com` in Email | — |\n| 3 | Enter `Secret@123` in Password | — |\n| 4 | Click **Log in** | Dashboard opens; URL contains `/dashboard` |\n| 5 | — | Text \"Hello, Asha\" is visible |\n\n**Translated into Playwright thinking**\n\n| Manual step | Type | Playwright action / assertion (plain English) |\n|---|---|---|\n| Open the login URL | Action | *go to* `https://shop.example.com/login` |\n| Heading \"Welcome back\" shows | Assertion | *expect* heading \"Welcome back\" *to be visible* |\n| Enter email | Action | *fill* the **Email** field with `asha@example.com` |\n| Enter password | Action | *fill* the **Password** field with `Secret@123` |\n| Click Log in | Action | *click* the **button** named \"Log in\" |\n| URL contains /dashboard | Assertion | *expect* page URL *to contain* `/dashboard` |\n| \"Hello, Asha\" visible | Assertion | *expect* text \"Hello, Asha\" *to be visible* |\n\nAnd here is what that becomes in Playwright code. Don't worry about the syntax yet — by Day 9 you will write this yourself. For now, notice how closely it matches the table:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\n\ntest('TC-101 successful login', async ({ page }) => {\n  await page.goto('https://shop.example.com/login');                                   // open URL\n  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();     // check heading\n\n  await page.getByLabel('Email').fill('asha@example.com');                             // enter email\n  await page.getByLabel('Password').fill('Secret@123');                                // enter password\n  await page.getByRole('button', { name: 'Log in' }).click();                          // click Log in\n\n  await expect(page).toHaveURL(/dashboard/);                                           // URL check\n  await expect(page.getByText('Hello, Asha')).toBeVisible();                           // welcome text\n});",
+              "mode": "read"
+            },
+            {
+              "type": "callout",
+              "variant": "tester",
+              "content": "Notice that Playwright finds elements the way a **user** describes them — \"the button named *Log in*\", \"the field labelled *Email*\" — not by technical ids. That makes tests easier to read and more robust when developers change the page's internals."
+            },
+            {
+              "type": "quiz",
+              "id": "d1-i1-q1",
+              "quizType": "single",
+              "question": "In the code above, which line is an ASSERTION (an expected result)?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`await page.getByLabel('Email').fill('asha@example.com');`"
+                },
+                {
+                  "id": "b",
+                  "text": "`await page.getByRole('button', { name: 'Log in' }).click();`"
+                },
+                {
+                  "id": "c",
+                  "text": "`await expect(page).toHaveURL(/dashboard/);`"
+                },
+                {
+                  "id": "d",
+                  "text": "`await page.goto('https://shop.example.com/login');`"
+                }
+              ],
+              "correct": [
+                "c"
+              ],
+              "explanation": "Lines that start with `expect(...)` are assertions — they check an expected result. `goto`, `fill` and `click` are actions."
+            }
+          ]
+        },
+        {
+          "id": "d1-implementation-2",
+          "title": "I2 · Take a tour of the DOM",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Lesson P2 said Playwright finds elements in the DOM the way a user describes them. Let's prove it. This demo loads the same tiny login page from P2 into the browser and asks Playwright questions about it — no clicking yet, just *looking*."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\n\n// The login page from lesson P2, as text\nconst loginPage = `\n  <title>My Shop - Log in</title>\n  <h1>Welcome back</h1>\n  <label for=\"email\">Email</label>\n  <input id=\"email\" type=\"email\" placeholder=\"you@example.com\">\n  <label for=\"password\">Password</label>\n  <input id=\"password\" type=\"password\">\n  <button class=\"btn-primary\">Log in</button>\n  <a href=\"/forgot\">Forgot password?</a>\n`;\n\ntest('a tour of the DOM', async ({ page }) => {\n  await page.setContent(loginPage);                    // load the page into the tab\n\n  // Ask the page questions, the way a user would describe things\n  console.log('Tab title:', await page.title());\n  console.log('Heading text:', await page.getByRole('heading').textContent());\n  console.log('Button text:', await page.getByRole('button').textContent());\n  console.log('Link goes to:', await page.getByRole('link').getAttribute('href'));\n  console.log('Email placeholder:', await page.getByLabel('Email').getAttribute('placeholder'));\n\n  // And check a few expected results\n  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();\n  await expect(page.getByRole('button', { name: 'Log in' })).toBeEnabled();\n  await expect(page.getByLabel('Email')).toHaveAttribute('type', 'email');\n});",
+              "mode": "editor",
+              "file": "tests/day1/dom-tour.spec.ts",
+              "run": "npx playwright test tests/day1/dom-tour.spec.ts --project=chromium --headed"
+            },
+            {
+              "type": "terminal",
+              "shell": "bash",
+              "commands": [
+                "npx playwright test tests/day1/dom-tour.spec.ts --project=chromium --headed"
+              ]
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "Running 1 test using 1 worker\n\nTab title: My Shop - Log in\nHeading text: Welcome back\nButton text: Log in\nLink goes to: /forgot\nEmail placeholder: you@example.com\n  ✓  1 [chromium] › tests/day1/dom-tour.spec.ts:15:5 › a tour of the DOM (190ms)\n\n  1 passed (1.1s)"
+            },
+            {
+              "type": "markdown",
+              "content": "Match each printed line to the HTML in P2: the **tag** decides the role (`h1` → heading, `button` → button, `a` → link), the **text** gives the name, and **attributes** (`href`, `placeholder`, `type`) are read with `getAttribute`.\n\n**Try it:** add a second button `<button>Cancel</button>` to the HTML and run again. The line `page.getByRole('button')` now matches **two** buttons and the test fails with a *strict mode violation*. Change it to `page.getByRole('button', { name: 'Log in' })` to make it pass. That error is Playwright protecting you from clicking the wrong thing — you'll meet it often."
+            },
+            {
+              "type": "quiz",
+              "id": "d1-i2-dom-q1",
+              "quizType": "single",
+              "question": "In the demo, which part of `<a href=\"/forgot\">Forgot password?</a>` makes `getByRole('link')` find it?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "The text \"Forgot password?\""
+                },
+                {
+                  "id": "b",
+                  "text": "The `a` tag — links have the role \"link\""
+                },
+                {
+                  "id": "c",
+                  "text": "The `href` attribute"
+                },
+                {
+                  "id": "d",
+                  "text": "The class name"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "The tag decides the role. The text becomes the link's accessible name (used for `{ name: '…' }`), and `href` is an attribute you can read with `getAttribute`."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "practice",
+      "title": "Practice",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d1-practice-1",
+          "title": "Quiz · Day 1 check",
+          "blocks": [
+            {
+              "type": "quiz",
+              "id": "d1-pr-q1",
+              "quizType": "single",
+              "question": "Which is the BEST description of Playwright?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "A manual test-case management tool from Microsoft"
+                },
+                {
+                  "id": "b",
+                  "text": "An open-source framework that automates Chromium, Firefox and WebKit to test web apps end-to-end"
+                },
+                {
+                  "id": "c",
+                  "text": "A browser made by Microsoft"
+                },
+                {
+                  "id": "d",
+                  "text": "A load-testing tool for APIs"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "Playwright is an open-source end-to-end testing framework for web apps that drives all three major browser engines."
+            },
+            {
+              "type": "quiz",
+              "id": "d1-pr-q3",
+              "quizType": "single",
+              "question": "What does \"headless\" mean?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "The browser has no address bar"
+                },
+                {
+                  "id": "b",
+                  "text": "The browser runs without a visible window"
+                },
+                {
+                  "id": "c",
+                  "text": "The test has no assertions"
+                },
+                {
+                  "id": "d",
+                  "text": "The page has no heading element"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "Headless browsers do all the same work but don't draw a window. Tests run headless by default; add `--headed` to watch."
+            },
+            {
+              "type": "quiz",
+              "id": "d1-pr-q6",
+              "quizType": "truefalse",
+              "question": "A flaky test is one that fails every single time because of a real bug.",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "True"
+                },
+                {
+                  "id": "b",
+                  "text": "False"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "A flaky test passes sometimes and fails sometimes without any code change — usually because of timing or shared-state problems. A test that fails every time because of a bug is doing its job!"
+            }
+          ]
+        },
+        {
+          "id": "d1-practice-2",
+          "title": "Exercises",
+          "blocks": [
+            {
+              "type": "exercise",
+              "exerciseType": "written",
+              "id": "d1-ex1",
+              "title": "Convert a manual test case",
+              "level": "easy",
+              "prompt": "Convert this manual test case into an **action / assertion** table like the one in lesson I1.\n\n**TC-205 — Search for a product**\n1. Open `https://shop.example.com`\n2. Type `wireless mouse` in the search box\n3. Press Enter\n4. Expected: the results heading says `Results for \"wireless mouse\"`\n5. Expected: at least one product card is shown\n6. Click the first product\n7. Expected: the product page shows an **Add to cart** button\n\nFor every row write: the manual step, whether it is an **Action** or an **Assertion**, and the plain-English Playwright step (e.g. *click the button named \"Add to cart\"*).",
+              "hints": [
+                "Steps that *do* something are actions; steps that *check* something are assertions.",
+                "Describe elements the way a user would: \"the search box\", \"the heading\", \"the button named …\"."
+              ],
+              "modelAnswer": "| Manual step | Type | Playwright step (plain English) |\n|---|---|---|\n| Open the shop | Action | go to `https://shop.example.com` |\n| Type \"wireless mouse\" in search | Action | fill the search box with `wireless mouse` |\n| Press Enter | Action | press `Enter` in the search box |\n| Heading says Results for \"wireless mouse\" | Assertion | expect the heading to have text `Results for \"wireless mouse\"` |\n| At least one product card | Assertion | expect the number of product cards to be greater than 0 |\n| Click the first product | Action | click the first product card |\n| Add to cart button shown | Assertion | expect the button named \"Add to cart\" to be visible |",
+              "check": {
+                "kind": "self"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d1-ex5",
+              "title": "Break the auto-wait demo on purpose",
+              "level": "challenge",
+              "prompt": "Open `tests/day1/auto-wait.spec.ts`.\n\n1. Change the button's text in the page from `Pay now` to `Pay` (inside the `<script>`), **but leave the test looking for `Pay now`**. Run the test.\n2. Read the error message. What is Playwright waiting for, and for how long?\n3. Fix the test so it looks for the correct button name, and run it again.",
+              "file": "tests/day1/auto-wait.spec.ts",
+              "run": "npx playwright test tests/day1/auto-wait.spec.ts --project=chromium",
+              "hints": [
+                "The error message quotes the exact locator it was waiting for.",
+                "The default time limit for one test is 30 seconds."
+              ],
+              "solution": "// Step 1 result: the test fails after ~30 s with a timeout. The message says it was\n// waiting for getByRole('button', { name: 'Pay now' }), which never appeared.\n//\n// Step 3 fix — look for the new button name:\nawait page.getByRole('button', { name: 'Pay' }).click();",
+              "check": {
+                "kind": "testsPass",
+                "cwd": "pw-course",
+                "run": "npx playwright test tests/day1/auto-wait.spec.ts --project=chromium"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d1-practice-3",
+          "title": "Reflection",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Before moving on, make sure you can answer these out loud:\n\n1. Which kinds of manual tests are worth automating, and which are not?\n2. What is the difference between a **tag**, an **attribute** and the **DOM**?\n3. Why did the auto-wait demo pass without any \"wait 2 seconds\" instruction?\n4. Name the three browser engines Playwright ships and one real browser built on each."
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "How Playwright actually talks to a browser, the Browser → Context → Page model, the features that make it stand out, and an honest comparison with Selenium and Cypress.",
+              "title": "Coming up on Day 2"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "lessons": 11,
+    "quizzes": 11,
+    "exercises": 2,
+    "codeBlocks": 4
+  }
+}

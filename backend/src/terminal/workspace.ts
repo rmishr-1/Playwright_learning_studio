@@ -15,11 +15,13 @@
  *   ts-basics/               the TypeScript playground, where `node day3/hello.ts` runs
  *   test-results/, playwright-report/   written by the test runner
  *
- * The files a workspace starts with come from Data/Content/workspaces.json. A seed file is written
- * only when it is missing, so a file the learner saved from the editor is kept. The studio's own
+ * The files a workspace starts with come from Data/Content/workspaces.json. The studio keeps them
+ * up to date with the course, but never touches a file the learner has changed (see
+ * prepareWorkspace()). The studio's own
  * files are written again before every command, so an edit to them, or an upgrade of Playwright,
  * can never leave a workspace broken. Data/Workspace/ is ignored by Git.
  */
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { CONTENT, DATA } from '../config';
@@ -162,7 +164,32 @@ export function resolveInside(name: Workspace, rel: string): string | null {
   return path.join(workspaceDir(name), ...clean.split('/'));
 }
 
-/** Writes the studio's own files, and any seed file that is missing. */
+const fingerprint = (text: string): string => crypto.createHash('sha256').update(text).digest('hex').slice(0, 16);
+
+/**
+ * Files an earlier version of the course put into the workspaces, before .studio/seeded.json
+ * existed, by path and fingerprint. A workspace with no record yet is cleaned against this list,
+ * so a course update does not leave the old course's demo tests behind; a file the learner changed
+ * has a different fingerprint and is kept.
+ */
+const LEGACY_SEEDS: Record<string, readonly string[]> = {
+  'tests/example.spec.ts': ['a3cbab846a58843b', 'b76c4eb77f320104'],
+  'tests/day1/auto-wait.spec.ts': ['599bfb967e4641b6', 'f24f55645b447900'],
+  'tests/day1/contexts.spec.ts': ['d91427a1ccc3c50b', '2c74e693dd2b1235'],
+  'tests/day1/browsers.spec.ts': ['7edef709810a0592', 'c49c4a31d4bb76e4'],
+  'tests/day5/practice-pages.ts': ['d6961e019b4c1c23', '6663e418677e48b0'],
+  'ts-basics/day4/helpers.ts': ['ccd1c960c2758fe5', 'f0d874a7c052735f'],
+  'ts-basics/package.json': ['f85a086c7664d25e'],
+};
+
+/**
+ * Writes the studio's own files, and brings the course's starting files up to date.
+ *
+ * .studio/seeded.json records each starting file the studio wrote, with its fingerprint. A file
+ * that still matches its record is the studio's, so it is updated when the course changes it and
+ * removed when the course no longer has it. A file that no longer matches has been changed by
+ * the learner, and is left exactly as it is. A missing starting file is written.
+ */
 export function prepareWorkspace(name: Workspace): void {
   const dir = workspaceDir(name);
   fs.mkdirSync(path.join(dir, '.studio'), { recursive: true });
@@ -171,12 +198,42 @@ export function prepareWorkspace(name: Workspace): void {
   fs.writeFileSync(path.join(dir, 'tsconfig.json'), TSCONFIG);
   fs.writeFileSync(path.join(dir, '.studio', 'test.ts'), wrapper());
   fs.mkdirSync(path.join(dir, 'tests'), { recursive: true });
-  for (const [rel, text] of Object.entries(readSeeds()[name]?.files ?? {})) {
-    const file = path.join(dir, ...rel.split('/'));
-    if (fs.existsSync(file)) continue;
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, text);
+
+  const recordFile = path.join(dir, '.studio', 'seeded.json');
+  const hadRecord = fs.existsSync(recordFile);
+  const before: Record<string, readonly string[]> = hadRecord
+    ? Object.fromEntries(
+        Object.entries(JSON.parse(fs.readFileSync(recordFile, 'utf-8')) as Record<string, string>).map(([k, v]) => [k, [v]]),
+      )
+    : LEGACY_SEEDS;
+  const seeds = readSeeds()[name]?.files ?? {};
+  const fileOf = (rel: string): string => path.join(dir, ...rel.split('/'));
+  const current = (rel: string): string | null => {
+    const file = fileOf(rel);
+    return fs.existsSync(file) ? fingerprint(fs.readFileSync(file, 'utf-8')) : null;
+  };
+
+  // The course dropped a file the studio wrote, and the learner never changed it: remove it.
+  for (const [rel, prints] of Object.entries(before)) {
+    if (rel in seeds) continue;
+    const now = current(rel);
+    if (now && prints.includes(now)) fs.rmSync(fileOf(rel), { force: true });
   }
+
+  const after: Record<string, string> = {};
+  for (const [rel, text] of Object.entries(seeds)) {
+    const now = current(rel);
+    const untouched = now !== null && (before[rel] ?? []).includes(now);
+    if (now === null || untouched) {
+      fs.mkdirSync(path.dirname(fileOf(rel)), { recursive: true });
+      fs.writeFileSync(fileOf(rel), text);
+      after[rel] = fingerprint(text);
+    } else if (now === fingerprint(text)) {
+      after[rel] = now;
+    }
+    // Otherwise the learner has changed it: it is theirs now, and it is not recorded.
+  }
+  fs.writeFileSync(recordFile, JSON.stringify(after, null, 2) + '\n');
 }
 
 /** Saves the editor's code as a file in the workspace, and returns its path there. */

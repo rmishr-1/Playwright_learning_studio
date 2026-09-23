@@ -3,12 +3,18 @@
  *
  *   npm run build:content
  *
- * Each Data/Source/week-<n>/ folder is one week's course package. Its Markdown files are the
- * source the authors edit, and its own tools (tools/build_json.py) turn them into json/day<n>.json.
- * This script reads that JSON and writes one app day file per day, plus the course index:
+ * Each folder in Data/Source/ other than workspace/ is a course package, holding one or more
+ * weeks. Its Markdown files are the source the authors edit, and its own tools
+ * (tools/build_json.py) turn them into json/day<n>.json and json/week<n>.json. This script reads
+ * that JSON and writes one app day file per day, the course index, and the Terminal's workspaces:
  *
  *   Data/Content/course-index.json
- *   Data/Content/weeks/week-<n>/day-<n>.json
+ *   Data/Content/weeks/week-<w>/day-<d>.json
+ *   Data/Content/workspaces.json
+ *
+ * The course counts its days across the whole course (Week 2 starts on Day 6), and that number is
+ * kept as `number`, because the lessons and their file names use it. `day` is the position within
+ * the week (1-5), which the page's address uses: Day 6 is /learn/w2/d1.
  *
  * A day's four sections become its four tabs, in order: Prerequisites, Fundamentals,
  * Implementation, Practice. Each lesson in a section becomes a `##` heading on that tab, followed
@@ -32,7 +38,8 @@ import type { PartNumber } from '../shared/contracts/common';
 const ROOT = path.resolve(__dirname, '..');
 const SOURCE = path.join(ROOT, 'Data', 'Source');
 const CONTENT = path.join(ROOT, 'Data', 'Content');
-const COURSE_TITLE = 'Playwright with TypeScript';
+/** Used when a package has no json/course.json title. */
+const DEFAULT_TITLE = 'Playwright with TypeScript';
 
 // ---------------------------------------------------------------- the source format
 
@@ -77,7 +84,7 @@ function fail(where: string, message: string): never {
 const str = (b: SrcBlock, key: string): string | undefined => (typeof b[key] === 'string' ? (b[key] as string) : undefined);
 
 function block(type: ContentBlock['type'], text: string, extra: Partial<ContentBlock> = {}): ContentBlock {
-  return { type, text, starter: null, variation: null, checkpoint: null, code: null, callout: null, ...extra };
+  return { type, text, starter: null, variation: null, checkpoint: null, code: null, callout: null, title: null, ...extra };
 }
 
 /** A fenced code block, with a fence long enough that the code's own backticks cannot close it. */
@@ -202,6 +209,8 @@ function convertBlock(b: SrcBlock, where: string): ContentBlock | null {
     case 'diagram':
       if (str(b, 'format') !== 'mermaid') fail(where, 'only mermaid diagrams are supported');
       return block('diagram', str(b, 'content') ?? '');
+    case 'reference':
+      return block('reference', str(b, 'content') ?? '', { title: str(b, 'title') ?? 'More' });
     case 'code':
       return block('code', str(b, 'content') ?? '', {
         code: {
@@ -239,7 +248,8 @@ function atAGlance(d: SrcDay): string {
   return rows.join('\n').trim();
 }
 
-function convertDay(d: SrcDay, files: Record<string, string>): CourseDay {
+/** `position` is the day's place in its week (1-5); `d.day` is its number across the course. */
+function convertDay(d: SrcDay, position: number, files: Record<string, string>): CourseDay {
   const at = 'week ' + d.week + ' day ' + d.day;
   let exerciseNo = 0;
   const parts = d.sections.map((s): CoursePart => {
@@ -285,7 +295,16 @@ function convertDay(d: SrcDay, files: Record<string, string>): CourseDay {
   parts.sort((a, b) => a.part - b.part);
   // A day that runs before the learner has installed anything works in a ready-made workspace.
   const workspace: Workspace = /^pre-loaded/i.test(d.workspace ?? '') ? 'demo' : 'project';
-  return CourseDay.parse({ schema: 'course-day/v2', week: d.week, day: d.day, title: d.title, locked: false, workspace, parts });
+  return CourseDay.parse({
+    schema: 'course-day/v2',
+    week: d.week,
+    day: position,
+    number: d.day,
+    title: d.title,
+    locked: false,
+    workspace,
+    parts,
+  });
 }
 
 // ---------------------------------------------------------------- the Terminal's workspaces
@@ -330,7 +349,7 @@ function buildSeeds(days: CourseDay[], lessonFiles: Record<string, string>): Wor
     for (const b of day.parts.flatMap((p) => p.blocks)) {
       const file = b.code?.file;
       if (!file) continue;
-      demo[file] = lessonFiles[file] ?? fail('week ' + day.week + ' day ' + day.day, 'no lesson file for ' + file);
+      demo[file] = lessonFiles[file] ?? fail('day ' + day.number, 'no lesson file for ' + file);
     }
   }
 
@@ -349,45 +368,68 @@ function buildSeeds(days: CourseDay[], lessonFiles: Record<string, string>): Wor
 // ---------------------------------------------------------------- the course
 
 function main(): void {
-  const weekDirs = fs
-    .readdirSync(SOURCE)
-    .filter((n) => /^week-\d+$/.test(n))
-    .sort((a, b) => Number(a.slice(5)) - Number(b.slice(5)));
-  if (weekDirs.length === 0) fail('Data/Source', 'no week-<n> folder');
+  const packages = fs
+    .readdirSync(SOURCE, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name !== 'workspace' && fs.existsSync(path.join(SOURCE, e.name, 'json')))
+    .map((e) => e.name)
+    .sort();
+  if (packages.length === 0) fail('Data/Source', 'no course package (a folder with a json/ folder)');
 
   const weeks: CourseIndex['weeks'] = [];
   const out: { file: string; day: CourseDay }[] = [];
-  // Every week's lesson files, keyed by their path in the learner's project.
+  let title: string | null = null;
+  // Every package's lesson files, keyed by their path in the learner's project.
   const lessonFiles: Record<string, string> = {};
-  for (const dir of weekDirs) {
+  for (const dir of packages) {
     Object.assign(lessonFiles, readTree(path.join(SOURCE, dir, 'files', 'lessons')));
+  }
+  // The files an exercise can start from: the lesson files, and those every workspace starts with.
+  const known = { ...readTree(path.join(SOURCE, 'workspace'), (rel) => rel === 'README.md'), ...lessonFiles };
+
+  for (const dir of packages) {
     const json = path.join(SOURCE, dir, 'json');
-    const weekFile = fs.readdirSync(json).find((n) => /^week\d+\.json$/.test(n)) ?? fail(dir, 'no json/week<n>.json');
-    const week = JSON.parse(fs.readFileSync(path.join(json, weekFile), 'utf-8')) as SrcWeek;
-    const dayFiles = fs
+    const read = <T>(name: string): T => JSON.parse(fs.readFileSync(path.join(json, name), 'utf-8')) as T;
+    // "Playwright with TypeScript — Fundamentals, Setup & Programming" -> the name before the dash.
+    if (!title && fs.existsSync(path.join(json, 'course.json'))) {
+      title = read<{ title: string }>('course.json').title.split(/\s+[—–]\s+/)[0];
+    }
+    const srcWeeks = fs
+      .readdirSync(json)
+      .filter((n) => /^week\d+\.json$/.test(n))
+      .map((n) => read<SrcWeek>(n))
+      .sort((a, b) => a.week - b.week);
+    const srcDays = fs
       .readdirSync(json)
       .filter((n) => /^day\d+\.json$/.test(n))
-      .sort((a, b) => Number(a.slice(3, -5)) - Number(b.slice(3, -5)));
-    // The files an exercise can start from: the lesson files, and those every workspace starts with.
-    const known = { ...readTree(path.join(SOURCE, 'workspace'), (rel) => rel === 'README.md'), ...lessonFiles };
-    const days = dayFiles.map((f) => convertDay(JSON.parse(fs.readFileSync(path.join(json, f), 'utf-8')) as SrcDay, known));
-    for (const day of days) {
-      if (day.week !== week.week) fail(dir, 'day ' + day.day + ' says week ' + day.week);
-      out.push({ file: path.join(CONTENT, 'weeks', 'week-' + day.week, 'day-' + day.day + '.json'), day });
+      .map((n) => read<SrcDay>(n))
+      .sort((a, b) => a.day - b.day);
+    if (srcWeeks.length === 0) fail(dir, 'no json/week<n>.json');
+
+    for (const week of srcWeeks) {
+      const inWeek = srcDays.filter((d) => d.week === week.week);
+      if (inWeek.length === 0) fail(dir, 'week ' + week.week + ' has no days');
+      if (inWeek.length > 5) fail(dir, 'week ' + week.week + ' has more than five days');
+      const days = inWeek.map((d, i) => convertDay(d, i + 1, known));
+      for (const day of days) {
+        out.push({ file: path.join(CONTENT, 'weeks', 'week-' + day.week, 'day-' + day.day + '.json'), day });
+      }
+      weeks.push({
+        week: week.week,
+        // "Week 1 — Playwright Foundations & Setup" -> the part after the week number.
+        theme: week.title.replace(/^Week\s+\d+\s*[—–-]\s*/, ''),
+        locked: false,
+        days: days.map((d) => ({ day: d.day, number: d.number, title: d.title, locked: d.locked })),
+      });
     }
-    weeks.push({
-      week: week.week,
-      // "Week 1 — Fundamentals, Setup & Programming" -> the part after the week number.
-      theme: week.title.replace(/^Week\s+\d+\s*[—–-]\s*/, ''),
-      locked: false,
-      days: days.map((d) => ({ day: d.day, title: d.title, locked: d.locked })),
-    });
+    const orphans = srcDays.filter((d) => !srcWeeks.some((w) => w.week === d.week));
+    if (orphans.length) fail(dir, 'day ' + orphans[0].day + ' belongs to week ' + orphans[0].week + ', which has no week file');
   }
+  weeks.sort((a, b) => a.week - b.week);
 
   const days = out.map((o) => o.day);
   const index = CourseIndex.parse({
     schema: 'course-index/v1',
-    title: COURSE_TITLE,
+    title: title ?? DEFAULT_TITLE,
     totals: {
       weeks: weeks.length,
       days: days.length,

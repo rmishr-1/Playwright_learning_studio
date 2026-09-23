@@ -13,13 +13,13 @@ only process that touches `Data/`, so a keyed mutex is sufficient and there is n
 | Path | Holds | Written by | Read by |
 |---|---|---|---|
 | `Data/Formats/` | These wire contracts | format changes only | both sides |
-| `Data/Source/` | The course source: one package per week (`week-N/`), and the files every Terminal workspace starts with (`workspace/`) | authors | `npm run build:content` |
+| `Data/Source/` | The course source: the course package (`course/`, holding every week), and the files every Terminal workspace starts with (`workspace/`) | authors | `npm run build:content` |
 | `Data/Content/` | The built course — `course-index.json`, `weeks/week-N/day-N.json`, `workspaces.json` | `npm run build:content` **only** | backend |
 | `Data/Workspace/` | The Terminal's workspaces, `demo/` and `project/`, with the files the learner saved | backend | backend |
 | `Data/Progress/` | The ONE progress record. No accounts: each clone of this repo is run by one person | backend | backend |
 | `Data/Config/` | `studio.config.json` — run limits and allowed sites | operator | backend |
 
-**`Data/Content/` is built.** Each week's package in `Data/Source/week-N/` is authored as Markdown,
+**`Data/Content/` is built.** The course package in `Data/Source/course/` is authored as Markdown,
 turned into JSON by the package's own tool (`tools/build_json.py`), and `npm run build:content`
 turns that JSON into the app's format, validating every day against the contract before it writes
 anything. Editing `Data/Content/` by hand is always wrong: the next build overwrites it. The backend

@@ -41,25 +41,29 @@ ships. `Data/Content/` **is** committed, so a fresh clone has the whole course.
 
 ## Where the content lives
 
-Each week of the course is a package in `Data/Source/week-N/`, written by the course authors:
+The course is a package in `Data/Source/course/`, written by the course authors. It holds both
+weeks, ten days in all:
 
 | Folder | What it holds |
 |---|---|
-| `markdown/` | The source the authors edit, one file per day |
-| `json/` | The same days as JSON, made by the package's own `tools/build_json.py` |
+| `markdown/` | The source the authors edit, one file per day (`day1.md` to `day10.md`) |
+| `json/` | The same days as JSON, with a file per week, made by the package's own `tools/build_json.py` |
 | `files/` | Every lesson file, exercise starter and solution, as real files |
 | `FORMAT.md` | How the Markdown is written |
 
-`npm run build:content` turns each package's JSON into what the app serves, in `Data/Content/`:
+`npm run build:content` turns the package's JSON into what the app serves, in `Data/Content/`:
 `course-index.json`, one `weeks/week-N/day-N.json` per day, and `workspaces.json` (below). A day's
-four sections, Prerequisites, Fundamentals, Implementation and Practice, become its four tabs. Every
+four sections, Prerequisites, Fundamentals, Implementation and Practice, become its four tabs.
+The course numbers its days across both weeks (Week 2 starts on Day 6), and the app shows those
+numbers, as the lessons and their file names use them; a day's address counts within its week, so
+Day 6 is `/learn/w2/d1`. Every
 day is validated against the contract before anything is written. The formats are in
 [Data/Formats/](Data/Formats/FORMAT-REGISTRY.md).
 
 To change a lesson, edit the Markdown, then rebuild both steps:
 
 ```bash
-python Data/Source/week-1/tools/build_json.py
+python Data/Source/course/tools/build_json.py
 ```
 ```bash
 npm run build:content
@@ -135,7 +139,7 @@ command. **Run** beside a command in a lesson types that command into the Termin
 - **Two workspaces.** Commands run in `Data/Workspace/demo/` or `Data/Workspace/project/` (ignored by
   Git), each laid out like the learner's project: `playwright.config.ts` with Chromium, Firefox and
   WebKit, `tests/`, and `ts-basics/` for the TypeScript lessons. A day that comes before the
-  learner has a project (Week 1 Day 1) uses `demo`, which starts with that day's files. Every other
+  learner has a project (Days 1 and 2) uses `demo`, which starts with that day's files. Every other
   day uses `project`, which starts as `npm init playwright@latest` leaves a project, plus the files
   other lesson files import. What they start with is `Data/Content/workspaces.json`, written by the
   build; a starting file is written only when it is missing, so what the learner saves is kept.

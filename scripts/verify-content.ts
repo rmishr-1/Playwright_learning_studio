@@ -43,10 +43,17 @@ type SrcBlock = { type: string; [key: string]: unknown };
 
 function collect(): Item[] {
   const items: Item[] = [];
-  const weeks = fs.readdirSync(path.join(ROOT, 'Data', 'Source')).filter((n) => /^week-\d+$/.test(n));
-  for (const w of weeks) {
-    const json = path.join(ROOT, 'Data', 'Source', w, 'json');
-    for (const f of fs.readdirSync(json).filter((n) => /^day\d+\.json$/.test(n)).sort()) {
+  // Every course package: a folder in Data/Source/ with a json/ folder (workspace/ is not one).
+  const source = path.join(ROOT, 'Data', 'Source');
+  const packages = fs
+    .readdirSync(source, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name !== 'workspace' && fs.existsSync(path.join(source, e.name, 'json')))
+    .map((e) => e.name);
+  for (const w of packages) {
+    const json = path.join(source, w, 'json');
+    const dayFiles = fs.readdirSync(json).filter((n) => /^day\d+\.json$/.test(n));
+    dayFiles.sort((a, b) => Number(a.slice(3, -5)) - Number(b.slice(3, -5)));
+    for (const f of dayFiles) {
       const day = JSON.parse(fs.readFileSync(path.join(json, f), 'utf-8')) as {
         day: number;
         workspace?: string;

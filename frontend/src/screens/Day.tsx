@@ -131,7 +131,8 @@ function Sidebar({
                     <span className="tick">{done ? '✓' : ''}</span>
                     {/* One line with an ellipsis, full title on hover - three-line wrapping
                         made the sidebar impossible to scan. */}
-                    <span className="dayno">Day {d.day}</span>
+                    {/* The course counts days across weeks (Week 2 starts on Day 6), as its lessons do. */}
+                    <span className="dayno">Day {d.number}</span>
                     <span className="daytitle" title={d.title}>
                       {d.title}
                     </span>
@@ -364,7 +365,10 @@ export function Day({
               </button>
             </p>
           )}
-          <h1>Week {week} - Day {day}</h1>
+          <h1>
+            Week {week} - Day{' '}
+            {index?.weeks.find((w) => w.week === week)?.days.find((d) => d.day === day)?.number ?? day}
+          </h1>
           <p className="muted" style={{ fontSize: 16 }}>{locked}</p>
           <div className="notice" style={{ marginTop: 18 }}>
             This day is not open yet.

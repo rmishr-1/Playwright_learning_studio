@@ -1,0 +1,687 @@
+{
+  "schema": "course-day/v2",
+  "week": 2,
+  "day": 5,
+  "number": 10,
+  "title": "Playwright Test Runner II: Control, Debug & Ship",
+  "locked": false,
+  "workspace": "project",
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "Prerequisites",
+      "tab_label": "Prerequisites",
+      "has_runnable_code": false,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 10 · Prerequisites\n\n",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "**Playwright Test Runner II: Control, Debug & Ship**\n\n*Annotations and tags, how the runner works under the hood, filtering, debugging, the HTML report — and the Week 2 mini-project*\n\n**Time:** 3–3.5 hours\n\n**Where you work:** pw-course/tests/day10/\n\n**By the end of the day you can:**\n\n- Control tests with `test.only`, `test.skip`, `test.fixme` and tags, and filter them from the CLI\n- Explain how the runner discovers, parallelises, times out, retries and reports tests\n- See hooks run in order across workers\n- Debug a failing test from its error output, the Inspector and the HTML report\n- Turn written requirements into a complete, tagged, passing test suite\n\n**From earlier days:**\n\n- Day 9: test anatomy, fixtures, locators, assertions, describe, beforeEach, the practice pages",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P1 · Quick recap from Day 9\n\nQuick checks on Day 9 before we take control of the runner:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which locator finds `<button>Sign in</button>`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`page.getByRole('button', { name: 'Sign in' })`",
+              "`page.getByLabel('Sign in')`",
+              "`page.getByRole('link', { name: 'Sign in' })`"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "A button element has the role button; its text is its accessible name."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Where does `await page.setContent(loginPage)` belong when every test in a file needs it?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`test.beforeAll`",
+              "`test.beforeEach`",
+              "Copied into every test"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`beforeEach` runs before every test and has access to `page`; `beforeAll` runs once and cannot use `page`."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which assertion keeps retrying until the text matches?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`expect(await locator.textContent()).toBe('Dashboard')`",
+              "`await expect(locator).toHaveText('Dashboard')`"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Web-first assertions retry (5 s by default); reading the text once and comparing does not."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Fundamentals",
+      "tab_label": "Fundamentals",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 10 · Fundamentals\n\n\n\n## F1 · Controlling which tests run: annotations and tags\n\n| Annotation | Effect |\n|---|---|\n| `test.only('…', …)` | Run **only** this test (and other `.only` tests). Handy while writing — never commit it! |\n| `test.skip('…', …)` | Don't run this test; report it as skipped |\n| `test.skip(condition, 'reason')` *(inside a test)* | Skip only when the condition is true, e.g. `test.skip(browserName === 'webkit', 'Feature not supported in Safari yet')` |\n| `test.fixme('…', …)` | Skip because the **test** needs fixing (marks it as \"fixme\" in the report) |\n| `test.fail()` *(inside a test)* | \"This test is expected to fail\" (known bug) — it passes when it fails, and alerts you when it starts passing |\n| `test.slow()` *(inside a test)* | Triple the timeout for this test |\n\nThe config line `forbidOnly: !!process.env.CI` (Day 4) makes CI **fail** if someone left a `test.only` in the code — otherwise CI would silently run only one test.\n\n### Tags\n\nTags label tests so you can run subsets such as smoke or regression packs:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "test('valid user reaches the dashboard', { tag: '@smoke' }, async ({ page }) => { /* … */ });\n\ntest('remember-me box can be ticked', { tag: ['@regression', '@login'] }, async ({ page }) => { /* … */ });\n\ntest.describe('Enrolment', { tag: '@enrol' }, () => { /* every test inside gets @enrol */ });",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "(Tags written inside the title, like `'login works @smoke'`, also work.)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright test --grep @smoke            # only tests tagged @smoke\nnpx playwright test --grep-invert @slow      # everything EXCEPT @slow\nnpx playwright test --grep \"@smoke|@login\"   # @smoke OR @login",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "A teammate pushed code with `test.only` still in it. What happens on CI with the generated config?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "CI runs only that one test and reports success",
+              "CI fails the run, because `forbidOnly` is true when the CI variable is set",
+              "CI ignores `.only`",
+              "CI deletes the test"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`forbidOnly: !!process.env.CI` turns a leftover `.only` into a failure on CI, protecting the full suite from being silently skipped."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F2 · What the runner does when you press Run",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "diagram",
+          "text": "flowchart LR\n  A[\"1. Load config<br/>playwright.config.ts\"] --> B[\"2. Discover tests<br/>*.spec.ts in testDir\"]\n  B --> C[\"3. Multiply by projects<br/>(chromium, firefox, webkit)\"]\n  C --> D[\"4. Distribute to workers<br/>(parallel processes)\"]\n  D --> E[\"5. For each test:<br/>fixtures → hooks → body → teardown\"]\n  E --> F[\"6. Retry failures<br/>(if retries > 0)\"]\n  F --> G[\"7. Report<br/>list, html…\"]",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Timeouts to remember\n\n| Timeout | Default | Change it with |\n|---|---|---|\n| Whole test — the body plus `beforeEach` hooks and fixture setup | **30 s** | `timeout` in the config, `--timeout=60000`, or `test.setTimeout(60000)` |\n| Each web-first assertion (`expect`) | **5 s** | `expect: { timeout: 10000 }` in the config, or `{ timeout: 10000 }` on one assertion |\n| Each action (`click`, `fill`…) | no separate limit — bounded by the test timeout | `use: { actionTimeout: 10000 }` |\n\n### Results you can get\n\n| Status | Meaning |\n|---|---|\n| ✓ **passed** | Everything worked |\n| ✘ **failed** | An action/assertion failed or timed out |\n| **flaky** | Failed first, then **passed on retry** — investigate! |\n| **skipped** | Skipped by `test.skip` / `test.fixme` |\n\nWhen any test fails, the command ends with a non-zero **exit code** — that's how CI knows the build is red.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "With `retries: 1`, a test fails on the first attempt and passes on the retry. How is it reported?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "passed",
+              "failed",
+              "flaky",
+              "skipped"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "Passing only on retry means the result isn't consistent. Playwright marks it flaky so you can investigate the root cause."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "Implementation",
+      "tab_label": "Implementation",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 10 · Implementation\n\n\n\n## I1 · Filter, list, tag and skip\n\nRun subsets of your suite:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "# only smoke tests\nnpx playwright test tests/day9 --grep @smoke --project=chromium\n# everything except smoke tests\nnpx playwright test tests/day9 --grep-invert @smoke --project=chromium\n# titles containing \"error\"\nnpx playwright test tests/day9 -g \"error\" --project=chromium\n# what would run in ALL browsers, without running it\nnpx playwright test tests/day9/login.spec.ts --list",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nListing tests:\n  [chromium] › day9/login.spec.ts:10:7 › Sign in page › shows the sign-in form @smoke\n  [chromium] › day9/login.spec.ts:17:7 › Sign in page › valid user reaches the dashboard @smoke\n  …\n  [webkit] › day9/login.spec.ts:48:7 › Sign in page › remember-me can be ticked and unticked @regression\nTotal: 18 tests in 1 file\n```\n\n6 tests × 3 projects = 18.\n\nNow try the annotations. Create `tests/day10/annotations.spec.ts` (it imports the practice pages from the Day 9 folder):",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "import { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\ntest('runs everywhere', async ({ page }) => {\n  await page.setContent(loginPage);\n  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();\n});\n\ntest('skipped on WebKit only', async ({ page, browserName }) => {\n  // Conditional skip: imagine a known Safari-only issue\n  test.skip(browserName === 'webkit', 'Known Safari issue BUG-123');\n  await page.setContent(loginPage);\n  await expect(page.getByLabel('Remember me')).not.toBeChecked();\n});\n\ntest.skip('password reset link', async ({ page }) => {\n  // Not built yet — skipped for everyone\n});\n\ntest.fixme('sign in with Google', async ({ page }) => {\n  // The test itself needs work — shows as \"fixme\" in the report\n});",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "tests/day10/annotations.spec.ts",
+            "run": "npx playwright test tests/day10/annotations.spec.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright test tests/day10/annotations.spec.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nRunning 12 tests using 4 workers\n\n  ✓   1 [chromium] › tests/day10/annotations.spec.ts:4:5 › runs everywhere (210ms)\n  ✓   2 [chromium] › tests/day10/annotations.spec.ts:9:5 › skipped on WebKit only (190ms)\n  -   3 [chromium] › tests/day10/annotations.spec.ts:16:6 › password reset link\n  -   4 [chromium] › tests/day10/annotations.spec.ts:20:6 › sign in with Google\n  ✓   5 [firefox] › tests/day10/annotations.spec.ts:4:5 › runs everywhere (520ms)\n  …\n  -  11 [webkit] › tests/day10/annotations.spec.ts:9:5 › skipped on WebKit only\n  …\n\n  7 skipped\n  5 passed (3.1s)\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Change one `test(` to `test.only(` and run the file — only that test runs. Remove `.only` before you commit: on CI it fails the whole run (`forbidOnly`).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": "`test.only` while you work"
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I2 · See the hooks run in order",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "import { test, expect } from '@playwright/test';\n\ntest.beforeAll(async () => {\n  console.log('beforeAll  → once, before the tests');\n});\n\ntest.beforeEach(async ({ page }) => {\n  console.log('beforeEach → before each test');\n  await page.setContent('<h1>Hooks demo</h1>');\n});\n\ntest.afterEach(async () => {\n  console.log('afterEach  → after each test');\n});\n\ntest.afterAll(async () => {\n  console.log('afterAll   → once, after the tests');\n});\n\ntest('first test', async ({ page }) => {\n  console.log('test body  → first test');\n  await expect(page.getByRole('heading')).toHaveText('Hooks demo');\n});\n\ntest('second test', async ({ page }) => {\n  console.log('test body  → second test');\n  await expect(page.getByRole('heading')).toBeVisible();\n});",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "tests/day10/hooks.spec.ts",
+            "run": "npx playwright test tests/day10/hooks.spec.ts --project=chromium --workers=1",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "`--workers=1` makes the tests run one after another so the order is easy to read:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright test tests/day10/hooks.spec.ts --project=chromium --workers=1",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nRunning 2 tests using 1 worker\n\nbeforeAll  → once, before the tests\nbeforeEach → before each test\ntest body  → first test\nafterEach  → after each test\n  ✓  1 [chromium] › tests/day10/hooks.spec.ts:20:5 › first test (160ms)\nbeforeEach → before each test\ntest body  → second test\nafterEach  → after each test\nafterAll   → once, after the tests\n  ✓  2 [chromium] › tests/day10/hooks.spec.ts:25:5 › second test (40ms)\n\n  2 passed (900ms)\n```\n\n**Try it:** run the same command **without** `--workers=1`. If Playwright starts two or more workers (the default is half your CPU cores), each worker runs its own `beforeAll` and `afterAll` — you'll see them printed more than once.\n\n## I3 · Debug a failing test\n\nCreate a test with two deliberate mistakes:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "import { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\ntest('wrong expected text', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  // Mistake 1: the real message is \"Please enter your email and password\"\n  await expect(page.getByRole('alert')).toHaveText('Email is required');\n});\n\ntest('element that does not exist', async ({ page }) => {\n  test.setTimeout(5000);   // fail faster than the default 30 s while we practise\n  await page.setContent(loginPage);\n  // Mistake 2: there is no \"Log in\" button — it's called \"Sign in\"\n  await page.getByRole('button', { name: 'Log in' }).click();\n});",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "tests/day10/broken.spec.ts",
+            "run": "npx playwright test tests/day10/broken.spec.ts --project=chromium",
+            "mode": "editor",
+            "expect_error": true,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright test tests/day10/broken.spec.ts --project=chromium",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\n  1) [chromium] › tests/day10/broken.spec.ts:4:5 › wrong expected text ─────────────\n\n    Error: expect(locator).toHaveText(expected) failed\n\n    Locator:  getByRole('alert')\n    Expected: \"Email is required\"\n    Received: \"Please enter your email and password\"\n    Timeout:  5000ms\n\n       6 |   await page.getByRole('button', { name: 'Sign in' }).click();\n       7 |   // Mistake 1: the real message is \"Please enter your email and password\"\n    >  8 |   await expect(page.getByRole('alert')).toHaveText('Email is required');\n         |                                         ^\n\n  2) [chromium] › tests/day10/broken.spec.ts:11:5 › element that does not exist ──────\n\n    Test timeout of 5000ms exceeded.\n\n    Error: locator.click: Test timeout of 5000ms exceeded.\n    Call log:\n      - waiting for getByRole('button', { name: 'Log in' })\n\n      14 |   // Mistake 2: there is no \"Log in\" button — it's called \"Sign in\"\n    > 15 |   await page.getByRole('button', { name: 'Log in' }).click();\n         |                                                      ^\n\n  2 failed\n```\n\nTwo very different failures:\n\n| Failure | Clue in the output | Typical cause |\n|---|---|---|\n| **Assertion failed** | `Expected: …` vs `Received: …` | Wrong expectation — or a real bug in the app |\n| **Timeout waiting for an element** | `waiting for getByRole('button', { name: 'Log in' })` | Wrong locator, element never appears, or appears too late |\n\n### Your debugging toolbox\n\n| Tool | Command | Best for |\n|---|---|---|\n| Error output | *(always shown)* | First look: which line, expected vs received |\n| HTML report | `npx playwright show-report` | Browsing failures, steps and timings; screenshots/traces when enabled |\n| Headed mode | `--headed` | Watching what really happens |\n| Inspector | `npx playwright test tests/day10/broken.spec.ts --debug` | Stepping through one action at a time |\n| UI Mode | `npx playwright test --ui` | Watch mode, time-travel through each step |\n\nFix both mistakes (`'Please enter your email and password'` and `'Sign in'`), remove the `test.setTimeout` line, and run again until it's green.\n\n## I4 · Read the HTML report",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright test tests/day9 tests/day10 --project=chromium\nnpx playwright show-report",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "In the report:\n\n1. Use the filters at the top (**Passed / Failed / Flaky / Skipped**) and the search box — try typing `@smoke`.\n2. Click a test to see every step (`setContent`, `fill`, `click`, `expect …`) with its duration.\n3. Failed tests show the same error as the terminal, plus attachments when screenshots or traces are enabled in the config.\n\nPress `Ctrl + C` in the terminal to stop the report server when you're done.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice",
+      "tab_label": "Practice",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 10 · Practice\n\n\n\n## Quiz · Day 10 check",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What is the default timeout for a whole test, and for one web-first assertion?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "5 s and 30 s",
+              "30 s and 5 s",
+              "60 s and 10 s",
+              "No limit for both"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "A test may take up to 30 s (its body plus beforeEach hooks and fixture setup; afterEach and beforeAll/afterAll get their own limit of the same length). Each expect retries for up to 5 s."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which of these are valid ways to tag a test as @smoke? (Select all that apply)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`test('login works', { tag: '@smoke' }, async ({ page }) => {…})`",
+              "`test('login works @smoke', async ({ page }) => {…})`",
+              "`test.smoke('login works', async ({ page }) => {…})`",
+              "`test.describe('Login', { tag: '@smoke' }, () => {…})` around the test"
+            ],
+            "answers": [
+              0,
+              1,
+              3
+            ],
+            "kind": "multiple",
+            "explanation": "Tags go in the details object, in the title, or on a describe (applies to every test inside). There is no `test.smoke`."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`test.skip(browserName === 'firefox', 'Upload not supported')` is written inside a test. When is the test skipped?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Always",
+              "Only when it runs in the firefox project",
+              "Never — skip must be outside the test",
+              "Only on CI"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "The conditional form of `test.skip` skips only when the condition is true."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You run `npx playwright test --grep @smoke --project=firefox`. Two files contain 3 and 4 tests; 2 tests in total are tagged @smoke. How many test runs?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "2",
+              "6",
+              "7",
+              "21"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "Only the 2 @smoke tests are selected, and only one project runs: 2 × 1 = 2."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Spot the bug",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "1",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Exercises",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "2",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Week 2 mini-project · Test the enrolment page",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "3",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Week 2 wrap-up\n\nYou can now:\n\n- ✅ Read and write TypeScript: variables, types, operators, conditions, loops, functions, async/await, modules\n- ✅ Write, organise, tag, filter, run and debug Playwright tests\n- ✅ Turn written requirements into an automated test suite",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "**Locators in depth** (role, text, CSS, XPath, filtering, chaining, strictness), **actions** (hover, drag-and-drop, uploads, dialogs, frames), more **assertions**, and your first **Page Object Model** — moving the \"how\" out of your tests into `pages/`.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": "Coming up in Week 3"
+          },
+          "title": null
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": "Medium",
+          "title": "Four bugs, one test file",
+          "kind": "code",
+          "statement": "This file has **four** bugs. Some make tests fail, some make them unreliable, one breaks CI. Find and fix them all, then save the fixed version as `tests/day10/bugs.spec.ts` and run it.\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\ntest.beforeAll(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\ntest.only('wrong password shows an error', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  page.getByRole('button', { name: 'Sign in' }).click();\n  expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n```",
+          "stub": "import { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\ntest.beforeAll(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\ntest.only('wrong password shows an error', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  page.getByRole('button', { name: 'Sign in' }).click();\n  expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n",
+          "hints": [
+            "Which fixtures are available in beforeAll?",
+            "Which lines talk to the browser but have no `await`?",
+            "What does `forbidOnly` do on CI?"
+          ],
+          "file": "tests/day10/bugs.spec.ts",
+          "run": "npx playwright test tests/day10/bugs.spec.ts --project=chromium",
+          "solution": "```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\n// Bug 1: beforeAll can't use `page` → use beforeEach (and remove the duplicate setContent in the test)\ntest.beforeEach(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\n// Bug 2: test.only would fail CI (forbidOnly) and hide all other tests → plain test()\ntest('wrong password shows an error', async ({ page }) => {\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  // Bug 3: missing await on the click\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  // Bug 4: missing await on the web-first assertion\n  await expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n```"
+        },
+        {
+          "number": 2,
+          "difficulty": "Easy",
+          "title": "Run exactly what you need",
+          "kind": "terminal",
+          "statement": "Write (and run) the command for each:\n\n1. Only the `@smoke` tests in `tests/day9`, Chromium only.\n2. Every test in `tests/day9` **except** `@smoke`, one worker, Firefox only.\n3. Only tests with `dashboard` in the title, with the browser visible.\n4. List all tests in `tests/day9/login.spec.ts` for WebKit without running them.\n5. Re-run only the tests that failed last time, then open the HTML report.",
+          "stub": null,
+          "hints": [],
+          "file": null,
+          "run": null,
+          "solution": "```bash\nnpx playwright test tests/day9 --grep @smoke --project=chromium\nnpx playwright test tests/day9 --grep-invert @smoke --workers=1 --project=firefox\nnpx playwright test -g \"dashboard\" --headed\nnpx playwright test tests/day9/login.spec.ts --project=webkit --list\nnpx playwright test --last-failed\nnpx playwright show-report\n```"
+        },
+        {
+          "number": 3,
+          "difficulty": "Challenge",
+          "title": "Mini-project: automate the QA Academy enrolment page",
+          "kind": "code",
+          "statement": "You've received these requirements for the **enrolment page** (`enrolPage` in `tests/day9/practice-pages.ts`). Like a manual tester, first list your test cases — then automate them in `tests/day10/enrol.spec.ts`.\n\n**Requirements**\n- **R1** The page title is `QA Academy - Enrol` and the heading is `Enrol in a course`.\n- **R2** The **Enrol now** button is **disabled** until *I accept the terms* is ticked, and disabled again when it is unticked.\n- **R3** Submitting without a name shows `Name is required`.\n- **R4** An email without `@` shows `Enter a valid email`.\n- **R5** Submitting without choosing a course shows `Please choose a course`.\n- **R6** A valid enrolment (name `Asha Verma`, email `asha@example.com`, course **API Testing**) shows `Thanks, Asha! You are enrolled in API Testing.`\n- **R7** After a successful enrolment, `Seats left` goes from **12** to **11**.\n\n**Your suite must**\n- use `test.describe('Enrolment page', …)` and a `beforeEach` that loads the page,\n- have at least **7** tests (one per requirement — R6 and R7 may share one test if you prefer 6),\n- tag R1 and R6 with `@smoke`, the rest with `@regression`,\n- use user-facing locators (`getByRole`, `getByLabel`, `getByTestId`) and web-first assertions only,\n- pass on **chromium** and **firefox**.\n\nThen run:\n```\nnpx playwright test tests/day10/enrol.spec.ts --project=chromium --project=firefox\nnpx playwright test tests/day10/enrol.spec.ts --grep @smoke\nnpx playwright show-report\n```",
+          "stub": "// Mini-project: automate the QA Academy enrolment page\n// Save this as tests/day10/enrol.spec.ts\n",
+          "hints": [
+            "The course dropdown has the label Course: `page.getByLabel('Course').selectOption('API Testing')` (by visible text or by value 'api').",
+            "The seats text has a test id: `page.getByTestId('seats')`.",
+            "To test R3–R5 the Enrol button must be enabled — tick the terms box first.",
+            "Write a small helper function inside the file (e.g. `fillForm(page, name, email, course)`) to avoid repeating the same fills. Its `page` parameter can be typed with `import { type Page } from '@playwright/test'`."
+          ],
+          "file": "tests/day10/enrol.spec.ts",
+          "run": "npx playwright test tests/day10/enrol.spec.ts --project=chromium --project=firefox",
+          "solution": "```ts\nimport { test, expect, type Page } from '@playwright/test';\nimport { enrolPage } from '../day9/practice-pages';\n\n// Helper: fill the form (empty strings leave a field blank) and accept the terms\nasync function fillForm(page: Page, name: string, email: string, course: string): Promise<void> {\n  await page.getByLabel('Full name').fill(name);\n  await page.getByLabel('Email').fill(email);\n  if (course !== '') {\n    await page.getByLabel('Course').selectOption(course);\n  }\n  await page.getByLabel('I accept the terms').check();\n}\n\ntest.describe('Enrolment page', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(enrolPage);\n  });\n\n  test('R1: shows the correct title and heading', { tag: '@smoke' }, async ({ page }) => {\n    await expect(page).toHaveTitle('QA Academy - Enrol');\n    await expect(page.getByRole('heading', { name: 'Enrol in a course' })).toBeVisible();\n  });\n\n  test('R2: Enrol button follows the terms checkbox', { tag: '@regression' }, async ({ page }) => {\n    const enrol = page.getByRole('button', { name: 'Enrol now' });\n    const terms = page.getByLabel('I accept the terms');\n    await expect(enrol).toBeDisabled();\n    await terms.check();\n    await expect(enrol).toBeEnabled();\n    await terms.uncheck();\n    await expect(enrol).toBeDisabled();\n  });\n\n  test('R3: name is required', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, '', 'asha@example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Name is required');\n  });\n\n  test('R4: email must contain @', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha.example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Enter a valid email');\n  });\n\n  test('R5: a course must be chosen', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha@example.com', '');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Please choose a course');\n  });\n\n  test('R6: valid enrolment shows a confirmation', { tag: '@smoke' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha@example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Thanks, Asha! You are enrolled in API Testing.');\n  });\n\n  test('R7: seats left goes down by one', { tag: '@regression' }, async ({ page }) => {\n    await expect(page.getByTestId('seats')).toHaveText('Seats left: 12');\n    await fillForm(page, 'Asha Verma', 'asha@example.com', 'Playwright Basics');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByTestId('seats')).toHaveText('Seats left: 11');\n  });\n});\n```"
+        }
+      ]
+    }
+  ]
+}

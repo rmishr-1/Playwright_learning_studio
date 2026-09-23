@@ -1,0 +1,646 @@
+{
+  "schemaVersion": "1.0",
+  "day": 6,
+  "week": 2,
+  "title": "TypeScript I: Arrays, Objects & Types for Test Data",
+  "subtitle": "Lists and records — how you'll store test data — plus union and literal types and the `any` trap",
+  "estimatedTime": "2.5 hours",
+  "topics": [
+    "Data Types (arrays, tuples, objects)",
+    "Type aliases",
+    "Union & literal types"
+  ],
+  "objectives": [
+    "Store lists in arrays and tuples and read items by index",
+    "Describe objects with type aliases, including optional properties",
+    "Use union and literal types, and explain why `any` should be avoided",
+    "Find and fix type errors in test-data code"
+  ],
+  "prerequisitesFromEarlierDays": [
+    "Day 5: let/const, primitive types, template literals, operators, the ts-basics playground"
+  ],
+  "workspace": "pw-course/ts-basics/day6/",
+  "sections": [
+    {
+      "id": "prerequisites",
+      "title": "Prerequisites",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d6-prerequisites-1",
+          "title": "P1 · Quick recap from Day 5",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Three quick checks from Day 5 before we add lists and records:"
+            },
+            {
+              "type": "quiz",
+              "id": "d6-p1-q1",
+              "quizType": "single",
+              "question": "What does `console.log(`${2 + 3} items`);` print?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "${2 + 3} items"
+                },
+                {
+                  "id": "b",
+                  "text": "5 items"
+                },
+                {
+                  "id": "c",
+                  "text": "23 items"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "Inside backticks, `${ }` evaluates the expression: 2 + 3 = 5."
+            },
+            {
+              "type": "quiz",
+              "id": "d6-p1-q2",
+              "quizType": "single",
+              "question": "Which line does the type checker reject? `const a = 1; let b = 'x';`",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`a = 2;`"
+                },
+                {
+                  "id": "b",
+                  "text": "`b = 'y';`"
+                },
+                {
+                  "id": "c",
+                  "text": "Neither"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "explanation": "`a` is a const and cannot be reassigned. `b` is a let holding a string, so 'y' is fine."
+            },
+            {
+              "type": "quiz",
+              "id": "d6-p1-q3",
+              "quizType": "single",
+              "question": "`const ok = 10 % 3 === 1 && !false;` — what is ok?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "true"
+                },
+                {
+                  "id": "b",
+                  "text": "false"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "explanation": "10 % 3 is 1, so the comparison is true; !false is true; true && true is true."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fundamentals",
+      "title": "Fundamentals",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d6-fundamentals-1",
+          "title": "F1 · Arrays and tuples",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "### Arrays — ordered lists"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// An array of strings. Two ways to write the type: string[] or Array<string>\nconst browsers: string[] = ['chromium', 'firefox', 'webkit'];\n\nconsole.log(browsers[0]);        // first item — counting starts at 0!\nconsole.log(browsers[2]);        // third item\nconsole.log(browsers.length);    // how many items\n\nbrowsers.push('msedge');         // add an item at the end\nconsole.log(browsers);\nconsole.log(browsers.includes('firefox'));   // is \"firefox\" in the list?\n\nconst retryDelays: number[] = [1000, 2000, 4000];\nconsole.log(retryDelays[1]);",
+              "mode": "editor",
+              "file": "ts-basics/day6/arrays.ts",
+              "run": "node day6/arrays.ts",
+              "expectedOutput": "chromium\nwebkit\n3\n[ 'chromium', 'firefox', 'webkit', 'msedge' ]\ntrue\n2000",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "chromium\nwebkit\n3\n[ 'chromium', 'firefox', 'webkit', 'msedge' ]\ntrue\n2000"
+            },
+            {
+              "type": "callout",
+              "variant": "note",
+              "content": "`browsers` is a `const`, yet we could `push` into it. `const` means *the box can't be replaced with a different array* — the contents of the array can still change."
+            },
+            {
+              "type": "markdown",
+              "content": "### Tuples — fixed-length lists with a type per position"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// [username, password] — always exactly a string then a string\nconst credentials: [string, string] = ['asha@example.com', 'Secret@123'];\n\n// [product name, price, in stock?]\nconst item: [string, number, boolean] = ['Keyboard', 1499, true];\nitem[1] = 'free';   // ❌ error — position 1 must be a number",
+              "mode": "read"
+            },
+            {
+              "type": "quiz",
+              "id": "d6-f4-q1",
+              "quizType": "single",
+              "question": "`const cities = ['Delhi', 'Kolkata', 'Hyderabad'];` — what is `cities[1]`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "'Delhi'"
+                },
+                {
+                  "id": "b",
+                  "text": "'Kolkata'"
+                },
+                {
+                  "id": "c",
+                  "text": "'Hyderabad'"
+                },
+                {
+                  "id": "d",
+                  "text": "undefined"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "Array positions (indexes) start at 0. Index 0 is 'Delhi', index 1 is 'Kolkata'."
+            }
+          ]
+        },
+        {
+          "id": "d6-fundamentals-2",
+          "title": "F2 · Objects — records with named properties",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "### Objects — named properties\n\nObjects group related values under **property names** — perfect for test data:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// A type alias describes the shape of an object once, so we can reuse it\ntype User = {\n  name: string;\n  email: string;\n  age: number;\n  isAdmin: boolean;\n  phone?: string;          // ? = optional property (may be missing)\n};\n\nconst testUser: User = {\n  name: 'Asha Verma',\n  email: 'asha@example.com',\n  age: 29,\n  isAdmin: false,\n};\n\nconsole.log(testUser.name);        // read a property with a dot\nconsole.log(testUser['email']);    // or with square brackets\ntestUser.age = 30;                 // change a property\nconsole.log(testUser);\nconsole.log(testUser.phone);       // optional and not set → undefined",
+              "mode": "editor",
+              "file": "ts-basics/day6/objects.ts",
+              "run": "node day6/objects.ts",
+              "expectedOutput": "Asha Verma\nasha@example.com\n{\n  name: 'Asha Verma',\n  email: 'asha@example.com',\n  age: 30,\n  isAdmin: false\n}\nundefined",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "Asha Verma\nasha@example.com\n{\n  name: 'Asha Verma',\n  email: 'asha@example.com',\n  age: 30,\n  isAdmin: false\n}\nundefined"
+            },
+            {
+              "type": "markdown",
+              "content": "If you forget a required property or use the wrong type, the checker complains:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const badUser: User = { name: 'Ravi', email: 'ravi@example.com', age: '31' };\n// ❌ Type 'string' is not assignable to type 'number'   (age)\n// ❌ Property 'isAdmin' is missing",
+              "mode": "read"
+            },
+            {
+              "type": "callout",
+              "variant": "tester",
+              "content": "Objects are how you'll store **test data**: one object per user, product or form submission — just like a row in your test-data spreadsheet, with named columns."
+            },
+            {
+              "type": "quiz",
+              "id": "d6-f4-q3",
+              "quizType": "single",
+              "question": "In `type Product = { name: string; price: number; discount?: number };`, what does the `?` mean?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "discount must be a question"
+                },
+                {
+                  "id": "b",
+                  "text": "discount is optional — an object may leave it out"
+                },
+                {
+                  "id": "c",
+                  "text": "discount can be any type"
+                },
+                {
+                  "id": "d",
+                  "text": "discount is required"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "A `?` after a property name makes it optional. If it's missing, reading it gives `undefined`."
+            }
+          ]
+        },
+        {
+          "id": "d6-fundamentals-3",
+          "title": "F3 · Union, literal and special types",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "### Union types — \"this OR that\""
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "let orderId: string | number;   // may be a string or a number\norderId = 1045;                 // ✅\norderId = 'ORD-1045';           // ✅\norderId = true;                 // ❌ boolean is not allowed",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "### Literal types — only these exact values"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "type BrowserName = 'chromium' | 'firefox' | 'webkit';\n\nlet target: BrowserName = 'firefox';   // ✅\ntarget = 'safari';                     // ❌ '\"safari\"' is not assignable to type 'BrowserName'",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "Playwright uses literal types a lot — for example `browserName` is typed as `'chromium' | 'firefox' | 'webkit'`, so VS Code can autocomplete and catch typos.\n\n### `any` and `unknown` — escape hatches\n\n| Type | Meaning | Advice |\n|---|---|---|\n| `any` | \"Turn off type checking for this value\" — anything goes | **Avoid.** It hides bugs — it turns TypeScript back into plain JavaScript |\n| `unknown` | \"Could be anything — check before using it\" | Safer when you truly don't know the type (e.g. data from a file) |"
+            },
+            {
+              "type": "quiz",
+              "id": "d6-f4-q2",
+              "quizType": "single",
+              "question": "Given `type Status = 'passed' | 'failed' | 'skipped';`, which assignment causes a type error?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`let s: Status = 'passed';`"
+                },
+                {
+                  "id": "b",
+                  "text": "`let s: Status = 'skipped';`"
+                },
+                {
+                  "id": "c",
+                  "text": "`let s: Status = 'flaky';`"
+                },
+                {
+                  "id": "d",
+                  "text": "`let s: Status = 'failed';`"
+                }
+              ],
+              "correct": [
+                "c"
+              ],
+              "explanation": "A literal-union type only accepts the exact listed values. 'flaky' isn't one of them."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "implementation",
+      "title": "Implementation",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d6-implementation-1",
+          "title": "I1 · Build a test-data profile",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "You'll store test data for a registration test and print a summary — using `const`, an object type, template literals and string tools."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// Describe the shape of our test data once\ntype RegistrationData = {\n  fullName: string;\n  email: string;\n  age: number;\n  country: string;\n  acceptsTerms: boolean;\n};\n\n// One test-data record (like one row in a test-data sheet)\nconst newCustomer: RegistrationData = {\n  fullName: 'Meera Iyer',\n  email: 'meera.iyer@example.com',\n  age: 27,\n  country: 'India',\n  acceptsTerms: true,\n};\n\n// Build some values from the data\nconst firstName = newCustomer.fullName.split(' ')[0];   // split the name at the space, take the first part\nconst expectedWelcome = `Welcome, ${firstName}!`;\n\n// Print a readable summary\nconsole.log('--- Test data: new customer ---');\nconsole.log(`Name:    ${newCustomer.fullName}`);\nconsole.log(`Email:   ${newCustomer.email}`);\nconsole.log(`Adult:   ${newCustomer.age >= 18}`);\nconsole.log(`Terms:   ${newCustomer.acceptsTerms ? 'accepted' : 'NOT accepted'}`);\nconsole.log(`Expected message after sign-up: \"${expectedWelcome}\"`);",
+              "mode": "editor",
+              "file": "ts-basics/day6/test-data.ts",
+              "run": "node day6/test-data.ts"
+            },
+            {
+              "type": "terminal",
+              "shell": "bash",
+              "commands": [
+                "node day6/test-data.ts",
+                "npm run check -- day6/test-data.ts"
+              ]
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "--- Test data: new customer ---\nName:    Meera Iyer\nEmail:   meera.iyer@example.com\nAdult:   true\nTerms:   accepted\nExpected message after sign-up: \"Welcome, Meera!\""
+            },
+            {
+              "type": "markdown",
+              "content": "**Try it:** change `age` to `'27'` (in quotes) and run `npm run check -- day6/test-data.ts`. Read the error, then change it back."
+            }
+          ]
+        },
+        {
+          "id": "d6-implementation-2",
+          "title": "I2 · Type detective — find and fix 5 bugs",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "This file has **five** type errors (it uses the operators from Day 5). Don't run it yet — first **check** it:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "type Product = {\n  name: string;\n  price: number;\n  inStock: boolean;\n};\n\nconst keyboard: Product = {\n  name: 'Mechanical Keyboard',\n  price: '2499',            // bug 1\n  inStock: 'yes',           // bug 2\n};\n\nconst quantity: number = 2;\nconst maxQuantity = 5;\nmaxQuantity = 10;           // bug 3\n\nlet browser: 'chromium' | 'firefox' | 'webkit' = 'chrome';   // bug 4\n\nconst total: string = keyboard.price * quantity;             // bug 5\nconsole.log(`Total for ${quantity}: ${total}`);",
+              "mode": "editor",
+              "file": "ts-basics/day6/detective.ts",
+              "run": "npm run check -- day6/detective.ts",
+              "expectError": true
+            },
+            {
+              "type": "terminal",
+              "shell": "bash",
+              "commands": [
+                "npm run check -- day6/detective.ts"
+              ]
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "day6/detective.ts(9,3): error TS2322: Type 'string' is not assignable to type 'number'.\nday6/detective.ts(10,3): error TS2322: Type 'string' is not assignable to type 'boolean'.\nday6/detective.ts(15,1): error TS2588: Cannot assign to 'maxQuantity' because it is a constant.\nday6/detective.ts(17,5): error TS2322: Type '\"chrome\"' is not assignable to type '\"chromium\" | \"firefox\" | \"webkit\"'.\nday6/detective.ts(19,7): error TS2322: Type 'number' is not assignable to type 'string'."
+            },
+            {
+              "type": "markdown",
+              "content": "Fix each line, then check again until the command prints nothing, and finally run it:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "type Product = {\n  name: string;\n  price: number;\n  inStock: boolean;\n};\n\nconst keyboard: Product = {\n  name: 'Mechanical Keyboard',\n  price: 2499,              // fix 1: a number, not text\n  inStock: true,            // fix 2: a boolean\n};\n\nconst quantity: number = 2;\nlet maxQuantity = 5;        // fix 3: let, because it changes\nmaxQuantity = 10;\n\nlet browser: 'chromium' | 'firefox' | 'webkit' = 'chromium';   // fix 4: an allowed value\n\nconst total: number = keyboard.price * quantity;               // fix 5: the result is a number\nconsole.log(`Total for ${quantity}: ${total}`);\nconsole.log(`Max quantity: ${maxQuantity}, browser: ${browser}`);",
+              "mode": "editor",
+              "file": "ts-basics/day6/detective-fixed.ts",
+              "run": "node day6/detective-fixed.ts",
+              "expectedOutput": "Total for 2: 4998\nMax quantity: 10, browser: chromium",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "Total for 2: 4998\nMax quantity: 10, browser: chromium"
+            }
+          ]
+        },
+        {
+          "id": "d6-implementation-3",
+          "title": "I3 · Arrays, tuples and literal types for a test matrix",
+          "blocks": [
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// Only these three browser names are allowed\ntype BrowserName = 'chromium' | 'firefox' | 'webkit';\n\n// The browsers we test on\nconst browsers: BrowserName[] = ['chromium', 'firefox'];\nbrowsers.push('webkit');                        // add one more\n\n// Login credentials as a tuple: [email, password]\nconst validLogin: [string, string] = ['asha@example.com', 'Secret@123'];\nconst [email, password] = validLogin;          // unpack the tuple into two variables\n\n// Pages to check\nconst pagesToCheck: string[] = ['/home', '/products', '/cart'];\n\nconst runsNeeded = browsers.length * pagesToCheck.length;\n\nconsole.log(`Browsers: ${browsers.join(', ')}`);\nconsole.log(`Logging in as ${email} (password has ${password.length} characters)`);\nconsole.log(`First page: ${pagesToCheck[0]}, last page: ${pagesToCheck[pagesToCheck.length - 1]}`);\nconsole.log(`Total page checks: ${runsNeeded}`);",
+              "mode": "editor",
+              "file": "ts-basics/day6/matrix.ts",
+              "run": "node day6/matrix.ts",
+              "expectedOutput": "Browsers: chromium, firefox, webkit\nLogging in as asha@example.com (password has 10 characters)\nFirst page: /home, last page: /cart\nTotal page checks: 9",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "Browsers: chromium, firefox, webkit\nLogging in as asha@example.com (password has 10 characters)\nFirst page: /home, last page: /cart\nTotal page checks: 9"
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "`const [email, password] = validLogin;` is called **destructuring** — unpacking values into separate variables. You'll meet its object version, `{ page }`, on Day 8 and then in every Playwright test."
+            },
+            {
+              "type": "markdown",
+              "content": "**Try it:** add `browsers.push('safari');` and run the checker. Why does it complain?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "practice",
+      "title": "Practice",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d6-practice-1",
+          "title": "Quiz · Day 6 check",
+          "blocks": [
+            {
+              "type": "quiz",
+              "id": "d6-pr-q4",
+              "quizType": "single",
+              "question": "`const tags = ['@smoke', '@regression'];` — what is `tags.length`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "1"
+                },
+                {
+                  "id": "b",
+                  "text": "2"
+                },
+                {
+                  "id": "c",
+                  "text": "3"
+                },
+                {
+                  "id": "d",
+                  "text": "0"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "The array has two items. (The last index is 1, but the length is 2.)"
+            },
+            {
+              "type": "quiz",
+              "id": "d6-pr-q7",
+              "quizType": "multiple",
+              "question": "Which of these are TypeScript-only features (they don't exist in plain JavaScript)? (Select all that apply)",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "Type annotations like `: string`"
+                },
+                {
+                  "id": "b",
+                  "text": "`const` and `let`"
+                },
+                {
+                  "id": "c",
+                  "text": "Type aliases like `type User = { … }`"
+                },
+                {
+                  "id": "d",
+                  "text": "Template literals with backticks"
+                }
+              ],
+              "correct": [
+                "a",
+                "c"
+              ],
+              "explanation": "`const`, `let` and template literals are modern JavaScript. Type annotations and type aliases are what TypeScript adds — and they're removed when the code runs."
+            },
+            {
+              "type": "quiz",
+              "id": "d6-pr-q8",
+              "quizType": "single",
+              "question": "Why is using `any` everywhere a bad idea?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "It makes the program run slower"
+                },
+                {
+                  "id": "b",
+                  "text": "It switches off type checking for those values, so TypeScript can no longer catch mistakes"
+                },
+                {
+                  "id": "c",
+                  "text": "It isn't allowed in Playwright"
+                },
+                {
+                  "id": "d",
+                  "text": "It turns numbers into strings"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`any` tells TypeScript to trust you blindly — you lose the main benefit of TypeScript."
+            }
+          ]
+        },
+        {
+          "id": "d6-practice-2",
+          "title": "Predict the output",
+          "blocks": [
+            {
+              "type": "exercise",
+              "exerciseType": "predict",
+              "id": "d6-pr-p3",
+              "title": "Predict — arrays and objects",
+              "level": "medium",
+              "prompt": "What is printed?",
+              "code": "const results = ['pass', 'fail', 'pass'];\nconst summary = { suite: 'Checkout', total: results.length };\nresults.push('skip');\nconsole.log(results.length, summary.total, results[results.length - 1]);",
+              "answer": "`4 3 skip`\n\n`summary.total` stored the length (3) at the moment the object was created; pushing later doesn't change it. The array now has 4 items and the last one is 'skip'.",
+              "check": {
+                "kind": "self"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d6-practice-3",
+          "title": "Exercises",
+          "blocks": [
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d6-ex1",
+              "title": "Tester profile card",
+              "level": "easy",
+              "prompt": "Create `day6/profile.ts`. Declare **constants** for your name (string), years of testing experience (number), favourite browser (only `'chromium' | 'firefox' | 'webkit'` allowed) and whether you have used automation before (boolean).\n\nPrint exactly this format using **one template literal per line** (with your own values):\n\n```\nTester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false\n```",
+              "file": "ts-basics/day6/profile.ts",
+              "run": "node day6/profile.ts",
+              "starter": "// 1. Declare your constants here (with types)\n\n// 2. Print the four lines with template literals",
+              "hints": [
+                "A literal type looks like: `const favouriteBrowser: 'chromium' | 'firefox' | 'webkit' = 'firefox';`",
+                "A template literal: `` console.log(`Tester: ${testerName}`); ``"
+              ],
+              "solution": "// 1. Constants with types\nconst testerName: string = 'Priya Sharma';\nconst yearsOfExperience: number = 3;\nconst favouriteBrowser: 'chromium' | 'firefox' | 'webkit' = 'firefox';\nconst usedAutomation: boolean = false;\n\n// 2. Print with template literals\nconsole.log(`Tester: ${testerName}`);\nconsole.log(`Experience: ${yearsOfExperience} years`);\nconsole.log(`Favourite browser: ${favouriteBrowser}`);\nconsole.log(`Automation before: ${usedAutomation}`);",
+              "expectedOutput": "Tester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false",
+              "check": {
+                "kind": "stdoutEquals",
+                "cwd": "pw-course/ts-basics",
+                "run": "node day6/profile.ts",
+                "expected": "Tester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d6-ex3",
+              "title": "Test-data object with a type alias",
+              "level": "medium",
+              "prompt": "Create `day6/login-data.ts`:\n\n1. Define a type alias `LoginCase` with: `id` (string), `username` (string), `password` (string), `shouldSucceed` (boolean) and an **optional** `expectedError` (string).\n2. Create two constants of that type:\n   - `validCase`: id `TC-01`, username `standard_user`, password `secret_sauce`, shouldSucceed `true`\n   - `lockedCase`: id `TC-02`, username `locked_out_user`, password `secret_sauce`, shouldSucceed `false`, expectedError `Sorry, this user has been locked out.`\n3. Put both in an array `loginCases` typed `LoginCase[]` and print:\n```\n2 login cases\nTC-01 standard_user expects success: true\nTC-02 locked_out_user expects error: Sorry, this user has been locked out.\n```\nRun `npm run check -- day6/login-data.ts` — it must print nothing.",
+              "file": "ts-basics/day6/login-data.ts",
+              "run": "node day6/login-data.ts",
+              "hints": [
+                "Optional property: `expectedError?: string;`",
+                "Access items with `loginCases[0]` and `loginCases[1]`."
+              ],
+              "solution": "// The shape of one login test case\ntype LoginCase = {\n  id: string;\n  username: string;\n  password: string;\n  shouldSucceed: boolean;\n  expectedError?: string;   // only needed for failing cases\n};\n\nconst validCase: LoginCase = {\n  id: 'TC-01',\n  username: 'standard_user',\n  password: 'secret_sauce',\n  shouldSucceed: true,\n};\n\nconst lockedCase: LoginCase = {\n  id: 'TC-02',\n  username: 'locked_out_user',\n  password: 'secret_sauce',\n  shouldSucceed: false,\n  expectedError: 'Sorry, this user has been locked out.',\n};\n\nconst loginCases: LoginCase[] = [validCase, lockedCase];\n\nconsole.log(`${loginCases.length} login cases`);\nconsole.log(`${loginCases[0].id} ${loginCases[0].username} expects success: ${loginCases[0].shouldSucceed}`);\nconsole.log(`${loginCases[1].id} ${loginCases[1].username} expects error: ${loginCases[1].expectedError}`);",
+              "expectedOutput": "2 login cases\nTC-01 standard_user expects success: true\nTC-02 locked_out_user expects error: Sorry, this user has been locked out.",
+              "check": {
+                "kind": "stdoutEquals",
+                "cwd": "pw-course/ts-basics",
+                "run": "node day6/login-data.ts",
+                "expected": "2 login cases\nTC-01 standard_user expects success: true\nTC-02 locked_out_user expects error: Sorry, this user has been locked out."
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d6-ex5",
+              "title": "Challenge: build a URL and a test title",
+              "level": "challenge",
+              "prompt": "Create `day6/url-builder.ts`. Given:\n```ts\nconst baseUrl = 'https://shop.example.com';\nconst category = 'Laptops & Tablets';\nconst page = 2;\nconst sortBy: 'price' | 'rating' = 'price';\n```\n1. Turn the category into a URL-friendly **slug**: lowercase, `&` removed, spaces replaced by `-`, no double dashes → `laptops-tablets`. (Use `toLowerCase()`, `replace('&', '')`, `split(' ')`, `filter(...)` and `join('-')` — or research your own way.)\n2. Build: `https://shop.example.com/c/laptops-tablets?page=2&sort=price`\n3. Build a test title: `[P2] Laptops & Tablets sorted by price` — `P2` comes from the page number.\n4. Print both lines, the URL first.",
+              "file": "ts-basics/day6/url-builder.ts",
+              "run": "node day6/url-builder.ts",
+              "hints": [
+                "'Laptops & Tablets'.toLowerCase() → 'laptops & tablets'",
+                ".replace('&', '') → 'laptops  tablets' (two spaces!)",
+                ".split(' ') → ['laptops', '', 'tablets'] — filter out the empty string with `.filter((word) => word !== '')`"
+              ],
+              "solution": "const baseUrl = 'https://shop.example.com';\nconst category = 'Laptops & Tablets';\nconst page = 2;\nconst sortBy: 'price' | 'rating' = 'price';\n\n// 1. Make a slug: lowercase → remove & → split into words → drop empty words → join with -\nconst slug = category\n  .toLowerCase()\n  .replace('&', '')\n  .split(' ')\n  .filter((word) => word !== '')\n  .join('-');\n\n// 2. Build the URL with a template literal\nconst url = `${baseUrl}/c/${slug}?page=${page}&sort=${sortBy}`;\n\n// 3. Build the test title\nconst title = `[P${page}] ${category} sorted by ${sortBy}`;\n\n// 4. Print\nconsole.log(url);\nconsole.log(title);",
+              "expectedOutput": "https://shop.example.com/c/laptops-tablets?page=2&sort=price\n[P2] Laptops & Tablets sorted by price",
+              "check": {
+                "kind": "stdoutEquals",
+                "cwd": "pw-course/ts-basics",
+                "run": "node day6/url-builder.ts",
+                "expected": "https://shop.example.com/c/laptops-tablets?page=2&sort=price\n[P2] Laptops & Tablets sorted by price"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d6-practice-4",
+          "title": "Reflection",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "1. Give one example each of an array, a tuple and an object you'd use as test data.\n2. What is the difference between `string | number` and `'chromium' | 'firefox'`?\n3. Why is `any` a bad habit?"
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "Conditions, loops and functions: your code starts making decisions, repeating work and packaging steps you can reuse — like reusable test steps.",
+              "title": "Coming up on Day 7"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "lessons": 11,
+    "quizzes": 9,
+    "exercises": 4,
+    "codeBlocks": 10
+  }
+}

@@ -39,6 +39,11 @@
             "days": {
                 "_itemTemplate": {
                     "day": {
+                        "_comment": "Position within the week, 1-5.",
+                        "value": 1
+                    },
+                    "number": {
+                        "_comment": "Number across the whole course, as the lessons count it: Week 2 starts on Day 6.",
                         "value": 1
                     },
                     "title": {

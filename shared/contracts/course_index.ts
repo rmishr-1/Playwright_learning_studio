@@ -5,6 +5,8 @@ import { DayNumber, WeekNumber } from './common';
 
 export const IndexDay = z.object({
   day: DayNumber,
+  /** The day's number across the whole course, as the lessons count it (see course_day.ts). */
+  number: z.number().int().min(1),
   title: z.string(),
   locked: z.boolean(),
 });

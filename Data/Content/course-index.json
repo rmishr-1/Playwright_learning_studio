@@ -2,41 +2,83 @@
   "schema": "course-index/v1",
   "title": "Playwright with TypeScript",
   "totals": {
-    "weeks": 1,
-    "days": 5,
-    "parts": 20,
+    "weeks": 2,
+    "days": 10,
+    "parts": 40,
     "practice_problems": 31,
-    "available_days": 5
+    "available_days": 10
   },
   "weeks": [
     {
       "week": 1,
-      "theme": "Fundamentals, Setup & Programming",
+      "theme": "Playwright Foundations & Setup",
       "locked": false,
       "days": [
         {
           "day": 1,
-          "title": "Why Playwright & How It Works",
+          "number": 1,
+          "title": "From Manual Testing to Automation",
           "locked": false
         },
         {
           "day": 2,
-          "title": "Setup & Your First Test Run",
+          "number": 2,
+          "title": "How Playwright Works & Why Teams Choose It",
           "locked": false
         },
         {
           "day": 3,
-          "title": "TypeScript Foundations I: Variables, Data Types & Operators",
+          "number": 3,
+          "title": "Setting Up Your Tools & Project",
           "locked": false
         },
         {
           "day": 4,
-          "title": "TypeScript Foundations II: Conditions, Loops, Functions & Async",
+          "number": 4,
+          "title": "Configuring & Running Tests",
           "locked": false
         },
         {
           "day": 5,
-          "title": "Playwright Test Runner Basics",
+          "number": 5,
+          "title": "TypeScript I: Your First Program, Variables & Operators",
+          "locked": false
+        }
+      ]
+    },
+    {
+      "week": 2,
+      "theme": "TypeScript & the Test Runner",
+      "locked": false,
+      "days": [
+        {
+          "day": 1,
+          "number": 6,
+          "title": "TypeScript I: Arrays, Objects & Types for Test Data",
+          "locked": false
+        },
+        {
+          "day": 2,
+          "number": 7,
+          "title": "TypeScript II: Conditions, Loops & Functions",
+          "locked": false
+        },
+        {
+          "day": 3,
+          "number": 8,
+          "title": "TypeScript II: Async, Modules & Your Own Test Runner",
+          "locked": false
+        },
+        {
+          "day": 4,
+          "number": 9,
+          "title": "Playwright Test Runner I: Your First Real Tests",
+          "locked": false
+        },
+        {
+          "day": 5,
+          "number": 10,
+          "title": "Playwright Test Runner II: Control, Debug & Ship",
           "locked": false
         }
       ]

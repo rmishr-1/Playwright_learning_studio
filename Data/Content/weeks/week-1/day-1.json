@@ -2,7 +2,8 @@
   "schema": "course-day/v2",
   "week": 1,
   "day": 1,
-  "title": "Why Playwright & How It Works",
+  "number": 1,
+  "title": "From Manual Testing to Automation",
   "locked": false,
   "workspace": "demo",
   "parts": [
@@ -20,16 +21,18 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "at-a-glance",
-          "text": "**Why Playwright & How It Works**\n\n*From manual testing to automation — what Playwright is, how it talks to browsers, and why teams are choosing it*\n\n**Time:** 2.5–3 hours\n\n**Where you work:** Pre-loaded demo workspace (you install your own on Day 2)\n\n**By the end of the day you can:**\n\n- Explain what test automation is and which manual tests are worth automating\n- Describe how a web page is built (HTML, elements, attributes, the DOM) in simple words\n- Explain Playwright's architecture — test code → Playwright → browser — and the Browser → Context → Page model\n- List Playwright's key features (auto-waiting, cross-browser, isolation, tooling) and its limitations\n- Compare Playwright with Selenium and Cypress and justify when to choose each\n- Run pre-built demo tests and read the results in the terminal and browser",
+          "text": "**From Manual Testing to Automation**\n\n*What automation is for, how a web page is built, what Playwright is — and your first automated test run, before any theory*\n\n**Time:** 2–2.5 hours\n\n**Where you work:** Pre-loaded demo workspace (you install your own on Day 3)\n\n**By the end of the day you can:**\n\n- Explain what test automation is and which manual tests are worth automating\n- Describe how a web page is built (HTML, elements, attributes, the DOM) in simple words\n- Name the three browser engines Playwright supports and explain headed vs headless\n- Say what Playwright is and what comes in the box\n- Run pre-built demo tests, watch auto-waiting happen and read the result in the terminal",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
@@ -38,7 +41,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
@@ -50,7 +54,8 @@
           "callout": {
             "variant": "tester",
             "title": "Automation does not replace you"
-          }
+          },
+          "title": null
         },
         {
           "type": "markdown",
@@ -59,7 +64,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -81,7 +87,8 @@
             "explanation": "Repeated checks (login before every release) and data-driven checks (40 input combinations) give the best return. Visual \"feel\" needs human judgement, and a one-time check is not worth scripting."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
@@ -90,7 +97,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
@@ -106,7 +114,8 @@
             "expect_error": false,
             "network": false
           },
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
@@ -115,7 +124,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "diagram",
@@ -124,7 +134,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
@@ -133,7 +144,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
@@ -145,7 +157,8 @@
           "callout": {
             "variant": "tip",
             "title": "Try it in any browser"
-          }
+          },
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -166,7 +179,8 @@
             "explanation": "`input` is the tag (element). `id`, `type` and `placeholder` are attributes — extra information about that element."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -185,7 +199,8 @@
             "explanation": "The DOM is live. JavaScript adds, removes and changes elements all the time. This is exactly why automation tools must be good at *waiting* for elements — a key Playwright strength."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
@@ -194,7 +209,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -214,16 +230,18 @@
             "explanation": "Safari (desktop and iOS) is built on the WebKit engine, so `webkit` is the closest match."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## P4 · Words you will hear all week\n\n| Term | Plain-English meaning |\n|---|---|\n| **Script** | A file of instructions a computer runs |\n| **Framework** | A ready-made structure + tools you build your tests inside |\n| **Library** | A package of ready-made code you call from your own code |\n| **Test runner** | The program that finds your tests, runs them and reports pass/fail |\n| **Assertion** | An automated \"expected result\" check, e.g. *the title should be \"Dashboard\"* |\n| **Locator** | The way a test finds an element, e.g. *the button named \"Log in\"* |\n| **Flaky test** | A test that sometimes passes and sometimes fails without any code change — usually a timing problem |\n| **CI (Continuous Integration)** | A server that automatically runs your tests whenever developers push code |\n| **Node.js** | The program that runs JavaScript/TypeScript outside a browser (you install it on Day 2) |\n| **TypeScript** | JavaScript + types. The language we write Playwright tests in (Days 3–4) |",
+          "text": "## P4 · Words you will hear all course\n\n| Term | Plain-English meaning |\n|---|---|\n| **Script** | A file of instructions a computer runs |\n| **Framework** | A ready-made structure + tools you build your tests inside |\n| **Library** | A package of ready-made code you call from your own code |\n| **Test runner** | The program that finds your tests, runs them and reports pass/fail |\n| **Assertion** | An automated \"expected result\" check, e.g. *the title should be \"Dashboard\"* |\n| **Locator** | The way a test finds an element, e.g. *the button named \"Log in\"* |\n| **Flaky test** | A test that sometimes passes and sometimes fails without any code change — usually a timing problem |\n| **CI (Continuous Integration)** | A server that automatically runs your tests whenever developers push code |\n| **Node.js** | The program that runs JavaScript/TypeScript outside a browser (you install it on Day 3) |\n| **TypeScript** | JavaScript + types. The language we write Playwright tests in (Days 5–8) |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
@@ -235,7 +253,8 @@
           "callout": {
             "variant": "tester",
             "title": "Test case → automated test"
-          }
+          },
+          "title": null
         }
       ],
       "problems": []
@@ -245,7 +264,7 @@
       "kind": "concept",
       "title": "Fundamentals",
       "tab_label": "Fundamentals",
-      "has_runnable_code": false,
+      "has_runnable_code": true,
       "blocks": [
         {
           "type": "markdown",
@@ -254,7 +273,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
@@ -266,7 +286,8 @@
           "callout": {
             "variant": "note",
             "title": null
-          }
+          },
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -284,458 +305,21 @@
               1
             ],
             "kind": "single",
-            "explanation": "`@playwright/test` (\"Playwright Test\") bundles the runner, `expect` assertions, fixtures and reporters. It is what `npm init playwright@latest` installs on Day 2."
+            "explanation": "`@playwright/test` (\"Playwright Test\") bundles the runner, `expect` assertions, fixtures and reporters. It is what `npm init playwright@latest` installs on Day 3."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## F2 · Architecture — how Playwright talks to the browser\n\n### The big picture\n\nEvery Playwright test involves three players:",
+          "text": "## F2 · See auto-waiting before you study it\n\nBefore any more theory, watch Playwright's most important feature in action. Your workspace already contains a demo test. It opens a practice \"Checkout\" page where the **Pay now** button only appears **2 seconds** after the page loads — just like a real page waiting for a payment service.\n\nThe test does **not** contain any \"wait 2 seconds\" instruction. Watch what happens.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "diagram",
-          "text": "flowchart LR\n  A[\"Your test code<br/>(TypeScript)\"] -- \"commands:<br/>click, fill, goto\" --> B[\"Playwright<br/>(server / driver)\"]\n  B -- \"events & results:<br/>page loaded, element found\" --> A\n  B -- \"browser protocol\" --> C1[Chromium]\n  B -- \"browser protocol\" --> C2[Firefox]\n  B -- \"browser protocol\" --> C3[WebKit]",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "1. **Your test code** says *what* should happen: \"go to the login page, fill the email, click Log in\".\n2. **Playwright** (often called the *server* or *driver*) translates each command into the language the browser understands and sends it.\n3. **The browser** performs the action and reports back: the page loaded, the element exists, the click happened, the text changed.\n\n### The key idea: one open line, not one letter per command\n\nOlder tools such as classic **Selenium WebDriver** send each command as a separate HTTP request — like posting a letter for every instruction and waiting for the reply before sending the next one.\n\nPlaywright keeps **one persistent, two-way connection** open for the whole session (a pipe when it launches the browser itself, or a WebSocket when it connects to a remote browser). It is like being on a phone call with the browser:\n\n- Playwright can send commands quickly, one after another\n- The browser can **push events back at any moment** — \"a new page opened\", \"the network request finished\", \"a dialog appeared\"\n\nBecause every message over this open line is fast, Playwright can check \"is the element ready yet?\" many times per second before acting, and it also hears about navigations, dialogs and network activity as they happen. That's the foundation for **auto-waiting** (see F4).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "diagram",
-          "text": "sequenceDiagram\n  participant T as Your test\n  participant P as Playwright\n  participant B as Browser\n  T->>P: click \"Log in\"\n  P->>B: is the button attached, visible, stable, enabled?\n  B-->>P: not yet (page still loading)\n  Note over P,B: Playwright re-checks every few milliseconds\n  P->>B: check again\n  B-->>P: ready ✓\n  P->>B: click at the button's position\n  B-->>P: click done\n  P-->>T: ✓ next step",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "### Which \"language\" does Playwright speak to each browser?\n\n| Browser | How Playwright talks to it |\n|---|---|\n| Chromium (Chrome, Edge) | **Chrome DevTools Protocol (CDP)** — the same low-level protocol Chrome's own DevTools uses |\n| Firefox | A Playwright-patched Firefox build with its own automation protocol |\n| WebKit | A Playwright-patched WebKit build with its own automation protocol |\n\nThis is why Playwright **downloads its own browser builds** during installation (`npx playwright install`). Each Playwright version is tested against specific browser versions, so everything matches.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "callout",
-          "text": "In Python, Java and .NET, your test talks to a separate Playwright driver process (written in Node.js). In Node.js/TypeScript the Playwright client and server run together in your test's process, and the server talks to the browser directly — for a locally launched Chromium over a pipe (`--remote-debugging-pipe`), for a remote browser over a WebSocket. Either way the idea is the same: a persistent, message-based connection — not one HTTP request per command. Low-level protocols like CDP are also what make features such as network interception, console-log capture and trace recording possible without extra plugins.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "deepdive",
-            "title": "A little more precisely"
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "How does Playwright wait for elements without fixed sleeps?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "It adds a fixed 5-second sleep before every action",
-              "Before each action it checks the element is ready (attached, visible, stable, enabled…) and quickly re-checks until it is — cheap to do over its fast, persistent connection",
-              "It runs the test code inside the web page itself",
-              "It takes a screenshot and compares pixels before every click"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Playwright runs readiness (actionability) checks and retries them rapidly, acting the moment the element is ready. The persistent connection makes those repeated checks fast, and also lets Playwright hear about navigations, dialogs and network events as they happen."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Playwright uses the Chrome DevTools Protocol (CDP) to control Chromium-based browsers.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "True",
-              "False"
-            ],
-            "answers": [
-              0
-            ],
-            "kind": "truefalse",
-            "explanation": "For Chromium, Playwright speaks CDP. For Firefox and WebKit it uses Playwright-patched browser builds with their own automation protocols."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F3 · Browser → Context → Page\n\nInside the browser, Playwright organises everything in three layers. You will use these words every single day.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "diagram",
-          "text": "flowchart TD\n  B[\"🌐 Browser<br/>(one running Chromium / Firefox / WebKit)\"]\n  B --> C1[\"🔒 Context A<br/>like an incognito window:<br/>own cookies, storage, login\"]\n  B --> C2[\"🔒 Context B<br/>completely separate<br/>from Context A\"]\n  C1 --> P1[\"📄 Page<br/>(a tab)\"]\n  C1 --> P2[\"📄 Page<br/>(another tab)\"]\n  C2 --> P3[\"📄 Page<br/>(a tab)\"]",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "| Layer | Real-life analogy | What it holds |\n|---|---|---|\n| **Browser** | The Chrome application running on your laptop | The browser process itself |\n| **Context** | A brand-new **incognito window** | Its own cookies, local storage, session, permissions — shares **nothing** with other contexts |\n| **Page** | A **tab** inside that window | One web page you interact with: URL, elements, clicks |\n\n### Why contexts matter so much\n\nStarting a whole new browser is slow (about a second). Creating a new **context** takes only milliseconds, yet it is just as clean — no leftover cookies, no logged-in user from the previous test.\n\nSo Playwright Test gives **every test its own fresh context and page**:\n\n1. Start the browser (once, reused)\n2. Test 1 → new context → new page → run → context thrown away\n3. Test 2 → new context → new page → run → context thrown away\n\nResult: tests **cannot affect each other**, and they can safely run **in parallel**.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "callout",
-          "text": "You have probably seen \"it worked when I tested it, but failed when you tested it\" because of a leftover login session or cached data. Contexts give every automated test a perfectly clean browser, every time — like testing each case in a new incognito window.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "tester",
-            "title": "Why this matters to a manual tester"
-          }
-        },
-        {
-          "type": "markdown",
-          "text": "You will see code like this later in the course (read-only for now — just spot the three layers):",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "code",
-          "text": "import { chromium } from 'playwright';\n\nconst browser = await chromium.launch();        // 1. Browser: start Chromium\nconst context = await browser.newContext();     // 2. Context: a fresh \"incognito window\"\nconst page = await context.newPage();           // 3. Page: a tab inside it\n\nawait page.goto('https://playwright.dev');      // use the tab\nawait browser.close();                          // close everything",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null
-        },
-        {
-          "type": "callout",
-          "text": "In Playwright **Test** you almost never write those first three lines yourself. The runner creates the browser, context and page for you and hands the page to your test. You will see this on Day 5 as `async ({ page }) => { … }`.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "note",
-            "title": null
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "Two tests run at the same time. Test A logs in as \"admin\". Why does Test B NOT see the admin session?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Because Playwright deletes all cookies from your computer before each test",
-              "Because each test gets its own browser context, which has separate cookies and storage",
-              "Because Test B uses a different browser engine",
-              "Because Playwright runs only one test at a time"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Each test gets a fresh context — like a new incognito window. Cookies, storage and sessions are never shared between contexts."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which layer represents a single browser TAB?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Browser",
-              "Context",
-              "Page"
-            ],
-            "answers": [
-              2
-            ],
-            "kind": "single",
-            "explanation": "A Page is one tab. A Context can hold several pages (useful for tests that open a link in a new tab)."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F4 · The features that make Playwright stand out\n\n### 1. Auto-waiting\n\nBefore every action Playwright automatically checks that the element is **ready**: it is attached to the page, visible, not moving (animation finished), enabled, and not covered by another element. Only then does it click or type. If the element never becomes ready, the step fails after a timeout with a clear message.\n\nNo more `sleep(5000)` \"just in case\" waits — the #1 cause of slow and flaky tests.\n\n### 2. Web-first assertions\n\nChecks such as \"the heading should say *Welcome*\" **retry automatically** until they pass or a timeout is reached (5 seconds by default). If the text appears after 1.2 seconds, the check passes at 1.2 seconds.\n\n### 3. Cross-browser with one code base\n\nThe *same* test runs on Chromium, Firefox and WebKit. You choose browsers in one configuration file — the tests don't change.\n\n### 4. Isolation and parallel execution\n\nFresh context per test (F3) + multiple **workers** running test files at the same time = fast, independent tests. No extra \"grid\" server is needed to run in parallel on one machine.\n\n### 5. Built-in tooling\n\n| Tool | What it helps with |\n|---|---|\n| **Codegen** (`npx playwright codegen`) | Records your clicks in a browser and writes the test code for you |\n| **UI Mode** (`--ui`) | A visual window to run, watch and time-travel through tests |\n| **Inspector / debug mode** (`--debug`) | Step through a test one action at a time |\n| **Trace Viewer** | A full recording of a test run: every action, DOM snapshots, network calls, console logs |\n| **HTML report** | A web page with results, errors and attachments after every run |\n\n### 6. Beyond clicking\n\nNetwork interception and API mocking, API testing without a browser (`request`), mobile device emulation, geolocation and permissions, multiple tabs and users in one test, file uploads/downloads, screenshots and videos.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "A \"Success\" message appears 3 seconds after clicking Save. With Playwright's default settings, what happens when you assert the message is visible?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "The assertion fails immediately because the message is not there yet",
-              "The assertion keeps retrying and passes as soon as the message appears (within the 5-second default)",
-              "You must add `sleep(3000)` before the assertion",
-              "Playwright refreshes the page until the message appears"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Web-first assertions retry until the condition is true or the timeout (5 s by default) runs out. The message appears at ~3 s, so the assertion passes then."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which Playwright tool records your manual clicks and writes the test code for you?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Trace Viewer",
-              "Codegen",
-              "HTML reporter",
-              "Workers"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`npx playwright codegen <url>` opens a browser, records what you do and generates the matching code. It's a great learning aid (and you'll still need to review and tidy the generated code)."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F5 · Why Playwright? Comparing the main tools\n\n### Playwright vs Selenium vs Cypress\n\n| | **Playwright** | **Selenium WebDriver** | **Cypress** |\n|---|---|---|---|\n| First released | 2020 (Microsoft) | 2004 (started at ThoughtWorks, now an open-source project) | 2017 (Cypress.io) |\n| Languages | JS/TS, Python, Java, .NET | Java, Python, C#, JS, Ruby and more | JS/TS only |\n| How it controls the browser | Persistent connection (CDP / patched browser protocols) | W3C WebDriver over HTTP via a browser driver (plus newer WebDriver BiDi) | Runs *inside* the browser alongside your app |\n| Browsers | Chromium, Firefox, WebKit | Chrome, Edge, Firefox, Safari (real branded browsers) | Chrome-family, Firefox, Electron; WebKit experimental |\n| Waiting | Automatic for actions and assertions | Mostly manual (explicit waits) | Automatic retries |\n| Parallel runs | Built in (workers) + sharding across machines, free | Via the test runner (TestNG, JUnit 5, pytest-xdist…); Selenium Grid to spread across many machines | Via paid cloud service or third-party tools |\n| Multiple tabs / users | Yes (pages and contexts) | Yes (window handles) | Very limited |\n| Built-in test runner | Yes | No — pair with TestNG, JUnit, pytest, Mocha… | Yes |\n| Community & age | Younger, growing very fast | Largest, most mature | Large JS community |\n\n### When would you still choose something else?\n\nPlaywright is not the best answer to everything. Be honest about its limits:\n\n- **Native mobile apps** (Android/iOS apps from the app store) — Playwright tests *web* apps only. Use Appium or similar.\n- **Very old browsers** such as Internet Explorer — not supported.\n- **Real branded Safari** — Playwright's WebKit is very close to Safari but is not the exact Safari app. (Real branded **Chrome** and **Edge** *can* be used via the `channel` option.)\n- **An existing large Selenium suite** in Java with a skilled team — migrating everything may not be worth it. Many companies run both.\n- **Desktop applications** (Windows/Mac apps) — out of scope.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "callout",
-          "text": "A strong answer to *\"Why Playwright over Selenium?\"* names concrete things: auto-waiting (fewer flaky tests), browser contexts (fast isolation), built-in parallelism and reporting, one API for three engines, and tools like Codegen and Trace Viewer. Then add one honest limitation — interviewers like balance.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "tester",
-            "title": "Interview tip"
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "Your company needs to automate its Android banking APP downloaded from the Play Store. Is Playwright the right tool?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Yes — Playwright's mobile emulation covers native apps",
-              "No — Playwright automates web applications; a native-app tool such as Appium fits better",
-              "Yes, but only with the webkit browser"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Mobile *emulation* in Playwright means making a desktop browser behave like a phone browser (screen size, touch, user agent). It cannot drive native Android/iOS apps."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which statements about Selenium and Playwright are correct? (Select all that apply)",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Selenium supports more programming languages than Playwright",
-              "Playwright includes its own test runner and HTML reporter",
-              "Selenium automatically waits for every element before every action, exactly like Playwright",
-              "Playwright can run tests in parallel on one machine without an extra grid server"
-            ],
-            "answers": [
-              0,
-              1,
-              3
-            ],
-            "kind": "multiple",
-            "explanation": "Selenium supports more languages and is older and very mature. Playwright bundles its own runner and reporters and runs tests in parallel with workers (Selenium can also run in parallel on one machine, but through a separate test runner). Selenium mostly relies on explicit waits that you write yourself, so option C is false."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F6 · Why Playwright is called \"the future of automation\"\n\nPlaywright has become one of the most popular end-to-end testing tools in only a few years. The reasons are practical:\n\n1. **Built for modern web apps.** Today's apps (React, Angular, Vue…) change the page constantly without full reloads. Auto-waiting and web-first assertions were designed for exactly this.\n2. **Fewer flaky tests.** Flaky tests destroy trust in automation. Removing manual sleeps and giving every test a clean context attacks the two biggest causes: timing and shared state.\n3. **Speed.** Parallel workers and lightweight contexts make large suites finish much faster, which matters when tests run on every code change in CI.\n4. **One tool, many kinds of testing.** UI tests, API tests, mobile-viewport tests, visual comparisons and network mocking — all with the same API and report.\n5. **AI-ready.** Playwright now ships an **MCP server** and **test agents** that let AI assistants open browsers, explore apps, and help plan, generate and repair tests. The AI still needs a tester who knows what \"correct\" looks like — that is you.\n6. **Active development.** Microsoft releases a new version roughly every month or two with new features and updated browsers. (At the time of writing the current line is 1.6x — always check the release notes.)",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "callout",
-          "text": "\"Future of automation\" does not mean the other tools disappear. It means the skills you learn here — thinking in actions and assertions, reliable locators, isolated tests, reading reports — are in high demand and transfer to any modern tool.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "note",
-            "title": null
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which problem do auto-waiting AND fresh browser contexts both help reduce?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Licence costs",
-              "Flaky tests",
-              "The number of test cases you need to write",
-              "Browser download size"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Auto-waiting removes timing problems; fresh contexts remove shared-state problems. Timing and shared state are the two biggest causes of flaky tests."
-          },
-          "code": null,
-          "callout": null
-        }
-      ],
-      "problems": []
-    },
-    {
-      "part": 3,
-      "kind": "concept",
-      "title": "Implementation",
-      "tab_label": "Implementation",
-      "has_runnable_code": true,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Day 1 · Implementation\n\n\n\n## I1 · Turn a manual test case into automation steps\n\nBefore writing any code, automation engineers translate a manual test case into **actions** and **assertions**. Let's do it for a real-world example.\n\n**Manual test case TC-101 — Successful login**\n\n| # | Step | Expected result |\n|---|---|---|\n| 1 | Open `https://shop.example.com/login` | Login page shows heading \"Welcome back\" |\n| 2 | Enter `asha@example.com` in Email | — |\n| 3 | Enter `Secret@123` in Password | — |\n| 4 | Click **Log in** | Dashboard opens; URL contains `/dashboard` |\n| 5 | — | Text \"Hello, Asha\" is visible |\n\n**Translated into Playwright thinking**\n\n| Manual step | Type | Playwright action / assertion (plain English) |\n|---|---|---|\n| Open the login URL | Action | *go to* `https://shop.example.com/login` |\n| Heading \"Welcome back\" shows | Assertion | *expect* heading \"Welcome back\" *to be visible* |\n| Enter email | Action | *fill* the **Email** field with `asha@example.com` |\n| Enter password | Action | *fill* the **Password** field with `Secret@123` |\n| Click Log in | Action | *click* the **button** named \"Log in\" |\n| URL contains /dashboard | Assertion | *expect* page URL *to contain* `/dashboard` |\n| \"Hello, Asha\" visible | Assertion | *expect* text \"Hello, Asha\" *to be visible* |\n\nAnd here is what that becomes in Playwright code. Don't worry about the syntax yet — by Day 5 you will write this yourself. For now, notice how closely it matches the table:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "code",
-          "text": "import { test, expect } from '@playwright/test';\n\ntest('TC-101 successful login', async ({ page }) => {\n  await page.goto('https://shop.example.com/login');                                   // open URL\n  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();     // check heading\n\n  await page.getByLabel('Email').fill('asha@example.com');                             // enter email\n  await page.getByLabel('Password').fill('Secret@123');                                // enter password\n  await page.getByRole('button', { name: 'Log in' }).click();                          // click Log in\n\n  await expect(page).toHaveURL(/dashboard/);                                           // URL check\n  await expect(page.getByText('Hello, Asha')).toBeVisible();                           // welcome text\n});",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null
-        },
-        {
-          "type": "callout",
-          "text": "Notice that Playwright finds elements the way a **user** describes them — \"the button named *Log in*\", \"the field labelled *Email*\" — not by technical ids. That makes tests easier to read and more robust when developers change the page's internals.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "tester",
-            "title": null
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "In the code above, which line is an ASSERTION (an expected result)?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`await page.getByLabel('Email').fill('asha@example.com');`",
-              "`await page.getByRole('button', { name: 'Log in' }).click();`",
-              "`await expect(page).toHaveURL(/dashboard/);`",
-              "`await page.goto('https://shop.example.com/login');`"
-            ],
-            "answers": [
-              2
-            ],
-            "kind": "single",
-            "explanation": "Lines that start with `expect(...)` are assertions — they check an expected result. `goto`, `fill` and `click` are actions."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "## I2 · Watch auto-waiting in action\n\nYour workspace already contains a demo test. It opens a practice \"Checkout\" page where the **Pay now** button only appears **2 seconds** after the page loads — just like a real page waiting for a payment service.\n\nThe test does **not** contain any \"wait 2 seconds\" instruction. Watch what happens.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
@@ -751,7 +335,8 @@
             "expect_error": false,
             "network": false
           },
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
@@ -760,7 +345,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "terminal",
@@ -769,7 +355,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
@@ -778,7 +365,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -799,135 +387,149 @@
             "explanation": "Playwright's actions auto-wait until the element exists, is visible, stable and enabled. It clicked as soon as the button was ready."
           },
           "code": null,
-          "callout": null
-        },
+          "callout": null,
+          "title": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "Implementation",
+      "tab_label": "Implementation",
+      "has_runnable_code": true,
+      "blocks": [
         {
           "type": "markdown",
-          "text": "## I3 · See contexts keep users apart\n\nThis demo creates **two contexts** from the same browser — imagine two different customers on two different devices — and proves they don't share anything.",
+          "text": "# Day 1 · Implementation\n\n\n\n## I1 · Turn a manual test case into automation steps\n\nBefore writing any code, automation engineers translate a manual test case into **actions** and **assertions**. Let's do it for a real-world example.\n\n**Manual test case TC-101 — Successful login**\n\n| # | Step | Expected result |\n|---|---|---|\n| 1 | Open `https://shop.example.com/login` | Login page shows heading \"Welcome back\" |\n| 2 | Enter `asha@example.com` in Email | — |\n| 3 | Enter `Secret@123` in Password | — |\n| 4 | Click **Log in** | Dashboard opens; URL contains `/dashboard` |\n| 5 | — | Text \"Hello, Asha\" is visible |\n\n**Translated into Playwright thinking**\n\n| Manual step | Type | Playwright action / assertion (plain English) |\n|---|---|---|\n| Open the login URL | Action | *go to* `https://shop.example.com/login` |\n| Heading \"Welcome back\" shows | Assertion | *expect* heading \"Welcome back\" *to be visible* |\n| Enter email | Action | *fill* the **Email** field with `asha@example.com` |\n| Enter password | Action | *fill* the **Password** field with `Secret@123` |\n| Click Log in | Action | *click* the **button** named \"Log in\" |\n| URL contains /dashboard | Assertion | *expect* page URL *to contain* `/dashboard` |\n| \"Hello, Asha\" visible | Assertion | *expect* text \"Hello, Asha\" *to be visible* |\n\nAnd here is what that becomes in Playwright code. Don't worry about the syntax yet — by Day 9 you will write this yourself. For now, notice how closely it matches the table:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "import { test, expect } from '@playwright/test';\n\n// A page that prints the browser language and window width\nconst whoAmIPage = `\n  <h1 id=\"info\"></h1>\n  <script>\n    document.getElementById('info').textContent =\n      navigator.language + ' | ' + window.innerWidth + 'px wide';\n  </script>\n`;\n\ntest('two contexts behave like two different devices', async ({ browser }) => {\n  // Context 1: a laptop user in India\n  const laptopUser = await browser.newContext({ locale: 'en-IN', viewport: { width: 1280, height: 720 } });\n  // Context 2: a phone-sized user in France\n  const phoneUser = await browser.newContext({ locale: 'fr-FR', viewport: { width: 390, height: 844 } });\n\n  // One tab (page) in each context\n  const laptopPage = await laptopUser.newPage();\n  const phonePage = await phoneUser.newPage();\n  await laptopPage.setContent(whoAmIPage);\n  await phonePage.setContent(whoAmIPage);\n\n  // Each context has its own settings\n  await expect(laptopPage.locator('#info')).toHaveText('en-IN | 1280px wide');\n  await expect(phonePage.locator('#info')).toHaveText('fr-FR | 390px wide');\n\n  await laptopUser.close();\n  await phoneUser.close();\n});\n\ntest('cookies in one context are invisible to another', async ({ browser }) => {\n  const customerA = await browser.newContext();\n  const customerB = await browser.newContext();\n\n  // Customer A \"logs in\" — we store a login cookie in context A only\n  await customerA.addCookies([{ name: 'session', value: 'asha-logged-in', url: 'https://shop.example.com' }]);\n\n  const cookiesA = await customerA.cookies();\n  const cookiesB = await customerB.cookies();\n  console.log('Customer A has', cookiesA.length, 'cookie(s)');\n  console.log('Customer B has', cookiesB.length, 'cookie(s)');\n\n  expect(cookiesA).toHaveLength(1); // A is logged in\n  expect(cookiesB).toHaveLength(0); // B is NOT — contexts share nothing\n\n  await customerA.close();\n  await customerB.close();\n});",
+          "text": "import { test, expect } from '@playwright/test';\n\ntest('TC-101 successful login', async ({ page }) => {\n  await page.goto('https://shop.example.com/login');                                   // open URL\n  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();     // check heading\n\n  await page.getByLabel('Email').fill('asha@example.com');                             // enter email\n  await page.getByLabel('Password').fill('Secret@123');                                // enter password\n  await page.getByRole('button', { name: 'Log in' }).click();                          // click Log in\n\n  await expect(page).toHaveURL(/dashboard/);                                           // URL check\n  await expect(page.getByText('Hello, Asha')).toBeVisible();                           // welcome text\n});",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "tests/day1/contexts.spec.ts",
-            "run": "npx playwright test tests/day1/contexts.spec.ts --project=chromium",
-            "mode": "editor",
+            "file": null,
+            "run": null,
+            "mode": "read",
             "expect_error": false,
             "network": false
           },
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test tests/day1/contexts.spec.ts --project=chromium",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nRunning 2 tests using 2 workers\n\n[chromium] › tests/day1/contexts.spec.ts:32:5 › cookies in one context are invisible to another\nCustomer A has 1 cookie(s)\nCustomer B has 0 cookie(s)\n\n  ✓  1 [chromium] › tests/day1/contexts.spec.ts:12:5 › two contexts behave like two different devices (410ms)\n  ✓  2 [chromium] › tests/day1/contexts.spec.ts:32:5 › cookies in one context are invisible to another (95ms)\n\n  2 passed (1.4s)\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
-          "text": "Here the test receives `browser` (not `page`) and builds its own contexts — useful for multi-user scenarios such as \"an admin approves a request that a customer submitted\". In most tests you'll simply use the ready-made `page`.",
+          "text": "Notice that Playwright finds elements the way a **user** describes them — \"the button named *Log in*\", \"the field labelled *Email*\" — not by technical ids. That makes tests easier to read and more robust when developers change the page's internals.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
           "callout": {
-            "variant": "note",
+            "variant": "tester",
             "title": null
-          }
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "In the code above, which line is an ASSERTION (an expected result)?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`await page.getByLabel('Email').fill('asha@example.com');`",
+              "`await page.getByRole('button', { name: 'Log in' }).click();`",
+              "`await expect(page).toHaveURL(/dashboard/);`",
+              "`await page.goto('https://shop.example.com/login');`"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "Lines that start with `expect(...)` are assertions — they check an expected result. `goto`, `fill` and `click` are actions."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## I4 · One test, three browsers\n\nThe last demo is a single test. You'll run it once — and Playwright will run it on **all three engines**, because the project configuration lists Chromium, Firefox and WebKit.",
+          "text": "## I2 · Take a tour of the DOM\n\nLesson P2 said Playwright finds elements in the DOM the way a user describes them. Let's prove it. This demo loads the same tiny login page from P2 into the browser and asks Playwright questions about it — no clicking yet, just *looking*.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "code",
-          "text": "import { test, expect } from '@playwright/test';\n\ntest('same test, any browser', async ({ page, browserName }) => {\n  // browserName is \"chromium\", \"firefox\" or \"webkit\"\n  await page.setContent('<h1>Hello from an automated test!</h1>');\n  console.log(`Running in: ${browserName}`);\n\n  await expect(page.getByRole('heading')).toHaveText('Hello from an automated test!');\n});",
+          "text": "import { test, expect } from '@playwright/test';\n\n// The login page from lesson P2, as text\nconst loginPage = `\n  <title>My Shop - Log in</title>\n  <h1>Welcome back</h1>\n  <label for=\"email\">Email</label>\n  <input id=\"email\" type=\"email\" placeholder=\"you@example.com\">\n  <label for=\"password\">Password</label>\n  <input id=\"password\" type=\"password\">\n  <button class=\"btn-primary\">Log in</button>\n  <a href=\"/forgot\">Forgot password?</a>\n`;\n\ntest('a tour of the DOM', async ({ page }) => {\n  await page.setContent(loginPage);                    // load the page into the tab\n\n  // Ask the page questions, the way a user would describe things\n  console.log('Tab title:', await page.title());\n  console.log('Heading text:', await page.getByRole('heading').textContent());\n  console.log('Button text:', await page.getByRole('button').textContent());\n  console.log('Link goes to:', await page.getByRole('link').getAttribute('href'));\n  console.log('Email placeholder:', await page.getByLabel('Email').getAttribute('placeholder'));\n\n  // And check a few expected results\n  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();\n  await expect(page.getByRole('button', { name: 'Log in' })).toBeEnabled();\n  await expect(page.getByLabel('Email')).toHaveAttribute('type', 'email');\n});",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "tests/day1/browsers.spec.ts",
-            "run": "npx playwright test tests/day1/browsers.spec.ts",
+            "file": "tests/day1/dom-tour.spec.ts",
+            "run": "npx playwright test tests/day1/dom-tour.spec.ts --project=chromium --headed",
             "mode": "editor",
             "expect_error": false,
             "network": false
           },
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "terminal",
-          "text": "npx playwright test tests/day1/browsers.spec.ts",
+          "text": "npx playwright test tests/day1/dom-tour.spec.ts --project=chromium --headed",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "```output\nRunning 3 tests using 3 workers\n\nRunning in: chromium\nRunning in: firefox\nRunning in: webkit\n  ✓  1 [chromium] › tests/day1/browsers.spec.ts:3:5 › same test, any browser (180ms)\n  ✓  2 [firefox] › tests/day1/browsers.spec.ts:3:5 › same test, any browser (420ms)\n  ✓  3 [webkit] › tests/day1/browsers.spec.ts:3:5 › same test, any browser (390ms)\n\n  3 passed (2.6s)\n```\n\n**Read the output like a pro**\n\n- `Running 3 tests using 3 workers` — 1 test × 3 browsers = 3 test runs, done in parallel by 3 workers\n- `[chromium]`, `[firefox]`, `[webkit]` — the **project** (browser) each run used\n- `tests/day1/browsers.spec.ts:3:5` — file, line 3, column 5, where the test is defined\n- `(180ms)` — how long that run took\n- The order of lines may differ on your machine, because the runs happen in parallel\n\nNow run it on **one** browser only:",
+          "text": "```output\nRunning 1 test using 1 worker\n\nTab title: My Shop - Log in\nHeading text: Welcome back\nButton text: Log in\nLink goes to: /forgot\nEmail placeholder: you@example.com\n  ✓  1 [chromium] › tests/day1/dom-tour.spec.ts:15:5 › a tour of the DOM (190ms)\n\n  1 passed (1.1s)\n```\n\nMatch each printed line to the HTML in P2: the **tag** decides the role (`h1` → heading, `button` → button, `a` → link), the **text** gives the name, and **attributes** (`href`, `placeholder`, `type`) are read with `getAttribute`.\n\n**Try it:** add a second button `<button>Cancel</button>` to the HTML and run again. The line `page.getByRole('button')` now matches **two** buttons and the test fails with a *strict mode violation*. Change it to `page.getByRole('button', { name: 'Log in' })` to make it pass. That error is Playwright protecting you from clicking the wrong thing — you'll meet it often.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test tests/day1/browsers.spec.ts --project=webkit",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "A file has 4 tests and the configuration has 3 browser projects (chromium, firefox, webkit). How many test runs does `npx playwright test` report?",
+          "text": "In the demo, which part of `<a href=\"/forgot\">Forgot password?</a>` makes `getByRole('link')` find it?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "4",
-              "3",
-              "7",
-              "12"
+              "The text \"Forgot password?\"",
+              "The `a` tag — links have the role \"link\"",
+              "The `href` attribute",
+              "The class name"
             ],
             "answers": [
-              3
+              1
             ],
             "kind": "single",
-            "explanation": "Every test runs once per project — 4 tests × 3 projects = 12 runs. Use `--project=chromium` to run just one browser while you're developing."
+            "explanation": "The tag decides the role. The text becomes the link's accessible name (used for `{ name: '…' }`), and `href` is an attribute you can read with `getAttribute`."
           },
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         }
       ],
       "problems": []
@@ -946,7 +548,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -967,28 +570,8 @@
             "explanation": "Playwright is an open-source end-to-end testing framework for web apps that drives all three major browser engines."
           },
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Put the Playwright layers in order from LARGEST to SMALLEST.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Page → Context → Browser",
-              "Browser → Page → Context",
-              "Browser → Context → Page",
-              "Context → Browser → Page"
-            ],
-            "answers": [
-              2
-            ],
-            "kind": "single",
-            "explanation": "A Browser holds Contexts (isolated \"incognito windows\"), and each Context holds Pages (tabs)."
-          },
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -1009,51 +592,8 @@
             "explanation": "Headless browsers do all the same work but don't draw a window. Tests run headless by default; add `--headed` to watch."
           },
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which of these come built into Playwright Test? (Select all that apply)",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "An HTML report",
-              "A test runner with parallel workers",
-              "A code recorder (Codegen)",
-              "A native Android app driver"
-            ],
-            "answers": [
-              0,
-              1,
-              2
-            ],
-            "kind": "multiple",
-            "explanation": "Playwright Test ships a runner, assertions, reporters and tools such as Codegen, UI Mode and Trace Viewer. It does not automate native mobile apps."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Why does Playwright download its own browser builds during installation?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Because it cannot work with any browser installed on your computer",
-              "Each Playwright version is tested with matching browser builds (and Firefox/WebKit builds are patched for automation)",
-              "To track your browsing history",
-              "Because Chrome is not free"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Playwright pins browser versions that it is tested against, and uses patched Firefox and WebKit builds. Branded Chrome/Edge can still be used via the `channel` option."
-          },
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
@@ -1072,49 +612,8 @@
             "explanation": "A flaky test passes sometimes and fails sometimes without any code change — usually because of timing or shared-state problems. A test that fails every time because of a bug is doing its job!"
           },
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which protocol does Playwright use to control Chromium?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "HTTP WebDriver (one request per command)",
-              "Chrome DevTools Protocol (CDP)",
-              "FTP",
-              "SMTP"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Playwright speaks the Chrome DevTools Protocol to Chromium over a persistent connection."
-          },
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "A test fails only when it runs right after another test that changed the user's language setting. Which Playwright feature is designed to prevent this?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Codegen",
-              "A fresh browser context for every test",
-              "The HTML reporter",
-              "Headed mode"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "This is a shared-state problem. Playwright Test gives each test its own context, so settings, cookies and storage from one test never leak into the next."
-          },
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
@@ -1123,7 +622,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "problem-ref",
@@ -1132,7 +632,8 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "problem-ref",
@@ -1141,47 +642,22 @@
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "3",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "4",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "5",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "markdown",
-          "text": "## Reflection\n\nBefore moving to Day 2, make sure you can answer these out loud:\n\n1. What is the difference between a **browser**, a **context** and a **page**?\n2. Why is a persistent connection better than one HTTP request per command?\n3. Name three Playwright features that reduce flaky tests.\n4. Name two situations where Playwright is *not* the right tool.",
+          "text": "## Reflection\n\nBefore moving on, make sure you can answer these out loud:\n\n1. Which kinds of manual tests are worth automating, and which are not?\n2. What is the difference between a **tag**, an **attribute** and the **DOM**?\n3. Why did the auto-wait demo pass without any \"wait 2 seconds\" instruction?\n4. Name the three browser engines Playwright ships and one real browser built on each.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
-          "callout": null
+          "callout": null,
+          "title": null
         },
         {
           "type": "callout",
-          "text": "You'll install Node.js and VS Code, create your own Playwright project with one command, explore every generated file, and run — and deliberately break — your first tests.",
+          "text": "How Playwright actually talks to a browser, the Browser → Context → Page model, the features that make it stand out, and an honest comparison with Selenium and Cypress.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1189,7 +665,8 @@
           "callout": {
             "variant": "tip",
             "title": "Coming up on Day 2"
-          }
+          },
+          "title": null
         }
       ],
       "problems": [
@@ -1210,47 +687,11 @@
         },
         {
           "number": 2,
-          "difficulty": "Medium",
-          "title": "Choose the right tool",
-          "kind": "written",
-          "statement": "For each scenario, say whether Playwright is a good fit and **why** (one or two sentences each).\n\n1. A travel website must work on Chrome, Firefox and Safari. The team writes TypeScript.\n2. A bank wants to automate its native iOS app from the App Store.\n3. A company has 3,000 stable Selenium + Java tests and a team of Java experts. The tests work well.\n4. An e-commerce site's checkout tests keep failing randomly because pages load at different speeds.\n5. A test must check that when an admin approves a leave request, the employee (in another session) sees \"Approved\".",
-          "stub": null,
-          "hints": [],
-          "file": null,
-          "run": null,
-          "solution": "1. **Good fit** — one TypeScript test suite runs on Chromium, Firefox and WebKit (Safari's engine).\n2. **Not a fit** — Playwright automates web apps, not native mobile apps. Use a native tool such as Appium.\n3. **Probably keep Selenium** for the existing suite — it works and the team is skilled. Playwright could be piloted for *new* projects; a full migration may not be worth the cost.\n4. **Good fit** — auto-waiting and web-first assertions remove timing-based flakiness without fixed sleeps.\n5. **Good fit** — two browser contexts in one test act as two separate users (admin and employee) with separate sessions."
-        },
-        {
-          "number": 3,
-          "difficulty": "Medium",
-          "title": "Explain Playwright to your manager",
-          "kind": "written",
-          "statement": "Your manager has never heard of Playwright. Write **4–6 sentences** explaining:\n- what it is,\n- how it controls browsers (in simple words),\n- two benefits for the team,\n- one limitation.",
-          "stub": null,
-          "hints": [],
-          "file": null,
-          "run": null,
-          "solution": "Playwright is a free, open-source tool from Microsoft that runs our web test cases automatically in real browsers — Chrome/Edge (Chromium), Firefox and Safari's engine (WebKit). Our test script sends instructions such as \"click Log in\" to Playwright, which keeps a live connection open to the browser, so it knows exactly when the page is ready before acting. That automatic waiting means far fewer random \"flaky\" failures than tools that rely on fixed waits. Every test also runs in a fresh, isolated browser session, so tests can run in parallel and finish much faster. It also produces an HTML report with errors and recordings for every run. One limitation: it only tests web applications — it can't automate our native mobile apps."
-        },
-        {
-          "number": 4,
-          "difficulty": "Easy",
-          "title": "Predict the test count",
-          "kind": "predict",
-          "statement": "The configuration has the projects **chromium** and **firefox** only. The folder `tests/` contains:\n- `login.spec.ts` with 3 tests\n- `search.spec.ts` with 2 tests\n\nHow many test runs will `npx playwright test` report? And how many with `npx playwright test --project=firefox`?\n\n```text\nprojects: chromium, firefox\nlogin.spec.ts  → 3 tests\nsearch.spec.ts → 2 tests\n```",
-          "stub": null,
-          "hints": [],
-          "file": null,
-          "run": null,
-          "solution": "`npx playwright test` → (3 + 2) × 2 projects = **10** runs.\n`npx playwright test --project=firefox` → 5 tests × 1 project = **5** runs."
-        },
-        {
-          "number": 5,
           "difficulty": "Challenge",
           "title": "Break the auto-wait demo on purpose",
           "kind": "code",
           "statement": "Open `tests/day1/auto-wait.spec.ts`.\n\n1. Change the button's text in the page from `Pay now` to `Pay` (inside the `<script>`), **but leave the test looking for `Pay now`**. Run the test.\n2. Read the error message. What is Playwright waiting for, and for how long?\n3. Fix the test so it looks for the correct button name, and run it again.",
-          "stub": "import { test, expect } from '@playwright/test';\r\n\r\n// A tiny practice page. The \"Pay now\" button is added 2 seconds after the page loads.\r\nconst checkoutPage = `\r\n  <h1>Checkout</h1>\r\n  <p id=\"status\">Loading payment options…</p>\r\n  <script>\r\n    setTimeout(() => {\r\n      document.getElementById('status').textContent = 'Ready to pay';\r\n      const button = document.createElement('button');\r\n      button.textContent = 'Pay now';\r\n      button.onclick = () => {\r\n        document.getElementById('status').textContent = 'Payment successful';\r\n      };\r\n      document.body.appendChild(button);\r\n    }, 2000);\r\n  </script>\r\n`;\r\n\r\ntest('Playwright waits for the Pay now button by itself', async ({ page }) => {\r\n  // Load the practice page into the browser tab\r\n  await page.setContent(checkoutPage);\r\n\r\n  // Click the button — it does not exist yet! Playwright waits until it appears.\r\n  await page.getByRole('button', { name: 'Pay now' }).click();\r\n\r\n  // Check the result — this assertion also retries automatically\r\n  await expect(page.locator('#status')).toHaveText('Payment successful');\r\n});\r\n",
+          "stub": "import { test, expect } from '@playwright/test';\n\n// A tiny practice page. The \"Pay now\" button is added 2 seconds after the page loads.\nconst checkoutPage = `\n  <h1>Checkout</h1>\n  <p id=\"status\">Loading payment options…</p>\n  <script>\n    setTimeout(() => {\n      document.getElementById('status').textContent = 'Ready to pay';\n      const button = document.createElement('button');\n      button.textContent = 'Pay now';\n      button.onclick = () => {\n        document.getElementById('status').textContent = 'Payment successful';\n      };\n      document.body.appendChild(button);\n    }, 2000);\n  </script>\n`;\n\ntest('Playwright waits for the Pay now button by itself', async ({ page }) => {\n  // Load the practice page into the browser tab\n  await page.setContent(checkoutPage);\n\n  // Click the button — it does not exist yet! Playwright waits until it appears.\n  await page.getByRole('button', { name: 'Pay now' }).click();\n\n  // Check the result — this assertion also retries automatically\n  await expect(page.locator('#status')).toHaveText('Payment successful');\n});\n",
           "hints": [
             "The error message quotes the exact locator it was waiting for.",
             "The default time limit for one test is 30 seconds."

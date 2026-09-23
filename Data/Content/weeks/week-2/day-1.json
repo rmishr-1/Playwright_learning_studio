@@ -1,0 +1,797 @@
+{
+  "schema": "course-day/v2",
+  "week": 2,
+  "day": 1,
+  "number": 6,
+  "title": "TypeScript I: Arrays, Objects & Types for Test Data",
+  "locked": false,
+  "workspace": "project",
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "Prerequisites",
+      "tab_label": "Prerequisites",
+      "has_runnable_code": false,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 6 · Prerequisites\n\n",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "**TypeScript I: Arrays, Objects & Types for Test Data**\n\n*Lists and records — how you'll store test data — plus union and literal types and the `any` trap*\n\n**Time:** 2.5 hours\n\n**Where you work:** pw-course/ts-basics/day6/\n\n**By the end of the day you can:**\n\n- Store lists in arrays and tuples and read items by index\n- Describe objects with type aliases, including optional properties\n- Use union and literal types, and explain why `any` should be avoided\n- Find and fix type errors in test-data code\n\n**From earlier days:**\n\n- Day 5: let/const, primitive types, template literals, operators, the ts-basics playground",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P1 · Quick recap from Day 5\n\nThree quick checks from Day 5 before we add lists and records:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `console.log(`${2 + 3} items`);` print?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "${2 + 3} items",
+              "5 items",
+              "23 items"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Inside backticks, `${ }` evaluates the expression: 2 + 3 = 5."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which line does the type checker reject? `const a = 1; let b = 'x';`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`a = 2;`",
+              "`b = 'y';`",
+              "Neither"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "`a` is a const and cannot be reassigned. `b` is a let holding a string, so 'y' is fine."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const ok = 10 % 3 === 1 && !false;` — what is ok?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "true",
+              "false"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "10 % 3 is 1, so the comparison is true; !false is true; true && true is true."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Fundamentals",
+      "tab_label": "Fundamentals",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 6 · Fundamentals\n\n\n\n## F1 · Arrays and tuples\n\n### Arrays — ordered lists",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// An array of strings. Two ways to write the type: string[] or Array<string>\nconst browsers: string[] = ['chromium', 'firefox', 'webkit'];\n\nconsole.log(browsers[0]);        // first item — counting starts at 0!\nconsole.log(browsers[2]);        // third item\nconsole.log(browsers.length);    // how many items\n\nbrowsers.push('msedge');         // add an item at the end\nconsole.log(browsers);\nconsole.log(browsers.includes('firefox'));   // is \"firefox\" in the list?\n\nconst retryDelays: number[] = [1000, 2000, 4000];\nconsole.log(retryDelays[1]);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day6/arrays.ts",
+            "run": "node day6/arrays.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nchromium\nwebkit\n3\n[ 'chromium', 'firefox', 'webkit', 'msedge' ]\ntrue\n2000\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "`browsers` is a `const`, yet we could `push` into it. `const` means *the box can't be replaced with a different array* — the contents of the array can still change.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Tuples — fixed-length lists with a type per position",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// [username, password] — always exactly a string then a string\nconst credentials: [string, string] = ['asha@example.com', 'Secret@123'];\n\n// [product name, price, in stock?]\nconst item: [string, number, boolean] = ['Keyboard', 1499, true];\nitem[1] = 'free';   // ❌ error — position 1 must be a number",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const cities = ['Delhi', 'Kolkata', 'Hyderabad'];` — what is `cities[1]`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "'Delhi'",
+              "'Kolkata'",
+              "'Hyderabad'",
+              "undefined"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Array positions (indexes) start at 0. Index 0 is 'Delhi', index 1 is 'Kolkata'."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F2 · Objects — records with named properties\n\n### Objects — named properties\n\nObjects group related values under **property names** — perfect for test data:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// A type alias describes the shape of an object once, so we can reuse it\ntype User = {\n  name: string;\n  email: string;\n  age: number;\n  isAdmin: boolean;\n  phone?: string;          // ? = optional property (may be missing)\n};\n\nconst testUser: User = {\n  name: 'Asha Verma',\n  email: 'asha@example.com',\n  age: 29,\n  isAdmin: false,\n};\n\nconsole.log(testUser.name);        // read a property with a dot\nconsole.log(testUser['email']);    // or with square brackets\ntestUser.age = 30;                 // change a property\nconsole.log(testUser);\nconsole.log(testUser.phone);       // optional and not set → undefined",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day6/objects.ts",
+            "run": "node day6/objects.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nAsha Verma\nasha@example.com\n{\n  name: 'Asha Verma',\n  email: 'asha@example.com',\n  age: 30,\n  isAdmin: false\n}\nundefined\n```\n\nIf you forget a required property or use the wrong type, the checker complains:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const badUser: User = { name: 'Ravi', email: 'ravi@example.com', age: '31' };\n// ❌ Type 'string' is not assignable to type 'number'   (age)\n// ❌ Property 'isAdmin' is missing",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Objects are how you'll store **test data**: one object per user, product or form submission — just like a row in your test-data spreadsheet, with named columns.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "In `type Product = { name: string; price: number; discount?: number };`, what does the `?` mean?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "discount must be a question",
+              "discount is optional — an object may leave it out",
+              "discount can be any type",
+              "discount is required"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "A `?` after a property name makes it optional. If it's missing, reading it gives `undefined`."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F3 · Union, literal and special types\n\n### Union types — \"this OR that\"",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "let orderId: string | number;   // may be a string or a number\norderId = 1045;                 // ✅\norderId = 'ORD-1045';           // ✅\norderId = true;                 // ❌ boolean is not allowed",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Literal types — only these exact values",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "type BrowserName = 'chromium' | 'firefox' | 'webkit';\n\nlet target: BrowserName = 'firefox';   // ✅\ntarget = 'safari';                     // ❌ '\"safari\"' is not assignable to type 'BrowserName'",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Playwright uses literal types a lot — for example `browserName` is typed as `'chromium' | 'firefox' | 'webkit'`, so VS Code can autocomplete and catch typos.\n\n### `any` and `unknown` — escape hatches\n\n| Type | Meaning | Advice |\n|---|---|---|\n| `any` | \"Turn off type checking for this value\" — anything goes | **Avoid.** It hides bugs — it turns TypeScript back into plain JavaScript |\n| `unknown` | \"Could be anything — check before using it\" | Safer when you truly don't know the type (e.g. data from a file) |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Given `type Status = 'passed' | 'failed' | 'skipped';`, which assignment causes a type error?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`let s: Status = 'passed';`",
+              "`let s: Status = 'skipped';`",
+              "`let s: Status = 'flaky';`",
+              "`let s: Status = 'failed';`"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "A literal-union type only accepts the exact listed values. 'flaky' isn't one of them."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "Implementation",
+      "tab_label": "Implementation",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 6 · Implementation\n\n\n\n## I1 · Build a test-data profile\n\nYou'll store test data for a registration test and print a summary — using `const`, an object type, template literals and string tools.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Describe the shape of our test data once\ntype RegistrationData = {\n  fullName: string;\n  email: string;\n  age: number;\n  country: string;\n  acceptsTerms: boolean;\n};\n\n// One test-data record (like one row in a test-data sheet)\nconst newCustomer: RegistrationData = {\n  fullName: 'Meera Iyer',\n  email: 'meera.iyer@example.com',\n  age: 27,\n  country: 'India',\n  acceptsTerms: true,\n};\n\n// Build some values from the data\nconst firstName = newCustomer.fullName.split(' ')[0];   // split the name at the space, take the first part\nconst expectedWelcome = `Welcome, ${firstName}!`;\n\n// Print a readable summary\nconsole.log('--- Test data: new customer ---');\nconsole.log(`Name:    ${newCustomer.fullName}`);\nconsole.log(`Email:   ${newCustomer.email}`);\nconsole.log(`Adult:   ${newCustomer.age >= 18}`);\nconsole.log(`Terms:   ${newCustomer.acceptsTerms ? 'accepted' : 'NOT accepted'}`);\nconsole.log(`Expected message after sign-up: \"${expectedWelcome}\"`);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day6/test-data.ts",
+            "run": "node day6/test-data.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "node day6/test-data.ts\nnpm run check -- day6/test-data.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\n--- Test data: new customer ---\nName:    Meera Iyer\nEmail:   meera.iyer@example.com\nAdult:   true\nTerms:   accepted\nExpected message after sign-up: \"Welcome, Meera!\"\n```\n\n**Try it:** change `age` to `'27'` (in quotes) and run `npm run check -- day6/test-data.ts`. Read the error, then change it back.\n\n## I2 · Type detective — find and fix 5 bugs\n\nThis file has **five** type errors (it uses the operators from Day 5). Don't run it yet — first **check** it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "type Product = {\n  name: string;\n  price: number;\n  inStock: boolean;\n};\n\nconst keyboard: Product = {\n  name: 'Mechanical Keyboard',\n  price: '2499',            // bug 1\n  inStock: 'yes',           // bug 2\n};\n\nconst quantity: number = 2;\nconst maxQuantity = 5;\nmaxQuantity = 10;           // bug 3\n\nlet browser: 'chromium' | 'firefox' | 'webkit' = 'chrome';   // bug 4\n\nconst total: string = keyboard.price * quantity;             // bug 5\nconsole.log(`Total for ${quantity}: ${total}`);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day6/detective.ts",
+            "run": "npm run check -- day6/detective.ts",
+            "mode": "editor",
+            "expect_error": true,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm run check -- day6/detective.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nday6/detective.ts(9,3): error TS2322: Type 'string' is not assignable to type 'number'.\nday6/detective.ts(10,3): error TS2322: Type 'string' is not assignable to type 'boolean'.\nday6/detective.ts(15,1): error TS2588: Cannot assign to 'maxQuantity' because it is a constant.\nday6/detective.ts(17,5): error TS2322: Type '\"chrome\"' is not assignable to type '\"chromium\" | \"firefox\" | \"webkit\"'.\nday6/detective.ts(19,7): error TS2322: Type 'number' is not assignable to type 'string'.\n```\n\nFix each line, then check again until the command prints nothing, and finally run it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "type Product = {\n  name: string;\n  price: number;\n  inStock: boolean;\n};\n\nconst keyboard: Product = {\n  name: 'Mechanical Keyboard',\n  price: 2499,              // fix 1: a number, not text\n  inStock: true,            // fix 2: a boolean\n};\n\nconst quantity: number = 2;\nlet maxQuantity = 5;        // fix 3: let, because it changes\nmaxQuantity = 10;\n\nlet browser: 'chromium' | 'firefox' | 'webkit' = 'chromium';   // fix 4: an allowed value\n\nconst total: number = keyboard.price * quantity;               // fix 5: the result is a number\nconsole.log(`Total for ${quantity}: ${total}`);\nconsole.log(`Max quantity: ${maxQuantity}, browser: ${browser}`);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day6/detective-fixed.ts",
+            "run": "node day6/detective-fixed.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nTotal for 2: 4998\nMax quantity: 10, browser: chromium\n```\n\n## I3 · Arrays, tuples and literal types for a test matrix",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Only these three browser names are allowed\ntype BrowserName = 'chromium' | 'firefox' | 'webkit';\n\n// The browsers we test on\nconst browsers: BrowserName[] = ['chromium', 'firefox'];\nbrowsers.push('webkit');                        // add one more\n\n// Login credentials as a tuple: [email, password]\nconst validLogin: [string, string] = ['asha@example.com', 'Secret@123'];\nconst [email, password] = validLogin;          // unpack the tuple into two variables\n\n// Pages to check\nconst pagesToCheck: string[] = ['/home', '/products', '/cart'];\n\nconst runsNeeded = browsers.length * pagesToCheck.length;\n\nconsole.log(`Browsers: ${browsers.join(', ')}`);\nconsole.log(`Logging in as ${email} (password has ${password.length} characters)`);\nconsole.log(`First page: ${pagesToCheck[0]}, last page: ${pagesToCheck[pagesToCheck.length - 1]}`);\nconsole.log(`Total page checks: ${runsNeeded}`);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day6/matrix.ts",
+            "run": "node day6/matrix.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nBrowsers: chromium, firefox, webkit\nLogging in as asha@example.com (password has 10 characters)\nFirst page: /home, last page: /cart\nTotal page checks: 9\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "`const [email, password] = validLogin;` is called **destructuring** — unpacking values into separate variables. You'll meet its object version, `{ page }`, on Day 8 and then in every Playwright test.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "**Try it:** add `browsers.push('safari');` and run the checker. Why does it complain?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice",
+      "tab_label": "Practice",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 6 · Practice\n\n\n\n## Quiz · Day 6 check",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const tags = ['@smoke', '@regression'];` — what is `tags.length`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "1",
+              "2",
+              "3",
+              "0"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "The array has two items. (The last index is 1, but the length is 2.)"
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which of these are TypeScript-only features (they don't exist in plain JavaScript)? (Select all that apply)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Type annotations like `: string`",
+              "`const` and `let`",
+              "Type aliases like `type User = { … }`",
+              "Template literals with backticks"
+            ],
+            "answers": [
+              0,
+              2
+            ],
+            "kind": "multiple",
+            "explanation": "`const`, `let` and template literals are modern JavaScript. Type annotations and type aliases are what TypeScript adds — and they're removed when the code runs."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why is using `any` everywhere a bad idea?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "It makes the program run slower",
+              "It switches off type checking for those values, so TypeScript can no longer catch mistakes",
+              "It isn't allowed in Playwright",
+              "It turns numbers into strings"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`any` tells TypeScript to trust you blindly — you lose the main benefit of TypeScript."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Predict the output",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "1",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Exercises",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "2",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "3",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "4",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Reflection\n\n1. Give one example each of an array, a tuple and an object you'd use as test data.\n2. What is the difference between `string | number` and `'chromium' | 'firefox'`?\n3. Why is `any` a bad habit?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Conditions, loops and functions: your code starts making decisions, repeating work and packaging steps you can reuse — like reusable test steps.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": "Coming up on Day 7"
+          },
+          "title": null
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": "Medium",
+          "title": "Predict — arrays and objects",
+          "kind": "predict",
+          "statement": "What is printed?\n\n```ts\nconst results = ['pass', 'fail', 'pass'];\nconst summary = { suite: 'Checkout', total: results.length };\nresults.push('skip');\nconsole.log(results.length, summary.total, results[results.length - 1]);\n```",
+          "stub": null,
+          "hints": [],
+          "file": null,
+          "run": null,
+          "solution": "`4 3 skip`\n\n`summary.total` stored the length (3) at the moment the object was created; pushing later doesn't change it. The array now has 4 items and the last one is 'skip'."
+        },
+        {
+          "number": 2,
+          "difficulty": "Easy",
+          "title": "Tester profile card",
+          "kind": "code",
+          "statement": "Create `day6/profile.ts`. Declare **constants** for your name (string), years of testing experience (number), favourite browser (only `'chromium' | 'firefox' | 'webkit'` allowed) and whether you have used automation before (boolean).\n\nPrint exactly this format using **one template literal per line** (with your own values):\n\n```\nTester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false\n```",
+          "stub": "// 1. Declare your constants here (with types)\n\n// 2. Print the four lines with template literals",
+          "hints": [
+            "A literal type looks like: `const favouriteBrowser: 'chromium' | 'firefox' | 'webkit' = 'firefox';`",
+            "A template literal: `` console.log(`Tester: ${testerName}`); ``"
+          ],
+          "file": "ts-basics/day6/profile.ts",
+          "run": "node day6/profile.ts",
+          "solution": "```ts\n// 1. Constants with types\nconst testerName: string = 'Priya Sharma';\nconst yearsOfExperience: number = 3;\nconst favouriteBrowser: 'chromium' | 'firefox' | 'webkit' = 'firefox';\nconst usedAutomation: boolean = false;\n\n// 2. Print with template literals\nconsole.log(`Tester: ${testerName}`);\nconsole.log(`Experience: ${yearsOfExperience} years`);\nconsole.log(`Favourite browser: ${favouriteBrowser}`);\nconsole.log(`Automation before: ${usedAutomation}`);\n```\n\n**Output**\n\n```output\nTester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false\n```"
+        },
+        {
+          "number": 3,
+          "difficulty": "Medium",
+          "title": "Test-data object with a type alias",
+          "kind": "code",
+          "statement": "Create `day6/login-data.ts`:\n\n1. Define a type alias `LoginCase` with: `id` (string), `username` (string), `password` (string), `shouldSucceed` (boolean) and an **optional** `expectedError` (string).\n2. Create two constants of that type:\n   - `validCase`: id `TC-01`, username `standard_user`, password `secret_sauce`, shouldSucceed `true`\n   - `lockedCase`: id `TC-02`, username `locked_out_user`, password `secret_sauce`, shouldSucceed `false`, expectedError `Sorry, this user has been locked out.`\n3. Put both in an array `loginCases` typed `LoginCase[]` and print:\n```\n2 login cases\nTC-01 standard_user expects success: true\nTC-02 locked_out_user expects error: Sorry, this user has been locked out.\n```\nRun `npm run check -- day6/login-data.ts` — it must print nothing.",
+          "stub": "// Test-data object with a type alias\n// Save this as ts-basics/day6/login-data.ts\n",
+          "hints": [
+            "Optional property: `expectedError?: string;`",
+            "Access items with `loginCases[0]` and `loginCases[1]`."
+          ],
+          "file": "ts-basics/day6/login-data.ts",
+          "run": "node day6/login-data.ts",
+          "solution": "```ts\n// The shape of one login test case\ntype LoginCase = {\n  id: string;\n  username: string;\n  password: string;\n  shouldSucceed: boolean;\n  expectedError?: string;   // only needed for failing cases\n};\n\nconst validCase: LoginCase = {\n  id: 'TC-01',\n  username: 'standard_user',\n  password: 'secret_sauce',\n  shouldSucceed: true,\n};\n\nconst lockedCase: LoginCase = {\n  id: 'TC-02',\n  username: 'locked_out_user',\n  password: 'secret_sauce',\n  shouldSucceed: false,\n  expectedError: 'Sorry, this user has been locked out.',\n};\n\nconst loginCases: LoginCase[] = [validCase, lockedCase];\n\nconsole.log(`${loginCases.length} login cases`);\nconsole.log(`${loginCases[0].id} ${loginCases[0].username} expects success: ${loginCases[0].shouldSucceed}`);\nconsole.log(`${loginCases[1].id} ${loginCases[1].username} expects error: ${loginCases[1].expectedError}`);\n```\n\n**Output**\n\n```output\n2 login cases\nTC-01 standard_user expects success: true\nTC-02 locked_out_user expects error: Sorry, this user has been locked out.\n```"
+        },
+        {
+          "number": 4,
+          "difficulty": "Challenge",
+          "title": "Challenge: build a URL and a test title",
+          "kind": "code",
+          "statement": "Create `day6/url-builder.ts`. Given:\n```ts\nconst baseUrl = 'https://shop.example.com';\nconst category = 'Laptops & Tablets';\nconst page = 2;\nconst sortBy: 'price' | 'rating' = 'price';\n```\n1. Turn the category into a URL-friendly **slug**: lowercase, `&` removed, spaces replaced by `-`, no double dashes → `laptops-tablets`. (Use `toLowerCase()`, `replace('&', '')`, `split(' ')`, `filter(...)` and `join('-')` — or research your own way.)\n2. Build: `https://shop.example.com/c/laptops-tablets?page=2&sort=price`\n3. Build a test title: `[P2] Laptops & Tablets sorted by price` — `P2` comes from the page number.\n4. Print both lines, the URL first.",
+          "stub": "const baseUrl = 'https://shop.example.com';\nconst category = 'Laptops & Tablets';\nconst page = 2;\nconst sortBy: 'price' | 'rating' = 'price';\n",
+          "hints": [
+            "'Laptops & Tablets'.toLowerCase() → 'laptops & tablets'",
+            ".replace('&', '') → 'laptops  tablets' (two spaces!)",
+            ".split(' ') → ['laptops', '', 'tablets'] — filter out the empty string with `.filter((word) => word !== '')`"
+          ],
+          "file": "ts-basics/day6/url-builder.ts",
+          "run": "node day6/url-builder.ts",
+          "solution": "```ts\nconst baseUrl = 'https://shop.example.com';\nconst category = 'Laptops & Tablets';\nconst page = 2;\nconst sortBy: 'price' | 'rating' = 'price';\n\n// 1. Make a slug: lowercase → remove & → split into words → drop empty words → join with -\nconst slug = category\n  .toLowerCase()\n  .replace('&', '')\n  .split(' ')\n  .filter((word) => word !== '')\n  .join('-');\n\n// 2. Build the URL with a template literal\nconst url = `${baseUrl}/c/${slug}?page=${page}&sort=${sortBy}`;\n\n// 3. Build the test title\nconst title = `[P${page}] ${category} sorted by ${sortBy}`;\n\n// 4. Print\nconsole.log(url);\nconsole.log(title);\n```\n\n**Output**\n\n```output\nhttps://shop.example.com/c/laptops-tablets?page=2&sort=price\n[P2] Laptops & Tablets sorted by price\n```"
+        }
+      ]
+    }
+  ]
+}

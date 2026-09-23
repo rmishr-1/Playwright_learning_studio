@@ -12,6 +12,8 @@ import { Difficulty, DayNumber, PartNumber, ProblemNumber, WeekNumber } from './
  * - 'terminal': commands to type in a terminal, one per line.
  * - 'callout': a boxed note - a tip, a warning, the manual tester's view, and so on.
  * - 'diagram': a mermaid diagram.
+ * - 'reference': a full reference table or list, collapsed behind its title, for a lesson that
+ *   teaches only the first few items and keeps the rest for later.
  * - 'checkpoint': a quiz question.
  * - 'problem-ref': where a practice exercise sits, its text being the exercise's number, so that
  *   text written after the exercises renders after them rather than above the first one.
@@ -24,6 +26,7 @@ export const BlockType = z.enum([
   'terminal',
   'callout',
   'diagram',
+  'reference',
   'example',
   'your-turn',
   'problem-ref',
@@ -90,6 +93,8 @@ export const ContentBlock = z.object({
   code: CodeMeta.nullable().default(null),
   /** A 'callout' block's kind and title. null for every other block type. */
   callout: CalloutMeta.nullable().default(null),
+  /** A 'reference' block's title, shown while it is collapsed. null for every other block type. */
+  title: z.string().nullable().default(null),
 });
 
 export const Workspace = z.enum(['demo', 'project']);
@@ -150,6 +155,12 @@ export const CourseDay = z.object({
   schema: z.literal('course-day/v2'),
   week: WeekNumber,
   day: DayNumber,
+  /**
+   * The day's number across the whole course: Week 2's first day is Day 6. The lessons, their
+   * headings and their file names (tests/day9/...) all count this way, so it is what the page shows.
+   * `day` is the position within the week, which the URL uses.
+   */
+  number: z.number().int().min(1),
   title: z.string(),
   locked: z.boolean(),
   /**

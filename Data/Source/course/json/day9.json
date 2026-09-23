@@ -1,0 +1,746 @@
+{
+  "schemaVersion": "1.0",
+  "day": 9,
+  "week": 2,
+  "title": "Playwright Test Runner I: Your First Real Tests",
+  "subtitle": "The anatomy of a test, fixtures, locators, actions, assertions, describe and hooks — and a complete suite for a practice sign-in page",
+  "estimatedTime": "3 hours",
+  "topics": [
+    "Playwright Test Runner Basics",
+    "Locators, actions & assertions",
+    "describe & hooks"
+  ],
+  "objectives": [
+    "Explain every part of a Playwright test — import, test(), title, async callback, fixtures, await, expect",
+    "Use the built-in fixtures `page`, `context`, `browser`, `browserName` and `request`",
+    "Find elements with user-facing locators and perform basic actions (click, fill, check, selectOption, press)",
+    "Write web-first assertions and generic assertions, and know which ones need `await`",
+    "Group tests with `test.describe` and share setup with `beforeEach`, `afterEach`, `beforeAll`, `afterAll`"
+  ],
+  "prerequisitesFromEarlierDays": [
+    "Day 3–4: the pw-course project, running tests, playwright.config.ts",
+    "Day 7–8: callbacks, arrow functions, destructuring, async/await, import/export"
+  ],
+  "workspace": "pw-course/tests/day9/",
+  "sections": [
+    {
+      "id": "prerequisites",
+      "title": "Prerequisites",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d9-prerequisites-1",
+          "title": "P1 · Checklist before you start",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "You're ready for today if you can tick all of these. If not, revisit the lesson in brackets.\n\n- [ ] I can open the terminal in `pw-course` and run `npx playwright test --project=chromium` (Day 3 · I4, Day 4 · I2)\n- [ ] My `playwright.config.ts` uses `reporter: [['list'], ['html', { open: 'never' }]]` (Day 4 · I1)\n- [ ] I can read `async ({ page }) => { … }` as \"an async arrow function that destructures `page`\" (Day 7 · F3, Day 8 · F1)\n- [ ] I know why every browser action needs `await` (Day 8 · F2)\n- [ ] I can import a named export from another file (Day 8 · F3)"
+            }
+          ]
+        },
+        {
+          "id": "d9-prerequisites-2",
+          "title": "P2 · HTML roles — how Playwright \"sees\" a page",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Playwright's recommended way to find elements is the way **users and assistive technologies** (screen readers) see them: by **role** and **accessible name**.\n\nMost HTML elements have a built-in role:\n\n| HTML | Role | Accessible name comes from… |\n|---|---|---|\n| `<button>Sign in</button>` | `button` | its text → \"Sign in\" |\n| `<a href=\"/help\">Help</a>` | `link` | its text → \"Help\" |\n| `<h1>Dashboard</h1>` (also h2–h6) | `heading` | its text → \"Dashboard\" |\n| `<input type=\"text\">` / `type=\"email\"` with a `<label>` | `textbox` | its label → e.g. \"Email\" |\n| `<input type=\"checkbox\">` | `checkbox` | its label → e.g. \"Remember me\" |\n| `<select>` | `combobox` | its label → e.g. \"Course\" |\n| `<ul>` / `<li>` | `list` / `listitem` | — |\n| `<p role=\"alert\">` | `alert` | its text |\n\nSo `page.getByRole('button', { name: 'Sign in' })` means: *the button whose accessible name is \"Sign in\"* — exactly how you'd describe it in a manual test case."
+            },
+            {
+              "type": "callout",
+              "variant": "note",
+              "content": "A **password** input (`type=\"password\"`) has no ARIA role, so `getByRole('textbox')` won't find it — find it by its label instead: `page.getByLabel('Password')`."
+            },
+            {
+              "type": "quiz",
+              "id": "d9-p2-q1",
+              "quizType": "single",
+              "question": "Which locator finds `<a href=\"/pricing\">See pricing</a>`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`page.getByRole('button', { name: 'See pricing' })`"
+                },
+                {
+                  "id": "b",
+                  "text": "`page.getByRole('link', { name: 'See pricing' })`"
+                },
+                {
+                  "id": "c",
+                  "text": "`page.getByRole('heading', { name: 'pricing' })`"
+                },
+                {
+                  "id": "d",
+                  "text": "`page.getByLabel('See pricing')`"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "An `<a href>` element has the role `link`, and its accessible name is its text."
+            }
+          ]
+        },
+        {
+          "id": "d9-prerequisites-3",
+          "title": "P3 · The practice website for Days 9–10",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Real websites change, go down, or need a VPN — not ideal for learning. For the next two days you'll test two small **practice pages** that live inside your project as HTML text, and load them with `page.setContent(html)` instead of `page.goto(url)`. Everything you learn works the same on real sites.\n\nCreate the file `tests/day9/practice-pages.ts`. It's a normal module (Day 8!) that **exports** two HTML strings. Because its name doesn't end in `.spec.ts`, Playwright won't treat it as a test file."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// Practice web pages for Days 9–10.\n// Each constant holds the HTML of one page. Tests load it with: await page.setContent(loginPage);\n\n// ---------------------------------------------------------------------------\n// Page 1: QA Academy sign-in\n//   Valid user:   student@qa.academy / Learn@123  → \"Signing in…\" then (0.8 s later) the Dashboard\n//   Empty fields: \"Please enter your email and password\"\n//   Wrong login:  \"Invalid email or password\"\n// ---------------------------------------------------------------------------\nexport const loginPage = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>QA Academy - Sign in</title></head>\n<body>\n  <h1>Sign in to QA Academy</h1>\n  <form id=\"login-form\">\n    <label for=\"email\">Email</label>\n    <input id=\"email\" type=\"email\" placeholder=\"you@example.com\">\n\n    <label for=\"password\">Password</label>\n    <input id=\"password\" type=\"password\" placeholder=\"Your password\">\n\n    <label><input id=\"remember\" type=\"checkbox\"> Remember me</label>\n\n    <button type=\"submit\">Sign in</button>\n  </form>\n  <p id=\"message\" role=\"alert\" data-testid=\"login-message\"></p>\n\n  <script>\n    const form = document.getElementById('login-form');\n    const message = document.getElementById('message');\n\n    form.addEventListener('submit', (event) => {\n      event.preventDefault();\n      const email = document.getElementById('email').value.trim();\n      const password = document.getElementById('password').value;\n\n      if (email === '' || password === '') {\n        message.textContent = 'Please enter your email and password';\n      } else if (email === 'student@qa.academy' && password === 'Learn@123') {\n        message.textContent = 'Signing in…';\n        setTimeout(showDashboard, 800);          // pretend the server is slow\n      } else {\n        message.textContent = 'Invalid email or password';\n      }\n    });\n\n    function showDashboard() {\n      document.title = 'QA Academy - Dashboard';\n      document.body.innerHTML =\n        '<h1>Dashboard</h1>' +\n        '<p>Welcome back, Student!</p>' +\n        '<ul><li>Weeks 1-2 - Fundamentals</li><li>Week 3 - Locators</li><li>Week 4 - Page Objects</li></ul>' +\n        '<button id=\"logout\">Log out</button>';\n      document.getElementById('logout').addEventListener('click', () => {\n        document.title = 'QA Academy - Signed out';\n        document.body.innerHTML = '<h1>Signed out</h1><p>See you soon!</p>';\n      });\n    }\n  </script>\n</body>\n</html>\n`;\n\n// ---------------------------------------------------------------------------\n// Page 2: QA Academy course enrolment (used in the Day 10 mini-project)\n// ---------------------------------------------------------------------------\nexport const enrolPage = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>QA Academy - Enrol</title></head>\n<body>\n  <h1>Enrol in a course</h1>\n  <form id=\"enrol-form\">\n    <label for=\"name\">Full name</label>\n    <input id=\"name\" placeholder=\"e.g. Asha Verma\">\n\n    <label for=\"enrol-email\">Email</label>\n    <input id=\"enrol-email\" type=\"text\" placeholder=\"you@example.com\">\n\n    <label for=\"course\">Course</label>\n    <select id=\"course\">\n      <option value=\"\">-- choose a course --</option>\n      <option value=\"pw\">Playwright Basics</option>\n      <option value=\"api\">API Testing</option>\n      <option value=\"perf\">Performance Testing</option>\n    </select>\n\n    <label><input id=\"terms\" type=\"checkbox\"> I accept the terms</label>\n\n    <button type=\"submit\" disabled>Enrol now</button>\n  </form>\n  <p data-testid=\"seats\">Seats left: 12</p>\n  <p id=\"result\" role=\"status\"></p>\n\n  <script>\n    let seats = 12;\n    const terms = document.getElementById('terms');\n    const submit = document.querySelector('button[type=submit]');\n    const result = document.getElementById('result');\n\n    // The Enrol button is enabled only while the terms box is ticked\n    terms.addEventListener('change', () => {\n      submit.disabled = !terms.checked;\n    });\n\n    document.getElementById('enrol-form').addEventListener('submit', (event) => {\n      event.preventDefault();\n      const name = document.getElementById('name').value.trim();\n      const email = document.getElementById('enrol-email').value.trim();\n      const course = document.getElementById('course');\n\n      if (name === '') { result.textContent = 'Name is required'; return; }\n      if (!email.includes('@')) { result.textContent = 'Enter a valid email'; return; }\n      if (course.value === '') { result.textContent = 'Please choose a course'; return; }\n\n      seats = seats - 1;\n      document.querySelector('[data-testid=seats]').textContent = 'Seats left: ' + seats;\n      const courseName = course.options[course.selectedIndex].text;\n      const firstName = name.split(' ')[0];\n      result.textContent = 'Thanks, ' + firstName + '! You are enrolled in ' + courseName + '.';\n    });\n  </script>\n</body>\n</html>\n`;",
+              "mode": "editor",
+              "file": "tests/day9/practice-pages.ts"
+            },
+            {
+              "type": "callout",
+              "variant": "tester",
+              "content": "Read the comments at the top of each page like a requirements document. Your tests will check each rule — just as you'd derive manual test cases from requirements."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fundamentals",
+      "title": "Fundamentals",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d9-fundamentals-1",
+          "title": "F1 · Anatomy of a Playwright test",
+          "blocks": [
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';          // 1. import the tools\n\ntest('valid user can sign in', async ({ page }) => {      // 2. test(title, async callback)\n  await page.setContent(loginPage);                        // 3. ARRANGE — get to the start state\n  await page.getByLabel('Email').fill('student@qa.academy');   // 4. ACT — do what a user does\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page.getByRole('heading')).toHaveText('Dashboard');   // 5. ASSERT — check the result\n});",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "| Part | Meaning |\n|---|---|\n| `import { test, expect } from '@playwright/test'` | Bring in the test-declaring function and the assertion function |\n| `test('valid user can sign in', …)` | Register a test with a **title** that reads like a test-case name |\n| `async ({ page }) => { … }` | The test body: an **async** callback. Playwright calls it and passes **fixtures**; we destructure `page` |\n| `await page.…` | Each browser step returns a Promise — `await` it |\n| `await expect(…).toHaveText(…)` | An **assertion** — the expected result |\n\nThe **Arrange → Act → Assert** pattern (also called *Given / When / Then*) keeps tests readable: set up, perform the action, check the outcome."
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "Write titles as behaviour: `'shows an error for a wrong password'`, not `'test2'`. The title is what you'll read in reports at 2 a.m. when something breaks.",
+              "title": "Good test titles"
+            },
+            {
+              "type": "quiz",
+              "id": "d9-f1-q1",
+              "quizType": "single",
+              "question": "Why is the test body written as `async ({ page }) => { … }`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`async` makes the test run faster"
+                },
+                {
+                  "id": "b",
+                  "text": "It's an async callback, so it can use `await`; Playwright passes a fixtures object and `{ page }` destructures the page from it"
+                },
+                {
+                  "id": "c",
+                  "text": "`page` is a global variable that must be declared this way"
+                },
+                {
+                  "id": "d",
+                  "text": "It's required by the TypeScript compiler for all functions"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "The callback must be `async` to use `await`, and `{ page }` picks the page fixture out of the object Playwright passes in."
+            }
+          ]
+        },
+        {
+          "id": "d9-fundamentals-2",
+          "title": "F2 · Fixtures: tools the runner hands you",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "**Fixtures** are ready-made objects that Playwright creates **before** your test and cleans up **after** it. You ask for them by name in the callback's parameters.\n\n| Fixture | What you get | Typical use |\n|---|---|---|\n| `page` | A fresh tab in a fresh context | 95% of UI tests |\n| `context` | The browser context that `page` belongs to | Open a second tab, set cookies/permissions |\n| `browser` | The shared browser instance | Create extra contexts (multi-user tests), `beforeAll` |\n| `browserName` | `'chromium'`, `'firefox'` or `'webkit'` | Browser-specific skips or expectations |\n| `request` | An API client — no browser needed | API tests, creating test data via API |"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "test('fixtures demo', async ({ page, context, browserName }) => {\n  console.log(`Running on ${browserName}`);\n  const secondTab = await context.newPage();   // another tab in the SAME context as page\n  // …\n});",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "Playwright only creates the fixtures you ask for — and because each test gets its **own** `page` and `context`, tests are isolated from each other (Day 2 · F2)."
+            },
+            {
+              "type": "quiz",
+              "id": "d9-f2-q1",
+              "quizType": "single",
+              "question": "A test must check that an admin and a customer see different menus at the same time. Which fixture helps you create two separate sessions?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`browserName`"
+                },
+                {
+                  "id": "b",
+                  "text": "`browser` — to create two new contexts"
+                },
+                {
+                  "id": "c",
+                  "text": "`request`"
+                },
+                {
+                  "id": "d",
+                  "text": "Two `page` fixtures in the same test"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`browser.newContext()` twice gives two isolated sessions (admin and customer) in one test — like Day 2's contexts demo."
+            }
+          ]
+        },
+        {
+          "id": "d9-fundamentals-3",
+          "title": "F3 · Finding elements and acting on them",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Week 3 is all about locators. For now, learn the core set.\n\n### Getting to a page\n\n| Method | Use |\n|---|---|\n| `await page.goto('https://shop.example.com/login')` | Open a URL (with `baseURL` in the config you can write `page.goto('/login')`) |\n| `await page.setContent(html)` | Load HTML directly — used for today's practice pages |\n| `await page.title()` / `page.url()` | Read the current title / URL |\n\n### Locators — \"how to find the element\"\n\nPrefer them in this order (user-facing first):\n\n| Locator | Finds… | Example |\n|---|---|---|\n| `getByRole(role, { name })` | By role + accessible name | `page.getByRole('button', { name: 'Sign in' })` |\n| `getByLabel(text)` | Form field by its label | `page.getByLabel('Email')` |\n| `getByPlaceholder(text)` | Input by placeholder | `page.getByPlaceholder('you@example.com')` |\n| `getByText(text)` | Element by visible text | `page.getByText('Welcome back')` |\n| `getByTestId(id)` | By `data-testid` attribute | `page.getByTestId('login-message')` |\n| `locator(css)` | By CSS selector (fallback) | `page.locator('#email')` |\n\nText matching is **case-insensitive and matches part of the text** by default: `getByText('welcome')` finds \"Welcome back, Student!\". Add `{ exact: true }` for an exact match.\n\nA locator is a **recipe**, not the element itself: creating it doesn't touch the page (so no `await`). The search happens when you act or assert — and that's when auto-waiting kicks in."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const signIn = page.getByRole('button', { name: 'Sign in' });   // just a recipe — no await\nawait signIn.click();                                             // now it finds, waits, clicks",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "### Actions\n\n| Action | Example |\n|---|---|\n| Click | `await page.getByRole('button', { name: 'Sign in' }).click()` |\n| Type into a field (replaces its value) | `await page.getByLabel('Email').fill('student@qa.academy')` |\n| Press a key | `await page.getByLabel('Password').press('Enter')` |\n| Tick / untick a checkbox | `await page.getByLabel('Remember me').check()` / `.uncheck()` |\n| Choose from a `<select>` | `await page.getByLabel('Course').selectOption('API Testing')` |\n| Clear a field | `await page.getByLabel('Email').clear()` |"
+            },
+            {
+              "type": "quiz",
+              "id": "d9-f3-q1",
+              "quizType": "single",
+              "question": "Which line needs NO `await`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`page.getByLabel('Email').fill('a@b.com')`"
+                },
+                {
+                  "id": "b",
+                  "text": "`const email = page.getByLabel('Email')`"
+                },
+                {
+                  "id": "c",
+                  "text": "`page.getByRole('button', { name: 'Save' }).click()`"
+                },
+                {
+                  "id": "d",
+                  "text": "`page.setContent(html)`"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "Creating a locator only describes how to find the element — it doesn't talk to the browser yet. Actions like fill, click and setContent do, so they're awaited."
+            }
+          ]
+        },
+        {
+          "id": "d9-fundamentals-4",
+          "title": "F4 · Assertions with `expect`",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "### Web-first assertions — auto-retrying (use `await`!)\n\nThese keep checking the page until the condition is true or the timeout expires (**5 seconds** by default).\n\n**Learn these five now** — they cover most of what a test checks:\n\n1. `await expect(locator).toBeVisible()` — the element is on screen.\n2. `await expect(locator).toHaveText('Dashboard')` — its text **equals** this (a regex such as `/Dash/` matches part of it).\n3. `await expect(locator).toContainText('Welcome')` — its text **contains** this.\n4. `await expect(page).toHaveTitle(/Dashboard/)` — the tab title matches.\n5. `await expect(page).toHaveURL(/dashboard/)` — the URL matches.\n\nThe others follow the same pattern — open this when you need one:"
+            },
+            {
+              "type": "reference",
+              "title": "More web-first assertions",
+              "content": "| Assertion | Passes when… |\n|---|---|\n| `await expect(locator).toBeHidden()` | it's hidden or doesn't exist |\n| `await expect(locator).toHaveValue('a@b.com')` | an input's current value is this |\n| `await expect(locator).toBeEmpty()` | an input/element has no value or text |\n| `await expect(locator).toBeChecked()` | a checkbox/radio is ticked |\n| `await expect(locator).toBeEnabled()` / `.toBeDisabled()` | the element is (not) enabled |\n| `await expect(locator).toHaveCount(3)` | the locator matches exactly 3 elements |\n| `await expect(locator).toHaveAttribute('type', 'email')` | an attribute has this value |\n| `await expect(locator).toHaveClass(/active/)` | the class attribute matches |\n| `await expect(locator).toBeFocused()` | the element has keyboard focus |"
+            },
+            {
+              "type": "markdown",
+              "content": "Add `.not` to invert: `await expect(page.getByRole('alert')).not.toBeEmpty()`, `await expect(button).not.toBeVisible()`.\n\n### Generic assertions — check a plain value once (no `await`)\n\nFor values you already have in a variable — no retrying:\n\n| Assertion | Example |\n|---|---|\n| `toBe` (strict equal, like `===`) | `expect(total).toBe(3)` |\n| `toEqual` (same content — for objects/arrays) | `expect(tags).toEqual(['@smoke', '@login'])` |\n| `toContain` | `expect(title).toContain('Academy')` |\n| `toBeTruthy` / `toBeFalsy` | `expect(isVisible).toBeTruthy()` |\n| `toBeGreaterThan` / `toBeLessThan` | `expect(price).toBeGreaterThan(0)` |\n| `toHaveLength` | `expect(items).toHaveLength(3)` |"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// ❌ Flaky: reads the text ONCE, maybe before the page updated\nconst text = await page.getByRole('alert').textContent();\nexpect(text).toBe('Invalid email or password');\n\n// ✅ Reliable: retries until the text matches (up to 5 s)\nawait expect(page.getByRole('alert')).toHaveText('Invalid email or password');",
+              "mode": "read"
+            },
+            {
+              "type": "callout",
+              "variant": "warning",
+              "content": "Prefer **web-first** assertions for anything on the page. Use generic assertions only for plain values (numbers you calculated, arrays, API data)."
+            },
+            {
+              "type": "markdown",
+              "content": "You can add a custom message that appears in the report when the assertion fails:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "await expect(page.getByRole('heading'), 'user should land on the dashboard').toHaveText('Dashboard');",
+              "mode": "read"
+            },
+            {
+              "type": "quiz",
+              "id": "d9-f4-q1",
+              "quizType": "single",
+              "question": "After clicking \"Sign in\" with a wrong password, the page's script shows \"Invalid email or password\" — on a slow machine this can take a moment. Which assertion is reliable?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`expect(await page.getByRole('alert').textContent()).toBe('Invalid email or password')`"
+                },
+                {
+                  "id": "b",
+                  "text": "`await expect(page.getByRole('alert')).toHaveText('Invalid email or password')`"
+                },
+                {
+                  "id": "c",
+                  "text": "`expect(page.getByRole('alert')).toHaveText('Invalid email or password')` without await"
+                },
+                {
+                  "id": "d",
+                  "text": "`page.waitForTimeout(800)` then a generic toBe"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "The web-first assertion retries until it matches. Option A reads the text once (maybe too early). Option C forgets await. Fixed waits (D) are slow and still flaky."
+            },
+            {
+              "type": "quiz",
+              "id": "d9-f4-q2",
+              "quizType": "single",
+              "question": "What's the difference between `toHaveText('Welcome')` and `toContainText('Welcome')`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "None"
+                },
+                {
+                  "id": "b",
+                  "text": "`toHaveText` needs the whole text to match; `toContainText` passes if 'Welcome' appears anywhere in it"
+                },
+                {
+                  "id": "c",
+                  "text": "`toContainText` is case-sensitive, `toHaveText` isn't"
+                },
+                {
+                  "id": "d",
+                  "text": "`toHaveText` only works on headings"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "For \"Welcome back, Student!\", `toContainText('Welcome')` passes but `toHaveText('Welcome')` fails (with a plain string, toHaveText compares the full text)."
+            }
+          ]
+        },
+        {
+          "id": "d9-fundamentals-5",
+          "title": "F5 · Grouping tests and sharing setup: `describe` and hooks",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "### `test.describe` — a group (like a test suite / folder in a test-management tool)"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "test.describe('Sign in page', () => {\n  test('valid user reaches the dashboard', async ({ page }) => { /* … */ });\n  test('wrong password shows an error', async ({ page }) => { /* … */ });\n});",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "Report titles include the group: `Sign in page › wrong password shows an error`. Groups can be nested.\n\n### Hooks — run code around tests\n\n| Hook | Runs | Gets `page`? | Typical use |\n|---|---|---|---|\n| `test.beforeEach` | before **each** test in the file/group | ✅ yes | open the page, log in |\n| `test.afterEach` | after **each** test | ✅ yes | extra clean-up, logging |\n| `test.beforeAll` | **once** before all tests in the file/group (per worker) | ❌ no — use `browser` | expensive one-time setup, e.g. create test data via API |\n| `test.afterAll` | **once** after all tests (per worker) | ❌ no | delete test data |"
+            },
+            {
+              "type": "diagram",
+              "format": "mermaid",
+              "content": "flowchart TD\n  BA[\"beforeAll (once)\"] --> BE1[\"beforeEach\"] --> T1[\"test 1\"] --> AE1[\"afterEach\"]\n  AE1 --> BE2[\"beforeEach\"] --> T2[\"test 2\"] --> AE2[\"afterEach\"]\n  AE2 --> AA[\"afterAll (once)\"]"
+            },
+            {
+              "type": "markdown",
+              "content": "Hooks declared **inside** a `describe` apply only to tests in that group; hooks at the top of the file apply to every test in the file."
+            },
+            {
+              "type": "callout",
+              "variant": "note",
+              "content": "With parallel workers, each worker process runs its **own** `beforeAll`/`afterAll` for the tests it receives. Don't rely on `beforeAll` to share state between tests — each test should be able to run on its own.",
+              "title": "\"Per worker\""
+            },
+            {
+              "type": "quiz",
+              "id": "d9-f5-q1",
+              "quizType": "single",
+              "question": "A file has `beforeAll`, `beforeEach` and 3 tests, all run by ONE worker. How many times does each hook run?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "beforeAll 3, beforeEach 3"
+                },
+                {
+                  "id": "b",
+                  "text": "beforeAll 1, beforeEach 3"
+                },
+                {
+                  "id": "c",
+                  "text": "beforeAll 1, beforeEach 1"
+                },
+                {
+                  "id": "d",
+                  "text": "beforeAll 3, beforeEach 1"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "beforeAll runs once per worker for the file; beforeEach runs before every test."
+            },
+            {
+              "type": "quiz",
+              "id": "d9-f5-q2",
+              "quizType": "single",
+              "question": "Why does `test.beforeAll(async ({ page }) => { … })` throw an error?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "beforeAll cannot be async"
+                },
+                {
+                  "id": "b",
+                  "text": "The `page` fixture is created per test, so it isn't available in beforeAll — use `browser` instead"
+                },
+                {
+                  "id": "c",
+                  "text": "beforeAll must be inside a describe"
+                },
+                {
+                  "id": "d",
+                  "text": "Hooks can't receive fixtures at all"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`page` belongs to a single test. `beforeAll` runs outside any single test, so it can only use worker-level fixtures such as `browser`."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "implementation",
+      "title": "Implementation",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d9-implementation-1",
+          "title": "I1 · Your first test from scratch",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Make sure `tests/day9/practice-pages.ts` exists (Prerequisites · P3). Now create `tests/day9/first.spec.ts`:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';   // our practice page (no .ts needed in test files)\n\ntest('valid user can sign in', async ({ page }) => {\n  // Arrange: open the sign-in page\n  await page.setContent(loginPage);\n  await expect(page).toHaveTitle('QA Academy - Sign in');\n\n  // Act: sign in like a user would\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n\n  // Assert: the dashboard appears (after ~0.8 s — Playwright waits for it)\n  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n  await expect(page.getByText('Welcome back')).toBeVisible();\n  await expect(page).toHaveTitle(/Dashboard/);\n});",
+              "mode": "editor",
+              "file": "tests/day9/first.spec.ts",
+              "run": "npx playwright test tests/day9/first.spec.ts --project=chromium --headed"
+            },
+            {
+              "type": "terminal",
+              "shell": "bash",
+              "commands": [
+                "npx playwright test tests/day9/first.spec.ts --project=chromium --headed"
+              ]
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "Running 1 test using 1 worker\n\n  ✓  1 [chromium] › tests/day9/first.spec.ts:4:5 › valid user can sign in (1.2s)\n\n  1 passed (1.9s)"
+            },
+            {
+              "type": "markdown",
+              "content": "Watch the browser pane: the form fills in, \"Signing in…\" shows briefly, then the Dashboard appears.\n\n**Try it:** change `'Learn@123'` to `'learn@123'` (lowercase L) and run again. Read the error — which line failed, what was expected, what was received? Then change it back."
+            }
+          ]
+        },
+        {
+          "id": "d9-implementation-2",
+          "title": "I2 · A complete suite with `describe`, `beforeEach` and tags",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Now test **every rule** of the sign-in page. Opening the page is the same for every test, so it moves into `beforeEach` (lesson F5). The tests also carry **tags** such as `{ tag: '@smoke' }` — labels you'll use to run subsets on Day 10; for now just notice them."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest.describe('Sign in page', () => {\n  // Runs before EACH test in this group: every test starts on a fresh sign-in page\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(loginPage);\n  });\n\n  test('shows the sign-in form', { tag: '@smoke' }, async ({ page }) => {\n    await expect(page.getByRole('heading', { name: 'Sign in to QA Academy' })).toBeVisible();\n    await expect(page.getByLabel('Email')).toBeEmpty();\n    await expect(page.getByPlaceholder('you@example.com')).toHaveAttribute('type', 'email');\n    await expect(page.getByRole('button', { name: 'Sign in' })).toBeEnabled();\n  });\n\n  test('valid user reaches the dashboard', { tag: '@smoke' }, async ({ page }) => {\n    await page.getByLabel('Email').fill('student@qa.academy');\n    await page.getByLabel('Password').fill('Learn@123');\n    await page.getByRole('button', { name: 'Sign in' }).click();\n\n    await expect(page.getByRole('alert')).toHaveText('Signing in…');\n    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n    await expect(page.getByRole('listitem')).toHaveCount(3);   // three course weeks listed\n  });\n\n  test('wrong password shows an error', { tag: '@regression' }, async ({ page }) => {\n    await page.getByLabel('Email').fill('student@qa.academy');\n    await page.getByLabel('Password').fill('wrong-password');\n    await page.getByRole('button', { name: 'Sign in' }).click();\n\n    await expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeHidden();\n  });\n\n  test('empty form shows a validation message', { tag: '@regression' }, async ({ page }) => {\n    await page.getByRole('button', { name: 'Sign in' }).click();\n    await expect(page.getByTestId('login-message')).toHaveText('Please enter your email and password');\n  });\n\n  test('pressing Enter submits the form', { tag: '@regression' }, async ({ page }) => {\n    await page.getByLabel('Email').fill('student@qa.academy');\n    await page.getByLabel('Password').fill('Learn@123');\n    await page.getByLabel('Password').press('Enter');   // keyboard instead of mouse\n    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n  });\n\n  test('remember-me can be ticked and unticked', { tag: '@regression' }, async ({ page }) => {\n    const rememberMe = page.getByRole('checkbox', { name: 'Remember me' });   // a locator in a variable\n    await expect(rememberMe).not.toBeChecked();\n    await rememberMe.check();\n    await expect(rememberMe).toBeChecked();\n    await rememberMe.uncheck();\n    await expect(rememberMe).not.toBeChecked();\n  });\n});",
+              "mode": "editor",
+              "file": "tests/day9/login.spec.ts",
+              "run": "npx playwright test tests/day9/login.spec.ts --project=chromium"
+            },
+            {
+              "type": "terminal",
+              "shell": "bash",
+              "commands": [
+                "npx playwright test tests/day9/login.spec.ts --project=chromium"
+              ]
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "Running 6 tests using 4 workers\n\n  ✓  1 [chromium] › tests/day9/login.spec.ts:10:7 › Sign in page › shows the sign-in form @smoke (240ms)\n  ✓  2 [chromium] › tests/day9/login.spec.ts:27:7 › Sign in page › wrong password shows an error @regression (260ms)\n  ✓  3 [chromium] › tests/day9/login.spec.ts:36:7 › Sign in page › empty form shows a validation message @regression (180ms)\n  ✓  4 [chromium] › tests/day9/login.spec.ts:17:7 › Sign in page › valid user reaches the dashboard @smoke (1.1s)\n  ✓  5 [chromium] › tests/day9/login.spec.ts:41:7 › Sign in page › pressing Enter submits the form @regression (1.0s)\n  ✓  6 [chromium] › tests/day9/login.spec.ts:48:7 › Sign in page › remember-me can be ticked and unticked @regression (150ms)\n\n  6 passed (2.4s)"
+            },
+            {
+              "type": "markdown",
+              "content": "Notice: `fullyParallel: true` lets tests from the same file run at the same time, so they may finish in a different order each run. That's fine — every test is independent thanks to `beforeEach` and fresh pages."
+            },
+            {
+              "type": "quiz",
+              "id": "d9-i2-q1",
+              "quizType": "single",
+              "question": "Why is `await page.setContent(loginPage)` in `beforeEach` and not in a `beforeAll`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`beforeAll` is slower"
+                },
+                {
+                  "id": "b",
+                  "text": "`beforeAll` can't use the `page` fixture, and every test needs its own fresh page anyway"
+                },
+                {
+                  "id": "c",
+                  "text": "`beforeEach` runs only once"
+                },
+                {
+                  "id": "d",
+                  "text": "There is no difference"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "Each test gets its own new page, so opening the practice page must happen per test — in beforeEach, which also has access to `page`."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "practice",
+      "title": "Practice",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d9-practice-1",
+          "title": "Quiz · Day 9 check",
+          "blocks": [
+            {
+              "type": "quiz",
+              "id": "d9-pr-q1",
+              "quizType": "single",
+              "question": "Which file names will Playwright pick up as tests in `tests/`? (Choose the best answer)",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "Any .ts file"
+                },
+                {
+                  "id": "b",
+                  "text": "Files ending in .spec.ts or .test.ts"
+                },
+                {
+                  "id": "c",
+                  "text": "Only example.spec.ts"
+                },
+                {
+                  "id": "d",
+                  "text": "Files that start with \"test\""
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "That's why `practice-pages.ts` is treated as a normal module, not a test file."
+            },
+            {
+              "type": "quiz",
+              "id": "d9-pr-q2",
+              "quizType": "single",
+              "question": "Which assertion checks that an input field contains the text the user typed?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`toHaveText`"
+                },
+                {
+                  "id": "b",
+                  "text": "`toHaveValue`"
+                },
+                {
+                  "id": "c",
+                  "text": "`toContainText`"
+                },
+                {
+                  "id": "d",
+                  "text": "`toHaveTitle`"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "An input's typed content is its *value*, not its text. Use `await expect(locator).toHaveValue('…')`."
+            },
+            {
+              "type": "quiz",
+              "id": "d9-pr-q6",
+              "quizType": "single",
+              "question": "`getByText('welcome')` — does it match an element with the text \"Welcome back, Student!\"?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "No — it's case-sensitive and needs the whole text"
+                },
+                {
+                  "id": "b",
+                  "text": "Yes — by default text matching is case-insensitive and matches a substring"
+                },
+                {
+                  "id": "c",
+                  "text": "{'Only if you add `{ exact': 'true }`'}"
+                },
+                {
+                  "id": "d",
+                  "text": "Only inside a describe"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "Default text matching is case-insensitive and partial. `{ exact: true }` makes it case-sensitive and whole-string."
+            },
+            {
+              "type": "quiz",
+              "id": "d9-pr-q8",
+              "quizType": "single",
+              "question": "What is the MAIN purpose of `beforeEach` in a Playwright test file?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "To run the tests faster"
+                },
+                {
+                  "id": "b",
+                  "text": "To put shared setup (like opening the page) in one place so every test starts from the same state"
+                },
+                {
+                  "id": "c",
+                  "text": "To share a single page between all tests"
+                },
+                {
+                  "id": "d",
+                  "text": "To skip tests"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "It removes repetition and guarantees each test begins from a known state — while each test still gets its own fresh page."
+            }
+          ]
+        },
+        {
+          "id": "d9-practice-2",
+          "title": "Exercises",
+          "blocks": [
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d9-ex1",
+              "title": "Test the log-out flow",
+              "level": "easy",
+              "prompt": "Create `tests/day9/logout.spec.ts` with one test, `user can log out`:\n\n1. Sign in as `student@qa.academy` / `Learn@123`.\n2. Wait for the Dashboard heading.\n3. Click **Log out**.\n4. Assert the heading **Signed out** is visible, the text **See you soon!** is visible, and the title contains `Signed out`.",
+              "file": "tests/day9/logout.spec.ts",
+              "run": "npx playwright test tests/day9/logout.spec.ts --project=chromium --headed",
+              "hints": [
+                "`page.getByRole('button', { name: 'Log out' })`",
+                "`await expect(page).toHaveTitle(/Signed out/)`"
+              ],
+              "solution": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest('user can log out', async ({ page }) => {\n  // Sign in\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n\n  // Log out\n  await page.getByRole('button', { name: 'Log out' }).click();\n\n  // Check the signed-out page\n  await expect(page.getByRole('heading', { name: 'Signed out' })).toBeVisible();\n  await expect(page.getByText('See you soon!')).toBeVisible();\n  await expect(page).toHaveTitle(/Signed out/);\n});",
+              "check": {
+                "kind": "testsPass",
+                "cwd": "pw-course",
+                "run": "npx playwright test tests/day9/logout.spec.ts --project=chromium --headed"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d9-ex2",
+              "title": "Data-driven sign-in errors",
+              "level": "medium",
+              "prompt": "Use a **loop** (Day 7!) to create one test per row of test data. Create `tests/day9/login-data.spec.ts`:\n\n```ts\nconst invalidLogins = [\n  { email: '', password: '', message: 'Please enter your email and password' },\n  { email: 'student@qa.academy', password: '', message: 'Please enter your email and password' },\n  { email: 'nobody@qa.academy', password: 'Learn@123', message: 'Invalid email or password' },\n  { email: 'student@qa.academy', password: 'learn@123', message: 'Invalid email or password' },\n];\n```\n\nFor each row, register a test titled like `rejects \"nobody@qa.academy\" / \"Learn@123\"` that fills the fields, clicks **Sign in** and checks the alert text. Put all tests inside `test.describe('Invalid sign-in')` with a `beforeEach` that loads the page.\n\nRun with `--project=chromium` — you should see **4** tests.",
+              "file": "tests/day9/login-data.spec.ts",
+              "run": "npx playwright test tests/day9/login-data.spec.ts --project=chromium",
+              "hints": [
+                "Put `for (const data of invalidLogins) { test(`rejects ...`, async ({ page }) => { … }); }` inside the describe.",
+                "Test titles must be unique — including the email and password makes them unique.",
+                "`fill('')` is fine for empty fields."
+              ],
+              "solution": "import { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\n// Test data: one row = one test\nconst invalidLogins = [\n  { email: '', password: '', message: 'Please enter your email and password' },\n  { email: 'student@qa.academy', password: '', message: 'Please enter your email and password' },\n  { email: 'nobody@qa.academy', password: 'Learn@123', message: 'Invalid email or password' },\n  { email: 'student@qa.academy', password: 'learn@123', message: 'Invalid email or password' },\n];\n\ntest.describe('Invalid sign-in', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(loginPage);\n  });\n\n  // Create one test per data row\n  for (const data of invalidLogins) {\n    test(`rejects \"${data.email}\" / \"${data.password}\"`, async ({ page }) => {\n      await page.getByLabel('Email').fill(data.email);\n      await page.getByLabel('Password').fill(data.password);\n      await page.getByRole('button', { name: 'Sign in' }).click();\n      await expect(page.getByRole('alert')).toHaveText(data.message);\n    });\n  }\n});",
+              "check": {
+                "kind": "testsPass",
+                "cwd": "pw-course",
+                "run": "npx playwright test tests/day9/login-data.spec.ts --project=chromium"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d9-practice-3",
+          "title": "Reflection",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "1. Name the five parts of a Playwright test (from `import` to `expect`).\n2. Which fixture would you use to open a second tab in the same session? And to make two separate logged-in users?\n3. Why do web-first assertions need `await` while `expect(total).toBe(3)` does not?"
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "Annotations and tags, what the runner does under the hood (workers, timeouts, retries), filtering from the command line, debugging failures, the HTML report — and your Week 2 mini-project.",
+              "title": "Coming up on Day 10"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "lessons": 13,
+    "quizzes": 13,
+    "exercises": 2,
+    "codeBlocks": 9
+  }
+}

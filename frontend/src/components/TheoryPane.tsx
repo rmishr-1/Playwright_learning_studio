@@ -286,6 +286,15 @@ export function TheoryPane({
               return <Callout key={i} block={block} />;
             case 'diagram':
               return <Diagram key={i} source={block.text} />;
+            case 'reference':
+              // The full table, collapsed: the lesson teaches the first few items, and the rest
+              // are there to look up without crowding the page.
+              return (
+                <details className="reference" key={i}>
+                  <summary>{block.title ?? 'More'}</summary>
+                  <Markdown text={block.text} />
+                </details>
+              );
             case 'checkpoint':
               return <Checkpoint key={i} block={block} />;
             case 'at-a-glance':

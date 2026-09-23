@@ -1,0 +1,840 @@
+{
+  "schemaVersion": "1.0",
+  "day": 7,
+  "week": 2,
+  "title": "TypeScript II: Conditions, Loops & Functions",
+  "subtitle": "Make decisions, repeat work and package steps into reusable functions — including the callback pattern behind every Playwright test",
+  "estimatedTime": "3 hours",
+  "topics": [
+    "Conditions",
+    "Loops",
+    "Functions"
+  ],
+  "objectives": [
+    "Use `if / else if / else`, `switch` and the ternary operator to make decisions",
+    "Explain truthy and falsy values",
+    "Repeat work with `for`, `for...of`, `while` and array methods, using `break` and `continue`",
+    "Write functions with typed parameters, return types, optional and default parameters, and arrow functions",
+    "Pass functions to other functions (callbacks) — the pattern behind `test('title', async () => {…})`"
+  ],
+  "prerequisitesFromEarlierDays": [
+    "Day 5–6: variables, types, operators, arrays, objects, type aliases"
+  ],
+  "workspace": "pw-course/ts-basics/day7/",
+  "sections": [
+    {
+      "id": "prerequisites",
+      "title": "Prerequisites",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d7-prerequisites-1",
+          "title": "P1 · Blocks, indentation and scope",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Curly braces `{ }` group statements into a **block**. Code inside a block is **indented** (moved right) so you can see what belongs together."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "if (isLoggedIn) {            // the block starts\n  console.log('Welcome');    // indented: belongs to the if\n  showDashboard();\n}                            // the block ends\nconsole.log('Done');         // not indented: always runs",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "**Scope** means *where a variable exists*. A `let` or `const` created **inside** a block exists only inside that block:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const suite = 'Checkout';           // outside any block: visible everywhere below\nif (true) {\n  const message = 'inside';         // only exists inside these braces\n  console.log(suite, message);      // ✅ both visible\n}\nconsole.log(message);               // ❌ Cannot find name 'message'",
+              "mode": "read"
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "In VS Code, select code and press `Shift + Alt + F` (Windows/Linux) or `Shift + Option + F` (Mac) to auto-format indentation."
+            }
+          ]
+        },
+        {
+          "id": "d7-prerequisites-2",
+          "title": "P2 · Truthy and falsy",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Conditions need `true` or `false`. When you give them another value, JavaScript treats it as \"truthy\" or \"falsy\".\n\n**Falsy** — these count as `false`: `false`, `0`, `''` (empty string), `null`, `undefined`, `NaN`.\n**Truthy** — *everything else*: `'hello'`, `42`, `[]`, `{}`, `'false'` (a non-empty string!)."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const errorMessage = '';\nif (errorMessage) {\n  console.log('Error shown:', errorMessage);   // skipped — '' is falsy\n}",
+              "mode": "read"
+            },
+            {
+              "type": "quiz",
+              "id": "d7-p2-q1",
+              "quizType": "multiple",
+              "question": "Which values are FALSY? (Select all that apply)",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`0`"
+                },
+                {
+                  "id": "b",
+                  "text": "`'0'`"
+                },
+                {
+                  "id": "c",
+                  "text": "`''`"
+                },
+                {
+                  "id": "d",
+                  "text": "`undefined`"
+                }
+              ],
+              "correct": [
+                "a",
+                "c",
+                "d"
+              ],
+              "explanation": "`'0'` is a non-empty string, so it's truthy. The number 0, the empty string and undefined are falsy."
+            }
+          ]
+        },
+        {
+          "id": "d7-prerequisites-3",
+          "title": "P3 · Quick recap from Days 5–6",
+          "blocks": [
+            {
+              "type": "quiz",
+              "id": "d7-p3-q1",
+              "quizType": "single",
+              "question": "`const browsers = ['chromium', 'firefox']; browsers.push('webkit');` — what is `browsers[2]`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "'firefox'"
+                },
+                {
+                  "id": "b",
+                  "text": "'webkit'"
+                },
+                {
+                  "id": "c",
+                  "text": "undefined"
+                },
+                {
+                  "id": "d",
+                  "text": "An error, because browsers is const"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`const` stops you replacing the array, not changing its contents. After push, index 2 is 'webkit'."
+            },
+            {
+              "type": "quiz",
+              "id": "d7-p3-q2",
+              "quizType": "single",
+              "question": "What is `5 > 3 && 2 > 4`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "true"
+                },
+                {
+                  "id": "b",
+                  "text": "false"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "5 > 3 is true but 2 > 4 is false. With `&&`, both must be true."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fundamentals",
+      "title": "Fundamentals",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d7-fundamentals-1",
+          "title": "F1 · Conditions: making decisions",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "### `if`, `else if`, `else`"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const statusCode = 404;\n\n// Checked from top to bottom — the FIRST true condition wins, the rest are skipped\nif (statusCode >= 200 && statusCode < 300) {\n  console.log('Success');\n} else if (statusCode >= 400 && statusCode < 500) {\n  console.log('Client error — check the request');\n} else if (statusCode >= 500) {\n  console.log('Server error — raise a bug');\n} else {\n  console.log('Something else');\n}\n\n// A condition can use a truthy/falsy value directly\nconst couponCode = '';\nif (!couponCode) {\n  console.log('No coupon applied');\n}",
+              "mode": "editor",
+              "file": "ts-basics/day7/conditions.ts",
+              "run": "node day7/conditions.ts",
+              "expectedOutput": "Client error — check the request\nNo coupon applied",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "Client error — check the request\nNo coupon applied"
+            },
+            {
+              "type": "markdown",
+              "content": "### `switch` — choose between many exact values"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const browserName: string = 'webkit';\nlet realBrowser: string;\n\nswitch (browserName) {\n  case 'chromium':\n    realBrowser = 'Chrome / Edge';\n    break;                          // stop here — otherwise the next case runs too!\n  case 'firefox':\n    realBrowser = 'Firefox';\n    break;\n  case 'webkit':\n    realBrowser = 'Safari';\n    break;\n  default:                          // none of the cases matched\n    realBrowser = 'Unknown';\n}\n\nconsole.log(`${browserName} is like ${realBrowser}`);",
+              "mode": "editor",
+              "file": "ts-basics/day7/switch.ts",
+              "run": "node day7/switch.ts",
+              "expectedOutput": "webkit is like Safari",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "webkit is like Safari"
+            },
+            {
+              "type": "callout",
+              "variant": "warning",
+              "content": "Forgetting `break` is a classic bug: execution \"falls through\" into the next case."
+            },
+            {
+              "type": "markdown",
+              "content": "### Choosing the right tool\n\n| Situation | Use |\n|---|---|\n| Ranges or combined conditions (`>= 200 && < 300`) | `if / else if / else` |\n| One variable compared to many exact values | `switch` |\n| Choose between two values in one line | ternary `cond ? a : b` |"
+            },
+            {
+              "type": "quiz",
+              "id": "d7-f1-q1",
+              "quizType": "single",
+              "question": "`const score = 75;` — what prints? `if (score >= 90) { console.log('A'); } else if (score >= 70) { console.log('B'); } else if (score >= 50) { console.log('C'); }`",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "A"
+                },
+                {
+                  "id": "b",
+                  "text": "B"
+                },
+                {
+                  "id": "c",
+                  "text": "B and C"
+                },
+                {
+                  "id": "d",
+                  "text": "C"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "The chain stops at the first true condition. 75 >= 70 is true, so 'B' prints and the 'C' check is skipped."
+            }
+          ]
+        },
+        {
+          "id": "d7-fundamentals-2",
+          "title": "F2 · Loops: repeating work",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Automation is about repetition — the same check for every user, every browser, every row. Loops do that.\n\n### `for...of` — for each item in a list (your most-used loop)"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const users = ['asha', 'ravi', 'meera'];\nfor (const user of users) {\n  console.log(`Logging in as ${user}`);\n}",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "### Classic `for` — when you need a counter"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// start at 1; keep going while attempt <= 3; add 1 after each round\nfor (let attempt = 1; attempt <= 3; attempt++) {\n  console.log(`Attempt ${attempt}`);\n}",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "### `while` and `do...while` — repeat until something changes"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "let itemsInCart = 3;\nwhile (itemsInCart > 0) {        // checks BEFORE each round (may run 0 times)\n  itemsInCart--;\n}\n\nlet tries = 0;\ndo {                              // runs at least ONCE, checks AFTER each round\n  tries++;\n} while (tries < 3);",
+              "mode": "read"
+            },
+            {
+              "type": "callout",
+              "variant": "warning",
+              "content": "If the condition never becomes false (e.g. you forget `itemsInCart--`), the loop never ends. Press `Ctrl + C` in the terminal to stop it.",
+              "title": "Infinite loops"
+            },
+            {
+              "type": "markdown",
+              "content": "### `break` and `continue`"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const results = ['pass', 'pass', 'skip', 'fail', 'pass'];\n\n// continue: skip the rest of THIS round, go to the next item\nfor (const result of results) {\n  if (result === 'skip') {\n    continue;\n  }\n  console.log('Counted:', result);\n}\n\n// break: stop the whole loop immediately\nfor (let i = 0; i < results.length; i++) {\n  if (results[i] === 'fail') {\n    console.log(`First failure at position ${i}`);\n    break;\n  }\n}",
+              "mode": "editor",
+              "file": "ts-basics/day7/loops.ts",
+              "run": "node day7/loops.ts",
+              "expectedOutput": "Counted: pass\nCounted: pass\nCounted: fail\nCounted: pass\nFirst failure at position 3",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "Counted: pass\nCounted: pass\nCounted: fail\nCounted: pass\nFirst failure at position 3"
+            },
+            {
+              "type": "markdown",
+              "content": "### Array methods that loop for you\n\nArrays have built-in methods that take a small function (you'll write these properly in F3):\n\n| Method | Does | Example | Result |\n|---|---|---|---|\n| `forEach` | runs code for each item | `names.forEach((n) => console.log(n))` | prints each name |\n| `map` | makes a new array by transforming each item | `[1, 2, 3].map((n) => n * 2)` | `[2, 4, 6]` |\n| `filter` | keeps only items that pass a test | `['pass', 'fail'].filter((r) => r === 'fail')` | `['fail']` |\n| `find` | returns the first matching item | `users.find((u) => u.isAdmin)` | first admin or `undefined` |\n| `some` / `every` | is it true for any / all items? | `results.every((r) => r === 'pass')` | `true` or `false` |"
+            },
+            {
+              "type": "callout",
+              "variant": "warning",
+              "content": "Later, when a loop contains Playwright actions (`await page.click(…)`), use `for...of`. `forEach` does **not** wait for `await` inside it — a subtle and common bug.",
+              "title": "`forEach` and `await` don't mix"
+            },
+            {
+              "type": "quiz",
+              "id": "d7-f2-q1",
+              "quizType": "single",
+              "question": "How many times does \"Hi\" print? `for (let i = 0; i < 3; i++) { console.log('Hi'); }`",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "2"
+                },
+                {
+                  "id": "b",
+                  "text": "3"
+                },
+                {
+                  "id": "c",
+                  "text": "4"
+                },
+                {
+                  "id": "d",
+                  "text": "Forever"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "i takes the values 0, 1, 2 (three rounds). When i becomes 3, `i < 3` is false and the loop stops."
+            },
+            {
+              "type": "quiz",
+              "id": "d7-f2-q2",
+              "quizType": "single",
+              "question": "What does `[5, 12, 8, 20].filter((n) => n > 10)` return?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "[5, 8]"
+                },
+                {
+                  "id": "b",
+                  "text": "[12, 20]"
+                },
+                {
+                  "id": "c",
+                  "text": "12"
+                },
+                {
+                  "id": "d",
+                  "text": "true"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`filter` keeps the items for which the function returns true: 12 and 20."
+            }
+          ]
+        },
+        {
+          "id": "d7-fundamentals-3",
+          "title": "F3 · Functions: reusable steps",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "A **function** is a named, reusable block of steps — like a reusable test step \"Log in as user X\" that many test cases call.\n\n### Declaring and calling"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// name     parameters (inputs, with types)       return type\nfunction calculatePassRate(passed: number, total: number): number {\n  return (passed / total) * 100;              // return sends a value back to the caller\n}\n\n// A function that returns nothing uses the type void\nfunction printHeader(title: string): void {\n  console.log(`===== ${title} =====`);\n}\n\n// Calling (using) the functions\nprintHeader('Nightly run');\nconst rate = calculatePassRate(45, 50);       // arguments: the actual values\nconsole.log(`Pass rate: ${rate}%`);\nconsole.log(`Smoke pass rate: ${calculatePassRate(9, 10)}%`);",
+              "mode": "editor",
+              "file": "ts-basics/day7/functions.ts",
+              "run": "node day7/functions.ts",
+              "expectedOutput": "===== Nightly run =====\nPass rate: 90%\nSmoke pass rate: 90%",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "===== Nightly run =====\nPass rate: 90%\nSmoke pass rate: 90%"
+            },
+            {
+              "type": "markdown",
+              "content": "Words to know: **parameters** are the input names in the definition (`passed`, `total`); **arguments** are the actual values you pass (`45`, `50`); **`return`** ends the function and hands back a value.\n\n### Optional and default parameters"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// timeout has a DEFAULT value; tag is OPTIONAL (may be undefined)\nfunction describeTest(title: string, timeout: number = 30000, tag?: string): string {\n  const tagText = tag ? ` ${tag}` : '';        // add the tag only if one was given\n  return `${title}${tagText} (timeout ${timeout / 1000}s)`;\n}\n\nconsole.log(describeTest('Login works'));\nconsole.log(describeTest('Checkout completes', 60000));\nconsole.log(describeTest('Search returns results', 30000, '@smoke'));",
+              "mode": "editor",
+              "file": "ts-basics/day7/parameters.ts",
+              "run": "node day7/parameters.ts",
+              "expectedOutput": "Login works (timeout 30s)\nCheckout completes (timeout 60s)\nSearch returns results @smoke (timeout 30s)",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "Login works (timeout 30s)\nCheckout completes (timeout 60s)\nSearch returns results @smoke (timeout 30s)"
+            },
+            {
+              "type": "markdown",
+              "content": "### Rest parameters — any number of arguments"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "function logTags(title: string, ...tags: string[]): void {\n  console.log(title, 'has', tags.length, 'tags');\n}\nlogTags('Checkout', '@smoke', '@regression', '@payments');   // Checkout has 3 tags",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "### Arrow functions — the short form you'll see everywhere"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// Regular function\nfunction double(n: number): number {\n  return n * 2;\n}\n\n// Same thing as an arrow function stored in a constant\nconst doubleArrow = (n: number): number => {\n  return n * 2;\n};\n\n// Even shorter: one expression → no braces, no return keyword\nconst doubleShort = (n: number) => n * 2;",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "### Functions as values: callbacks\n\nIn TypeScript a function is a value — you can pass it **into another function**. The receiving function decides *when* to run it. A function passed like this is called a **callback**."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// runStep receives a NAME and a FUNCTION, prints the name, then calls the function\nfunction runStep(name: string, action: () => void): void {\n  console.log(`▶ ${name}`);\n  action();                       // run the function we were given\n}\n\n// Pass an arrow function directly as the second argument\nrunStep('Open the home page', () => {\n  console.log('  …navigating to /home');\n});\n\nrunStep('Search for \"mouse\"', () => {\n  console.log('  …typing into the search box');\n});",
+              "mode": "editor",
+              "file": "ts-basics/day7/callbacks.ts",
+              "run": "node day7/callbacks.ts",
+              "expectedOutput": "▶ Open the home page\n  …navigating to /home\n▶ Search for \"mouse\"\n  …typing into the search box",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "▶ Open the home page\n  …navigating to /home\n▶ Search for \"mouse\"\n  …typing into the search box"
+            },
+            {
+              "type": "callout",
+              "variant": "tester",
+              "content": "```ts\ntest('Open the home page', async ({ page }) => { … });\n```\n`test` is a function that receives a **title** and a **callback**. Playwright decides when to run your callback — and hands it a ready-made `page`. You just wrote the same pattern yourself!",
+              "title": "This is exactly how Playwright tests are written"
+            },
+            {
+              "type": "quiz",
+              "id": "d7-f3-q1",
+              "quizType": "single",
+              "question": "`` function greet(name: string, greeting = 'Hello'): string { return `${greeting}, ${name}`; } `` — what does `greet('Ravi')` return?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "'Ravi, Hello'"
+                },
+                {
+                  "id": "b",
+                  "text": "'Hello, Ravi'"
+                },
+                {
+                  "id": "c",
+                  "text": "'undefined, Ravi'"
+                },
+                {
+                  "id": "d",
+                  "text": "An error — greeting is missing"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`greeting` has a default value 'Hello', used when no second argument is passed."
+            },
+            {
+              "type": "quiz",
+              "id": "d7-f3-q2",
+              "quizType": "single",
+              "question": "Which is a correct arrow function that adds two numbers?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`const add = (a: number, b: number) => a + b;`"
+                },
+                {
+                  "id": "b",
+                  "text": "`const add = function => a + b;`"
+                },
+                {
+                  "id": "c",
+                  "text": "`add(a, b) => { a + b }`"
+                },
+                {
+                  "id": "d",
+                  "text": "`const add => (a + b);`"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "explanation": "Parameters in brackets, then `=>`, then the result. With a single expression the value is returned automatically."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "implementation",
+      "title": "Implementation",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d7-implementation-1",
+          "title": "I1 · A data-driven validator",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Combine **objects** (Day 6), **functions**, **conditions** and **loops**: a function checks a password against rules, and a loop runs it over a table of test data — exactly like a data-driven test."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// Business rule: 8+ characters, at least one digit, at least one uppercase letter\nfunction validatePassword(password: string): string[] {\n  const problems: string[] = [];\n\n  if (password.length < 8) {\n    problems.push('too short');\n  }\n  if (!/[0-9]/.test(password)) {          // /[0-9]/ = \"any digit\" pattern\n    problems.push('needs a digit');\n  }\n  if (!/[A-Z]/.test(password)) {          // /[A-Z]/ = \"any uppercase letter\" pattern\n    problems.push('needs an uppercase letter');\n  }\n  return problems;                        // an empty list means the password is valid\n}\n\n// Test data: each case says what we EXPECT\ntype PasswordCase = {\n  input: string;\n  shouldBeValid: boolean;\n};\n\nconst cases: PasswordCase[] = [\n  { input: 'Secret123', shouldBeValid: true },\n  { input: 'short1A', shouldBeValid: false },\n  { input: 'alllowercase1', shouldBeValid: false },\n  { input: 'NoDigitsHere', shouldBeValid: false },\n  { input: 'Valid2Password', shouldBeValid: true },\n];\n\nlet passed = 0;\nfor (const testCase of cases) {\n  const problems = validatePassword(testCase.input);\n  const isValid = problems.length === 0;\n  const ok = isValid === testCase.shouldBeValid;          // did reality match the expectation?\n  if (ok) {\n    passed++;\n  }\n  const details = isValid ? 'valid' : problems.join(', ');\n  console.log(`${ok ? '✓' : '✗'} \"${testCase.input}\" → ${details}`);\n}\n\nconsole.log(`${passed}/${cases.length} cases behaved as expected`);",
+              "mode": "editor",
+              "file": "ts-basics/day7/password-rules.ts",
+              "run": "node day7/password-rules.ts",
+              "expectedOutput": "✓ \"Secret123\" → valid\n✓ \"short1A\" → too short\n✓ \"alllowercase1\" → needs an uppercase letter\n✓ \"NoDigitsHere\" → needs a digit\n✓ \"Valid2Password\" → valid\n5/5 cases behaved as expected",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "✓ \"Secret123\" → valid\n✓ \"short1A\" → too short\n✓ \"alllowercase1\" → needs an uppercase letter\n✓ \"NoDigitsHere\" → needs a digit\n✓ \"Valid2Password\" → valid\n5/5 cases behaved as expected"
+            },
+            {
+              "type": "markdown",
+              "content": "**Try it:** add a case `{ input: 'Abcdefg1', shouldBeValid: true }` and predict the output first. Then add a new rule — \"must not contain spaces\" (`password.includes(' ')`) — and a case that checks it."
+            }
+          ]
+        },
+        {
+          "id": "d7-implementation-2",
+          "title": "I2 · Generate a smoke-test checklist",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Combine a **function**, a **loop** and **conditions** to produce a smoke-test checklist from a list of pages — the kind of thing you'd run after every deployment."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// Each page we want to check after a deployment\ntype PageCheck = {\n  path: string;\n  expectedTitle: string;\n  critical: boolean;      // critical pages block the release if broken\n};\n\nconst pages: PageCheck[] = [\n  { path: '/', expectedTitle: 'Home', critical: true },\n  { path: '/login', expectedTitle: 'Sign in', critical: true },\n  { path: '/help', expectedTitle: 'Help centre', critical: false },\n  { path: '/about', expectedTitle: 'About us', critical: false },\n];\n\n// A function that describes one check as a line of text\nfunction describeCheck(check: PageCheck, index: number): string {\n  const marker = check.critical ? '!' : ' ';                  // mark critical pages\n  return `${index + 1}. [${marker}] open ${check.path} → expect title \"${check.expectedTitle}\"`;\n}\n\n// A function that counts how many checks are critical\nfunction countCritical(checks: PageCheck[]): number {\n  let count = 0;\n  for (const check of checks) {\n    if (check.critical) {\n      count++;\n    }\n  }\n  return count;\n}\n\nconsole.log('Smoke checklist');\nfor (let i = 0; i < pages.length; i++) {\n  console.log(describeCheck(pages[i], i));\n}\nconsole.log(`${countCritical(pages)} of ${pages.length} checks are release-blocking`);",
+              "mode": "editor",
+              "file": "ts-basics/day7/checklist.ts",
+              "run": "node day7/checklist.ts",
+              "expectedOutput": "Smoke checklist\n1. [!] open / → expect title \"Home\"\n2. [!] open /login → expect title \"Sign in\"\n3. [ ] open /help → expect title \"Help centre\"\n4. [ ] open /about → expect title \"About us\"\n2 of 4 checks are release-blocking",
+              "expectedOutputTarget": "console"
+            },
+            {
+              "type": "output",
+              "target": "console",
+              "content": "Smoke checklist\n1. [!] open / → expect title \"Home\"\n2. [!] open /login → expect title \"Sign in\"\n3. [ ] open /help → expect title \"Help centre\"\n4. [ ] open /about → expect title \"About us\"\n2 of 4 checks are release-blocking"
+            },
+            {
+              "type": "markdown",
+              "content": "**Try it:** add a page `{ path: '/cart', expectedTitle: 'Your cart', critical: true }` and predict both the new line and the last line before running."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "practice",
+      "title": "Practice",
+      "intro": [],
+      "lessons": [
+        {
+          "id": "d7-practice-1",
+          "title": "Quiz · Day 7 check",
+          "blocks": [
+            {
+              "type": "quiz",
+              "id": "d7-pr-q1",
+              "quizType": "single",
+              "question": "Which loop always runs its body at least once?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "for"
+                },
+                {
+                  "id": "b",
+                  "text": "while"
+                },
+                {
+                  "id": "c",
+                  "text": "do...while"
+                },
+                {
+                  "id": "d",
+                  "text": "for...of"
+                }
+              ],
+              "correct": [
+                "c"
+              ],
+              "explanation": "`do...while` checks the condition AFTER each round, so the body runs at least once."
+            },
+            {
+              "type": "quiz",
+              "id": "d7-pr-q2",
+              "quizType": "single",
+              "question": "What does `continue` do inside a loop?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "Stops the loop completely"
+                },
+                {
+                  "id": "b",
+                  "text": "Skips the rest of the current round and moves to the next one"
+                },
+                {
+                  "id": "c",
+                  "text": "Restarts the loop from the first item"
+                },
+                {
+                  "id": "d",
+                  "text": "Pauses the program"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "`continue` skips to the next round; `break` exits the loop."
+            },
+            {
+              "type": "quiz",
+              "id": "d7-pr-q3",
+              "quizType": "single",
+              "question": "`function f(a: number, b?: number) { return b === undefined ? a : a + b; }` — what is `f(4)`?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "4"
+                },
+                {
+                  "id": "b",
+                  "text": "NaN"
+                },
+                {
+                  "id": "c",
+                  "text": "An error"
+                },
+                {
+                  "id": "d",
+                  "text": "undefined"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "explanation": "`b` is optional and wasn't passed, so it is undefined and the function returns `a`."
+            },
+            {
+              "type": "quiz",
+              "id": "d7-pr-q4",
+              "quizType": "single",
+              "question": "What is a callback?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "A phone call from the test runner"
+                },
+                {
+                  "id": "b",
+                  "text": "A function passed into another function, to be called later by that function"
+                },
+                {
+                  "id": "c",
+                  "text": "A function that calls itself forever"
+                },
+                {
+                  "id": "d",
+                  "text": "A type of loop"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "In `test('title', async ({ page }) => {…})`, the arrow function is a callback that Playwright calls when it runs the test."
+            }
+          ]
+        },
+        {
+          "id": "d7-practice-2",
+          "title": "Predict the output",
+          "blocks": [
+            {
+              "type": "exercise",
+              "exerciseType": "predict",
+              "id": "d7-pr-p1",
+              "title": "Predict — loop with conditions",
+              "level": "easy",
+              "prompt": "What does this print?",
+              "code": "const statuses = [200, 301, 404, 500];\nfor (const code of statuses) {\n  if (code >= 500) {\n    console.log(code, 'server');\n    break;\n  } else if (code >= 400) {\n    console.log(code, 'client');\n    continue;\n  }\n  console.log(code, 'ok');\n}",
+              "answer": "200 ok\n301 ok\n404 client\n500 server\n\n404 hits `continue`, so 'ok' is skipped for it. 500 prints 'server' and `break` ends the loop (it was the last item anyway).",
+              "check": {
+                "kind": "self"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "predict",
+              "id": "d7-pr-p3",
+              "title": "Predict — scope",
+              "level": "medium",
+              "prompt": "Which line does the type checker reject, and why?",
+              "code": "const suite = 'Login';\nfor (let i = 0; i < 2; i++) {\n  const title = `${suite} test ${i}`;\n  console.log(title);\n}\nconsole.log(title);",
+              "answer": "The last line: `console.log(title);` → \"Cannot find name 'title'\".\n\n`title` is declared with `const` inside the loop's block, so it only exists inside that block. `suite` is fine because it's declared outside.",
+              "check": {
+                "kind": "self"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d7-practice-3",
+          "title": "Exercises",
+          "blocks": [
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d7-ex1",
+              "title": "Test-run reporter",
+              "level": "easy",
+              "prompt": "Create `day7/reporter.ts`. Given\n```ts\nconst results: string[] = ['pass', 'fail', 'pass', 'skip', 'pass', 'fail'];\n```\nuse **one `for...of` loop** and **`if / else if / else`** to count passes, failures and skips, then print:\n```\nPassed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL\n```\nThe verdict is `PASS` only when there are **no** failures (use a ternary).",
+              "file": "ts-basics/day7/reporter.ts",
+              "run": "node day7/reporter.ts",
+              "hints": [
+                "Create three `let` counters starting at 0 before the loop.",
+                "`const verdict = failed === 0 ? 'PASS' : 'FAIL';`"
+              ],
+              "solution": "const results: string[] = ['pass', 'fail', 'pass', 'skip', 'pass', 'fail'];\n\n// Counters\nlet passed = 0;\nlet failed = 0;\nlet skipped = 0;\n\n// Count each result\nfor (const result of results) {\n  if (result === 'pass') {\n    passed++;\n  } else if (result === 'fail') {\n    failed++;\n  } else {\n    skipped++;\n  }\n}\n\n// Verdict: PASS only if nothing failed\nconst verdict = failed === 0 ? 'PASS' : 'FAIL';\n\nconsole.log(`Passed: ${passed}`);\nconsole.log(`Failed: ${failed}`);\nconsole.log(`Skipped: ${skipped}`);\nconsole.log(`Verdict: ${verdict}`);",
+              "expectedOutput": "Passed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL",
+              "check": {
+                "kind": "stdoutEquals",
+                "cwd": "pw-course/ts-basics",
+                "run": "node day7/reporter.ts",
+                "expected": "Passed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d7-ex2",
+              "title": "Priority mapper with switch",
+              "level": "easy",
+              "prompt": "Create `day7/priority.ts`. Write a function `slaHours(priority: 'P1' | 'P2' | 'P3' | 'P4'): number` that uses a **switch** to return the bug-fix deadline: P1 → 4, P2 → 24, P3 → 72, P4 → 168.\n\nThen loop over `['P1', 'P3', 'P4']` and print:\n```\nP1 must be fixed within 4 hours\nP3 must be fixed within 72 hours\nP4 must be fixed within 168 hours\n```",
+              "file": "ts-basics/day7/priority.ts",
+              "run": "node day7/priority.ts",
+              "hints": [
+                "With `return` inside each case you don't need `break` — `return` leaves the function immediately.",
+                "Type the list so TypeScript accepts it: `const priorities: ('P1' | 'P2' | 'P3' | 'P4')[] = ['P1', 'P3', 'P4'];`"
+              ],
+              "solution": "type Priority = 'P1' | 'P2' | 'P3' | 'P4';\n\n// Return the SLA (in hours) for a bug priority\nfunction slaHours(priority: Priority): number {\n  switch (priority) {\n    case 'P1':\n      return 4;\n    case 'P2':\n      return 24;\n    case 'P3':\n      return 72;\n    case 'P4':\n      return 168;\n  }\n}\n\nconst priorities: Priority[] = ['P1', 'P3', 'P4'];\nfor (const p of priorities) {\n  console.log(`${p} must be fixed within ${slaHours(p)} hours`);\n}",
+              "expectedOutput": "P1 must be fixed within 4 hours\nP3 must be fixed within 72 hours\nP4 must be fixed within 168 hours",
+              "check": {
+                "kind": "stdoutEquals",
+                "cwd": "pw-course/ts-basics",
+                "run": "node day7/priority.ts",
+                "expected": "P1 must be fixed within 4 hours\nP3 must be fixed within 72 hours\nP4 must be fixed within 168 hours"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d7-ex3",
+              "title": "Find the failed tests",
+              "level": "medium",
+              "prompt": "Create `day7/failed.ts` with this data:\n```ts\ntype TestResult = { title: string; status: 'passed' | 'failed' | 'skipped'; durationMs: number; };\nconst run: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'cart updates', status: 'passed', durationMs: 900 },\n  { title: 'checkout completes', status: 'failed', durationMs: 30000 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n```\n1. Use `filter` to get only the failed tests.\n2. Use `map` to get their titles.\n3. Write an **arrow function** `slowest(results: TestResult[]): TestResult` that loops over the list and returns the test with the largest `durationMs`.\n4. Print:\n```\nFailed (2): search works, checkout completes\nSlowest: checkout completes (30s)\n```",
+              "file": "ts-basics/day7/failed.ts",
+              "run": "node day7/failed.ts",
+              "hints": [
+                "`run.filter((r) => r.status === 'failed')`",
+                "In `slowest`, start with `let max = results[0];` and replace it whenever you find a longer duration."
+              ],
+              "solution": "type TestResult = {\n  title: string;\n  status: 'passed' | 'failed' | 'skipped';\n  durationMs: number;\n};\n\nconst run: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'cart updates', status: 'passed', durationMs: 900 },\n  { title: 'checkout completes', status: 'failed', durationMs: 30000 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n\n// 1 + 2: failed tests → their titles\nconst failedTests = run.filter((r) => r.status === 'failed');\nconst failedTitles = failedTests.map((r) => r.title);\n\n// 3: find the test with the largest duration\nconst slowest = (results: TestResult[]): TestResult => {\n  let max = results[0];\n  for (const r of results) {\n    if (r.durationMs > max.durationMs) {\n      max = r;\n    }\n  }\n  return max;\n};\n\nconst worst = slowest(run);\nconsole.log(`Failed (${failedTests.length}): ${failedTitles.join(', ')}`);\nconsole.log(`Slowest: ${worst.title} (${worst.durationMs / 1000}s)`);",
+              "expectedOutput": "Failed (2): search works, checkout completes\nSlowest: checkout completes (30s)",
+              "check": {
+                "kind": "stdoutEquals",
+                "cwd": "pw-course/ts-basics",
+                "run": "node day7/failed.ts",
+                "expected": "Failed (2): search works, checkout completes\nSlowest: checkout completes (30s)"
+              }
+            }
+          ]
+        },
+        {
+          "id": "d7-practice-4",
+          "title": "Reflection",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "1. When would you choose `switch` over `if / else if`?\n2. Write, from memory, an arrow function that takes a `name: string` and returns `` `Hello, ${name}` ``.\n3. Read this line aloud in plain English: `runStep('Open the home page', () => { … });`"
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "`async`/`await` — the one concept behind every `await page.click()` — plus interfaces, destructuring, modules, and a mini test runner you build yourself.",
+              "title": "Coming up on Day 8"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "lessons": 12,
+    "quizzes": 12,
+    "exercises": 5,
+    "codeBlocks": 16
+  }
+}
