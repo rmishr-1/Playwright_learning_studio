@@ -4,70 +4,79 @@
   "day": 1,
   "parts": {
     "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **Prerequisites** | [locators](/learn/w1/d4/p2) · [async and the page fixture](/learn/w1/d5/p1) |\n| **Tools** | `.fill()` · `.pressSequentially()` · `.check()` · `.selectOption()` |\n| **Environment** | [the Register.html signup form](https://demo.automationtesting.in/Register.html) — every control type on one page |\n| **Scope** | This lesson fills the form. Checking that it worked, with assertions, is covered in [Day 2 - Fundamentals](/learn/w2/d2/p2). |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Filling every kind of control on a registration form, and checking the result with an assertion. |\n| **Goals** | Fill a text field, type into it one key at a time, check a radio button and a checkbox, pick an option in a dropdown, and find a control that has no label. |\n| **Prerequisites** | [Week 1 - Day 4 - Fundamentals](/learn/w1/d4/p2) for locators, and [Week 1 - Day 5 - Fundamentals](/learn/w1/d5/p2) for assertions. |\n| **Tools** | `fill()`, `pressSequentially()`, `check()`, `selectOption()`, `page.locator()`, and `toHaveValue`. |\n| **Environment** | The editor on the right for the examples, then your own project for the spec file. |\n| **Key takeaway** | Each kind of control has one method that acts on it, and a test on a form ends with an assertion on the form. |",
       "checkpoints": [
         {
-          "question": "You are filling a search box that shows autocomplete suggestions as you type, and the suggestions are what you need to click. Which method fills it?",
+          "question": "A search box shows suggestions after each letter that a user types. Which method fills it?",
           "options": [
-            "`.fill()` — it is the default, and faster",
-            "`.pressSequentially()`, because the page reacts to each keystroke",
-            "Either — they produce identical events, only at different speeds"
+            "`fill()`, because it replaces the value in one step and is the usual choice",
+            "`pressSequentially()`, because the field reacts to each key",
+            "`selectOption()`, because the suggestions are a list of options to pick from"
           ],
           "answer": 1,
-          "explanation": "`.fill()` sets the value directly, so a page listening for per-key events never hears them and the suggestions never appear. That is exactly the case the lesson reserves `.pressSequentially()` for — it costs you the speed (68ms vs 92ms measured here) and you spend it deliberately."
+          "explanation": "The suggestions appear only when the field sees a keystroke. `fill()` sets the value in one step, so the field sees no keystroke and shows nothing. `pressSequentially()` sends one key at a time, as a person typing would."
         },
         {
-          "question": "On `#Skills` you call `.selectOption({ label: \"Java\" })`, then `.selectOption({ label: \"Python\" })`. What is selected at the end?",
+          "question": "You call `selectOption('Java')` and then `selectOption('Python')` on the Skills dropdown. What is selected at the end?",
           "options": [
-            "Both Java and Python — it has 78 options and takes multiple",
-            "Python only",
-            "Java only — the first pick wins and later calls are ignored",
-            "Neither — the second call throws, because the option is already taken"
+            "Java and Python, because a dropdown keeps every option that was picked",
+            "Python only, because this dropdown holds one pick at a time",
+            "Java only, because the first pick is kept and every later pick is ignored"
           ],
           "answer": 1,
-          "explanation": "\"Select Skills\" reads like a multi-select and has 78 options, but it carries no `multiple` attribute — verified in the lesson. A single-select keeps only your last pick, so Python replaces Java silently. Nothing errors, which is what makes it worth knowing."
+          "explanation": "The Skills dropdown holds one option at a time, so the second pick replaces the first. A dropdown that keeps several picks is a different kind of control, and this form has none."
         },
         {
-          "question": "The spec at the end of this lesson reports `1 passed`. What has it actually proved?",
+          "question": "Why does `register.spec.ts` end with two `toHaveValue` assertions?",
           "options": [
-            "That the form accepted the data and the registration succeeded",
-            "That every locator matched and no line threw — nothing more",
-            "That the page navigated away after Submit"
-          ],
-          "answer": 1,
-          "explanation": "There is not one `expect()` in that file, so \"passed\" means only that nothing threw on the way through. It is the same gap [Week 1 - Day 5 - Fundamentals](/learn/w1/d5/p2) showed with a wrong password, and [Day 2](/learn/w2/d2/p2) is where you close it."
-        }
-      ],
-      "recap": "- `.fill()` by default. `.pressSequentially()` only when the page reacts to each keystroke.\n- `.check()` makes a control checked — it does not toggle it, so calling it twice is safe and you never compute the current state first.\n- `.selectOption({ label })` matches the visible text; a bare string matches the option's `value`.\n- Verify a skinned `<select>` rather than assuming. `#country` carries `aria-hidden` and a Select2 class and still takes `.selectOption()` — on another app it might not.\n- **A test with no `expect()` cannot fail for the right reason.** Everything today is actions; assertions start tomorrow."
-    },
-    "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | where the code lives: ten repeated lines become one `fillRegistrationForm(page, email)` |\n| **Tools** | every line here is something you ran in [Fundamentals](/learn/w2/d1/p2) |\n| **Scope** | This lesson uses a plain function. The class-based Page Object Model is covered in Week 3. |",
-      "checkpoints": [
-        {
-          "question": "The helper is saved as `registration-helpers.ts`, deliberately not `registration-helpers.spec.ts`. Why does the suffix matter?",
-          "options": [
-            "The runner collects every `*.spec.ts` file and would try to execute a file with no tests in it",
-            "TypeScript refuses to export a function from a `.spec.ts` file",
-            "It is only a naming convention — either name works identically"
+            "Because a test without an assertion passes even when a step went wrong",
+            "Because Playwright runs a spec file only when its last line is an `expect` call",
+            "Because `fill()` reports an error only when an assertion follows it in the same test"
           ],
           "answer": 0,
-          "explanation": "The spec suffix is what the runner globs for. A helper that carries it gets collected and executed as a test file, and a file with no `test()` calls in it is an error, not a pass. The rule gets named formally in week 3."
-        },
-        {
-          "question": "Why does `fillRegistrationForm` take `email` as a parameter, but keep the first name, address and phone hardcoded?",
-          "options": [
-            "Because strings are the only type a helper can safely accept",
-            "Because the email is the one value these tests actually need to differ — parameterizing the rest would add knobs nobody turns",
-            "Because Playwright requires every helper to take exactly one parameter beyond `page`"
-          ],
-          "answer": 1,
-          "explanation": "Two tests register two learners, and the only thing that has to differ between them is the email. Everything else is fixed on purpose. Problem 3 asks you to add the phone as a second parameter — because there the tests do need it to vary."
+          "explanation": "Each action proves only that its own step could be performed. Without a check on the form, a test passes whether or not the fields hold the right values. `fill()` reports an error on its own when it cannot find the field, so the assertion is not what makes it report errors."
         }
       ],
-      "recap": "- Repetition across tests is a structural problem, not a typing problem: ten lines in thirty specs is thirty edits when the form changes.\n- The fix is the simplest thing that works — a function. The Page Object Model is the same instinct with a class around it, and it arrives in week 3.\n- Name a helper for what it does (`fillRegistrationForm`), not for the calls inside it.\n- No `expect()` inside a helper that performs actions. That is a preview of the \"no assertions in a page object\" rule, and it holds for the same reason."
+      "recap": "- `fill()` replaces the value of a text field in one step. `pressSequentially()` sends one key at a time, for a field that reacts to each keystroke.\n- `check()` makes a radio button or a checkbox checked, and `selectOption()` picks one option in a dropdown.\n- `page.locator()` finds a control by a **CSS selector** when it has no placeholder, role, or label: `#id` for an id, and `tag[attribute='value']` for an attribute.\n- A test on a form ends with an assertion on the form, such as `toHaveValue` on a field that was filled."
+    },
+    "3": {
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Moving the ten lines that fill the form into one function that every test can call. |\n| **Goals** | Write a helper function in a file of its own, export it, import it into a spec file, and explain why the helper acts and the test asserts. |\n| **Prerequisites** | [Fundamentals](/learn/w2/d1/p2), where you wrote the ten lines as a test. |\n| **Tools** | `export`, `import type`, and a function with a `Page` parameter. |\n| **Environment** | VS Code and its integrated terminal, in your project folder, then the editor on the right. |\n| **Scope** | This lesson uses a plain function. The class-based Page Object Model is covered in a later lesson. |\n| **Key takeaway** | Steps that several tests repeat belong in one function, and the assertions stay in the tests. |",
+      "checkpoints": [
+        {
+          "question": "Why is the helper file named `registration-helpers.ts` and not `registration-helpers.spec.ts`?",
+          "options": [
+            "Playwright runs every `.spec.ts` file, and this one contains no tests",
+            "TypeScript does not allow `export` in a file whose name ends in `.spec.ts`",
+            "The name of a helper file must end in `-helpers.ts` for an `import` line to find it"
+          ],
+          "answer": 0,
+          "explanation": "Playwright treats every file whose name ends in `.spec.ts` as a spec file and runs it. The helper contains no tests, so it must not match that pattern. `export` works in any file, and an `import` line finds a file by the path you write, whatever its name."
+        },
+        {
+          "question": "The helper takes the email as a parameter, but fills a fixed first name. Why?",
+          "options": [
+            "The email is the one value that the two tests need to differ",
+            "A function can take only one parameter besides `page`, so one value had to be chosen",
+            "The website checks the first name, so it must be the same in every test"
+          ],
+          "answer": 0,
+          "explanation": "The two tests register two people, and only their emails differ. A parameter for every field would make each call as long as the ten lines it replaces. A function can take as many parameters as it needs."
+        },
+        {
+          "question": "Where do the assertions belong when a test calls `fillRegistrationForm`?",
+          "options": [
+            "In the test, so that each test decides what the correct result is",
+            "In the helper, so that every test that calls it is checked in the same way",
+            "In both places, so that a mistake in either file is caught by the other one"
+          ],
+          "answer": 0,
+          "explanation": "The helper performs steps, and each test checks the result it expects. A helper that checked for Ada's email could not serve the test for Grace. Checking in both places would tie the helper to one expected result."
+        }
+      ],
+      "recap": "- Steps that several tests repeat belong in one function, in a file of its own that does not end in `.spec.ts`.\n- `export` makes a function available to other files, and `import type` brings in a type such as `Page`.\n- The helper performs the steps, and every assertion stays in the tests."
     },
     "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Beginner → Advanced, no answer key on the first two |\n| **Prerequisites** | [Fundamentals](/learn/w2/d1/p2) for the actions · [Implementation](/learn/w2/d1/p3) for the structure |\n| **Key takeaway** | more than ~20 minutes on one means the gap is in the lesson, not in you — go back and re-read |"
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three problems about actions on a form, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w2/d1/p2) for the actions, and [Implementation](/learn/w2/d1/p3) for the helper function. |\n| **Environment** | The editor on the right for the first problem, and your own project for the other two. |"
     }
   }
 }
