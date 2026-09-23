@@ -259,95 +259,13 @@
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Practice](/learn/w1/d3/p4) has you run the tests yourself and read your own configuration file.",
+          "text": "## What's next\n\nIn [Day 4 - Fundamentals](/learn/w1/d4/p2), you learn how to find the elements that a test acts on.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         }
       ],
       "problems": []
-    },
-    {
-      "part": 4,
-      "kind": "practice",
-      "title": "Running tests & the config file",
-      "tab_label": "Practice",
-      "source_notebook": "week1/day3_4.ipynb",
-      "has_runnable_code": true,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 1 - Day 3 - Practice - Running tests & the config file\n\nThese three problems use the commands from [Fundamentals](/learn/w1/d3/p2) and the settings from\n[Implementation](/learn/w1/d3/p3). You run each command in your own project.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | Three problems about running tests and reading your configuration file, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d3/p2) for the commands, and [Implementation](/learn/w1/d3/p3) for the settings. |\n| **Environment** | The integrated terminal in VS Code for the commands, and the editor on the right for your answers. |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## How to answer\n\nSelect **Start this in the editor** to open a template for a problem, and write your answer on the\nlines that start with `//`. Select **Reveal solution** to compare it with a model answer.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "1",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "2",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "3",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## When you are done\n\nYou can now run tests, read their results and their report, and recognize every setting in your\nconfiguration file. In [Day 4 - Fundamentals](/learn/w1/d4/p2), you learn how to find the elements\nthat a test acts on.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": [
-        {
-          "number": 1,
-          "difficulty": "Beginner",
-          "statement": "**What to build.** A short record of three test runs. In your project, run these commands one\nafter another, and note what you see after each:\n\n1. `npx playwright test --project=chromium --headed`\n2. `npx playwright test`\n3. `npx playwright show-report`\n\nThe third command keeps the terminal busy while the report is open. When you have looked at the\nreport, click in the terminal and press **Ctrl+C** to get the prompt back.\n\n**Where.** Run the commands in the integrated terminal in VS Code, and write your notes in the\neditor, using the template.\n\n**How you will know it worked.** You saw a Chromium window open and close, the second run\nreported six passed tests, and the report opened in your browser.",
-          "stub": "// Problem 1: three test runs\n//\n// 1. With --project=chromium --headed, what did you see?\n//\n// 2. How many tests passed without any options, and why that number?\n//\n// 3. What does the report show for each test?",
-          "solution": "**A model answer.** Your times and worker counts will be different.\n\n```ts\n// Problem 1: three test runs\n//\n// 1. With --project=chromium --headed, what did you see?\n//    Chromium windows opened, showed the Playwright website, and closed.\n//    The output said: 2 passed.\n//\n// 2. How many tests passed without any options, and why that number?\n//    6 passed. The file has two tests, and projects lists three browsers,\n//    so each test ran three times.\n//\n// 3. What does the report show for each test?\n//    Its name, the browser, whether it passed, and how long it took.\n//    Selecting a test shows each of its steps.\n```\n\n**Why this problem matters.** Watching a headed run shows that Playwright controls a real browser. The count of six shows that `projects` multiplies every test. The report is created after every run, so it is always there when you need it."
-        },
-        {
-          "number": 2,
-          "difficulty": "Intermediate",
-          "statement": "**What to build.** Answers to three questions about your project's configuration file. Open\n`playwright.config.ts` in VS Code and answer from what you see in the file:\n\n1. What value does `retries` have when you run tests on your computer?\n2. What value does `trace` have in the `use` block?\n3. How many projects are active, not counting lines that are comments?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Each answer comes from a line in your own file that you can\npoint to.",
-          "stub": "// Problem 2: my configuration file\n//\n// 1. retries on my computer:\n//\n// 2. trace:\n//\n// 3. Active projects:",
-          "solution": "**A model answer**, for a project created with `npm init playwright@latest`:\n\n> 1. **`retries`** is `process.env.CI ? 2 : 0`. On your computer, `process.env.CI` is not set, so the value is **0**: a failed test is reported the first time it fails.\n> 2. **`trace`** is `'on-first-retry'`. A trace is recorded only when Playwright runs a failed test again, which does not happen on your computer while `retries` is 0.\n> 3. **Three projects** are active: `chromium`, `firefox`, and `webkit`. The mobile and branded browser projects are comments.\n\n**What makes a good answer** is that each value comes from a line you can point to. A CI server retries a failed test, so it can report a pass where your computer reported a failure."
-        },
-        {
-          "number": 3,
-          "difficulty": "Advanced",
-          "statement": "**What to build.** The first version of a configuration file for a new project, with a reason\nfor each choice. Imagine that a team asks you to set up a new project tomorrow. Decide:\n\n1. Which browsers would you start with in `projects`?\n2. What would you set `retries` to, on your computer and on a CI server?\n3. What would you set `trace`, `screenshot`, and `video` to in the `use` block?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Every choice has a one-line reason, not only a preference.",
-          "stub": "// Problem 3: my first configuration for a new project\n//\n// 1. Browsers in projects, and why:\n//\n// 2. retries, and why:\n//\n// 3. trace, screenshot, and video, and why:",
-          "solution": "**A model answer.** There is no single correct configuration, but every choice needs a reason:\n\n```ts\nexport default defineConfig({\n  testDir: './tests',\n  retries: process.env.CI ? 2 : 0,\n  use: {\n    baseURL: 'https://test-automation-banking.vercel.app',\n    trace: 'retain-on-failure',\n    screenshot: 'only-on-failure',\n    video: 'retain-on-failure',\n  },\n  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],\n});\n```\n\n> **Chromium only, to start with.** In a new project, most failures are mistakes in the tests themselves. Running them in three browsers means investigating each failure three times. Add Firefox and WebKit once the tests are stable.\n>\n> **`retries` at 0 on your computer and 2 on a CI server.** On your computer, you want to see every failure at once. On a CI server, a retry absorbs a short network problem that has nothing to do with the application.\n>\n> **Evidence only for failures.** A trace, a screenshot, and a video of every passing test fill the disk with files that nobody opens. Keeping them for failures means that every failure can be investigated.\n\n**What makes a good answer** is a reason for every line. A later lesson covers these settings in depth."
-        }
-      ]
     }
   ]
 }

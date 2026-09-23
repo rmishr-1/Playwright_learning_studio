@@ -250,95 +250,13 @@
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Practice](/learn/w1/d2/p4) has you check your own setup and read your project's configuration file.\nIn [Day 3 - Fundamentals](/learn/w1/d3/p2), you run tests from the terminal.",
+          "text": "## What's next\n\nIn [Day 3 - Fundamentals](/learn/w1/d3/p2), you run tests from the terminal.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         }
       ],
       "problems": []
-    },
-    {
-      "part": 4,
-      "kind": "practice",
-      "title": "Environment setup",
-      "tab_label": "Practice",
-      "source_notebook": "week1/day2_4.ipynb",
-      "has_runnable_code": true,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 1 - Day 2 - Practice - Environment setup\n\nThese three problems check the setup you completed in [Fundamentals](/learn/w1/d2/p2). Each answer\nis something you can find on your own computer or in your own project.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | Three problems that check your setup and your project's configuration file, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2) and [Implementation](/learn/w1/d2/p3), and the project you created. |\n| **Environment** | Your terminal and VS Code, where you find each answer, and the editor on the right, where you write it. |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## How to answer\n\nSelect **Start this in the editor** to open a template for a problem, and write your answer on the\nlines that start with `//`. Select **Reveal solution** to compare it with a model answer.\n[Day 1 - Practice](/learn/w1/d1/p4) explains how the problems work in more detail.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "1",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "2",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "3",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## When you are done\n\nYour computer can now run Playwright, and you know the main parts of a project and its\nconfiguration file. In [Day 3 - Fundamentals](/learn/w1/d3/p2), you run tests from the terminal.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": [
-        {
-          "number": 1,
-          "difficulty": "Beginner",
-          "statement": "**What to build.** A record of the Node.js and npm versions on your computer.\n\n**Where.** Run `node -v` and `npm -v` in your terminal, and write the two version numbers in the\neditor, using the template.\n\n**How you will know it worked.** You wrote down two version numbers from your own computer, and\nthe Node.js version is 20 or higher.",
-          "stub": "// Problem 1: my Node.js and npm versions\n//\n// Node.js version (from node -v):\n//\n// npm version (from npm -v):\n//\n// Is the Node.js version 20 or higher?",
-          "solution": "**A model answer.** Your numbers will be different, which is expected.\n\n```ts\n// Problem 1: my Node.js and npm versions\n//\n// Node.js version (from node -v): v22.12.0\n//\n// npm version (from npm -v): 10.9.0\n//\n// Is the Node.js version 20 or higher? Yes, it is 22.\n```\n\n**What makes a good answer** is that both numbers come from your own terminal. When a test behaves differently on two computers, the Node.js version is one of the first things to compare. If your version is lower than 20, install the LTS version from https://nodejs.org before Day 3."
-        },
-        {
-          "number": 2,
-          "difficulty": "Intermediate",
-          "statement": "**What to build.** Answers to four questions about your project's configuration file. Open\n`playwright.config.ts` in VS Code and answer from what you see in the file:\n\n1. Which folder does `testDir` name?\n2. Which browsers does `projects` list, not counting lines that start with `//`?\n3. Which reporter does `reporter` name?\n4. Is `baseURL` set, or does its line start with `//`?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Each answer comes from your own `playwright.config.ts`, not from\nthe lesson.",
-          "stub": "// Problem 2: my project's configuration file\n//\n// 1. The folder that testDir names:\n//\n// 2. The browsers in projects:\n//\n// 3. The reporter:\n//\n// 4. Is baseURL set?",
-          "solution": "**A model answer**, for a project created with the answers from [Fundamentals](/learn/w1/d2/p2):\n\n> 1. **`testDir`** names `./tests`, the folder that holds `example.spec.ts`.\n> 2. **`projects`** lists `chromium`, `firefox`, and `webkit`. The file also contains entries for mobile browsers, Microsoft Edge, and Google Chrome, but their lines start with `//`, so Playwright ignores them.\n> 3. **`reporter`** names `html`, the report that you open in a browser after a run.\n> 4. **`baseURL`** is not set. Its line starts with `//`, so it is a comment. You learn what `baseURL` does in [Day 3 - Implementation](/learn/w1/d3/p3).\n\n**What makes a good answer** is that every answer comes from the file itself. A line that starts with `//` is a comment, so the setting on it has no effect. Reading a configuration file carefully is how you find out what a project really does."
-        },
-        {
-          "number": 3,
-          "difficulty": "Advanced",
-          "statement": "**What to build.** A short plan for a second project. Imagine that you are setting up a new\nPlaywright project for a team tomorrow. Decide these three things, and give a reason for each:\n\n1. Would you keep one `tests` folder, or give each kind of test its own folder?\n2. Would you run every test in all three browsers from the start, or begin with one?\n3. Would you answer **Yes** to the GitHub Actions question this time?\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** Each decision has a reason, not only a preference.",
-          "stub": "// Problem 3: my plan for a second project\n//\n// 1. One tests folder, or one folder for each kind of test? Why?\n//\n// 2. Three browsers, or one to start with? Why?\n//\n// 3. GitHub Actions: Yes or No? Why?",
-          "solution": "**A model answer.** There is no single right plan, but each choice needs a reason.\n\n> **Folders.** I would give each kind of test its own folder from the start, such as `tests/ui` and `tests/api`. Moving files later means changing the configuration, and every teammate has to learn the new layout.\n>\n> **Browsers.** I would begin with Chromium only. Running every test in three browsers takes three times as long, and early failures are usually mistakes in the tests, not differences between browsers. I would add Firefox and WebKit once the tests are stable.\n>\n> **GitHub Actions.** Yes. For a team, running the tests automatically on a server each time someone changes the code keeps the tests trustworthy.\n\n**What makes a good answer** is a reason for each choice. The answer \"Three browsers, because more is better\" states a preference. The answer \"Chromium first, because early failures are usually my own mistakes\" states a reason."
-        }
-      ]
     }
   ]
 }

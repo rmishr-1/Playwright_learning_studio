@@ -64,9 +64,6 @@
         }
       ],
       "recap": "- **CI**, or continuous integration, is a server that runs tests automatically. `process.env.CI` is true there and false on your computer.\n- `retries` is 0 on your computer and 2 on a CI server, so a failure on your computer shows itself at once.\n- The `use` block holds settings that every test receives. `baseURL` lets a test open short addresses such as `'/'`.\n- A **trace** is a step-by-step recording of a test. Keep traces, screenshots, and videos only for failed tests.\n- Every test runs once in each project that `projects` lists."
-    },
-    "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three problems about running tests and reading your configuration file, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d3/p2) for the commands, and [Implementation](/learn/w1/d3/p3) for the settings. |\n| **Environment** | The integrated terminal in VS Code for the commands, and the editor on the right for your answers. |"
     }
   }
 }

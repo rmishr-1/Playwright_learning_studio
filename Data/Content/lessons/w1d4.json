@@ -64,9 +64,6 @@
     }
    ],
    "recap": "- Playwright chooses which files to run from their names, before it reads any code.\n- A file with the wrong name is ignored, without an error or a warning.\n- `npx playwright test --list` lists the tests that Playwright can see, without running them.\n- When a test seems to be missing, list the tests and count them."
-  },
-  "4": {
-   "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three problems about Codegen, locators, and the naming rule, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d4/p2) for Codegen and locators, and [Implementation](/learn/w1/d4/p3) for the naming rule. |\n| **Environment** | Your own project for Codegen and the test commands, and the editor on the right for your answers. |"
   }
  }
 }

@@ -49,6 +49,7 @@ to match them.
 | Every technical term is explained where it first appears | Bold the term once and explain it in plain words in the same sentence. A glossary is not a substitute. |
 | Professional, beginner-friendly language | Every lesson is written for someone opening the course for the first time. Chatty phrasing, slang, and insider shorthand are removed. |
 | Never describe a lesson by what it lacks | "No new TypeScript today", "No code today", and a card row that answers "none" are all removed. State what the lesson *is* about. |
+| No Practice tab on Week 1 Days 1 to 4 | The owner removed those four Practice tabs. Week 1 practice starts on Day 5, whose Practice tab is kept. Day 1 now has only Fundamentals, and Days 2 to 4 have Fundamentals and Implementation. |
 | Remove a tab that has no content of its own | If a tab lacks content, or its lesson needs none, remove the tab instead of explaining why it is empty. The day opens on its next tab. See [section 2](#tabs-with-no-content-are-removed). |
 | Do not fill a sparse tab with prose that repeats its card | Where a tab is kept but has little content, it is a heading and its card, with nothing in between. |
 | Refer to lessons by their tab names | Write *Fundamentals*, *Day 4 - Fundamentals*, or *Week 1 - Day 5 - TypeScript*. Never write the old notebook numbering, such as "Day 5.2". See [section 7](#referring-to-another-lesson). |
@@ -58,7 +59,7 @@ to match them.
 | American spelling | *organize*, *behavior*, *favorite*. |
 | At-a-glance cards use formal labels | Every card uses only Focus, Goals, Prerequisites, Tools, Environment, Scope, and Key takeaway, in that order. Each row is a full, formal sentence. See [section 2](#the-at-a-glance-card). |
 | No "Next" row on a card | The tab bar and the week menu already show where to go next, so a card never repeats it. |
-| Explain the course's own conventions on first use | A beginner has not seen a practice page before. The first one explains the Beginner, Intermediate, and Advanced levels, the editor, and `//` comments, instead of referring to them as if they were known. |
+| Explain the course's own conventions on first use | A beginner has not seen a practice page before. The first one, Week 1 - Day 5 - Practice, explains the Beginner, Intermediate, and Advanced levels, the editor, and `//` comments, instead of referring to them as if they were known. |
 | Code examples follow the GeeksforGeeks order | A lead-in ending in a colon, then the code, **Output**, and **Explanation**. See [section 8](#8-code-presentation). |
 | The learner works in their own project | The learner has no copy of the course's training repository. From Week 1 - Day 2 - Fundamentals on, they create a project with `npm init playwright@latest`, and every lesson that needs the test runner uses that project, its `tests` folder, and its integrated terminal in VS Code. Code that runs in the studio uses the editor's helpers (`launch()`, `show()`, `BASE_URL`, `USERS`). |
 | Every fact is checked against a real run | Command output, file contents, and the behavior of the banking website are copied from a real run, not written from memory. For example, a wrong password shows the message *Please Enter Valid Credentials*. |
@@ -196,7 +197,8 @@ Output → Explanation**. That predictability is its main strength, and this cou
 1. Opening
 2. The at-a-glance card
 3. How the problems work: the three levels, how to use the editor, and how to check an answer.
-   Explain these in full on the first practice page of the course, and briefly after that.
+   Explain these in full on the first practice page of the course, Week 1 - Day 5 - Practice, and
+   briefly after that.
 4. Three problems, each using the fixed labels in section 10, and each with an editor template
    that lists the questions to answer as `//` comment lines
 5. When you are done
@@ -239,6 +241,10 @@ on the first tab it still has.
 - **The TypeScript tabs on Week 1 Days 1 to 4 were removed on this basis.** The course's language
   lessons begin on Day 5, so those four tabs had nothing of their own to teach. Each of those days
   now opens on Fundamentals. Day 5 keeps its TypeScript tab, because it is a real lesson.
+- **The Practice tabs on Week 1 Days 1 to 4 were removed at the owner's request.** Their rewrites,
+  problem statements, solutions, and cards were deleted with them, and every link to them now points
+  to the next lesson. Day 5 keeps its Practice tab, which now explains the practice conventions in
+  full. `npm run verify` checks that those four days carry no problems at all.
 - **To remove a tab**, add its key (for example `w1d2p1`) to `REMOVED_PARTS` in
   `scripts/lesson-overlay.ts`, delete its entry from the lesson card file, and run
   `npm run overlay`. The importer applies the same list, so a re-import cannot bring the tab back.

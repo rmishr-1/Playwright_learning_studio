@@ -64,9 +64,6 @@
         }
       ],
       "recap": "- Give each kind of test its own folder, and group tests by the setup they share.\n- `testDir` tells Playwright where to start looking. `testMatch` decides which files count as tests.\n- A **pattern** such as `**/*.spec.ts` matches many file names at once.\n- **Git** saves the history of a project. **If a run creates a file again each time, it does not belong in Git.**"
-    },
-    "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three problems that check your setup and your project's configuration file, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2) and [Implementation](/learn/w1/d2/p3), and the project you created. |\n| **Environment** | Your terminal and VS Code, where you find each answer, and the editor on the right, where you write it. |"
     }
   }
 }

@@ -69,7 +69,7 @@ function main(): void {
   );
 
   // Every day has parts 1-4, less the tabs removed for having no content of their own
-  // (REMOVED_PARTS: the TypeScript tab on Week 1 Days 1-4) and the one notebook that never existed
+  // (REMOVED_PARTS: the TypeScript and Practice tabs on Week 1 Days 1-4) and the one notebook that never existed
   // (Week 1 Day 1 has no _3). Stated as the exact expected list, so a part that goes missing for
   // any OTHER reason still fails here.
   const NO_NOTEBOOK = new Set(['w1d1p3']);
@@ -127,15 +127,20 @@ function main(): void {
 
   console.log('\nPractice');
   const inScope = days.filter((d) => !d.locked);
+  // A day whose Practice tab was removed (REMOVED_PARTS, Week 1 Days 1-4) has no problems at all;
+  // every other open day has exactly three. Stated both ways, so problems reappearing on a day
+  // without a Practice tab fail here as surely as problems going missing from one that has it.
+  const practiceRemoved = (d: (typeof days)[number]) => REMOVED_PARTS.has('w' + d.week + 'd' + d.day + 'p4');
+  const problemCount = (d: (typeof days)[number]) => d.parts.reduce((n, p) => n + p.problems.length, 0);
   check(
-    'every available day has practice problems',
-    inScope.every((d) => d.parts.some((p) => p.problems.length > 0)),
+    'every available day with a Practice tab has practice problems',
+    inScope.filter((d) => !practiceRemoved(d)).every((d) => d.parts.some((p) => p.problems.length > 0)),
   );
   check(
-    'every available day has exactly 3 problems',
-    inScope.every((d) => d.parts.reduce((n, p) => n + p.problems.length, 0) === 3),
+    'every available day has exactly 3 problems, or none where its Practice tab was removed',
+    inScope.every((d) => problemCount(d) === (practiceRemoved(d) ? 0 : 3)),
     inScope
-      .filter((d) => d.parts.reduce((n, p) => n + p.problems.length, 0) !== 3)
+      .filter((d) => problemCount(d) !== (practiceRemoved(d) ? 0 : 3))
       .map((d) => 'w' + d.week + 'd' + d.day)
       .join(' '),
   );

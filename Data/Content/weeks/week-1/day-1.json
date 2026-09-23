@@ -78,7 +78,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Explore the Playwright website\n\nOpen a new browser tab and follow these steps:\n\n1. Go to **https://playwright.dev**.\n2. Read the short description at the top of the home page, and the three features listed below it.\n3. Select **Docs**, then **Writing tests**, and read the page quickly. The code on that page makes\n   more sense after [Day 5 - Fundamentals](/learn/w1/d5/p2), where you write your first test.\n4. Write down three features on the site that this lesson did not mention. You need them for\n   [Practice](/learn/w1/d1/p4).",
+          "text": "## Explore the Playwright website\n\nOpen a new browser tab and follow these steps:\n\n1. Go to **https://playwright.dev**.\n2. Read the short description at the top of the home page, and the three features listed below it.\n3. Select **Docs**, then **Writing tests**, and read the page quickly. The code on that page makes\n   more sense after [Day 5 - Fundamentals](/learn/w1/d5/p2), where you write your first test.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -137,95 +137,13 @@
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\nContinue to [Practice](/learn/w1/d1/p4) for three short problems. In\n[Day 2 - Fundamentals](/learn/w1/d2/p2), you set up your computer so that you can write and run\ntests.",
+          "text": "## What's next\n\nIn [Day 2 - Fundamentals](/learn/w1/d2/p2), you set up your computer so that you can write and run\ntests.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         }
       ],
       "problems": []
-    },
-    {
-      "part": 4,
-      "kind": "practice",
-      "title": "Why automation, why Playwright",
-      "tab_label": "Practice",
-      "source_notebook": "week1/day1_4.ipynb",
-      "has_runnable_code": true,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 1 - Day 1 - Practice - Why automation, why Playwright\n\nThese three problems help you review what you learned in [Fundamentals](/learn/w1/d1/p2). You\nanswer each one in writing, using the lesson and the Playwright website.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | Three written problems that review this day's lesson, from Beginner level to Advanced. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d1/p2), including the Playwright website that it asks you to explore. |\n| **Environment** | The editor on the right, where you write each answer as comments. |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## How the problems work\n\nEach problem is marked with a level: **Beginner**, **Intermediate**, or **Advanced**. The problems\nget harder in that order. Every practice page in this course uses the same three levels.\n\nTo answer a problem, select **Start this in the editor**. The editor on the right opens with a short\ntemplate. Write your answer on the lines that start with `//`. In TypeScript, a line that starts\nwith `//` is a **comment**: text for people to read, which the computer ignores.\n\nWhen you finish a problem, select **Reveal solution** to compare your answer with a model answer.\nYour answer does not need to match it word for word.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "1",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "2",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "problem-ref",
-          "text": "3",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## When you are done\n\nYou now know what software testing is, what automation can and cannot do, and why teams choose\nPlaywright. In [Day 2 - Fundamentals](/learn/w1/d2/p2), you set up your computer so that you can\nwrite and run tests.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": [
-        {
-          "number": 1,
-          "difficulty": "Beginner",
-          "statement": "**What to build.** A short written answer about one test that you could run by hand. Choose any\napplication you use, such as a banking website or a shopping app, and one task in it, such as\nsigning in. Then answer these questions:\n\n1. What are the steps, and what is the expected result?\n2. Could Playwright automate this test? Use the two things from [Fundamentals](/learn/w1/d1/p2):\n   a known expected result, and a way to find the element.\n3. Which element on the page would the test need to find? Name a specific one, such as the\n   **Login** button or the email field.\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** You named a specific element, such as a button or a text field,\nand not a whole page such as \"the login page\". If you cannot name one, the test may not be ready\nto automate yet.",
-          "stub": "// Problem 1: a test you could run by hand\n//\n// The application and the task:\n//\n// The steps and the expected result:\n//\n// Could Playwright automate it, and why?\n//\n// The element the test would need to find:",
-          "solution": "**A model answer.** Your answer names a different test, which is expected.\n\n> **The application and the task:** the course's banking website, and signing in.\n>\n> **The steps and the expected result:** open the login page, enter a valid email and password, and select **Login**. The expected result is that the account dashboard opens and shows your name.\n>\n> **Could Playwright automate it, and why?** Yes. The test has a known expected result, and every step uses an element that the test can find.\n>\n> **The element the test would need to find:** the **Login** button, and the two text fields for the email and the password.\n\n**What makes a good answer** is naming a specific element, such as a button or a text field. An answer such as \"automate the login page\" is too general, because a test cannot click a whole page. It acts on one element at a time."
-        },
-        {
-          "number": 2,
-          "difficulty": "Intermediate",
-          "statement": "**What to build.** A list of three Playwright features that [Fundamentals](/learn/w1/d1/p2) did\nnot describe, with one sentence for each that explains what the feature is for.\n\n**Where.** Find the features on [playwright.dev](https://playwright.dev), and write your list in\nthe editor.\n\n**How you will know it worked.** Your three features are different from each other, and each\nsentence is in your own words.\n\n> **Hint:** Look at the features on the home page, and at the headings in the menu of the\n> **Docs** section. The lesson already describes automatic waiting, assertions, the test runner,\n> screenshots and video, Codegen, and mobile emulation, so choose three others.",
-          "stub": "// Problem 2: three Playwright features\n//\n// Feature 1, and what it is for:\n//\n// Feature 2, and what it is for:\n//\n// Feature 3, and what it is for:",
-          "solution": "**A model answer.** Three features from [playwright.dev](https://playwright.dev) that the lesson did not describe:\n\n1. **Trace Viewer** records every step of a test run, with a picture of the page at each step. After a test fails, you can replay the run to see what went wrong.\n2. **Test retries** run a failed test again, a set number of times, before reporting it as failed. This shows which tests fail only some of the time. You learn to configure retries in a later lesson.\n3. **Parallel runs** start several tests at the same time instead of one after another, so that a large set of tests finishes sooner.\n\nOther good choices include **UI Mode**, **component testing**, and **visual comparisons**.\n\n**What makes a good answer** is that the three features do different things, and each sentence is in your own words."
-        },
-        {
-          "number": 3,
-          "difficulty": "Advanced",
-          "statement": "**What to build.** A short plan for one test in a kind of testing other than the web interface.\nChoose API, performance, or mobile apps from the table in [Fundamentals](/learn/w1/d1/p2), and\ndescribe one test in it. For example, a performance test could check what happens when 100\npeople sign in to a banking website at the same time. Then use the section *Where the effort goes*\nin the same lesson to write down where most of the work for that test would go.\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** You named a tool from the table that suits your test, and your\neffort estimate describes your test in particular, not the general split.",
-          "stub": "// Problem 3: a test outside the web interface\n//\n// The kind of testing, and a tool from the table:\n//\n// The test, in one sentence:\n//\n// Where most of the work would go:",
-          "solution": "**A model answer.** This answer uses the performance example: checking what happens when 100 people sign in to the banking website at the same time.\n\n> **The kind of testing, and a tool from the table:** performance testing, with k6.\n>\n> **The test, in one sentence:** 100 simulated users sign in at the same time, and every sign-in must finish within two seconds.\n>\n> **Where most of the work would go:** into learning the application. You need to know how signing in works behind the scenes, which test accounts you may use, and how fast the team expects a sign-in to be. Writing the test in the tool is the smaller part of the work.\n\n**The point of this problem** is the balance of the effort. Learning the tool is the smaller part. Understanding the application, and what the correct result is for it, is most of the work."
-        }
-      ]
     }
   ]
 }

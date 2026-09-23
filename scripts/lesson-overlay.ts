@@ -232,10 +232,13 @@ function rewriteHeading(text: string, tab: string, generated: boolean): string |
  * Keyed "w<week>d<day>p<part>". Add a key here to remove another tab.
  */
 export const REMOVED_PARTS: ReadonlySet<string> = new Set([
+  // The TypeScript tab on Week 1 Days 1-4: the language lessons begin on Day 5.
   'w1d1p1', 'w1d2p1', 'w1d3p1', 'w1d4p1',
   // Week 2 Days 1, 4 and 5 have no language lesson either: their TypeScript tabs were "nothing
   // new today" pointers, which the owner's rule removes rather than keeps.
   'w2d1p1', 'w2d4p1', 'w2d5p1',
+  // The Practice tab on Week 1 Days 1-4, removed by the course owner. Day 5 keeps its Practice tab.
+  'w1d1p4', 'w1d2p4', 'w1d3p4', 'w1d4p4',
 ]);
 
 export function applyRemovedParts(day: CourseDay): CourseDay {
