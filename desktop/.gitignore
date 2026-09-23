@@ -8,3 +8,5 @@ release/
 # the private key can issue licences. Keep a backup somewhere safe.
 keys/
 licences/
+# Screenshots and results of the app tests.
+test-output/

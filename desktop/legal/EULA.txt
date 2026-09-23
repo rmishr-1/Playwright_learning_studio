@@ -1,0 +1,67 @@
+QA PRACTICE TRAINING STUDIO
+END-USER LICENCE AGREEMENT
+
+[DRAFT FOR LEGAL REVIEW. This text was prepared as a starting point and has not been reviewed by
+a lawyer. Evoke Technologies must have it reviewed, and completed where marked, before the
+software is given to anyone outside Evoke. Changing this file makes every user accept it again.]
+
+This agreement is between Evoke Technologies [full legal name, registered office] ("Evoke") and
+the person or organisation named in the licence ("you"). By selecting "I accept" you agree to it.
+If you do not agree, select Quit and do not use the software.
+
+1. WHAT IS LICENSED
+The "Software" is the QA Practice Training Studio application, its course content (lessons,
+exercises, quizzes, solutions, diagrams, example code and practice pages) and its documentation,
+including every update Evoke provides. The Software is licensed to you, not sold. Evoke and its
+licensors own it and all intellectual property rights in it.
+
+2. YOUR LICENCE
+Evoke grants you a non-exclusive, non-transferable licence to install and use the Software for
+your own learning, for one named learner, on the computer or computers the licence allows, for
+the period the licence allows. The licence file Evoke issued states these limits.
+
+3. WHAT YOU MAY NOT DO
+Except as the law expressly allows despite this restriction, you may not, and may not help
+anyone else to:
+ (a) copy, publish, distribute, share, sell, rent, lend or sub-license the Software or any part
+     of it, including the course content, in any form (including screenshots, recordings,
+     transcripts, printouts or text copied from the Software), except for your own personal
+     notes;
+ (b) extract, decrypt, scrape, download in bulk or otherwise obtain the course content other than
+     by viewing it in the Software as intended;
+ (c) reverse engineer, decompile, disassemble, decode or modify the Software, or attempt to derive
+     its source code, keys or content formats;
+ (d) remove, bypass or interfere with its licence checks, copy protection, identifying marks or
+     notices, or share your licence file;
+ (e) use the Software or its content to create a competing course or product.
+The code you write yourself while doing the exercises is yours.
+
+4. IDENTIFYING MARKS
+Each copy of the Software and its content carries marks that identify the licence it was issued
+under. Evoke may use these marks to find the source of an unauthorised copy.
+
+5. THIRD-PARTY SOFTWARE
+The Software includes third-party components (among them Electron, Node.js, Playwright and the
+Chromium, Firefox and WebKit browsers) that are licensed under their own terms, listed in
+THIRD-PARTY-NOTICES.txt in the installation folder. Those terms apply to those components, and
+nothing in this agreement limits your rights under them.
+
+6. TERMINATION
+This licence ends automatically if you break it, or when its period ends. When it ends you must
+stop using the Software and delete it. Sections 1, 3, 4, 7, 8 and 9 continue after it ends.
+
+7. NO WARRANTY
+The Software is provided "as is". To the extent the law allows, Evoke gives no warranty that it
+will be error-free or meet your needs. [Legal to review against applicable consumer law.]
+
+8. LIMITATION OF LIABILITY
+To the extent the law allows, Evoke is not liable for any indirect or consequential loss, and
+its total liability under this agreement is limited to [the fee you paid for the licence].
+[Legal to complete.]
+
+9. GENERAL
+This agreement is governed by the laws of [jurisdiction], and the courts of [place] have
+exclusive jurisdiction. [Legal to complete.] It is the whole agreement between you and Evoke about
+the Software. If any part of it cannot be enforced, the rest still applies.
+
+Copyright (c) 2026 Evoke Technologies. All rights reserved.

@@ -1,2 +1,5 @@
 # cmd.exe misreads batch files with Unix line endings, so they always check out with Windows ones.
 *.bat text eol=crlf
+# The app asks every learner to accept the agreement again when its text changes (a hash of the
+# file), so its line endings must not depend on the computer it was built on.
+desktop/legal/*.txt text eol=crlf

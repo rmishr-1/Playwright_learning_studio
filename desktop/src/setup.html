@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'" />
+    <title>Setup</title>
+    <style>
+      :root {
+        --ink: #1f2b4d; --muted: #5d6a85; --rule: #d9dfea; --paper: #fff; --page: #f4f6fa;
+        --accent: #2563eb; --bad: #b42318; --bad-wash: #fef3f2;
+        font-family: 'Segoe UI', system-ui, sans-serif; color: var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--page); height: 100vh; display: flex; flex-direction: column; }
+      header { display: flex; align-items: center; gap: 14px; padding: 18px 28px; background: var(--paper); border-bottom: 1px solid var(--rule); }
+      header img { height: 34px; }
+      header .name { font-weight: 600; font-size: 17px; }
+      header .ver { color: var(--muted); font-size: 12.5px; }
+      main { flex: 1; overflow: auto; padding: 26px 28px; display: flex; flex-direction: column; gap: 16px; }
+      h1 { margin: 0; font-size: 21px; }
+      p { margin: 0; line-height: 1.6; font-size: 14.5px; }
+      .reason { background: var(--bad-wash); border: 1px solid #fecdca; border-left: 3px solid var(--bad); color: var(--bad); padding: 10px 14px; border-radius: 8px; font-size: 14px; }
+      .machine { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+      .machine code { font-family: Consolas, monospace; font-size: 15px; background: var(--paper); border: 1px solid var(--rule); padding: 5px 10px; border-radius: 6px; letter-spacing: .04em; }
+      .eula { flex: 1; min-height: 200px; overflow: auto; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; white-space: pre-wrap; font-size: 13px; line-height: 1.55; font-family: 'Segoe UI', system-ui, sans-serif; }
+      label { display: flex; gap: 9px; align-items: center; font-size: 14.5px; }
+      footer { display: flex; gap: 10px; justify-content: flex-end; align-items: center; padding: 14px 28px; background: var(--paper); border-top: 1px solid var(--rule); }
+      footer .copy { margin-right: auto; color: var(--muted); font-size: 12px; }
+      button { font: inherit; font-size: 14px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); cursor: pointer; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+      button:disabled { opacity: .5; cursor: default; }
+      button.small { padding: 4px 10px; font-size: 13px; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="logo.png" alt="" />
+      <div>
+        <div class="name" id="product"></div>
+        <div class="ver" id="version"></div>
+      </div>
+    </header>
+
+    <main id="licence" hidden>
+      <h1>Add your licence</h1>
+      <p>This copy needs a licence file from Evoke before it can open the course. Choose the file you were given (it ends in <b>.lic</b>).</p>
+      <div class="reason" id="reason" hidden></div>
+      <p>If your licence is for one computer, Evoke needs this computer's machine code to issue it:</p>
+      <div class="machine"><code id="machine"></code><button class="small" id="copy">Copy</button><span id="copied" hidden>Copied</span></div>
+    </main>
+
+    <main id="eula" hidden>
+      <h1>Licence agreement</h1>
+      <p>Licensed to <b id="licensee"></b> (<span id="licence-id"></span>). Read the agreement, and accept it to open the studio.</p>
+      <div class="eula" id="eula-text" tabindex="0"></div>
+      <label><input type="checkbox" id="agree" /> I have read the licence agreement and I accept it.</label>
+    </main>
+
+    <footer>
+      <span class="copy" id="copyright"></span>
+      <button id="quit">Quit</button>
+      <button class="primary" id="choose" hidden>Choose licence file&hellip;</button>
+      <button class="primary" id="accept" hidden disabled>Accept and open</button>
+    </footer>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      function show(s) {
+        $('product').textContent = s.product;
+        $('version').textContent = 'Version ' + s.version;
+        $('copyright').textContent = s.copyright;
+        $('machine').textContent = s.machine;
+        const licence = s.step === 'licence';
+        $('licence').hidden = !licence;
+        $('choose').hidden = !licence;
+        $('eula').hidden = licence;
+        $('accept').hidden = licence;
+        $('reason').hidden = !s.reason;
+        $('reason').textContent = s.reason;
+        if (!licence) {
+          $('licensee').textContent = s.licensee;
+          $('licence-id').textContent = s.licenceId;
+          $('eula-text').textContent = s.eula;
+        }
+      }
+      $('choose').onclick = async () => show(await window.setup.chooseLicence());
+      $('copy').onclick = async () => {
+        await window.setup.copyMachineCode();
+        $('copied').hidden = false;
+      };
+      $('agree').onchange = () => ($('accept').disabled = !$('agree').checked);
+      $('accept').onclick = async () => {
+        const s = await window.setup.accept();
+        if (s) show(s);
+      };
+      $('quit').onclick = () => window.setup.quit();
+      window.setup.state().then(show);
+    </script>
+  </body>
+</html>
