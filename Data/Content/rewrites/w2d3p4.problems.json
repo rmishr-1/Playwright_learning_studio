@@ -1,0 +1,17 @@
+{
+  "1": {
+    "difficulty": "Beginner",
+    "statement": "**What to build.** Three unique emails, each built with `Date.now()` and `Math.random()` as in\n[TypeScript](/learn/w2/d3/p1), and each printed with `console.log`. Below them, write a comment\nthat explains why the three emails differ.\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** The Console tab shows three emails, and no two of them are the\nsame.",
+    "stub": "// Problem 1: three unique emails\n//\n// Build the first email, and print it:\n//\n// Build the second email, and print it:\n//\n// Build the third email, and print it:\n//\n// Why the three emails differ:"
+  },
+  "2": {
+    "difficulty": "Intermediate",
+    "statement": "**What to build.** A test that registers with `uniqueEmail()` and checks the email box. In the\n`tests` folder, create `practice-unique.spec.ts`, with one test that calls `uniqueEmail()`, stores\nthe result in a `const`, passes it to `fillRegistrationForm`, and asserts the email box with\n`toHaveValue`. Print the email with `console.log`. Then run the test twice.\n\n**Where.** In VS Code and its integrated terminal. Copy your test and the two printed emails into\nthe editor, using the template.\n\n**How you will know it worked.** Both runs report `1 passed`, and the two printed emails differ.\n\n**Hint.** Call `uniqueEmail()` once. A second call gives a different email, and the assertion would\ncompare the box with an email that was never typed.",
+    "stub": "// Problem 2: register with uniqueEmail()\n//\n// My test:\n//\n// Email printed by the first run:\n//\n// Email printed by the second run:\n//\n// Why the email is stored in a const before it is used:"
+  },
+  "3": {
+    "difficulty": "Advanced",
+    "statement": "**What to build.** A second helper, `uniquePhone()`, and a test that uses it. In\n`tests/registration-helpers.ts`, add an exported function `uniquePhone()` that returns ten digits as\ntext. Build it with `String(Math.floor(Math.random() * 10000000000)).padStart(10, '0')`. `String()`\nturns a number into text, and `padStart(10, '0')` adds `0` at the front until the text is ten\ncharacters long. Then create `practice-phone.spec.ts`, with one test that checks the phone number\nwith `expect(phone.length).toBe(10)`, fills the form, fills the **Phone** box\n(`input[type='tel']`) with the phone number, and asserts the box with `toHaveValue`.\n\n**Where.** In VS Code and its integrated terminal. Copy the new function and your test into the\neditor, using the template.\n\n**How you will know it worked.** The test reports `1 passed`, and the printed phone number has ten\ndigits, even when it starts with `0`.\n\n**Hint.** `phone.length` is the number of characters in the text. `Math.random() * 10000000000`\nsometimes gives a number with fewer than ten digits, and `padStart` fills the missing places.",
+    "stub": "// Problem 3: a unique phone number\n//\n// The uniquePhone function, added to tests/registration-helpers.ts:\n//\n// tests/practice-phone.spec.ts:\n//\n// Phone number printed by the run:\n//\n// Why padStart is needed:"
+  }
+}

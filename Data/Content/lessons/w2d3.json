@@ -1,95 +1,118 @@
 {
-  "schema": "lesson-overlay/v1",
-  "week": 2,
-  "day": 3,
-  "parts": {
-    "1": {
-      "checkpoints": [
-        {
-          "question": "What can `Math.random()` return?",
-          "options": [
-            "Any float from 0 up to but not including 1",
-            "Any float from 0 up to and including 1",
-            "Any float, including negative ones"
-          ],
-          "answer": 0,
-          "explanation": "`0 <= x < 1` — never negative, and never exactly 1. On its own it is not a usable id, which is why the lesson runs it through `.toString(36).slice(2, 8)` to get something short and readable."
-        },
-        {
-          "question": "`console.log(\"Learner\" + 42)` prints what?",
-          "options": [
-            "`Learner 42` — `+` inserts a separator between the two",
-            "`Learner42` — the number is converted to text first",
-            "A type error — you cannot add a number to a string"
-          ],
-          "answer": 1,
-          "explanation": "`+` converts the number to `\"42\"` and joins them with nothing in between. No space appears unless you add one yourself, which is the mistake that shows up as `Learner42` where `Learner 42` was wanted."
-        }
-      ]
+ "schema": "lesson-overlay/v1",
+ "week": 2,
+ "day": 3,
+ "parts": {
+  "1": {
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | The three pieces of TypeScript that build a value that differs on every run. |\n| **Goals** | Join text and numbers with `+`, read the current time with `Date.now()`, turn `Math.random()` into a whole number, and combine them into an email. |\n| **Prerequisites** | [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1), for `const`, `console.log`, and template literals. |\n| **Tools** | `+`, `Date.now()`, `Math.random()`, and `Math.floor()`. |\n| **Environment** | The editor on the right. The Console tab shows what your code prints. |\n| **Key takeaway** | A value built from the current time and a random number differs on every run. |",
+   "checkpoints": [
+    {
+     "question": "What does `'learner' + 7` print?",
+     "options": [
+      "`learner 7`, with a space between them",
+      "`learner7`, with the number turned into text",
+      "An error, because text and a number cannot be added"
+     ],
+     "answer": 1,
+     "explanation": "`+` turns the number into text and joins the two pieces with nothing between them. A space appears only where you write one, so the first option would need `' '` joined in the middle."
     },
-    "2": {
-      "at_a_glance": "| | |\n|---|---|\n| **Goals** | a value that differs every run, and an XPath assembled at runtime from it; why `@value` cannot find what you just typed — and what it *can* find |\n| **Prerequisites** | [string building and Math.random()](/learn/w2/d3/p1) · [XPath syntax](/learn/w2/d2/p2) |\n| **Key takeaway** | an HTML attribute and a live property are two different things |",
-      "checkpoints": [
-        {
-          "question": "You `.fill()` the email box with `learner7f3k2x@example.com`, then count `//input[@value='learner7f3k2x@example.com']`. How many matches?",
-          "options": [
-            "1 — the field holds exactly that value",
-            "0 — `@value` reads the markup attribute, which `.fill()` never touched",
-            "0, but only because the `@` in the email breaks the XPath"
-          ],
-          "answer": 1,
-          "explanation": "An `<input>` keeps two separate things: the `value=\"...\"` **attribute** written in the markup, and the **property** holding what is in the box right now. `.fill()` and real typing change only the property. `getAttribute('value')` returns `null` here while `.inputValue()` returns your string. This is true of every plain `<input>`, not just this app."
-        },
-        {
-          "question": "So why does `//input[@value='FeMale']` find the gender radio perfectly well?",
-          "options": [
-            "Because radios are exempt from the attribute-versus-property split",
-            "Because `FeMale` is written into the page source, so the attribute really is there",
-            "Because `.check()` writes the value attribute, unlike `.fill()`"
-          ],
-          "answer": 1,
-          "explanation": "A radio's `value` is part of the HTML the server sent — as is an `<option>`'s. Nothing at runtime had to set it, so `@value` finds it. `Math.random()` can still choose *which* one; what you cannot do is invent an attribute value that was never in the markup."
-        },
-        {
-          "question": "The heading's real text is `\"Automation Demo Site \"`. Which XPath matches it?",
-          "options": [
-            "`//h1[text()='Automation Demo Site']`",
-            "`//h1[normalize-space()='Automation Demo Site']`",
-            "Both — XPath trims whitespace before comparing"
-          ],
-          "answer": 1,
-          "explanation": "`text()` matches the text node exactly, trailing space and all, so it finds 0. `normalize-space()` collapses the whitespace first and finds 1. Note this is the opposite of Playwright's own `toContainText`, which normalizes for you — the normalization you get depends on which tool is doing the matching."
-        }
-      ],
-      "recap": "- Build unique values with `\"prefix\" + Math.random().toString(36).slice(2, 8)`. A bare `Date.now()` collides when two runs land in the same second.\n- **An attribute is not a property.** `@value` reads the markup; `.fill()` writes the live value. You cannot find a field by what you just typed into it.\n- To read back what you typed, ask the locator you already have: `.inputValue()`.\n- `@value` *does* work for values baked into the source — radios, `<option>` tags. Randomness picking which one is fine.\n- Default to `normalize-space()` over `text()` for XPath text matching."
+    {
+     "question": "Two tests start in the same millisecond, and each calls `Date.now()`. What happens?",
+     "options": [
+      "Both tests get the same number.",
+      "The second test gets the number plus one.",
+      "The second test waits until the next millisecond."
+     ],
+     "answer": 0,
+     "explanation": "`Date.now()` reads the clock, and the clock shows the same millisecond to both tests. It does not count calls or wait, which is why the lesson joins a random number after the time."
     },
-    "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Prerequisites** | the same `registration-helpers.ts` that Days [Day 1 - Implementation](/learn/w2/d1/p3) and [Day 2 - Implementation](/learn/w2/d2/p3) have been growing |\n| **Tools** | every line ran in [Fundamentals](/learn/w2/d3/p2) |",
-      "checkpoints": [
-        {
-          "question": "Two tests in the same file both call `uniqueEmail()`. Do they get the same string?",
-          "options": [
-            "Yes — the module is loaded once, so the value is computed once and shared",
-            "No — the function body runs on each call, producing a fresh value each time"
-          ],
-          "answer": 1,
-          "explanation": "`uniqueEmail()` computes its value inside the function, so every call produces a new one. Had the randomness been assigned to a module-level `const` instead, both tests really would have shared it — and the collision this whole day exists to prevent would be back."
-        },
-        {
-          "question": "Why does `pickAndCheckGender(page)` return the choice it made, rather than just checking the radio and returning nothing?",
-          "options": [
-            "So the caller can log or assert on which one was picked instead of guessing",
-            "Because an `async` function has to return something",
-            "So the next call knows which one to avoid"
-          ],
-          "answer": 0,
-          "explanation": "The function makes a random decision the test cannot otherwise see. Returning it hands that knowledge back to the caller, so a failure message can say which gender was picked. A helper that makes an invisible random choice is a helper you will be debugging blind."
-        }
-      ],
-      "recap": "- Randomness belongs inside one generator function, not copy-pasted into every test that needs a fresh value.\n- Compute the random value *inside* the function. A module-level `const` would be computed once and shared by every caller.\n- A helper that makes a hidden decision should return it, so failures can say what it chose.\n- These are the same lines from [Fundamentals](/learn/w2/d3/p2), moved once — not rewritten."
-    },
-    "4": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | a unique value, then a dynamic locator over real `<option>` markup, then a generator of your own |\n| **Prerequisites** | [TypeScript](/learn/w2/d3/p1) for the string building · [Fundamentals](/learn/w2/d3/p2) for which attributes are real |\n| **Key takeaway** | is this attribute really in the page source, or did a script set it? |"
+    {
+     "question": "What does `Math.floor(Math.random() * 1000000)` return?",
+     "options": [
+      "A whole number from 0 to 999999",
+      "A decimal between 0 and 1",
+      "A whole number from 1 to 1000000"
+     ],
+     "answer": 0,
+     "explanation": "`Math.random()` gives a decimal from 0 up to, but not including, 1. Multiplying by 1000000 stretches it to below 1000000, and `Math.floor()` rounds down, so the largest result is 999999 and the smallest is 0."
     }
+   ],
+   "recap": "- `+` joins text, and turns a number into text on the way. A template literal does the same work with `${}`.\n- `Date.now()` returns the current time in milliseconds, so a later run always gets a larger number.\n- `Math.floor(Math.random() * 1000000)` returns a random whole number with up to six digits.\n- The time joined with a random number gives a value that differs on every run, even for two tests that start in the same millisecond."
+  },
+  "2": {
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | Test data that differs on every run, and a locator built from a value at run time. |\n| **Goals** | Fill the registration form with a unique email, explain the difference between an attribute and a property, and select a radio button through a dynamic locator. |\n| **Prerequisites** | [TypeScript](/learn/w2/d3/p1) for building the value, and [Day 2 - Fundamentals](/learn/w2/d2/p2) for `page.locator()` with CSS and XPath. |\n| **Tools** | `page.locator()`, `getAttribute()`, `inputValue()`, `count()`, `check()`, `toHaveValue`, and `toBeChecked`. |\n| **Environment** | The editor on the right for the examples, then your own project for the spec file. Both use the registration form at `demo.automationtesting.in`. |\n| **Key takeaway** | An attribute is written in the markup, and a property is what the element holds now, so a typed value can be read back but not located. |",
+   "checkpoints": [
+    {
+     "question": "You fill the email box with `learner1@example.com`. Which call gives that text back?",
+     "options": [
+      "`emailBox.getAttribute('value')`",
+      "`emailBox.inputValue()`",
+      "`page.locator(\"//input[@value='learner1@example.com']\")`"
+     ],
+     "answer": 1,
+     "explanation": "Typing changes the property, and `inputValue()` reads the property. `getAttribute('value')` reads the markup, where nothing was written, so it returns `null`, and the XPath finds no element for the same reason."
+    },
+    {
+     "question": "Why does `//input[@value='FeMale']` find the gender radio button?",
+     "options": [
+      "Its `value` is written in the page's markup.",
+      "Playwright writes the value into the markup when it selects a radio button.",
+      "A radio button keeps a `value` attribute and no property."
+     ],
+     "answer": 0,
+     "explanation": "The radio button's `value` was in the HTML before any code ran, so `@value` matches it. Selecting a radio button changes which one is checked, and writes nothing into the markup."
+    },
+    {
+     "question": "What makes a locator dynamic?",
+     "options": [
+      "Its text is built from a value at run time.",
+      "It keeps retrying until the element appears on the page.",
+      "It matches several elements instead of only one."
+     ],
+     "answer": 0,
+     "explanation": "A dynamic locator is written as a template literal with a value inside `${}`, so its text is decided while the test runs. Every Playwright locator retries, so retrying is not what sets a dynamic locator apart."
+    }
+   ],
+   "recap": "- Test data that differs on every run keeps a sign-up test passing on its second run and on every run after it.\n- An **attribute** is written in the markup and does not change when you type. A **property** is what the element holds now.\n- A typed value can be read with `inputValue()` or checked with `toHaveValue`, but an XPath with `@value` cannot find it.\n- A dynamic locator is built at run time with a template literal, and it works when the value it contains is in the markup."
+  },
+  "3": {
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | A `uniqueEmail()` helper in `registration-helpers.ts`, so that no test repeats the line that builds an email. |\n| **Goals** | Add an exported function with a return type to the helper file, and use it from two tests that each get their own email. |\n| **Prerequisites** | [Fundamentals](/learn/w2/d3/p2), where you built the email inside a test, and [Day 1 - Implementation](/learn/w2/d1/p3), where `registration-helpers.ts` was created. |\n| **Tools** | `export`, a `: string` return type, and `import` from `./registration-helpers`. |\n| **Environment** | VS Code and its integrated terminal, in your project folder. |\n| **Key takeaway** | A helper builds the value inside its function body, so every call returns a new one. |",
+   "checkpoints": [
+    {
+     "question": "Two tests in the same file each call `uniqueEmail()`. Do they get the same email?",
+     "options": [
+      "Yes, because the file is loaded once.",
+      "No, because the body runs again on each call.",
+      "Yes, unless the tests run in different workers."
+     ],
+     "answer": 1,
+     "explanation": "The line that builds the email is inside the function, so every call runs it again and reads a new time and a new random number. Loading the file once defines the function, and does not run it."
+    },
+    {
+     "question": "Why is the email built inside `uniqueEmail()` instead of in a `const` at the top of the helper file?",
+     "options": [
+      "A `const` at the top of the file is computed once and shared.",
+      "A `const` cannot be exported to a spec file.",
+      "A `const` cannot hold text that was built with `+` and `Date.now()`."
+     ],
+     "answer": 0,
+     "explanation": "A `const` at the top of a file is computed once, when the file loads, so every test that imports it would get the same email. That is the collision the helper exists to prevent. A `const` can be exported, and it can hold any text."
+    },
+    {
+     "question": "Why does the test store the result of `uniqueEmail()` in a `const` before it fills the form?",
+     "options": [
+      "So the fill and the assertion use the same email.",
+      "Because `fillRegistrationForm` accepts only a `const`, never a call.",
+      "Because a function's result cannot be passed to another function."
+     ],
+     "answer": 0,
+     "explanation": "The test needs the email twice, to fill the box and to check it. A second call of `uniqueEmail()` would build a different email, and the assertion would compare the box with an email that was never typed."
+    }
+   ],
+   "recap": "- `uniqueEmail()` lives in `registration-helpers.ts`, and every test imports it instead of repeating the line.\n- The value is built inside the function body, so each call returns a new email.\n- A test calls the helper once, stores the result in a `const`, and uses it for both the fill and the assertion."
+  },
+  "4": {
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | Three problems about unique test data, from Beginner level to Advanced. |\n| **Prerequisites** | [TypeScript](/learn/w2/d3/p1) for building the value, [Fundamentals](/learn/w2/d3/p2) for the form, and [Implementation](/learn/w2/d3/p3) for the helper file. |\n| **Environment** | The editor on the right for the first problem, and your own project for the other two. |"
   }
+ }
 }
