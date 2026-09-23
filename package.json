@@ -10,6 +10,8 @@
     "scripts": {
         "dev:backend": "npm run dev --workspace backend",
         "dev:frontend": "npm run dev --workspace frontend",
+        "build:content": "tsx scripts/build-content.ts",
+        "verify:content": "tsx scripts/verify-content.ts",
         "typecheck": "npm run typecheck --workspaces --if-present"
     },
     "devDependencies": {

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { RunResult, RunStatus } from '../../../shared/contracts/run';
+import type { Workspace } from '../../../shared/contracts/course_day';
 import { TerminalSession } from '../lib/terminalSession';
 import { PopOut } from './PopOut';
 import { TerminalView } from './TerminalView';
@@ -92,12 +93,18 @@ function saveLayout(layout: Layout): void {
 export function RunOverlay({
   run,
   code,
+  file,
+  workspace,
   request,
   onClose,
 }: {
   run: RunState | null;
-  /** The editor's code, which Terminal commands run. */
+  /** The editor's code, which Terminal commands save before they run. */
   code: string;
+  /** The lesson file the editor holds, where the Terminal saves it. */
+  file: string | null;
+  /** The day's Terminal workspace. */
+  workspace: Workspace;
   /** Asks the overlay to show a panel, such as the Terminal button in the editor's toolbar. */
   request: OverlayRequest | null;
   onClose: () => void;
@@ -124,10 +131,10 @@ export function RunOverlay({
   };
 
   // The Terminal outlives its display, which is recreated when it moves to or from a window.
-  const codeRef = useRef(code);
-  codeRef.current = code;
+  const editorRef = useRef({ code, file, workspace });
+  editorRef.current = { code, file, workspace };
   const [session] = useState(
-    () => new TerminalSession(() => codeRef.current, { onStart: () => undefined, onFrame: () => undefined, onEnd: () => undefined }),
+    () => new TerminalSession(() => editorRef.current, { onStart: () => undefined, onFrame: () => undefined, onEnd: () => undefined }),
   );
   session.events = {
     onStart: () => {

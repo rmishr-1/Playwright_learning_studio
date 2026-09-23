@@ -1,0 +1,45 @@
+{
+  "schema": "course-index/v1",
+  "title": "Playwright with TypeScript",
+  "totals": {
+    "weeks": 1,
+    "days": 5,
+    "parts": 20,
+    "practice_problems": 31,
+    "available_days": 5
+  },
+  "weeks": [
+    {
+      "week": 1,
+      "theme": "Fundamentals, Setup & Programming",
+      "locked": false,
+      "days": [
+        {
+          "day": 1,
+          "title": "Why Playwright & How It Works",
+          "locked": false
+        },
+        {
+          "day": 2,
+          "title": "Setup & Your First Test Run",
+          "locked": false
+        },
+        {
+          "day": 3,
+          "title": "TypeScript Foundations I: Variables, Data Types & Operators",
+          "locked": false
+        },
+        {
+          "day": 4,
+          "title": "TypeScript Foundations II: Conditions, Loops, Functions & Async",
+          "locked": false
+        },
+        {
+          "day": 5,
+          "title": "Playwright Test Runner Basics",
+          "locked": false
+        }
+      ]
+    }
+  ]
+}

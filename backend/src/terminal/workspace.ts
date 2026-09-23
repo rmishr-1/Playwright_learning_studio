@@ -1,31 +1,35 @@
 /**
- * The one folder the Terminal works in: Data/Workspace.
+ * The folders the Terminal works in, under Data/Workspace/, one per kind of day:
  *
- * It is a small Playwright project that the studio owns, laid out the way the learner's own
- * project is:
+ *   demo/      ready-made, with a demo day's own files, for a day that comes before the learner
+ *              has a project of their own
+ *   project/   the learner's project, which starts as `npm init playwright@latest` leaves it
  *
- *   Data/Workspace/
- *     package.json             marks the folder as a project, as in the learner's own
- *     playwright.config.ts     the settings the test runner reads
- *     tsconfig.json            points `@playwright/test` at .studio/ (below)
- *     .studio/test.ts          adds the live browser view to every test
- *     tests/<one file>.spec.ts the editor's code, saved again before every command
- *     test-results/            written by the test runner
- *     playwright-report/       written by the test runner, opened by show-report
+ * Each is laid out the way the course's project is:
  *
- * Everything the Terminal creates stays inside this folder, and the tests folder only ever holds
- * the one file the current command runs, so a learner never sees stale files from an earlier
- * command. The files the studio writes are regenerated on every command, so an edit to them, or
- * an upgrade of Playwright, can never leave the folder in a broken state. The folder is ignored
- * by Git (see .gitignore).
+ *   package.json             marks the folder as a project
+ *   playwright.config.ts     the settings the test runner reads
+ *   tsconfig.json            points `@playwright/test` at .studio/ (below)
+ *   .studio/test.ts          adds the live browser view to every test
+ *   tests/                   the spec files
+ *   ts-basics/               the TypeScript playground, where `node day3/hello.ts` runs
+ *   test-results/, playwright-report/   written by the test runner
+ *
+ * The files a workspace starts with come from Data/Content/workspaces.json. A seed file is written
+ * only when it is missing, so a file the learner saved from the editor is kept. The studio's own
+ * files are written again before every command, so an edit to them, or an upgrade of Playwright,
+ * can never leave a workspace broken. Data/Workspace/ is ignored by Git.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { DATA } from '../config';
+import { CONTENT, DATA } from '../config';
+import { WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
 
-export const WORKSPACE = path.join(DATA, 'Workspace');
-export const TESTS_DIR = path.join(WORKSPACE, 'tests');
-export const REPORT_DIR = path.join(WORKSPACE, 'playwright-report');
+// STUDIO_WORKSPACE_ROOT lets `npm run verify:content` work in a folder of its own, so a check never
+// touches the files a learner has saved.
+const ROOT = process.env.STUDIO_WORKSPACE_ROOT || path.join(DATA, 'Workspace');
+export const workspaceDir = (name: Workspace): string => path.join(ROOT, name);
+export const reportDir = (name: Workspace): string => path.join(workspaceDir(name), 'playwright-report');
 
 /** The real @playwright/test, resolved once. The Terminal's own wrapper re-exports it. */
 const PLAYWRIGHT_TEST = require.resolve('@playwright/test');
@@ -40,13 +44,16 @@ export default defineConfig({
   fullyParallel: true,
   retries: 0,
   // The same report as a new project. It is opened with \`npx playwright show-report\`.
-  reporter: [['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'https://test-automation-banking.vercel.app',
     trace: 'on-first-retry',
   },
-  // The studio installs Chromium only, so it is the one browser the Terminal runs.
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // The three browsers a new project tests in. The live view shows Chromium.
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  ],
 });
 `;
 
@@ -139,24 +146,53 @@ export default test;
 // one here, that would be the studio's own, at the root of the repository.
 const PACKAGE = JSON.stringify({ name: 'studio-workspace', private: true }, null, 2) + '\n';
 
-/** Recreates the studio's own files, and empties the tests folder. */
-export function prepareWorkspace(): void {
-  fs.mkdirSync(path.join(WORKSPACE, '.studio'), { recursive: true });
-  fs.writeFileSync(path.join(WORKSPACE, 'package.json'), PACKAGE);
-  fs.writeFileSync(path.join(WORKSPACE, 'playwright.config.ts'), CONFIG);
-  fs.writeFileSync(path.join(WORKSPACE, 'tsconfig.json'), TSCONFIG);
-  fs.writeFileSync(path.join(WORKSPACE, '.studio', 'test.ts'), wrapper());
-  fs.rmSync(TESTS_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-  fs.mkdirSync(TESTS_DIR, { recursive: true });
+function readSeeds(): WorkspaceSeeds['workspaces'] {
+  const file = path.join(CONTENT, 'workspaces.json');
+  if (!fs.existsSync(file)) return { demo: { files: {} }, project: { files: {} } };
+  return WorkspaceSeeds.parse(JSON.parse(fs.readFileSync(file, 'utf-8'))).workspaces;
 }
 
-/** Saves the editor's code as the one file in the tests folder. */
-export function writeSpec(fileName: string, code: string): string {
-  const file = path.join(TESTS_DIR, path.basename(fileName));
+/**
+ * A path inside a workspace, from a path the learner or a lesson gave. Only files under tests/ and
+ * ts-basics/ may be written or named, and never a path that climbs out of the workspace.
+ */
+export function resolveInside(name: Workspace, rel: string): string | null {
+  const clean = rel.replace(/\\/g, '/').replace(/^\.\//, '');
+  if (!/^(tests|ts-basics)\/[\w./-]+$/.test(clean) || clean.split('/').includes('..')) return null;
+  return path.join(workspaceDir(name), ...clean.split('/'));
+}
+
+/** Writes the studio's own files, and any seed file that is missing. */
+export function prepareWorkspace(name: Workspace): void {
+  const dir = workspaceDir(name);
+  fs.mkdirSync(path.join(dir, '.studio'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'package.json'), PACKAGE);
+  fs.writeFileSync(path.join(dir, 'playwright.config.ts'), CONFIG);
+  fs.writeFileSync(path.join(dir, 'tsconfig.json'), TSCONFIG);
+  fs.writeFileSync(path.join(dir, '.studio', 'test.ts'), wrapper());
+  fs.mkdirSync(path.join(dir, 'tests'), { recursive: true });
+  for (const [rel, text] of Object.entries(readSeeds()[name]?.files ?? {})) {
+    const file = path.join(dir, ...rel.split('/'));
+    if (fs.existsSync(file)) continue;
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, text);
+  }
+}
+
+/** Saves the editor's code as a file in the workspace, and returns its path there. */
+export function saveFile(name: Workspace, rel: string, code: string): string | null {
+  const file = resolveInside(name, rel);
+  if (!file) return null;
+  fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, code.endsWith('\n') ? code : code + '\n');
-  return path.relative(WORKSPACE, file).split(path.sep).join('/');
+  return path.relative(workspaceDir(name), file).split(path.sep).join('/');
 }
 
-export function hasReport(): boolean {
-  return fs.existsSync(path.join(REPORT_DIR, 'index.html'));
+export function fileExists(name: Workspace, rel: string): boolean {
+  const file = resolveInside(name, rel);
+  return file !== null && fs.existsSync(file);
+}
+
+export function hasReport(name: Workspace): boolean {
+  return fs.existsSync(path.join(reportDir(name), 'index.html'));
 }

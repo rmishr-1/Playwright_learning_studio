@@ -14,18 +14,19 @@ import { TheoryPane } from '../components/TheoryPane';
 import { OpenWeeks } from '../components/Markdown';
 import { CodePane } from '../components/CodePane';
 import type { RunState } from '../components/RunOverlay';
+import type { EditorFile } from '../components/LessonBlocks';
 import type { CourseDay } from '../../../shared/contracts/course_day';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
 import type { Progress } from '../../../shared/contracts/progress';
 import type { PartNumber } from '../../../shared/contracts/common';
 
-const STARTER = `// Write your code here, then select Run.
-// launch() opens a browser, show(page) takes a screenshot, and BASE_URL is the
-// address of the banking website. You do not need to import them.
+const STARTER = `// Open a lesson's code in the editor, or write your own here, then select Run.
+// launch() opens a browser and show(page) takes a screenshot. You do not need to import them.
 
 const { browser, page } = await launch();
-await page.goto(BASE_URL);
+await page.setContent('<h1>Hello from Playwright</h1>');
 await show(page);
+await browser.close();
 `;
 
 function Sidebar({
@@ -183,6 +184,10 @@ export function Day({
   const [error, setError] = useState('');
   const [empty, setEmpty] = useState(false);
   const [code, setCode] = useState(STARTER);
+  // The lesson file the editor holds, if any: the Terminal saves the editor there before a command.
+  const [editorFile, setEditorFile] = useState<EditorFile>({ file: null, run: null });
+  // A command a lesson asked the Terminal to run. The nonce makes the same command run again.
+  const [command, setCommand] = useState<{ text: string; nonce: number } | null>(null);
   const [run, setRun] = useState<RunState | null>(null);
   const [running, setRunning] = useState(false);
   const [split, setSplit] = useState(52);
@@ -253,14 +258,25 @@ export function Day({
     };
   }, []);
 
-  const loadIntoEditor = useCallback((snippet: string) => {
+  const loadIntoEditor = useCallback((snippet: string, meta?: EditorFile) => {
     problemRef.current = null;
     setCode(snippet);
+    setEditorFile(meta ?? { file: null, run: null });
   }, []);
 
-  const startProblem = useCallback((snippet: string, problemNumber: number) => {
+  const startProblem = useCallback((snippet: string, problemNumber: number, meta: EditorFile) => {
     problemRef.current = problemNumber;
-    setCode(snippet.trim() + '\n\n');
+    setCode(snippet.trim() + '\n');
+    setEditorFile(meta);
+  }, []);
+
+  const runCommand = useCallback((text: string, load?: { code: string; meta: EditorFile }) => {
+    if (load) {
+      problemRef.current = null;
+      setCode(load.code);
+      setEditorFile(load.meta);
+    }
+    setCommand({ text, nonce: Date.now() });
   }, []);
 
   async function doRun(): Promise<void> {
@@ -382,6 +398,7 @@ export function Day({
             onSelect={(p) => navigate('/learn/w' + week + '/d' + day + '/p' + p)}
             viewed={viewed}
             onLoadIntoEditor={loadIntoEditor}
+            onRunCommand={runCommand}
             onStartProblem={startProblem}
             weeksShown={weeksShown}
             onToggleWeeks={() => setWeeksShown(!weeksShown)}
@@ -399,6 +416,9 @@ export function Day({
             onCloseRun={() => setRun(null)}
             enabled={activePart.has_runnable_code}
             appTheme={appTheme}
+            editorFile={editorFile}
+            workspace={content.workspace}
+            command={command}
           />
         </div>
       </div>

@@ -5,6 +5,8 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { RunOverlay, type OverlayRequest, type RunState } from './RunOverlay';
 import { isSpecFile } from './Markdown';
 import { conceptHighlight } from '../lib/conceptHighlight';
+import type { EditorFile } from './LessonBlocks';
+import type { Workspace } from '../../../shared/contracts/course_day';
 
 const LANGUAGES = [
   { id: 'ts', label: 'TypeScript', ready: true },
@@ -33,6 +35,9 @@ export function CodePane({
   onCloseRun,
   enabled,
   appTheme,
+  editorFile,
+  workspace,
+  command,
 }: {
   code: string;
   onChange: (v: string) => void;
@@ -44,6 +49,12 @@ export function CodePane({
   enabled: boolean;
   /** The page theme. The editor follows it, and can then be overridden on its own. */
   appTheme: 'dark' | 'light';
+  /** The lesson file the editor holds, and the command that runs it. */
+  editorFile: EditorFile;
+  /** The day's Terminal workspace. */
+  workspace: Workspace;
+  /** A command a lesson asked the Terminal to run. */
+  command: { text: string; nonce: number } | null;
 }) {
   const [theme, setTheme] = useState<'dark' | 'light'>(readTheme);
   // The Terminal keeps the overlay open without a Run. The nonce re-selects its tab when the
@@ -54,9 +65,15 @@ export function CodePane({
     setTerminalOpen(true);
     setRequest({ tab: 'terminal', nonce: Date.now(), command });
   };
-  // A spec file cannot run in the Run button's harness, and the Terminal is how it runs in a
-  // real project, so Run hands it to the Terminal instead of failing on the import line.
-  const run_ = (): void => (isSpecFile(code) ? openTerminal('npx playwright test') : onRun());
+  // A lesson file runs with its own command, in the Terminal, exactly as the lesson says. A spec
+  // file with no file of its own cannot run in the Run button's harness either, so Run hands it to
+  // the Terminal instead of failing on the import line. Anything else is the harness's.
+  const run_ = (): void =>
+    editorFile.run ? openTerminal(editorFile.run) : isSpecFile(code) ? openTerminal('npx playwright test') : onRun();
+
+  useEffect(() => {
+    if (command) openTerminal(command.text);
+  }, [command]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Two toggles exist - the page one bottom-left and this one - so they must not fight.
   // Changing the page theme resets the editor to match; the editor toggle then deviates.
@@ -121,12 +138,22 @@ export function CodePane({
             </option>
           ))}
         </select>
+        {editorFile.file && (
+          <span className="editor-file" title={'The editor holds ' + editorFile.file + '. The Terminal saves it there before each command.'}>
+            {editorFile.file}
+          </span>
+        )}
         <span className="spacer" />
         {toggle}
         <button className="term-btn" onClick={() => openTerminal()} title="Open the Terminal, to run npx playwright test on this code">
           &gt;_ Terminal
         </button>
-        <button className="run-btn" onClick={run_} disabled={running}>
+        <button
+          className="run-btn"
+          onClick={run_}
+          disabled={running}
+          title={editorFile.run ? 'Runs ' + editorFile.run + ' in the Terminal' : undefined}
+        >
           {running ? 'Running…' : '▶ Run'}
         </button>
       </div>
@@ -156,12 +183,11 @@ export function CodePane({
           <b>Select ▶ Run</b> to run this code. If it opens a browser, you see a screenshot of the
           page. Anything it prints with <span className="k">console.log</span> appears in the Console tab.
           <br />
-          <span className="k">launch()</span> <span className="k">show()</span>{' '}
-          <span className="k">USERS</span> <span className="k">BASE_URL</span> are already
+          <span className="k">launch()</span> and <span className="k">show()</span> are already
           available, so you do not need to import them.
           <br />
-          <b>Select &gt;_ Terminal</b> to run a spec file with <span className="k">npx playwright test</span>,
-          as in your own project.
+          <b>Select &gt;_ Terminal</b> to type the course's commands, such as{' '}
+          <span className="k">npx playwright test</span> and <span className="k">node day3/hello.ts</span>.
         </div>
       )}
 
@@ -169,6 +195,8 @@ export function CodePane({
         <RunOverlay
           run={run}
           code={code}
+          file={editorFile.file}
+          workspace={workspace}
           request={request}
           onClose={() => {
             setTerminalOpen(false);

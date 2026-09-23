@@ -3,12 +3,12 @@ import { z } from 'zod';
 import { config } from './config';
 import { ask, assistantAvailable } from './assistant';
 import { lastFrame, prepareRun, startRun } from './runner';
-import { receiveFrame, startCommand, stopCommand } from './terminal';
-import { REPORT_DIR } from './terminal/workspace';
+import { currentReportDir, receiveFrame, startCommand, stopCommand } from './terminal';
 import { courseDay, courseIndex, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { AssistantRequest } from '../../shared/contracts/assistant';
+import { Workspace } from '../../shared/contracts/course_day';
 import type { ErrorCode } from '../../shared/contracts/problem_error';
 
 /** Every non-2xx response is problem+json - clients branch on `code`, never on `detail`. */
@@ -120,8 +120,12 @@ const TerminalRequest = z.object({
   /** Minted by POST /api/run/prepare, so the output streams over the same WebSocket as a Run. */
   run_id: z.string().uuid(),
   command: z.string().min(1).max(2_000),
-  /** The editor's code, which the command saves as a spec file before it runs. */
+  /** The editor's code, which the command saves before it runs. */
   code: z.string().max(64_000),
+  /** The file the editor holds, relative to the workspace, when it holds a lesson's file. */
+  file: z.string().max(200).nullable().default(null),
+  /** The workspace of the day the learner is on. */
+  workspace: Workspace.default('project'),
 });
 
 /** Starts one Terminal command. Its output, and its outcome, arrive on the run's stream. */
@@ -132,7 +136,7 @@ router.post('/terminal', (req, res) => {
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
-  startCommand(parsed.run_id, parsed.command, parsed.code);
+  startCommand(parsed.run_id, parsed.command, parsed.code, parsed.file, parsed.workspace);
   res.json({ ok: true });
 });
 
@@ -150,7 +154,7 @@ router.post('/terminal/:run_id/frame', (req, res) => {
 });
 
 /** The HTML report of the last Terminal command, opened by `npx playwright show-report`. */
-router.use('/terminal/report', express.static(REPORT_DIR));
+router.use('/terminal/report', (req, res, next) => express.static(currentReportDir())(req, res, next));
 
 // ---------------------------------------------------------------- assistant
 

@@ -1,7 +1,7 @@
 {
-    "_comment": "Data/Content/weeks/week-<n>/day-<n>.json - ONE day of the course, written by hand. A day has UP TO 4 parts, and nothing downstream may assume four.",
+    "_comment": "Data/Content/weeks/week-<n>/day-<n>.json - ONE day of the course, built by `npm run build:content` from the course source in Data/Source/week-<n>/. Never edit it by hand: edit the source and rebuild. A day has UP TO 4 parts, and nothing downstream may assume four.",
     "schema": {
-        "value": "course-day/v1"
+        "value": "course-day/v2"
     },
     "week": {
         "value": 1
@@ -21,31 +21,44 @@
         "_comment": "1 to 4, in order. Each part is one tab of the day.",
         "_itemTemplate": {
             "part": {
-                "options": [1, 2, 3, 4],
+                "options": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
                 "value": 1
             },
             "kind": {
-                "_comment": "prerequisite = a language primer. concept = a lesson that teaches the tool. practice = practice problems.",
-                "options": ["prerequisite", "concept", "practice"],
+                "_comment": "prerequisite = the Prerequisites section. concept = Fundamentals and Implementation. practice = Practice.",
+                "options": [
+                    "prerequisite",
+                    "concept",
+                    "practice"
+                ],
                 "value": "concept"
             },
             "title": {
                 "value": ""
             },
             "tab_label": {
-                "_comment": "The text on the part's tab.",
+                "_comment": "The text on the part's tab: the section's title.",
                 "value": ""
             },
             "has_runnable_code": {
-                "_comment": "false when the part has no code to run. Drives the editor's empty state.",
+                "_comment": "true when the part has code to open in the editor, commands to run, or code and terminal exercises. Drives the editor's empty state.",
                 "value": false
             },
             "blocks": {
-                "_comment": "Ordered content blocks, in DOCUMENT ORDER. Markdown blocks render as prose; example blocks get a 'Load into editor' button; your-turn blocks render as a 'Try it' callout; a problem-ref block marks where a practice problem sits, its text being the problem number. at-a-glance opens a lesson, and checkpoint and recap close it; all three render as cards.",
+                "_comment": "Ordered content blocks, in DOCUMENT ORDER. Each lesson of a section is a `##` heading in a markdown block, followed by its blocks. markdown renders as prose (output samples are ```output fences); code is a sample with its file and command; terminal is commands, one per line, each with a Run button; callout is a boxed note; diagram is mermaid source; checkpoint is a quiz question; problem-ref marks where an exercise sits. at-a-glance opens the day.",
                 "_itemTemplate": {
                     "type": {
                         "options": [
                             "markdown",
+                            "code",
+                            "terminal",
+                            "callout",
+                            "diagram",
                             "example",
                             "your-turn",
                             "problem-ref",
@@ -56,31 +69,95 @@
                         "value": "markdown"
                     },
                     "text": {
-                        "_comment": "Markdown source for a markdown block; TypeScript source for example and your-turn blocks; the problem number as a string for problem-ref; markdown for at-a-glance and recap; the question itself for a checkpoint.",
+                        "_comment": "Markdown for markdown, callout, at-a-glance and recap; source code for code, example and your-turn; the commands, one per line, for terminal; mermaid source for diagram; the question for checkpoint; the exercise number as a string for problem-ref.",
                         "value": ""
                     },
                     "starter": {
-                        "_comment": "your-turn ONLY: runnable code that 'Try it' loads into the editor, so the learner never starts from a bare comment. null for every other block type.",
+                        "_comment": "your-turn ONLY: runnable code that 'Try it' loads. null for every other block type.",
                         "value": null
                     },
                     "variation": {
                         "_comment": "your-turn ONLY: the prompt the learner reads. null for every other block type.",
-                        "prompt": { "value": "" },
+                        "prompt": {
+                            "value": ""
+                        },
                         "value": null
                     },
                     "checkpoint": {
-                        "_comment": "checkpoint ONLY: the options, the answer and why. Formative and never scored - nothing is written to progress, so a wrong answer costs only the reading. null for every other block type.",
+                        "_comment": "checkpoint ONLY. Formative and never scored - nothing is written to progress.",
                         "options": {
-                            "_comment": "2-5 answers. Every one has to be defensible from the lesson's own text.",
-                            "value": ["", ""]
+                            "_comment": "2-8 answers.",
+                            "value": [
+                                "",
+                                ""
+                            ]
                         },
-                        "answer": {
-                            "_comment": "0-based index into options.",
-                            "value": 0
+                        "answers": {
+                            "_comment": "0-based indexes into options: one for single and truefalse, one or more for multiple.",
+                            "value": [
+                                0
+                            ]
+                        },
+                        "kind": {
+                            "_comment": "multiple asks the learner to select every correct option, then check.",
+                            "options": [
+                                "single",
+                                "multiple",
+                                "truefalse"
+                            ],
+                            "value": "single"
                         },
                         "explanation": {
                             "_comment": "Shown after answering, right or wrong - the reason, not just the verdict.",
                             "value": ""
+                        },
+                        "value": null
+                    },
+                    "code": {
+                        "_comment": "code ONLY: where the sample belongs and how it runs. null for every other block type.",
+                        "language": {
+                            "value": "ts"
+                        },
+                        "file": {
+                            "_comment": "Path relative to the learner's project folder, such as tests/day1/auto-wait.spec.ts or ts-basics/day3/hello.ts. The Terminal saves the editor there. null for a snippet.",
+                            "value": null
+                        },
+                        "run": {
+                            "_comment": "The command that runs it, such as `node day3/hello.ts`. Run opens the sample in the editor as its file and runs this in the Terminal. null when there is none.",
+                            "value": null
+                        },
+                        "mode": {
+                            "_comment": "editor = can be opened in the editor; read = shown only.",
+                            "options": [
+                                "editor",
+                                "read"
+                            ],
+                            "value": "read"
+                        },
+                        "expect_error": {
+                            "_comment": "The sample fails on purpose: a type error, or a failing test.",
+                            "value": false
+                        },
+                        "network": {
+                            "_comment": "The sample needs the internet.",
+                            "value": false
+                        },
+                        "value": null
+                    },
+                    "callout": {
+                        "_comment": "callout ONLY. The source's platform callouts are notes for the app's builders and are left out.",
+                        "variant": {
+                            "options": [
+                                "tip",
+                                "note",
+                                "warning",
+                                "tester",
+                                "deepdive"
+                            ],
+                            "value": "note"
+                        },
+                        "title": {
+                            "value": null
                         },
                         "value": null
                     }
@@ -88,26 +165,58 @@
                 "value": []
             },
             "problems": {
-                "_comment": "Present ONLY on a practice part. The count is not fixed.",
+                "_comment": "Present ONLY on a practice part: the day's exercises. The count is not fixed.",
                 "_itemTemplate": {
                     "number": {
                         "_comment": "1-based within the part.",
                         "value": 1
                     },
                     "difficulty": {
-                        "options": ["Beginner", "Intermediate", "Advanced", null],
-                        "value": "Beginner"
+                        "_comment": "The exercise's level. null for an exercise that carries none.",
+                        "options": [
+                            "Easy",
+                            "Medium",
+                            "Hard",
+                            "Challenge",
+                            null
+                        ],
+                        "value": "Easy"
+                    },
+                    "title": {
+                        "value": null
+                    },
+                    "kind": {
+                        "_comment": "code = written and run in the editor; terminal = commands; written = an answer in words; predict = shows code and asks what it does.",
+                        "options": [
+                            "code",
+                            "terminal",
+                            "written",
+                            "predict"
+                        ],
+                        "value": "code"
                     },
                     "statement": {
                         "_comment": "Markdown: what to build, where, and how you will know it worked.",
                         "value": ""
                     },
                     "stub": {
-                        "_comment": "What 'Start this in the editor' loads.",
+                        "_comment": "What 'Start this in the editor' loads: the exercise's starter code, or a comment template.",
                         "value": ""
                     },
+                    "hints": {
+                        "_comment": "Revealed one at a time.",
+                        "value": []
+                    },
+                    "file": {
+                        "_comment": "A code exercise's file, relative to the learner's project folder.",
+                        "value": null
+                    },
+                    "run": {
+                        "_comment": "The command that runs a code exercise.",
+                        "value": null
+                    },
                     "solution": {
-                        "_comment": "Model answer in MARKDOWN, revealed on a deliberate click. Code answers carry their own fence. null = not written, and the reveal button is absent rather than broken.",
+                        "_comment": "Model answer in MARKDOWN, revealed on a deliberate click. A code answer that is the whole file loads into the editor as the exercise's file. null = not written, and the reveal button is absent rather than broken.",
                         "value": null
                     }
                 },
@@ -115,5 +224,13 @@
             }
         },
         "value": []
+    },
+    "workspace": {
+        "_comment": "The Terminal workspace the day's commands run in. 'demo' is ready-made with the day's own files, for a day before the learner has a project; 'project' is the learner's own project, which starts as `npm init playwright@latest` leaves it and keeps what they save.",
+        "options": [
+            "demo",
+            "project"
+        ],
+        "value": "project"
     }
 }

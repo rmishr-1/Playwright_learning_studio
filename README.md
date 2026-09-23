@@ -41,11 +41,32 @@ ships. `Data/Content/` **is** committed, so a fresh clone has the whole course.
 
 ## Where the content lives
 
-The course is written by hand as JSON in `Data/Content/`: `course-index.json` lists the weeks and
-days, and each day is `weeks/week-N/day-N.json`. The formats are in
-[Data/Formats/](Data/Formats/FORMAT-REGISTRY.md). The backend reads these files and never writes
-them, and an edit shows on the next page load without a restart. With no `course-index.json`, the
-app says the course has no lessons yet.
+Each week of the course is a package in `Data/Source/week-N/`, written by the course authors:
+
+| Folder | What it holds |
+|---|---|
+| `markdown/` | The source the authors edit, one file per day |
+| `json/` | The same days as JSON, made by the package's own `tools/build_json.py` |
+| `files/` | Every lesson file, exercise starter and solution, as real files |
+| `FORMAT.md` | How the Markdown is written |
+
+`npm run build:content` turns each package's JSON into what the app serves, in `Data/Content/`:
+`course-index.json`, one `weeks/week-N/day-N.json` per day, and `workspaces.json` (below). A day's
+four sections, Prerequisites, Fundamentals, Implementation and Practice, become its four tabs. Every
+day is validated against the contract before anything is written. The formats are in
+[Data/Formats/](Data/Formats/FORMAT-REGISTRY.md).
+
+To change a lesson, edit the Markdown, then rebuild both steps:
+
+```bash
+python Data/Source/week-1/tools/build_json.py
+```
+```bash
+npm run build:content
+```
+
+The first needs Python with PyYAML (`pip install pyyaml`). The backend picks up the new files on the
+next page load, without a restart.
 
 A day or a week marked `locked` appears greyed with a "soon" marker, and a link into it lands on a
 locked page rather than a 404.
@@ -81,8 +102,9 @@ frame over a WebSocket to a canvas in the overlay — so you watch the browser f
 than seeing a screenshot afterwards. If screencast will not attach, the run still returns the
 `show()` screenshot.
 
-**The harness.** Learner code runs in Node against `playwright`, with `launch`, `show`, `login`,
-`USERS` and `BASE_URL` injected as ambient bindings, so an example needs no `import` line.
+**The harness.** Code that belongs to no lesson file runs in Node against `playwright`, with
+`launch` and `show` injected as ambient bindings, so it needs no `import` line. A lesson's own files
+run in the Terminal instead (below).
 
 ### The run panels
 
@@ -97,18 +119,29 @@ visit, because a browser opens a window only when the learner clicks something.
 
 ### The Terminal
 
-The **Terminal** panel (also opened by **>_ Terminal** in the editor toolbar) runs real
-Playwright commands on the code in the editor: `npx playwright test` with its common options
-(`--list`, `--headed`, `--project`, `-g`, `--workers`, `--retries`, `--trace`, `--reporter`), and
-`npx playwright show-report`. Type `help` for the list. Everything else is refused with a message,
-and a line is never handed to a shell: `backend/src/terminal/commands.ts` splits it into words and
-checks every option.
+The **Terminal** panel (also opened by **>_ Terminal** in the editor toolbar) runs the course's
+commands: `npx playwright test` with its common options (`--list`, `--headed`, `--project`, `-g`,
+`--workers`, `--retries`, `--trace`, `--reporter`, `--last-failed`), `npx playwright show-report`,
+`node day3/hello.ts` and `npm run check -- day3/hello.ts` for the TypeScript lessons, and the
+version commands. Type `help` for the list. Setup commands such as `npm init` get a message saying
+the studio is already set up, and a line is never handed to a shell:
+`backend/src/terminal/commands.ts` splits it into words and checks every option and path.
 
-- **One folder.** Every command works in `Data/Workspace/` (ignored by Git), a small Playwright
-  project laid out like the learner's own: `package.json`, `playwright.config.ts`, `tests/`,
-  `test-results/`, `playwright-report/`. The tests folder holds only the file the current command
-  runs. The editor is saved as `tests/editor.spec.ts`, or under the name the command gives, so
-  `npx playwright test tests/login.spec.ts` behaves as it would in the learner's own project.
+**The editor holds a lesson file.** **Open in editor** on a lesson's code, or **▶ Run** on it,
+loads it as its file, such as `tests/day1/auto-wait.spec.ts`, and the editor's toolbar shows the
+name. Every command saves the editor there first, and the editor's **▶ Run** runs the lesson's own
+command. **Run** beside a command in a lesson types that command into the Terminal.
+
+- **Two workspaces.** Commands run in `Data/Workspace/demo/` or `Data/Workspace/project/` (ignored by
+  Git), each laid out like the learner's project: `playwright.config.ts` with Chromium, Firefox and
+  WebKit, `tests/`, and `ts-basics/` for the TypeScript lessons. A day that comes before the
+  learner has a project (Week 1 Day 1) uses `demo`, which starts with that day's files. Every other
+  day uses `project`, which starts as `npm init playwright@latest` leaves a project, plus the files
+  other lesson files import. What they start with is `Data/Content/workspaces.json`, written by the
+  build; a starting file is written only when it is missing, so what the learner saves is kept.
+- **The TypeScript lessons.** `node` runs a `.ts` file directly (Node 22.18 or later), and
+  `npm run check` runs TypeScript 7, the version `npm install -D typescript` gives today, installed
+  as `typescript-learner` so the studio's own build keeps its version.
 - **Live view.** `tsconfig.json` in the workspace maps `@playwright/test` to a small wrapper
   (`.studio/test.ts`) that screencasts each Chromium page and posts the frames to the backend, so
   the Browser panel shows the test as it runs. The same wrapper applies the Run button's navigation
@@ -119,7 +152,7 @@ checks every option.
   by default), and one command runs at a time.
 - **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
   block in a lesson offers **Load into editor** for this.
-- The workspace runs Chromium only, because `setup.bat` installs only Chromium.
+- The Browser panel shows Chromium. `setup.bat` installs Chromium, Firefox and WebKit.
 
 ### It executes arbitrary user-supplied code
 
@@ -199,8 +232,15 @@ Without it the rest of the studio works and the assistant reports itself unavail
 ## Verifying
 
 ```bash
-npm run typecheck  # both workspaces, against shared/contracts/
+npm run typecheck        # both workspaces, against shared/contracts/
+npm run verify:content   # every lesson file and solution, run through the Terminal
 ```
+
+`npm run verify:content` runs each lesson file and each whole-file exercise solution through the
+same code a learner's Run uses, in a workspace folder of its own. A `node` file must print exactly
+what the lesson shows; `npm run check` must pass, or fail with the lesson's error when the sample
+fails on purpose; a test must pass, or fail when it is meant to. Add a filter to run fewer, such as
+`npm run verify:content -- day3`.
 
 Also worth walking by hand before a cohort uses it:
 

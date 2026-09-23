@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Markdown } from './Markdown';
+import { Markdown, isSpecFile } from './Markdown';
+import { Callout, CodeBlock, Diagram, TerminalBlock, type EditorFile } from './LessonBlocks';
 import type { ContentBlock, CoursePart, PracticeProblem } from '../../../shared/contracts/course_day';
 
 /**
@@ -21,43 +22,62 @@ function withCodeSpans(text: string) {
 }
 
 /**
- * A retrieval check, mid-lesson. Formative by design (registry invariant 10): the pick lives in
+ * A quiz question, mid-lesson. Formative by design (registry invariant 10): the pick lives in
  * local state and nothing is written to progress, so revisiting the day offers the question again
- * and a wrong answer costs nothing. Answering locks the options and reveals which one was right -
- * there is no score to chase, and the explanation is the whole point.
+ * and a wrong answer costs nothing. A single-answer question is answered by picking; a
+ * select-all-that-apply question by ticking options and then checking. Answering locks the
+ * options and marks the right ones - there is no score to chase, and the explanation is the point.
  */
 function Checkpoint({ block }: { block: ContentBlock }) {
-  const [picked, setPicked] = useState<number | null>(null);
+  const [picked, setPicked] = useState<number[]>([]);
+  const [answered, setAnswered] = useState(false);
   const check = block.checkpoint;
   if (!check) return null;
 
-  const answered = picked !== null;
-  const correct = picked === check.answer;
+  const multiple = check.kind === 'multiple';
+  const correct =
+    answered && picked.length === check.answers.length && check.answers.every((a) => picked.includes(a));
+
+  const choose = (i: number): void => {
+    if (answered) return;
+    if (!multiple) {
+      setPicked([i]);
+      setAnswered(true);
+      return;
+    }
+    setPicked((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
+  };
 
   return (
     <div className="checkpoint">
-      <span className="label">Check yourself</span>
+      <span className="label">{multiple ? 'Check yourself - select all that apply' : 'Check yourself'}</span>
       <Markdown text={block.text} />
       <div className="options">
         {check.options.map((option, i) => {
-          // After answering, the right one is always marked - including when the learner found it,
-          // so the correct answer is never something they have to infer from an absence.
+          const isAnswer = check.answers.includes(i);
+          const isPicked = picked.includes(i);
+          // After answering, the right ones are always marked - including when the learner found
+          // them, so the correct answer is never something they have to infer from an absence.
           const state = !answered
-            ? ''
-            : i === check.answer
+            ? isPicked
+              ? ' picked'
+              : ''
+            : isAnswer
               ? ' right'
-              : i === picked
+              : isPicked
                 ? ' wrong'
                 : ' dim';
+          const marker = answered ? (isAnswer ? '✓' : isPicked ? '✗' : '') : multiple ? (isPicked ? '■' : '□') : '';
           return (
             <button
               key={i}
               type="button"
               className={'option' + state}
               disabled={answered}
-              onClick={() => setPicked(i)}
+              aria-pressed={multiple ? isPicked : undefined}
+              onClick={() => choose(i)}
             >
-              <span className="marker">{answered && i === check.answer ? '✓' : answered && i === picked ? '✗' : ''}</span>
+              <span className="marker">{marker}</span>
               {/* NOT className="body" - that is the app's main layout region, a flex container,
                   and reusing the name here laid the option's words out in columns. */}
               <span className="opt-text">{withCodeSpans(option)}</span>
@@ -65,6 +85,13 @@ function Checkpoint({ block }: { block: ContentBlock }) {
           );
         })}
       </div>
+      {multiple && !answered && (
+        <div className="check-row">
+          <button className="btn small" disabled={picked.length === 0} onClick={() => setAnswered(true)}>
+            Check my answer
+          </button>
+        </div>
+      )}
       {answered && (
         // The verdict is spelled out as well as coloured - colour alone would carry it for
         // nobody who cannot see the difference between the green and the red.
@@ -77,45 +104,90 @@ function Checkpoint({ block }: { block: ContentBlock }) {
   );
 }
 
+const KIND_LABELS: Record<PracticeProblem['kind'], string> = {
+  code: 'Code',
+  terminal: 'Terminal',
+  written: 'Written answer',
+  predict: 'Predict',
+};
+
 function Problem({
   problem,
-  onLoad,
+  onStart,
 }: {
   problem: PracticeProblem;
-  onLoad: (code: string, problemNumber: number) => void;
+  onStart: (code: string, problemNumber: number, meta: EditorFile) => void;
 }) {
   const [revealed, setRevealed] = useState(false);
+  const [hints, setHints] = useState(0);
+  // A code exercise belongs to a file, so the editor saves it there and Run runs its command.
+  const meta: EditorFile = problem.kind === 'code' ? { file: problem.file, run: problem.run } : { file: null, run: null };
+  // A model answer loads as the exercise's file only when it is the whole file. Some answers to a
+  // test exercise are notes plus the one line that changes, and saving those over the test file
+  // would break it.
+  const solutionMeta = (code: string): EditorFile =>
+    meta.file?.endsWith('.spec.ts') && !isSpecFile(code) ? { file: null, run: null } : meta;
 
   return (
     <div className="problem">
       <div className="head">
-        <span className="num">Problem {problem.number}</span>
+        <span className="num">Exercise {problem.number}</span>
         {problem.difficulty && <span className={'diff ' + problem.difficulty}>{problem.difficulty}</span>}
+        <span className="kind">{KIND_LABELS[problem.kind]}</span>
       </div>
+      {problem.title && <h3 className="problem-title">{problem.title}</h3>}
       <Markdown text={problem.statement} />
+      {(problem.file || problem.run) && (
+        <p className="problem-meta">
+          {problem.file && (
+            <>
+              File: <code>{problem.file}</code>
+            </>
+          )}
+          {problem.file && problem.run && ' · '}
+          {problem.run && (
+            <>
+              Run: <code>{problem.run}</code>
+            </>
+          )}
+        </p>
+      )}
+      {hints > 0 && (
+        <ol className="hints">
+          {problem.hints.slice(0, hints).map((h, i) => (
+            <li key={i}>
+              <Markdown text={h} />
+            </li>
+          ))}
+        </ol>
+      )}
       <div className="actions">
-        <button className="btn small" onClick={() => onLoad(problem.stub, problem.number)}>
+        <button className="btn small" onClick={() => onStart(problem.stub, problem.number, meta)}>
           Start this in the editor
         </button>
+        {hints < problem.hints.length && (
+          <button className="btn small ghost" onClick={() => setHints(hints + 1)}>
+            {hints === 0 ? 'Show a hint' : 'Show another hint'}
+          </button>
+        )}
         {problem.solution && !revealed && (
           <button className="btn small ghost" onClick={() => setRevealed(true)}>
             Reveal solution
           </button>
         )}
       </div>
-      {/* No solution authored yet means NO button, rather than a button that disappoints. */}
+      {/* No solution written means NO button, rather than a button that disappoints. */}
       {!problem.solution && (
         <p className="no-solution">
-          No worked solution for this one yet. The problem statement tells you how to know it
-          worked.
+          No worked solution for this one yet. The exercise tells you how to know it worked.
         </p>
       )}
       {revealed && problem.solution && (
         <div className="solution">
           {/* Solutions are markdown, not bare code: a worked answer to a written or terminal
-              problem is prose. Code answers carry their own fence, which still gets a Load
-              button. */}
-          <Markdown text={problem.solution} onLoadIntoEditor={(c) => onLoad(c, problem.number)} />
+              exercise is prose. A code answer can be loaded into the editor as the exercise's
+              file. */}
+          <Markdown text={problem.solution} offerAll onLoadIntoEditor={(c) => onStart(c, problem.number, solutionMeta(c))} />
         </div>
       )}
     </div>
@@ -128,6 +200,7 @@ export function TheoryPane({
   onSelect,
   viewed,
   onLoadIntoEditor,
+  onRunCommand,
   onStartProblem,
   weeksShown,
   onToggleWeeks,
@@ -137,8 +210,11 @@ export function TheoryPane({
   active: number;
   onSelect: (part: number) => void;
   viewed: number[];
-  onLoadIntoEditor: (code: string) => void;
-  onStartProblem: (code: string, problemNumber: number) => void;
+  /** Puts code in the editor, as the file it belongs to when it has one. */
+  onLoadIntoEditor: (code: string, meta?: EditorFile) => void;
+  /** Runs a command in the Terminal, after putting `load` in the editor when it is given. */
+  onRunCommand: (command: string, load?: { code: string; meta: EditorFile }) => void;
+  onStartProblem: (code: string, problemNumber: number, meta: EditorFile) => void;
   /** Whether the week list is open, so the one button can say which way it goes. */
   weeksShown?: boolean;
   onToggleWeeks?: () => void;
@@ -169,11 +245,7 @@ export function TheoryPane({
             the week list is closed: open, the list says where you are, and two answers to the
             same question would just crowd the tabs. */}
         {onToggleWeeks && !weeksShown && (
-          <Link
-            to="/learn/w1/d1/p1"
-            className="studio-title"
-            title={courseTitle}
-          >
+          <Link to="/learn/w1/d1/p1" className="studio-title" title={courseTitle}>
             {courseTitle}
           </Link>
         )}
@@ -187,60 +259,68 @@ export function TheoryPane({
 
       <div className="lesson">
         {part.blocks.map((block, i) => {
-          if (block.type === 'problem-ref') {
-            // Render the problem exactly where it sat in the source document.
-            const problem = part.problems.find((p) => String(p.number) === block.text);
-            return problem ? (
-              <Problem key={'p' + block.text} problem={problem} onLoad={onStartProblem} />
-            ) : null;
-          }
-          if (block.type === 'markdown') {
-            return <Markdown key={i} text={block.text} onLoadIntoEditor={onLoadIntoEditor} />;
-          }
-          // The three authored-overlay types. Cards rather than more prose: they are the fixed
-          // furniture of every lesson, and a learner scanning for "what is this for" or "what do
-          // I keep" should find them without reading the paragraphs in between.
-          if (block.type === 'at-a-glance' || block.type === 'recap') {
-            return (
-              <div className={'lesson-card ' + block.type} key={i}>
-                <span className="label">{block.type === 'recap' ? 'Recap' : 'At a glance'}</span>
-                <Markdown text={block.text} onLoadIntoEditor={onLoadIntoEditor} />
-              </div>
-            );
-          }
-          if (block.type === 'checkpoint') {
-            return <Checkpoint key={i} block={block} />;
-          }
-          if (block.type === 'your-turn') {
-            // An authored variation replaces the generic "retype from memory" prompt once
-            // written; unauthored (most days, for now) falls back to that generic text - the
-            // same graceful-absence pattern a missing practice solution already uses. Either
-            // way, what loads into the editor also carries the preceding example's own setup,
-            // when there is one, so "Try it" opens on working navigation, not a bare comment.
-            const prompt = block.variation?.prompt ?? block.text.replace(/^\s*\/\/\s?/gm, '').trim();
-            const starting = block.starter ? block.text + '\n\n' + block.starter : block.text;
-            return (
-              <div className="yourturn" key={i}>
-                <div className="txt">
-                  <span className="label">Your turn</span>
-                  {prompt}
+          switch (block.type) {
+            case 'problem-ref': {
+              // Render the exercise exactly where it sat in the source document.
+              const problem = part.problems.find((p) => String(p.number) === block.text);
+              return problem ? <Problem key={'p' + block.text} problem={problem} onStart={onStartProblem} /> : null;
+            }
+            case 'markdown':
+              return <Markdown key={i} text={block.text} onLoadIntoEditor={(c) => onLoadIntoEditor(c)} />;
+            case 'code':
+              return (
+                <CodeBlock
+                  key={i}
+                  block={block}
+                  onOpen={(code, meta) => onLoadIntoEditor(code, meta)}
+                  onRun={(command, code, meta) => onRunCommand(command, { code, meta })}
+                />
+              );
+            case 'terminal':
+              return <TerminalBlock key={i} text={block.text} onRun={(command) => onRunCommand(command)} />;
+            case 'callout':
+              return <Callout key={i} block={block} />;
+            case 'diagram':
+              return <Diagram key={i} source={block.text} />;
+            case 'checkpoint':
+              return <Checkpoint key={i} block={block} />;
+            case 'at-a-glance':
+            case 'recap':
+              // Cards rather than more prose: a learner scanning for "what is this for" or "what do
+              // I keep" should find them without reading the paragraphs in between.
+              return (
+                <div className={'lesson-card ' + block.type} key={i}>
+                  <span className="label">{block.type === 'recap' ? 'Recap' : 'Today'}</span>
+                  <Markdown text={block.text} />
                 </div>
-                <button className="btn small" onClick={() => onLoadIntoEditor(starting)}>
-                  Try it
-                </button>
-              </div>
-            );
+              );
+            case 'your-turn': {
+              const prompt = block.variation?.prompt ?? block.text.replace(/^\s*\/\/\s?/gm, '').trim();
+              const starting = block.starter ? block.text + '\n\n' + block.starter : block.text;
+              return (
+                <div className="yourturn" key={i}>
+                  <div className="txt">
+                    <span className="label">Your turn</span>
+                    {prompt}
+                  </div>
+                  <button className="btn small" onClick={() => onLoadIntoEditor(starting)}>
+                    Try it
+                  </button>
+                </div>
+              );
+            }
+            default:
+              return (
+                <Markdown key={i} text={'```ts\n' + block.text + '\n```'} onLoadIntoEditor={(c) => onLoadIntoEditor(c)} />
+              );
           }
-          return (
-            <Markdown key={i} text={'```ts\n' + block.text + '\n```'} onLoadIntoEditor={onLoadIntoEditor} />
-          );
         })}
 
-        {/* Any problem the blocks did not place - a safety net, not the normal path. */}
+        {/* Any exercise the blocks did not place - a safety net, not the normal path. */}
         {part.problems
           .filter((p) => !part.blocks.some((b) => b.type === 'problem-ref' && b.text === String(p.number)))
           .map((p) => (
-            <Problem key={p.number} problem={p} onLoad={onStartProblem} />
+            <Problem key={p.number} problem={p} onStart={onStartProblem} />
           ))}
       </div>
     </div>

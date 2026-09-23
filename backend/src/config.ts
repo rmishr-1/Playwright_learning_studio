@@ -44,10 +44,9 @@ const DEFAULTS: StudioConfig = {
     timeout_ms: 30_000,
     max_concurrent: 3,
     terminal_timeout_ms: 300_000,
+    // The course's practice pages load with page.setContent(), so they need no site at all. Two
+    // lessons open playwright.dev.
     allowed_origins: [
-      'https://test-automation-banking.vercel.app',
-      'https://demo.automationtesting.in',
-      'https://opensource-demo.orangehrmlive.com',
       'https://playwright.dev',
       'http://localhost',
       'http://127.0.0.1',

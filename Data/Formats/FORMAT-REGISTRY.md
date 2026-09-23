@@ -13,11 +13,17 @@ only process that touches `Data/`, so a keyed mutex is sufficient and there is n
 | Path | Holds | Written by | Read by |
 |---|---|---|---|
 | `Data/Formats/` | These wire contracts | format changes only | both sides |
-| `Data/Content/` | Course content — `course-index.json` + `weeks/week-N/day-N.json` | authors, by hand | backend |
+| `Data/Source/` | The course source: one package per week (`week-N/`), and the files every Terminal workspace starts with (`workspace/`) | authors | `npm run build:content` |
+| `Data/Content/` | The built course — `course-index.json`, `weeks/week-N/day-N.json`, `workspaces.json` | `npm run build:content` **only** | backend |
+| `Data/Workspace/` | The Terminal's workspaces, `demo/` and `project/`, with the files the learner saved | backend | backend |
 | `Data/Progress/` | The ONE progress record. No accounts: each clone of this repo is run by one person | backend | backend |
 | `Data/Config/` | `studio.config.json` — run limits, allowed sites, assistant settings | operator | backend |
 
-The backend reads `Data/Content/` and never writes it. With no `course-index.json`, the API answers
+**`Data/Content/` is built.** Each week's package in `Data/Source/week-N/` is authored as Markdown,
+turned into JSON by the package's own tool (`tools/build_json.py`), and `npm run build:content`
+turns that JSON into the app's format, validating every day against the contract before it writes
+anything. Editing `Data/Content/` by hand is always wrong: the next build overwrites it. The backend
+reads `Data/Content/` and never writes it. With no `course-index.json`, the API answers
 `CONTENT_MISSING` and the app says the course has no lessons yet.
 
 ## The change workflow
@@ -30,14 +36,14 @@ The backend reads `Data/Content/` and never writes it. With no `course-index.jso
 
 ## Format index and consumers
 
-Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **A** = authored
-content in `Data/Content/`.
+Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **S** = the build,
+`scripts/build-content.ts`, from `Data/Source/`.
 
 | Format | Direction | Producer → Consumer | Endpoint |
 |---|---|---|---|
 | `problem_error_format.json` | response | B → F | every non-2xx |
-| `course_index_format.json` | content | A → B → F | `GET /api/course` |
-| `course_day_format.json` | content | A → B → F | `GET /api/course/:week/:day` |
+| `course_index_format.json` | content | S → B → F | `GET /api/course` |
+| `course_day_format.json` | content | S → B → F | `GET /api/course/:week/:day` |
 | `progress_format.json` | state | F ↔ B | `GET /api/progress`, `POST /api/progress` |
 | `run_format.json` | req/resp | F ↔ B | `POST /api/run` + `WS /api/run/:run_id/stream` |
 | `assistant_format.json` | req/SSE | F ↔ B | `POST /api/assistant` |
@@ -84,6 +90,8 @@ content in `Data/Content/`.
 - [ ] Every `*.json` here parses.
 - [ ] No `options`, `_itemTemplate` or `_comment` key in anything under `Data/Content/` or `Data/Progress/`.
 - [ ] `shared/contracts/` reflects the change and `npm run typecheck` passes in both workspaces.
+- [ ] `npm run build:content` builds every day, and `npm run verify:content` passes: every lesson file
+      and every whole-file solution runs through the Terminal with the result the lesson shows.
 - [ ] `grep -r "fetch(" frontend/src` matches only `api/client.ts`.
 - [ ] A content edit is visible **without restarting the backend**. `store.ts` caches a day against
       that day's own mtime; anything that caches on a different file's stamp will serve stale content

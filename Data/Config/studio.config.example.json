@@ -4,9 +4,6 @@
     "timeout_ms": 30000,
     "max_concurrent": 3,
     "allowed_origins": [
-      "https://test-automation-banking.vercel.app",
-      "https://demo.automationtesting.in",
-      "https://opensource-demo.orangehrmlive.com",
       "https://playwright.dev",
       "http://localhost",
       "http://127.0.0.1"

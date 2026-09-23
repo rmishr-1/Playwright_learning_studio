@@ -1,0 +1,1408 @@
+{
+  "schema": "course-day/v2",
+  "week": 1,
+  "day": 2,
+  "title": "Setup & Your First Test Run",
+  "locked": false,
+  "workspace": "project",
+  "parts": [
+    {
+      "part": 1,
+      "kind": "prerequisite",
+      "title": "Prerequisites",
+      "tab_label": "Prerequisites",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 2 · Prerequisites\n\n",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "**Setup & Your First Test Run**\n\n*Install the tools, create a Playwright project with one command, understand every generated file, and run (and break) your first tests*\n\n**Time:** 2.5–3 hours\n\n**Where you work:** pw-course/ (you create it today)\n\n**By the end of the day you can:**\n\n- Explain what Node.js, npm, npx and package.json are, in plain words\n- Use basic terminal commands to move around folders\n- Install Node.js, VS Code and the Playwright extension on your own computer\n- Create a Playwright + TypeScript project with `npm init playwright@latest`\n- Describe the purpose of every generated file and folder, including `playwright.config.ts`\n- Run tests headless, headed, per browser, per file and by name, and open the HTML report\n- Read a failing test's error message and fix it\n- Set up npm scripts and a scalable folder structure for the weeks ahead\n\n**From earlier days:**\n\n- Day 1: Browser → Context → Page, headed vs headless",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P1 · Node.js, npm and npx in plain words\n\nPlaywright for TypeScript runs on **Node.js**. Three names come as a set:\n\n| Name | Plain-English meaning | Analogy |\n|---|---|---|\n| **Node.js** | A program that runs JavaScript (and TypeScript) *outside* a browser, on your computer or a server | The engine of a car |\n| **npm** (Node Package Manager) | Downloads and manages *packages* — ready-made code other people published. Installed together with Node.js | An app store for code |\n| **npx** | Runs a command that comes *inside* a package, without you installing it globally | \"Open app\" without putting it on your home screen |\n\nA few more words you will see today:\n\n| Name | What it is |\n|---|---|\n| **package** | A bundle of code published to npm, e.g. `@playwright/test` |\n| **`package.json`** | Your project's *ID card and shopping list*: its name, the packages it needs, and handy commands (scripts) |\n| **`node_modules/`** | The folder where npm puts the downloaded packages. Big, auto-generated — never edit it, never commit it to Git |\n| **`package-lock.json`** | Records the *exact* versions installed, so every teammate gets the same ones |\n| **dependency** | A package your project needs. `devDependencies` are needed only while developing/testing |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You clone a teammate's project. It has package.json but no node_modules folder. What do you run?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`npx playwright test`",
+              "`npm install`",
+              "`node package.json`",
+              "Copy node_modules from the teammate's laptop"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`npm install` reads package.json (and package-lock.json) and downloads every dependency into node_modules. node_modules is never shared or committed — it is always re-created."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P2 · Terminal survival kit\n\nThe **terminal** (also called command line, shell, console or command prompt) is a text window where you type commands. On this course platform it is the **Terminal** panel; on your computer it is also built into VS Code (**View → Terminal**).\n\n| Task | macOS / Linux / platform terminal | Windows (PowerShell) |\n|---|---|---|\n| Where am I? | `pwd` | `pwd` |\n| List files | `ls` (add `-a` to see hidden files) | `ls` or `dir` |\n| Go into a folder | `cd pw-course` | `cd pw-course` |\n| Go up one folder | `cd ..` | `cd ..` |\n| Create a folder | `mkdir tests` | `mkdir tests` |\n| Clear the screen | `clear` | `cls` or `clear` |\n| Stop a running command | `Ctrl + C` | `Ctrl + C` |\n| Repeat a previous command | `↑` arrow key | `↑` arrow key |\n| Auto-complete a name | `Tab` | `Tab` |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "Most \"command not found\" or \"no such file\" errors mean you are in the **wrong folder**. Run `pwd` to check, then `cd` to the right place.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": null
+          }
+        },
+        {
+          "type": "markdown",
+          "text": "Try it in the terminal panel:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "pwd\nmkdir practice-folder\ncd practice-folder\npwd\ncd ..\nls",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "A long-running command is stuck and you want to stop it. What do you press?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`Ctrl + Z`",
+              "`Ctrl + C`",
+              "`Esc`",
+              "Close the browser"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`Ctrl + C` stops (interrupts) the running command. You'll use it to close the HTML report server later today."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P3 · VS Code essentials\n\n**Visual Studio Code (VS Code)** is a free code editor from Microsoft and the most common editor for Playwright work. On this platform you already have a built-in editor; on your own computer you'll use VS Code.\n\nThe five areas you'll use:\n\n1. **Explorer** (left) — your project's files and folders\n2. **Editor** (centre) — where you write code; tabs for open files\n3. **Terminal** (bottom, **View → Terminal** or `` Ctrl + ` ``) — runs commands inside your project folder\n4. **Extensions** (left bar, the squares icon) — add features such as the Playwright extension\n5. **Testing** (left bar, the flask icon) — run and debug tests with a click (after installing the Playwright extension)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "Think of VS Code as your test-management tool, test editor and execution console in one window.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          }
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Fundamentals",
+      "tab_label": "Fundamentals",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 2 · Fundamentals\n\n\n\n## F1 · System requirements\n\nPlaywright's official requirements (check [playwright.dev/docs/intro](https://playwright.dev/docs/intro) for the latest):\n\n| Requirement | Supported |\n|---|---|\n| **Node.js** | Latest **22.x**, **24.x** or **26.x** |\n| **Windows** | Windows 11+, Windows Server 2019+, or WSL |\n| **macOS** | macOS 14 (Sonoma) or later |\n| **Linux** | Debian 12/13, Ubuntu 22.04 / 24.04 / 26.04 (x86-64 or arm64) |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "Download the **LTS** (\"Long-Term Support\") version from [nodejs.org](https://nodejs.org). Very old versions (for example Node 16 or 18) are no longer supported and cause confusing installation errors.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "warning",
+            "title": "Use an even-numbered LTS version of Node.js"
+          }
+        },
+        {
+          "type": "markdown",
+          "text": "## F2 · Installing the tools on your own computer",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "On this course platform everything is already installed — you can skip to **F3** and do the hands-on part in **Implementation**. Follow F2 when you set up your own laptop.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": null
+          }
+        },
+        {
+          "type": "markdown",
+          "text": "### Step 1 — Install Node.js (npm comes with it)\n\n1. Go to [nodejs.org](https://nodejs.org) and download the **LTS** installer for your operating system\n2. Run it and accept the defaults\n3. Open a **new** terminal and check:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "node -v\nnpm -v",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nv24.11.0\n11.6.1\n```\n\nYour numbers will differ — anything starting with `v22`, `v24` or `v26` for Node is fine.\n\n### Step 2 — Install VS Code\n\nDownload it from [code.visualstudio.com](https://code.visualstudio.com), install, and open it.\n\n### Step 3 — Install the Playwright extension\n\n1. Open **Extensions** (`Ctrl + Shift + X` / `Cmd + Shift + X`)\n2. Search **Playwright Test for VS Code** — publisher **Microsoft**\n3. Click **Install**\n\nThe extension adds a **Testing** panel where you can run, debug and record tests with a click, and see green/red icons next to each test in the editor.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You typed `node -v` and got \"command not found\". What is the most likely cause?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Playwright is not installed",
+              "Node.js is not installed, or the terminal was opened before installing it",
+              "The tests folder is missing",
+              "VS Code needs the Playwright extension"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`node` comes from the Node.js installation. Install Node.js, then open a NEW terminal window so it picks up the updated system path."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F3 · Creating a project: `npm init playwright@latest`\n\nOne command creates a complete, working Playwright project:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm init playwright@latest",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "What that command means:\n\n- `npm init <something>` → run the project *initializer* package called `create-<something>` — here, `create-playwright`\n- `@latest` → use the newest version\n\nIt asks four questions (on Linux, a fifth one):\n\n| Prompt | Recommended answer | Why |\n|---|---|---|\n| Do you want to use TypeScript or JavaScript? | **TypeScript** (default) | This course uses TypeScript |\n| Where to put your end-to-end tests? | **tests** (default) | Playwright looks for tests here (becomes `testDir` in the config) |\n| Add a GitHub Actions workflow? | **N** for now | Creates a CI file — we'll cover CI later in the course |\n| Install Playwright browsers? | **Y** (default) | Downloads Chromium, Firefox and WebKit |\n| *(Linux only)* Install Playwright operating system dependencies? | **N** on this platform (already done); **Y** on a fresh Linux machine | Installs system libraries the browsers need — requires `sudo`/root |\n\nThen it:\n\n1. Installs `@playwright/test` (and `@types/node`) into `node_modules/`\n2. Creates `playwright.config.ts`, `tests/example.spec.ts` and `.gitignore`\n3. Downloads the browser builds (a few hundred MB, only the first time)\n\n### Where do the browsers go?\n\nNot into your project. They go into a shared cache folder so every project on your computer can reuse them:\n\n| OS | Browser cache folder |\n|---|---|\n| Windows | `%USERPROFILE%\\AppData\\Local\\ms-playwright` |\n| macOS | `~/Library/Caches/ms-playwright` |\n| Linux | `~/.cache/ms-playwright` |\n\nUseful related commands:\n\n| Command | What it does |\n|---|---|\n| `npx playwright install` | Download the browsers for the Playwright version in this project |\n| `npx playwright install chromium` | Download only Chromium |\n| `npx playwright install --with-deps` | Also install the operating-system libraries browsers need (mainly Linux/CI) |\n| `npx playwright --version` | Show the installed Playwright version |\n| `npm install -D @playwright/test@latest` | Upgrade Playwright in this project (then run `npx playwright install` again) |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "You can safely re-run `npm init playwright@latest` in an existing project — for every file that already exists it **asks** before overwriting it (the default answer is No).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": null
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "After upgrading Playwright with `npm install -D @playwright/test@latest`, tests fail with \"Executable doesn't exist\". What should you run?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`npm init playwright@latest` in a new folder",
+              "`npx playwright install`",
+              "`npm uninstall node`",
+              "`npx playwright show-report`"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Each Playwright version needs its matching browser builds. `npx playwright install` downloads them."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F4 · The generated project, file by file\n\nAfter the installer finishes, your project looks like this:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "pw-course/\n├── .gitignore               ← tells Git which files NOT to save\n├── package.json             ← project ID card + dependencies + scripts\n├── package-lock.json        ← exact installed versions (don't edit by hand)\n├── playwright.config.ts     ← THE settings file for all your tests\n├── node_modules/            ← downloaded packages (auto-generated, never edit)\n└── tests/\n    └── example.spec.ts      ← a sample test file with 2 tests",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "text",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "After you run tests, two more folders appear:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "├── test-results/            ← raw results: error details, traces, screenshots of failures\n└── playwright-report/       ← the HTML report (open with: npx playwright show-report)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "text",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "(If you answered **Y** to GitHub Actions you also get `.github/workflows/playwright.yml`.)\n\n### `package.json`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "{\n  \"name\": \"pw-course\",\n  \"version\": \"1.0.0\",\n  \"scripts\": {},\n  \"devDependencies\": {\n    \"@playwright/test\": \"^1.63.0\",\n    \"@types/node\": \"^26.6.2\"\n  }\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "json",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "- `@playwright/test` — Playwright Test itself (the version number on your machine may be newer)\n- `@types/node` — type information about Node.js so TypeScript and VS Code can help you\n- `^1.63.0` — \"version 1.63.0 or any newer 1.x\" (the `^` allows minor updates)\n- `scripts` — empty for now; you'll add shortcuts in the Implementation part\n\n### `.gitignore`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "# Playwright\nnode_modules/\n/test-results/\n/playwright-report/\n/blob-report/\n/playwright/.cache/\n/playwright/.auth/",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "text",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "Everything generated or downloaded is excluded from Git: packages, results and reports can always be re-created.\n\n### Test files: `*.spec.ts`\n\nPlaywright finds tests by name: any file in the `testDir` folder (and its sub-folders) ending in **`.spec.ts`** or **`.test.ts`** (also `.js` variants). A file called `tests/login.ts` would be **ignored**.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You create `tests/checkout.ts` with a test inside, but `npx playwright test` doesn't run it. Why?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Test files must be in the project root",
+              "Test file names must end in `.spec.ts` or `.test.ts`",
+              "Playwright only runs example.spec.ts",
+              "You must restart VS Code"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Rename it to `tests/checkout.spec.ts` and Playwright will discover it."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which of these should NOT be committed to Git? (Select all that apply)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "node_modules/",
+              "playwright.config.ts",
+              "playwright-report/",
+              "tests/example.spec.ts"
+            ],
+            "answers": [
+              0,
+              2
+            ],
+            "kind": "multiple",
+            "explanation": "node_modules and the report are generated automatically and are already in .gitignore. Your config and tests are the valuable source code — always commit them."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F5 · `playwright.config.ts` explained\n\nThis file controls **how** all your tests run. Here is the generated file with the comments shortened (the full file has more commented-out examples):",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "import { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',                        // where to look for *.spec.ts files\n  fullyParallel: true,                       // run tests in parallel, even inside one file\n  forbidOnly: !!process.env.CI,              // on CI, fail if someone left test.only in the code\n  retries: process.env.CI ? 2 : 0,           // retry failed tests twice on CI, never locally\n  workers: process.env.CI ? 1 : undefined,   // 1 worker on CI; locally Playwright decides (half your CPU cores)\n  reporter: 'html',                          // produce the HTML report\n\n  use: {                                     // settings shared by every test\n    // baseURL: 'http://localhost:3000',     // lets you write page.goto('/login')\n    trace: 'on-first-retry',                 // record a trace when a test is retried\n  },\n\n  projects: [                                // one \"project\" per browser\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox',  use: { ...devices['Desktop Firefox'] } },\n    { name: 'webkit',   use: { ...devices['Desktop Safari'] } },\n    // Commented examples: 'Mobile Chrome' (Pixel 5), 'Mobile Safari' (iPhone 12),\n    // branded 'Microsoft Edge' and 'Google Chrome' via channel: 'msedge' / 'chrome'\n  ],\n\n  // webServer: { ... }                      // optionally start your app before the tests\n});",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "The most important ideas:\n\n| Setting | In one line |\n|---|---|\n| `testDir` | The folder Playwright searches for test files |\n| `fullyParallel` | `true` = tests inside the same file may also run at the same time |\n| `retries` | How many times to re-run a failed test before calling it failed |\n| `workers` | How many tests run at the same time (each worker is a separate process) |\n| `reporter` | How results are shown — `'list'`, `'line'`, `'dot'`, `'html'`, `'json'`, `'junit'`… |\n| `use` | Default options for every test: `baseURL`, `headless`, `viewport`, `trace`, `screenshot`, `video`… |\n| `projects` | Each project = one set of settings (usually one browser or device). Every test runs once per project |\n| `devices['Desktop Chrome']` | A ready-made preset: browser engine, screen size, user agent |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "CI servers (GitHub Actions, Jenkins, Azure DevOps…) set an environment variable called `CI`. The config uses it to behave differently on the build server (retries, one worker) than on your laptop. You'll learn the `condition ? a : b` syntax on Day 3.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": "What is `process.env.CI`?"
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "You want every test to use `https://staging.shop.com` as its starting address so tests can write `page.goto('/login')`. Which setting do you use?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`testDir`",
+              "`use: { baseURL: 'https://staging.shop.com' }`",
+              "`projects: ['https://staging.shop.com']`",
+              "`reporter: 'https://staging.shop.com'`"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`baseURL` inside `use` is prepended to relative URLs, so `page.goto('/login')` opens `https://staging.shop.com/login`."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "The config has 3 projects and `retries: process.env.CI ? 2 : 0`. On your LAPTOP, a test fails once. What happens?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "It is retried twice",
+              "It is reported as failed immediately (0 retries)",
+              "It is skipped",
+              "It runs on a 4th browser"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Your laptop doesn't set the `CI` variable, so `retries` is 0. On a CI server the same test would be retried up to 2 times."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F6 · Running tests — the command cheat sheet\n\n| Goal | Command |\n|---|---|\n| Run **all** tests, all projects, headless | `npx playwright test` |\n| Watch the browser | `npx playwright test --headed` |\n| One browser only | `npx playwright test --project=chromium` |\n| One file | `npx playwright test tests/example.spec.ts` |\n| Files whose path contains a word | `npx playwright test example` |\n| One line in a file | `npx playwright test tests/example.spec.ts:3` |\n| Tests whose **title** matches | `npx playwright test -g \"has title\"` |\n| List tests without running them | `npx playwright test --list` |\n| Run tests one at a time | `npx playwright test --workers=1` |\n| Only re-run what failed last time | `npx playwright test --last-failed` |\n| Step through with the Inspector | `npx playwright test --debug` |\n| Visual UI Mode | `npx playwright test --ui` |\n| Open the last HTML report | `npx playwright show-report` |\n| Record a test by clicking | `npx playwright codegen https://playwright.dev` |\n\nOptions can be combined: `npx playwright test tests/example.spec.ts --project=firefox --headed`.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which command runs ONLY the test titled \"get started link\", in Firefox, with the browser visible?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`npx playwright test --headed firefox get started link`",
+              "`npx playwright test -g \"get started link\" --project=firefox --headed`",
+              "`npx playwright show-report --project=firefox`",
+              "`npx playwright codegen \"get started link\"`"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`-g` filters by test title, `--project` picks the browser project, and `--headed` shows the window."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F7 · Framework structure overview — where you're heading\n\nThe generated project is the *starting point*. Real automation frameworks add layers so that hundreds of tests stay easy to maintain. Over the coming weeks you'll build this structure:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "pw-course/\n├── playwright.config.ts        ← global settings: browsers, baseURL, retries, reporters\n├── package.json                ← dependencies + npm scripts (npm test, npm run test:headed)\n├── tests/                      ← WHAT to test: spec files grouped by feature\n│   ├── auth/login.spec.ts\n│   └── cart/checkout.spec.ts\n├── pages/                      ← HOW to use each page (Page Object Model — later weeks)\n│   ├── LoginPage.ts\n│   └── CartPage.ts\n├── fixtures/                   ← reusable setup, e.g. \"a logged-in page\" (later weeks)\n├── test-data/                  ← input data: users.json, products.json\n└── utils/                      ← small helpers: random emails, date formatting",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "text",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null
+        },
+        {
+          "type": "diagram",
+          "text": "flowchart TD\n  T[\"tests/<br/>test scenarios\"] --> P[\"pages/<br/>page objects\"]\n  T --> D[\"test-data/<br/>inputs\"]\n  T --> U[\"utils/<br/>helpers\"]\n  P --> PW[\"@playwright/test<br/>page, locators, expect\"]\n  C[\"playwright.config.ts<br/>browsers, baseURL, reporters\"] -. controls .-> T",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "The rule of thumb: **tests describe *what* the user does and expects; everything else describes *how*.** When the login page changes, you fix one page object instead of 50 tests.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "This mirrors good manual-testing practice: test cases (tests/) are separate from test data (test-data/) and from detailed navigation instructions (pages/).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "The \"Log in\" button's text changes to \"Sign in\". In a well-structured framework, where would you ideally update this — once?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "In every test file that logs in",
+              "In the login page object (pages/LoginPage.ts)",
+              "In package.json",
+              "In .gitignore"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Page objects hold the \"how\" (locators and steps for a page). Change it once there and every test that uses it keeps working."
+          },
+          "code": null,
+          "callout": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 3,
+      "kind": "concept",
+      "title": "Implementation",
+      "tab_label": "Implementation",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 2 · Implementation\n\n\n\n## I1 · Check your tools\n\nOpen the **Terminal** panel and run:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "node -v\nnpm -v",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "You should see a Node version starting with `v22`, `v24` or `v26`, and an npm version.\n\n## I2 · Create your project\n\nCreate a folder for the course and generate a Playwright project inside it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "mkdir pw-course\ncd pw-course\nnpm init playwright@latest",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "Answer the prompts: **TypeScript**, **tests**, **N** (no GitHub Actions), **Y** (install browsers) and, if asked, **N** for operating-system dependencies (the platform already has them).\n\n```output\nNeed to install the following packages:\ncreate-playwright@1.17.x\nOk to proceed? (y) y\n\nGetting started with writing end-to-end tests with Playwright:\nInitializing project in '.'\n✔ Do you want to use TypeScript or JavaScript? · TypeScript\n✔ Where to put your end-to-end tests? · tests\n✔ Add a GitHub Actions workflow? (y/N) · false\n✔ Install Playwright browsers (can be done manually via 'npx playwright install')? (Y/n) · true\n✔ Install Playwright operating system dependencies (requires sudo / root …)? (y/N) · false\nInitializing NPM project (npm init -y)…\nInstalling Playwright Test (npm install --save-dev @playwright/test)…\nInstalling Types (npm install --save-dev @types/node)…\nWriting playwright.config.ts.\nWriting tests/example.spec.ts.\nWriting package.json.\nDownloading browsers (npx playwright install)…\n✔ Success! Created a Playwright Test project at /home/learner/pw-course\n```\n\n(Version numbers and paths will differ.) Confirm the version:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright --version",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "If the browser download finishes but tests later complain about missing libraries, run `npx playwright install --with-deps` (it may ask for your password).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "warning",
+            "title": "Linux users on their own machine"
+          }
+        },
+        {
+          "type": "markdown",
+          "text": "## I3 · Explore what was created",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "ls -a\nls tests",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "Open `package.json`, `.gitignore`, `playwright.config.ts` and `tests/example.spec.ts` in the editor and match each one to lesson F4/F5.\n\nNow read the sample test. You don't need to understand every symbol yet — Days 3–5 will explain them — but you can already read it like a test case:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "import { test, expect } from '@playwright/test';\n\ntest('has title', async ({ page }) => {\n  await page.goto('https://playwright.dev/');\n\n  // Expect a title \"to contain\" a substring.\n  await expect(page).toHaveTitle(/Playwright/);\n});\n\ntest('get started link', async ({ page }) => {\n  await page.goto('https://playwright.dev/');\n\n  // Click the get started link.\n  await page.getByRole('link', { name: 'Get started' }).click();\n\n  // Expects page to have a heading with the name of Installation.\n  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();\n});",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "tests/example.spec.ts",
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": true
+          },
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "| Line | Reads as |\n|---|---|\n| `test('has title', …)` | A test case named **has title** |\n| `page.goto('https://playwright.dev/')` | Step: open the Playwright website |\n| `expect(page).toHaveTitle(/Playwright/)` | Expected: the tab title contains \"Playwright\" |\n| `page.getByRole('link', { name: 'Get started' }).click()` | Step: click the link named \"Get started\" |\n| `expect(…heading 'Installation'…).toBeVisible()` | Expected: a heading \"Installation\" is visible |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "How many tests are in example.spec.ts, and how many runs will `npx playwright test` report with the default 3 browser projects?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "2 tests → 2 runs",
+              "2 tests → 6 runs",
+              "3 tests → 6 runs",
+              "1 test → 3 runs"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "2 tests × 3 projects (chromium, firefox, webkit) = 6 runs."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I4 · Your first run",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "The example tests open playwright.dev, so they need an internet connection.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": null
+          }
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright test",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nRunning 6 tests using 3 workers\n  6 passed (6.8s)\n\nTo open last HTML report run:\n\n  npx playwright show-report\n```\n\nSix green runs: 2 tests × 3 browsers. Everything ran **headless** — no windows opened.\n\nOpen the report:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright show-report",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "The report opens in the browser pane (it is served at `http://localhost:9323`). Click a test to see its steps and timing. Filter by browser or status at the top.\n\n**When you're done, go back to the terminal and press `Ctrl + C`** to stop the report server — the terminal is blocked until you do.\n\n## I5 · Tune the config for learning\n\nTwo small changes make the next weeks smoother:\n\n1. See **each test** in the terminal as it finishes (the `list` reporter) *and* still get the HTML report.\n2. Stop the HTML report from **opening automatically** after a failure (it would block your terminal until you press `Ctrl + C`).\n\nIn `playwright.config.ts`, replace the `reporter` line:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "  // BEFORE\n  reporter: 'html',\n\n  // AFTER: list in the terminal + HTML report on demand\n  reporter: [['list'], ['html', { open: 'never' }]],",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "Run again, this time only on Chromium:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright test --project=chromium",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nRunning 2 tests using 2 workers\n\n  ✓  1 [chromium] › tests/example.spec.ts:3:5 › has title (1.1s)\n  ✓  2 [chromium] › tests/example.spec.ts:10:5 › get started link (1.6s)\n\n  2 passed (2.5s)\n```\n\n## I6 · Headed, one file, one test, one browser\n\nTry each command and notice the difference:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "# watch the browser work\nnpx playwright test --project=chromium --headed\n# only one file\nnpx playwright test tests/example.spec.ts --project=firefox\n# only tests whose title contains \"title\"\nnpx playwright test -g \"title\" --project=webkit\n# list what WOULD run, without running anything\nnpx playwright test --list",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nListing tests:\n  [chromium] › example.spec.ts:3:5 › has title\n  [chromium] › example.spec.ts:10:5 › get started link\n  [firefox] › example.spec.ts:3:5 › has title\n  [firefox] › example.spec.ts:10:5 › get started link\n  [webkit] › example.spec.ts:3:5 › has title\n  [webkit] › example.spec.ts:10:5 › get started link\nTotal: 6 tests in 1 file\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `npx playwright test --list` do?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Runs all tests and lists failures",
+              "Shows which tests would run (per project) without running them",
+              "Lists installed browsers",
+              "Opens the HTML report"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`--list` is a quick way to check that your filters (`-g`, `--project`, file names) select the tests you expect."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I7 · Break it on purpose — and read the error\n\nA tester's superpower is reading failures. Let's create one.\n\n1. In `tests/example.spec.ts`, change `/Playwright/` to `/Selenium/` in the first test.\n2. Run just that test:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx playwright test -g \"has title\" --project=chromium",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nRunning 1 test using 1 worker\n\n  ✘  1 [chromium] › tests/example.spec.ts:3:5 › has title (5.9s)\n\n  1) [chromium] › tests/example.spec.ts:3:5 › has title ─────────────────────────\n\n    Error: expect(page).toHaveTitle(expected) failed\n\n    Expected pattern: /Selenium/\n    Received string:  \"Fast and reliable end-to-end testing for modern web apps | Playwright\"\n    Timeout: 5000ms\n\n    Call log:\n      - Expect \"toHaveTitle\" with timeout 5000ms\n        9 × locator resolved to <html lang=\"en\" dir=\"ltr\" …>…</html>\n          - unexpected value \"Fast and reliable end-to-end testing for modern web apps | Playwright\"\n\n       4 |   await page.goto('https://playwright.dev/');\n       5 |   // Expect a title \"to contain\" a substring.\n    >  6 |   await expect(page).toHaveTitle(/Selenium/);\n         |                      ^\n       7 | });\n\n  1 failed\n    [chromium] › tests/example.spec.ts:3:5 › has title ──────────────────────────\n```\n\nHow to read it — top to bottom:\n\n| Part | What it tells you |\n|---|---|\n| `✘ … has title (5.9s)` | Which test failed and on which browser |\n| `Expected pattern: /Selenium/` | What the test expected |\n| `Received string: \"… | Playwright\"` | What the page actually had |\n| `Timeout: 5000ms` / `9 × … unexpected value` | Playwright retried the check for 5 seconds before giving up (web-first assertion!) |\n| `> 6 | … ^` | The exact line and position in your code |\n\n3. Change `/Selenium/` back to `/Playwright/` and run again — green.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "This is a defect report written for you: **expected**, **actual**, **where**. When a test fails, first decide: is it a bug in the app, or a problem in the test?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          }
+        },
+        {
+          "type": "markdown",
+          "text": "## I8 · Add npm script shortcuts\n\nTyping long commands gets old. Add **scripts** to `package.json` with the terminal (or edit the file by hand):",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm pkg set scripts.test=\"playwright test\"\nnpm pkg set scripts.test:headed=\"playwright test --headed\"\nnpm pkg set scripts.test:chromium=\"playwright test --project=chromium\"\nnpm pkg set scripts.report=\"playwright show-report\"",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "Your `package.json` now contains:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "code",
+          "text": "\"scripts\": {\n  \"test\": \"playwright test\",\n  \"test:headed\": \"playwright test --headed\",\n  \"test:chromium\": \"playwright test --project=chromium\",\n  \"report\": \"playwright show-report\"\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "json",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "Use them:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm test\nnpm run test:chromium\n# pass extra options after --\nnpm run test:chromium -- -g \"get started\"\nnpm run report",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "`test` is special — `npm test` works without `run`. Every other script needs `npm run <name>`. Inside scripts you don't need `npx`; npm finds the `playwright` command in `node_modules` automatically.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": null
+          }
+        },
+        {
+          "type": "markdown",
+          "text": "## I9 · Prepare your framework folders\n\nCreate the folders from lesson F7 so your project is ready to grow (they'll stay empty for now):",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "terminal",
+          "text": "mkdir -p pages fixtures test-data utils tests/day5\nls",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "`mkdir -p` creates several folders at once (and nested ones such as `tests/day5`) without complaining if one already exists. In Windows PowerShell, `mkdir pages, fixtures, test-data, utils, tests/day5` does the same.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": null
+          }
+        },
+        {
+          "type": "markdown",
+          "text": "## I10 · (Own computer) Run tests from VS Code\n\nWith the **Playwright Test for VS Code** extension installed:\n\n1. Open the `pw-course` folder in VS Code (**File → Open Folder**)\n2. Click the **Testing** (flask) icon — your tests appear in a tree\n3. Click ▶ next to a test to run it; tick **Show browser** at the bottom of the panel to watch it\n4. Green ✓ / red ✗ icons also appear next to each `test(...)` line in the editor\n5. **Record new** opens a browser and records your clicks into a new test file (Codegen)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 4,
+      "kind": "practice",
+      "title": "Practice",
+      "tab_label": "Practice",
+      "has_runnable_code": true,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 2 · Practice\n\n\n\n## Quiz · Day 2 check",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which file lists your project's dependencies and npm scripts?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "playwright.config.ts",
+              "package.json",
+              ".gitignore",
+              "tests/example.spec.ts"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "package.json is the project's ID card — name, dependencies (`devDependencies`) and `scripts`."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What is the default folder where Playwright looks for tests in a freshly generated project?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`./src`",
+              "`./tests`",
+              "`./node_modules`",
+              "`./e2e` always"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`testDir: './tests'` — unless a `tests` folder already existed, in which case the installer suggests `e2e`."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "In the config, what does a \"project\" usually represent?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "A Git repository",
+              "A browser or device configuration that every test runs against",
+              "A single test file",
+              "A team of testers"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Projects are sets of settings — typically one per browser/device. Each test runs once per project."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `npx playwright show-report` do?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Runs tests and prints a report",
+              "Serves the last HTML report so you can open it in a browser",
+              "Sends the report by email",
+              "Deletes old reports"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "It starts a small local web server (default port 9323) for the playwright-report folder. Press Ctrl + C to stop it."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Playwright's browser binaries are downloaded into your project's node_modules folder.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "True",
+              "False"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "truefalse",
+            "explanation": "They go into a shared cache folder (e.g. ~/.cache/ms-playwright on Linux) so all projects on the computer can reuse them."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You run `npm run test:chromium -- -g \"login\"`. What does the `--` do?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Comments out the rest of the line",
+              "Passes the options after it (`-g \"login\"`) on to the Playwright command inside the script",
+              "Runs the tests twice",
+              "Disables Chromium"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Everything after `--` is forwarded to the script's command, so it becomes `playwright test --project=chromium -g \"login\"`."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "The failure output says: Expected pattern: /Dashboard/, Received string: \"Login\", Timeout: 5000ms. What can you conclude? (Select all that apply)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "The page title was \"Login\" instead of containing \"Dashboard\"",
+              "Playwright retried the assertion for about 5 seconds",
+              "The test definitely found a real bug in the app",
+              "The login step may have failed, or the test's expectation may be wrong — investigate"
+            ],
+            "answers": [
+              0,
+              1,
+              3
+            ],
+            "kind": "multiple",
+            "explanation": "The message shows expected vs actual and that the assertion retried for 5 s. Whether it's an app bug or a test problem needs investigation — never assume."
+          },
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Exercises",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "1",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "2",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "3",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "4",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "5",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Reflection\n\n1. Explain `npm`, `npx` and `package.json` to a teammate in one sentence each.\n2. Which file would you open to add a fourth browser, change retries, or set a base URL?\n3. When a test fails, which three pieces of information in the error do you look at first?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null
+        },
+        {
+          "type": "callout",
+          "text": "The Playwright code is written in **TypeScript**. Over the next two days you'll learn exactly enough programming to read and write it confidently — starting with variables, data types and operators.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": "Coming up on Day 3"
+          }
+        }
+      ],
+      "problems": [
+        {
+          "number": 1,
+          "difficulty": "Easy",
+          "title": "Write the command",
+          "kind": "terminal",
+          "statement": "Write the single command for each situation (run them to check):\n\n1. Run every test, only in WebKit.\n2. Run only `tests/example.spec.ts`, in Chromium, with the browser visible.\n3. Run only tests whose title contains `link`, in all browsers.\n4. Show which tests would run in Firefox without running them.\n5. Re-run only the tests that failed in the previous run.",
+          "stub": "# Write one command per line.\n",
+          "hints": [
+            "`--project=<name>` picks a browser project.",
+            "`-g` filters by title; `--list` lists; `--last-failed` re-runs failures."
+          ],
+          "file": null,
+          "run": null,
+          "solution": "```bash\nnpx playwright test --project=webkit\nnpx playwright test tests/example.spec.ts --project=chromium --headed\nnpx playwright test -g \"link\"\nnpx playwright test --project=firefox --list\nnpx playwright test --last-failed\n```"
+        },
+        {
+          "number": 2,
+          "difficulty": "Medium",
+          "title": "Troubleshooting desk",
+          "kind": "written",
+          "statement": "A colleague sends you these problems. What is the most likely cause and fix for each?\n\n1. `npx: command not found`\n2. `Error: No tests found` — their file is `tests/Login.ts`.\n3. `browserType.launch: Executable doesn't exist at …/ms-playwright/chromium-…` right after upgrading Playwright.\n4. They ran `npm test` in their home folder and got `Missing script: \"test\"`.\n5. After a failing run, the terminal shows `Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.` and won't accept commands.",
+          "stub": "// Write your answer here.\n",
+          "hints": [],
+          "file": null,
+          "run": null,
+          "solution": "1. Node.js (which includes npm and npx) isn't installed, or the terminal was opened before installing it. Install Node.js LTS and open a new terminal.\n2. Test files must end in `.spec.ts` or `.test.ts`. Rename it to `tests/login.spec.ts`.\n3. The new Playwright version needs matching browser builds. Run `npx playwright install`.\n4. They're in the wrong folder — npm reads the package.json of the current folder. `cd pw-course` first (check with `pwd`).\n5. The HTML reporter opened the report automatically after the failure. Press `Ctrl + C`. To prevent it, set `reporter: [['list'], ['html', { open: 'never' }]]`."
+        },
+        {
+          "number": 3,
+          "difficulty": "Medium",
+          "title": "Customise the config",
+          "kind": "code",
+          "statement": "Edit `playwright.config.ts` so that:\n\n1. Only **chromium** and **firefox** projects remain (remove or comment out webkit).\n2. Failed tests are retried **once** locally and **twice** on CI.\n3. Tests run **headed** by default (hint: `headless: false` inside `use`).\n\nThen run `npx playwright test --list` and check that only 4 runs are listed (2 tests × 2 projects). Afterwards, set `headless` back (or remove the line) so tests run headless again.",
+          "stub": "// Customise the config\n// Save this as playwright.config.ts\n",
+          "hints": [
+            "`retries` uses the same `process.env.CI ? a : b` pattern that is already there — just change the numbers.",
+            "Projects are objects inside the `projects: [ … ]` list. Put `//` in front of lines to comment them out."
+          ],
+          "file": "playwright.config.ts",
+          "run": null,
+          "solution": "```ts\nimport { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',\n  fullyParallel: true,\n  forbidOnly: !!process.env.CI,\n  retries: process.env.CI ? 2 : 1,          // 2 on CI, 1 locally\n  workers: process.env.CI ? 1 : undefined,\n  reporter: [['list'], ['html', { open: 'never' }]],\n  use: {\n    trace: 'on-first-retry',\n    headless: false,                         // show the browser for every run\n  },\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n    // { name: 'webkit', use: { ...devices['Desktop Safari'] } },\n  ],\n});\n```"
+        },
+        {
+          "number": 4,
+          "difficulty": "Medium",
+          "title": "Your own copy of the example",
+          "kind": "code",
+          "statement": "Create `tests/day2/my-first.spec.ts` by **copying** `tests/example.spec.ts`, then change it so that:\n\n1. The first test is called `docs page has title` and checks that the title contains `Playwright`.\n2. The second test is called `get started opens installation` (same steps as before).\n3. Add a comment above every line describing the step in your own words.\n\nRun only your new file in Chromium: `npx playwright test tests/day2 --project=chromium`.",
+          "stub": "// Your own copy of the example\n// Save this as tests/day2/my-first.spec.ts\n",
+          "hints": [
+            "Only the text inside `test('…'` changes for the names.",
+            "Comments start with `//`."
+          ],
+          "file": "tests/day2/my-first.spec.ts",
+          "run": "npx playwright test tests/day2 --project=chromium",
+          "solution": "```ts\nimport { test, expect } from '@playwright/test';\n\ntest('docs page has title', async ({ page }) => {\n  // Open the Playwright website\n  await page.goto('https://playwright.dev/');\n  // Check that the tab title contains the word \"Playwright\"\n  await expect(page).toHaveTitle(/Playwright/);\n});\n\ntest('get started opens installation', async ({ page }) => {\n  // Open the Playwright website\n  await page.goto('https://playwright.dev/');\n  // Click the \"Get started\" link\n  await page.getByRole('link', { name: 'Get started' }).click();\n  // Check that the \"Installation\" heading is visible\n  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();\n});\n```"
+        },
+        {
+          "number": 5,
+          "difficulty": "Challenge",
+          "title": "Record a test with Codegen (own computer)",
+          "kind": "terminal",
+          "statement": "On your own computer, run `npx playwright codegen https://playwright.dev`.\n\n1. In the browser that opens, click **Docs**, then use the search box to search for `locators`.\n2. Watch the Playwright Inspector window write code as you click.\n3. Copy the generated code into `tests/day2/recorded.spec.ts` and run it.\n4. Write down two things in the generated code you *don't* understand yet — you'll recognise them by the end of Day 5.",
+          "stub": "# Write one command per line.\n",
+          "hints": [
+            "Close the Codegen browser window when you're finished recording.",
+            "Codegen code often needs small clean-ups; that's normal."
+          ],
+          "file": null,
+          "run": null,
+          "solution": "```bash\nnpx playwright codegen https://playwright.dev\n# …record, copy the code into tests/day2/recorded.spec.ts, then:\nnpx playwright test tests/day2/recorded.spec.ts --project=chromium --headed\n```"
+        }
+      ]
+    }
+  ]
+}

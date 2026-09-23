@@ -363,6 +363,69 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 .lesson-card.recap { background: var(--good-wash); border-left-color: var(--good); }
 .lesson-card.recap .label { color: var(--good); }
 
+/* ---------------------------------------------------------------- lesson blocks */
+/* A code sample that belongs to a file: the file name heads it, and it can be opened or run. */
+.code-block .head .file { text-transform: none; letter-spacing: .02em; color: #cfd8e6; font-size: 11.5px; }
+.code-block .head .tags { display: flex; gap: 6px; }
+.code-block .head .tag {
+  font-size: 10px; letter-spacing: .04em; text-transform: none; padding: 2px 8px;
+  border-radius: 20px; background: #333b4a; color: #cfd8e6;
+}
+.code-block .head .tag.warn { background: #4a3514; color: #f0c27a; }
+.code-block .head .spacer { flex: 1; }
+.code-block .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
+.code-block .head button.run:hover { background: #1d4fd8; }
+
+/* Commands to type in a terminal, each with its own Run. */
+.terminal-block { margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2b3240; background: #14181f; }
+.terminal-block .head {
+  background: #262c38; color: #8e99ad; padding: 6px 13px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+}
+.terminal-block .lines { padding: 8px 0; }
+.terminal-block .line {
+  display: flex; align-items: center; gap: 9px; padding: 3px 10px 3px 14px;
+  font-family: var(--mono); font-size: 12.5px; color: #dbe2ee;
+}
+.terminal-block .line.comment { color: #6b7488; }
+.terminal-block .line .prompt { color: #5fb3c6; }
+.terminal-block .line code { background: none; border: none; padding: 0; color: inherit; flex: 1; white-space: pre-wrap; word-break: break-word; }
+.terminal-block .line button {
+  background: transparent; color: #cfd8e6; border: 1px solid #3d4757; border-radius: 6px;
+  padding: 2px 10px; font-size: 11px; opacity: .75;
+}
+.terminal-block .line:hover button { opacity: 1; }
+.terminal-block .line button:hover { background: #333b4a; color: #fff; }
+
+/* A boxed note. The label says what kind, so the color is never the only signal. */
+.callout {
+  margin: 18px 0; border-radius: 10px; padding: 12px 16px; border: 1px solid var(--rule);
+  border-left-width: 3px; background: var(--tint);
+}
+.callout .label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  display: block; margin-bottom: 4px; font-weight: 600; color: var(--muted);
+}
+.callout .title { font-weight: 600; color: var(--heading); margin-bottom: 4px; }
+.callout > div > :first-child { margin-top: 0; }
+.callout > div > :last-child { margin-bottom: 0; }
+.callout :is(p, li) { font-size: 14.5px; }
+.callout.tip { background: var(--good-wash); border-left-color: var(--good); }
+.callout.tip .label { color: var(--good); }
+.callout.note { background: var(--accent-wash); border-left-color: var(--accent); }
+.callout.note .label { color: var(--accent); }
+.callout.warning { background: var(--warn-wash); border-left-color: var(--warn); }
+.callout.warning .label { color: var(--warn); }
+.callout.tester { border-left-color: var(--concept-wait); }
+.callout.tester .label { color: var(--concept-wait); }
+.callout.deepdive { background: var(--paper); border-style: dashed; border-left-style: solid; }
+
+.diagram {
+  margin: 18px 0; padding: 14px; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--paper); overflow-x: auto; text-align: center;
+}
+.diagram svg { max-width: 100%; height: auto; }
+
 /* Retrieval check. Formative and never scored (registry invariant 10) - which is why it is a
    plain card and not a graded widget: nothing here is recorded or gated on. */
 .checkpoint {
@@ -389,6 +452,8 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 .checkpoint .option.right { background: var(--good-wash); border-color: var(--good); color: var(--good); }
 .checkpoint .option.wrong { background: var(--bad-wash); border-color: var(--bad); color: var(--bad); }
 .checkpoint .option.dim { opacity: .55; }
+.checkpoint .option.picked { background: var(--accent-wash); border-color: var(--accent); }
+.checkpoint .check-row { margin-top: 12px; }
 .checkpoint .verdict {
   margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--rule);
   font-size: 14px; line-height: 1.6;
@@ -410,8 +475,17 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   padding: 3px 9px; border-radius: 20px; background: var(--good-wash); color: var(--good);
   font-weight: 600;
 }
-.problem .diff.Intermediate { background: var(--warn-wash); color: var(--warn); }
-.problem .diff.Advanced { background: var(--bad-wash); color: var(--bad); }
+.problem .diff.Medium { background: var(--accent-wash); color: var(--accent); }
+.problem .diff.Hard { background: var(--warn-wash); color: var(--warn); }
+.problem .diff.Challenge { background: var(--bad-wash); color: var(--bad); }
+.problem .kind { font-size: 12px; color: var(--muted); margin-left: auto; }
+.problem .problem-title { margin: 2px 0 8px; font-size: 16.5px; }
+.problem .problem-meta { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+.problem .hints {
+  margin: 12px 0 0; padding: 10px 14px 10px 32px; background: var(--warn-wash);
+  border-radius: 8px; font-size: 14px;
+}
+.problem .hints li :is(div, p) { display: inline; margin: 0; }
 .problem .actions { display: flex; gap: 9px; margin-top: 14px; flex-wrap: wrap; }
 .solution { margin-top: 14px; border-top: 1px solid var(--rule); padding-top: 4px; }
 .no-solution { margin-top: 11px; font-size: 13.5px; color: var(--muted); font-style: italic; }
@@ -431,6 +505,11 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   max-width: 132px; min-width: 0;
 }
 .editor-head .spacer { flex: 1 1 auto; min-width: 0; }
+/* The lesson file the editor holds. It shrinks first, so the buttons never wrap. */
+.editor-head .editor-file {
+  color: var(--ed-text); font-size: 11.5px; letter-spacing: .02em; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto;
+}
 .icon-btn {
   background: var(--ed-bg); border: 1px solid var(--ed-rule); border-radius: 7px;
   color: var(--ed-text); padding: 5px 9px; font-size: 13px; line-height: 1;

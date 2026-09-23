@@ -51,11 +51,18 @@ function buildContext(day: CourseDay, part: number): string {
       // q.solution out. Handing the assistant the question invites it to answer it for them,
       // which is the one thing a retrieval check cannot survive.
       if (b.type === 'checkpoint') continue;
-      const isProse = b.type === 'markdown' || b.type === 'at-a-glance' || b.type === 'recap';
-      lines.push(isProse ? b.text : '```ts\n' + b.text + '\n```');
+      if (b.type === 'problem-ref') continue;
+      if (b.type === 'markdown' || b.type === 'at-a-glance' || b.type === 'recap') lines.push(b.text);
+      else if (b.type === 'callout') lines.push((b.callout?.title ? b.callout.title + ': ' : '') + b.text);
+      else if (b.type === 'terminal') lines.push('```bash\n' + b.text + '\n```');
+      else if (b.type === 'diagram') lines.push('```mermaid\n' + b.text + '\n```');
+      else {
+        const file = b.code?.file ? '// ' + b.code.file + '\n' : '';
+        lines.push('```' + (b.code?.language ?? 'ts') + '\n' + file + b.text + '\n```');
+      }
     }
     for (const q of p.problems) {
-      lines.push('Practice problem ' + q.number + (q.difficulty ? ' (' + q.difficulty + ')' : ''));
+      lines.push('Exercise ' + q.number + (q.title ? ': ' + q.title : '') + (q.difficulty ? ' (' + q.difficulty + ')' : ''));
       lines.push(q.statement);
       // q.solution is deliberately NOT included - invariant 4.
     }

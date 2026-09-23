@@ -99,12 +99,6 @@ const { chromium } = require(${playwrightPath});
 const SENTINEL = ${JSON.stringify(SENTINEL)};
 
 const ALLOWED = ${allowed};
-const BASE_URL = 'https://test-automation-banking.vercel.app/';
-const USERS = [
-  { name: 'Leela', email: 'leela@gmail.com', password: 'Leela@123' },
-  { name: 'Katy', email: 'katy@gmail.com', password: 'Katy@12354' },
-  { name: 'Jyosthna', email: 'jyosthna@gmail.com', password: 'Jyos@123' },
-];
 
 const send = (o) => { try { process.stdout.write(SENTINEL + JSON.stringify(o) + '\\n'); } catch {} };
 
@@ -161,15 +155,6 @@ async function show(page) {
   if (!target) return;
   _lastShot = (await target.screenshot()).toString('base64');
   send({ event: 'shot' });
-}
-
-async function login(page, user) {
-  const u = user || USERS[0];
-  await page.goto(BASE_URL);
-  await page.getByPlaceholder('Enter Email').fill(u.email);
-  await page.getByPlaceholder('Enter Password').fill(u.password);
-  await page.getByRole('button', { name: 'Login' }).click();
-  await page.waitForURL('**/dashboard');
 }
 
 (async () => {

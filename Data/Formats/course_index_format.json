@@ -1,5 +1,5 @@
 {
-    "_comment": "Data/Content/course-index.json - the course map the sidebar and landing page read. Written by hand, alongside the day files.",
+    "_comment": "Data/Content/course-index.json - the course map the sidebar and landing page read. Built by `npm run build:content` alongside the day files.",
     "schema": {
         "value": "course-index/v1"
     },
@@ -7,10 +7,18 @@
         "value": ""
     },
     "totals": {
-        "weeks": { "value": 0 },
-        "days": { "value": 0 },
-        "parts": { "value": 0 },
-        "practice_problems": { "value": 0 },
+        "weeks": {
+            "value": 0
+        },
+        "days": {
+            "value": 0
+        },
+        "parts": {
+            "value": 0
+        },
+        "practice_problems": {
+            "value": 0
+        },
         "available_days": {
             "_comment": "Days not locked - what a learner can actually open today.",
             "value": 0
@@ -18,17 +26,27 @@
     },
     "weeks": {
         "_itemTemplate": {
-            "week": { "value": 1 },
+            "week": {
+                "value": 1
+            },
             "theme": {
                 "_comment": "Short description of the week, shown on the landing page outline.",
                 "value": ""
             },
-            "locked": { "value": false },
+            "locked": {
+                "value": false
+            },
             "days": {
                 "_itemTemplate": {
-                    "day": { "value": 1 },
-                    "title": { "value": "" },
-                    "locked": { "value": false }
+                    "day": {
+                        "value": 1
+                    },
+                    "title": {
+                        "value": ""
+                    },
+                    "locked": {
+                        "value": false
+                    }
                 },
                 "value": []
             }

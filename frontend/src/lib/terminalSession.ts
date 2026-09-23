@@ -1,9 +1,13 @@
 import type { Terminal } from '@xterm/xterm';
 import { openRunStream, prepareRun, runTerminal, stopTerminal } from '../api/client';
+import type { Workspace } from '../../../shared/contracts/course_day';
+
+/** What a command needs from the editor: its code, the file it holds, and the day's workspace. */
+export type EditorState = { code: string; file: string | null; workspace: Workspace };
 
 const PROMPT = '\x1b[36m$\x1b[0m ';
 const WELCOME =
-  'This terminal runs Playwright commands on the code in the editor, such as \x1b[1mnpx playwright test\x1b[0m.\r\n' +
+  "This terminal runs the course's commands, such as \x1b[1mnpx playwright test\x1b[0m and \x1b[1mnode day3/hello.ts\x1b[0m.\r\n" +
   'Type \x1b[1mhelp\x1b[0m to see the commands you can run.\r\n';
 
 /** Output kept for redrawing the terminal when it moves to or from its own window. */
@@ -28,7 +32,7 @@ export type SessionEvents = {
  */
 export class TerminalSession {
   events: SessionEvents;
-  private readonly getCode: () => string;
+  private readonly getEditor: () => EditorState;
   private term: Terminal | null = null;
   private chunks: string[] = [];
   private size = 0;
@@ -44,8 +48,8 @@ export class TerminalSession {
   /** A command whose stream was still being prepared must never start once this is set. */
   private disposed = false;
 
-  constructor(getCode: () => string, events: SessionEvents) {
-    this.getCode = getCode;
+  constructor(getEditor: () => EditorState, events: SessionEvents) {
+    this.getEditor = getEditor;
     this.events = events;
     this.write(WELCOME);
     this.prompt();
@@ -235,7 +239,8 @@ export class TerminalSession {
           this.finish(event.code);
         }
       });
-      await runTerminal(run_id, trimmed, this.getCode());
+      const editor = this.getEditor();
+      await runTerminal(run_id, trimmed, editor.code, editor.file, editor.workspace);
     } catch (e) {
       this.write('\x1b[31m' + (e as Error).message + '\x1b[0m\r\n');
       this.finish(1);

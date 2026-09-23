@@ -21,10 +21,27 @@ hljs.registerLanguage('json', json);
 
 marked.setOptions({ gfm: true, breaks: false });
 
+/** Highlights code into the <code> element `el`, with the concept colors on top of hljs's own. */
+export function highlightInto(el: Element, code: string, lang: string): void {
+  if (!hljs.getLanguage(lang)) {
+    el.textContent = code;
+    return;
+  }
+  el.innerHTML = hljs.highlight(code, { language: lang }).value;
+  // Concept color grading. hljs tags every call-shaped identifier - a locator, an action, an
+  // assertion matcher, a wait, `test(` itself - with the SAME class (`hljs-title function_`); it
+  // cannot tell them apart. This adds a second, concept-specific class on top of hljs's own,
+  // using the vocabulary both this and the live editor (CodePane.tsx) share.
+  for (const span of el.querySelectorAll('.hljs-title.function_')) {
+    const concept = classify(span.textContent ?? '');
+    if (concept) span.classList.add('concept-' + concept);
+  }
+}
+
 /**
  * The runner wraps pasted code inside an async function body, so a fence with a module-level
  * `import`/`export` (a spec file, a playwright.config.ts) cannot even parse there. The editor's
- * helpers (launch, show, login, USERS, BASE_URL) are provided without an import. A fence that
+ * helpers (launch, show) are provided without an import. A fence that
  * reaches for `page.`/`browser.` without calling `launch()` is a fragment lifted out of a bigger
  * example, missing the one line that would make it self-contained. Both throw before any of the
  * learner's own code runs, which is worse than no button at all.
@@ -78,9 +95,12 @@ export const OpenWeeks = createContext<ReadonlySet<number> | null>(null);
 export function Markdown({
   text,
   onLoadIntoEditor,
+  offerAll,
 }: {
   text: string;
   onLoadIntoEditor?: (code: string) => void;
+  /** Offer every TypeScript fence to the editor, as a model answer's code is. */
+  offerAll?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -94,18 +114,7 @@ export function Markdown({
     for (const block of Array.from(host.querySelectorAll('pre > code'))) {
       const code = block.textContent ?? '';
       const lang = /language-(\w+)/.exec(block.className)?.[1] ?? '';
-      if (hljs.getLanguage(lang)) {
-        block.innerHTML = hljs.highlight(code, { language: lang }).value;
-        // Concept color grading. hljs tags every call-shaped identifier - a locator, an
-        // action, an assertion matcher, a wait, `test(` itself - with the SAME class
-        // (`hljs-title function_`, confirmed against the real TypeScript grammar); it cannot
-        // tell them apart. This adds a second, concept-specific class on top of hljs's own,
-        // using the vocabulary both this and the live editor (CodePane.tsx) share.
-        for (const span of block.querySelectorAll('.hljs-title.function_')) {
-          const concept = classify(span.textContent ?? '');
-          if (concept) span.classList.add('concept-' + concept);
-        }
-      }
+      if (hljs.getLanguage(lang)) highlightInto(block, code, lang);
 
       const pre = block.parentElement!;
       const wrap = document.createElement('div');
@@ -117,7 +126,7 @@ export function Markdown({
       // Only offer the button for code the editor can actually take.
       const tsOrJs = !lang || ['ts', 'js', 'typescript', 'javascript'].includes(lang);
       if (tsOrJs && onLoadIntoEditor) {
-        if (isExecutable(code)) {
+        if (offerAll || isExecutable(code)) {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.textContent = 'Load into editor';
@@ -169,7 +178,7 @@ export function Markdown({
     };
     host.addEventListener('click', onClick);
     return () => host.removeEventListener('click', onClick);
-  }, [text, onLoadIntoEditor, navigate, openWeeks]);
+  }, [text, onLoadIntoEditor, offerAll, navigate, openWeeks]);
 
   return <div ref={ref} />;
 }

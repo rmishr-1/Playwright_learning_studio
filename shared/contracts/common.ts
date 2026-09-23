@@ -12,7 +12,7 @@ export const PartNumber = z.union([z.literal(1), z.literal(2), z.literal(3), z.l
 /** A day may have any number of practice problems up to 20. Nothing may assume three. */
 export const ProblemNumber = z.number().int().min(1).max(20);
 
-export const Difficulty = z.enum(['Beginner', 'Intermediate', 'Advanced']);
+export const Difficulty = z.enum(['Easy', 'Medium', 'Hard', 'Challenge']);
 
 /** 'w2d1' — the progress key, and the id used in URLs. */
 export const dayKey = (week: number, day: number) => `w${week}d${day}`;
