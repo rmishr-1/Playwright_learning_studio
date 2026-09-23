@@ -91,9 +91,12 @@ process that touches `Data/`, so a keyed mutex is enough and there is no CAS or 
 | `Data/Formats/` | The wire contracts + [FORMAT-REGISTRY.md](Data/Formats/FORMAT-REGISTRY.md) |
 | `Data/Content/` | The course content, written by hand |
 | `Data/Progress/` | **Generated.** The one progress record, for whoever runs this clone |
+| `desktop/` | The Option C studio as an offline Windows app, with licences - see [desktop/README.md](desktop/README.md) |
 
 The backend binds loopback only. In dev, Vite proxies to it; a deployment puts a TLS edge in
-front. It is never directly reachable.
+front. It is never directly reachable. The desktop app starts the same backend inside itself, with
+its own folders, Node and browsers, and a token only its window holds (`backend/src/config.ts`,
+`backend/src/server.ts`).
 
 ---
 
