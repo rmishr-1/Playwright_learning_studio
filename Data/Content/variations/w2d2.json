@@ -1,7 +1,1 @@
-{
-  "p1_yt1": "Same rule, a different container: declare a `const` object with two properties, change one of them, and print it — the object mutates and `const` says nothing. Then add a line that points the same `const` at a brand-new object and read the error TypeScript gives you.",
-  "p1_yt2": "Same stand-in, one more method: add a `pretendFill(loc, value)` that stores the value on the object, call it once, and print the object. Two methods have now changed its contents and the `const` still has never been reassigned.",
-  "p1_yt3": "Same inference, different types: declare a `const` boolean and a `const` array of strings, neither annotated, and print `typeof` each — note that the array reports `object`, because `typeof` predates arrays having their own answer. Then try pushing a number into the string array and read which line `tsc` refuses.",
-  "p2_yt1": "Same two syntaxes, a different element: count the matches for the First Name field, once with a relative XPath on its `placeholder` attribute and once with the CSS equivalent. Both should print 1 — and the pair of expressions should look exactly as different as the table said they would.",
-  "p2_yt2": "Same idea, a different element: assign the Refresh button (`#Button1`) to a `const` and print its `textContent()` wrapped in `JSON.stringify()`. Note the exact string, stray whitespace and all, before you ever write an assertion against it."
-}
+{}
