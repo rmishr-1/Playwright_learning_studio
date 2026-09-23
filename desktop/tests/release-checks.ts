@@ -21,7 +21,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import * as asar from '@electron/asar';
 import { FuseV1Options, getCurrentFuseWire } from '@electron/fuses';
-import { machineCode, sign, type Licence } from '../src/licence';
+import { machineCode, sign, type Licence, type LicenceFile } from '../src/licence';
 
 const DESKTOP = path.resolve(__dirname, '..');
 const UNPACKED = path.join(DESKTOP, 'release', 'win-unpacked');
@@ -74,11 +74,20 @@ async function runFor(exe: string, args: string[], ms: number, env: NodeJS.Proce
   return { alive, out };
 }
 
+/** A customer's build carries its licence, and accepts no other. */
+function builtInLicence(): Licence | null {
+  try {
+    return (JSON.parse(asar.extractFile(ASAR, 'licence.lic').toString('utf-8')) as LicenceFile).licence;
+  } catch {
+    return null;
+  }
+}
+
 function reset(licence: Licence | null, accepted: boolean): void {
   fs.rmSync(USER, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   fs.mkdirSync(USER, { recursive: true });
   if (!licence) return;
-  fs.writeFileSync(path.join(USER, 'licence.lic'), JSON.stringify(sign(licence, PRIVATE_KEY)));
+  if (!builtInLicence()) fs.writeFileSync(path.join(USER, 'licence.lic'), JSON.stringify(sign(licence, PRIVATE_KEY)));
   if (accepted) {
     const eula = asar.extractFile(ASAR, 'EULA.txt');
     fs.writeFileSync(
@@ -120,12 +129,16 @@ async function main(): Promise<void> {
   const unpackedOwn = fs.existsSync(unpacked) ? fs.readdirSync(unpacked).filter((n) => n !== 'node_modules') : [];
   expect(unpackedOwn.length === 0, 'only third-party packages are unpacked', unpackedOwn.join(', '));
 
-  console.log('\nStarting the app');
+  const carried = builtInLicence();
+  console.log('\nStarting the app' + (carried ? ', a build for ' + carried.licensee + ' (' + carried.id + ')' : ''));
   reset(null, false);
   let r = await runFor(EXE, [], 8000);
-  expect(r.alive && !fs.existsSync(path.join(USER, 'port.json')), 'without a licence it waits on the licence screen; the backend never starts');
+  expect(
+    r.alive && !fs.existsSync(path.join(USER, 'port.json')),
+    'until there is a licence and the agreement is accepted, the backend never starts',
+  );
 
-  const licence: Licence = {
+  const licence: Licence = carried ?? {
     id: 'EVK-RELEASE1',
     licensee: 'Release Check Ltd',
     email: null,
