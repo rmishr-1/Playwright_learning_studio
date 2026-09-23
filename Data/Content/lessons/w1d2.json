@@ -30,7 +30,7 @@
           "question": "Weeks later, a test fails with `browserType.launch: Executable doesn't exist`. What is the most likely cause?",
           "options": [
             "Node.js is too old for the installed version of Playwright.",
-            "The browsers were never downloaded, and `npx playwright install` fixes it.",
+            "The browsers were never downloaded when the project was created.",
             "The configuration file has no `projects` entry for that browser at all."
           ],
           "answer": 1,
@@ -40,7 +40,7 @@
       "recap": "- **Node.js** runs your tests, and **npm** installs packages such as Playwright. `node -v` and `npm -v` show their versions, and Playwright needs Node.js 20 or later.\n- **VS Code** is the editor you write tests in. Open your project folder in it, and use its integrated terminal.\n- `npm init playwright@latest` creates a project in an empty folder. Answer TypeScript, tests, No, and Yes.\n- `playwright.config.ts` holds the settings for every run. `testDir` tells Playwright where the tests are.\n- Playwright and its browsers are separate downloads. `npx playwright install` downloads missing browsers."
     },
     "3": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Organizing test files into folders, and choosing which files to keep out of Git. |\n| **Goals** | Explain what `testDir` and `testMatch` decide, and which entries belong in `.gitignore` and why. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2), where you created your project and opened its configuration file. |",
+      "at_a_glance": "| | |\n|---|---|\n| **Focus** | Organizing test files into folders, and choosing which files to keep out of Git. |\n| **Goals** | Explain what `testDir` and `testMatch` decide, and which entries belong in `.gitignore` and why. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d2/p2), where you created your project and opened its configuration file. |\n| **Environment** | The editor on the right for the example, and your own project's `playwright.config.ts` and `.gitignore` for the rest of the lesson. |",
       "checkpoints": [
         {
           "question": "You move your tests into `tests/ui` and `tests/api`, and want to run only the UI tests. Which setting selects them?",
@@ -50,7 +50,7 @@
             "`reporter`, because it decides which test results Playwright shows you after a run"
           ],
           "answer": 1,
-          "explanation": "`testDir` says where Playwright starts looking. `testMatch` decides which files count as tests once it is there, so a pattern such as `ui/**/*.spec.ts` selects only the UI tests."
+          "explanation": "`testDir` says where Playwright starts looking. `testMatch` decides which files count as tests once it is there, so a pattern such as `ui/**/*.spec.ts` selects only the UI tests. Naming a folder on the command line, as in `npx playwright test tests/ui`, runs it once, while `testMatch` decides which files count as tests on every run."
         },
         {
           "question": "Which rule decides whether a file belongs in `.gitignore`?",

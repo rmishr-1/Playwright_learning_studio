@@ -19,9 +19,9 @@
         {
           "question": "According to this lesson, which two things do you need before you can automate a test?",
           "options": [
-            "A test runner, a report, and a tool that records video",
+            "A test runner and a tool that records video of every run",
             "A known expected result and a way to find the element",
-            "A fast computer and a colleague to review your script"
+            "A fast computer and a colleague who reviews your script line by line"
           ],
           "answer": 1,
           "explanation": "Without a known expected result, the script has nothing to compare the actual result with. Without a reliable way to find the element, the script cannot click it, type into it, or read it. If either one is missing, the test stays manual."
@@ -29,9 +29,9 @@
         {
           "question": "Your manager asks you to automate tests for the company's Android app, which people install on their phones. Is Playwright the right tool?",
           "options": [
-            "Yes, because mobile support is one of the features Playwright lists.",
-            "No. Playwright imitates phone screens in a browser and cannot test installed apps.",
-            "Yes, but only on an emulator on your computer, not on a real phone."
+            "Yes, because mobile support is one of the features that Playwright lists.",
+            "No. Playwright only imitates a phone screen inside a desktop browser.",
+            "No, because Playwright supports only websites that open on a desktop computer."
           ],
           "answer": 1,
           "explanation": "Playwright's mobile support is mobile emulation: a desktop browser imitates a phone screen. This is useful for testing websites on phone-sized screens. An app installed on a phone needs a mobile testing tool such as Appium."

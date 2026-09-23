@@ -10,7 +10,7 @@
      "question": "Why does Codegen write `getByRole('button', { name: 'Login' })` instead of `#ng-x7f2q3`?",
      "options": [
       "Because Playwright can find an element by its role faster than by its id",
-      "Because the role and the name stay the same when the page is redesigned",
+      "Because the role and the name survive a redesign of the page",
       "Because an id can match more than one element on the same page"
      ],
      "answer": 1,
@@ -53,10 +53,10 @@
      "explanation": "A mistake in the code causes an error that you can see. A file whose name does not end in `.spec.ts` or `.test.ts` adds nothing to the list, and no message explains why. Check the file names first."
     },
     {
-     "question": "After the rename, the total went from 6 tests to 9. What changed inside the file?",
+     "question": "After the rename, the total went from 6 tests to 9. Why?",
      "options": [
-      "Nothing: only the name changed, so Playwright found the file",
-      "The rename added the test to a list that Playwright keeps",
+      "Only the name changed, and Playwright chooses files by name",
+      "The rename added the test to a list of files that Playwright keeps",
       "Playwright corrected the code in the file as part of the rename"
      ],
      "answer": 0,

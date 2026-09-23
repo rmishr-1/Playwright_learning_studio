@@ -46,7 +46,7 @@
      "question": "Both tests type the same wrong password. Why does the first one pass?",
      "options": [
       "The website accepted the wrong password, so the sign-in worked.",
-      "The test has no assertion, so nothing in it could fail.",
+      "The test has no assertion, so nothing could fail.",
       "Playwright reports a failed sign-in as a warning, not a failure."
      ],
      "answer": 1,
@@ -73,16 +73,16 @@
      "explanation": "A test is useful only if it fails when the feature does not work. Changing one value and watching the test fail proves that its assertions check something."
     }
    ],
-   "recap": "- An **assertion** compares what happened with what should have happened, and fails the test if they differ.\n- A test without an assertion passes whether or not the feature works.\n- Check the result of the steps, such as the dashboard address or the user's name.\n- Playwright's assertions retry for up to five seconds before they fail.\n- Watch every new test fail once, to prove that it checks something."
+   "recap": "- An **assertion** compares what happened with what should have happened, and fails the test if they differ.\n- A test without an assertion passes whether or not the feature works.\n- Check the result of the steps, such as the dashboard address or the name of the user.\n- Assertions retry for up to five seconds before they fail.\n- Watch every new test fail once, to prove that it checks something."
   },
   "3": {
-   "at_a_glance": "| | |\n|---|---|\n| **Focus** | Writing the sign-in steps once, in a page object that every test can use. |\n| **Goals** | Explain what a class, a constructor, and a method are, and use one page object in two tests that expect opposite results. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d5/p2), where you wrote the sign-in tests. |\n| **Tools** | A class with `constructor`, `readonly`, and `this`, and `new` to make an object from it. |\n| **Environment** | VS Code and its integrated terminal, in your project folder, then the editor on the right. |\n| **Scope** | This lesson introduces page objects. Week 5 covers the Page Object Model in full. |\n| **Key takeaway** | A page object performs the steps, and the test makes the assertions. |",
+   "at_a_glance": "| | |\n|---|---|\n| **Focus** | Writing the sign-in steps once, in a page object that every test can use. |\n| **Goals** | Explain what a class, a constructor, and a method are, and use one page object in two tests that expect opposite results. |\n| **Prerequisites** | [Fundamentals](/learn/w1/d5/p2), where you wrote the sign-in tests. |\n| **Tools** | A class with `constructor`, `readonly`, and `this`, and `new` to make an object from it. |\n| **Environment** | VS Code and its integrated terminal, in your project folder, then the editor on the right. |\n| **Scope** | This lesson introduces page objects. A later lesson covers the Page Object Model in full. |\n| **Key takeaway** | A page object performs the steps, and the test makes the assertions. |",
    "checkpoints": [
     {
      "question": "Why does `LoginPage` contain no assertions?",
      "options": [
       "Assertions can be written only inside a test, never inside a class.",
-      "So that tests expecting different results can all use the same class.",
+      "So that tests expecting opposite results can share it.",
       "Because the class runs before Playwright has opened the page."
      ],
      "answer": 1,

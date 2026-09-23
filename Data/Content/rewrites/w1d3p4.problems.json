@@ -1,6 +1,6 @@
 {
   "1": {
-    "statement": "**What to build.** A short record of three test runs. In your project, run these commands one\nafter another, and note what you see after each:\n\n1. `npx playwright test --project=chromium --headed`\n2. `npx playwright test`\n3. `npx playwright show-report`\n\n**Where.** Run the commands in the integrated terminal in VS Code, and write your notes in the\neditor, using the template.\n\n**How you will know it worked.** You saw a Chromium window open and close, the second run\nreported six passed tests, and the report opened in your browser.",
+    "statement": "**What to build.** A short record of three test runs. In your project, run these commands one\nafter another, and note what you see after each:\n\n1. `npx playwright test --project=chromium --headed`\n2. `npx playwright test`\n3. `npx playwright show-report`\n\nThe third command keeps the terminal busy while the report is open. When you have looked at the\nreport, click in the terminal and press **Ctrl+C** to get the prompt back.\n\n**Where.** Run the commands in the integrated terminal in VS Code, and write your notes in the\neditor, using the template.\n\n**How you will know it worked.** You saw a Chromium window open and close, the second run\nreported six passed tests, and the report opened in your browser.",
     "stub": "// Problem 1: three test runs\n//\n// 1. With --project=chromium --headed, what did you see?\n//\n// 2. How many tests passed without any options, and why that number?\n//\n// 3. What does the report show for each test?"
   },
   "2": {
