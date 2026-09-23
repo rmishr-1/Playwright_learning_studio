@@ -499,32 +499,62 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .overlay .tabs button.on { color: #fff; border-bottom-color: var(--accent); }
 .overlay .tabs .spacer { flex: 1; }
-.overlay .status {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
-  padding: 3px 10px; border-radius: 20px; font-weight: 600;
-}
-.overlay .status.running { background: #1f3352; color: #93b8fb; }
-.overlay .status.ok { background: #14351f; color: #6ee7a0; }
-.overlay .status.error, .overlay .status.timeout, .overlay .status.blocked { background: #3d1b1b; color: #fca5a5; }
-.overlay .status.stopped { background: #3a3218; color: #fcd34d; }
-.overlay .expand { color: #8e99ad; background: none; border: none; font-size: 15px; padding: 4px 9px; }
-.overlay .expand:hover { color: #fff; }
+.overlay .tabs button.out { color: #93b8fb; }
+.overlay .tabs .out-mark { font-size: 11px; }
 .overlay .close { color: #8e99ad; background: none; border: none; font-size: 18px; padding: 4px 9px; }
 .overlay .close:hover { color: #fff; }
-.overlay .view { flex: 1; min-height: 0; overflow: auto; }
-.overlay .view.browser { display: flex; align-items: center; justify-content: center; background: #05070a; }
-.overlay .view.browser img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.overlay .view.console { padding: 12px 15px; }
+
+/* The panels shown in the overlay, side by side. Narrow overlays stack them instead. */
+.overlay { container-type: inline-size; }
+.overlay .panels { flex: 1; min-height: 0; display: flex; }
+.overlay .panels > .empty { margin: auto; padding: 0 20px; text-align: center; }
+.overlay .panel-slot { display: flex; min-width: 0; min-height: 0; }
+.overlay .divider { flex: 0 0 5px; cursor: col-resize; background: #262c38; }
+.overlay .divider:hover, body.dragging-divider .overlay .divider { background: var(--accent); }
+body.dragging-divider { cursor: col-resize; user-select: none; }
+@container (max-width: 560px) {
+  .overlay .panels { flex-direction: column; }
+  .overlay .panel-slot { flex-basis: auto !important; }
+  .overlay .divider { display: none; }
+}
+
+/* One panel: a small header, then its view. The same markup shows in a popped-out window. */
+.panel { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #12161e; }
+.panel-head {
+  display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 12px;
+  border-bottom: 1px solid #262c38; min-height: 30px;
+}
+.panel-title { color: #dbe2ee; font-size: 12px; font-weight: 600; }
+.panel-head .spacer { flex: 1; }
+.panel-btn { color: #8e99ad; background: none; border: none; font-size: 13px; padding: 3px 7px; border-radius: 6px; cursor: pointer; }
+.panel-btn:hover { color: #fff; background: #262c38; }
+.panel .status {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 2px 9px; border-radius: 20px; font-weight: 600;
+}
+.panel .status.running { background: #1f3352; color: #93b8fb; }
+.panel .status.ok { background: #14351f; color: #6ee7a0; }
+.panel .status.error, .panel .status.timeout, .panel .status.blocked { background: #3d1b1b; color: #fca5a5; }
+.panel .status.stopped { background: #3a3218; color: #fcd34d; }
+.panel .status.muted { background: none; color: #8a94a6; padding: 0; }
+.panel .view { flex: 1; min-height: 0; overflow: auto; }
+.panel .view.browser { display: flex; align-items: center; justify-content: center; background: #05070a; }
+.panel .view.browser img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.panel .view.console { padding: 12px 15px; }
 /* xterm.js sizes itself to this box, so it must not scroll or pad unevenly itself. */
-.overlay .view.terminal { padding: 8px 4px 4px 12px; overflow: hidden; background: #12161e; border-radius: 0 0 11px 11px; }
-.overlay .view.terminal .xterm { height: 100%; }
-.overlay .view.terminal .xterm-viewport { background: #12161e !important; }
-.overlay pre {
+.panel .view.terminal { padding: 8px 4px 4px 12px; overflow: hidden; background: #12161e; }
+.panel .view.terminal .xterm { height: 100%; }
+.panel .view.terminal .xterm-viewport { background: #12161e !important; }
+.panel pre {
   margin: 0; font-family: var(--mono); font-size: 12px; line-height: 1.6;
   color: #dbe2ee; white-space: pre-wrap; word-break: break-word;
 }
-.overlay pre.err { color: #fca5a5; }
-.overlay .waiting { color: #8e99ad; font-size: 13px; }
+.panel pre.err { color: #fca5a5; }
+.panel .waiting, .overlay .waiting { color: #8e99ad; font-size: 13px; }
+
+/* A panel in its own window fills it. */
+body.popout-body { margin: 0; background: #12161e; }
+.popout { position: fixed; inset: 0; display: flex; }
 
 /* ---------------------------------------------------------------- detached run view
    The whole page, in its own popped-out window - see RunOverlay's Detach button. */

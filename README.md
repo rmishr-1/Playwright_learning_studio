@@ -111,9 +111,20 @@ than seeing a screenshot afterwards. If screencast will not attach, the run stil
 `import { launch, show } from "../_shared/deno-helpers.ts"` line is rewritten on the way in, so an
 example copied straight out of the lesson runs unchanged.
 
+### The run panels
+
+The overlay over the editor has three panels: **Browser**, **Console**, and **Terminal**. Each
+has a toggle in the overlay's header, so any of them can show at the same time, side by side, with
+draggable dividers between them. The **⇱** button on a panel pops it out into a window of its own,
+which stays live and, for the Terminal, typeable; **Back to the studio**, or closing the window,
+puts it back. The panel is a React portal into that window (`frontend/src/components/PopOut.tsx`),
+so no state is copied between windows. Which panels show, their widths, and the overlay's height
+are remembered in the browser's local storage. Popped-out windows are not reopened on the next
+visit, because a browser opens a window only when the learner clicks something.
+
 ### The Terminal
 
-The overlay's **Terminal** tab (also opened by **>_ Terminal** in the editor toolbar) runs real
+The **Terminal** panel (also opened by **>_ Terminal** in the editor toolbar) runs real
 Playwright commands on the code in the editor: `npx playwright test` with its common options
 (`--list`, `--headed`, `--project`, `-g`, `--workers`, `--retries`, `--trace`, `--reporter`), and
 `npx playwright show-report`. Type `help` for the list. Everything else is refused with a message,
@@ -128,10 +139,11 @@ checks every option.
   behave exactly as the lessons say.
 - **Live view.** `tsconfig.json` in the workspace maps `@playwright/test` to a small wrapper
   (`.studio/test.ts`) that screencasts each Chromium page and posts the frames to the backend, so
-  the Browser tab shows the test as it runs. The same wrapper applies the Run button's navigation
+  the Browser panel shows the test as it runs. The same wrapper applies the Run button's navigation
   allowlist.
 - **Output** streams with its colors over the same WebSocket a Run uses. **Ctrl+C** stops the
-  command, with its workers and browsers. A command is stopped at `terminal_timeout_ms` (5 minutes
+  command, with its workers and browsers. The Terminal's state lives in a session object
+  (`frontend/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command. A command is stopped at `terminal_timeout_ms` (5 minutes
   by default), and one command runs at a time.
 - **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
   block in a lesson offers **Load into editor** for this.
