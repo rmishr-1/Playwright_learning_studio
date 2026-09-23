@@ -344,7 +344,13 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
     child.on('close', () => {
       clearTimeout(timer);
       active--;
-      fs.rmSync(scratch, { recursive: true, force: true });
+      // On Windows the browser can still hold a file in the scratch folder for a moment after the
+      // child exits, and rmSync then throws EPERM. Retry, and never let cleanup fail the run.
+      try {
+        fs.rmSync(scratch, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      } catch {
+        // Leave the folder to the OS temp cleanup rather than report a learner's run as broken.
+      }
       if (status === 'ok' && stderr.trim() && !screenshot) status = 'error';
       emit(runId, { event: 'ended', status });
       // Long enough that pressing Detach a little while after a run finished still has a last

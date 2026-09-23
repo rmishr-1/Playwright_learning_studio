@@ -42,6 +42,9 @@ function main(): void {
 
   let applied = 0;
   let unchanged = 0;
+  // Day titles, for the course index below. A rewrite of a Fundamentals part retitles its day,
+  // and the week menu reads the index, not the day file.
+  const titles = new Map<string, string>();
 
   for (let week = 1; week <= 8; week++) {
     if (onlyWeek !== null && week !== onlyWeek) continue;
@@ -69,6 +72,7 @@ function main(): void {
       merged = applyRewrites(merged, loadRewrites(CONTENT, week, day));
       if (overlay) merged = applyOverlay(merged, overlay);
       const after = JSON.stringify(CourseDay.parse(merged), null, 2) + '\n';
+      titles.set(week + '/' + day, merged.title);
 
       if (after === before) {
         unchanged++;
@@ -89,6 +93,20 @@ function main(): void {
     applied + ' day(s) updated, ' + unchanged + ' already current' +
       (onlyWeek !== null ? ' (week ' + onlyWeek + ' only)' : ''),
   );
+
+  // The importer writes the index from the day titles it built; keep it in step with the titles
+  // the rewrites now decide, so the two paths agree.
+  const indexFile = path.join(CONTENT, 'course-index.json');
+  const before = fs.readFileSync(indexFile, 'utf-8');
+  const index = JSON.parse(before) as { weeks: { week: number; days: { day: number; title: string }[] }[] };
+  for (const w of index.weeks) {
+    for (const d of w.days) d.title = titles.get(w.week + '/' + d.day) ?? d.title;
+  }
+  const after = JSON.stringify(index, null, 2) + '\n';
+  if (after !== before) {
+    fs.writeFileSync(indexFile, after);
+    console.log('course-index.json <- day titles');
+  }
 }
 
 main();

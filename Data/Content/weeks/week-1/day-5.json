@@ -430,7 +430,7 @@
     {
       "part": 4,
       "kind": "practice",
-      "title": "Practice: your first test, and the assertions gap",
+      "title": "Your first test, and the assertions gap",
       "tab_label": "Practice",
       "source_notebook": "week1/day5_4.ipynb",
       "has_runnable_code": true,

@@ -337,7 +337,24 @@ export type RewriteBlock =
   | { type: 'your-turn'; text: string; prompt: string };
 /** `difficulty` is optional: a rewrite may relabel a problem (the notebooks' "Reflection" is not one of the three levels the course promises). */
 export type ProblemRewrite = { statement: string; stub: string; difficulty?: Difficulty };
-export type PartRewrite = { blocks: RewriteBlock[]; problems: Record<string, ProblemRewrite>; authorsCode: boolean };
+export type PartRewrite = {
+  blocks: RewriteBlock[];
+  problems: Record<string, ProblemRewrite>;
+  authorsCode: boolean;
+  /** The subject after "Week N - Day D - <Tab> - " in the H1, which becomes the part's title. */
+  title: string | null;
+};
+
+/**
+ * The lesson subject a rewrite's H1 states, or null when the H1 carries only the tab name.
+ * A rewrite owns its heading, so it owns the part's `title` too: the day's title in the week menu
+ * and course index comes from the Fundamentals part, and a rewrite that changes the heading
+ * would otherwise leave the old notebook title in the menu.
+ */
+export function rewriteTitle(md: string): string | null {
+  const m = /^# Week \d+ - Day \d+ - [A-Za-z]+ - (.+)$/m.exec(md.replace(/\r\n/g, '\n'));
+  return m ? m[1].trim() : null;
+}
 
 export function loadRewrites(contentDir: string, week: number, day: number): Map<number, PartRewrite> {
   const out = new Map<number, PartRewrite>();
@@ -353,6 +370,7 @@ export function loadRewrites(contentDir: string, week: number, day: number): Map
     out.set(+m[3], {
       blocks: splitRewrite(md),
       authorsCode: rewriteAuthorsCode(md),
+      title: rewriteTitle(md),
       problems: fs.existsSync(sibling) ? (JSON.parse(fs.readFileSync(sibling, 'utf-8')) as Record<string, ProblemRewrite>) : {},
     });
   }
@@ -404,8 +422,12 @@ const GENERATED_CODE = new Set(['example', 'your-turn']);
 export function applyRewrites(day: CourseDay, rewrites: Map<number, PartRewrite>): CourseDay {
   if (day.locked || rewrites.size === 0) return day;
   const at = (part: number) => 'w' + day.week + 'd' + day.day + 'p' + part;
+  // The importer takes the day's title from the Fundamentals part, so a rewrite of that part
+  // retitles the day as well.
+  const dayTitle = rewrites.get(2)?.title ?? day.title;
   return {
     ...day,
+    title: dayTitle,
     parts: day.parts.map((part) => {
       const rw = rewrites.get(part.part);
       if (!rw) return part;
@@ -439,7 +461,7 @@ export function applyRewrites(day: CourseDay, rewrites: Map<number, PartRewrite>
         if (!o) return q;
         return { ...q, statement: o.statement, stub: o.stub, difficulty: o.difficulty ?? q.difficulty };
       });
-      return { ...part, blocks: [...body, ...cards], problems };
+      return { ...part, title: rw.title ?? part.title, blocks: [...body, ...cards], problems };
     }) as CourseDay['parts'],
   };
 }
