@@ -83,25 +83,32 @@ learner runs are written to their workspace in plain text; that is the product w
 ## Tests
 
 ```bash
-npm run build -- --dev
+npm run build -- --dev --obfuscate
 npm run test:app
 npm run package
 npm run test:release
 ```
 
-- `test:app` drives the development build with Playwright: every licence case, the agreement, the
+- `test:app` drives a development build with Playwright: every licence case, the agreement, the
   locked API, offline fonts, watermarks, the Terminal on the bundled Node, the editor's Run, and
-  Check my answer with tests in all three bundled browsers.
+  Check my answer with tests in all three bundled browsers. `--obfuscate` makes the build's code
+  exactly a release's, so this tests the code that ships; a real release refuses Playwright.
 - `test:release` checks the packaged app from outside: the fuses, what `app.asar` contains, that
   nothing in it is readable, that debugger switches and a changed `app.asar` are refused, and that
   the API refuses everything but the window.
+- `npm run build -- --dev --licence <file>` then `npm run test:customer -- <file>` checks a
+  customer's build: it opens with its licence, refuses others, and carries that watermark.
 
-Both use the real app data folder (`%APPDATA%\QA Practice Training Studio`) and empty it.
+They use the real app data folder (`%APPDATA%\QA Practice Training Studio`) and empty it.
 
 ## Before the first external release
 
 - **Code signing.** Buy a Windows code-signing certificate; set `CSC_LINK` and
   `CSC_KEY_PASSWORD` when running `npm run package`. Unsigned, SmartScreen warns on install.
+  electron-builder then signs every .exe it ships, the browsers' included; decide whether that is
+  wanted, or limit it with a custom `win.signtoolOptions.sign`.
+- **Test on a clean computer**: a Windows machine or VM with no Node and no internet. Install,
+  add a licence, and run a Day 1 demo, a Day 5 `node` file and a Day 9 Check my answer.
 - **Legal review** of `legal/EULA.txt` (placeholders in brackets) and of the `[REVIEW]` notes in
   the generated `THIRD-PARTY-NOTICES.txt` (source offer for the LGPL/MPL browser parts, Node's
   licence file).
