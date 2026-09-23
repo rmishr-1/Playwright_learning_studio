@@ -15,144 +15,104 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 3 - TypeScript - Building a unique value at runtime\n\nBy the end of this lesson you will build a guaranteed-different string on every run\nusing `+` and `Math.random()` — the exact technique [Fundamentals](/learn/w2/d3/p2) uses so two\nruns of the same test never collide.\n\n> **Every run starts fresh.** Each time you press Run, your code starts from a clean slate. Nothing from a previous run is still in memory.",
+          "text": "# Week 2 - Day 3 - TypeScript - Building a unique value at run time\n\nA **unique value** is a value that no earlier run of the same code has used. This lesson shows the\nthree pieces that build one: `+` to join text, `Date.now()` for the current time, and\n`Math.random()` for a random number.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "at-a-glance",
+          "text": "| | |\n|---|---|\n| **Focus** | The three pieces of TypeScript that build a value that differs on every run. |\n| **Goals** | Join text and numbers with `+`, read the current time with `Date.now()`, turn `Math.random()` into a whole number, and combine them into an email. |\n| **Prerequisites** | [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1), for `const`, `console.log`, and template literals. |\n| **Tools** | `+`, `Date.now()`, `Math.random()`, and `Math.floor()`. |\n| **Environment** | The editor on the right. The Console tab shows what your code prints. |\n| **Key takeaway** | A value built from the current time and a random number differs on every run. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "| # | Concept | Why today needs it |\n|---|---|---|\n| 1 | `+` on strings | building a unique value, and a dynamic XPath string |\n| 2 | `Math.random()` | the source of the \"unique\" part |",
+          "text": "## 1. Joining text with `+`\n\nBetween two pieces of text, `+` joins them into one piece. When one side is a number, `+` turns the\nnumber into text first, and then joins. Nothing is added between the two pieces, so a space appears\nonly where you write one.\n\nPrint a word and a number, joined three ways:\n\n```ts\n// Join a word and a number with +, with and without a space.\nconst prefix = 'learner';\nconst number = 42;\nconsole.log(prefix + number);\nconsole.log(prefix + ' ' + number);\nconsole.log(prefix + number + '@example.com');\n```\n\n**Output**\n\n```output\nlearner42\nlearner 42\nlearner42@example.com\n```\n\n**Explanation:** The first line has no space, because `+` adds nothing of its own. The second line\nhas a space, because `' '` was joined in between. The third line joins three pieces, and the number\nin the middle becomes text on the way. This is how the rest of the day builds an email around a\nnumber.\n\n[Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1) introduced the **template literal**, which is text\nin backticks with `${}` around each value. Build the same email both ways:\n\n```ts\n// Build the same email twice: once with +, once with a template literal.\nconst prefix = 'learner';\nconst number = 42;\nconsole.log(prefix + number + '@example.com');\nconsole.log(`${prefix}${number}@example.com`);\n```\n\n**Output**\n\n```output\nlearner42@example.com\nlearner42@example.com\n```\n\n**Explanation:** The two lines print the same text, because the two forms do the same work. `+`\nreads well for two or three pieces, and a template literal reads well when the text is long. Either\nis fine, and this course uses both.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## 1. The `+` operator on strings\n\n`+` concatenates two strings into one. A number gets converted to text first, rather\nthan mixing silently.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "const base = \"Learner\";\nconst suffix = \"42\";\nconsole.log(base + suffix); // \"Learner42\" — no space; you add one yourself\nconsole.log(base + \" \" + suffix); // \"Learner 42\"\nconsole.log(base + 42); // \"Learner42\" — the number 42 is converted to \"42\" first",
+          "text": "## 2. `Date.now()`\n\n`Date.now()` returns the current time as a number of milliseconds since the start of 1970. A\n**millisecond** is one thousandth of a second, so the number changes one thousand times a second.\nTwo runs that start a millisecond apart get different numbers.\n\nPrint the time, and build an email from it:\n\n```ts\n// Read the current time as a number, and build an email from it.\nconst now = Date.now();\nconsole.log(now);\nconsole.log('learner' + now + '@example.com');\n```\n\n**Output**\n\n```output\n1790134629851\nlearner1790134629851@example.com\n```\n\n**Explanation:** Your digits differ from these, because your run starts at a different moment. The\nnumber has 13 digits, and it grows by one every millisecond, so a run made later always gets a\nlarger number. That is what makes it useful as part of a unique value.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `Learner42`, `Learner 42`, `Learner42`.\n\nNothing in this course uses template literals (`` `${}` ``) yet — that's a later day.\n`+` is the whole toolkit for now.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": null,
-          "variation": {
-            "prompt": "Same operator, different pieces: build one sentence out of three separate `const` strings, with the spaces in the right places. Then print `typeof (\"id\" + 42)` and confirm for yourself that the result is a string, not a number."
-          },
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## 2. `Math.random()`\n\nReturns a float, always `0 <= x < 1` — never negative, never exactly 1. On its own it's\nnot a usable id; you convert or slice it into something readable.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "console.log(Math.random()); // e.g. 0.7392... — different every run\nconsole.log(Math.random().toString(36)); // base-36: digits + letters, e.g. \"0.k3j9f2...\"\nconsole.log(Math.random().toString(36).slice(2, 8)); // drop the \"0.\" prefix, keep 6 chars",
+          "text": "## 3. `Math.random()`\n\n`Math.random()` returns a decimal number between 0 and 1, and each call returns a different one. A\ndecimal is not readable as part of an email, so two more steps turn it into a whole number.\n`* 1000000` stretches the range to 0 up to 999999, and `Math.floor()` rounds a number down to the\nnearest whole number.\n\nPrint two random decimals, then a random whole number:\n\n```ts\n// Print two random numbers, then turn one into a whole number with up to six digits.\nconsole.log(Math.random());\nconsole.log(Math.random());\nconst n = Math.floor(Math.random() * 1000000);\nconsole.log(n);\nconsole.log('learner' + n + '@example.com');\n```\n\n**Output**\n\n```output\n0.9910865003019883\n0.9430810001716421\n170624\nlearner170624@example.com\n```\n\n**Explanation:** The two decimals differ although the code that made them is the same, because each\ncall of `Math.random()` produces a new number. Your digits differ from these on every run. The third\nline is a whole number with up to six digits, which reads as part of an email.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** three lines, all different on every run you make — that unpredictability\nis exactly what makes it useful for uniqueness. `.toString(36)` turns the float into\nletters+digits instead of a long decimal.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": null,
-          "variation": {
-            "prompt": "Same generator, a shorter slice: keep 4 characters instead of 6, and print the length to prove you got 4. Run the cell three or four times and watch the value change each time — that unpredictability is the whole feature."
-          },
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## 3. Putting them together\n\n```ts\nconst unique = \"learner\" + Math.random().toString(36).slice(2, 8);\n```\n\nWhere you'll use this next: `\"//input[@value='\" + unique + \"']\"` — [Fundamentals](/learn/w2/d3/p2) builds an\nXPath string the same way, by concatenating a runtime value into a fixed template.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "const unique = \"learner\" + Math.random().toString(36).slice(2, 8);\nconsole.log(unique);\n\nconst xpath = \"//input[@value='\" + unique + \"']\";\nconsole.log(xpath);",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "**Expected:** a string starting with `learner`, followed by 6 random characters; then\nthat same string embedded inside an XPath expression.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": null,
-          "variation": {
-            "prompt": "Same technique, a different template: build a unique username and embed it in a CSS selector string (`\"input[name='\" + unique + \"']\"`) instead of an XPath one. Print both the value and the finished selector — string-building does not care which locator syntax it is feeding."
-          },
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Recap\n\n| Concept | Remember |\n|---|---|\n| `+` on strings | concatenates; numbers get converted to text first |\n| `Math.random()` | always `0 <= x < 1`; slice/convert it into something readable |\n| Combining them | `\"prefix\" + Math.random().toString(36).slice(2, 8)` — a fresh value every run |\n\n**Next:** [Fundamentals - Unique test data and dynamic locators](/learn/w2/d3/p2)",
+          "text": "## 4. Joining the time and a random number\n\n`Date.now()` alone is enough when one test runs at a time. Playwright runs several tests at once,\nand two tests can start in the same millisecond, so both would get the same time. Joining a random\nnumber after the time makes that collision practically impossible. Build the value that the rest of\nthe day uses:\n\n```ts\n// Join the time and a random number, so that two tests started in the same millisecond still differ.\nconst email = 'learner' + Date.now() + Math.floor(Math.random() * 1000) + '@example.com';\nconsole.log(email);\n```\n\n**Output**\n\n```output\nlearner1790134631368307@example.com\n```\n\n**Explanation:** The text joins four pieces: the word `learner`, the 13 digits of the time, up to\nthree random digits, and `@example.com`. Two tests that start in the same millisecond share the\nfirst two pieces, and the random piece tells them apart.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "What can `Math.random()` return?",
+          "text": "What does `'learner' + 7` print?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Any float from 0 up to but not including 1",
-              "Any float from 0 up to and including 1",
-              "Any float, including negative ones"
-            ],
-            "answer": 0,
-            "explanation": "`0 <= x < 1` — never negative, and never exactly 1. On its own it is not a usable id, which is why the lesson runs it through `.toString(36).slice(2, 8)` to get something short and readable."
-          }
-        },
-        {
-          "type": "checkpoint",
-          "text": "`console.log(\"Learner\" + 42)` prints what?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`Learner 42` — `+` inserts a separator between the two",
-              "`Learner42` — the number is converted to text first",
-              "A type error — you cannot add a number to a string"
+              "`learner 7`, with a space between them",
+              "`learner7`, with the number turned into text",
+              "An error, because text and a number cannot be added"
             ],
             "answer": 1,
-            "explanation": "`+` converts the number to `\"42\"` and joins them with nothing in between. No space appears unless you add one yourself, which is the mistake that shows up as `Learner42` where `Learner 42` was wanted."
+            "explanation": "`+` turns the number into text and joins the two pieces with nothing between them. A space appears only where you write one, so the first option would need `' '` joined in the middle."
           }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Two tests start in the same millisecond, and each calls `Date.now()`. What happens?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Both tests get the same number.",
+              "The second test gets the number plus one.",
+              "The second test waits until the next millisecond."
+            ],
+            "answer": 0,
+            "explanation": "`Date.now()` reads the clock, and the clock shows the same millisecond to both tests. It does not count calls or wait, which is why the lesson joins a random number after the time."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `Math.floor(Math.random() * 1000000)` return?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "A whole number from 0 to 999999",
+              "A decimal between 0 and 1",
+              "A whole number from 1 to 1000000"
+            ],
+            "answer": 0,
+            "explanation": "`Math.random()` gives a decimal from 0 up to, but not including, 1. Multiplying by 1000000 stretches it to below 1000000, and `Math.floor()` rounds down, so the largest result is 999999 and the smallest is 0."
+          }
+        },
+        {
+          "type": "recap",
+          "text": "- `+` joins text, and turns a number into text on the way. A template literal does the same work with `${}`.\n- `Date.now()` returns the current time in milliseconds, so a later run always gets a larger number.\n- `Math.floor(Math.random() * 1000000)` returns a random whole number with up to six digits.\n- The time joined with a random number gives a value that differs on every run, even for two tests that start in the same millisecond.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What's next\n\n[Fundamentals](/learn/w2/d3/p2) types a value built this way into the registration form, and shows\nwhy a locator cannot find the field by that value.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
         }
       ],
       "problems": []
@@ -167,221 +127,131 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 3 - Fundamentals - Unique test data and dynamic locators\n\nBy the end of this lesson you will generate a unique value per run, fill it into the\nform, build a runtime XPath that *fails* and understand exactly why, build one that\n*works*, and prove `text()` vs `normalize-space()` on real markup.",
+          "text": "# Week 2 - Day 3 - Fundamentals - Unique test data and dynamic locators\n\n**Test data** is the set of values that a test types into an application, such as a name, an email,\nor a phone number. This lesson builds test data that differs on every run, and builds a locator from\na value chosen at run time.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Goals** | a value that differs every run, and an XPath assembled at runtime from it; why `@value` cannot find what you just typed — and what it *can* find |\n| **Prerequisites** | [string building and Math.random()](/learn/w2/d3/p1) · [XPath syntax](/learn/w2/d2/p2) |\n| **Key takeaway** | an HTML attribute and a live property are two different things |",
+          "text": "| | |\n|---|---|\n| **Focus** | Test data that differs on every run, and a locator built from a value at run time. |\n| **Goals** | Fill the registration form with a unique email, explain the difference between an attribute and a property, and select a radio button through a dynamic locator. |\n| **Prerequisites** | [TypeScript](/learn/w2/d3/p1) for building the value, and [Day 2 - Fundamentals](/learn/w2/d2/p2) for `page.locator()` with CSS and XPath. |\n| **Tools** | `page.locator()`, `getAttribute()`, `inputValue()`, `count()`, `check()`, `toHaveValue`, and `toBeChecked`. |\n| **Environment** | The editor on the right for the examples, then your own project for the spec file. Both use the registration form at `demo.automationtesting.in`. |\n| **Key takeaway** | An attribute is written in the markup, and a property is what the element holds now, so a typed value can be read back but not located. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "> **Try it here**, with one real spec at the end. ",
+          "text": "## Why a test needs a new email on every run\n\nMany applications refuse a second sign-up with an email they have already seen. A test that types\nthe same email every time passes on its first run, and fails on every later run, because the\napplication reports that the email is taken. The test is correct, the application is correct, and\nthe failure comes from the data. The registration form at\n`https://demo.automationtesting.in/Register.html` accepts any email, so nothing fails here. The\nlesson builds the habit on this form, where a mistake costs nothing.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The problem with re-running the same test\n\n| Rejected approach | Why |\n|---|---|\n| Delete the record after creating it | adds a second failure point — cleanup itself can fail |\n| A file of pre-seeded data | runs out after N runs |\n| `Date.now()` alone | two runs in the same second collide |\n\nThe fix from [TypeScript](/learn/w2/d3/p1): `\"prefix\" + Math.random().toString(36).slice(2, 8)`\n— different every run, no file to run out of, nothing to clean up.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { launch, show } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst uniqueEmail = \"learner\" + Math.random().toString(36).slice(2, 8) + \"@example.com\";\nconsole.log(\"generated:\", uniqueEmail);\n\nconst emailBox = page.locator(\"input[type='email']\");\nawait emailBox.fill(uniqueEmail);\n\nawait show(page);\nawait browser.close();",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "**Expected result:** the screenshot shows the field filled with a value starting\n`learner...@example.com` — different characters every time you run the cell.",
+          "text": "## Example: Fill the form with a unique email\n\nThe email box on the form has no placeholder text, so the example finds it with\n`page.locator(\"input[type='email']\")`. That text is a CSS selector from\n[Day 2 - Fundamentals](/learn/w2/d2/p2), and it means \"an `input` whose `type` is `email`\". Select\n**Load into editor**, then select **Run**:\n\n```ts\nconst { browser, page } = await launch();\nawait page.goto('https://demo.automationtesting.in/Register.html');\n\n// Build an email that differs on every run, and print it.\nconst email = 'learner' + Date.now() + '@example.com';\nconsole.log(email);\n\n// Find the email box by its type, and fill it.\nawait page.locator(\"input[type='email']\").fill(email);\n\nawait show(page);\nawait browser.close();\n```\n\n**Output**\n\nThe Console tab shows one line, such as `learner1790134635273@example.com`, and the screenshot shows\nthe registration form with the end of that email in the **Email address** box. The digits differ on\nevery run.\n\n**Explanation:** `Date.now()` from [TypeScript](/learn/w2/d3/p1) gives each run its own number, so\nthe email is new every time. The email is stored in a `const` before it is used, because the code\nneeds the same text twice: once to print it, and once to fill it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
+          "text": "const { browser, page } = await launch();\nawait page.goto('https://demo.automationtesting.in/Register.html');\n\n// Build a unique first name, and print it.\n\n// Fill the First Name box with it, then show a screenshot.\n\nawait browser.close();",
+          "starter": null,
           "variation": {
-            "prompt": "Same idea, a different field: generate a unique phone number using digits only, with no `@example.com` on the end, and fill it into the `input[type='tel']` field. Getting this right now makes Problem 3 mostly typing."
+            "prompt": "Build a unique first name the same way, such as 'Learner' + Date.now(), and print it. Fill it into the First Name box with page.getByPlaceholder('First Name'), and show a screenshot."
           },
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## Finding it again — the naive way, and why it fails\n\nThe obvious next move: build an XPath from that same string and locate the field by it.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst attemptEmail = \"learner\" + Math.random().toString(36).slice(2, 8) + \"@example.com\";\nconst attemptEmailBox = page.locator(\"input[type='email']\");\nawait attemptEmailBox.fill(attemptEmail);\n\nconst xpath = \"//input[@value='\" + attemptEmail + \"']\";\nconsole.log(\"xpath:\", xpath);\nconsole.log(\"matches:\", await page.locator(\"xpath=\" + xpath).count());\nconsole.log(\"getAttribute('value'):\", await attemptEmailBox.getAttribute(\"value\"));\nconsole.log(\"inputValue():\", await attemptEmailBox.inputValue());\n\nawait browser.close();",
+          "text": "## An attribute and a property\n\nAn `<input>` tag keeps two separate things that are both called `value`. An **attribute** is a\nsetting written in the page's markup, such as `type=\"email\"`, and it does not change when you type.\nA **property** is what the element holds right now, and it changes with every keystroke.\n[Week 1 - Day 4 - Fundamentals](/learn/w1/d4/p2) introduced markup, and\n[Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1) introduced a property as a named value inside an\nobject. An element on a page is an object too.\n\n| Attribute | Property |\n|---|---|\n| Written in the page's HTML, such as `type=\"email\"`. | Held by the element while the page is open. |\n| Stays the same when you type into the field. | Changes with every keystroke. |\n| Read with `getAttribute('value')`, or matched with `@value` in an XPath. | Read with `inputValue()`. |\n\nRead both, after typing an email:\n\n```ts\nconst { browser, page } = await launch();\nawait page.goto('https://demo.automationtesting.in/Register.html');\n\nconst email = 'learner' + Date.now() + '@example.com';\nconst emailBox = page.locator(\"input[type='email']\");\nawait emailBox.fill(email);\n\n// Read the value attribute, which comes from the markup.\nconsole.log('attribute:', await emailBox.getAttribute('value'));\n\n// Read the value property, which is what the box holds now.\nconsole.log('property:', await emailBox.inputValue());\n\n// Count the elements whose value attribute equals the typed email.\nconsole.log('matches:', await page.locator(`//input[@value='${email}']`).count());\n\nawait browser.close();\n```\n\n**Output**\n\n```output\nattribute: null\nproperty: learner1790134638392@example.com\nmatches: 0\n```\n\n**Explanation:** `getAttribute('value')` prints `null`, a value that means \"nothing is there\",\nbecause the markup of this box has no `value` attribute, and typing did not add one. `inputValue()`\nreturns the property, which is the email that was typed. `count()` returns the number of elements\nthat a locator finds, and the XPath `//input[@value='...']` found none, because `@value` reads the\nattribute. You cannot find a field by the value you typed into it. To read that value back, call\n`inputValue()` on the locator you already have.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected (verified live):** `matches: 0`. `getAttribute('value')` prints `null`;\n`inputValue()` prints the real string you filled.\n\nHTML inputs keep two separate things: the **attribute** (`value=\"...\"` in the original\nmarkup — the default) and the **property** (what's actually in the box right now).\n`.fill()` — and typing in general — only ever changes the property. XPath's `@value`\nreads the attribute, which never moved. This is true of every plain `<input>`, not just\nthis app: **you cannot find a field by the value you just typed into it, via `@value`.**\nIf you need that value back, ask the locator you already have (`.inputValue()`), not XPath.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": {
-            "prompt": "Same proof, a different field: fill First Name with a generated value, then count `//input[@value='...']` for that value and print `.inputValue()` next to it. Confirm the count is 0 here too — so you know it is a rule about every plain `<input>`, not something peculiar to the email box."
-          },
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## A dynamic XPath that does work\n\n`@value` matching works for anything whose value is **baked into the HTML markup** —\nradio buttons and `<option>` tags, for example — because that attribute is part of the\npage source, not something a script sets afterward. `Math.random()` can still decide\n*which* one at runtime; you just can't invent an attribute value that was never there.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst genderChoice = Math.random() < 0.5 ? \"Male\" : \"FeMale\";\nconst genderXPath = \"//input[@value='\" + genderChoice + \"']\";\nconsole.log(\"choosing:\", genderChoice);\nconsole.log(\"matches:\", await page.locator(\"xpath=\" + genderXPath).count());\n\nawait page.locator(\"xpath=\" + genderXPath).check();\nconsole.log(\"checked:\", await page.locator(\"xpath=\" + genderXPath).isChecked());\n\nawait browser.close();",
+          "text": "## A dynamic locator\n\nA **dynamic locator** is a locator whose text is built at run time from a value, instead of being\nwritten out in full. A template literal builds it, with the value inside `${}`. The gender radio\nbuttons on the form have `value=\"Male\"` and `value=\"FeMale\"` written in their markup, so `@value`\nfinds them.\n\nThe example chooses a gender with `if` and `else`. An **`if` statement** runs the block after it\nonly when its condition is true, and `else` runs the other block otherwise. Choose a gender at\nrandom, and select its radio button:\n\n```ts\n// Return 'Male' or 'FeMale', chosen at random.\nfunction pickGender() {\n  if (Math.random() < 0.5) {\n    return 'Male';\n  } else {\n    return 'FeMale';\n  }\n}\n\nconst { browser, page } = await launch();\nawait page.goto('https://demo.automationtesting.in/Register.html');\n\n// Choose a gender, then build the locator's text from the choice.\nconst gender = pickGender();\nconsole.log('chosen:', gender);\nconst radio = page.locator(`//input[@value='${gender}']`);\n\n// Select the radio button, and confirm that it is selected.\nawait radio.check();\nconsole.log('checked:', await radio.isChecked());\n\nawait show(page);\nawait browser.close();\n```\n\n**Output**\n\n```output\nchosen: FeMale\nchecked: true\n```\n\nThe screenshot shows the form with the chosen gender selected. Your run may choose `Male`.\n\n**Explanation:** `pickGender()` returns one of two words, and the template literal places that word\ninside the XPath. `page.locator()` treats text that starts with `//` as an XPath. The locator finds\nthe radio button because its `value` is an attribute in the markup, unlike the email that was typed.\n`check()` selects a radio button or a checkbox, and `isChecked()` reports whether it is selected.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected:** `matches: 1` and `checked: true`, whichever gender `Math.random()` picked\nthis run. Same string-building technique as the failing example — the difference is\nentirely in what's really in the DOM, not in the XPath syntax.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": {
-            "prompt": "Same pattern, a different control: let `Math.random()` choose between the two checkbox ids you know (`#checkbox1` and `#checkbox2`), build the selector by concatenating the number onto `\"#checkbox\"`, then check it and print which one it picked."
-          },
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## `text()` vs `normalize-space()`\n\n`text()` in XPath matches the exact text node — every leading, trailing, and internal\nspace included. Real markup is full of stray whitespace nobody notices.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { launch } from \"../_shared/deno-helpers.ts\";\n\nconst { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\nconst raw = await page.locator(\"h1\").innerText();\nconsole.log(\"raw text:\", JSON.stringify(raw)); // note the trailing space\n\nconsole.log(\"text() match:\", await page.locator(\"xpath=//h1[text()='Automation Demo Site']\").count());\nconsole.log(\"normalize-space() match:\", await page.locator(\"xpath=//h1[normalize-space()='Automation Demo Site']\").count());\n\nawait browser.close();",
+          "text": "## The same test in your project\n\nNow write both ideas as one test, and run it twice to watch the data change. In the `tests` folder,\ncreate a file named `unique-data.spec.ts`, and paste this code into it:\n\n```ts\nimport { test, expect } from '@playwright/test';\n\n// Return 'Male' or 'FeMale', chosen at random.\nfunction pickGender() {\n  if (Math.random() < 0.5) {\n    return 'Male';\n  } else {\n    return 'FeMale';\n  }\n}\n\ntest('the form takes an email that differs on every run', async ({ page }) => {\n  await page.goto('https://demo.automationtesting.in/Register.html');\n\n  // Build the email once, and keep it, so the assertion can compare against it.\n  const email = 'learner' + Date.now() + '@example.com';\n  console.log('email:', email);\n  const emailBox = page.locator(\"input[type='email']\");\n  await emailBox.fill(email);\n  await expect(emailBox).toHaveValue(email);\n\n  // Choose a gender, build the locator from the choice, and select it.\n  const gender = pickGender();\n  console.log('gender:', gender);\n  const radio = page.locator(`//input[@value='${gender}']`);\n  await radio.check();\n  await expect(radio).toBeChecked();\n});\n```\n\nIn the integrated terminal, run the test in Chromium only:\n\n```bash\nnpx playwright test tests/unique-data.spec.ts --project=chromium\n```\n\n**Output**\n\n```output\nRunning 1 test using 1 worker\n\n[chromium] › tests\\unique-data.spec.ts:12:5 › the form takes an email that differs on every run\nemail: learner1790134987570@example.com\n\ngender: FeMale\n\n  1 passed (3.9s)\n```\n\nRun the same command a second time.\n\n**Output**\n\n```output\nRunning 1 test using 1 worker\n\n[chromium] › tests\\unique-data.spec.ts:12:5 › the form takes an email that differs on every run\nemail: learner1790134995784@example.com\n\ngender: FeMale\n\n  1 passed (3.4s)\n```\n\n**Explanation:** `console.log` inside a test prints to the terminal, under the name of the test, so\nyou can see the data that each run used. The two runs typed two different emails, and both passed,\nbecause each assertion compared the box with the email of its own run. The gender was the same in\nboth runs by chance. `toHaveValue` checks the property of a field, and `toBeChecked` checks that a\nradio button or a checkbox is selected. Your time may be different.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected (verified live):** raw text is `\"Automation Demo Site \"` — a real trailing\nspace baked into this app's markup, not a typo. `text()` finds **0**; `normalize-space()`\nfinds **1**. Default to `normalize-space()` whenever you match by text in XPath.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "your-turn",
-          "text": "// Your turn — retype the example above from memory, then run it.\n// Typing beats reading. Peek above if you get stuck.",
-          "starter": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");",
-          "variation": {
-            "prompt": "Same two functions, the opposite direction: write the `text()` XPath that *does* match the heading, by putting the real trailing space inside your string. Then confirm `normalize-space()` still matches it as well. Both find it — and you will not want to maintain the first one."
-          },
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Doing it for real, in a spec file\n\nUnique email, dynamic-XPath gender pick, and a `normalize-space()` check, all in one test.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { writeProjectFile, runSpec } from \"../_shared/deno-helpers.ts\";\n\nconst specPath = \"week2/generated/day3-unique-data.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"a fresh unique value every run, located dynamically\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  const uniqueEmail = \"learner\" + Math.random().toString(36).slice(2, 8) + \"@example.com\";\n  await page.locator(\"input[type='email']\").fill(uniqueEmail);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(uniqueEmail);\n\n  const genderChoice = Math.random() < 0.5 ? \"Male\" : \"FeMale\";\n  const genderXPath = \"//input[@value='\" + genderChoice + \"']\";\n  await page.locator(\"xpath=\" + genderXPath).check();\n  await expect(page.locator(\"xpath=\" + genderXPath)).toBeChecked();\n\n  await expect(page.locator(\"xpath=//h1[normalize-space()='Automation Demo Site']\")).toHaveCount(1);\n});\n`.trim());\n\nawait runSpec(specPath);",
+          "text": "## Best practices\n\n- Build the unique value once, store it in a `const`, and use that `const` to fill and to assert, so\n  both steps use the same text.\n- Print the value with `console.log`, so a failed run tells you which data it used.\n- Match `@value` in an XPath only against a value written in the markup, such as a radio button's.\n- Read what a field holds with `inputValue()`, or check it with `toHaveValue`, never with an XPath.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "> ▶ **Run it yourself.** `npx playwright test week2/generated/day3-unique-data.spec.ts`\n>\n> Run it a second time immediately — it generates a different email and may pick the\n> other gender, and still passes. That's the whole point of today.\n\n## Best practices\n\n- Build unique values with `+` and `Math.random()` — never a bare timestamp.\n- Never assume `@value` finds what a user just typed — verify with `inputValue()` instead.\n- Default to `normalize-space()` over `text()` for any XPath text match.\n\n## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| `//input[@value='...']` for a value you just `.fill()`ed | 0 matches, every time | use `.inputValue()`, or match on an attribute that's really in the markup |\n| `//h1[text()='...']` against real markup | 0 matches when there's stray whitespace | use `normalize-space()` |\n| A bare `Date.now()` as the \"unique\" value | two tests in the same second collide | concatenate `Math.random()` too |",
+          "text": "## Common mistakes\n\n| Mistake | What you see | Fix |\n|---|---|---|\n| Built the email inside `fill()` and again inside `toHaveValue()` | The assertion fails, because each call built a different email | Build the email once, in a `const`, and use it in both places. |\n| Looked for a typed value with `//input[@value='...']` | The locator finds nothing, and an action on it times out | Use the locator that filled the field, and read it with `inputValue()`. |\n| Typed the same email on every run of a sign-up test | The first run passes, and later runs report that the email is taken | Build the email from `Date.now()` and `Math.random()`. |\n| Wrote the template literal in single quotes | The text `${gender}` appears in the locator as it is, and nothing matches | Put the text in backticks, not in single quotes. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "You `.fill()` the email box with `learner7f3k2x@example.com`, then count `//input[@value='learner7f3k2x@example.com']`. How many matches?",
+          "text": "You fill the email box with `learner1@example.com`. Which call gives that text back?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "1 — the field holds exactly that value",
-              "0 — `@value` reads the markup attribute, which `.fill()` never touched",
-              "0, but only because the `@` in the email breaks the XPath"
+              "`emailBox.getAttribute('value')`",
+              "`emailBox.inputValue()`",
+              "`page.locator(\"//input[@value='learner1@example.com']\")`"
             ],
             "answer": 1,
-            "explanation": "An `<input>` keeps two separate things: the `value=\"...\"` **attribute** written in the markup, and the **property** holding what is in the box right now. `.fill()` and real typing change only the property. `getAttribute('value')` returns `null` here while `.inputValue()` returns your string. This is true of every plain `<input>`, not just this app."
+            "explanation": "Typing changes the property, and `inputValue()` reads the property. `getAttribute('value')` reads the markup, where nothing was written, so it returns `null`, and the XPath finds no element for the same reason."
           }
         },
         {
           "type": "checkpoint",
-          "text": "So why does `//input[@value='FeMale']` find the gender radio perfectly well?",
+          "text": "Why does `//input[@value='FeMale']` find the gender radio button?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Because radios are exempt from the attribute-versus-property split",
-              "Because `FeMale` is written into the page source, so the attribute really is there",
-              "Because `.check()` writes the value attribute, unlike `.fill()`"
+              "Its `value` is written in the page's markup.",
+              "Playwright writes the value into the markup when it selects a radio button.",
+              "A radio button keeps a `value` attribute and no property."
             ],
-            "answer": 1,
-            "explanation": "A radio's `value` is part of the HTML the server sent — as is an `<option>`'s. Nothing at runtime had to set it, so `@value` finds it. `Math.random()` can still choose *which* one; what you cannot do is invent an attribute value that was never in the markup."
+            "answer": 0,
+            "explanation": "The radio button's `value` was in the HTML before any code ran, so `@value` matches it. Selecting a radio button changes which one is checked, and writes nothing into the markup."
           }
         },
         {
           "type": "checkpoint",
-          "text": "The heading's real text is `\"Automation Demo Site \"`. Which XPath matches it?",
+          "text": "What makes a locator dynamic?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "`//h1[text()='Automation Demo Site']`",
-              "`//h1[normalize-space()='Automation Demo Site']`",
-              "Both — XPath trims whitespace before comparing"
+              "Its text is built from a value at run time.",
+              "It keeps retrying until the element appears on the page.",
+              "It matches several elements instead of only one."
             ],
-            "answer": 1,
-            "explanation": "`text()` matches the text node exactly, trailing space and all, so it finds 0. `normalize-space()` collapses the whitespace first and finds 1. Note this is the opposite of Playwright's own `toContainText`, which normalizes for you — the normalization you get depends on which tool is doing the matching."
+            "answer": 0,
+            "explanation": "A dynamic locator is written as a template literal with a value inside `${}`, so its text is decided while the test runs. Every Playwright locator retries, so retrying is not what sets a dynamic locator apart."
           }
         },
         {
           "type": "recap",
-          "text": "- Build unique values with `\"prefix\" + Math.random().toString(36).slice(2, 8)`. A bare `Date.now()` collides when two runs land in the same second.\n- **An attribute is not a property.** `@value` reads the markup; `.fill()` writes the live value. You cannot find a field by what you just typed into it.\n- To read back what you typed, ask the locator you already have: `.inputValue()`.\n- `@value` *does* work for values baked into the source — radios, `<option>` tags. Randomness picking which one is fine.\n- Default to `normalize-space()` over `text()` for XPath text matching.",
+          "text": "- Test data that differs on every run keeps a sign-up test passing on its second run and on every run after it.\n- An **attribute** is written in the markup and does not change when you type. A **property** is what the element holds now.\n- A typed value can be read with `inputValue()` or checked with `toHaveValue`, but an XPath with `@value` cannot find it.\n- A dynamic locator is built at run time with a template literal, and it works when the value it contains is in the markup.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Implementation](/learn/w2/d3/p3) wraps unique-value generation and the working dynamic locator in a reusable function.",
+          "text": "## What's next\n\n[Implementation](/learn/w2/d3/p3) moves the line that builds the email into a function in your helper\nfile, so that every test can call it.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -399,85 +269,108 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 3 - Implementation - Unique data and dynamic locators, wrapped for reuse\n\nBy the end of this lesson you will have a `uniqueEmail()` generator and a\n`pickAndCheckGender()` helper that any spec can call, extending the same\n`registration-helpers.ts` file from Days 1 and 2.\n\n> **No new API here on purpose.** Everything below is something you already ran in [Fundamentals](/learn/w2/d3/p2).",
+          "text": "# Week 2 - Day 3 - Implementation - A helper that returns a unique email\n\nA **helper** is a function that several tests call, kept in a file of its own. This lesson adds one\nto the helper file from [Day 1 - Implementation](/learn/w2/d1/p3), so that no test repeats the line\nthat builds an email.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | the random line and the dynamic-XPath line each move into a function, called instead of retyped |\n| **Prerequisites** | the same `registration-helpers.ts` that Days [Day 1 - Implementation](/learn/w2/d1/p3) and [Day 2 - Implementation](/learn/w2/d2/p3) have been growing |\n| **Tools** | every line ran in [Fundamentals](/learn/w2/d3/p2) |",
+          "text": "| | |\n|---|---|\n| **Focus** | A `uniqueEmail()` helper in `registration-helpers.ts`, so that no test repeats the line that builds an email. |\n| **Goals** | Add an exported function with a return type to the helper file, and use it from two tests that each get their own email. |\n| **Prerequisites** | [Fundamentals](/learn/w2/d3/p2), where you built the email inside a test, and [Day 1 - Implementation](/learn/w2/d1/p3), where `registration-helpers.ts` was created. |\n| **Tools** | `export`, a `: string` return type, and `import` from `./registration-helpers`. |\n| **Environment** | VS Code and its integrated terminal, in your project folder. |\n| **Key takeaway** | A helper builds the value inside its function body, so every call returns a new one. |",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## The problem with what we wrote yesterday\n\nEvery test that needs a unique value re-writes the same `Math.random()` line; every test\nthat needs a dynamic gender pick re-writes the same XPath-building line. Small lines, but\ncopy-pasted enough times they become the thing that's wrong when the pattern needs to change.\n\n## Same code, with structure around it\n\n| In [Fundamentals](/learn/w2/d3/p2) you wrote | Here it becomes | Why |\n|---|---|---|\n| `\"learner\" + Math.random()...` inline | `uniqueEmail()` | one function that returns a fresh value; the \"how\" lives in exactly one place |\n| the gender XPath built inline, then `.check()`ed | `pickAndCheckGender(page)` | the working dynamic-locator pattern, reusable without re-deriving it |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { writeProjectFile } from \"../_shared/deno-helpers.ts\";\n\n// Extends the same file from Day 1.3 and Day 2.3 with two more helpers.\nawait writeProjectFile(\"week2/generated/registration-helpers.ts\", `// Week 2 — shared actions, checks, and unique-data helpers for the Register.html form.\nimport type { Page } from \"@playwright/test\";\nimport { expect } from \"@playwright/test\";\n\nexport async function fillRegistrationForm(page: Page, email: string) {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  await page.getByPlaceholder(\"First Name\").fill(\"Ada\");\n  await page.getByPlaceholder(\"Last Name\").fill(\"Lovelace\");\n  await page.locator(\"textarea\").fill(\"123 Analytical Engine Way\");\n  await page.locator(\"input[type='email']\").fill(email);\n  await page.locator(\"input[type='tel']\").fill(\"5551234567\");\n\n  await page.locator(\"input[value='FeMale']\").check();\n  await page.locator(\"#checkbox1\").check();\n\n  await page.locator(\"#Skills\").selectOption({ label: \"Java\" });\n  await page.locator(\"#country\").selectOption(\"India\");\n}\n\nexport async function expectFormFilledCorrectly(page: Page, email: string) {\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await expect(page.getByPlaceholder(\"First Name\")).toHaveValue(\"Ada\");\n  await expect(page).toHaveURL(/Register\\\\.html/);\n}\n\n// A fresh, collision-free email on every call.\nexport function uniqueEmail(): string {\n  return \"learner\" + Math.random().toString(36).slice(2, 8) + \"@example.com\";\n}\n\n// Picks Male or FeMale at random and checks it via a dynamic XPath built from\n// that choice — @value works here because both values are static markup, not\n// something .fill() set at runtime (see Day 3.2 for why that distinction matters).\nexport async function pickAndCheckGender(page: Page): Promise<string> {\n  const choice = Math.random() < 0.5 ? \"Male\" : \"FeMale\";\n  const xpath = \"//input[@value='\" + choice + \"']\";\n  await page.locator(\"xpath=\" + xpath).check();\n  return choice;\n}\n`.trim());",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "example",
-          "text": "import { runSpec } from \"../_shared/deno-helpers.ts\"; // writeProjectFile already imported above\n\nconst specPath = \"week2/generated/day3-reuse.spec.ts\";\n\nawait writeProjectFile(specPath, `\nimport { test, expect } from \"@playwright/test\";\nimport { uniqueEmail, pickAndCheckGender } from \"./registration-helpers\";\n\ntest(\"run A gets its own unique data\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n  const email = uniqueEmail();\n  await page.locator(\"input[type='email']\").fill(email);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await pickAndCheckGender(page);\n});\n\ntest(\"run B gets a different unique value than run A\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n  const email = uniqueEmail();\n  await page.locator(\"input[type='email']\").fill(email);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n  await pickAndCheckGender(page);\n});\n`.trim());\n\nawait runSpec(specPath);",
+          "text": "## The problem with the Fundamentals version\n\nThe test in [Fundamentals](/learn/w2/d3/p2) builds its email with\n`'learner' + Date.now() + '@example.com'`. Every test that registers a user needs the same line. If\nten tests each contain it, and the application starts to reject long emails, you change ten lines.\nIf the line is in one function, you change one line, and every test gets the change.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "**Expected result:** `2 passed`. Both tests call `uniqueEmail()` independently and get\ndifferent strings — check the traces or add a `console.log` if you want to see both values.\n\n## What a reviewer would look for\n\n- The randomness lives inside `uniqueEmail()`, not copy-pasted into every test.\n- `pickAndCheckGender` returns the choice it made, so a test can log or assert on it instead of guessing.\n- Nothing here duplicates the [Fundamentals](/learn/w2/d3/p2) lesson's logic — it's the same lines, moved once.",
+          "text": "## Step 1: Add the function to the helper file\n\nOpen `tests/registration-helpers.ts` and add this:\n\n```ts\n// Return an email that differs on every call.\nexport function uniqueEmail(): string {\n  return 'learner' + Date.now() + Math.floor(Math.random() * 1000) + '@example.com';\n}\n```\n\n**Explanation:** `export` makes the function available to any file that imports it, as it does for\n`fillRegistrationForm` in the same file. `: string` after the parentheses is the **return type**,\nwhich states that the function gives back text. The value is built inside the function, so each call\nruns the line again and gets a new email. The random digits after the time are there because\nPlaywright runs tests at the same time, and two tests can start in the same millisecond.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Step 2: Use the function in a test\n\nIn the `tests` folder, create a file named `unique-helper.spec.ts`, and paste this code into it:\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { fillRegistrationForm, uniqueEmail } from './registration-helpers';\n\ntest('the first test registers with its own email', async ({ page }) => {\n  // Call the helper once, and keep its result.\n  const email = uniqueEmail();\n  console.log('email:', email);\n  await fillRegistrationForm(page, email);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n});\n\ntest('the second test registers with a different email', async ({ page }) => {\n  const email = uniqueEmail();\n  console.log('email:', email);\n  await fillRegistrationForm(page, email);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n});\n```\n\nIn the integrated terminal, run:\n\n```bash\nnpx playwright test tests/unique-helper.spec.ts --project=chromium\n```\n\n**Output**\n\n```output\nRunning 2 tests using 2 workers\n\n[chromium] › tests\\unique-helper.spec.ts:4:5 › the first test registers with its own email\nemail: learner1790135003446709@example.com\n\n[chromium] › tests\\unique-helper.spec.ts:12:5 › the second test registers with a different email\nemail: learner1790135003508186@example.com\n\n  2 passed (4.3s)\n```\n\n**Explanation:** Both tests import `uniqueEmail` and `fillRegistrationForm` from the same file, and\nneither test contains the line that builds an email. The two printed emails differ, although both\ntests ran at almost the same moment, because each call of `uniqueEmail()` builds a new one. Each\ntest keeps its email in a `const`, passes it to `fillRegistrationForm`, and then asserts against the\nsame `const`. Your time and your number of workers may be different.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## Why it is shaped this way\n\n| Choice | Reason |\n|---|---|\n| The email is built inside the function, not in a `const` at the top of the file | A `const` at the top of the file is computed once, when the file loads, so every test would get the same email. |\n| The function takes no parameters | Every caller wants the same kind of value, so there is nothing to pass in. |\n| The function returns the email instead of filling the field | The test needs the email twice, to fill and to assert, so the function hands the value back and the test decides what to do with it. |\n| `fillRegistrationForm` takes the email as a parameter | The helper that fills the form does not decide what the email is, so a test can pass a unique one or a fixed one. |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## What a reviewer looks for\n\n- The line that builds an email appears once, in `registration-helpers.ts`, and in no spec file.\n- Each test calls `uniqueEmail()` once, stores the result in a `const`, and uses that `const` for\n  both the fill and the assertion.\n- The helper file contains no `test()`, and its name has no `.spec`, so Playwright never runs it as\n  a test file.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "checkpoint",
-          "text": "Two tests in the same file both call `uniqueEmail()`. Do they get the same string?",
+          "text": "Two tests in the same file each call `uniqueEmail()`. Do they get the same email?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Yes — the module is loaded once, so the value is computed once and shared",
-              "No — the function body runs on each call, producing a fresh value each time"
+              "Yes, because the file is loaded once.",
+              "No, because the body runs again on each call.",
+              "Yes, unless the tests run in different workers."
             ],
             "answer": 1,
-            "explanation": "`uniqueEmail()` computes its value inside the function, so every call produces a new one. Had the randomness been assigned to a module-level `const` instead, both tests really would have shared it — and the collision this whole day exists to prevent would be back."
+            "explanation": "The line that builds the email is inside the function, so every call runs it again and reads a new time and a new random number. Loading the file once defines the function, and does not run it."
           }
         },
         {
           "type": "checkpoint",
-          "text": "Why does `pickAndCheckGender(page)` return the choice it made, rather than just checking the radio and returning nothing?",
+          "text": "Why is the email built inside `uniqueEmail()` instead of in a `const` at the top of the helper file?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "So the caller can log or assert on which one was picked instead of guessing",
-              "Because an `async` function has to return something",
-              "So the next call knows which one to avoid"
+              "A `const` at the top of the file is computed once and shared.",
+              "A `const` cannot be exported to a spec file.",
+              "A `const` cannot hold text that was built with `+` and `Date.now()`."
             ],
             "answer": 0,
-            "explanation": "The function makes a random decision the test cannot otherwise see. Returning it hands that knowledge back to the caller, so a failure message can say which gender was picked. A helper that makes an invisible random choice is a helper you will be debugging blind."
+            "explanation": "A `const` at the top of a file is computed once, when the file loads, so every test that imports it would get the same email. That is the collision the helper exists to prevent. A `const` can be exported, and it can hold any text."
+          }
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why does the test store the result of `uniqueEmail()` in a `const` before it fills the form?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "So the fill and the assertion use the same email.",
+              "Because `fillRegistrationForm` accepts only a `const`, never a call.",
+              "Because a function's result cannot be passed to another function."
+            ],
+            "answer": 0,
+            "explanation": "The test needs the email twice, to fill the box and to check it. A second call of `uniqueEmail()` would build a different email, and the assertion would compare the box with an email that was never typed."
           }
         },
         {
           "type": "recap",
-          "text": "- Randomness belongs inside one generator function, not copy-pasted into every test that needs a fresh value.\n- Compute the random value *inside* the function. A module-level `const` would be computed once and shared by every caller.\n- A helper that makes a hidden decision should return it, so failures can say what it chose.\n- These are the same lines from [Fundamentals](/learn/w2/d3/p2), moved once — not rewritten.",
+          "text": "- `uniqueEmail()` lives in `registration-helpers.ts`, and every test imports it instead of repeating the line.\n- The value is built inside the function body, so each call returns a new email.\n- A test calls the helper once, stores the result in a `const`, and uses it for both the fill and the assertion.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "markdown",
-          "text": "## What's next\n\n[Practice](/learn/w2/d3/p4) — your turn, with no worked examples to lean on.",
+          "text": "## What's next\n\n[Practice](/learn/w2/d3/p4) has you print unique emails in the editor, register with\n`uniqueEmail()`, and write a second helper for a phone number.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -495,14 +388,21 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Week 2 - Day 3 - Practice - Unique data and dynamic locators\n\nThree problems, getting harder. No answer key.\n\nWrite spec files into `week2/generated/` and run them with `npx playwright test`.\n\n> Struggling for more than about twenty minutes on one problem means the gap is in\n> [TypeScript](/learn/w2/d3/p1) or [Fundamentals](/learn/w2/d3/p2). Go back, re-read, come here again.",
+          "text": "# Week 2 - Day 3 - Practice - Unique data and dynamic locators\n\nThese three problems use the value building from [TypeScript](/learn/w2/d3/p1), the attribute and\nproperty distinction from [Fundamentals](/learn/w2/d3/p2), and the helper from\n[Implementation](/learn/w2/d3/p3). The first problem runs in the editor, and the other two run in\nyour own project.",
           "starter": null,
           "variation": null,
           "checkpoint": null
         },
         {
           "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | a unique value, then a dynamic locator over real `<option>` markup, then a generator of your own |\n| **Prerequisites** | [TypeScript](/learn/w2/d3/p1) for the string building · [Fundamentals](/learn/w2/d3/p2) for which attributes are real |\n| **Key takeaway** | is this attribute really in the page source, or did a script set it? |",
+          "text": "| | |\n|---|---|\n| **Focus** | Three problems about unique test data, from Beginner level to Advanced. |\n| **Prerequisites** | [TypeScript](/learn/w2/d3/p1) for building the value, [Fundamentals](/learn/w2/d3/p2) for the form, and [Implementation](/learn/w2/d3/p3) for the helper file. |\n| **Environment** | The editor on the right for the first problem, and your own project for the other two. |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null
+        },
+        {
+          "type": "markdown",
+          "text": "## How to answer\n\nThe problems run from Beginner to Advanced. Select **Start this in the editor** to open a template\nfor a problem, and write your answer on the lines that start with `//`. Select **Reveal solution**\nto compare it with a model answer.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -530,7 +430,7 @@
         },
         {
           "type": "markdown",
-          "text": "## When you are done\n\nAsk yourself the [Fundamentals](/learn/w2/d3/p2) question one more time: for any locator you wrote today, could\nyou swap in a value the site itself generated (not one you typed) and have it still work?\nIf the answer is \"only via `@value`\", check whether that attribute is really live markup\nor something a script set — that's this week's whole lesson in one question.",
+          "text": "## When you are done\n\nYou can build a value that no earlier run has used, keep it in a `const` so that the fill and the\nassertion agree, and build a locator from a value chosen at run time.\n[Day 4 - Fundamentals](/learn/w2/d4/p2) continues from here.",
           "starter": null,
           "variation": null,
           "checkpoint": null
@@ -540,23 +440,23 @@
         {
           "number": 1,
           "difficulty": "Beginner",
-          "statement": "**What to build.** Generate a unique First Name (e.g. `\"Learner\" + Math.random()...`),\nfill it in, and assert it with `toHaveValue`.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** `npx playwright test` passes, and running it twice in a row fills two different names — check the trace or a `console.log`.",
-          "stub": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Problem 1 — your code here.",
-          "solution": "`week2/generated/day3-practice-unique.spec.ts`:\n\n```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"a fresh first name on every run\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  const firstName = \"Learner\" + Math.random().toString(36).slice(2, 8);\n  console.log(\"generated:\", firstName);\n\n  const field = page.getByPlaceholder(\"First Name\");\n  await field.fill(firstName);\n\n  await expect(field).toHaveValue(firstName);\n});\n```\n\nRun it twice and compare the two `generated:` lines — different every time.\n\n**Why the value goes in a variable first.** The temptation is to inline the expression into `fill()`. Do that and the assertion has nothing to compare against: `Math.random()` gives a *different* string the second time you call it, so the test would assert the field holds a value it was never given. Generate once, hold it, use it in both places.\n\n**Why unique data at all.** The course chose it over three obvious alternatives. Deleting the record afterwards leaves the suite broken whenever a run fails mid-way. A file of ten prepared names runs out on the eleventh run. A timestamp collides when two tests start in the same second. A random suffix makes the duplicate check simply unreachable.\n\n> `Math.random().toString(36).slice(2, 8)` gives six alphanumeric characters. `Math.floor(Math.random() * 100000)` is equally fine where the field only accepts digits."
+          "statement": "**What to build.** Three unique emails, each built with `Date.now()` and `Math.random()` as in\n[TypeScript](/learn/w2/d3/p1), and each printed with `console.log`. Below them, write a comment\nthat explains why the three emails differ.\n\n**Where.** In the editor, using the template.\n\n**How you will know it worked.** The Console tab shows three emails, and no two of them are the\nsame.",
+          "stub": "// Problem 1: three unique emails\n//\n// Build the first email, and print it:\n//\n// Build the second email, and print it:\n//\n// Build the third email, and print it:\n//\n// Why the three emails differ:",
+          "solution": "**A model answer.** In the editor:\n\n```ts\n// Problem 1: three unique emails\nconst first = 'learner' + Date.now() + Math.floor(Math.random() * 1000) + '@example.com';\nconst second = 'learner' + Date.now() + Math.floor(Math.random() * 1000) + '@example.com';\nconst third = 'learner' + Date.now() + Math.floor(Math.random() * 1000) + '@example.com';\nconsole.log(first);\nconsole.log(second);\nconsole.log(third);\n\n// Why the three emails differ:\n//   Date.now() gives the current time in milliseconds, and the three lines\n//   run within the same millisecond or a few apart. Math.random() then adds\n//   a different number to each one, so the three emails differ even when\n//   the time part is the same.\n```\n\n**Output**\n\n```output\nlearner1790134642398169@example.com\nlearner1790134642398667@example.com\nlearner1790134642398243@example.com\n```\n\n**What to check in your own answer.** The three emails share the same time digits, because all three lines ran within one millisecond, and the random digits at the end differ. Your digits differ from these on every run. If you built the email once and printed the same `const` three times, the three lines are the same, because the value was computed once."
         },
         {
           "number": 2,
           "difficulty": "Intermediate",
-          "statement": "**What to build.** Read every real `<option>` value out of `#Skills`, pick one at random\nwith `Math.random()`, build a dynamic XPath `//option[@value='...']` from that choice, and\nassert it exists (`toHaveCount(1)`) before selecting it.\n\n**Where.** A spec in `week2/generated/`.\n\n**How you will know it worked.** The test passes on repeated runs even though it picks a different skill each time.\n\n> **Hint** — [Fundamentals](/learn/w2/d3/p2) showed exactly this pattern for the gender radios; option `value`s are static markup too.",
-          "stub": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Problem 2 — your code here.",
-          "solution": "```ts\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"pick a real option at random and prove it exists before selecting it\", async ({ page }) => {\n  await page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n  // Read the options the page ACTUALLY has - never guess at them.\n  const values = await page.locator(\"#Skills option\").evaluateAll(\n    (options) => options.map((o) => (o as HTMLOptionElement).value),\n  );\n  console.log(\"option count:\", values.length);\n\n  const chosen = values[Math.floor(Math.random() * values.length)];\n  console.log(\"chose:\", chosen);\n\n  // Build the locator from the choice, then prove it before acting on it.\n  const optionXPath = \"//option[@value='\" + chosen + \"']\";\n  await expect(page.locator(\"xpath=\" + optionXPath)).toHaveCount(1);\n\n  await page.locator(\"#Skills\").selectOption(chosen);\n  await expect(page.locator(\"#Skills\")).toHaveValue(chosen);\n});\n```\n\n**The `toHaveCount(1)` step is the whole exercise.** A dynamic locator is a string you built at runtime, and a string you built can be wrong — a stray space, an apostrophe in the value, an option that was not there today. Asserting the count *before* you act turns a confusing \"element not found, waited 30 s\" into an immediate, readable \"expected 1, got 0\".\n\nIt also guards a nastier failure: if your expression accidentally matched **two** options, `selectOption` would quietly take one of them and the test would pass while testing something you did not intend.\n\n**Reading the options rather than hard-coding them** is the other half. `#Skills` carries 78 of them; a list you typed out by hand is wrong the day someone edits the page.\n\n> Run it several times. Different option each run, still passing — that is the property you want from dynamic data."
+          "statement": "**What to build.** A test that registers with `uniqueEmail()` and checks the email box. In the\n`tests` folder, create `practice-unique.spec.ts`, with one test that calls `uniqueEmail()`, stores\nthe result in a `const`, passes it to `fillRegistrationForm`, and asserts the email box with\n`toHaveValue`. Print the email with `console.log`. Then run the test twice.\n\n**Where.** In VS Code and its integrated terminal. Copy your test and the two printed emails into\nthe editor, using the template.\n\n**How you will know it worked.** Both runs report `1 passed`, and the two printed emails differ.\n\n**Hint.** Call `uniqueEmail()` once. A second call gives a different email, and the assertion would\ncompare the box with an email that was never typed.",
+          "stub": "// Problem 2: register with uniqueEmail()\n//\n// My test:\n//\n// Email printed by the first run:\n//\n// Email printed by the second run:\n//\n// Why the email is stored in a const before it is used:",
+          "solution": "**A model answer.** `tests/practice-unique.spec.ts`:\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { fillRegistrationForm, uniqueEmail } from './registration-helpers';\n\ntest('registers with a unique email', async ({ page }) => {\n  // Keep the email in a const, so the same value is typed and then checked.\n  const email = uniqueEmail();\n  console.log('email:', email);\n  await fillRegistrationForm(page, email);\n  await expect(page.locator(\"input[type='email']\")).toHaveValue(email);\n});\n```\n\nRun it twice with `npx playwright test tests/practice-unique.spec.ts --project=chromium`. The notes in the template:\n\n```ts\n// Email printed by the first run: learner1790135013364217@example.com\n//\n// Email printed by the second run: learner1790135165646374@example.com\n//\n// Why the email is stored in a const before it is used:\n//   The test needs the same email twice, once for fillRegistrationForm and\n//   once for toHaveValue. Each call of uniqueEmail() builds a new email, so\n//   calling it in both places would type one email and check for another.\n```\n\n**What to check in your own answer.** Both runs report `1 passed`, and the two printed emails differ. `uniqueEmail()` is called once, and the same `const` appears in the call to `fillRegistrationForm` and in the assertion."
         },
         {
           "number": 3,
           "difficulty": "Advanced",
-          "statement": "**What to build.** Add a `uniquePhone()` generator to\n`week2/generated/registration-helpers.ts` (digits only — no `@example.com` suffix), then\na spec that fills the form twice with two different generated phone numbers and asserts\nboth values with `toHaveValue`.\n\n**Where.** `week2/generated/registration-helpers.ts`, plus a spec in `week2/generated/`.\n\n**How you will know it worked.** `2 passed`, and the two asserted phone numbers are never the same.",
-          "stub": "const { browser, page } = await launch();\nawait page.goto(\"https://demo.automationtesting.in/Register.html\");\n\n// Problem 3 — your code here.",
-          "solution": "Add the generator to `week2/generated/registration-helpers.ts`:\n\n```ts\n/** Digits only - the tel field rejects anything else. */\nexport function uniquePhone(): string {\n  return \"555\" + Math.floor(Math.random() * 10_000_000).toString().padStart(7, \"0\");\n}\n```\n\nThen a spec that fills the form twice and asserts both values:\n\n```ts\nimport { test, expect } from \"@playwright/test\";\nimport { fillRegistrationForm, uniquePhone } from \"./registration-helpers\";\n\ntest(\"two runs of the same form get two different phone numbers\", async ({ page }) => {\n  const phoneOne = uniquePhone();\n  await fillRegistrationForm(page, \"learner.one@example.com\");\n  await page.locator(\"input[type='tel']\").fill(phoneOne);\n  await expect(page.locator(\"input[type='tel']\")).toHaveValue(phoneOne);\n\n  const phoneTwo = uniquePhone();\n  await fillRegistrationForm(page, \"learner.two@example.com\"); // re-navigates, clearing the form\n  await page.locator(\"input[type='tel']\").fill(phoneTwo);\n  await expect(page.locator(\"input[type='tel']\")).toHaveValue(phoneTwo);\n\n  expect(phoneOne).not.toBe(phoneTwo);\n});\n```\n\n**`padStart` is doing real work.** Without it, `Math.floor(Math.random() * 10_000_000)` occasionally produces a short number, and you get a six-digit phone where the test expected ten. A generator that is *usually* the right shape is the kind of flakiness that appears once a fortnight and is miserable to chase.\n\n**Why no `@example.com` suffix.** The email generator's suffix makes a valid address; a `tel` field rejects it. Each generator's rule comes from the field it feeds, which is why this is a separate function rather than a parameter on the email one.\n\n**The final `expect(phoneOne).not.toBe(phoneTwo)`** asserts the generator's actual contract. Without it the test still passes if `uniquePhone()` returns a constant — and a \"unique\" generator that is not unique is exactly the bug worth catching."
+          "statement": "**What to build.** A second helper, `uniquePhone()`, and a test that uses it. In\n`tests/registration-helpers.ts`, add an exported function `uniquePhone()` that returns ten digits as\ntext. Build it with `String(Math.floor(Math.random() * 10000000000)).padStart(10, '0')`. `String()`\nturns a number into text, and `padStart(10, '0')` adds `0` at the front until the text is ten\ncharacters long. Then create `practice-phone.spec.ts`, with one test that checks the phone number\nwith `expect(phone.length).toBe(10)`, fills the form, fills the **Phone** box\n(`input[type='tel']`) with the phone number, and asserts the box with `toHaveValue`.\n\n**Where.** In VS Code and its integrated terminal. Copy the new function and your test into the\neditor, using the template.\n\n**How you will know it worked.** The test reports `1 passed`, and the printed phone number has ten\ndigits, even when it starts with `0`.\n\n**Hint.** `phone.length` is the number of characters in the text. `Math.random() * 10000000000`\nsometimes gives a number with fewer than ten digits, and `padStart` fills the missing places.",
+          "stub": "// Problem 3: a unique phone number\n//\n// The uniquePhone function, added to tests/registration-helpers.ts:\n//\n// tests/practice-phone.spec.ts:\n//\n// Phone number printed by the run:\n//\n// Why padStart is needed:",
+          "solution": "**A model answer.** The function added to `tests/registration-helpers.ts`:\n\n```ts\n// Return a phone number of exactly ten digits that differs on every call.\nexport function uniquePhone(): string {\n  return String(Math.floor(Math.random() * 10000000000)).padStart(10, '0');\n}\n```\n\n`tests/practice-phone.spec.ts`:\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { fillRegistrationForm, uniqueEmail, uniquePhone } from './registration-helpers';\n\ntest('registers with a unique phone number of ten digits', async ({ page }) => {\n  const phone = uniquePhone();\n  console.log('phone:', phone);\n  expect(phone.length).toBe(10);\n\n  await fillRegistrationForm(page, uniqueEmail());\n  const phoneBox = page.locator(\"input[type='tel']\");\n  await phoneBox.fill(phone);\n  await expect(phoneBox).toHaveValue(phone);\n});\n```\n\nRun it with `npx playwright test tests/practice-phone.spec.ts --project=chromium`:\n\n```output\nRunning 1 test using 1 worker\n\n[chromium] › tests\\practice-phone.spec.ts:4:5 › registers with a unique phone number of ten digits\nphone: 1898712721\n\n  1 passed (3.7s)\n```\n\n**Why `padStart` is needed.** `Math.random() * 10000000000` gives a number below ten billion, and about one time in ten it is below one billion, which has nine digits or fewer. `padStart(10, '0')` adds `0` at the front until the text has ten characters, so the phone number has ten digits on every run. `String()` comes first, because `padStart` works on text, not on a number.\n\n**What to check in your own answer.** `uniquePhone()` returns text, so `phone.length` counts its characters. `expect(phone.length).toBe(10)` has no `await`, because the length is already a number and there is nothing to wait for. If `fillRegistrationForm` already fills the Phone box, `fill()` replaces that value with the unique one, because `fill()` clears a field before typing."
         }
       ]
     }
