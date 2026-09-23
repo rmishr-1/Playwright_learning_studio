@@ -152,10 +152,6 @@ async function main(): Promise<void> {
   }
   const viaLocalhost = port ? (await fetch('http://localhost:' + port + '/api/course').catch(() => ({ status: 0 }))).status : 0;
   expect(viaLocalhost === 401 || viaLocalhost === 0, 'another host name for the same port is refused', String(viaLocalhost));
-  await sleep(3000);
-  if (process.env.STUDIO_SCREENSHOT) {
-    execFileSync('powershell', ['-NoProfile', '-File', path.join(__dirname, 'screenshot.ps1'), path.join(DESKTOP, 'test-output', 'release-window.png')]);
-  }
   killTree(child);
   await sleep(2000);
 

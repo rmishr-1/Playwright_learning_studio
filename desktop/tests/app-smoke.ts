@@ -11,6 +11,8 @@
  *
  *   npm run test:app     (in desktop/; uses the learner's real app data folder, and empties it)
  *
+ * Build with `npm run build -- --dev --obfuscate` to test the release's obfuscated code.
+ *
  * A release build cannot be driven this way: its fuses refuse the debugger connection Playwright
  * uses. tests/release-checks.ts checks the packaged app from the outside instead.
  */

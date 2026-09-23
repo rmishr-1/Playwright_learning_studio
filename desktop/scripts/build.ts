@@ -13,6 +13,9 @@
  *   npm run build                                  release build, for any valid Evoke licence
  *   npm run build -- --licence licences/X.lic      release build for one customer
  *   npm run build -- --dev                         readable, with DevTools, for working on the app
+ *   npm run build -- --dev --obfuscate             obfuscated like a release, but with DevTools and a
+ *                                                  debugger allowed, so test:app can drive the
+ *                                                  release's code (a release refuses Playwright)
  */
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
@@ -51,7 +54,8 @@ function installedVersion(name: string): string {
   return p.name === name ? p.version : 'npm:' + p.name + '@' + p.version;
 }
 
-export async function build(opts: { release: boolean; licenceFile: string | null }): Promise<BuildInfo> {
+export async function build(opts: { release: boolean; licenceFile: string | null; obfuscate?: boolean }): Promise<BuildInfo> {
+  const obfuscate = opts.obfuscate ?? opts.release;
   const publicKeyFile = path.join(DESKTOP, 'src', 'licence-public.pem');
   if (!fs.existsSync(publicKeyFile)) throw new Error('No licence key yet. Run `npm run licence:keygen` once.');
   const publicKey = fs.readFileSync(publicKeyFile, 'utf-8');
@@ -80,8 +84,8 @@ export async function build(opts: { release: boolean; licenceFile: string | null
     env: {
       ...process.env,
       STUDIO_WEB_OUT: path.join(APP, 'web'),
-      STUDIO_RELEASE: opts.release ? '1' : '0',
-      STUDIO_BANNER: opts.release ? BANNER : '',
+      STUDIO_RELEASE: obfuscate ? '1' : '0',
+      STUDIO_BANNER: obfuscate ? BANNER : '',
       STUDIO_PRODUCT: PRODUCT,
       STUDIO_WEB_PACKAGES: webPackages,
     },
@@ -105,7 +109,7 @@ export async function build(opts: { release: boolean; licenceFile: string | null
       __STUDIO_BUILD__: JSON.stringify({ product: PRODUCT, version: VERSION, publicKey, onlyId: licence?.id ?? null }),
       __STUDIO_PACK_KEY__: JSON.stringify(packed.key),
     },
-    minify: opts.release,
+    minify: obfuscate,
     legalComments: 'none',
     sourcemap: false,
     metafile: true,
@@ -113,7 +117,7 @@ export async function build(opts: { release: boolean; licenceFile: string | null
   });
 
   const mainJs = path.join(APP, 'main.js');
-  if (opts.release) {
+  if (obfuscate) {
     step('Obfuscating the main process');
     const started = Date.now();
     const obfuscated = JavaScriptObfuscator.obfuscate(fs.readFileSync(mainJs, 'utf-8'), {
@@ -202,7 +206,11 @@ export async function build(opts: { release: boolean; licenceFile: string | null
 
 if (require.main === module) {
   const i = process.argv.indexOf('--licence');
-  build({ release: !process.argv.includes('--dev'), licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]) }).catch((e) => {
+  build({
+    release: !process.argv.includes('--dev'),
+    obfuscate: process.argv.includes('--obfuscate') || undefined,
+    licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]),
+  }).catch((e) => {
     console.error(e instanceof Error ? e.message : e);
     process.exit(1);
   });
