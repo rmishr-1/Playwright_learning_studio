@@ -901,6 +901,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "1. **Good fit** — one TypeScript test suite runs on Chromium, Firefox and WebKit (Safari's engine).\n2. **Not a fit** — Playwright automates web apps, not native mobile apps. Use a native tool such as Appium.\n3. **Probably keep Selenium** for the existing suite — it works and the team is skilled. Playwright could be piloted for *new* projects; a full migration may not be worth the cost.\n4. **Good fit** — auto-waiting and web-first assertions remove timing-based flakiness without fixed sleeps.\n5. **Good fit** — two browser contexts in one test act as two separate users (admin and employee) with separate sessions."
         },
         {
@@ -913,6 +914,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "Playwright is a free, open-source tool from Microsoft that runs our web test cases automatically in real browsers — Chrome/Edge (Chromium), Firefox and Safari's engine (WebKit). Our test script sends instructions such as \"click Log in\" to Playwright, which keeps a live connection open to the browser, so it knows exactly when the page is ready before acting. That automatic waiting means far fewer random \"flaky\" failures than tools that rely on fixed waits. Every test also runs in a fresh, isolated browser session, so tests can run in parallel and finish much faster. It also produces an HTML report with errors and recordings for every run. One limitation: it only tests web applications — it can't automate our native mobile apps."
         },
         {
@@ -925,6 +927,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "`npx playwright test` → (3 + 2) × 2 projects = **10** runs.\n`npx playwright test --project=firefox` → 5 tests × 1 project = **5** runs."
         }
       ]

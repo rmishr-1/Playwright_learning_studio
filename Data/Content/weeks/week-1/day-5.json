@@ -1323,6 +1323,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "15\n105\ntrue\n10 items\n\n`b + 5` joins text ('10' + 5 → '105'). `Number(b)` converts the string '10' to the number 10, so the strict comparison is true."
         },
         {
@@ -1335,6 +1336,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "`4 many`\n\ncount: 1 → 5 (after `+= 4`) → 4 (after `--`). 4 > 3 is true, so label is 'many'. No errors — `count` uses `let`, so it may change."
         },
         {
@@ -1350,6 +1352,11 @@
           ],
           "file": "ts-basics/day5/cart.ts",
           "run": "node day5/cart.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day5/cart.ts",
+            "expected": "Subtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30"
+          },
           "solution": "```ts\n// Inputs\nconst unitPrice = 1299;\nconst quantity = 3;\nconst discountPercent = 10;\n\n// Calculations\nconst subtotal = unitPrice * quantity;                      // 3897\nconst discount = (subtotal * discountPercent) / 100;        // 389.7\nconst afterDiscount = subtotal - discount;                  // 3507.3\nconst shipping = afterDiscount >= 3000 ? 0 : 99;            // free above 3000\nconst totalToPay = afterDiscount + shipping;\n\n// Output\nconsole.log(`Subtotal: ${subtotal}`);\nconsole.log(`Discount: ${discount}`);\nconsole.log(`After discount: ${afterDiscount}`);\nconsole.log(`Shipping: ${shipping}`);\nconsole.log(`Total to pay: ${totalToPay.toFixed(2)}`);\n```\n\n**Output**\n\n```output\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```"
         },
         {
@@ -1366,6 +1373,11 @@
           ],
           "file": "ts-basics/day5/settings.ts",
           "run": "node day5/settings.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day5/settings.ts",
+            "expected": "Retries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000"
+          },
           "solution": "```ts\nconst isCI: boolean = false;                              // fix 1: boolean, not text\nconst retries: number = isCI ? 2 : 0;                     // fix 2: number on both sides\nconst workers: number = isCI ? 1 : 4;\nconst headless: boolean = true;                           // fix 3: boolean, not text\nlet baseURL: string | undefined;\nconst finalUrl: string = baseURL ?? 'http://localhost:3000';   // fix 4: the result is a string\nconsole.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${finalUrl}`);\n```\n\n**Output**\n\n```output\nRetries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000\n```"
         }
       ]

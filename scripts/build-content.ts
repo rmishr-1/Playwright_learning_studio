@@ -143,6 +143,27 @@ function starterFor(b: SrcBlock, file: string | null, title: string, files: Reco
   return '// ' + title + (file ? '\n// Save this as ' + file : '') + '\n';
 }
 
+/**
+ * The exercise's automatic check, for "Check my answer". Only a check the studio can run on the
+ * learner's own answer is kept: the answer is the editor's code, so the exercise must open in the
+ * editor (a stub), and the check must run that code. A `commandsRun` check runs the model answer's
+ * commands rather than the learner's, a `typecheckPasses` one checks a file the studio writes
+ * itself, and `self` is the learner's own judgement, so those exercises have no button.
+ */
+function checkFor(b: SrcBlock, stub: string | null, where: string): PracticeProblem['check'] {
+  const c = b.check as { kind?: string; run?: string; expected?: string } | undefined;
+  if (!c || stub === null) return null;
+  if (c.kind === 'stdoutEquals') {
+    if (!c.run || c.expected === undefined) fail(where, 'a stdoutEquals check needs run and expected');
+    return { kind: 'stdoutEquals', run: c.run, expected: c.expected };
+  }
+  if (c.kind === 'testsPass') {
+    if (!c.run) fail(where, 'a testsPass check needs run');
+    return { kind: 'testsPass', run: c.run };
+  }
+  return null;
+}
+
 function exercise(b: SrcBlock, number: number, where: string, files: Record<string, string>): PracticeProblem {
   const kind = str(b, 'exerciseType') ?? 'code';
   if (kind !== 'code' && kind !== 'terminal' && kind !== 'written' && kind !== 'predict') {
@@ -181,6 +202,7 @@ function exercise(b: SrcBlock, number: number, where: string, files: Record<stri
 
   return {
     number,
+    check: checkFor(b, stub, where),
     difficulty: LEVELS[str(b, 'level') ?? ''] ?? null,
     title,
     kind,

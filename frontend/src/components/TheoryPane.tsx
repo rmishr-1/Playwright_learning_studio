@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { Markdown, isSpecFile } from './Markdown';
 import { Callout, CodeBlock, Diagram, TerminalBlock, type EditorFile } from './LessonBlocks';
 import type { ContentBlock, CoursePart, PracticeProblem } from '../../../shared/contracts/course_day';
+import type { CheckResult } from '../../../shared/contracts/check';
+
+/** What checking an answer can come back with: a verdict, or a reason there is none yet. */
+export type CheckOutcome = CheckResult | { status: 'not-in-editor' } | { status: 'error'; message: string };
 
 /**
  * Option labels are one line of phrasing content inside a `<button>`, where the Markdown
@@ -111,15 +115,67 @@ const KIND_LABELS: Record<PracticeProblem['kind'], string> = {
   predict: 'Predict',
 };
 
+/**
+ * The verdict of "Check my answer". Spelled out in words as well as color, and for a wrong answer
+ * it shows what to fix: the expected and actual output side by side, or the end of the test run.
+ */
+function CheckVerdict({ outcome }: { outcome: CheckOutcome }) {
+  if (outcome.status === 'not-in-editor') {
+    return (
+      <div className="check-result note">
+        Select <b>Start this in the editor</b> first, and write your answer there. The check runs the
+        code in the editor.
+      </div>
+    );
+  }
+  if (outcome.status === 'error' || outcome.status === 'busy') {
+    return <div className="check-result note">{outcome.message}</div>;
+  }
+  const passed = outcome.status === 'passed';
+  return (
+    <div className={'check-result ' + (passed ? 'right' : 'wrong')}>
+      <strong>{passed ? 'Correct.' : 'Not yet.'}</strong> {outcome.message}
+      {!passed && outcome.expected !== null && outcome.actual !== null && outcome.output === null && (
+        <div className="compare">
+          <div>
+            <span className="label">Expected output</span>
+            <pre>{outcome.expected}</pre>
+          </div>
+          <div>
+            <span className="label">Your output</span>
+            <pre>{outcome.actual || '(nothing was printed)'}</pre>
+          </div>
+        </div>
+      )}
+      {!passed && outcome.output && <pre className="check-output">{outcome.output}</pre>}
+    </div>
+  );
+}
+
 function Problem({
   problem,
   onStart,
+  onCheck,
 }: {
   problem: PracticeProblem;
   onStart: (code: string, problemNumber: number, meta: EditorFile) => void;
+  onCheck: (problem: PracticeProblem) => Promise<CheckOutcome>;
 }) {
   const [revealed, setRevealed] = useState(false);
   const [hints, setHints] = useState(0);
+  const [checking, setChecking] = useState(false);
+  const [outcome, setOutcome] = useState<CheckOutcome | null>(null);
+  const check = async (): Promise<void> => {
+    setChecking(true);
+    setOutcome(null);
+    try {
+      setOutcome(await onCheck(problem));
+    } catch (e) {
+      setOutcome({ status: 'error', message: 'The check could not run: ' + (e as Error).message });
+    } finally {
+      setChecking(false);
+    }
+  };
   // A code exercise belongs to a file, so the editor saves it there and Run runs its command.
   const meta: EditorFile = problem.kind === 'code' ? { file: problem.file, run: problem.run } : { file: null, run: null };
   // A model answer loads as the exercise's file only when it is the whole file. Some answers to a
@@ -169,6 +225,11 @@ function Problem({
             Start this in the editor
           </button>
         )}
+        {problem.check && (
+          <button className="btn small check" onClick={() => void check()} disabled={checking}>
+            {checking ? 'Checking…' : 'Check my answer'}
+          </button>
+        )}
         {hints < problem.hints.length && (
           <button className="btn small ghost" onClick={() => setHints(hints + 1)}>
             {hints === 0 ? 'Show a hint' : 'Show another hint'}
@@ -180,6 +241,12 @@ function Problem({
           </button>
         )}
       </div>
+      {checking && (
+        <p className="check-running">
+          {problem.check?.kind === 'testsPass' ? 'Running the tests…' : 'Running your program…'}
+        </p>
+      )}
+      {outcome && !checking && <CheckVerdict outcome={outcome} />}
       {/* No solution written means NO button, rather than a button that disappoints. */}
       {!problem.solution && (
         <p className="no-solution">
@@ -206,6 +273,7 @@ export function TheoryPane({
   onLoadIntoEditor,
   onRunCommand,
   onStartProblem,
+  onCheckAnswer,
   weeksShown,
   onToggleWeeks,
   courseTitle,
@@ -219,6 +287,8 @@ export function TheoryPane({
   /** Runs a command in the Terminal, after putting `load` in the editor when it is given. */
   onRunCommand: (command: string, load?: { code: string; meta: EditorFile }) => void;
   onStartProblem: (code: string, problemNumber: number, meta: EditorFile) => void;
+  /** Grades an exercise of this part with its automatic check. */
+  onCheckAnswer: (part: number, problem: PracticeProblem) => Promise<CheckOutcome>;
   /** Whether the week list is open, so the one button can say which way it goes. */
   weeksShown?: boolean;
   onToggleWeeks?: () => void;
@@ -267,7 +337,14 @@ export function TheoryPane({
             case 'problem-ref': {
               // Render the exercise exactly where it sat in the source document.
               const problem = part.problems.find((p) => String(p.number) === block.text);
-              return problem ? <Problem key={'p' + block.text} problem={problem} onStart={onStartProblem} /> : null;
+              return problem ? (
+                <Problem
+                  key={'p' + block.text}
+                  problem={problem}
+                  onStart={onStartProblem}
+                  onCheck={(q) => onCheckAnswer(part.part, q)}
+                />
+              ) : null;
             }
             case 'markdown':
               return <Markdown key={i} text={block.text} onLoadIntoEditor={(c) => onLoadIntoEditor(c)} />;
@@ -333,7 +410,7 @@ export function TheoryPane({
         {part.problems
           .filter((p) => !part.blocks.some((b) => b.type === 'problem-ref' && b.text === String(p.number)))
           .map((p) => (
-            <Problem key={p.number} problem={p} onStart={onStartProblem} />
+            <Problem key={p.number} problem={p} onStart={onStartProblem} onCheck={(q) => onCheckAnswer(part.part, q)} />
           ))}
       </div>
     </div>

@@ -158,6 +158,23 @@ command. **Run** beside a command in a lesson types that command into the Termin
   block in a lesson offers **Load into editor** for this.
 - The Browser panel shows Chromium. `setup.bat` installs Chromium, Firefox and WebKit.
 
+### Check my answer
+
+A code exercise that the course can grade has a **Check my answer** button. The browser sends only
+the learner's code and which exercise it is. The server reads the exercise's check from the course,
+so a learner cannot mark their own answer correct, saves the code as the exercise's file, and runs
+the check's command through the Terminal's own code (`backend/src/check.ts`):
+
+- **Output checks** (the TypeScript exercises) pass when the program prints exactly the expected
+  output; a wrong answer shows the expected and actual output side by side.
+- **Test checks** (the Playwright exercises) pass when every test passes; a wrong answer shows the
+  end of the test run, where the first error is.
+
+The button grades the code in the editor, so it asks the learner to select **Start this in the
+editor** first when the editor holds a different file. Written, predict and Terminal exercises have
+no automatic check, and keep **Reveal solution**. `npm run verify:content` grades every model
+answer through the same code, so a right answer is never marked wrong.
+
 ### It executes arbitrary user-supplied code
 
 That is the feature, not an oversight. The guards are load-bearing:

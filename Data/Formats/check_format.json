@@ -1,0 +1,22 @@
+{
+    "_comment": "POST /api/check - 'Check my answer' on a code exercise. The browser sends only which exercise it is and the learner's code; the server reads the exercise's check from the course, saves the code as the exercise's file, and runs the check's command in the Terminal's workspace, through the same code and limits as a Terminal command.",
+    "request": {
+        "week": { "value": 1 },
+        "day": { "_comment": "Position within the week, 1-5.", "value": 5 },
+        "part": { "value": 4 },
+        "problem": { "_comment": "The exercise's number within the part.", "value": 3 },
+        "code": { "_comment": "The editor's code: the learner's answer.", "value": "" },
+        "workspace": { "options": ["demo", "project"], "value": "project" }
+    },
+    "response": {
+        "status": {
+            "_comment": "passed and failed are the verdict. busy: a Terminal command was already running, so nothing was checked.",
+            "options": ["passed", "failed", "busy"],
+            "value": "passed"
+        },
+        "message": { "_comment": "One sentence saying what was checked and what happened.", "value": "" },
+        "expected": { "_comment": "stdoutEquals only: the output the exercise expects.", "value": null },
+        "actual": { "_comment": "stdoutEquals only: the output the learner's code printed.", "value": null },
+        "output": { "_comment": "The end of what the command printed, for a failed check that is not an output comparison (a test failure, or a program that stopped with an error).", "value": null }
+    }
+}

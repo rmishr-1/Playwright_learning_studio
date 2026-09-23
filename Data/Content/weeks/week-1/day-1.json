@@ -683,6 +683,7 @@
           ],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "| Manual step | Type | Playwright step (plain English) |\n|---|---|---|\n| Open the shop | Action | go to `https://shop.example.com` |\n| Type \"wireless mouse\" in search | Action | fill the search box with `wireless mouse` |\n| Press Enter | Action | press `Enter` in the search box |\n| Heading says Results for \"wireless mouse\" | Assertion | expect the heading to have text `Results for \"wireless mouse\"` |\n| At least one product card | Assertion | expect the number of product cards to be greater than 0 |\n| Click the first product | Action | click the first product card |\n| Add to cart button shown | Assertion | expect the button named \"Add to cart\" to be visible |"
         },
         {
@@ -698,6 +699,10 @@
           ],
           "file": "tests/day1/auto-wait.spec.ts",
           "run": "npx playwright test tests/day1/auto-wait.spec.ts --project=chromium",
+          "check": {
+            "kind": "testsPass",
+            "run": "npx playwright test tests/day1/auto-wait.spec.ts --project=chromium"
+          },
           "solution": "```ts\n// Step 1 result: the test fails after ~30 s with a timeout. The message says it was\n// waiting for getByRole('button', { name: 'Pay now' }), which never appeared.\n//\n// Step 3 fix — look for the new button name:\nawait page.getByRole('button', { name: 'Pay' }).click();\n```"
         }
       ]

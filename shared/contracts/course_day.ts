@@ -108,6 +108,17 @@ export const WorkspaceSeeds = z.object({
   workspaces: z.record(Workspace, z.object({ files: z.record(z.string(), z.string()) })),
 });
 
+/**
+ * How "Check my answer" grades a code exercise. The learner's code is saved as the exercise's
+ * file, and `run` runs in the Terminal's workspace, as the lesson would run it.
+ * - stdoutEquals: the program's output, trimmed, must equal `expected`.
+ * - testsPass: the command must succeed, which for `npx playwright test` means every test passed.
+ */
+export const ExerciseCheck = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('stdoutEquals'), run: z.string(), expected: z.string() }),
+  z.object({ kind: z.literal('testsPass'), run: z.string() }),
+]);
+
 export const PartKind = z.enum(['prerequisite', 'concept', 'practice']);
 
 export const PracticeProblem = z.object({
@@ -134,6 +145,8 @@ export const PracticeProblem = z.object({
   file: z.string().nullable().default(null),
   /** The command that runs the exercise's code in the Terminal. */
   run: z.string().nullable().default(null),
+  /** How "Check my answer" grades the exercise. null when it has no automatic check. */
+  check: ExerciseCheck.nullable().default(null),
   /**
    * Markdown, revealed on a deliberate click. Code answers carry their own fence. null until
    * written - the reveal button is then absent, not broken.

@@ -4,3 +4,4 @@ export * from './course_day';
 export * from './course_index';
 export * from './progress';
 export * from './run';
+export * from './check';

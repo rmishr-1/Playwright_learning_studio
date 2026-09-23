@@ -765,6 +765,7 @@
           ],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "```bash\nnpx playwright test --project=webkit\nnpx playwright test tests/example.spec.ts --project=chromium --headed\nnpx playwright test -g \"link\"\nnpx playwright test --project=firefox --list\nnpx playwright test --last-failed\n```"
         },
         {
@@ -780,6 +781,7 @@
           ],
           "file": "playwright.config.ts",
           "run": null,
+          "check": null,
           "solution": "```ts\nimport { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',\n  fullyParallel: true,\n  forbidOnly: !!process.env.CI,\n  retries: process.env.CI ? 2 : 1,          // 2 on CI, 1 locally\n  workers: process.env.CI ? 1 : undefined,\n  reporter: [['list'], ['html', { open: 'never' }]],\n  use: {\n    trace: 'on-first-retry',\n    headless: false,                         // show the browser for every run\n  },\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n    // { name: 'webkit', use: { ...devices['Desktop Safari'] } },\n  ],\n});\n```"
         },
         {
@@ -795,6 +797,7 @@
           ],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "```bash\nnpx playwright codegen https://playwright.dev\n# …record, copy the code into tests/day4/recorded.spec.ts, then:\nnpx playwright test tests/day4/recorded.spec.ts --project=chromium --headed\n```"
         }
       ]

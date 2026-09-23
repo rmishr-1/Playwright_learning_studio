@@ -856,6 +856,10 @@
           ],
           "file": "tests/day9/logout.spec.ts",
           "run": "npx playwright test tests/day9/logout.spec.ts --project=chromium --headed",
+          "check": {
+            "kind": "testsPass",
+            "run": "npx playwright test tests/day9/logout.spec.ts --project=chromium --headed"
+          },
           "solution": "```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\ntest('user can log out', async ({ page }) => {\n  // Sign in\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n\n  // Log out\n  await page.getByRole('button', { name: 'Log out' }).click();\n\n  // Check the signed-out page\n  await expect(page.getByRole('heading', { name: 'Signed out' })).toBeVisible();\n  await expect(page.getByText('See you soon!')).toBeVisible();\n  await expect(page).toHaveTitle(/Signed out/);\n});\n```"
         },
         {
@@ -872,6 +876,10 @@
           ],
           "file": "tests/day9/login-data.spec.ts",
           "run": "npx playwright test tests/day9/login-data.spec.ts --project=chromium",
+          "check": {
+            "kind": "testsPass",
+            "run": "npx playwright test tests/day9/login-data.spec.ts --project=chromium"
+          },
           "solution": "```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from './practice-pages';\n\n// Test data: one row = one test\nconst invalidLogins = [\n  { email: '', password: '', message: 'Please enter your email and password' },\n  { email: 'student@qa.academy', password: '', message: 'Please enter your email and password' },\n  { email: 'nobody@qa.academy', password: 'Learn@123', message: 'Invalid email or password' },\n  { email: 'student@qa.academy', password: 'learn@123', message: 'Invalid email or password' },\n];\n\ntest.describe('Invalid sign-in', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(loginPage);\n  });\n\n  // Create one test per data row\n  for (const data of invalidLogins) {\n    test(`rejects \"${data.email}\" / \"${data.password}\"`, async ({ page }) => {\n      await page.getByLabel('Email').fill(data.email);\n      await page.getByLabel('Password').fill(data.password);\n      await page.getByRole('button', { name: 'Sign in' }).click();\n      await expect(page.getByRole('alert')).toHaveText(data.message);\n    });\n  }\n});\n```"
         }
       ]

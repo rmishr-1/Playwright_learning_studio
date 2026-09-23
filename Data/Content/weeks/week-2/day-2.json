@@ -1000,6 +1000,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "200 ok\n301 ok\n404 client\n500 server\n\n404 hits `continue`, so 'ok' is skipped for it. 500 prints 'server' and `break` ends the loop (it was the last item anyway)."
         },
         {
@@ -1012,6 +1013,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "The last line: `console.log(title);` → \"Cannot find name 'title'\".\n\n`title` is declared with `const` inside the loop's block, so it only exists inside that block. `suite` is fine because it's declared outside."
         },
         {
@@ -1027,6 +1029,11 @@
           ],
           "file": "ts-basics/day7/reporter.ts",
           "run": "node day7/reporter.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day7/reporter.ts",
+            "expected": "Passed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL"
+          },
           "solution": "```ts\nconst results: string[] = ['pass', 'fail', 'pass', 'skip', 'pass', 'fail'];\n\n// Counters\nlet passed = 0;\nlet failed = 0;\nlet skipped = 0;\n\n// Count each result\nfor (const result of results) {\n  if (result === 'pass') {\n    passed++;\n  } else if (result === 'fail') {\n    failed++;\n  } else {\n    skipped++;\n  }\n}\n\n// Verdict: PASS only if nothing failed\nconst verdict = failed === 0 ? 'PASS' : 'FAIL';\n\nconsole.log(`Passed: ${passed}`);\nconsole.log(`Failed: ${failed}`);\nconsole.log(`Skipped: ${skipped}`);\nconsole.log(`Verdict: ${verdict}`);\n```\n\n**Output**\n\n```output\nPassed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL\n```"
         },
         {
@@ -1042,6 +1049,11 @@
           ],
           "file": "ts-basics/day7/priority.ts",
           "run": "node day7/priority.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day7/priority.ts",
+            "expected": "P1 must be fixed within 4 hours\nP3 must be fixed within 72 hours\nP4 must be fixed within 168 hours"
+          },
           "solution": "```ts\ntype Priority = 'P1' | 'P2' | 'P3' | 'P4';\n\n// Return the SLA (in hours) for a bug priority\nfunction slaHours(priority: Priority): number {\n  switch (priority) {\n    case 'P1':\n      return 4;\n    case 'P2':\n      return 24;\n    case 'P3':\n      return 72;\n    case 'P4':\n      return 168;\n  }\n}\n\nconst priorities: Priority[] = ['P1', 'P3', 'P4'];\nfor (const p of priorities) {\n  console.log(`${p} must be fixed within ${slaHours(p)} hours`);\n}\n```\n\n**Output**\n\n```output\nP1 must be fixed within 4 hours\nP3 must be fixed within 72 hours\nP4 must be fixed within 168 hours\n```"
         },
         {
@@ -1057,6 +1069,11 @@
           ],
           "file": "ts-basics/day7/failed.ts",
           "run": "node day7/failed.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day7/failed.ts",
+            "expected": "Failed (2): search works, checkout completes\nSlowest: checkout completes (30s)"
+          },
           "solution": "```ts\ntype TestResult = {\n  title: string;\n  status: 'passed' | 'failed' | 'skipped';\n  durationMs: number;\n};\n\nconst run: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'cart updates', status: 'passed', durationMs: 900 },\n  { title: 'checkout completes', status: 'failed', durationMs: 30000 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n\n// 1 + 2: failed tests → their titles\nconst failedTests = run.filter((r) => r.status === 'failed');\nconst failedTitles = failedTests.map((r) => r.title);\n\n// 3: find the test with the largest duration\nconst slowest = (results: TestResult[]): TestResult => {\n  let max = results[0];\n  for (const r of results) {\n    if (r.durationMs > max.durationMs) {\n      max = r;\n    }\n  }\n  return max;\n};\n\nconst worst = slowest(run);\nconsole.log(`Failed (${failedTests.length}): ${failedTitles.join(', ')}`);\nconsole.log(`Slowest: ${worst.title} (${worst.durationMs / 1000}s)`);\n```\n\n**Output**\n\n```output\nFailed (2): search works, checkout completes\nSlowest: checkout completes (30s)\n```"
         }
       ]

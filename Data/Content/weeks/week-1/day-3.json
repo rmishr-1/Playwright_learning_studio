@@ -886,6 +886,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "1. Node.js (which includes npm and npx) isn't installed, or the terminal was opened before installing it. Install Node.js LTS and open a new terminal.\n2. Test files must end in `.spec.ts` or `.test.ts`. Rename it to `tests/login.spec.ts`.\n3. The new Playwright version needs matching browser builds. Run `npx playwright install`.\n4. They're in the wrong folder — npm reads the package.json of the current folder. `cd pw-course` first (check with `pwd`).\n5. The HTML reporter opened the report automatically after the failure. Press `Ctrl + C`. (Tomorrow, Day 4 · I1, you'll change one config line so this stops happening.)"
         },
         {
@@ -901,6 +902,10 @@
           ],
           "file": "tests/day3/my-first.spec.ts",
           "run": "npx playwright test tests/day3 --project=chromium",
+          "check": {
+            "kind": "testsPass",
+            "run": "npx playwright test tests/day3 --project=chromium"
+          },
           "solution": "```ts\nimport { test, expect } from '@playwright/test';\n\ntest('docs page has title', async ({ page }) => {\n  // Open the Playwright website\n  await page.goto('https://playwright.dev/');\n  // Check that the tab title contains the word \"Playwright\"\n  await expect(page).toHaveTitle(/Playwright/);\n});\n\ntest('get started opens installation', async ({ page }) => {\n  // Open the Playwright website\n  await page.goto('https://playwright.dev/');\n  // Click the \"Get started\" link\n  await page.getByRole('link', { name: 'Get started' }).click();\n  // Check that the \"Installation\" heading is visible\n  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();\n});\n```"
         }
       ]

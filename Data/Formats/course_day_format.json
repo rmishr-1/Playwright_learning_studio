@@ -225,6 +225,26 @@
                         "_comment": "The command that runs a code exercise.",
                         "value": null
                     },
+                    "check": {
+                        "_comment": "How 'Check my answer' grades the exercise, from the course's own check. Kept only where the studio can grade the learner's code: a code exercise that opens in the editor. null for every other exercise, and the button is then absent.",
+                        "kind": {
+                            "_comment": "stdoutEquals: the program's trimmed output must equal `expected`. testsPass: the command must succeed, so every test passed.",
+                            "options": [
+                                "stdoutEquals",
+                                "testsPass"
+                            ],
+                            "value": "stdoutEquals"
+                        },
+                        "run": {
+                            "_comment": "The command the check runs, as a Terminal command.",
+                            "value": "node day5/cart.ts"
+                        },
+                        "expected": {
+                            "_comment": "stdoutEquals only.",
+                            "value": ""
+                        },
+                        "value": null
+                    },
                     "solution": {
                         "_comment": "Model answer in MARKDOWN, revealed on a deliberate click. A code answer that is the whole file loads into the editor as the exercise's file. null = not written, and the reveal button is absent rather than broken.",
                         "value": null

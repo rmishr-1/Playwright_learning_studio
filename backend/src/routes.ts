@@ -6,6 +6,8 @@ import { currentReportDir, receiveFrame, startCommand, stopCommand } from './ter
 import { courseDay, courseIndex, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
+import { CheckRequest } from '../../shared/contracts/check';
+import { checkAnswer } from './check';
 import { Workspace } from '../../shared/contracts/course_day';
 import type { ErrorCode } from '../../shared/contracts/problem_error';
 
@@ -113,6 +115,36 @@ router.post('/run/prepare', (_req, res) => res.json({ run_id: prepareRun() }));
  */
 router.get('/run/:run_id/last-frame', (req, res) => {
   res.json(lastFrame(req.params.run_id) ?? { frame: null, status: null });
+});
+
+// ---------------------------------------------------------------- check my answer
+
+/**
+ * Grades a code exercise with the check the course gives it. The browser sends only the learner's
+ * code and which exercise it is; the check itself is read from the course here.
+ */
+router.post('/check', async (req, res) => {
+  let parsed;
+  try {
+    parsed = CheckRequest.parse(req.body);
+  } catch (e) {
+    return badRequest(res, 'CODE_REQUIRED', e);
+  }
+  const problem = courseDay(parsed.week, parsed.day)
+    ?.parts.find((p) => p.part === parsed.part)
+    ?.problems.find((q) => q.number === parsed.problem);
+  if (!problem?.check || !problem.file) {
+    return fail(res, 404, 'EXERCISE_NOT_FOUND', 'This exercise has no automatic check.');
+  }
+  // Checking an answer is an attempt at the exercise, not reading the part.
+  void recordProgress({
+    week: parsed.week,
+    day: parsed.day,
+    part: parsed.part,
+    attempted_problem: parsed.problem,
+    viewed: false,
+  });
+  res.json(await checkAnswer(problem, parsed));
 });
 
 // ---------------------------------------------------------------- terminal

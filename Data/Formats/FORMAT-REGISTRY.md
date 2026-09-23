@@ -45,6 +45,7 @@ Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **S*
 | `course_index_format.json` | content | S → B → F | `GET /api/course` |
 | `course_day_format.json` | content | S → B → F | `GET /api/course/:week/:day` |
 | `progress_format.json` | state | F ↔ B | `GET /api/progress`, `POST /api/progress` |
+| `check_format.json` | req/resp | F ↔ B | `POST /api/check` |
 | `run_format.json` | req/resp | F ↔ B | `POST /api/run` + `WS /api/run/:run_id/stream` |
 
 ## Cross-cutting invariants

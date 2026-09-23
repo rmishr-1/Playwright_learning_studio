@@ -906,6 +906,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "A\nC\nD\nB\n\n'B' starts but isn't awaited. `await step('C', 100)` waits 100 ms → prints C, then D. B finishes at 200 ms, so it prints last (the final `await wait(200)` keeps the program alive long enough)."
         },
         {
@@ -922,6 +923,11 @@
           ],
           "file": "ts-basics/day8/retry.ts",
           "run": "node day8/retry.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day8/retry.ts",
+            "expected": "Attempt 1 failed: Service unavailable\nAttempt 2 failed: Service unavailable\nResult: OK on call 3"
+          },
           "solution": "```ts\nconst wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));\n\nlet calls = 0;\nasync function flakyCheck(): Promise<string> {\n  calls++;\n  await wait(50);\n  if (calls < 3) {\n    throw new Error('Service unavailable');\n  }\n  return `OK on call ${calls}`;\n}\n\n// Try an async action up to maxAttempts times\nasync function retry(action: () => Promise<string>, maxAttempts: number): Promise<string> {\n  for (let attempt = 1; attempt <= maxAttempts; attempt++) {\n    try {\n      return await action();                                        // success → leave immediately\n    } catch (error) {\n      console.log(`Attempt ${attempt} failed: ${(error as Error).message}`);\n    }\n  }\n  throw new Error(`Gave up after ${maxAttempts} attempts`);         // every attempt failed\n}\n\nasync function main(): Promise<void> {\n  const result = await retry(flakyCheck, 3);\n  console.log(`Result: ${result}`);\n}\nmain();\n```\n\n**Output**\n\n```output\nAttempt 1 failed: Service unavailable\nAttempt 2 failed: Service unavailable\nResult: OK on call 3\n```"
         },
         {
@@ -938,6 +944,11 @@
           ],
           "file": "ts-basics/day8/mini-runner-v2.ts",
           "run": "node day8/mini-runner-v2.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day8/mini-runner-v2.ts",
+            "expected": "  ✓ adds one item\n  ✓ cart starts empty\n  - applies coupon (skipped)\n  ✘ total is right\n      Expected 3 but received 2\n\n  2 passed, 1 failed, 1 skipped"
+          },
           "solution": "```ts\ntype TestFunction = () => Promise<void>;\n\ninterface RegisteredTest {\n  title: string;\n  body: TestFunction;\n  skipped: boolean;\n}\n\nconst registeredTests: RegisteredTest[] = [];\nlet beforeEachHook: TestFunction | undefined;      // no hook until beforeEach() is called\n\nfunction test(title: string, body: TestFunction): void {\n  registeredTests.push({ title, body, skipped: false });\n}\n\nfunction skip(title: string, body: TestFunction): void {\n  registeredTests.push({ title, body, skipped: true });\n}\n\nfunction beforeEach(fn: TestFunction): void {\n  beforeEachHook = fn;\n}\n\nfunction expectEqual(actual: unknown, expected: unknown): void {\n  if (actual !== expected) {\n    throw new Error(`Expected ${JSON.stringify(expected)} but received ${JSON.stringify(actual)}`);\n  }\n}\n\nasync function run(): Promise<void> {\n  let passed = 0;\n  let failed = 0;\n  let skippedCount = 0;\n\n  for (const t of registeredTests) {\n    if (t.skipped) {                                // don't run skipped tests\n      console.log(`  - ${t.title} (skipped)`);\n      skippedCount++;\n      continue;\n    }\n    try {\n      if (beforeEachHook) {\n        await beforeEachHook();                     // fresh state before every test\n      }\n      await t.body();\n      console.log(`  ✓ ${t.title}`);\n      passed++;\n    } catch (error) {\n      console.log(`  ✘ ${t.title}`);\n      console.log(`      ${(error as Error).message}`);\n      failed++;\n    }\n  }\n  console.log(`\\n  ${passed} passed, ${failed} failed, ${skippedCount} skipped`);\n}\n\n// ---------- the tests ----------\nlet cart: number[] = [];\nbeforeEach(async () => { cart = []; });\ntest('adds one item', async () => { cart.push(499); expectEqual(cart.length, 1); });\ntest('cart starts empty', async () => { expectEqual(cart.length, 0); });\nskip('applies coupon', async () => { expectEqual(1, 2); });\ntest('total is right', async () => { cart.push(100, 200); expectEqual(cart.length, 3); });\n\nrun();\n```\n\n**Output**\n\n```output\n  ✓ adds one item\n  ✓ cart starts empty\n  - applies coupon (skipped)\n  ✘ total is right\n      Expected 3 but received 2\n\n  2 passed, 1 failed, 1 skipped\n```"
         }
       ]

@@ -27,6 +27,10 @@ process.env.STUDIO_WORKSPACE_ROOT = workRoot;
 const { prepareRun, attachStream } = require('../backend/src/runner') as typeof import('../backend/src/runner');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { startCommand } = require('../backend/src/terminal') as typeof import('../backend/src/terminal');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { checkAnswer } = require('../backend/src/check') as typeof import('../backend/src/check');
+import { CourseDay, type PracticeProblem } from '../shared/contracts/course_day';
+import type { CheckRequest } from '../shared/contracts/check';
 
 type Item = {
   label: string;
@@ -95,6 +99,55 @@ function collect(): Item[] {
     }
   }
   return items;
+}
+
+/**
+ * Every built exercise with an automatic check, paired with its model answer from the source. The
+ * built day's exercises are numbered in the order the source lists them, so exercise N of a day is
+ * the source day's Nth exercise.
+ */
+function checkItems(): { label: string; problem: PracticeProblem; request: CheckRequest }[] {
+  const out: { label: string; problem: PracticeProblem; request: CheckRequest }[] = [];
+  const source = path.join(ROOT, 'Data', 'Source');
+  const packages = fs
+    .readdirSync(source, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name !== 'workspace' && fs.existsSync(path.join(source, e.name, 'json')))
+    .map((e) => e.name);
+  const solutions = new Map<number, string[]>();
+  for (const pkg of packages) {
+    const json = path.join(source, pkg, 'json');
+    for (const f of fs.readdirSync(json).filter((n) => /^day\d+\.json$/.test(n))) {
+      const day = JSON.parse(fs.readFileSync(path.join(json, f), 'utf-8')) as {
+        day: number;
+        sections: { lessons: { blocks: SrcBlock[] }[] }[];
+      };
+      const exercises = day.sections.flatMap((s) => s.lessons.flatMap((l) => l.blocks.filter((b) => b.type === 'exercise')));
+      solutions.set(day.day, exercises.map((b) => (typeof b.solution === 'string' ? b.solution : '')));
+    }
+  }
+  const weeks = path.join(ROOT, 'Data', 'Content', 'weeks');
+  for (const w of fs.readdirSync(weeks)) {
+    for (const f of fs.readdirSync(path.join(weeks, w))) {
+      const day = CourseDay.parse(JSON.parse(fs.readFileSync(path.join(weeks, w, f), 'utf-8')));
+      for (const part of day.parts) {
+        for (const problem of part.problems) {
+          if (!problem.check) continue;
+          // An answer to a test exercise that is notes plus the one changed line is not a file the
+          // check can run. For those, the file the exercise starts from is a correct answer: it is
+          // the lesson's own working test, which the learner breaks and then fixes.
+          const solution = solutions.get(day.number)?.[problem.number - 1] ?? '';
+          const wholeFile = !problem.file?.endsWith('.spec.ts') || /\btest\s*(\.\w+\s*)?\(/.test(solution);
+          const code = wholeFile ? solution : (problem.stub ?? '');
+          out.push({
+            label: 'day ' + day.number + ' exercise ' + problem.number + ' ' + problem.file,
+            problem,
+            request: { week: day.week, day: day.day, part: part.part, problem: problem.number, code, workspace: day.workspace },
+          });
+        }
+      }
+    }
+  }
+  return out.sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
 }
 
 /** The output block after a code block, skipping the terminal block that runs it. */
@@ -186,7 +239,25 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log('\n' + passed + ' passed, ' + failures.length + ' failed, ' + skipped + ' skipped, of ' + items.length);
+  // "Check my answer": every exercise's model answer must pass its own check, through the same
+  // code the button uses, or the button would tell a learner with a right answer that it is wrong.
+  console.log('\nCheck my answer, with each model answer:');
+  const answers = checkItems().filter((c) => !only || c.label.includes(only));
+  for (const c of answers) {
+    const started = Date.now();
+    const result = await checkAnswer(c.problem, c.request);
+    const secs = ((Date.now() - started) / 1000).toFixed(1) + 's';
+    if (result.status === 'passed') {
+      passed++;
+      console.log('ok    ' + c.label + '  (' + secs + ')');
+    } else {
+      failures.push(c.label + ': ' + result.message + (result.output ? '\n' + result.output.split('\n').slice(-12).join('\n') : ''));
+      console.log('FAIL  ' + c.label + '  (' + secs + ')');
+    }
+  }
+
+  const total = items.length + answers.length;
+  console.log('\n' + passed + ' passed, ' + failures.length + ' failed, ' + skipped + ' skipped, of ' + total);
   for (const f of failures) console.log('\n' + f);
   fs.rmSync(workRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   process.exit(failures.length ? 1 : 0);

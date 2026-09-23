@@ -743,6 +743,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "`4 3 skip`\n\n`summary.total` stored the length (3) at the moment the object was created; pushing later doesn't change it. The array now has 4 items and the last one is 'skip'."
         },
         {
@@ -758,6 +759,11 @@
           ],
           "file": "ts-basics/day6/profile.ts",
           "run": "node day6/profile.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day6/profile.ts",
+            "expected": "Tester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false"
+          },
           "solution": "```ts\n// 1. Constants with types\nconst testerName: string = 'Priya Sharma';\nconst yearsOfExperience: number = 3;\nconst favouriteBrowser: 'chromium' | 'firefox' | 'webkit' = 'firefox';\nconst usedAutomation: boolean = false;\n\n// 2. Print with template literals\nconsole.log(`Tester: ${testerName}`);\nconsole.log(`Experience: ${yearsOfExperience} years`);\nconsole.log(`Favourite browser: ${favouriteBrowser}`);\nconsole.log(`Automation before: ${usedAutomation}`);\n```\n\n**Output**\n\n```output\nTester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false\n```"
         },
         {
@@ -773,6 +779,11 @@
           ],
           "file": "ts-basics/day6/login-data.ts",
           "run": "node day6/login-data.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day6/login-data.ts",
+            "expected": "2 login cases\nTC-01 standard_user expects success: true\nTC-02 locked_out_user expects error: Sorry, this user has been locked out."
+          },
           "solution": "```ts\n// The shape of one login test case\ntype LoginCase = {\n  id: string;\n  username: string;\n  password: string;\n  shouldSucceed: boolean;\n  expectedError?: string;   // only needed for failing cases\n};\n\nconst validCase: LoginCase = {\n  id: 'TC-01',\n  username: 'standard_user',\n  password: 'secret_sauce',\n  shouldSucceed: true,\n};\n\nconst lockedCase: LoginCase = {\n  id: 'TC-02',\n  username: 'locked_out_user',\n  password: 'secret_sauce',\n  shouldSucceed: false,\n  expectedError: 'Sorry, this user has been locked out.',\n};\n\nconst loginCases: LoginCase[] = [validCase, lockedCase];\n\nconsole.log(`${loginCases.length} login cases`);\nconsole.log(`${loginCases[0].id} ${loginCases[0].username} expects success: ${loginCases[0].shouldSucceed}`);\nconsole.log(`${loginCases[1].id} ${loginCases[1].username} expects error: ${loginCases[1].expectedError}`);\n```\n\n**Output**\n\n```output\n2 login cases\nTC-01 standard_user expects success: true\nTC-02 locked_out_user expects error: Sorry, this user has been locked out.\n```"
         },
         {
@@ -789,6 +800,11 @@
           ],
           "file": "ts-basics/day6/url-builder.ts",
           "run": "node day6/url-builder.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day6/url-builder.ts",
+            "expected": "https://shop.example.com/c/laptops-tablets?page=2&sort=price\n[P2] Laptops & Tablets sorted by price"
+          },
           "solution": "```ts\nconst baseUrl = 'https://shop.example.com';\nconst category = 'Laptops & Tablets';\nconst page = 2;\nconst sortBy: 'price' | 'rating' = 'price';\n\n// 1. Make a slug: lowercase → remove & → split into words → drop empty words → join with -\nconst slug = category\n  .toLowerCase()\n  .replace('&', '')\n  .split(' ')\n  .filter((word) => word !== '')\n  .join('-');\n\n// 2. Build the URL with a template literal\nconst url = `${baseUrl}/c/${slug}?page=${page}&sort=${sortBy}`;\n\n// 3. Build the test title\nconst title = `[P${page}] ${category} sorted by ${sortBy}`;\n\n// 4. Print\nconsole.log(url);\nconsole.log(title);\n```\n\n**Output**\n\n```output\nhttps://shop.example.com/c/laptops-tablets?page=2&sort=price\n[P2] Laptops & Tablets sorted by price\n```"
         }
       ]

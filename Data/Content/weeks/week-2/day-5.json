@@ -650,6 +650,10 @@
           ],
           "file": "tests/day10/bugs.spec.ts",
           "run": "npx playwright test tests/day10/bugs.spec.ts --project=chromium",
+          "check": {
+            "kind": "testsPass",
+            "run": "npx playwright test tests/day10/bugs.spec.ts --project=chromium"
+          },
           "solution": "```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\n// Bug 1: beforeAll can't use `page` → use beforeEach (and remove the duplicate setContent in the test)\ntest.beforeEach(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\n// Bug 2: test.only would fail CI (forbidOnly) and hide all other tests → plain test()\ntest('wrong password shows an error', async ({ page }) => {\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  // Bug 3: missing await on the click\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  // Bug 4: missing await on the web-first assertion\n  await expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n```"
         },
         {
@@ -662,6 +666,7 @@
           "hints": [],
           "file": null,
           "run": null,
+          "check": null,
           "solution": "```bash\nnpx playwright test tests/day9 --grep @smoke --project=chromium\nnpx playwright test tests/day9 --grep-invert @smoke --workers=1 --project=firefox\nnpx playwright test -g \"dashboard\" --headed\nnpx playwright test tests/day9/login.spec.ts --project=webkit --list\nnpx playwright test --last-failed\nnpx playwright show-report\n```"
         },
         {
@@ -679,6 +684,10 @@
           ],
           "file": "tests/day10/enrol.spec.ts",
           "run": "npx playwright test tests/day10/enrol.spec.ts --project=chromium --project=firefox",
+          "check": {
+            "kind": "testsPass",
+            "run": "npx playwright test tests/day10/enrol.spec.ts --project=chromium --project=firefox"
+          },
           "solution": "```ts\nimport { test, expect, type Page } from '@playwright/test';\nimport { enrolPage } from '../day9/practice-pages';\n\n// Helper: fill the form (empty strings leave a field blank) and accept the terms\nasync function fillForm(page: Page, name: string, email: string, course: string): Promise<void> {\n  await page.getByLabel('Full name').fill(name);\n  await page.getByLabel('Email').fill(email);\n  if (course !== '') {\n    await page.getByLabel('Course').selectOption(course);\n  }\n  await page.getByLabel('I accept the terms').check();\n}\n\ntest.describe('Enrolment page', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(enrolPage);\n  });\n\n  test('R1: shows the correct title and heading', { tag: '@smoke' }, async ({ page }) => {\n    await expect(page).toHaveTitle('QA Academy - Enrol');\n    await expect(page.getByRole('heading', { name: 'Enrol in a course' })).toBeVisible();\n  });\n\n  test('R2: Enrol button follows the terms checkbox', { tag: '@regression' }, async ({ page }) => {\n    const enrol = page.getByRole('button', { name: 'Enrol now' });\n    const terms = page.getByLabel('I accept the terms');\n    await expect(enrol).toBeDisabled();\n    await terms.check();\n    await expect(enrol).toBeEnabled();\n    await terms.uncheck();\n    await expect(enrol).toBeDisabled();\n  });\n\n  test('R3: name is required', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, '', 'asha@example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Name is required');\n  });\n\n  test('R4: email must contain @', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha.example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Enter a valid email');\n  });\n\n  test('R5: a course must be chosen', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha@example.com', '');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Please choose a course');\n  });\n\n  test('R6: valid enrolment shows a confirmation', { tag: '@smoke' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha@example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Thanks, Asha! You are enrolled in API Testing.');\n  });\n\n  test('R7: seats left goes down by one', { tag: '@regression' }, async ({ page }) => {\n    await expect(page.getByTestId('seats')).toHaveText('Seats left: 12');\n    await fillForm(page, 'Asha Verma', 'asha@example.com', 'Playwright Basics');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByTestId('seats')).toHaveText('Seats left: 11');\n  });\n});\n```"
         }
       ]
