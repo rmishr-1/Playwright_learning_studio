@@ -2,7 +2,7 @@
     "name": "studio-frontend-c",
     "private": true,
     "version": "0.1.0",
-    "description": "Learning Studio - Option C: Option B’s dashboard as the course index, with Option A’s lesson screen.",
+    "description": "QA Practice Training Studio - Option C: a learner dashboard as the course index, with a side-by-side lesson and editor.",
     "type": "module",
     "scripts": {
         "dev": "node ../node_modules/vite/bin/vite.js",

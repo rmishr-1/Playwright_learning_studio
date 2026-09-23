@@ -13,7 +13,7 @@ export default defineConfig({
   },
   server: {
     port: 5185,
-    // Fail rather than drift to another port: the port is how v1, v2, A, B and C are told apart.
+    // Fail rather than drift to another port: the port is how v1, v2 and C are told apart.
     strictPort: true,
     proxy: {
       '/api': {
