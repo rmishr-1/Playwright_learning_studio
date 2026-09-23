@@ -33,14 +33,20 @@ export const Progress = z.object({
 });
 
 /**
- * POST /api/progress - records a part view, and optionally a practice attempt. There is no
- * learner id anywhere in this request: there is only the one record.
+ * POST /api/progress - records where the learner is, that a part was read, and optionally a
+ * practice attempt. There is no learner id anywhere in this request: there is only the one record.
  */
 export const ProgressUpdate = z.object({
   week: WeekNumber,
   day: DayNumber,
   part: PartNumber,
   attempted_problem: ProblemNumber.nullable().optional(),
+  /**
+   * Whether this counts the part as read. `false` only moves the resume point here - for a
+   * frontend that marks a part read once the learner reaches its end, not on arrival. Omitted
+   * means true, which is how every update behaved before this field existed.
+   */
+  viewed: z.boolean().optional(),
 });
 
 export type ResumePoint = z.infer<typeof ResumePoint>;

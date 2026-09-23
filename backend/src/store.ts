@@ -104,9 +104,10 @@ async function withLock<T>(fn: () => T): Promise<T> {
 }
 
 /**
- * Records that a part was viewed. A part completes on view; a day completes when every part
- * the day actually HAS has been viewed - not a hardcoded four, because a day may have fewer
- * parts, with gaps in the part numbers.
+ * Records where the learner is and, unless `viewed: false`, that a part was read. A part
+ * completes when it is recorded as read; a day completes when every part the day actually HAS
+ * has been read - not a hardcoded four, because a day may have fewer parts, with gaps in the
+ * part numbers.
  */
 export async function recordProgress(update: ProgressUpdate): Promise<Progress> {
   return withLock(() => {
@@ -124,9 +125,11 @@ export async function recordProgress(update: ProgressUpdate): Promise<Progress> 
       completed_at: null,
     };
 
-    const viewed = prior.parts_viewed.includes(update.part)
-      ? prior.parts_viewed
-      : [...prior.parts_viewed, update.part].sort((a, b) => a - b);
+    // `viewed: false` moves the resume point without counting the part as read.
+    const viewed =
+      update.viewed === false || prior.parts_viewed.includes(update.part)
+        ? prior.parts_viewed
+        : [...prior.parts_viewed, update.part].sort((a, b) => a - b);
 
     const attempted =
       update.attempted_problem && !prior.attempted_problems.includes(update.attempted_problem)

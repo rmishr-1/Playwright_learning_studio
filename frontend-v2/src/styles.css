@@ -1,0 +1,910 @@
+/* Learning Studio.
+   Light reading pane, switchable editor. The palette deliberately moved off the assessment
+   portal's ink-on-bone: this is somewhere you learn, not somewhere you are examined.
+   Colour roles are fixed and not decorative:
+     green  -> go, and done            (Run, completed ticks, a passing run)
+     blue   -> interactive             (buttons, links, the active tab)
+     red    -> a run that failed
+     navy   -> masthead and headings   */
+:root {
+  /* --ink is the BRAND navy (masthead, chat header) and stays navy in both themes.
+     --heading is heading TEXT, which has to invert in dark. Keeping them separate is what
+     stops the masthead turning pale when the dark theme lands. */
+  --ink: #0f1e3d;            /* navy header */
+  --ink-2: #172a52;          /* raised surfaces on the header */
+  --heading: #14244a;
+  --brand-orange: #f26522;   /* the swooshes in the Evoke logo - used sparingly as a highlight */
+  --page: #ffffff;
+  --paper: #ffffff;
+  /* The page is white, so subtle fills (table headers, code chips, badges) need their own
+     token rather than reusing --page. */
+  --tint: #f3f5fa;
+  --muted: #5b6880;
+  --graphite: #232936;
+  --rule: #e3e8f0;
+  --rule-soft: #f2f4f8;
+
+  --accent: #1d5bd6;         /* royal blue, from the logo - interactive things */
+  --accent-wash: #ebf1fd;
+  --good: #15a34a;
+  --good-wash: #e7f6ed;
+  --warn: #d97706;
+  --warn-wash: #fdf3e3;
+  --bad: #dc2626;
+  --bad-wash: #fdecec;
+
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(31, 43, 77, .06), 0 4px 16px rgba(31, 43, 77, .05);
+
+  --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  --serif: 'Source Serif 4', Georgia, serif;
+  --sans: 'Inter', system-ui, 'Segoe UI', sans-serif;
+}
+
+/* Dark theme for the whole page. Toggled bottom-left; the editor follows it but can then be
+   overridden on its own. */
+:root[data-theme='dark'] {
+  --heading: #e9edf6;
+  --page: #141821;
+  --paper: #1a1f29;
+  --tint: #232936;
+  --muted: #97a2b7;
+  --graphite: #d7dde9;
+  --rule: #2b3240;
+  --rule-soft: #222835;
+
+  --accent: #6f9bff;
+  --accent-wash: #1c2740;
+  --good: #3dc97f;
+  --good-wash: #16301f;
+  --warn: #e3a250;
+  --warn-wash: #33260f;
+  --bad: #f07272;
+  --bad-wash: #331a1a;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
+  --brand-orange: #ff7a3d;
+  color-scheme: dark;
+}
+
+/* The editor half is themed independently of the page - the learner toggles it. */
+.pane-editor[data-editor-theme='dark'] {
+  --ed-bg: #1e232d;
+  --ed-bg-2: #262c38;
+  --ed-rule: #333b4a;
+  --ed-text: #dbe2ee;
+  --ed-dim: #8e99ad;
+  /* Concept color grading. Like --ed-bg above, these are literal values, not var(--accent) etc -
+     the editor's theme toggles independently of the page's, so a page-scoped token would take
+     whatever the PAGE currently is, not the editor. The values match the dark :root's own
+     --accent/--good/--warn, so a learner who reads blue-as-interactive and green-as-passing
+     elsewhere in the studio gets the same association here - just pinned, not inherited. */
+  --concept-locator: #6f9bff;
+  --concept-assertion: #3dc97f;
+  --concept-action: #e3a250;
+  --concept-wait: #b794f6;
+  --concept-test: #eab308;
+}
+.pane-editor[data-editor-theme='light'] {
+  --ed-bg: #ffffff;
+  --ed-bg-2: #f2f5fa;
+  --ed-rule: var(--rule);
+  --ed-text: var(--graphite);
+  --ed-dim: var(--muted);
+  --concept-locator: #2563eb;
+  --concept-assertion: #15a34a;
+  --concept-action: #d97706;
+  --concept-wait: #7c3aed;
+  --concept-test: #a16207;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { font-family: var(--sans); color: var(--graphite); background: var(--page); }
+a { color: var(--accent); }
+button { font: inherit; cursor: pointer; }
+
+/* The masthead was a 50px navy bar carrying the course title. The title now rides the tab row
+   (.tabbar .studio-title), so the bar and its brand styles are gone rather than left unused. */
+
+/* ---------------------------------------------------------------- shells */
+.app { height: 100%; display: flex; flex-direction: column; }
+.body { flex: 1; min-height: 0; display: flex; }
+.centered { max-width: 900px; margin: 0 auto; padding: 44px 24px 80px; }
+h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
+.muted { color: var(--muted); }
+
+/* ---------------------------------------------------------------- landing */
+.hero h1 { font-size: 36px; margin: 0 0 10px; letter-spacing: -.01em; }
+.hero .sub { color: var(--muted); font-size: 16.5px; margin: 0 0 28px; max-width: 60ch; line-height: 1.6; }
+.stats { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+.stat {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 12px 18px; min-width: 110px; box-shadow: var(--shadow);
+}
+.stat b { display: block; font-family: var(--mono); font-size: 21px; color: var(--heading); }
+.stat span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.enrol { display: flex; gap: 10px; margin: 8px 0 12px; max-width: 470px; }
+.enrol input {
+  flex: 1; font: inherit; padding: 12px 14px; border: 1px solid var(--rule);
+  border-radius: 10px; background: var(--paper);
+}
+.enrol input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.btn {
+  background: var(--accent); color: #fff; border: none; border-radius: 10px;
+  padding: 12px 24px; font-weight: 600; white-space: nowrap;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:disabled { background: var(--accent); opacity: .42; cursor: default; }
+.btn.ghost { background: var(--paper); color: var(--heading); border: 1px solid var(--rule); }
+.btn.ghost:hover { background: var(--accent-wash); border-color: var(--accent); }
+.btn.small { padding: 6px 14px; font-size: 13px; border-radius: 8px; }
+
+.outline { display: grid; gap: 12px; }
+.week-card {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 16px 18px; box-shadow: var(--shadow);
+}
+.week-card.locked { opacity: .62; }
+.week-card h3 { margin: 0 0 4px; font-size: 17px; }
+.week-card .theme { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+.week-card ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 14px; }
+.pill {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 20px; background: var(--warn-wash); color: var(--warn);
+  margin-left: 10px; vertical-align: 2px; font-weight: 600;
+}
+.pill.done { background: var(--good-wash); color: var(--good); }
+
+/* The only pill left is "soon" = not written yet. There was a second, "locked", for a week whose
+   predecessor you had not finished; the course no longer gates on that. */
+
+/* ---------------------------------------------------------------- sidebar */
+.sidebar {
+  width: 250px; flex: 0 0 250px; background: var(--paper);
+  border-right: 1px solid var(--rule); overflow-y: auto; padding: 10px 0 40px;
+}
+/* The org mark, above the master row - not a link or a control, just identity. */
+.brand {
+  display: flex; align-items: center; gap: 10px; padding: 14px 16px 12px; border-bottom: 1px solid var(--rule);
+}
+.brand-mark {
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 34px; height: 34px; border-radius: 9px; background: var(--ink); color: #fff;
+  font-family: var(--mono); font-size: 12.5px; font-weight: 700; letter-spacing: .02em;
+}
+.brand-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.brand-org {
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600;
+}
+.brand-title { font-family: var(--serif); font-size: 15.5px; font-weight: 600; color: var(--heading); }
+
+/* The master row. Sits above every week and collapses the lot. */
+.sidebar .wk-all {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; border-bottom: 1px solid var(--rule); text-align: left;
+  padding: 12px 16px; color: var(--muted);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  font-weight: 600;
+}
+.sidebar .wk-all:hover { background: var(--rule-soft); color: var(--heading); }
+.sidebar .wk-all .chev-left { font-size: 11px; line-height: 1; flex: 0 0 auto; }
+.sidebar .wk-all .spacer { flex: 1; }
+.sidebar .wk-all .count {
+  font-size: 10px; letter-spacing: .04em; color: var(--muted);
+  background: var(--tint); border: 1px solid var(--rule); border-radius: 20px; padding: 2px 8px;
+}
+
+.sidebar .wk { padding: 2px 0 0; }
+/* Each week is a disclosure. Collapsed, the whole 8-week course fits without scrolling. */
+.sidebar .wk-title {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; text-align: left;
+  padding: 11px 16px; border-radius: 0;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); font-weight: 600;
+}
+.sidebar .wk-title:hover { background: var(--rule-soft); color: var(--heading); }
+.sidebar .wk-title .chev {
+  font-size: 11px; line-height: 1; transition: transform .15s ease; flex: 0 0 auto;
+}
+.sidebar .wk-title.open .chev { transform: rotate(90deg); }
+.sidebar .wk-title .spacer { flex: 1; }
+.sidebar .wk-title .count {
+  font-size: 10px; letter-spacing: .04em; color: var(--muted);
+  background: var(--tint); border: 1px solid var(--rule); border-radius: 20px; padding: 2px 8px;
+}
+.sidebar .wk-title .count.all { background: var(--good-wash); border-color: transparent; color: var(--good); }
+.sidebar ul { list-style: none; margin: 0 0 6px; padding: 0; }
+.sidebar ul[hidden] { display: none; }
+.sidebar li a {
+  display: flex; align-items: center; gap: 9px; padding: 8px 16px;
+  color: var(--graphite); text-decoration: none; font-size: 13.5px;
+  border-left: 3px solid transparent;
+}
+.sidebar li a:hover { background: var(--accent-wash); }
+.sidebar li a.on { background: var(--accent-wash); border-left-color: var(--accent); font-weight: 600; color: var(--heading); }
+.sidebar li a.locked { color: #a3adbf; cursor: not-allowed; }
+.sidebar li a.locked:hover { background: none; }
+.sidebar .tick { font-family: var(--mono); font-size: 12px; color: var(--good); width: 12px; flex: 0 0 12px; }
+/* A three-line day title made the sidebar unreadable. One line, ellipsis, full text on hover. */
+.sidebar .dayno { font-weight: 600; flex: 0 0 auto; }
+.sidebar .daytitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+/* ---------------------------------------------------------------- day split */
+.split { flex: 1; min-width: 0; display: flex; position: relative; }
+.pane-theory { flex: 1 1 auto; min-width: 0; overflow-y: auto; background: var(--paper); }
+.gutter {
+  flex: 0 0 6px; cursor: col-resize; background: var(--rule-soft);
+  border-left: 1px solid var(--rule); border-right: 1px solid var(--rule);
+}
+.gutter:hover { background: var(--accent); }
+.pane-editor {
+  flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;
+  background: var(--ed-bg); position: relative;
+}
+
+.tabbar {
+  display: flex; gap: 2px; border-bottom: 1px solid var(--rule); background: var(--paper);
+  padding: 0 12px; position: sticky; top: 0; z-index: 2; overflow-x: auto;
+}
+.tabbar button {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 13px 14px; font-size: 13.5px; color: var(--muted); white-space: nowrap;
+}
+.tabbar button:hover { color: var(--heading); }
+.tabbar button.on { color: var(--heading); border-bottom-color: var(--accent); font-weight: 600; }
+.tabbar .viewed { color: var(--good); font-size: 11px; margin-left: 6px; }
+/* Always rendered - it toggles the week list both ways, so it must not move or disappear when
+   the list opens. Styled off aria-expanded rather than a class, so the look cannot drift from
+   the state screen readers are told about. Deliberately not `.on`: that is the active-TAB style
+   (an accent underline), and this is a control, not one of the parts. */
+.tabbar .show-weeks {
+  padding: 13px 12px; font-size: 15px; color: var(--muted); border-bottom: 2px solid transparent;
+  flex: 0 0 auto;
+}
+.tabbar .show-weeks:hover { color: var(--accent); }
+.tabbar .show-weeks[aria-expanded='true'] { color: var(--heading); background: var(--rule-soft); }
+
+/* The course title, on the tab row rather than in a bar of its own. It is the brand voice, so it
+   keeps the serif the masthead used, and a rule separates it from the tabs - which are controls,
+   where this is a label. `flex: 0 1 auto` with min-width 0 lets it give up width to the tabs and
+   ellipsis rather than pushing them off the row on a narrow pane. */
+.tabbar .studio-title {
+  font-family: var(--serif); font-size: 13.5px; font-weight: 600; color: var(--heading);
+  text-decoration: none; align-self: center; padding: 0 11px 0 3px; margin-right: 5px;
+  border-right: 1px solid var(--rule);
+  /* Yields all its width to the tabs before clipping them - they are the controls, this is a
+     label. The full name is on hover, and widening the lesson pane shows more of it. */
+  flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tabbar .studio-title:hover { color: var(--accent); }
+
+/* Centred: on a wide pane, left-aligned text left a large empty column to its right. */
+.lesson { padding: 26px 34px 90px; max-width: 74ch; margin: 0 auto; }
+.lesson h1 { font-size: 27px; margin: 0 0 18px; line-height: 1.25; letter-spacing: -.01em; }
+.lesson h2 { font-size: 20px; margin: 34px 0 10px; }
+.lesson h3 { font-size: 16.5px; margin: 24px 0 8px; }
+.lesson p, .lesson li { font-size: 15.5px; line-height: 1.68; }
+.lesson table { border-collapse: collapse; margin: 16px 0; font-size: 14px; width: 100%; }
+.lesson th, .lesson td { border: 1px solid var(--rule); padding: 8px 11px; text-align: left; vertical-align: top; }
+.lesson th { background: var(--tint); font-weight: 600; color: var(--heading); }
+.lesson blockquote {
+  margin: 16px 0; padding: 12px 18px; border-left: 3px solid var(--accent);
+  background: var(--accent-wash); border-radius: 0 10px 10px 0; font-size: 15px;
+}
+.lesson blockquote p:first-child { margin-top: 0; }
+.lesson blockquote p:last-child { margin-bottom: 0; }
+.lesson code {
+  font-family: var(--mono); font-size: .88em; background: var(--tint);
+  border: 1px solid var(--rule); padding: 1px 5px; border-radius: 5px;
+}
+.lesson pre { margin: 0; }
+.lesson pre code { background: none; border: none; padding: 0; }
+
+/* Code examples inside the lesson are always dark - they read as "this is code",
+   independently of which theme the editor is on. */
+.example { margin: 18px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2b3240; }
+.example .head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: #262c38; color: #8e99ad; padding: 6px 8px 6px 13px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+}
+.example .head button {
+  background: transparent; color: #cfd8e6; border: 1px solid #3d4757;
+  border-radius: 6px; padding: 4px 11px; font-size: 11px; letter-spacing: .02em;
+  text-transform: none; white-space: nowrap;
+}
+.example .head button:hover { background: #333b4a; color: #fff; }
+.example .head .not-runnable { font-size: 11px; letter-spacing: .02em; text-transform: none; color: #6b7488; }
+.example pre { background: #1e232d; color: #dbe2ee; margin: 0; padding: 13px 15px; }
+/* Wrap rather than hide: a lesson example scrolled off the right edge is simply unread. */
+.example pre code {
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+  white-space: pre-wrap; word-break: break-word;
+}
+/* Concept color grading (lesson code - always dark, so these are literal, not var()-driven -
+   see the .pane-editor blocks above for the live-editor equivalent, which toggles theme). */
+.example pre .concept-locator { color: #6f9bff; }
+.example pre .concept-assertion { color: #3dc97f; }
+.example pre .concept-action { color: #e3a250; }
+.example pre .concept-wait { color: #b794f6; }
+.example pre .concept-test { color: #eab308; }
+
+.yourturn {
+  margin: 18px 0; border: 1px dashed var(--warn); background: var(--warn-wash);
+  border-radius: 10px; padding: 13px 15px; display: flex; gap: 14px; align-items: flex-start;
+}
+.yourturn .txt { flex: 1; font-size: 14.5px; white-space: pre-wrap; line-height: 1.55; }
+.yourturn .label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--warn); display: block; margin-bottom: 5px; font-weight: 600;
+}
+
+/* The fixed furniture of every lesson: an at-a-glance card opens it, a recap card closes it.
+   Cards rather than more prose so a learner scanning the page finds them without reading what
+   is in between.
+   Roles follow the palette: blue orients (what this is for), green consolidates (what you keep). */
+.lesson-card {
+  margin: 18px 0; border-radius: 10px; padding: 14px 17px;
+  border: 1px solid var(--rule); border-left-width: 3px;
+}
+.lesson-card .label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  display: block; margin-bottom: 7px; font-weight: 600;
+}
+/* A card is a summary, so its own paragraphs sit tighter than body prose. */
+.lesson-card :is(p, ul, ol) { margin: 6px 0; }
+/* These cards use a two-column table with no meaningful header, but GFM requires the header
+   row to exist - it renders as an empty strip above the first real row. Hidden only when it
+   is genuinely empty, so a card that does want headers still gets them. */
+.lesson-card thead:not(:has(th:not(:empty))) { display: none; }
+.lesson-card > div > :first-child { margin-top: 0; }
+.lesson-card > div > :last-child { margin-bottom: 0; }
+.lesson-card.at-a-glance { background: var(--accent-wash); border-left-color: var(--accent); }
+.lesson-card.at-a-glance .label { color: var(--accent); }
+.lesson-card.recap { background: var(--good-wash); border-left-color: var(--good); }
+.lesson-card.recap .label { color: var(--good); }
+
+/* ---------------------------------------------------------------- lesson blocks */
+/* A code sample that belongs to a file: the file name heads it, and it can be opened or run. */
+.code-block .head .file { text-transform: none; letter-spacing: .02em; color: #cfd8e6; font-size: 11.5px; }
+.code-block .head .tags { display: flex; gap: 6px; }
+.code-block .head .tag {
+  font-size: 10px; letter-spacing: .04em; text-transform: none; padding: 2px 8px;
+  border-radius: 20px; background: #333b4a; color: #cfd8e6;
+}
+.code-block .head .tag.warn { background: #4a3514; color: #f0c27a; }
+.code-block .head .spacer { flex: 1; }
+.code-block .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
+.code-block .head button.run:hover { background: #1d4fd8; }
+
+/* Commands to type in a terminal, each with its own Run. */
+.terminal-block { margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2b3240; background: #14181f; }
+.terminal-block .head {
+  background: #262c38; color: #8e99ad; padding: 6px 13px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+}
+.terminal-block .lines { padding: 8px 0; }
+.terminal-block .line {
+  display: flex; align-items: center; gap: 9px; padding: 3px 10px 3px 14px;
+  font-family: var(--mono); font-size: 12.5px; color: #dbe2ee;
+}
+.terminal-block .line.comment { color: #6b7488; }
+.terminal-block .line .prompt { color: #5fb3c6; }
+.terminal-block .line code { background: none; border: none; padding: 0; color: inherit; flex: 1; white-space: pre-wrap; word-break: break-word; }
+.terminal-block .line button {
+  background: transparent; color: #cfd8e6; border: 1px solid #3d4757; border-radius: 6px;
+  padding: 2px 10px; font-size: 11px; opacity: .75;
+}
+.terminal-block .line:hover button { opacity: 1; }
+.terminal-block .line button:hover { background: #333b4a; color: #fff; }
+
+/* A boxed note. The label says what kind, so the color is never the only signal. */
+.callout {
+  margin: 18px 0; border-radius: 10px; padding: 12px 16px; border: 1px solid var(--rule);
+  border-left-width: 3px; background: var(--tint);
+}
+.callout .label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  display: block; margin-bottom: 4px; font-weight: 600; color: var(--muted);
+}
+.callout .title { font-weight: 600; color: var(--heading); margin-bottom: 4px; }
+.callout > div > :first-child { margin-top: 0; }
+.callout > div > :last-child { margin-bottom: 0; }
+.callout :is(p, li) { font-size: 14.5px; }
+.callout.tip { background: var(--good-wash); border-left-color: var(--good); }
+.callout.tip .label { color: var(--good); }
+.callout.note { background: var(--accent-wash); border-left-color: var(--accent); }
+.callout.note .label { color: var(--accent); }
+.callout.warning { background: var(--warn-wash); border-left-color: var(--warn); }
+.callout.warning .label { color: var(--warn); }
+.callout.tester { border-left-color: var(--concept-wait); }
+.callout.tester .label { color: var(--concept-wait); }
+.callout.deepdive { background: var(--paper); border-style: dashed; border-left-style: solid; }
+
+.diagram {
+  margin: 18px 0; padding: 14px; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--paper); overflow-x: auto; text-align: center;
+}
+.diagram svg { max-width: 100%; height: auto; }
+
+/* Retrieval check. Formative and never scored (registry invariant 10) - which is why it is a
+   plain card and not a graded widget: nothing here is recorded or gated on. */
+.checkpoint {
+  margin: 20px 0; border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 16px 18px; background: var(--paper); box-shadow: var(--shadow);
+}
+.checkpoint .label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 7px; font-weight: 600;
+}
+.checkpoint > div > :first-child { margin-top: 0; }
+.checkpoint .options { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.checkpoint .option {
+  display: flex; gap: 10px; align-items: baseline; width: 100%; text-align: left;
+  font: inherit; font-size: 14.5px; line-height: 1.5; color: var(--graphite);
+  background: var(--tint); border: 1px solid var(--rule); border-radius: 8px;
+  padding: 10px 13px; cursor: pointer;
+}
+.checkpoint .option:not(:disabled):hover { border-color: var(--accent); background: var(--accent-wash); }
+/* Answered: the options stop being controls, so they lose the affordance as well as the handler. */
+.checkpoint .option:disabled { cursor: default; }
+.checkpoint .option .marker { font-family: var(--mono); font-weight: 700; width: 11px; flex: none; }
+.checkpoint .option .opt-text { flex: 1; }
+.checkpoint .option.right { background: var(--good-wash); border-color: var(--good); color: var(--good); }
+.checkpoint .option.wrong { background: var(--bad-wash); border-color: var(--bad); color: var(--bad); }
+.checkpoint .option.dim { opacity: .55; }
+.checkpoint .option.picked { background: var(--accent-wash); border-color: var(--accent); }
+.checkpoint .check-row { margin-top: 12px; }
+.checkpoint .verdict {
+  margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--rule);
+  font-size: 14px; line-height: 1.6;
+}
+/* The explanation is markdown, which renders a block - inlined so it reads as one sentence
+   continuing from the verdict rather than starting a new paragraph under it. */
+.checkpoint .verdict :is(div, p) { display: inline; margin: 0; }
+.checkpoint .verdict.right strong { color: var(--good); }
+.checkpoint .verdict.wrong strong { color: var(--bad); }
+
+.problem {
+  border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px 20px;
+  margin: 20px 0; background: var(--paper); box-shadow: var(--shadow);
+}
+.problem .head { display: flex; align-items: center; gap: 11px; margin-bottom: 8px; }
+.problem .num { font-family: var(--mono); font-weight: 600; color: var(--heading); font-size: 15px; }
+.problem .diff {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 20px; background: var(--good-wash); color: var(--good);
+  font-weight: 600;
+}
+.problem .diff.Medium { background: var(--accent-wash); color: var(--accent); }
+.problem .diff.Hard { background: var(--warn-wash); color: var(--warn); }
+.problem .diff.Challenge { background: var(--bad-wash); color: var(--bad); }
+.problem .kind { font-size: 12px; color: var(--muted); margin-left: auto; }
+.problem .problem-title { margin: 2px 0 8px; font-size: 16.5px; }
+.problem .problem-meta { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+.problem .hints {
+  margin: 12px 0 0; padding: 10px 14px 10px 32px; background: var(--warn-wash);
+  border-radius: 8px; font-size: 14px;
+}
+.problem .hints li :is(div, p) { display: inline; margin: 0; }
+.problem .actions { display: flex; gap: 9px; margin-top: 14px; flex-wrap: wrap; }
+.solution { margin-top: 14px; border-top: 1px solid var(--rule); padding-top: 4px; }
+.no-solution { margin-top: 11px; font-size: 13.5px; color: var(--muted); font-style: italic; }
+
+/* ---------------------------------------------------------------- editor */
+.editor-head {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--ed-bg-2); border-bottom: 1px solid var(--ed-rule); color: var(--ed-dim);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .07em;
+  /* The pane is often narrow. Without nowrap the Run button wrapped onto two lines and
+     overflowed the row - which is exactly how it looked broken. */
+  flex-wrap: nowrap; min-height: 44px;
+}
+.editor-head .lang {
+  background: var(--ed-bg); border: 1px solid var(--ed-rule); border-radius: 7px;
+  padding: 5px 7px; color: var(--ed-text); font-family: var(--mono); font-size: 11px;
+  max-width: 132px; min-width: 0;
+}
+.editor-head .spacer { flex: 1 1 auto; min-width: 0; }
+/* The lesson file the editor holds. It shrinks first, so the buttons never wrap. */
+.editor-head .editor-file {
+  color: var(--ed-text); font-size: 11.5px; letter-spacing: .02em; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto;
+}
+.icon-btn {
+  background: var(--ed-bg); border: 1px solid var(--ed-rule); border-radius: 7px;
+  color: var(--ed-text); padding: 5px 9px; font-size: 13px; line-height: 1;
+  flex: 0 0 auto; white-space: nowrap;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+.run-btn {
+  background: var(--good); color: #fff; border: none; border-radius: 8px;
+  padding: 7px 16px; font-weight: 600; font-family: var(--sans); font-size: 13px;
+  flex: 0 0 auto; white-space: nowrap; letter-spacing: 0;
+}
+.run-btn:hover { filter: brightness(1.1); }
+.run-btn:disabled { background: var(--good); opacity: .5; cursor: default; }
+/* Opens the run overlay on its Terminal tab. Quieter than Run, which stays the main action. */
+.term-btn {
+  font-family: var(--mono); font-size: 12px; padding: 6px 11px; margin-right: 6px;
+  border-radius: 8px; border: 1px solid var(--ed-border, #333b4a); background: transparent;
+  color: var(--ed-text, #dbe2ee); cursor: pointer;
+}
+.term-btn:hover { border-color: var(--accent); }
+
+.editor-body { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; }
+.editor-body > * { flex: 1; min-width: 0; }
+.editor-body .cm-editor { height: 100%; }
+.editor-body .cm-scroller { overflow: auto; }
+/* Concept color grading, live in the editor - see conceptHighlight.ts. Values come from the
+   --concept-* vars the .pane-editor[data-editor-theme] blocks above set, so this follows the
+   EDITOR's own light/dark toggle, not the page's. */
+.editor-body .cm-concept-locator { color: var(--concept-locator); }
+.editor-body .cm-concept-assertion { color: var(--concept-assertion); }
+.editor-body .cm-concept-action { color: var(--concept-action); }
+.editor-body .cm-concept-wait { color: var(--concept-wait); }
+.editor-body .cm-concept-test { color: var(--concept-test); }
+
+/* The idle panel below the editor. Without it the pane was a large dead void whenever a
+   run was not in flight. */
+.editor-idle {
+  flex: 0 0 auto; border-top: 1px solid var(--ed-rule); background: var(--ed-bg-2);
+  /* The Ask button is fixed to the bottom-right of the viewport, which is exactly where this
+     panel ends. The bottom padding keeps the last line clear of it. */
+  padding: 14px 16px 68px; color: var(--ed-dim); font-size: 12.5px; line-height: 1.65;
+}
+.editor-idle b { color: var(--ed-text); font-weight: 600; }
+.editor-idle .k {
+  font-family: var(--mono); background: var(--ed-bg); border: 1px solid var(--ed-rule);
+  border-radius: 5px; padding: 1px 6px; font-size: 11.5px;
+}
+.editor-empty {
+  flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px;
+  color: var(--ed-dim); text-align: center; font-size: 13.5px; line-height: 1.65;
+}
+
+/* ---------------------------------------------------------------- run overlay */
+.overlay {
+  position: absolute; left: 10px; right: 10px; bottom: 10px; height: 58%;
+  min-height: 190px; background: #12161e; border: 1px solid #333b4a;
+  border-radius: var(--radius); display: flex; flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, .45); z-index: 5;
+}
+.overlay .grip { height: 8px; cursor: row-resize; border-radius: 11px 11px 0 0; background: #262c38; }
+.overlay .tabs { display: flex; align-items: center; gap: 2px; padding: 0 8px; border-bottom: 1px solid #333b4a; }
+.overlay .tabs button {
+  background: none; border: none; color: #8e99ad; padding: 9px 13px; font-size: 12.5px;
+  border-bottom: 2px solid transparent;
+}
+.overlay .tabs button.on { color: #fff; border-bottom-color: var(--accent); }
+.overlay .tabs .spacer { flex: 1; }
+.overlay .tabs button.out { color: #93b8fb; }
+.overlay .tabs .out-mark { font-size: 11px; }
+.overlay .close { color: #8e99ad; background: none; border: none; font-size: 18px; padding: 4px 9px; }
+.overlay .close:hover { color: #fff; }
+
+/* The panels shown in the overlay, side by side. Narrow overlays stack them instead. */
+.overlay { container-type: inline-size; }
+.overlay .panels { flex: 1; min-height: 0; display: flex; }
+.overlay .panels > .empty { margin: auto; padding: 0 20px; text-align: center; }
+.overlay .panel-slot { display: flex; min-width: 0; min-height: 0; }
+.overlay .divider { flex: 0 0 5px; cursor: col-resize; background: #262c38; }
+.overlay .divider:hover, body.dragging-divider .overlay .divider { background: var(--accent); }
+body.dragging-divider { cursor: col-resize; user-select: none; }
+@container (max-width: 560px) {
+  .overlay .panels { flex-direction: column; }
+  .overlay .panel-slot { flex-basis: auto !important; }
+  .overlay .divider { display: none; }
+}
+
+/* One panel: a small header, then its view. The same markup shows in a popped-out window. */
+.panel { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #12161e; }
+.panel-head {
+  display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 12px;
+  border-bottom: 1px solid #262c38; min-height: 30px;
+}
+.panel-title { color: #dbe2ee; font-size: 12px; font-weight: 600; }
+.panel-head .spacer { flex: 1; }
+.panel-btn { color: #8e99ad; background: none; border: none; font-size: 13px; padding: 3px 7px; border-radius: 6px; cursor: pointer; }
+.panel-btn:hover { color: #fff; background: #262c38; }
+.panel .status {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 2px 9px; border-radius: 20px; font-weight: 600;
+}
+.panel .status.running { background: #1f3352; color: #93b8fb; }
+.panel .status.ok { background: #14351f; color: #6ee7a0; }
+.panel .status.error, .panel .status.timeout, .panel .status.blocked { background: #3d1b1b; color: #fca5a5; }
+.panel .status.stopped { background: #3a3218; color: #fcd34d; }
+.panel .status.muted { background: none; color: #8a94a6; padding: 0; }
+.panel .view { flex: 1; min-height: 0; overflow: auto; }
+.panel .view.browser { display: flex; align-items: center; justify-content: center; background: #05070a; }
+.panel .view.browser img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.panel .view.console { padding: 12px 15px; }
+/* xterm.js sizes itself to this box, so it must not scroll or pad unevenly itself. */
+.panel .view.terminal { padding: 8px 4px 4px 12px; overflow: hidden; background: #12161e; }
+.panel .view.terminal .xterm { height: 100%; }
+.panel .view.terminal .xterm-viewport { background: #12161e !important; }
+.panel pre {
+  margin: 0; font-family: var(--mono); font-size: 12px; line-height: 1.6;
+  color: #dbe2ee; white-space: pre-wrap; word-break: break-word;
+}
+.panel pre.err { color: #fca5a5; }
+.panel .waiting, .overlay .waiting { color: #8e99ad; font-size: 13px; }
+
+/* A panel in its own window fills it. */
+body.popout-body { margin: 0; background: #12161e; }
+.popout { position: fixed; inset: 0; display: flex; }
+
+/* ---------------------------------------------------------------- detached run view
+   The whole page, in its own popped-out window - see RunOverlay's Detach button. */
+.run-view {
+  position: fixed; inset: 0; background: #05070a;
+  display: flex; align-items: center; justify-content: center;
+}
+.run-view img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.run-view .waiting { color: #8e99ad; font-size: 13px; font-family: var(--mono); }
+.run-view-ended {
+  position: fixed; left: 14px; bottom: 14px; color: #8e99ad; background: #1a1f29;
+  border: 1px solid #333b4a; border-radius: 20px; padding: 5px 13px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- assistant */
+.bubble {
+  position: fixed; right: 22px; bottom: 22px; height: 50px; border-radius: 25px;
+  background: var(--accent); color: #fff; border: none; z-index: 40;
+  display: flex; align-items: center; gap: 9px; padding: 0 20px;
+  font-size: 14px; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, .38), 0 1px 3px rgba(0, 0, 0, .2);
+}
+.bubble:hover { filter: brightness(1.08); box-shadow: 0 6px 20px rgba(37, 99, 235, .46); }
+.bubble .ico { font-size: 16px; }
+.chat {
+  position: fixed; right: 22px; bottom: 22px; width: 390px; max-width: calc(100vw - 32px);
+  height: 540px; max-height: calc(100vh - 92px); background: var(--paper);
+  border: 1px solid var(--rule); border-radius: var(--radius); display: flex;
+  flex-direction: column; z-index: 41; box-shadow: 0 12px 44px rgba(31, 43, 77, .22);
+  overflow: hidden;
+}
+.chat .head {
+  background: var(--ink); color: #eef1f7; padding: 12px 15px; display: flex; align-items: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
+}
+.chat .head .spacer { flex: 1; }
+.chat .head button { background: none; border: none; color: #a9b6cf; font-size: 18px; }
+.chat .head button:hover { color: #fff; }
+.chat .log { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+.chat .msg { font-size: 14.5px; line-height: 1.6; }
+.chat .msg.user {
+  align-self: flex-end; background: var(--accent-wash); border-radius: 12px 12px 3px 12px;
+  padding: 9px 13px; max-width: 86%;
+}
+.chat .msg.assistant { align-self: flex-start; max-width: 96%; }
+.chat .msg.assistant code {
+  font-family: var(--mono); font-size: .88em; background: var(--tint);
+  border: 1px solid var(--rule); padding: 1px 5px; border-radius: 5px;
+}
+.chat .hint { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.chat .ask { display: flex; gap: 8px; padding: 11px; border-top: 1px solid var(--rule); }
+.chat .ask textarea {
+  flex: 1; resize: none; font: inherit; font-size: 14px; padding: 9px 11px; height: 44px;
+  border: 1px solid var(--rule); border-radius: 10px;
+}
+
+/* Global light/dark toggle, bottom-left - the mirror of the Ask bubble on the right. */
+.theme-btn {
+  position: fixed; left: 22px; bottom: 22px; height: 40px; border-radius: 20px;
+  background: var(--paper); color: var(--muted); border: 1px solid var(--rule);
+  display: flex; align-items: center; gap: 8px; padding: 0 15px; z-index: 40;
+  font-size: 12.5px; font-weight: 600; box-shadow: var(--shadow);
+}
+.theme-btn:hover { color: var(--heading); border-color: var(--accent); }
+.theme-btn .ico { font-size: 14px; }
+
+/* ---------------------------------------------------------------- misc */
+.notice {
+  background: var(--warn-wash); border: 1px solid var(--warn); color: var(--warn);
+  border-radius: 10px; padding: 14px 17px; font-size: 14.5px; line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------- narrow screens
+   A two-pane IDE does not fit a phone, so the panes stack and the sidebar collapses. */
+@media (max-width: 900px) {
+  .body { flex-direction: column; }
+  .sidebar { width: auto; flex: 0 0 auto; max-height: 160px; border-right: none; border-bottom: 1px solid var(--rule); }
+  .split { flex-direction: column; }
+  .pane-theory { flex: 1 1 auto; max-height: 58vh; }
+  .gutter { display: none; }
+  .pane-editor { flex: 0 0 auto; height: 46vh; min-height: 300px; border-top: 1px solid var(--rule); }
+  .overlay { height: 72%; }
+  .lesson { padding: 18px 16px 60px; }
+  .chat { right: 8px; left: 8px; width: auto; }
+  .bubble { right: 14px; bottom: 14px; }
+  .theme-btn { left: 14px; bottom: 14px; height: 34px; padding: 0 11px; font-size: 11.5px; }
+  .editor-idle { display: none; }
+}
+
+
+/* ================================================================ navy header */
+.app-header {
+  flex: 0 0 56px; height: 56px; display: flex; align-items: center; gap: 14px;
+  padding: 0 16px; background: var(--ink); color: #fff;
+  /* A thin orange line under the navy picks up the logo's swooshes. */
+  box-shadow: inset 0 -3px 0 var(--brand-orange);
+  position: relative; z-index: 30;
+}
+.hdr-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; flex: 0 0 auto; }
+/* The ET block: white chip so the blue/orange logo reads on navy in both themes. */
+.hdr-logo {
+  display: flex; align-items: center; height: 38px; padding: 5px 10px;
+  background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+}
+.hdr-logo img { height: 26px; width: auto; display: block; }
+.hdr-product { font-family: var(--serif); font-size: 17px; font-weight: 600; letter-spacing: .01em; white-space: nowrap; }
+.hdr-sep { width: 1px; height: 26px; background: rgba(255, 255, 255, .18); flex: 0 0 auto; }
+.hdr-crumbs { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13.5px; color: #aebbd6; }
+.hdr-crumbs .crumb { color: #aebbd6; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hdr-crumbs a.crumb:hover { color: #fff; }
+.hdr-crumbs .crumb.current { color: #fff; font-weight: 600; }
+.hdr-crumbs .crumb-sep { color: #5f7196; }
+.hdr-spacer { flex: 1; }
+.hdr-btn {
+  display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px;
+  background: var(--ink-2); color: #dfe6f5; border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap;
+}
+.hdr-btn:hover { background: #22386a; color: #fff; border-color: rgba(255, 255, 255, .3); }
+.hdr-btn.icon { width: 34px; padding: 0; justify-content: center; font-size: 15px; }
+/* The old floating bottom-left toggle now lives in the header. */
+.theme-btn { display: none; }
+
+/* ================================================================ sidebar polish */
+.sidebar { padding-top: 0; }
+.sidebar .wk-title { color: var(--heading); font-weight: 600; }
+.sidebar li a.on {
+  background: var(--accent-wash); border-left-color: var(--brand-orange); color: var(--heading);
+}
+.sidebar li a.on .dayno { color: var(--accent); }
+
+/* ================================================================ lesson tabs as steps */
+.tabbar { padding: 0 10px; gap: 4px; align-items: stretch; }
+.tabbar button { display: inline-flex; align-items: center; gap: 8px; padding: 12px 12px; border-bottom-width: 3px; }
+.tabbar button.on { border-bottom-color: var(--ink); }
+:root[data-theme='dark'] .tabbar button.on { border-bottom-color: var(--accent); }
+.tabbar .step {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 700;
+  background: var(--tint); color: var(--muted); border: 1px solid var(--rule);
+}
+.tabbar button.on .step { background: var(--ink); color: #fff; border-color: var(--ink); }
+.tabbar button.seen .step { background: var(--good-wash); color: var(--good); border-color: transparent; }
+.tabbar button.on.seen .step { background: var(--good); color: #fff; }
+
+/* Previous / Next at the foot of a tab. */
+.part-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--rule); }
+.part-nav-btn {
+  display: flex; flex-direction: column; gap: 3px; min-width: 180px; text-align: left;
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 11px 16px;
+  box-shadow: var(--shadow);
+}
+.part-nav-btn.next { text-align: right; margin-left: auto; }
+.part-nav-btn .dir { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+.part-nav-btn .name { font-size: 15px; font-weight: 600; color: var(--heading); }
+.part-nav-btn:hover { border-color: var(--accent); }
+.part-nav-btn:hover .name { color: var(--accent); }
+
+/* ================================================================ course index page */
+.index-page { flex: 1; min-height: 0; overflow-y: auto; padding: 32px 32px 90px; background: var(--page); }
+.index-page > * { max-width: 1180px; margin-left: auto; margin-right: auto; }
+.index-hero {
+  display: flex; gap: 28px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  background: var(--paper); border: 1px solid var(--rule); border-left: 5px solid var(--ink);
+  border-radius: var(--radius); padding: 26px 30px; box-shadow: var(--shadow); margin-bottom: 26px;
+}
+.index-hero-text { flex: 1 1 460px; min-width: 0; }
+.index-hero .eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-orange);
+}
+.index-hero h1 { font-size: 32px; margin: 6px 0 8px; letter-spacing: -.01em; }
+.index-hero .sub { color: var(--muted); font-size: 15.5px; line-height: 1.6; margin: 0 0 18px; max-width: 62ch; }
+.index-hero .stats { margin-bottom: 0; }
+.index-hero .stat { box-shadow: none; background: var(--tint); }
+.index-progress { display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 0 0 auto; }
+.index-progress .small { font-size: 13px; }
+/* Progress ring: a conic gradient filled to --pct. */
+.ring {
+  --pct: 0%;
+  width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(var(--good) var(--pct), var(--rule) 0);
+}
+.ring span {
+  width: 76px; height: 76px; border-radius: 50%; background: var(--paper); display: grid; place-items: center;
+  font-family: var(--mono); font-size: 19px; font-weight: 600; color: var(--heading);
+}
+.index-progress .btn { text-decoration: none; background: var(--ink); }
+:root[data-theme='dark'] .index-progress .btn { background: var(--accent); }
+
+.index-table-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule); box-shadow: var(--shadow); overflow-x: auto; }
+.index-table { width: 100%; border-collapse: collapse; background: var(--paper); min-width: 720px; }
+.index-table thead th {
+  background: var(--ink); color: #fff; font-size: 14px; font-weight: 700; padding: 14px 16px;
+  text-align: center; border-right: 1px solid rgba(255, 255, 255, .12);
+}
+.index-table thead th:last-child { border-right: none; }
+.index-table td { border-top: 1px solid var(--rule); border-right: 1px solid var(--rule); padding: 14px 16px; vertical-align: middle; }
+.index-table td:last-child { border-right: none; }
+.index-table td.duration { text-align: center; background: var(--tint); }
+.index-table td.duration b { display: block; font-size: 15px; color: var(--heading); }
+.index-table .wk-count {
+  display: inline-block; margin-top: 6px; font-family: var(--mono); font-size: 11px; color: var(--muted);
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 20px; padding: 2px 9px;
+}
+.index-table .wk-count.all { color: var(--good); background: var(--good-wash); border-color: transparent; }
+.index-table td.module { color: #fff; font-weight: 700; text-align: center; font-size: 14.5px; }
+.index-table td.focus { font-style: italic; color: var(--graphite); font-size: 14px; text-align: center; }
+.index-table tr.locked td { opacity: .6; }
+.index-table td.topics { padding: 8px 10px; }
+.index-table td.topics ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.day-link {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px;
+  text-decoration: none; color: var(--graphite); font-size: 14.5px; border: 1px solid transparent;
+}
+a.day-link:hover { background: var(--accent-wash); border-color: var(--accent); }
+a.day-link:hover .day-title { color: var(--accent); }
+.day-link .day-state {
+  width: 18px; height: 18px; flex: 0 0 18px; border-radius: 50%; border: 1.5px solid var(--rule);
+  display: grid; place-items: center; font-size: 11px; font-weight: 700;
+}
+.day-link.done .day-state { background: var(--good); border-color: var(--good); color: #fff; }
+.day-link .day-no { font-weight: 700; color: var(--heading); flex: 0 0 auto; min-width: 46px; }
+.day-link .day-title { flex: 1; min-width: 0; }
+.day-link .here {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--brand-orange); border: 1px solid var(--brand-orange); border-radius: 20px; padding: 1px 8px; white-space: nowrap;
+}
+.day-link .go { color: var(--muted); opacity: 0; transition: opacity .15s, transform .15s; }
+a.day-link:hover .go { opacity: 1; transform: translateX(2px); color: var(--accent); }
+.day-link.locked { color: var(--muted); cursor: not-allowed; }
+
+@media (max-width: 900px) {
+  .app-header { gap: 10px; padding: 0 10px; }
+  .hdr-product, .hdr-sep { display: none; }
+  .hdr-logo img { height: 20px; }
+  .hdr-btn { padding: 0 10px; font-size: 12px; }
+  .index-page { padding: 18px 16px 60px; }
+  .index-hero { padding: 20px; }
+  .index-hero h1 { font-size: 25px; }
+}
+
+/* ================================================================ side scrollbars
+   All three sections - Learners Dashboard (sidebar), lesson, and editor - scroll on their own,
+   with an always-visible scrollbar on the side. */
+.sidebar, .pane-theory, .editor-body .cm-scroller { overflow-y: scroll !important; }
+
+/* Firefox only - in Chrome these properties would switch off the styled bar below. */
+@supports not selector(::-webkit-scrollbar) {
+  .sidebar, .pane-theory, .editor-body .cm-scroller {
+    scrollbar-width: thin;
+    scrollbar-color: #8a9bbd var(--tint);
+  }
+}
+/* Chrome / Edge */
+.sidebar::-webkit-scrollbar,
+.pane-theory::-webkit-scrollbar,
+.editor-body .cm-scroller::-webkit-scrollbar { width: 10px; height: 10px; }
+.sidebar::-webkit-scrollbar-track,
+.pane-theory::-webkit-scrollbar-track,
+.editor-body .cm-scroller::-webkit-scrollbar-track { background: var(--tint); }
+.sidebar::-webkit-scrollbar-thumb,
+.pane-theory::-webkit-scrollbar-thumb,
+.editor-body .cm-scroller::-webkit-scrollbar-thumb {
+  background: #8a9bbd; border-radius: 10px; border: 2px solid var(--tint);
+}
+.sidebar::-webkit-scrollbar-thumb:hover,
+.pane-theory::-webkit-scrollbar-thumb:hover,
+.editor-body .cm-scroller::-webkit-scrollbar-thumb:hover { background: var(--ink); }
+:root[data-theme='dark'] .sidebar::-webkit-scrollbar-thumb:hover,
+:root[data-theme='dark'] .pane-theory::-webkit-scrollbar-thumb:hover,
+:root[data-theme='dark'] .editor-body .cm-scroller::-webkit-scrollbar-thumb:hover { background: var(--accent); }

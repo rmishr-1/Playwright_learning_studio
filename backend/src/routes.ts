@@ -86,12 +86,15 @@ router.post('/run', async (req, res) => {
     );
   }
   // Recording the attempt is progress bookkeeping; a failure there must not fail the run.
+  // Attempting an exercise is not reading the part, so it does not count the part as read -
+  // every frontend records that separately.
   if (parsed.problem_number) {
     void recordProgress({
       week: parsed.week,
       day: parsed.day,
       part: parsed.part,
       attempted_problem: parsed.problem_number,
+      viewed: false,
     });
   }
   res.json(await started.done);
