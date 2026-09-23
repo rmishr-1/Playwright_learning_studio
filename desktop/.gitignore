@@ -1,0 +1,10 @@
+node_modules/
+# Gathered by `npm run runtime`: Node and the browsers the app ships.
+runtime/
+# Build output: the staged app and the installers.
+build/
+release/
+# Evoke's licence signing key and the record of issued licences. NEVER commit these: anyone with
+# the private key can issue licences. Keep a backup somewhere safe.
+keys/
+licences/

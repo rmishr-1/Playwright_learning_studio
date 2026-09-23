@@ -17,7 +17,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as ts from 'typescript';
-import { config } from './config';
+import { NODE_BIN, config, onDisk } from './config';
 import type { RunRequest, RunResult, RunStreamEvent } from '../../shared/contracts/run';
 
 /**
@@ -93,7 +93,7 @@ function buildProgram(code: string): string {
   const allowed = JSON.stringify(config.run.allowed_origins);
   // The program runs from a temp directory, so ordinary resolution would not find playwright.
   // Resolve it here, in the parent, and bake in the absolute path.
-  const playwrightPath = JSON.stringify(require.resolve('playwright'));
+  const playwrightPath = JSON.stringify(onDisk(require.resolve('playwright')));
   return `
 const { chromium } = require(${playwrightPath});
 const SENTINEL = ${JSON.stringify(SENTINEL)};
@@ -263,7 +263,7 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
     if (/ANTHROPIC|API_KEY|TOKEN|SECRET|PASSWORD/i.test(key)) delete childEnv[key];
   }
 
-  const child = spawn(process.execPath, [program], {
+  const child = spawn(NODE_BIN, [program], {
     cwd: scratch,
     env: childEnv,
     stdio: ['ignore', 'pipe', 'pipe'],

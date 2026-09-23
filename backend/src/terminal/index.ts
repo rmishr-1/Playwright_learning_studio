@@ -11,10 +11,10 @@
  * (commands.ts), nothing goes through a shell, one command runs at a time, and a command is
  * stopped at a time limit.
  */
-import { spawn, type ChildProcess } from 'node:child_process';
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { config } from '../config';
+import { NODE_BIN, config, listening, onDisk } from '../config';
 import { emit, retireStream } from '../runner';
 import { DEFAULT_SPEC, HELP, parse, type Parsed } from './commands';
 import { PLAYWRIGHT_CLI, fileExists, hasReport, prepareWorkspace, reportDir, saveFile, workspaceDir } from './workspace';
@@ -33,7 +33,7 @@ export const currentReportDir = (): string => reportDir(reportFrom);
  * the studio's own build keeps its version. Its bin/ is not in the package's exports, so it is
  * found from the package folder.
  */
-const TSC = path.join(path.dirname(require.resolve('typescript-learner/package.json')), 'bin', 'tsc');
+const TSC = onDisk(path.join(path.dirname(require.resolve('typescript-learner/package.json')), 'bin', 'tsc'));
 const CHECK_FLAGS = [
   '--noEmit',
   '--strict',
@@ -68,8 +68,20 @@ function npmVersion(): string {
   const agent = /npm\/([\d.]+)/.exec(process.env.npm_config_user_agent ?? '');
   if (agent) return agent[1];
   try {
-    const file = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'package.json');
+    const file = path.join(path.dirname(NODE_BIN), 'node_modules', 'npm', 'package.json');
     return (JSON.parse(fs.readFileSync(file, 'utf-8')) as { version: string }).version;
+  } catch {
+    return 'unknown';
+  }
+}
+
+/** The version of the Node that runs the learner's code, which may not be the one running this. */
+let nodeVersionText: string | null = null;
+function nodeVersion(): string {
+  if (NODE_BIN === process.execPath && !process.versions.electron) return process.version;
+  try {
+    nodeVersionText ??= execFileSync(NODE_BIN, ['--version'], { encoding: 'utf-8', windowsHide: true }).trim();
+    return nodeVersionText;
   } catch {
     return 'unknown';
   }
@@ -140,7 +152,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
   if (parsed.kind === 'version') {
     const text =
       parsed.program === 'node'
-        ? process.version
+        ? nodeVersion()
         : parsed.program === 'npm'
           ? npmVersion()
           : 'Version ' + (require('@playwright/test/package.json') as { version: string }).version;
@@ -177,7 +189,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
   if (parsed.kind === 'test') {
     reportFrom = ws;
     env.PLAYWRIGHT_HTML_OPEN = 'never';
-    env.STUDIO_FRAME_URL = 'http://127.0.0.1:' + config.port + '/api/terminal/' + runId + '/frame';
+    env.STUDIO_FRAME_URL = 'http://127.0.0.1:' + listening.port + '/api/terminal/' + runId + '/frame';
     env.STUDIO_ALLOWED_ORIGINS = JSON.stringify(config.run.allowed_origins);
     args = [PLAYWRIGHT_CLI, 'test', ...parsed.args];
     cwd = workspaceDir(ws);
@@ -190,7 +202,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
         : [TSC, ...CHECK_FLAGS, parsed.file];
   }
 
-  const child = spawn(process.execPath, args, {
+  const child = spawn(NODE_BIN, args, {
     cwd,
     env,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -223,6 +235,11 @@ export function startCommand(runId: string, line: string, code: string, file: st
     }
     done(runId, current.stopping ? 130 : exitCode);
   });
+}
+
+/** Stops whatever is running, with its browsers: the desktop app calls this as it closes. */
+export function stopAll(): void {
+  if (running) kill(running, true);
 }
 
 /** Ctrl+C. Returns false when there was nothing to stop. */
