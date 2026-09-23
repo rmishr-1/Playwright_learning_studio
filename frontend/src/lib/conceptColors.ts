@@ -5,18 +5,14 @@
  * imported by both, so "same concept, same color" is structural rather than two lists that can
  * drift apart.
  *
- * The vocabulary was built from what this course's own content actually uses - every
- * example/your-turn/stub/solution across all 8 weeks was scanned for real method names, not
- * guessed. Two things fell out of that scan that shape the lists below:
+ * The vocabulary lists real Playwright method names, not patterns:
  *
- *  - Only 3 of Playwright's `getBy*` locators appear in this course (`getByRole`,
- *    `getByPlaceholder`, `getByText`) - the rest are included anyway, for weeks 3-8 and any
- *    future content, since they cost nothing to list.
+ *  - Every `getBy*` locator is listed, whether or not a lesson uses it yet, since they cost
+ *    nothing to list.
  *  - The assertion list is a closed WHITELIST of real Playwright/Jest matcher names, not a
- *    pattern like `/\.to[A-Z]\w*\(/`. The course also teaches plain TypeScript in its primer
- *    parts, which uses `.toString()`, `.toFixed()`, `.toUpperCase()` - real methods that would
- *    misfire as "assertions" under a blind `.toXxx(` regex. They are deliberately never added
- *    to this whitelist.
+ *    pattern like `/\.to[A-Z]\w*\(/`. Plain TypeScript has `.toString()`, `.toFixed()`,
+ *    `.toUpperCase()` - real methods that would misfire as "assertions" under a blind `.toXxx(`
+ *    regex. They are deliberately never added to this whitelist.
  *
  * The explore-mode harness's own `launch()`/`show()`/`login()` are deliberately NOT a sixth
  * category - only the five requested ones are colored; harness calls stay neutral.

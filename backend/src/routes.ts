@@ -5,7 +5,7 @@ import { ask, assistantAvailable } from './assistant';
 import { lastFrame, prepareRun, startRun } from './runner';
 import { receiveFrame, startCommand, stopCommand } from './terminal';
 import { REPORT_DIR } from './terminal/workspace';
-import { concepts, courseDay, courseIndex, readProgress, recordProgress } from './store';
+import { courseDay, courseIndex, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { AssistantRequest } from '../../shared/contracts/assistant';
@@ -31,15 +31,14 @@ export const router = Router();
 
 router.get('/course', (_req, res) => {
   try {
-    // Only open weeks are listed. Weeks 3-8 are written but not ready, and a sidebar of six weeks
-    // marked "soon" made the course look unfinished rather than scoped. The filter keys off
-    // `locked` rather than a week number, so a week reappears on its own the moment it is
-    // unlocked. Nothing is deleted: the content stays on disk, and a direct link to a locked day
-    // still gets the honest locked screen below instead of a 404.
+    // Only open weeks are listed, so a week that is written but not ready does not make the course
+    // look unfinished. The filter keys off `locked` rather than a week number, so a week appears
+    // on its own the moment it is unlocked, and a direct link to a locked day still gets the
+    // locked screen below instead of a 404.
     const index = courseIndex();
     res.json({ ...index, weeks: index.weeks.filter((w) => !w.locked) });
   } catch {
-    fail(res, 503, 'CONTENT_NOT_IMPORTED', 'Course content has not been imported yet. Run `npm run import`.');
+    fail(res, 503, 'CONTENT_MISSING', 'The course has no content yet.');
   }
 });
 
@@ -55,8 +54,6 @@ router.get('/course/:week/:day', (req, res) => {
   }
   res.json(found);
 });
-
-router.get('/concepts', (_req, res) => res.json({ entries: concepts() }));
 
 // ---------------------------------------------------------------- progress
 

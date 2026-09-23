@@ -1,16 +1,15 @@
 import { z } from 'zod';
 import { Difficulty, DayNumber, PartNumber, ProblemNumber, WeekNumber } from './common';
 
-/** Mirrors Data/Formats/course_day_format.json. GENERATED content — the notebooks are master. */
+/** Mirrors Data/Formats/course_day_format.json. One day of the course, written by hand. */
 
 /**
- * 'problem-ref' marks the position of a practice problem in the document flow. Without it,
- * every non-problem paragraph was rendered before every problem - which put the practice
- * notebook's closing "When you are done" note ABOVE Problem 1.
+ * 'problem-ref' marks the position of a practice problem in the document flow, so that text
+ * written after the problems (a closing note, for example) renders after them rather than above
+ * Problem 1.
  *
- * The last three are never parsed out of a notebook: they come from an authored lesson overlay
- * (Data/Content/lessons/), which is how a generated day gets the fixed section template -
- * 'at-a-glance' opens the lesson, 'checkpoint' and 'recap' close it.
+ * 'at-a-glance' opens a lesson, and 'checkpoint' and 'recap' close it. They render as cards
+ * rather than prose.
  */
 export const BlockType = z.enum([
   'markdown',
@@ -44,47 +43,33 @@ export const ContentBlock = z.object({
   type: BlockType,
   /**
    * Markdown source for a markdown block, TypeScript source for example / your-turn,
-   * the problem number as a string for problem-ref, and markdown again for the three
-   * overlay-authored types - the question itself, for a checkpoint.
+   * the problem number as a string for problem-ref, and markdown again for at-a-glance,
+   * checkpoint and recap - the question itself, for a checkpoint.
    */
   text: z.string(),
   /**
-   * A 'your-turn' block's runnable starting point - the setup (harness launch + the page it
-   * opens) pulled from the example it immediately follows, so "Try it" never hands the editor a
-   * comment-only stub. null for every other block type, and for a your-turn block whose example
-   * never opened a page in the first place.
+   * A 'your-turn' block's runnable starting point, loaded by "Try it" so that the editor never
+   * receives a comment-only stub. null for every other block type.
    */
   starter: z.string().nullable().default(null),
-  /**
-   * A 'your-turn' block's authored variation - a same-concept, different-scenario prompt that
-   * REPLACES the generic "retype the example above from memory" text once written. null (the
-   * default) falls back to that generic prompt, the same graceful-absence pattern
-   * PracticeProblem.solution already uses: an unauthored day looks unfinished, never broken.
-   */
+  /** A 'your-turn' block's prompt: what the learner is asked to write. null for other blocks. */
   variation: z.object({ prompt: z.string() }).nullable().default(null),
-  /**
-   * A 'checkpoint' block's options, answer and explanation. null for every other block type,
-   * and the same graceful-absence default as the two fields above: a day imported before any
-   * overlay existed parses unchanged.
-   */
+  /** A 'checkpoint' block's options, answer and explanation. null for every other block type. */
   checkpoint: Checkpoint.nullable().default(null),
 });
 
-export const PartKind = z.enum([
-  'prerequisite',
-  'concept',
-  'practice',
-  'generated-prerequisite',
-]);
+export const PartKind = z.enum(['prerequisite', 'concept', 'practice']);
 
 export const PracticeProblem = z.object({
   number: ProblemNumber,
-  /** null where the source notebook numbers its problems without labelling difficulty. */
+  /** null for a problem that carries no difficulty label. */
   difficulty: Difficulty.nullable(),
   statement: z.string(),
   stub: z.string(),
-  /** null until authored — the reveal button is then absent, not broken (invariant 2). */
-  /** Markdown. Code answers carry their own fence; reflection answers are prose. */
+  /**
+   * Markdown, revealed on a deliberate click. Code answers carry their own fence. null until
+   * written - the reveal button is then absent, not broken.
+   */
   solution: z.string().nullable(),
 });
 
@@ -93,7 +78,6 @@ export const CoursePart = z.object({
   kind: PartKind,
   title: z.string(),
   tab_label: z.string(),
-  source_notebook: z.string().nullable(),
   has_runnable_code: z.boolean(),
   blocks: z.array(ContentBlock),
   problems: z.array(PracticeProblem),
@@ -105,10 +89,7 @@ export const CourseDay = z.object({
   day: DayNumber,
   title: z.string(),
   locked: z.boolean(),
-  /**
-   * Ordered, 1-4. Most days have all four, but the course does not guarantee it:
-   * Week 1 Day 1 has no _3 notebook at all. Nothing downstream may assume four.
-   */
+  /** Ordered, 1-4. A day need not have all four, and nothing downstream may assume it does. */
   parts: z.array(CoursePart).min(1).max(4),
 });
 

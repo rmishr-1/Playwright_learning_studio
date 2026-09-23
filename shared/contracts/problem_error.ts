@@ -5,7 +5,7 @@ export const ErrorCode = z.enum([
   'DAY_NOT_FOUND',
   'DAY_LOCKED',
   'PART_NOT_FOUND',
-  'CONTENT_NOT_IMPORTED',
+  'CONTENT_MISSING',
   'CODE_REQUIRED',
   'RUN_QUEUE_FULL',
   'RUN_TIMEOUT',

@@ -1,51 +1,47 @@
 {
-    "_comment": "Data/Content/week-<n>/day-<n>.json - ONE day of the course, imported from four .ipynb notebooks by scripts/import-notebooks.ts. GENERATED: never hand-edit; the notebooks in the training repo are the master. A day has UP TO 4 parts. A missing _1 becomes a generated placeholder so the TypeScript tab stays present (Week 1 days 1-4). A missing _3 is simply absent - Week 1 Day 1 is theory plus practice and has no second concept notebook. Nothing downstream may assume four parts.",
+    "_comment": "Data/Content/weeks/week-<n>/day-<n>.json - ONE day of the course, written by hand. A day has UP TO 4 parts, and nothing downstream may assume four.",
     "schema": {
         "value": "course-day/v1"
     },
     "week": {
-        "value": 2
+        "value": 1
     },
     "day": {
         "value": 1
     },
     "title": {
-        "_comment": "Day title, taken from the _2 notebook's H1 with the 'Week N, Day N.2 - ' prefix stripped.",
-        "value": "From recorder to real code: actions on a form"
+        "_comment": "The day's title, shown in the week menu and the course index.",
+        "value": ""
     },
     "locked": {
-        "_comment": "true for weeks not yet authored (3-8 in the first release). A locked day imports fully but the UI shows it greyed and refuses to open it.",
+        "_comment": "true for a day that is written but not open yet. The UI shows it greyed and refuses to open it.",
         "value": false
     },
     "parts": {
-        "_comment": "1 to 4, in order. part 1 = TypeScript prerequisites, 2 and 3 = Playwright concepts, 4 = practice. Week 1 Day 1 has only parts 2 and 4.",
+        "_comment": "1 to 4, in order. Each part is one tab of the day.",
         "_itemTemplate": {
             "part": {
                 "options": [1, 2, 3, 4],
                 "value": 1
             },
             "kind": {
-                "_comment": "prerequisite = the _1 TypeScript check-in. concept = _2 and _3. practice = _4. generated-prerequisite = emitted by the importer where no _1 notebook exists.",
-                "options": ["prerequisite", "concept", "practice", "generated-prerequisite"],
-                "value": "prerequisite"
+                "_comment": "prerequisite = a language primer. concept = a lesson that teaches the tool. practice = practice problems.",
+                "options": ["prerequisite", "concept", "practice"],
+                "value": "concept"
             },
             "title": {
-                "value": "TypeScript check-in: nothing new today"
+                "value": ""
             },
             "tab_label": {
-                "_comment": "The part's ROLE, from its part number alone: 1 TypeScript, 2 Fundamentals, 3 Implementation, 4 Practice. Derived by tabLabel() in scripts/notebook-parse.ts, never authored. It used to be a truncated copy of the part's own title, which restated the H1 two lines below it and clipped mid-word; the role names give every day one rhythm instead.",
-                "value": "TypeScript"
-            },
-            "source_notebook": {
-                "_comment": "Path relative to the training repo root. null for a generated part.",
-                "value": "week2/day1_1.ipynb"
+                "_comment": "The text on the part's tab.",
+                "value": ""
             },
             "has_runnable_code": {
-                "_comment": "false when the notebook carries no example cells (e.g. Week 1 Day 1.2, a pure-theory day). Drives the editor's empty state.",
+                "_comment": "false when the part has no code to run. Drives the editor's empty state.",
                 "value": false
             },
             "blocks": {
-                "_comment": "Ordered content blocks, in DOCUMENT ORDER. Markdown blocks render as prose; example blocks get a 'Load into editor' button; your-turn blocks render as a 'Try it' callout; a problem-ref block marks where a practice problem sits, its text being the problem number. Rendering all prose before all problems put the closing note above Problem 1. The last three types are never parsed from a notebook - they are merged in from an authored lesson overlay (see lesson_overlay_format.json) and give every lesson the same shape: at-a-glance opens it, checkpoint and recap close it.",
+                "_comment": "Ordered content blocks, in DOCUMENT ORDER. Markdown blocks render as prose; example blocks get a 'Load into editor' button; your-turn blocks render as a 'Try it' callout; a problem-ref block marks where a practice problem sits, its text being the problem number. at-a-glance opens a lesson, and checkpoint and recap close it; all three render as cards.",
                 "_itemTemplate": {
                     "type": {
                         "options": [
@@ -64,16 +60,16 @@
                         "value": ""
                     },
                     "starter": {
-                        "_comment": "your-turn ONLY: the preceding example's setup (harness launch through its first page.goto), so 'Try it' opens the editor on working navigation rather than a bare comment. null for every other block type, and for a your-turn whose example never opened a page.",
+                        "_comment": "your-turn ONLY: runnable code that 'Try it' loads into the editor, so the learner never starts from a bare comment. null for every other block type.",
                         "value": null
                     },
                     "variation": {
-                        "_comment": "your-turn ONLY: an authored same-concept, different-scenario prompt (Data/Content/variations/w<week>d<day>.json, keyed 'p<part>_yt<n>'), replacing the generic 'retype from memory' text once written. null = not yet authored, and the generic prompt renders instead - the reveal-solution pattern, not a broken callout.",
-                        "prompt": { "value": "Do the same thing, but sign in as Katy instead of Leela." },
+                        "_comment": "your-turn ONLY: the prompt the learner reads. null for every other block type.",
+                        "prompt": { "value": "" },
                         "value": null
                     },
                     "checkpoint": {
-                        "_comment": "checkpoint ONLY: the options, the answer and why. Merged in from Data/Content/lessons/w<week>d<day>.json. Formative and never scored - nothing is written to progress, so a wrong answer costs only the reading. null for every other block type.",
+                        "_comment": "checkpoint ONLY: the options, the answer and why. Formative and never scored - nothing is written to progress, so a wrong answer costs only the reading. null for every other block type.",
                         "options": {
                             "_comment": "2-5 answers. Every one has to be defensible from the lesson's own text.",
                             "value": ["", ""]
@@ -92,15 +88,14 @@
                 "value": []
             },
             "problems": {
-                "_comment": "Present ONLY on a practice part. Weeks 1-4 and 8 give 3 labelled problems; weeks 5-7 give 7-8 numbered exercises with no difficulty label, so `difficulty` is nullable and the count is NOT fixed at 3. `solution` is authored by hand - the source notebooks carry empty stubs - and is null until a week has been authored.",
+                "_comment": "Present ONLY on a practice part. The count is not fixed.",
                 "_itemTemplate": {
                     "number": {
-                        "_comment": "1-based within the part. Runs to 8 in weeks 5-7.",
+                        "_comment": "1-based within the part.",
                         "value": 1
                     },
                     "difficulty": {
-                        "_comment": "null where the source numbers its exercises without labelling them (weeks 5-7). 'Reflection, no code' is normalised to 'Reflection'.",
-                        "options": ["Beginner", "Intermediate", "Advanced", "Reflection", null],
+                        "options": ["Beginner", "Intermediate", "Advanced", null],
                         "value": "Beginner"
                     },
                     "statement": {
@@ -108,11 +103,11 @@
                         "value": ""
                     },
                     "stub": {
-                        "_comment": "The starter cell, e.g. '// Problem 1 - your code here.'. For a non-Reflection problem, prefixed at import time with the day's own setup boilerplate (the last example's launch + goto, from parts 2-3) so the editor is never a blank comment - see extractBoilerplate() in scripts/notebook-parse.ts.",
+                        "_comment": "What 'Start this in the editor' loads.",
                         "value": ""
                     },
                     "solution": {
-                        "_comment": "Authored model answer in MARKDOWN, revealed on a deliberate click. Markdown rather than bare code because many problems are reflection, research or terminal work, where the worked answer is prose; code answers carry their own fence. null = not yet authored, and the reveal button is absent rather than broken.",
+                        "_comment": "Model answer in MARKDOWN, revealed on a deliberate click. Code answers carry their own fence. null = not written, and the reveal button is absent rather than broken.",
                         "value": null
                     }
                 },

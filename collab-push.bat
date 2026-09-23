@@ -171,16 +171,6 @@ for /f "tokens=*" %%L in ('git diff --cached --name-status 2^>nul') do (
 )
 if !NCHANGES! GTR 25 echo     ... and the rest, !NCHANGES! files in total
 
-:: A notebook in the list is worth a word: they are JSON and they conflict badly.
-git diff --cached --name-only 2>nul | findstr /i ".ipynb" >nul 2>&1
-if not errorlevel 1 (
-  echo.
-  echo   NOTE: you are committing notebooks. They are JSON and merge badly.
-  echo         If you have not already, enable notebook-aware merges once:
-  echo           pip install nbdime
-  echo           nbdime config-git --enable --global
-)
-
 if not defined MSG (
   for /f "usebackq delims=" %%d in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-Date -Format \"yyyy-MM-dd HH:mm\"" 2^>nul`) do set "STAMP=%%d"
   set "MSG=Work in progress: !STAMP!"

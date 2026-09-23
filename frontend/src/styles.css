@@ -339,8 +339,8 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 
 /* The fixed furniture of every lesson: an at-a-glance card opens it, a recap card closes it.
-   Both are authored in Data/Content/lessons/, never parsed from a notebook. Cards rather than
-   more prose so a learner scanning the page finds them without reading what is in between.
+   Cards rather than more prose so a learner scanning the page finds them without reading what
+   is in between.
    Roles follow the palette: blue orients (what this is for), green consolidates (what you keep). */
 .lesson-card {
   margin: 18px 0; border-radius: 10px; padding: 14px 17px;
@@ -412,7 +412,6 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .problem .diff.Intermediate { background: var(--warn-wash); color: var(--warn); }
 .problem .diff.Advanced { background: var(--bad-wash); color: var(--bad); }
-.problem .diff.Reflection { background: var(--accent-wash); color: var(--accent); }
 .problem .actions { display: flex; gap: 9px; margin-top: 14px; flex-wrap: wrap; }
 .solution { margin-top: 14px; border-top: 1px solid var(--rule); padding-top: 4px; }
 .no-solution { margin-top: 11px; font-size: 13.5px; color: var(--muted); font-style: italic; }

@@ -29,16 +29,6 @@ if not exist "Data\Config\studio.config.json" (
   copy /y "Data\Config\studio.config.example.json" "Data\Config\studio.config.json" >nul
 )
 
-echo.
-echo Importing the course from the training repo...
-if defined TRAINING_REPO ( echo   TRAINING_REPO=%TRAINING_REPO% ) else ( echo   using the default path in scripts\import-notebooks.ts )
-call npm run import
-if errorlevel 1 ( echo [BLOCKING] import failed - is TRAINING_REPO set correctly? & exit /b 1 )
-
-echo.
-echo Verifying the imported content...
-call npm run verify
-if errorlevel 1 ( echo [BLOCKING] content verification failed. & exit /b 1 )
 
 echo.
 echo ==========================================================

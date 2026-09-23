@@ -1,4 +1,0 @@
-{
-  "p2_yt1": "Same experiment, a shorter journey: in your own checkout, write the same style of single test doing only three of the banking app's steps instead of five, and compare the duration the reporter prints against the five-step run. You are measuring how much of the 30-second budget one real step costs — which is the number that decides when a test is too long.",
-  "p2_yt2": "Same failure, a different pair: split some other two-step journey so the second test needs something only the first one set up, and read the error it gives you. Note what the message actually says — it names an element that was not found, never a session that was not there. The error describes the symptom; the cause is yours to know."
-}

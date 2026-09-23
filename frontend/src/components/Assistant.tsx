@@ -23,7 +23,7 @@ export function Assistant({
   const [busy, setBusy] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
-  // A new day is a new conversation - carrying Week 1 questions into Week 2 just confuses it.
+  // A new day is a new conversation - carrying one day's questions into the next just confuses it.
   useEffect(() => {
     setTurns([]);
   }, [week, day]);

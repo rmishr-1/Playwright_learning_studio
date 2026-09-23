@@ -1,7 +1,7 @@
 /**
- * The only reader and writer of Data/. Content is read-only (the importer owns it); the single
- * progress record is read-modify-write, serialised behind a lock so two tabs updating progress
- * at once cannot lose one another's writes.
+ * The only reader and writer of Data/. Content is read-only here; the single progress record is
+ * read-modify-write, serialised behind a lock so two tabs updating progress at once cannot lose
+ * one another's writes.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -10,8 +10,6 @@ import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
 import { Progress, type DayProgress, type ProgressUpdate } from '../../shared/contracts/progress';
 import { dayKey } from '../../shared/contracts/common';
-
-export type ConceptEntry = { section: string; term: string; link: string; note: string };
 
 const nowIso = (): string => new Date().toISOString().replace(/\.\d+Z$/, 'Z');
 
@@ -25,11 +23,11 @@ const dayCache = new Map<string, { day: CourseDay; stamp: number }>();
 const indexFile = (): string => path.join(CONTENT, 'course-index.json');
 
 /**
- * Re-running the importer must be visible without restarting the server, so the cache is keyed
- * on the index's mtime. Without this a re-import silently serves the previous content and every
+ * An edited course index must be visible without restarting the server, so the cache is keyed
+ * on the index's mtime. Without this the server silently serves the previous content and every
  * fix looks like it did not work.
  */
-function invalidateIfReimported(): void {
+function invalidateIfChanged(): void {
   const stamp = fs.statSync(indexFile()).mtimeMs;
   if (stamp === indexStamp) return;
   indexStamp = stamp;
@@ -40,26 +38,20 @@ function invalidateIfReimported(): void {
 export function courseIndex(): CourseIndex {
   const file = indexFile();
   if (!fs.existsSync(file)) {
-    throw Object.assign(new Error('content not imported'), { code: 'CONTENT_NOT_IMPORTED' });
+    throw Object.assign(new Error('no course content'), { code: 'CONTENT_MISSING' });
   }
-  invalidateIfReimported();
+  invalidateIfChanged();
   if (indexCache) return indexCache;
   indexCache = CourseIndex.parse(JSON.parse(fs.readFileSync(file, 'utf-8')));
   return indexCache;
 }
 
 /**
- * Cached against the DAY FILE's own mtime, not just the index's.
- *
- * The index stamp alone was not enough: `npm run overlay` rewrites day files without touching
- * course-index.json, so every authored lesson change was served from a cache that had no reason
- * to believe anything had happened - the exact "every fix looks like it did not work" failure
- * invalidateIfReimported() was written to prevent, arriving through a door it did not watch.
- * Keying on the file being read makes this correct for any writer: the importer, the overlay
- * script, or a hand edit.
+ * Cached against the DAY FILE's own mtime, not just the index's: a day file is often edited
+ * without touching course-index.json, and the edit must still show on the next request.
  */
 export function courseDay(week: number, day: number): CourseDay | null {
-  if (fs.existsSync(indexFile())) invalidateIfReimported();
+  if (fs.existsSync(indexFile())) invalidateIfChanged();
   const key = dayKey(week, day);
   const file = path.join(CONTENT, 'weeks', 'week-' + week, 'day-' + day + '.json');
   if (!fs.existsSync(file)) return null;
@@ -69,12 +61,6 @@ export function courseDay(week: number, day: number): CourseDay | null {
   const parsed = CourseDay.parse(JSON.parse(fs.readFileSync(file, 'utf-8')));
   dayCache.set(key, { day: parsed, stamp });
   return parsed;
-}
-
-export function concepts(): ConceptEntry[] {
-  const file = path.join(CONTENT, 'concepts.json');
-  if (!fs.existsSync(file)) return [];
-  return (JSON.parse(fs.readFileSync(file, 'utf-8')) as { entries: ConceptEntry[] }).entries;
 }
 
 // ---------------------------------------------------------------- progress
@@ -119,8 +105,8 @@ async function withLock<T>(fn: () => T): Promise<T> {
 
 /**
  * Records that a part was viewed. A part completes on view; a day completes when every part
- * the day actually HAS has been viewed - not a hardcoded four, because a removed tab or a missing
- * notebook leaves some days with fewer, and with gaps in the part numbers.
+ * the day actually HAS has been viewed - not a hardcoded four, because a day may have fewer
+ * parts, with gaps in the part numbers.
  */
 export async function recordProgress(update: ProgressUpdate): Promise<Progress> {
   return withLock(() => {
@@ -147,9 +133,8 @@ export async function recordProgress(update: ProgressUpdate): Promise<Progress> 
         ? [...prior.attempted_problems, update.attempted_problem].sort((a, b) => a - b)
         : prior.attempted_problems;
 
-    // Every part the day HAS must be among those viewed. A count ("viewed.length >= parts") went
-    // wrong once a tab could be removed: someone who had viewed the old part 1 reached 2-of-2 on
-    // Week 1 Day 1 without ever opening Practice.
+    // Every part the day HAS must be among those viewed. A count ("viewed.length >= parts") goes
+    // wrong when part numbers have gaps: viewing a part the day no longer has would count.
     const completed = day ? day.parts.every((p) => viewed.includes(p.part)) : viewed.length >= partsInDay;
 
     const next: Progress = {

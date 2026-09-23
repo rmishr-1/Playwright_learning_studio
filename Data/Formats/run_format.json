@@ -13,7 +13,7 @@
             "value": null
         },
         "code": {
-            "_comment": "TypeScript as typed in the editor. The runner rewrites the course's deno-helpers import and injects launch/show/login/USERS/BASE_URL as ambient bindings.",
+            "_comment": "TypeScript as typed in the editor. The runner injects launch/show/login/USERS/BASE_URL as ambient bindings, so the code needs no import.",
             "value": ""
         }
     },

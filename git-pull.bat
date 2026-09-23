@@ -40,14 +40,6 @@ if errorlevel 1 (
     goto :fail
 )
 
-REM ---------- discard generated content before pulling ----------
-REM Data\Content\weeks, course-index.json and concepts.json are generated and tracked, so running
-REM the studio rewrites them and the next pull collides with changes nobody made. They rebuild on
-REM the next launcher.bat start, so dropping them costs nothing. The authored side-cars
-REM (lessons\, variations\, solutions\) are deliberately NOT in this list.
-echo [pull ] Restoring generated content so it cannot conflict...
-git checkout -- Data/Content/weeks Data/Content/course-index.json Data/Content/concepts.json >nul 2>nul
-
 REM ---------- pull ----------
 echo [pull ] Fetching from origin...
 git fetch origin

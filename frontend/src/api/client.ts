@@ -48,9 +48,6 @@ export const getCourse = (): Promise<CourseIndex> => call('/course');
 export const getDay = (week: number, day: number): Promise<CourseDay> =>
   call('/course/' + week + '/' + day);
 
-export const getConcepts = (): Promise<{ entries: { term: string; section: string; link: string; note: string }[] }> =>
-  call('/concepts');
-
 // ---------------------------------------------------------------- progress
 
 export const getMyProgress = (): Promise<Progress> => call('/progress');

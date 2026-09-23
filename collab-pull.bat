@@ -97,14 +97,6 @@ echo   Branch : !CURBRANCH!
 :: Dirty tree. Rebasing over uncommitted work aborts part-way, so settle it up
 :: front rather than discovering it mid-operation.
 :: --------------------------------------------------------------------------
-:: Data\Content\weeks, course-index.json and concepts.json are GENERATED and tracked, so they go
-:: dirty whenever the importer or launcher.bat's overlay step writes them - which is every time
-:: anyone runs the studio. They were then counted as "uncommitted work" and blocked the sync, for
-:: changes nobody made and nobody wants to keep. Restoring them first is safe precisely because
-:: they are reproducible: launcher.bat rebuilds them on the next start. The AUTHORED side-cars
-:: (lessons\, variations\, solutions\) are never touched here - those are real work.
-git checkout -- Data/Content/weeks Data/Content/course-index.json Data/Content/concepts.json >nul 2>&1
-
 set /a NDIRTY=0
 for /f %%n in ('git status --porcelain 2^>nul ^| find /c /v ""') do set /a NDIRTY=%%n
 
@@ -229,12 +221,6 @@ echo.
 echo   Or back out completely and return to where you started:
 echo.
 echo       git rebase --abort
-echo.
-echo   If the conflict is in a .ipynb notebook, resolving the raw JSON by hand
-echo   is close to impossible. Install notebook-aware merging first, then
-echo   abort and retry:
-echo       pip install nbdime
-echo       nbdime config-git --enable --global
 echo.
 if /i "!STASHED!"=="yes" (
   echo   NOTE: your uncommitted changes are still stashed and are NOT lost.

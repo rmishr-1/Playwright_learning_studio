@@ -112,9 +112,9 @@ function Problem({
       )}
       {revealed && problem.solution && (
         <div className="solution">
-          {/* Solutions are markdown, not bare code: 11 of the 30 problems in weeks 1-2 are
-              reflection, research or terminal work, and a worked answer to those is prose.
-              Code answers carry their own fence, which still gets a Load button. */}
+          {/* Solutions are markdown, not bare code: a worked answer to a written or terminal
+              problem is prose. Code answers carry their own fence, which still gets a Load
+              button. */}
           <Markdown text={problem.solution} onLoadIntoEditor={(c) => onLoad(c, problem.number)} />
         </div>
       )}
@@ -131,6 +131,7 @@ export function TheoryPane({
   onStartProblem,
   weeksShown,
   onToggleWeeks,
+  courseTitle,
 }: {
   parts: CoursePart[];
   active: number;
@@ -141,6 +142,8 @@ export function TheoryPane({
   /** Whether the week list is open, so the one button can say which way it goes. */
   weeksShown?: boolean;
   onToggleWeeks?: () => void;
+  /** The course's title, from its course index. */
+  courseTitle?: string;
 }) {
   const part = parts.find((p) => p.part === active) ?? parts[0];
 
@@ -169,9 +172,9 @@ export function TheoryPane({
           <Link
             to="/learn/w1/d1/p1"
             className="studio-title"
-            title="Beginner to Advanced: Playwright Fundamentals"
+            title={courseTitle}
           >
-            Beginner to Advanced: Playwright Fundamentals
+            {courseTitle}
           </Link>
         )}
         {parts.map((p) => (

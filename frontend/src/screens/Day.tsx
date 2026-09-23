@@ -181,6 +181,7 @@ export function Day({
   const [content, setContent] = useState<CourseDay | null>(null);
   const [locked, setLocked] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [empty, setEmpty] = useState(false);
   const [code, setCode] = useState(STARTER);
   const [run, setRun] = useState<RunState | null>(null);
   const [running, setRunning] = useState(false);
@@ -193,7 +194,16 @@ export function Day({
   const draggingRef = useRef(false);
 
   useEffect(() => {
-    getCourse().then(setIndex).catch(() => undefined);
+    getCourse()
+      .then((i) => {
+        setIndex(i);
+        document.title = i.title;
+      })
+      .catch((e: unknown) => {
+        // With no course at all, say so, rather than the "day does not exist" the day request
+        // would otherwise report.
+        if (e instanceof ApiError && e.code === 'CONTENT_MISSING') setEmpty(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -314,6 +324,14 @@ export function Day({
   // only, so this is the set a lesson link may lead into.
   const openWeeks = useMemo(() => (index ? new Set(index.weeks.map((w) => w.week)) : null), [index]);
 
+  if (empty) {
+    return (
+      <div className="centered">
+        <div className="notice">The course has no lessons yet.</div>
+      </div>
+    );
+  }
+
   if (error) return <div className="centered"><div className="notice">{error}</div></div>;
 
   if (locked !== null) {
@@ -333,12 +351,11 @@ export function Day({
           <h1>Week {week} - Day {day}</h1>
           <p className="muted" style={{ fontSize: 16 }}>{locked}</p>
           <div className="notice" style={{ marginTop: 18 }}>
-            This day is written but not open yet. Weeks 1 and 2 are ready today; the rest unlock as
-            each week is prepared.
+            This day is not open yet.
           </div>
           <p style={{ marginTop: 20 }}>
             <button className="btn ghost" onClick={() => navigate('/learn/w1/d1/p1')}>
-              Back to Week 1
+              Back to the first day
             </button>
           </p>
         </div>
@@ -368,6 +385,7 @@ export function Day({
             onStartProblem={startProblem}
             weeksShown={weeksShown}
             onToggleWeeks={() => setWeeksShown(!weeksShown)}
+            courseTitle={index.title}
           />
         </div>
         <div className="gutter" onMouseDown={() => (draggingRef.current = true)} />

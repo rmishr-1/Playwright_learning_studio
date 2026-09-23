@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:frontend"],
       "port": 5180
+    },
+    {
+      "name": "learning-studio-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:backend"],
+      "port": 3010
     }
   ]
 }

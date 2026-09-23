@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DayNumber, Timestamp, WeekNumber } from './common';
+import { DayNumber, WeekNumber } from './common';
 
 /** Mirrors Data/Formats/course_index_format.json. */
 
@@ -19,8 +19,6 @@ export const IndexWeek = z.object({
 export const CourseIndex = z.object({
   schema: z.literal('course-index/v1'),
   title: z.string(),
-  imported_at: Timestamp,
-  source_repo: z.string(),
   totals: z.object({
     weeks: z.number().int(),
     days: z.number().int(),

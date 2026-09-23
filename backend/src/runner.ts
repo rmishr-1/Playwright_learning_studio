@@ -88,18 +88,6 @@ export function retireStream(runId: string, afterMs = 60_000): void {
   setTimeout(() => streams.delete(runId), afterMs);
 }
 
-/**
- * The course writes `import { launch, show } from "../_shared/deno-helpers.ts"`. That path does
- * not exist here and the notebooks target Deno, so the import is rewritten to the runner's own
- * harness. Without this, every example copied out of the theory fails on line 1.
- */
-function rewriteHarnessImports(code: string): string {
-  return code.replace(
-    /^\s*import\s+\{([^}]*)\}\s+from\s+["'](?:\.\.\/)*_shared\/deno-helpers(?:\.ts)?["'];?\s*$/gm,
-    '// harness: {$1} are provided by the studio runner',
-  );
-}
-
 /** Written into the scratch dir and executed by node. */
 function buildProgram(code: string): string {
   const allowed = JSON.stringify(config.run.allowed_origins);
@@ -272,7 +260,7 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
 
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-run-'));
   const program = path.join(scratch, 'run.js');
-  fs.writeFileSync(program, transpile(buildProgram(rewriteHarnessImports(req.code))));
+  fs.writeFileSync(program, transpile(buildProgram(req.code)));
 
   const started = Date.now();
   let stdout = '';
