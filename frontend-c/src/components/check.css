@@ -1,0 +1,26 @@
+/* "Check my answer", on a code exercise. Green, so it reads apart from Start (blue) and the grey
+   secondary buttons; the verdict is spelled out as well as colored. */
+.problem .btn.check { background: var(--good); }
+.problem .btn.check:disabled { background: var(--good); opacity: .6; }
+.problem .check-running { margin: 12px 0 0; font-size: 13.5px; color: var(--muted); font-style: italic; }
+.check-result {
+  margin-top: 12px; padding: 11px 14px; border-radius: 8px; font-size: 14px; line-height: 1.55;
+  border: 1px solid var(--rule); border-left-width: 3px; background: var(--tint);
+}
+.check-result.right { background: var(--good-wash); border-left-color: var(--good); }
+.check-result.right strong { color: var(--good); }
+.check-result.wrong { background: var(--bad-wash); border-left-color: var(--bad); }
+.check-result.wrong strong { color: var(--bad); }
+.check-result.note { border-left-color: var(--accent); }
+.check-result .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.check-result .compare .label {
+  display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+.check-result pre, .check-result .check-output {
+  margin: 0; padding: 9px 11px; background: #1e232d; color: #dbe2ee; border-radius: 6px;
+  font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+  max-height: 320px; overflow: auto;
+}
+.check-result .check-output { margin-top: 10px; }
+@media (max-width: 700px) { .check-result .compare { grid-template-columns: 1fr; } }

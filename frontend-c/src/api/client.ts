@@ -10,6 +10,7 @@ import type { CourseIndex } from '../../../shared/contracts/course_index';
 import type { Progress, ProgressUpdate } from '../../../shared/contracts/progress';
 import type { RunResult, RunStreamEvent } from '../../../shared/contracts/run';
 import type { ErrorCode } from '../../../shared/contracts/problem_error';
+import type { CheckRequest, CheckResult } from '../../../shared/contracts/check';
 
 export class ApiError extends Error {
   constructor(
@@ -107,6 +108,12 @@ export const runTerminal = (
 /** Ctrl+C for the command started with `runId`. */
 export const stopTerminal = (runId: string): Promise<{ stopped: boolean }> =>
   call('/terminal/' + runId + '/stop', { method: 'POST' });
+
+// ---------------------------------------------------------------- check my answer
+
+/** Grades a code exercise with the check the course gives it. */
+export const checkAnswer = (req: CheckRequest): Promise<CheckResult> =>
+  call('/check', { method: 'POST', body: JSON.stringify(req) });
 
 // ---------------------------------------------------------------- assistant
 

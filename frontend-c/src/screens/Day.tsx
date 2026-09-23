@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ApiError,
+  checkAnswer,
   getCourse,
   getDay,
   getMyProgress,
@@ -10,14 +11,14 @@ import {
   recordProgress,
   runCode,
 } from '../api/client';
-import { TheoryPane, type DayLink } from '../components/TheoryPane';
+import { TheoryPane, type CheckOutcome, type DayLink } from '../components/TheoryPane';
 import { OpenWeeks } from '../components/Markdown';
 import { CodePane } from '../components/CodePane';
 import type { RunState } from '../components/RunOverlay';
 import type { EditorFile } from '../components/LessonBlocks';
 import { planWeeks, weeksPhrase, type PlanWeek } from '../lib/coursePlan';
 import { PRODUCT_NAME } from '../components/AppHeader';
-import type { CourseDay } from '../../../shared/contracts/course_day';
+import type { CourseDay, PracticeProblem } from '../../../shared/contracts/course_day';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
 import type { Progress } from '../../../shared/contracts/progress';
 import type { PartNumber } from '../../../shared/contracts/common';
@@ -303,6 +304,13 @@ export function Day({
     setEditorFile(meta);
   }, []);
 
+  // "Check my answer" grades the code in the editor, so the editor must hold this exercise's file:
+  // checking whatever else is open would mark the wrong code.
+  const checkExercise = async (checkPart: number, problem: PracticeProblem): Promise<CheckOutcome> => {
+    if (!content || !problem.file || editorFile.file !== problem.file) return { status: 'not-in-editor' };
+    return checkAnswer({ week, day, part: checkPart as PartNumber, problem: problem.number, code, workspace: content.workspace });
+  };
+
   const runCommand = useCallback((text: string, load?: { code: string; meta: EditorFile }) => {
     if (load) {
       problemRef.current = null;
@@ -476,6 +484,7 @@ export function Day({
             onLoadIntoEditor={loadIntoEditor}
             onRunCommand={runCommand}
             onStartProblem={startProblem}
+            onCheckAnswer={checkExercise}
             weeksShown={weeksShown}
             onToggleWeeks={() => setWeeksShown(!weeksShown)}
             courseTitle={index.title}
