@@ -1,11 +1,13 @@
 /**
- * The only reader and writer of Data/. Content is read-only here; the single progress record is
+ * The only reader and writer of Data/. Content is read-only here (content.ts says where it comes
+ * from); the single progress record is
  * read-modify-write, serialised behind a lock so two tabs updating progress at once cannot lose
  * one another's writes.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { CONTENT, PROGRESS_FILE } from './config';
+import { PROGRESS_FILE } from './config';
+import { contentStamp, readContent } from './content';
 import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
 import { Progress, type DayProgress, type ProgressUpdate } from '../../shared/contracts/progress';
@@ -20,15 +22,14 @@ let indexStamp = 0;
 /** Each day is cached with the mtime it was read at - see courseDay(). */
 const dayCache = new Map<string, { day: CourseDay; stamp: number }>();
 
-const indexFile = (): string => path.join(CONTENT, 'course-index.json');
+const INDEX = 'course-index.json';
 
 /**
  * An edited course index must be visible without restarting the server, so the cache is keyed
  * on the index's mtime. Without this the server silently serves the previous content and every
  * fix looks like it did not work.
  */
-function invalidateIfChanged(): void {
-  const stamp = fs.statSync(indexFile()).mtimeMs;
+function invalidateIfChanged(stamp: number): void {
   if (stamp === indexStamp) return;
   indexStamp = stamp;
   indexCache = null;
@@ -36,13 +37,13 @@ function invalidateIfChanged(): void {
 }
 
 export function courseIndex(): CourseIndex {
-  const file = indexFile();
-  if (!fs.existsSync(file)) {
+  const stamp = contentStamp(INDEX);
+  if (stamp === null) {
     throw Object.assign(new Error('no course content'), { code: 'CONTENT_MISSING' });
   }
-  invalidateIfChanged();
+  invalidateIfChanged(stamp);
   if (indexCache) return indexCache;
-  indexCache = CourseIndex.parse(JSON.parse(fs.readFileSync(file, 'utf-8')));
+  indexCache = CourseIndex.parse(JSON.parse(readContent(INDEX) ?? ''));
   return indexCache;
 }
 
@@ -51,14 +52,15 @@ export function courseIndex(): CourseIndex {
  * without touching course-index.json, and the edit must still show on the next request.
  */
 export function courseDay(week: number, day: number): CourseDay | null {
-  if (fs.existsSync(indexFile())) invalidateIfChanged();
+  const indexStampNow = contentStamp(INDEX);
+  if (indexStampNow !== null) invalidateIfChanged(indexStampNow);
   const key = dayKey(week, day);
-  const file = path.join(CONTENT, 'weeks', 'week-' + week, 'day-' + day + '.json');
-  if (!fs.existsSync(file)) return null;
-  const stamp = fs.statSync(file).mtimeMs;
+  const rel = 'weeks/week-' + week + '/day-' + day + '.json';
+  const stamp = contentStamp(rel);
+  if (stamp === null) return null;
   const cached = dayCache.get(key);
   if (cached && cached.stamp === stamp) return cached.day;
-  const parsed = CourseDay.parse(JSON.parse(fs.readFileSync(file, 'utf-8')));
+  const parsed = CourseDay.parse(JSON.parse(readContent(rel) ?? ''));
   dayCache.set(key, { day: parsed, stamp });
   return parsed;
 }

@@ -24,7 +24,8 @@
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { CONTENT, DATA } from '../config';
+import { DATA, onDisk } from '../config';
+import { readContent } from '../content';
 import { WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
 
 // STUDIO_WORKSPACE_ROOT lets `npm run verify:content` work in a folder of its own, so a check never
@@ -34,9 +35,9 @@ export const workspaceDir = (name: Workspace): string => path.join(ROOT, name);
 export const reportDir = (name: Workspace): string => path.join(workspaceDir(name), 'playwright-report');
 
 /** The real @playwright/test, resolved once. The Terminal's own wrapper re-exports it. */
-const PLAYWRIGHT_TEST = require.resolve('@playwright/test');
+const PLAYWRIGHT_TEST = onDisk(require.resolve('@playwright/test'));
 /** The test runner's command-line entry point: what `npx playwright` runs. */
-export const PLAYWRIGHT_CLI = require.resolve('@playwright/test/cli');
+export const PLAYWRIGHT_CLI = onDisk(require.resolve('@playwright/test/cli'));
 
 const CONFIG = `// Written by the Learning Studio for its Terminal. Changes to this file are replaced.
 import { defineConfig, devices } from '@playwright/test';
@@ -149,9 +150,9 @@ export default test;
 const PACKAGE = JSON.stringify({ name: 'studio-workspace', private: true }, null, 2) + '\n';
 
 function readSeeds(): WorkspaceSeeds['workspaces'] {
-  const file = path.join(CONTENT, 'workspaces.json');
-  if (!fs.existsSync(file)) return { demo: { files: {} }, project: { files: {} } };
-  return WorkspaceSeeds.parse(JSON.parse(fs.readFileSync(file, 'utf-8'))).workspaces;
+  const text = readContent('workspaces.json');
+  if (text === null) return { demo: { files: {} }, project: { files: {} } };
+  return WorkspaceSeeds.parse(JSON.parse(text)).workspaces;
 }
 
 /**
