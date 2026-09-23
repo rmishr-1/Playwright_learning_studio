@@ -8,9 +8,5 @@
       "http://localhost",
       "http://127.0.0.1"
     ]
-  },
-  "assistant": {
-    "enabled": true,
-    "model": "claude-opus-5"
   }
 }

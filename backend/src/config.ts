@@ -32,10 +32,6 @@ export type StudioConfig = {
      */
     allowed_origins: string[];
   };
-  assistant: {
-    enabled: boolean;
-    model: string;
-  };
 };
 
 const DEFAULTS: StudioConfig = {
@@ -52,10 +48,6 @@ const DEFAULTS: StudioConfig = {
       'http://127.0.0.1',
     ],
   },
-  assistant: {
-    enabled: true,
-    model: 'claude-opus-5',
-  },
 };
 
 function load(): StudioConfig {
@@ -66,14 +58,7 @@ function load(): StudioConfig {
     ...DEFAULTS,
     ...raw,
     run: { ...DEFAULTS.run, ...(raw.run ?? {}) },
-    assistant: { ...DEFAULTS.assistant, ...(raw.assistant ?? {}) },
   };
 }
 
 export const config = load();
-
-/**
- * The API key never comes from the config file - it is an environment variable, so it cannot
- * be committed by accident and never reaches the browser.
- */
-export const anthropicKey = process.env.ANTHROPIC_API_KEY ?? '';

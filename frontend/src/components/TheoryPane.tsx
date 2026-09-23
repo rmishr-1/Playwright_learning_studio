@@ -22,7 +22,7 @@ function withCodeSpans(text: string) {
 }
 
 /**
- * A quiz question, mid-lesson. Formative by design (registry invariant 10): the pick lives in
+ * A quiz question, mid-lesson. Formative by design (registry invariant 9): the pick lives in
  * local state and nothing is written to progress, so revisiting the day offers the question again
  * and a wrong answer costs nothing. A single-answer question is answered by picking; a
  * select-all-that-apply question by ticking options and then checking. Answering locks the

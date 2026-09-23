@@ -82,7 +82,7 @@ process that touches `Data/`, so a keyed mutex is enough and there is no CAS or 
 | Path | What it is |
 |---|---|
 | `shared/contracts/` | zod schemas mirroring `Data/Formats/`, imported by **both** sides so they cannot drift |
-| `backend/` | Express on `127.0.0.1:3010` — content, progress, the code runner, the assistant |
+| `backend/` | Express on `127.0.0.1:3010` — content, progress, the code runner, the Terminal |
 | `frontend/` | Vite + React on `5180`, proxying `/api` to the backend |
 | `Data/Formats/` | The wire contracts + [FORMAT-REGISTRY.md](Data/Formats/FORMAT-REGISTRY.md) |
 | `Data/Content/` | The course content, written by hand |
@@ -186,7 +186,7 @@ back to the first day for a clone that has not been opened yet.
 
 This used to be an RBAC system — real accounts, a login screen, three roles, a cohort dashboard,
 an admin People screen, a certificate, forgotten-password email. All of it is gone, on purpose;
-see the format registry's invariant 5 for why re-adding any of it needs a deliberate decision,
+see the format registry's invariant 4 for why re-adding any of it needs a deliberate decision,
 not a quiet regression.
 
 ### The week list collapses
@@ -210,22 +210,6 @@ The one lock left is about whether a week **exists** yet, not whether you have e
 
 Progress is still recorded — the sidebar ticks days off and counts them per week — it just never
 stands between you and a lesson.
-
----
-
-## The learning assistant
-
-A floating bubble on each day, backed by `claude-opus-5` through `@anthropic-ai/sdk`. It is
-**explain-only**: it cannot write the editor, run code, or see run output, and it says so rather
-than pretending otherwise.
-
-It is given the day's parts and the learner's progress. It is **never** given
-`problems[].solution` — that is invariant 4 in the format registry, and `buildContext()` in
-`backend/src/assistant.ts` is what enforces it. On practice problems it gives hints and points at
-the API; the Reveal solution button stays the only route to an answer.
-
-Needs `ANTHROPIC_API_KEY` in the environment — never in a config file, never sent to the browser.
-Without it the rest of the studio works and the assistant reports itself unavailable.
 
 ---
 

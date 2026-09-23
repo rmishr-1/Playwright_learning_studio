@@ -17,7 +17,7 @@ only process that touches `Data/`, so a keyed mutex is sufficient and there is n
 | `Data/Content/` | The built course — `course-index.json`, `weeks/week-N/day-N.json`, `workspaces.json` | `npm run build:content` **only** | backend |
 | `Data/Workspace/` | The Terminal's workspaces, `demo/` and `project/`, with the files the learner saved | backend | backend |
 | `Data/Progress/` | The ONE progress record. No accounts: each clone of this repo is run by one person | backend | backend |
-| `Data/Config/` | `studio.config.json` — run limits, allowed sites, assistant settings | operator | backend |
+| `Data/Config/` | `studio.config.json` — run limits and allowed sites | operator | backend |
 
 **`Data/Content/` is built.** Each week's package in `Data/Source/week-N/` is authored as Markdown,
 turned into JSON by the package's own tool (`tools/build_json.py`), and `npm run build:content`
@@ -46,7 +46,6 @@ Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **S*
 | `course_day_format.json` | content | S → B → F | `GET /api/course/:week/:day` |
 | `progress_format.json` | state | F ↔ B | `GET /api/progress`, `POST /api/progress` |
 | `run_format.json` | req/resp | F ↔ B | `POST /api/run` + `WS /api/run/:run_id/stream` |
-| `assistant_format.json` | req/SSE | F ↔ B | `POST /api/assistant` |
 
 ## Cross-cutting invariants
 
@@ -58,27 +57,22 @@ Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **S*
    `null` means the reveal button is *absent*, never a broken button or an empty panel.
 3. **A locked day still loads.** `locked: true` is a UI gate, not a filter. Cross-links from an
    available day into a locked one must resolve to the locked state, never a 404.
-4. **No answer keys reach the assistant.** The assistant's context carries lesson text and progress
-   only. `problems[].solution` must never be placed in an assistant prompt — that would route around
-   the hints-only guardrail. A `checkpoint` block is withheld **entirely**, question included: its
-   payload is an answer key by another name, and handing over the question invites the assistant to
-   answer it for the learner, which is the one thing a retrieval check cannot survive.
-5. **There is no identity, so there is nothing to check it against.** This is the second inversion
+4. **There is no identity, so there is nothing to check it against.** This is the second inversion
    of this invariant. It first said identity is not authentication (anyone could claim a name); a
    later revision added real accounts, roles and a session cookie. Both are gone. Each clone of
    this repo is run by one person, so `Data/Progress/progress.json` is not "someone's" record to
    protect from someone else — it is simply the state. Nothing in this codebase may reintroduce a
    `learner_id`, a role, or a credential without first updating this invariant and the format it
    would touch.
-6. **Timestamps.** ISO-8601 UTC `Z`; `_ms` suffix for durations; stored, not derived.
-7. **Template vs instance.** `{options, value}`, `_itemTemplate` and `_comment` exist ONLY in
+5. **Timestamps.** ISO-8601 UTC `Z`; `_ms` suffix for durations; stored, not derived.
+6. **Template vs instance.** `{options, value}`, `_itemTemplate` and `_comment` exist ONLY in
    `*_format.json`. Real payloads are plain values.
-8. **Additive evolution.** New keys are appended; removing or renaming one bumps the `schema`
+7. **Additive evolution.** New keys are appended; removing or renaming one bumps the `schema`
    version.
-9. **The run path is the attack surface.** Any change to `run_format` must preserve the timeout, the
+8. **The run path is the attack surface.** Any change to `run_format` must preserve the timeout, the
    concurrency cap and the navigation allowlist. A format change may not introduce a way to run code
    that bypasses them.
-10. **Checkpoints are formative, never scored.** A `checkpoint` block exists so the learner retrieves
+9. **Checkpoints are formative, never scored.** A `checkpoint` block exists so the learner retrieves
    what they just read; it is not an assessment. Nothing about an answer is written to
    `progress_format` — no score, no attempt count, no right/wrong history — and nothing in the UI
    gates progress on one. This studio is deliberately not the assessment portal: the moment a

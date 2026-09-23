@@ -1,13 +1,11 @@
 import express, { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { config } from './config';
-import { ask, assistantAvailable } from './assistant';
 import { lastFrame, prepareRun, startRun } from './runner';
 import { currentReportDir, receiveFrame, startCommand, stopCommand } from './terminal';
 import { courseDay, courseIndex, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
-import { AssistantRequest } from '../../shared/contracts/assistant';
 import { Workspace } from '../../shared/contracts/course_day';
 import type { ErrorCode } from '../../shared/contracts/problem_error';
 
@@ -155,37 +153,3 @@ router.post('/terminal/:run_id/frame', (req, res) => {
 
 /** The HTML report of the last Terminal command, opened by `npx playwright show-report`. */
 router.use('/terminal/report', (req, res, next) => express.static(currentReportDir())(req, res, next));
-
-// ---------------------------------------------------------------- assistant
-
-router.post('/assistant', async (req: Request, res: Response) => {
-  if (!assistantAvailable()) {
-    return fail(res, 503, 'ASSISTANT_UNAVAILABLE', 'The assistant is not configured on this server.');
-  }
-  let parsed;
-  try {
-    parsed = AssistantRequest.parse(req.body);
-  } catch (e) {
-    return badRequest(res, 'ASSISTANT_UNAVAILABLE', e);
-  }
-
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream; charset=utf-8',
-    'Cache-Control': 'no-cache, no-transform',
-    Connection: 'keep-alive',
-  });
-  const send = (event: string, data: unknown): void => {
-    res.write('event: ' + event + '\ndata: ' + JSON.stringify(data) + '\n\n');
-  };
-
-  try {
-    for await (const chunk of ask(parsed)) {
-      if (chunk.type === 'delta') send('delta', { text: chunk.text });
-      else if (chunk.type === 'error') send('error', { text: chunk.text });
-      else send('done', {});
-    }
-  } catch (e) {
-    send('error', { text: e instanceof Error ? e.message : 'Assistant failed.' });
-  }
-  res.end();
-});

@@ -426,7 +426,7 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .diagram svg { max-width: 100%; height: auto; }
 
-/* Retrieval check. Formative and never scored (registry invariant 10) - which is why it is a
+/* Retrieval check. Formative and never scored (registry invariant 9) - which is why it is a
    plain card and not a graded widget: nothing here is recorded or gated on. */
 .checkpoint {
   margin: 20px 0; border: 1px solid var(--rule); border-radius: var(--radius);
@@ -647,58 +647,6 @@ body.popout-body { margin: 0; background: #12161e; }
   border: 1px solid #333b4a; border-radius: 20px; padding: 5px 13px;
   font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
 }
-
-/* ---------------------------------------------------------------- assistant */
-.bubble {
-  position: fixed; right: 22px; bottom: 22px; height: 50px; border-radius: 25px;
-  background: var(--accent); color: #fff; border: none; z-index: 40;
-  display: flex; align-items: center; gap: 9px; padding: 0 20px;
-  font-size: 14px; font-weight: 600;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, .38), 0 1px 3px rgba(0, 0, 0, .2);
-}
-.bubble:hover { filter: brightness(1.08); box-shadow: 0 6px 20px rgba(37, 99, 235, .46); }
-.bubble .ico { font-size: 16px; }
-.chat {
-  position: fixed; right: 22px; bottom: 22px; width: 390px; max-width: calc(100vw - 32px);
-  height: 540px; max-height: calc(100vh - 92px); background: var(--paper);
-  border: 1px solid var(--rule); border-radius: var(--radius); display: flex;
-  flex-direction: column; z-index: 41; box-shadow: 0 12px 44px rgba(31, 43, 77, .22);
-  overflow: hidden;
-}
-.chat .head {
-  background: var(--ink); color: #eef1f7; padding: 12px 15px; display: flex; align-items: center;
-  font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
-}
-.chat .head .spacer { flex: 1; }
-.chat .head button { background: none; border: none; color: #a9b6cf; font-size: 18px; }
-.chat .head button:hover { color: #fff; }
-.chat .log { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-.chat .msg { font-size: 14.5px; line-height: 1.6; }
-.chat .msg.user {
-  align-self: flex-end; background: var(--accent-wash); border-radius: 12px 12px 3px 12px;
-  padding: 9px 13px; max-width: 86%;
-}
-.chat .msg.assistant { align-self: flex-start; max-width: 96%; }
-.chat .msg.assistant code {
-  font-family: var(--mono); font-size: .88em; background: var(--tint);
-  border: 1px solid var(--rule); padding: 1px 5px; border-radius: 5px;
-}
-.chat .hint { color: var(--muted); font-size: 13px; line-height: 1.6; }
-.chat .ask { display: flex; gap: 8px; padding: 11px; border-top: 1px solid var(--rule); }
-.chat .ask textarea {
-  flex: 1; resize: none; font: inherit; font-size: 14px; padding: 9px 11px; height: 44px;
-  border: 1px solid var(--rule); border-radius: 10px;
-}
-
-/* Global light/dark toggle, bottom-left - the mirror of the Ask bubble on the right. */
-.theme-btn {
-  position: fixed; left: 22px; bottom: 22px; height: 40px; border-radius: 20px;
-  background: var(--paper); color: var(--muted); border: 1px solid var(--rule);
-  display: flex; align-items: center; gap: 8px; padding: 0 15px; z-index: 40;
-  font-size: 12.5px; font-weight: 600; box-shadow: var(--shadow);
-}
-.theme-btn:hover { color: var(--heading); border-color: var(--accent); }
-.theme-btn .ico { font-size: 14px; }
 
 /* ---------------------------------------------------------------- misc */
 .notice {

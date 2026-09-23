@@ -45,8 +45,4 @@ echo.
 echo ==========================================================
 echo  All blocking checks passed. Run launcher.bat next.
 echo ==========================================================
-echo.
-echo  The learning assistant needs ANTHROPIC_API_KEY in the
-echo  environment. Without it everything else still works and
-echo  the assistant reports itself unavailable.
 endlocal

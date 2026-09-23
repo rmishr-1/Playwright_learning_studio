@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** ISO-8601 UTC with a trailing Z — invariant 6 in the format registry. */
+/** ISO-8601 UTC with a trailing Z — invariant 5 in the format registry. */
 export const Timestamp = z.string().regex(
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/,
   'must be ISO-8601 UTC ending in Z',

@@ -26,7 +26,6 @@
             "SOLUTION_NOT_AUTHORED",
             "TRAINER_CODE_REQUIRED",
             "TRAINER_CODE_INCORRECT",
-            "ASSISTANT_UNAVAILABLE",
             "INTERNAL_ERROR"
         ],
         "value": "INTERNAL_ERROR"
