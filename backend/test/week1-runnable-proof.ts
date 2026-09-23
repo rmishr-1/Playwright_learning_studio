@@ -1,5 +1,5 @@
 /**
- * Executes every snippet Week 1 offers a "Load into editor" button on, through the real runner.
+ * Executes every snippet Weeks 1 and 2 offer a "Load into editor" button on, through the real runner.
  *
  * A learner only ever presses Run on a fence that actually carries the button, so this filters
  * fences the same way frontend/src/components/Markdown.tsx's isExecutable() does before
@@ -14,7 +14,11 @@ import { startRun } from '../src/runner';
 import { prepareRun } from '../src/runner';
 import type { CourseDay } from '../../shared/contracts/course_day';
 
-const WEEKS = ['week-1'].map((w) => path.join(__dirname, '../../Data/Content/weeks', w));
+// Weeks 1 and 2 are the open weeks. RUNNABLE_WEEKS=week-2 narrows a run to one week while
+// authoring, because every snippet opens a real browser and a full pass takes minutes.
+const WEEKS = (process.env.RUNNABLE_WEEKS ?? 'week-1,week-2')
+  .split(',')
+  .map((w) => path.join(__dirname, '../../Data/Content/weeks', w.trim()));
 
 type Snippet = { where: string; code: string };
 

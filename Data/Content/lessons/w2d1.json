@@ -3,22 +3,6 @@
   "week": 2,
   "day": 1,
   "parts": {
-    "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **Prerequisites** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |",
-      "checkpoints": [
-        {
-          "question": "Every test today is written `async ({ page }) => { ... }`. What is that `page`?",
-          "options": [
-            "A fresh browser tab, created for this test alone",
-            "One shared browser tab that every test in the file takes turns using",
-            "The page object for the site under test, which you define yourself"
-          ],
-          "answer": 0,
-          "explanation": "Each test gets its own `page` — a fresh tab, so nothing one test does leaks into the next. That per-test isolation was [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1), and Day 5 of this week is about what happens when you split a test and lose it."
-        }
-      ],
-      "recap": "Today's code uses the TypeScript from Week 1. If the table above had any surprises in it, follow the link before starting [Fundamentals](/learn/w2/d1/p2) — the Playwright will be easier to see if the language underneath it is not also new."
-    },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **Prerequisites** | [locators](/learn/w1/d4/p2) · [async and the page fixture](/learn/w1/d5/p1) |\n| **Tools** | `.fill()` · `.pressSequentially()` · `.check()` · `.selectOption()` |\n| **Environment** | [the Register.html signup form](https://demo.automationtesting.in/Register.html) — every control type on one page |\n| **Scope** | This lesson fills the form. Checking that it worked, with assertions, is covered in [Day 2 - Fundamentals](/learn/w2/d2/p2). |",
       "checkpoints": [

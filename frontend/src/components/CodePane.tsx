@@ -138,12 +138,12 @@ export function CodePane({
           learner what Run will actually do before they press it. */}
       {!run && (
         <div className="editor-idle">
-          <b>Press ▶ Run</b> to run this against a real browser. You will see it drive the page
-          live, along with anything you <span className="k">console.log</span>.
+          <b>Select ▶ Run</b> to run this code. If it opens a browser, you see a screenshot of the
+          page. Anything it prints with <span className="k">console.log</span> appears in the Console tab.
           <br />
           <span className="k">launch()</span> <span className="k">show()</span>{' '}
-          <span className="k">login()</span> <span className="k">USERS</span>{' '}
-          <span className="k">BASE_URL</span> are already available, so you do not need to import them.
+          <span className="k">USERS</span> <span className="k">BASE_URL</span> are already
+          available, so you do not need to import them.
         </div>
       )}
 

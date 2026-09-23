@@ -6,67 +6,6 @@
   "locked": false,
   "parts": [
     {
-      "part": 1,
-      "kind": "prerequisite",
-      "title": "TypeScript check-in: nothing new today",
-      "tab_label": "TypeScript",
-      "source_notebook": "week2/day1_1.ipynb",
-      "has_runnable_code": false,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 2 - Day 1 - TypeScript\n\nThe [Fundamentals](/learn/w2/d1/p2) lesson's Playwright code — filling fields, checking boxes, picking from dropdowns — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Fundamentals](/learn/w2/d1/p2).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Prerequisites** | [async and the page fixture](/learn/w1/d5/p1) · [chaining onto a locator](/learn/w1/d4/p2) |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## What today's code leans on\n\n| Concept | Status | Where it was taught |\n|---|---|---|\n| `async` functions, arrow functions | already covered | [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1) |\n| `page` fixture, per-test isolation (preview) | already covered | [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1) |\n| Chaining a method onto a locator | already covered | [Week 1 - Day 4 - Fundamentals](/learn/w1/d4/p2) |\n\nNothing below is new syntax — [Fundamentals](/learn/w2/d1/p2) spends its time on the Playwright\nAPI (`.fill()`, `.check()`, `.selectOption()`), not the language.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Every test today is written `async ({ page }) => { ... }`. What is that `page`?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "A fresh browser tab, created for this test alone",
-              "One shared browser tab that every test in the file takes turns using",
-              "The page object for the site under test, which you define yourself"
-            ],
-            "answer": 0,
-            "explanation": "Each test gets its own `page` — a fresh tab, so nothing one test does leaks into the next. That per-test isolation was [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1), and Day 5 of this week is about what happens when you split a test and lose it."
-          }
-        },
-        {
-          "type": "recap",
-          "text": "Today's code uses the TypeScript from Week 1. If the table above had any surprises in it, follow the link before starting [Fundamentals](/learn/w2/d1/p2) — the Playwright will be easier to see if the language underneath it is not also new.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## What's next\n\n[Fundamentals - From recorder to real code](/learn/w2/d1/p2) puts these actions to work on a real form.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": []
-    },
-    {
       "part": 2,
       "kind": "concept",
       "title": "From recorder to real code: actions on a form",

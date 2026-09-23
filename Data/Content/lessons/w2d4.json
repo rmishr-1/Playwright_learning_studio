@@ -3,22 +3,6 @@
   "week": 2,
   "day": 4,
   "parts": {
-    "1": {
-      "at_a_glance": "| | |\n|---|---|\n| **Focus** | one locator technique, the sibling axis — and a new app, because it needs a real table |",
-      "checkpoints": [
-        {
-          "question": "Day 4 switches to OrangeHRM's demo HR system instead of the registration form used all week. Why?",
-          "options": [
-            "Because the registration form's locators had started to break",
-            "Because today's technique finds one row among many that look alike, and none of the earlier apps has a real multi-row table",
-            "Because the sibling axis only works on applications built with tables"
-          ],
-          "answer": 1,
-          "explanation": "The app changed to fit the technique, not the other way round. It is also a shared public sandbox, which is why every employee the lesson creates gets deleted before the lesson ends."
-        }
-      ],
-      "recap": "Today's code uses `const`, `Math.random()`, XPath and `async`, all from earlier this week. If any row in the table above was a surprise, follow its link before starting [Fundamentals](/learn/w2/d4/p2)."
-    },
     "2": {
       "at_a_glance": "| | |\n|---|---|\n| **Prerequisites** | [XPath syntax](/learn/w2/d2/p2) · [Math.random() for unique data](/learn/w2/d3/p1) |\n| **Tools** | `parent::` · `following-sibling::` · `[last()]` · `contains()` |\n| **Environment** | OrangeHRM's demo HR system — a **shared public sandbox**, so everything created here is deleted again |\n| **Key takeaway** | anchor on text you know, then walk sideways — never count columns |",
       "checkpoints": [

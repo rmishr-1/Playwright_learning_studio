@@ -19,8 +19,9 @@ import type { CourseIndex } from '../../../shared/contracts/course_index';
 import type { Progress } from '../../../shared/contracts/progress';
 import type { PartNumber } from '../../../shared/contracts/common';
 
-const STARTER = `// The studio gives you launch(), show(), login(), USERS and BASE_URL.
-// No imports needed - just write the body of your test.
+const STARTER = `// Write your code here, then select Run.
+// launch() opens a browser, show(page) takes a screenshot, and BASE_URL is the
+// address of the banking website. You do not need to import them.
 
 const { browser, page } = await launch();
 await page.goto(BASE_URL);

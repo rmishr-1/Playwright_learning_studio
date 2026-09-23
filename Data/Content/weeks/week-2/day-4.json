@@ -6,67 +6,6 @@
   "locked": false,
   "parts": [
     {
-      "part": 1,
-      "kind": "prerequisite",
-      "title": "TypeScript check-in: nothing new today",
-      "tab_label": "TypeScript",
-      "source_notebook": "week2/day4_1.ipynb",
-      "has_runnable_code": false,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 2 - Day 4 - TypeScript\n\nThe [Fundamentals](/learn/w2/d4/p2) lesson's Playwright code — creating, finding, updating, and deleting an employee — uses\nonly TypeScript you already have. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Fundamentals](/learn/w2/d4/p2).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | one locator technique, the sibling axis — and a new app, because it needs a real table |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## What today's code leans on\n\n| Concept | Status | Where it was taught |\n|---|---|---|\n| `const`, dynamic typing | already covered | [Day 2 - TypeScript](/learn/w2/d2/p1) |\n| `Math.random()` for a unique value | already covered | [Day 3 - TypeScript](/learn/w2/d3/p1) |\n| XPath vs CSS, first real assertions | already covered | [Day 2 - Fundamentals](/learn/w2/d2/p2) |\n| `async` functions, arrow functions | already covered | [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1) |\n| \"structure around it\" = a function, not a class | already covered | [Day 1 - Implementation](/learn/w2/d1/p3) |\n\nNothing below is new syntax — [Fundamentals](/learn/w2/d4/p2) spends its time on one new\n*locator* technique (the sibling axis), not the language. It just happens to run\nagainst a new app, because that technique needs a real multi-row table to show off —\nmore on that in the [Fundamentals](/learn/w2/d4/p2) lesson's first cell.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Day 4 switches to OrangeHRM's demo HR system instead of the registration form used all week. Why?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Because the registration form's locators had started to break",
-              "Because today's technique finds one row among many that look alike, and none of the earlier apps has a real multi-row table",
-              "Because the sibling axis only works on applications built with tables"
-            ],
-            "answer": 1,
-            "explanation": "The app changed to fit the technique, not the other way round. It is also a shared public sandbox, which is why every employee the lesson creates gets deleted before the lesson ends."
-          }
-        },
-        {
-          "type": "recap",
-          "text": "Today's code uses `const`, `Math.random()`, XPath and `async`, all from earlier this week. If any row in the table above was a surprise, follow its link before starting [Fundamentals](/learn/w2/d4/p2).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## What's next\n\n[Fundamentals - The sibling axis](/learn/w2/d4/p2) puts everything above to work finding a table\nrow by what it says, not where it sits.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": []
-    },
-    {
       "part": 2,
       "kind": "concept",
       "title": "The sibling axis: finding a row by what it says",

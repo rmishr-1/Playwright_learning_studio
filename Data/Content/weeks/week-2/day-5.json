@@ -6,67 +6,6 @@
   "locked": false,
   "parts": [
     {
-      "part": 1,
-      "kind": "prerequisite",
-      "title": "TypeScript check-in: nothing new today",
-      "tab_label": "TypeScript",
-      "source_notebook": "week2/day5_1.ipynb",
-      "has_runnable_code": false,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Week 2 - Day 5 - TypeScript\n\n[Fundamentals](/learn/w2/d5/p2) splits one test into several and watches the second one fail. Nothing about that\nneeds new TypeScript — it's the same `test()`/`async ({ page })` shape you've written all\nweek. This lesson is a pointer, not a primer.\n\n> **This day introduces no new TypeScript**, so there is no primer to work through. Go\n> straight to [Fundamentals](/learn/w2/d5/p2).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "at-a-glance",
-          "text": "| | |\n|---|---|\n| **Focus** | a fact about how Playwright runs tests, not a language feature |\n| **Tools** | `test.describe`, which uses syntax you already know |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## What today's code leans on\n\n| Concept | Status | Where it was taught |\n|---|---|---|\n| `async ({ page }) => {}`, destructuring a fixture | already covered | [Week 1 - Day 5 - TypeScript](/learn/w1/d5/p1) |\n| `test()`, `expect()`, the assertions gap | already covered | [Week 1 - Day 5 - Fundamentals](/learn/w1/d5/p2) |\n| `test.describe(...)` grouping | new **name** today, no new syntax — it's a function call around `test()`s you already know how to write | — |\n\nThe only thing [Fundamentals](/learn/w2/d5/p2) adds is a fact about how Playwright runs your tests, not a\nlanguage feature: **every `test()` gets its own fresh `page`.** That's the whole lesson.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "What is the one new thing Day 5 introduces?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`test.describe`, which is new syntax for grouping tests",
-              "That every `test()` gets its own fresh `page` — a fact about how the runner works",
-              "A new set of assertion matchers for checking login state"
-            ],
-            "answer": 1,
-            "explanation": "`test.describe` is just a function call wrapped around `test()`s you already know how to write — a new name, not new syntax. The actual lesson is per-test isolation, and today is where you first feel it cost you something."
-          }
-        },
-        {
-          "type": "recap",
-          "text": "Today changes what you know about the runner: each test starts from a blank tab. Hold that thought going into [Fundamentals](/learn/w2/d5/p2) — it is about to fail a test that has nothing wrong with it.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        },
-        {
-          "type": "markdown",
-          "text": "## What's next\n\n[Fundamentals - Splitting one long test](/learn/w2/d5/p2) shows why that fact matters the moment\nyou split a test for readability.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null
-        }
-      ],
-      "problems": []
-    },
-    {
       "part": 2,
       "kind": "concept",
       "title": "Splitting one long test, and the problem it creates",

@@ -17,6 +17,7 @@ import * as path from 'node:path';
 import { placeholderBody, PLACEHOLDER_TITLE, relabelDayRefs, studioise, tabLabel } from './notebook-parse';
 import { LessonOverlay, type OverlayPart } from '../shared/contracts/lesson_overlay';
 import type { ContentBlock, CourseDay, CoursePart } from '../shared/contracts/course_day';
+import type { Difficulty } from '../shared/contracts/common';
 
 /** The three types an overlay owns. Anything else in a part came from a notebook and is left alone. */
 const OVERLAY_TYPES: ReadonlySet<ContentBlock['type']> = new Set([
@@ -230,7 +231,12 @@ function rewriteHeading(text: string, tab: string, generated: boolean): string |
  *
  * Keyed "w<week>d<day>p<part>". Add a key here to remove another tab.
  */
-export const REMOVED_PARTS: ReadonlySet<string> = new Set(['w1d1p1', 'w1d2p1', 'w1d3p1', 'w1d4p1']);
+export const REMOVED_PARTS: ReadonlySet<string> = new Set([
+  'w1d1p1', 'w1d2p1', 'w1d3p1', 'w1d4p1',
+  // Week 2 Days 1, 4 and 5 have no language lesson either: their TypeScript tabs were "nothing
+  // new today" pointers, which the owner's rule removes rather than keeps.
+  'w2d1p1', 'w2d4p1', 'w2d5p1',
+]);
 
 export function applyRemovedParts(day: CourseDay): CourseDay {
   const kept = day.parts.filter((p) => !REMOVED_PARTS.has('w' + day.week + 'd' + day.day + 'p' + p.part));
@@ -329,7 +335,8 @@ export function applyStudioCopy(day: CourseDay): CourseDay {
 export type RewriteBlock =
   | { type: 'markdown' | 'problem-ref'; text: string }
   | { type: 'your-turn'; text: string; prompt: string };
-export type ProblemRewrite = { statement: string; stub: string };
+/** `difficulty` is optional: a rewrite may relabel a problem (the notebooks' "Reflection" is not one of the three levels the course promises). */
+export type ProblemRewrite = { statement: string; stub: string; difficulty?: Difficulty };
 export type PartRewrite = { blocks: RewriteBlock[]; problems: Record<string, ProblemRewrite>; authorsCode: boolean };
 
 export function loadRewrites(contentDir: string, week: number, day: number): Map<number, PartRewrite> {
@@ -429,7 +436,8 @@ export function applyRewrites(day: CourseDay, rewrites: Map<number, PartRewrite>
       }));
       const problems = part.problems.map((q) => {
         const o = rw.problems[String(q.number)];
-        return o ? { ...q, statement: o.statement, stub: o.stub } : q;
+        if (!o) return q;
+        return { ...q, statement: o.statement, stub: o.stub, difficulty: o.difficulty ?? q.difficulty };
       });
       return { ...part, blocks: [...body, ...cards], problems };
     }) as CourseDay['parts'],
