@@ -89,5 +89,8 @@ function load(): StudioConfig {
 
 export const config = load();
 
-/** The port the server is actually listening on, once it is: config.port may be 0. */
-export const listening = { port: config.port };
+/**
+ * The ports the servers are actually listening on, once they are: config.port may be 0, and the
+ * test report's server (server.ts) always takes a free one.
+ */
+export const listening = { port: config.port, reportPort: 0 };

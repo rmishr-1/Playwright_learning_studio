@@ -1,5 +1,6 @@
 @echo off
 setlocal
+set "NoDefaultCurrentDirectoryInExePath=1"
 cd /d "%~dp0"
 
 if not exist "node_modules" ( echo Run setup.bat first. & exit /b 1 )

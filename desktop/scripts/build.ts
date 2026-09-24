@@ -11,8 +11,9 @@
  * and desktop/build/legal (EULA.txt, THIRD-PARTY-NOTICES.txt), which is installed beside the app.
  *
  *   npm run build                                  release build, for any valid Evoke licence
- *   npm run build -- --licence licences/X.lic      release build for one customer, carrying the licence
- *   ... --licence licences/X.lic --no-carry         for one customer, who adds the licence themselves
+ *   npm run build -- --licence licences/X.lic      release build for one customer, who adds the licence
+ *   ... --licence licences/X.lic --carry            for one customer, carrying their licence
+ *   ... --public-key <file>                         built for another public key (the tests' own)
  *   npm run build -- --dev                         readable, with DevTools, for working on the app
  *   npm run build -- --dev --obfuscate             obfuscated like a release, but with DevTools and a
  *                                                  debugger allowed, so test:app can drive the
@@ -26,6 +27,8 @@ import JavaScriptObfuscator from 'javascript-obfuscator';
 import { verify, type Licence } from '../src/licence';
 import { packContent } from './pack-content';
 import { packageDirOf, withDependencies, writeNotices } from './notices';
+import { checkedPublicKey } from './signing-key';
+import { readRevoked } from './revoke-licence';
 
 export const DESKTOP = path.resolve(__dirname, '..');
 const ROOT = path.resolve(DESKTOP, '..');
@@ -42,6 +45,8 @@ const BANNER =
 
 /** The packages the learner's code runs on, at the versions the studio is built and tested with. */
 const RUNTIME_PACKAGES = ['@playwright/test', 'playwright', 'playwright-core', 'typescript', 'typescript-learner'];
+/** What they need, with their dependencies, copied from the root install that package-lock.json verified. */
+const RUNTIME_COPY = [...RUNTIME_PACKAGES, '@typescript/typescript-win32-x64'];
 
 export type BuildInfo = { release: boolean; licence: Licence | null; mark: string };
 
@@ -59,19 +64,24 @@ export async function build(opts: {
   release: boolean;
   licenceFile: string | null;
   obfuscate?: boolean;
-  /** A customer's build carries their licence, unless this is false: then they add it themselves. */
+  /**
+   * A customer's build carries their licence only when this is true. By default they add it
+   * themselves, so the app alone opens nothing; with a seal in the licence it cannot even be
+   * decrypted without it.
+   */
   carryLicence?: boolean;
+  /** The public key to build in, when not Evoke's (the tests use their own). */
+  publicKeyFile?: string | null;
 }): Promise<BuildInfo> {
   const obfuscate = opts.obfuscate ?? opts.release;
-  const publicKeyFile = path.join(DESKTOP, 'src', 'licence-public.pem');
-  if (!fs.existsSync(publicKeyFile)) throw new Error('No licence key yet. Run `npm run licence:keygen` once.');
-  const publicKey = fs.readFileSync(publicKeyFile, 'utf-8');
+  const publicKey = checkedPublicKey(opts.publicKeyFile ?? undefined);
+  const revoked = readRevoked().revoked.map((r) => r.fingerprint);
 
   let licence: Licence | null = null;
   if (opts.licenceFile) {
     const text = fs.readFileSync(opts.licenceFile, 'utf-8');
     const parsed = JSON.parse(text) as { licence?: Licence };
-    const verdict = verify(text, publicKey, { onlyId: null, machine: parsed.licence?.machine ?? '' });
+    const verdict = verify(text, publicKey, { onlyId: null, machine: parsed.licence?.machine ?? '', revoked });
     if (!verdict.ok) throw new Error(opts.licenceFile + ': ' + verdict.reason);
     licence = verdict.licence;
   }
@@ -99,8 +109,9 @@ export async function build(opts: {
   });
 
   step('The course');
-  const packed = packContent(path.join(APP, 'content.pack'), mark);
-  console.log('  ' + packed.files + ' files, ' + packed.marks + ' watermarks (' + mark + '), encrypted');
+  const seal = licence?.seal ?? null;
+  const packed = packContent(path.join(APP, 'content.pack'), mark, seal);
+  console.log('  ' + packed.files + ' files, ' + packed.marks + ' watermarks (' + mark + '), encrypted' + (seal ? ', sealed to the licence' : ''));
 
   step('The main process and backend');
   const result = await esbuild.build({
@@ -110,11 +121,15 @@ export async function build(opts: {
     platform: 'node',
     format: 'cjs',
     target: 'node22',
-    external: ['electron', ...RUNTIME_PACKAGES, 'bufferutil', 'utf-8-validate'],
+    external: ['electron', ...RUNTIME_PACKAGES],
+    // ws's optional native add-ons are never looked for: a module found outside app.asar would run
+    // inside the app, beyond its integrity check.
+    alias: { bufferutil: path.join(DESKTOP, 'src', 'stubs', 'absent.js'), 'utf-8-validate': path.join(DESKTOP, 'src', 'stubs', 'absent.js') },
     define: {
       __STUDIO_RELEASE__: JSON.stringify(opts.release),
-      __STUDIO_BUILD__: JSON.stringify({ product: PRODUCT, version: VERSION, publicKey, onlyId: licence?.id ?? null }),
+      __STUDIO_BUILD__: JSON.stringify({ product: PRODUCT, version: VERSION, publicKey, onlyId: licence?.id ?? null, revoked }),
       __STUDIO_PACK_KEY__: JSON.stringify(packed.key),
+      __STUDIO_PACK_SEALED__: JSON.stringify(seal !== null),
     },
     minify: obfuscate,
     legalComments: 'none',
@@ -158,7 +173,7 @@ export async function build(opts: {
   fs.copyFileSync(path.join(ROOT, 'frontend-c', 'public', 'evoke-logo.png'), path.join(APP, 'logo.png'));
   fs.copyFileSync(path.join(DESKTOP, 'legal', 'EULA.txt'), path.join(APP, 'EULA.txt'));
   fs.copyFileSync(path.join(DESKTOP, 'legal', 'EULA.txt'), path.join(LEGAL, 'EULA.txt'));
-  if (licence && opts.licenceFile && opts.carryLicence !== false) fs.copyFileSync(opts.licenceFile, path.join(APP, 'licence.lic'));
+  if (licence && opts.licenceFile && opts.carryLicence === true) fs.copyFileSync(opts.licenceFile, path.join(APP, 'licence.lic'));
   const dependencies = Object.fromEntries(
     ['@playwright/test', 'playwright', 'typescript', 'typescript-learner'].map((n) => [n, installedVersion(n)]),
   );
@@ -182,14 +197,17 @@ export async function build(opts: {
   );
 
   step('The packages the learner\'s code runs on');
-  const npm = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
-  execFileSync(process.execPath, [npm, 'install', '--omit=dev', '--prefer-offline', '--no-audit', '--no-fund', '--no-package-lock', '--loglevel=error'], {
-    cwd: APP,
-    stdio: 'inherit',
-  });
+  // Copied from the root install, which npm checked against package-lock.json's hashes, rather
+  // than installed again: nothing is fetched, and no install script runs.
+  for (const name of RUNTIME_COPY) {
+    const from = path.join(ROOT, 'node_modules', ...name.split('/'));
+    if (!fs.existsSync(path.join(from, 'package.json'))) throw new Error('Missing ' + name + ' in node_modules. Run `npm ci` at the root.');
+    fs.cpSync(from, path.join(APP, 'node_modules', ...name.split('/')), { recursive: true, dereference: true });
+  }
+  console.log('  ' + RUNTIME_COPY.join(', '));
 
-  // The backend uses one file of the typescript package, to turn a Run's TypeScript into
-  // JavaScript. Its type definitions and language server are left out.
+  // A Run's own process uses one file of the typescript package, to turn the learner's TypeScript
+  // into JavaScript. Its type definitions and language server are left out.
   const ts = path.join(APP, 'node_modules', 'typescript');
   for (const entry of fs.readdirSync(path.join(ts, 'lib'))) {
     if (entry !== 'typescript.js') fs.rmSync(path.join(ts, 'lib', entry), { recursive: true, force: true });
@@ -224,7 +242,8 @@ if (require.main === module) {
   build({
     release: !process.argv.includes('--dev'),
     obfuscate: process.argv.includes('--obfuscate') || undefined,
-    carryLicence: !process.argv.includes('--no-carry'),
+    carryLicence: process.argv.includes('--carry'),
+    publicKeyFile: process.argv.includes('--public-key') ? path.resolve(process.argv[process.argv.indexOf('--public-key') + 1]) : null,
     licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]),
   }).catch((e) => {
     console.error(e instanceof Error ? e.message : e);

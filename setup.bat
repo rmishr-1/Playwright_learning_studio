@@ -1,5 +1,6 @@
 @echo off
 setlocal
+set "NoDefaultCurrentDirectoryInExePath=1"
 cd /d "%~dp0"
 echo ==========================================================
 echo  Playwright Learning Studio - setup

@@ -1,5 +1,6 @@
 @echo off
 setlocal
+set "NoDefaultCurrentDirectoryInExePath=1"
 cd /d "%~dp0"
 rem Issues a licence to a new customer and builds the app they get: a zip, their licence file and a
 rem read-me, in desktop\deliveries\. Needs Evoke's signing key (desktop\keys) on this computer.

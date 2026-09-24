@@ -7,3 +7,20 @@ Data/Config/*.json
 
 # The Terminal's Playwright project (backend/src/terminal/workspace.ts). Regenerated on every command.
 Data/Workspace/
+
+# Secrets and customer records never belong in the repository, wherever they are dropped. The one
+# key file that is committed is the licence PUBLIC key, which every copy of the app carries.
+*.pem
+!desktop/src/licence-public.pem
+*.pfx
+*.p12
+*.key
+*.dpapi
+*.lic
+*.lic.old
+issued.csv
+.env
+.env.*
+**/keys/
+**/licences/
+**/deliveries/

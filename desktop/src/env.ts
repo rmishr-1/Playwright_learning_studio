@@ -22,6 +22,13 @@ process.env.STUDIO_CONTENT_PACK = path.join(APP_DIR, 'content.pack');
 process.env.STUDIO_WEB_DIR = path.join(APP_DIR, 'web');
 process.env.STUDIO_NODE_PATH = path.join(RESOURCES, 'node', 'node.exe');
 process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(RESOURCES, 'ms-playwright');
-// The learner's processes must not inherit anything that would turn Node into something else.
+// Nothing from the launch environment may redirect where the studio keeps or finds things.
+delete process.env.STUDIO_WORKSPACE_ROOT;
+delete process.env.STUDIO_PORT;
 delete process.env.NODE_OPTIONS;
 delete process.env.ELECTRON_RUN_AS_NODE;
+// Express hides error details in production. ws's optional native add-ons are never loaded: a
+// module found outside app.asar would run inside the app, beyond its integrity check.
+process.env.NODE_ENV = 'production';
+process.env.WS_NO_BUFFER_UTIL = '1';
+process.env.WS_NO_UTF_8_VALIDATE = '1';

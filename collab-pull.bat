@@ -1,5 +1,6 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
+set "NoDefaultCurrentDirectoryInExePath=1"
 :: ===========================================================================
 ::  collab-pull.bat - for COLLABORATORS, not the repo owner.
 ::  ---------------------------------------------------------------------
@@ -249,14 +250,21 @@ where git >nul 2>&1 && exit /b 0
 if exist "%GITCMD%\git.exe"  ( set "PATH=%GITCMD%;%PATH%" & exit /b 0 )
 if exist "%GITCMD2%\git.exe" ( set "PATH=%GITCMD2%;%PATH%" & exit /b 0 )
 
-echo   [setup] Git is not installed. Installing now...
+echo   [setup] Git is not installed.
+choice /c YN /n /m "  [setup] Install Git for Windows now? [Y/N] "
+if errorlevel 2 (
+    echo   [setup] Git was not installed. Install it from https://git-scm.com/download/win and run this again.
+    exit /b 1
+)
 where winget >nul 2>&1 && (
     echo   [setup] Installing via winget...
     winget install --id Git.Git -e --source winget --silent --accept-package-agreements --accept-source-agreements
 ) || (
-    echo   [setup] winget not available - downloading the Git installer...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $f=Join-Path $env:TEMP 'git-setup.exe'; Invoke-WebRequest $a.browser_download_url -OutFile $f; Start-Process $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait"
+    echo   [setup] winget not available - downloading the Git installer, and checking its signature...
+    REM The download goes to a folder of its own, and runs only when Windows confirms it is
+    REM signed by the Git for Windows project.
+    powershell -NoProfile -NonInteractive -Command ^
+      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Johannes Schindelin') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
 )
 
 set "PATH=%GITCMD%;%GITCMD2%;%PATH%"

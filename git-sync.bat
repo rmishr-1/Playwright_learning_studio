@@ -1,5 +1,6 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
+set "NoDefaultCurrentDirectoryInExePath=1"
 :: ===========================================================================
 ::  git-sync.bat - one-click sync for the REPO OWNER.
 ::  ---------------------------------------------------------------------
@@ -35,9 +36,14 @@ if not exist ".git" (
     git init -b main 2>nul || (git init && git checkout -B main)
 )
 
-REM identity enforced repo-locally: this email maps to rmishr-1 on GitHub
-git config user.email "rmishra@evoketechnologies.com"
-git config user.name  "rmishr-1"
+REM The owner's identity, set in this repository only when none is set yet, so a
+REM collaborator who runs this by mistake keeps their own name on their commits.
+set "HAVE_MAIL="
+for /f "tokens=*" %%v in ('git config user.email 2^>nul') do set "HAVE_MAIL=%%v"
+if not defined HAVE_MAIL (
+    git config user.email "rmishra@evoketechnologies.com"
+    git config user.name  "rmishr-1"
+)
 
 git remote get-url origin >nul 2>nul && (
     git remote set-url origin "%REPO%"
@@ -58,9 +64,25 @@ if errorlevel 1 (
 REM ---------- step 1: commit everything local ----------
 echo [ 1/3 ] Committing local changes...
 git add -A
+git diff --cached --name-only | findstr /i /r "\.pem$ \.pfx$ \.p12$ \.key$ \.dpapi$ \.lic$ issued\.csv$ \.env$ \.env\." >nul && (
+    echo.
+    echo [STOP] These staged files look like keys, certificates, licences or secrets:
+    git diff --cached --name-only | findstr /i /r "\.pem$ \.pfx$ \.p12$ \.key$ \.dpapi$ \.lic$ issued\.csv$ \.env$ \.env\."
+    echo        Nothing was committed. Move them out of the project, or add them to .gitignore.
+    git reset -q
+    goto :fail
+)
 git diff --cached --quiet && (
     echo         Nothing new to commit.
 ) || (
+    echo         These changes will be committed and pushed to GitHub:
+    git diff --cached --stat
+    choice /c YN /n /m "        Commit and push them? [Y/N] "
+    if errorlevel 2 (
+        git reset -q
+        echo         Nothing was committed or pushed.
+        goto :fail
+    )
     git commit -m "Update %date% %time%"
     if errorlevel 1 goto :fail
     echo         Committed.
@@ -176,14 +198,21 @@ where git >nul 2>&1 && exit /b 0
 if exist "%GITCMD%\git.exe"  ( set "PATH=%GITCMD%;%PATH%" & exit /b 0 )
 if exist "%GITCMD2%\git.exe" ( set "PATH=%GITCMD2%;%PATH%" & exit /b 0 )
 
-echo [setup] Git is not installed. Installing now...
+echo [setup] Git is not installed.
+choice /c YN /n /m "[setup] Install Git for Windows now? [Y/N] "
+if errorlevel 2 (
+    echo [setup] Git was not installed. Install it from https://git-scm.com/download/win and run this again.
+    exit /b 1
+)
 where winget >nul 2>&1 && (
     echo [setup] Installing via winget...
     winget install --id Git.Git -e --source winget --silent --accept-package-agreements --accept-source-agreements
 ) || (
-    echo [setup] winget not available - downloading the Git installer...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $f=Join-Path $env:TEMP 'git-setup.exe'; Invoke-WebRequest $a.browser_download_url -OutFile $f; Start-Process $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait"
+    echo [setup] winget not available - downloading the Git installer, and checking its signature...
+    REM The download goes to a folder of its own, and runs only when Windows confirms it is
+    REM signed by the Git for Windows project.
+    powershell -NoProfile -NonInteractive -Command ^
+      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Johannes Schindelin') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
 )
 
 set "PATH=%GITCMD%;%GITCMD2%;%PATH%"

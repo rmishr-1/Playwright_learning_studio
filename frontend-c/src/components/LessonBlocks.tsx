@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Markdown, highlightInto } from './Markdown';
+import { fence } from '../lib/fence';
 import type { ContentBlock } from '../../../shared/contracts/course_day';
 
 /** A file the editor holds: where it is saved, and the command that runs it. */
@@ -146,7 +147,7 @@ export function Diagram({ source }: { source: string }) {
     };
   }, [id, source, theme]);
 
-  if (failed) return <Markdown text={'```text\n' + source + '\n```'} />;
+  if (failed) return <Markdown text={fence('text', source)} />;
   return (
     <div className="diagram" role="img" aria-label="Diagram">
       {svg ? <div dangerouslySetInnerHTML={{ __html: svg }} /> : <span className="muted">Drawing the diagram…</span>}

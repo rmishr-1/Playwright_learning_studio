@@ -3,9 +3,10 @@
  *
  *   npm run package                                an internal installer, for any valid Evoke licence
  *   npm run package -- --licence licences/X.lic    an installer for one customer: it accepts only
- *                                                  that licence, carries it, and its course carries
- *                                                  that licence's watermark
- *   ... --no-carry                                 the customer adds the licence themselves
+ *                                                  that licence, which is sent apart from it, and its
+ *                                                  course carries that licence's watermark
+ *   ... --carry                                    the installer carries the licence (it then opens
+ *                                                  for anyone who has it)
  *   ... --zip                                      a zip of the app instead of an installer
  *
  * new-customer.ts issues a licence and makes a customer's zip in one go.
@@ -24,6 +25,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { build as electronBuild, Platform, type Configuration } from 'electron-builder';
 import { DESKTOP, PRODUCT, VERSION, build } from './build';
+import { verifyManifest } from './runtime';
 
 /**
  * Builds the app and packs it: an installer (nsis), or a zip of the app that runs where it is
@@ -37,6 +39,8 @@ export async function packageApp(opts: {
   for (const need of ['runtime/node/node.exe', 'runtime/ms-playwright']) {
     if (!fs.existsSync(path.join(DESKTOP, need))) throw new Error('Missing ' + need + '. Run `npm run runtime` first.');
   }
+  // What ships from desktop/runtime is exactly what `npm run runtime` gathered and checked.
+  verifyManifest();
   const target = opts.target ?? 'nsis';
   const info = await build({ release: true, licenceFile: opts.licenceFile, carryLicence: opts.carryLicence });
   const electronVersion = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'node_modules', 'electron', 'package.json'), 'utf-8')) as { version: string }).version;
@@ -71,6 +75,8 @@ export async function packageApp(opts: {
       loadBrowserProcessSpecificV8Snapshot: false,
       grantFileProtocolExtraPrivileges: false,
     },
+    // With a certificate given (CSC_LINK), an unsigned result is a failure, not a warning.
+    forceCodeSigning: Boolean(process.env.CSC_LINK),
     win: {
       target: [{ target, arch: ['x64'] }],
       // Short, because Windows unzips into a folder of the zip's name, and the browsers' deepest
@@ -101,7 +107,7 @@ if (require.main === module) {
   const i = process.argv.indexOf('--licence');
   packageApp({
     licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]),
-    carryLicence: !process.argv.includes('--no-carry'),
+    carryLicence: process.argv.includes('--carry'),
     target: process.argv.includes('--zip') ? 'zip' : 'nsis',
   }).catch((e) => {
     console.error(e instanceof Error ? e.stack : e);

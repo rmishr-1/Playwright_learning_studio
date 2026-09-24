@@ -1,19 +1,18 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
+set "NoDefaultCurrentDirectoryInExePath=1"
 :: ===========================================================================
 ::  collab-push.bat - for COLLABORATORS, not the repo owner.
 ::  ---------------------------------------------------------------------
-::  Commits your work, pushes it to YOUR OWN BRANCH, and then AUTO-LANDS it
-::  on main when it merges cleanly - no pull request, no waiting.
+::  Commits your work, pushes it to YOUR OWN BRANCH, and gives you the link
+::  to open a pull request: the owner reviews it before it reaches main.
 ::
 ::    collab-push.bat                          commit with an automatic message
 ::    collab-push.bat "what you changed"       commit with your own message
 ::    collab-push.bat "message" /branch fix-week3-typo
 ::
-::  Two people pushing at almost the same time is fine: whoever lands second
-::  is merged on top automatically and retried. Only a real CONFLICT - the
-::  same lines changed by two people - falls back to a pull request, because
-::  that genuinely needs a human decision.
+::  Nothing reaches main without review: customer builds are made from main,
+::  so every change there goes through a pull request.
 ::
 ::  No repo on this machine yet? Run collab-pull.bat first - it clones it.
 ::  Owner pushing to main directly? Use git-sync.bat.
@@ -107,7 +106,7 @@ goto :have_target
 :: so a single [^a-z0-9] reaches PowerShell as [a-z0-9] -- which replaces every
 :: alphanumeric instead of every non-alphanumeric and yields an empty slug.
 set "SLUG="
-for /f "usebackq delims=" %%S in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$n=[regex]::Replace('!GIT_NAME!'.ToLower(),'[^^a-z0-9]+','-').Trim('-'); if($n -eq ''){'collab'}else{$n}" 2^>nul`) do set "SLUG=%%S"
+for /f "usebackq delims=" %%S in (`powershell -NoProfile -NonInteractive -Command "$n=[regex]::Replace($env:GIT_NAME.ToLower(),'[^^a-z0-9]+','-').Trim('-'); if($n -eq ''){'collab'}else{$n}" 2^>nul`) do set "SLUG=%%S"
 set "SLUG=!SLUG: =!"
 if not defined SLUG set "SLUG=collab"
 set "TARGET=!SLUG!/work"
@@ -156,6 +155,14 @@ if errorlevel 1 (
   echo   [FAIL] git add failed.
   goto :die
 )
+git diff --cached --name-only | findstr /i /r "\.pem$ \.pfx$ \.p12$ \.key$ \.dpapi$ \.lic$ issued\.csv$ \.env$ \.env\." >nul && (
+    echo.
+    echo [STOP] These staged files look like keys, certificates, licences or secrets:
+    git diff --cached --name-only | findstr /i /r "\.pem$ \.pfx$ \.p12$ \.key$ \.dpapi$ \.lic$ issued\.csv$ \.env$ \.env\."
+    echo        Nothing was committed. Move them out of the project, or add them to .gitignore.
+    git reset -q
+    goto :die
+)
 
 set /a NCHANGES=0
 for /f %%n in ('git diff --cached --name-only 2^>nul ^| find /c /v ""') do set /a NCHANGES=%%n
@@ -172,7 +179,7 @@ for /f "tokens=*" %%L in ('git diff --cached --name-status 2^>nul') do (
 if !NCHANGES! GTR 25 echo     ... and the rest, !NCHANGES! files in total
 
 if not defined MSG (
-  for /f "usebackq delims=" %%d in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-Date -Format \"yyyy-MM-dd HH:mm\"" 2^>nul`) do set "STAMP=%%d"
+  for /f "usebackq delims=" %%d in (`powershell -NoProfile -NonInteractive -Command "Get-Date -Format \"yyyy-MM-dd HH:mm\"" 2^>nul`) do set "STAMP=%%d"
   set "MSG=Work in progress: !STAMP!"
 )
 echo.
@@ -238,70 +245,9 @@ if errorlevel 1 goto :push_failed
 
 echo.
 echo   [ OK ] Pushed branch !TARGET!
-
-:: --------------------------------------------------------------------------
-:: Auto-land: merge the latest main into this branch. If that is conflict-
-:: free, push the result straight to main - done, no pull request. If main
-:: moves while we do it (someone else landed first), fetch and retry: git
-:: rejects the late push, so concurrent pushers serialise safely on their own.
-:: --------------------------------------------------------------------------
 echo.
-echo   ---------------------------------------------------------------------
-echo   Landing on %MAINBRANCH% ^(automatic when there are no conflicts^)
-echo   ---------------------------------------------------------------------
-set /a LTRIES=0
-:land
-set /a LTRIES+=1
-if !LTRIES! GTR 3 goto :land_giveup
-
-git fetch origin "%MAINBRANCH%" >nul 2>&1
-
-:: If everything on main is already in this branch, main can just fast-forward.
-git merge-base --is-ancestor "origin/%MAINBRANCH%" HEAD >nul 2>&1
-if not errorlevel 1 goto :push_main
-
-:: Bring main's commits into this branch first.
-git merge "origin/%MAINBRANCH%" --no-edit
-if errorlevel 1 (
-  git merge --abort >nul 2>&1
-  goto :land_conflict
-)
-git push origin "!TARGET!" >nul 2>&1
-
-:push_main
-git push origin "HEAD:%MAINBRANCH%" >nul 2>&1
-if errorlevel 1 (
-  echo   %MAINBRANCH% moved while landing - attempt !LTRIES! of 3, retrying...
-  goto :land
-)
-
-echo   [ OK ] No conflicts - your work is now on %MAINBRANCH%.
-echo          Everyone gets it on their next collab-pull. No pull request needed.
-echo.
-pause
-endlocal & exit /b 0
-
-:land_conflict
-echo.
-echo   [INFO] Your changes CONFLICT with something already on %MAINBRANCH%:
-echo          someone else changed the same lines. Auto-landing is not safe,
-echo          so this one needs human eyes.
-echo.
-echo          Your branch IS safely pushed - nothing is lost. Open a pull
-echo          request here and resolve it with the owner:
-echo            %REPO_WEB%/compare/%MAINBRANCH%...!TARGET!?expand=1
-echo.
-pause
-endlocal & exit /b 0
-
-:land_giveup
-echo.
-echo   [WARN] Could not land on %MAINBRANCH% after 3 attempts. Either others
-echo          are pushing right now - run this again in a minute - or your
-echo          account does not have write access to %MAINBRANCH%.
-echo.
-echo          Your branch IS safely pushed. Fallback - open a pull request:
-echo            %REPO_WEB%/compare/%MAINBRANCH%...!TARGET!?expand=1
+echo   Open a pull request so the owner can review it and bring it into %MAINBRANCH%:
+echo     %REPO_WEB%/compare/%MAINBRANCH%...!TARGET!?expand=1
 echo.
 pause
 endlocal & exit /b 0
@@ -340,7 +286,7 @@ echo   collab-push.bat                          commit with an automatic message
 echo   collab-push.bat "what you changed"       commit with your own message
 echo   collab-push.bat "message" /branch NAME   push to a specific branch
 echo.
-echo   Pushes to your own branch, then auto-lands it on %MAINBRANCH% when the
+echo   Pushes to your own branch, and gives you the link for a pull request into %MAINBRANCH%; the
 echo   merge is conflict-free. Conflicts fall back to a pull-request link.
 echo.
 endlocal & exit /b 0
@@ -351,14 +297,21 @@ where git >nul 2>&1 && exit /b 0
 if exist "%GITCMD%\git.exe"  ( set "PATH=%GITCMD%;%PATH%" & exit /b 0 )
 if exist "%GITCMD2%\git.exe" ( set "PATH=%GITCMD2%;%PATH%" & exit /b 0 )
 
-echo   [setup] Git is not installed. Installing now...
+echo   [setup] Git is not installed.
+choice /c YN /n /m "  [setup] Install Git for Windows now? [Y/N] "
+if errorlevel 2 (
+    echo   [setup] Git was not installed. Install it from https://git-scm.com/download/win and run this again.
+    exit /b 1
+)
 where winget >nul 2>&1 && (
     echo   [setup] Installing via winget...
     winget install --id Git.Git -e --source winget --silent --accept-package-agreements --accept-source-agreements
 ) || (
-    echo   [setup] winget not available - downloading the Git installer...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $f=Join-Path $env:TEMP 'git-setup.exe'; Invoke-WebRequest $a.browser_download_url -OutFile $f; Start-Process $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait"
+    echo   [setup] winget not available - downloading the Git installer, and checking its signature...
+    REM The download goes to a folder of its own, and runs only when Windows confirms it is
+    REM signed by the Git for Windows project.
+    powershell -NoProfile -NonInteractive -Command ^
+      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Johannes Schindelin') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
 )
 
 set "PATH=%GITCMD%;%GITCMD2%;%PATH%"

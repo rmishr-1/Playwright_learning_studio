@@ -1,37 +1,40 @@
 /**
  * Checks a packaged release build from the outside, the way someone trying to copy it would go at
  * it. `npm run package` first; this uses desktop/release/win-unpacked, the files the installer
- * installs.
+ * installs (or STUDIO_TEST_APP_DIR, such as a customer's zip, extracted).
  *
- *   npm run test:release                  (moves the app's data folder aside, and puts it back)
- *   npm run test:release -- <licence>     a build for one customer that does not carry its licence
+ *   npm run test:release -- <licence file>   a licence the build accepts (never Evoke's signing key)
  *
  *   - the fuses are set: no running as Node, no NODE_OPTIONS, no debugger, app.asar only, and
  *     app.asar is checked against the hash built into the program
  *   - app.asar holds no source, no source maps, no plain course, and nothing readable in main.js
  *   - content.pack is not readable
- *   - the app refuses debugger switches, and a changed app.asar
+ *   - the app refuses every command-line switch (debuggers, proxies, network logs) and a changed
+ *     app.asar; a reg.exe or a module planted beside it is never used; the one compiler file
+ *     outside app.asar is never loaded by the app itself
  *   - without a licence the backend never starts; with one, the API still refuses anyone but the
- *     window
+ *     window, and to every other host name
+ *
+ * It moves the app's data folder aside while it runs, and puts it back.
  */
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
+import * as http from 'node:http';
 import * as net from 'node:net';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as asar from '@electron/asar';
 import { FuseV1Options, getCurrentFuseWire } from '@electron/fuses';
-import { machineCode, sign, type Licence, type LicenceFile } from '../src/licence';
+import { machineCode, type LicenceFile } from '../src/licence';
 import { keepUserData } from './user-data';
 
 const DESKTOP = path.resolve(__dirname, '..');
-// STUDIO_TEST_APP_DIR checks another copy, such as a customer's zip, extracted.
 const UNPACKED = process.env.STUDIO_TEST_APP_DIR || path.join(DESKTOP, 'release', 'win-unpacked');
-const EXE = path.join(UNPACKED, 'QA Practice Training Studio.exe');
+const EXE_NAME = 'QA Practice Training Studio.exe';
+const EXE = path.join(UNPACKED, EXE_NAME);
 const ASAR = path.join(UNPACKED, 'resources', 'app.asar');
 const USER = path.join(process.env.APPDATA!, 'QA Practice Training Studio');
-const PRIVATE_KEY = fs.readFileSync(path.join(DESKTOP, 'keys', 'licence-private.pem'), 'utf-8');
 
 let failures = 0;
 function expect(ok: boolean, what: string, detail = ''): void {
@@ -52,10 +55,21 @@ function listening(port: number): Promise<boolean> {
   });
 }
 
+function status(port: number, p: string, host?: string): Promise<number> {
+  return new Promise((resolve) => {
+    const req = http.request({ hostname: '127.0.0.1', port, path: p, headers: host ? { host } : {} }, (res) => {
+      res.resume();
+      resolve(res.statusCode ?? 0);
+    });
+    req.on('error', () => resolve(0));
+    req.end();
+  });
+}
+
 function killTree(child: ChildProcess): void {
   if (child.pid) {
     try {
-      execFileSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+      execFileSync('C:\\Windows\\System32\\taskkill.exe', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
     } catch {
       // Already gone.
     }
@@ -63,8 +77,8 @@ function killTree(child: ChildProcess): void {
 }
 
 /** Starts the app, lets it run for a while, and says whether it was still running. */
-async function runFor(exe: string, args: string[], ms: number, env: NodeJS.ProcessEnv = process.env): Promise<{ alive: boolean; out: string }> {
-  const child = spawn(exe, args, { env, stdio: ['ignore', 'pipe', 'pipe'] });
+async function runFor(exe: string, args: string[], ms: number, opts: { env?: NodeJS.ProcessEnv; cwd?: string } = {}): Promise<{ alive: boolean; out: string }> {
+  const child = spawn(exe, args, { env: opts.env ?? process.env, cwd: opts.cwd, stdio: ['ignore', 'pipe', 'pipe'] });
   let out = '';
   child.stdout?.on('data', (d: Buffer) => (out += d.toString()));
   child.stderr?.on('data', (d: Buffer) => (out += d.toString()));
@@ -77,24 +91,21 @@ async function runFor(exe: string, args: string[], ms: number, env: NodeJS.Proce
   return { alive, out };
 }
 
-/** A customer's build carries its licence, and accepts no other. */
-function builtInLicence(): Licence | null {
+/** A customer's build may carry its licence; otherwise the licence given is installed. */
+function builtInLicence(): LicenceFile | null {
   try {
-    return (JSON.parse(asar.extractFile(ASAR, 'licence.lic').toString('utf-8')) as LicenceFile).licence;
+    return JSON.parse(asar.extractFile(ASAR, 'licence.lic').toString('utf-8')) as LicenceFile;
   } catch {
     return null;
   }
 }
 
-function reset(licence: Licence | null, accepted: boolean): void {
+function reset(licenceText: string | null, accepted: boolean): void {
   fs.rmSync(USER, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   fs.mkdirSync(USER, { recursive: true });
-  if (!licence) return;
-  if (!builtInLicence()) {
-    // A customer's licence as it was issued (its logo and signature included), else a test one.
-    const given = process.argv[2] ? fs.readFileSync(process.argv[2], 'utf-8') : null;
-    fs.writeFileSync(path.join(USER, 'licence.lic'), given ?? JSON.stringify(sign(licence, PRIVATE_KEY)));
-  }
+  if (licenceText === null) return;
+  const licence = (JSON.parse(licenceText) as LicenceFile).licence;
+  if (!builtInLicence()) fs.writeFileSync(path.join(USER, 'licence.lic'), licenceText);
   if (accepted) {
     const eula = asar.extractFile(ASAR, 'EULA.txt');
     fs.writeFileSync(
@@ -104,60 +115,9 @@ function reset(licence: Licence | null, accepted: boolean): void {
   }
 }
 
-async function main(): Promise<void> {
-  if (!fs.existsSync(EXE)) throw new Error('No packaged app. Run `npm run package` first.');
-  keepUserData(USER, 'QA Practice Training Studio.exe');
-
-  console.log('Fuses');
-  const wire = await getCurrentFuseWire(EXE);
-  const on = (f: FuseV1Options): boolean => wire[f] === '1'.charCodeAt(0);
-  expect(!on(FuseV1Options.RunAsNode), 'cannot be run as Node (ELECTRON_RUN_AS_NODE)');
-  expect(!on(FuseV1Options.EnableNodeOptionsEnvironmentVariable), 'ignores NODE_OPTIONS');
-  expect(!on(FuseV1Options.EnableNodeCliInspectArguments), 'ignores --inspect');
-  expect(on(FuseV1Options.OnlyLoadAppFromAsar), 'loads its code only from app.asar');
-  expect(on(FuseV1Options.EnableEmbeddedAsarIntegrityValidation), 'checks app.asar against its built-in hash');
-  expect(on(FuseV1Options.EnableCookieEncryption), 'encrypts its cookies on disk');
-
-  console.log('\nWhat app.asar holds');
-  const files = asar.listPackage(ASAR, { isPack: false }).map((f) => f.replace(/\\/g, '/'));
-  const own = files.filter((f) => !f.startsWith('/node_modules/'));
-  expect(!own.some((f) => /\.(ts|tsx|map|md)$/.test(f)), 'no source, source maps or Markdown', own.filter((f) => /\.(ts|tsx|map|md)$/.test(f)).join(', '));
-  expect(!files.some((f) => /Data\/(Source|Content)|course-index\.json|day-\d+\.json|workspaces\.json/.test(f)), 'no course files in plain form');
-  expect(files.includes('/content.pack'), 'the course is there as content.pack');
-  const main = asar.extractFile(ASAR, 'main.js').toString('utf-8');
-  expect(main.startsWith('/*! QA Practice Training Studio'), 'main.js starts with the copyright notice');
-  const readable = ['studio_token', 'aes-256-gcm', 'SPK1', 'licence.lic', 'eula-accepted', 'courseIndex', 'recordProgress', 'setup:accept'];
-  const found = readable.filter((s) => main.includes(s));
-  expect(found.length === 0, 'main.js is obfuscated: none of the studio\'s names are readable', found.join(', '));
-  const pack = asar.extractFile(ASAR, 'content.pack');
-  const text = pack.toString('latin1');
-  expect(!/Playwright|"parts"|course-index|TypeScript/.test(text), 'content.pack is not readable', pack.length + ' bytes');
-  expect(!fs.existsSync(path.join(UNPACKED, 'resources', 'app')), 'there is no unpacked app folder to load instead');
-  const unpacked = path.join(UNPACKED, 'resources', 'app.asar.unpacked');
-  const unpackedOwn = fs.existsSync(unpacked) ? fs.readdirSync(unpacked).filter((n) => n !== 'node_modules') : [];
-  expect(unpackedOwn.length === 0, 'only third-party packages are unpacked', unpackedOwn.join(', '));
-
-  const carried = builtInLicence();
-  console.log('\nStarting the app' + (carried ? ', a build for ' + carried.licensee + ' (' + carried.id + ')' : ''));
-  reset(null, false);
-  let r = await runFor(EXE, [], 8000);
-  expect(
-    r.alive && !fs.existsSync(path.join(USER, 'port.json')),
-    'until there is a licence and the agreement is accepted, the backend never starts',
-  );
-
-  const given = process.argv[2] ? (JSON.parse(fs.readFileSync(process.argv[2], 'utf-8')) as LicenceFile) : null;
-  const licence: Licence = carried ?? given?.licence ?? {
-    id: 'EVK-RELEASE1',
-    licensee: 'Release Check Ltd',
-    email: null,
-    issued: '2026-09-24',
-    expires: null,
-    machine: machineCode(),
-    product: 'learning-studio',
-  };
-  reset(licence, true);
-  const child = spawn(EXE, [], { stdio: 'ignore' });
+/** Starts the app with its licence and agreement in place, and waits for its server. */
+async function startStudio(exe: string, opts: { cwd?: string } = {}): Promise<{ child: ChildProcess; port: number }> {
+  const child = spawn(exe, [], { stdio: 'ignore', cwd: opts.cwd });
   let port = 0;
   for (let i = 0; i < 60 && !port; i++) {
     await sleep(500);
@@ -167,42 +127,128 @@ async function main(): Promise<void> {
       port = 0;
     }
   }
-  expect(port > 0 && (await listening(port)), 'with a licence and the agreement accepted, the studio starts', 'port ' + port);
+  if (port && !(await listening(port))) port = 0;
+  return { child, port };
+}
+
+async function main(): Promise<void> {
+  if (!fs.existsSync(EXE)) throw new Error('No packaged app. Run `npm run package` first.');
+  const given = builtInLicence() ? JSON.stringify(builtInLicence()) : process.argv[2] ? fs.readFileSync(process.argv[2], 'utf-8') : null;
+  if (!given) throw new Error('Usage: npm run test:release -- <a licence file the build accepts>');
+  const licence = (JSON.parse(given) as LicenceFile).licence;
+  keepUserData(USER, EXE_NAME);
+  console.log('Checking ' + UNPACKED + ' with licence ' + licence.id + ' (' + licence.licensee + ')');
+
+  console.log('\nFuses');
+  const wire = await getCurrentFuseWire(EXE);
+  const on = (f: FuseV1Options): boolean => wire[f] === '1'.charCodeAt(0);
+  expect(!on(FuseV1Options.RunAsNode), 'cannot be run as Node (ELECTRON_RUN_AS_NODE)');
+  expect(!on(FuseV1Options.EnableNodeOptionsEnvironmentVariable), 'ignores NODE_OPTIONS');
+  expect(!on(FuseV1Options.EnableNodeCliInspectArguments), 'ignores --inspect');
+  expect(on(FuseV1Options.OnlyLoadAppFromAsar), 'loads its code only from app.asar');
+  expect(on(FuseV1Options.EnableEmbeddedAsarIntegrityValidation), 'checks app.asar against its built-in hash');
+  expect(on(FuseV1Options.EnableCookieEncryption), 'encrypts its cookies on disk');
+  expect(!on(FuseV1Options.GrantFileProtocolExtraPrivileges), 'gives file:// pages no extra rights');
+
+  console.log('\nWhat app.asar holds');
+  const files = asar.listPackage(ASAR, { isPack: false }).map((f) => f.replace(/\\/g, '/'));
+  const own = files.filter((f) => !f.startsWith('/node_modules/'));
+  expect(!own.some((f) => /\.(ts|tsx|map|md)$/.test(f)), 'no source, source maps or Markdown', own.filter((f) => /\.(ts|tsx|map|md)$/.test(f)).join(', '));
+  expect(!files.some((f) => /Data\/(Source|Content)|course-index\.json|day-\d+\.json|workspaces\.json/.test(f)), 'no course files in plain form');
+  expect(files.includes('/content.pack'), 'the course is there as content.pack');
+  const main = asar.extractFile(ASAR, 'main.js').toString('utf-8');
+  expect(main.startsWith('/*! QA Practice Training Studio'), 'main.js starts with the copyright notice');
+  const readable = ['studio_token', 'aes-256-gcm', 'SPK1', 'licence.lic', 'eula-accepted', 'courseIndex', 'recordProgress', 'setup:accept', 'last-seen'];
+  const found = readable.filter((s) => main.includes(s));
+  expect(found.length === 0, 'main.js is obfuscated: none of the studio\'s names are readable', found.join(', '));
+  if (licence.seal) expect(!main.includes(licence.seal), 'the licence\'s seal is not in the app');
+  const pack = asar.extractFile(ASAR, 'content.pack');
+  expect(!/Playwright|"parts"|course-index|TypeScript/.test(pack.toString('latin1')), 'content.pack is not readable', pack.length + ' bytes');
+  expect(!fs.existsSync(path.join(UNPACKED, 'resources', 'app')), 'there is no unpacked app folder to load instead');
+  const unpacked = path.join(UNPACKED, 'resources', 'app.asar.unpacked');
+  const unpackedOwn = fs.existsSync(unpacked) ? fs.readdirSync(unpacked).filter((n) => n !== 'node_modules') : [];
+  expect(unpackedOwn.length === 0, 'only third-party packages are unpacked', unpackedOwn.join(', '));
+  const tsLib = path.join(unpacked, 'node_modules', 'typescript', 'lib');
+  expect(fs.existsSync(tsLib) && fs.readdirSync(tsLib).join() === 'typescript.js', 'of the TypeScript package, only the one file a Run needs ships');
+  expect(!fs.existsSync(path.join(UNPACKED, 'resources', 'node', 'node_modules')), 'Node ships without npm');
+
+  console.log('\nStarting the app');
+  reset(null, false);
+  let r = await runFor(EXE, [], 8000);
+  expect(r.alive && !fs.existsSync(path.join(USER, 'port.json')), 'until there is a licence and the agreement is accepted, the backend never starts');
+
+  reset(given, true);
+  const { child, port } = await startStudio(EXE);
+  expect(port > 0, 'with a licence and the agreement accepted, the studio starts', 'port ' + port);
   for (const p of ['/', '/api/course', '/api/course/1/1', '/api/progress']) {
-    const status = port ? (await fetch('http://127.0.0.1:' + port + p)).status : 0;
-    expect(status === 401, 'from outside the window, ' + p + ' is refused', String(status));
+    const s = port ? await status(port, p) : 0;
+    expect(s === 401, 'from outside the window, ' + p + ' is refused', String(s));
   }
-  const viaLocalhost = port ? (await fetch('http://localhost:' + port + '/api/course').catch(() => ({ status: 0 }))).status : 0;
-  expect(viaLocalhost === 401 || viaLocalhost === 0, 'another host name for the same port is refused', String(viaLocalhost));
+  const rebound = port ? await status(port, '/api/course', 'attacker.example:' + port) : 0;
+  expect(rebound === 401, 'another host name for the same port (DNS rebinding) is refused', String(rebound));
   killTree(child);
   await sleep(2000);
 
-  console.log('\nDebuggers and changed files');
-  reset(licence, true);
-  r = await runFor(EXE, ['--inspect=9339'], 7000);
-  expect(!(await listening(9339)) && !r.alive, 'refuses to start with --inspect', r.alive ? 'still running' : 'exited');
-  r = await runFor(EXE, ['--remote-debugging-port=9340'], 7000);
-  expect(!(await listening(9340)), 'no remote debugging port', r.alive ? 'still running' : 'exited');
-  r = await runFor(EXE, ['-e', 'console.log("RAN AS NODE")'], 6000, { ...process.env, ELECTRON_RUN_AS_NODE: '1' });
+  console.log('\nCommand-line switches');
+  const netlog = path.join(os.tmpdir(), 'studio-netlog-' + Date.now() + '.json');
+  const switches: [string, string][] = [
+    ['--inspect=9339', 'a debugger (--inspect)'],
+    ['--remote-debugging-port=9340', 'remote debugging'],
+    ['--proxy-server=127.0.0.1:9341', 'a proxy that would capture its traffic'],
+    ['--log-net-log=' + netlog, 'a network log of its traffic'],
+    ['--enable-logging', 'Chromium logging'],
+  ];
+  for (const [arg, what] of switches) {
+    reset(given, true);
+    r = await runFor(EXE, [arg], 7000);
+    expect(!r.alive && !fs.existsSync(path.join(USER, 'port.json')), 'refuses to start with ' + what, r.alive ? 'still running' : 'exited');
+  }
+  expect(!fs.existsSync(netlog) && !(await listening(9339)) && !(await listening(9340)), 'no debugger port and no network log appeared');
+  reset(given, true);
+  r = await runFor(EXE, ['-e', 'console.log("RAN AS NODE")'], 6000, { env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' } });
   expect(!r.out.includes('RAN AS NODE'), 'ELECTRON_RUN_AS_NODE does not turn it into Node');
-  r = await runFor(EXE, [], 6000, { ...process.env, NODE_OPTIONS: '--require ./nothing.js' });
+  reset(given, true);
+  r = await runFor(EXE, [], 6000, { env: { ...process.env, NODE_OPTIONS: '--require ./nothing.js' } });
   expect(!/nothing\.js/.test(r.out), 'NODE_OPTIONS is ignored');
 
-  // A copy of the app with one byte of app.asar changed must refuse to start.
+  console.log('\nChanged and planted files');
   const copy = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-tamper-'));
-  fs.cpSync(UNPACKED, copy, {
-    recursive: true,
-    filter: (src) => !src.includes(path.join('resources', 'ms-playwright')),
-  });
+  fs.cpSync(UNPACKED, copy, { recursive: true, filter: (src) => !src.includes(path.join('resources', 'ms-playwright')) });
+  const copyExe = path.join(copy, EXE_NAME);
+  const marker = path.join(os.tmpdir(), 'studio-planted-' + Date.now() + '.txt');
+  const plant = 'require("fs").writeFileSync(' + JSON.stringify(marker) + ', "loaded"); module.exports = {};';
+  // A module where Node would look for ws's native add-on, beside and above the app.
+  for (const dir of [path.join(copy, 'resources', 'node_modules'), path.join(copy, 'node_modules')]) {
+    fs.mkdirSync(path.join(dir, 'bufferutil'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'bufferutil', 'index.js'), plant);
+  }
+  // The one compiler file outside app.asar, turned into a trap the app itself must never spring.
+  const copyTs = path.join(copy, 'resources', 'app.asar.unpacked', 'node_modules', 'typescript', 'lib', 'typescript.js');
+  fs.writeFileSync(copyTs, plant + '\n' + fs.readFileSync(copyTs, 'utf-8'));
+  // A reg.exe that is not Windows' own, in the folder the app starts from.
+  fs.copyFileSync(process.execPath, path.join(copy, 'reg.exe'));
+  reset(given, true);
+  const planted = await startStudio(copyExe, { cwd: copy });
+  expect(planted.port > 0, 'with files planted beside it, the app still starts', 'port ' + planted.port);
+  expect(!fs.existsSync(marker), 'no planted module, and not the compiler file, ran inside the app');
+  if (licence.machine) {
+    expect(planted.port > 0 && licence.machine === machineCode(), 'a planted reg.exe cannot answer for the machine code');
+  } else {
+    console.log('skip  a planted reg.exe (the licence given is not for one computer)');
+  }
+  killTree(planted.child);
+  await sleep(2000);
+  fs.rmSync(marker, { force: true });
+
+  // One byte of main.js changed: the app must refuse to start.
+  const raw = asar.getRawHeader(path.join(copy, 'resources', 'app.asar')) as { headerSize: number; header: { files: Record<string, { offset: string }> } };
   const copyAsar = path.join(copy, 'resources', 'app.asar');
-  // One letter of the copyright line at the top of main.js, past the archive's header.
-  const raw = asar.getRawHeader(copyAsar) as { headerSize: number; header: { files: Record<string, { offset: string }> } };
   const bytes = fs.readFileSync(copyAsar);
   const at = 8 + raw.headerSize + Number(raw.header.files['main.js'].offset) + 5;
   bytes[at] = bytes[at] ^ 0x20;
   fs.writeFileSync(copyAsar, bytes);
-  reset(licence, true);
-  r = await runFor(path.join(copy, 'QA Practice Training Studio.exe'), [], 8000);
+  reset(given, true);
+  r = await runFor(copyExe, [], 8000, { cwd: copy });
   expect(!r.alive && !fs.existsSync(path.join(USER, 'port.json')), 'a changed app.asar is refused', r.alive ? 'still running' : 'exited');
   fs.rmSync(copy, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 });
 

@@ -12,16 +12,21 @@
  * stopped at a time limit.
  */
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { NODE_BIN, config, listening, onDisk } from '../config';
 import { emit, retireStream } from '../runner';
+import { learnerEnv, systemExe } from '../child-env';
 import { DEFAULT_SPEC, HELP, parse, type Parsed } from './commands';
 import { PLAYWRIGHT_CLI, fileExists, hasReport, prepareWorkspace, reportDir, saveFile, workspaceDir } from './workspace';
 import type { Workspace } from '../../../shared/contracts/course_day';
 
-/** Where the backend serves the last HTML report. routes.ts mounts it. */
-export const REPORT_URL = '/api/terminal/report/index.html';
+/**
+ * Where the last HTML report is served: a server of its own (server.ts), outside the studio's
+ * origin, so the report cannot use the studio's API.
+ */
+const reportUrl = (): string => 'http://127.0.0.1:' + listening.reportPort + '/index.html';
 
 /** The workspace whose report show-report opens: the one the last test run used. */
 let reportFrom: Workspace = 'project';
@@ -49,7 +54,8 @@ const CHECK_FLAGS = [
   'false',
 ];
 
-type Running = { runId: string; child: ChildProcess; stopping: boolean; timedOut: boolean };
+/** frameKey: what the command's test processes send with each live-view frame (receiveFrame). */
+type Running = { runId: string; child: ChildProcess; stopping: boolean; timedOut: boolean; frameKey: string };
 let running: Running | null = null;
 
 const say = (runId: string, text: string): void => emit(runId, { event: 'term', data: text.replace(/\n/g, '\r\n') + '\r\n' });
@@ -172,7 +178,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
       return done(runId, 1);
     }
     say(runId, 'Opening the report of the last run in a new browser tab.');
-    return done(runId, 0, REPORT_URL);
+    return done(runId, 0, reportUrl());
   }
 
   try {
@@ -183,13 +189,10 @@ export function startCommand(runId: string, line: string, code: string, file: st
     return done(runId, 1);
   }
 
-  // The learner's code runs with the studio's environment minus its secrets, as a Run does.
-  const env: NodeJS.ProcessEnv = { ...process.env };
-  for (const key of Object.keys(env)) {
-    if (/ANTHROPIC|API_KEY|TOKEN|SECRET|PASSWORD/i.test(key)) delete env[key];
-  }
-  delete env.CI; // A CI variable would change retries and forbidOnly, and the lessons assume a computer.
-  env.FORCE_COLOR = '1';
+  // The learner's code runs with only the environment a program needs (child-env.ts). No CI
+  // variable either: it would change retries and forbidOnly, and the lessons assume a computer.
+  const frameKey = crypto.randomBytes(16).toString('hex');
+  const env = learnerEnv({ FORCE_COLOR: '1' });
 
   let args: string[];
   let cwd: string;
@@ -197,6 +200,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
     reportFrom = ws;
     env.PLAYWRIGHT_HTML_OPEN = 'never';
     env.STUDIO_FRAME_URL = 'http://127.0.0.1:' + listening.port + '/api/terminal/' + runId + '/frame';
+    env.STUDIO_FRAME_KEY = frameKey;
     env.STUDIO_ALLOWED_ORIGINS = JSON.stringify(config.run.allowed_origins);
     args = [PLAYWRIGHT_CLI, 'test', ...parsed.args];
     cwd = workspaceDir(ws);
@@ -217,7 +221,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
     detached: process.platform !== 'win32',
     windowsHide: true,
   });
-  const current: Running = { runId, child, stopping: false, timedOut: false };
+  const current: Running = { runId, child, stopping: false, timedOut: false, frameKey };
   running = current;
 
   const forward = (chunk: Buffer): void => emit(runId, { event: 'term', data: chunk.toString('utf-8').replace(/\r?\n/g, '\r\n') });
@@ -266,7 +270,7 @@ function kill(r: Running, hard: boolean): void {
   const pid = r.child.pid;
   if (!pid) return;
   if (process.platform === 'win32') {
-    spawn('taskkill', ['/pid', String(pid), '/T', '/F'], { windowsHide: true }).on('error', () => r.child.kill());
+    spawn(systemExe('taskkill.exe'), ['/pid', String(pid), '/T', '/F'], { windowsHide: true }).on('error', () => r.child.kill());
     return;
   }
   const signal = (sig: NodeJS.Signals): void => {
@@ -280,9 +284,15 @@ function kill(r: Running, hard: boolean): void {
   if (!hard) setTimeout(() => { if (r.child.exitCode === null && r.child.signalCode === null) signal('SIGKILL'); }, 4000);
 }
 
-/** One live-view frame from the workspace's test wrapper. Frames for a finished command are dropped. */
-export function receiveFrame(runId: string, body: { data?: unknown; width?: unknown; height?: unknown }): boolean {
+/**
+ * One live-view frame from the workspace's test wrapper, which sends the key only the running
+ * command was given. Frames for a finished command, or without that key, are dropped.
+ */
+export function receiveFrame(runId: string, key: string | undefined, body: { data?: unknown; width?: unknown; height?: unknown }): boolean {
   if (!running || running.runId !== runId || typeof body.data !== 'string') return false;
+  const want = Buffer.from(running.frameKey);
+  const got = Buffer.from(key ?? '');
+  if (got.length !== want.length || !crypto.timingSafeEqual(got, want)) return false;
   emit(runId, {
     event: 'frame',
     data: body.data,

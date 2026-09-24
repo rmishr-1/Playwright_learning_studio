@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Markdown, isSpecFile } from './Markdown';
+import { fence } from '../lib/fence';
 import { Callout, CodeBlock, Diagram, TerminalBlock, type EditorFile } from './LessonBlocks';
 import type { ContentBlock, CoursePart, PracticeProblem } from '../../../shared/contracts/course_day';
 import type { CheckResult } from '../../../shared/contracts/check';
@@ -425,7 +426,7 @@ export function TheoryPane({
             }
             default:
               return (
-                <Markdown key={i} text={'```ts\n' + block.text + '\n```'} onLoadIntoEditor={(c) => onLoadIntoEditor(c)} />
+                <Markdown key={i} text={fence('ts', block.text)} onLoadIntoEditor={(c) => onLoadIntoEditor(c)} />
               );
           }
         })}

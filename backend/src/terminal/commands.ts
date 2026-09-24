@@ -48,16 +48,18 @@ const FLAGS = new Set([
  * command; the checks exist to give a clear message instead of a confusing runner error.
  */
 const NUMBER = /^\d{1,4}$/;
+/** A whole number up to a limit: enough for any lesson, not enough to exhaust the computer. */
+const UP_TO = (max: number) => (v: string): boolean => /^\d{1,4}$/.test(v) && Number(v) <= max;
 const TEXT = (v: string): boolean => v.length > 0 && v.length <= 200;
 const WITH_VALUE: Record<string, (v: string) => boolean> = {
   '--project': (v) => /^[\w.-]{1,40}$/.test(v),
   '--grep': TEXT,
   '-g': TEXT,
   '--grep-invert': TEXT,
-  '--workers': (v) => NUMBER.test(v) || /^\d{1,3}%$/.test(v),
-  '-j': (v) => NUMBER.test(v),
-  '--retries': (v) => NUMBER.test(v),
-  '--repeat-each': (v) => NUMBER.test(v),
+  '--workers': (v) => UP_TO(16)(v) || (/^\d{1,3}%$/.test(v) && Number(v.slice(0, -1)) <= 100),
+  '-j': UP_TO(16),
+  '--retries': UP_TO(10),
+  '--repeat-each': UP_TO(100),
   '--max-failures': (v) => NUMBER.test(v),
   '--timeout': (v) => /^\d{1,7}$/.test(v),
   '--trace': (v) => ['on', 'off', 'on-first-retry', 'on-all-retries', 'retain-on-failure', 'retain-on-first-failure'].includes(v),
@@ -128,14 +130,16 @@ export function tokenize(line: string): string[] | null {
 /** A path under tests/, a file or a folder, with no way to climb out of it. */
 function testsPath(w: string): string | null {
   const clean = w.replace(/^\.\//, '').replace(/\/$/, '');
-  if (!/^tests(\/[\w.-]+)*$/.test(clean) || clean.split('/').includes('..')) return null;
+  // No part may start with '-', so a path can never be read as an option.
+  if (!/^tests(\/\w[\w.-]*)*$/.test(clean) || clean.split('/').includes('..')) return null;
   return clean;
 }
 
 /** A TypeScript file in ts-basics/, written as the lessons write it: `day3/hello.ts`. */
 function tsBasicsFile(w: string): string | null {
   const clean = w.replace(/^\.\//, '').replace(/^ts-basics\//, '');
-  if (!/^([\w.-]+\/)*[\w.-]+\.ts$/.test(clean) || clean.split('/').includes('..')) return null;
+  // No part may start with '-' or '.', so a file name can never be read as an option.
+  if (!/^(\w[\w.-]*\/)*\w[\w.-]*\.ts$/.test(clean) || clean.split('/').includes('..')) return null;
   return clean;
 }
 

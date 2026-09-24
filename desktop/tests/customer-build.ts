@@ -1,31 +1,29 @@
 /**
- * Checks a build made for one customer, laid out as installed (see packed.ts):
+ * Checks a build made for one customer, laid out as installed (see packed.ts). It makes everything
+ * it needs with the tests' own key (test-keys.ts): a customer licence with a seal and a logo, and a
+ * build for it that does not carry it, as new-customer.bat makes.
  *
- *   npm run build -- --dev --obfuscate --licence <file> [--no-carry]
- *   npm run test:customer -- <file>
+ *   npm run test:customer [-- <logo.png>]
  *
- *   - it accepts only that customer's licence: every other one is refused, even a valid one Evoke
- *     issued to someone else
- *   - a build that carries the licence opens straight to the agreement; one that does not (the
- *     zip new-customer.bat makes) asks for it, and opens nothing until it is the right one
+ *   - it accepts only that customer's licence: every other one is refused, even a valid one
+ *   - without that licence it opens nothing, and its course cannot even be decrypted
  *   - its lessons carry that customer's licence ID as their watermark
- *   - when the licence carries a logo, the header shows it right of the theme switch
+ *   - the header shows the customer's logo right of the theme switch
  */
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { _electron as electron, type ElectronApplication, type Page } from 'playwright';
-import { machineCode, sign, verify, type LicenceFile } from '../src/licence';
+import { machineCode, sign, verify, type Licence } from '../src/licence';
 import { decodeAll } from '../src/watermark';
+import { build } from '../scripts/build';
 import { packedApp } from './packed';
+import { testKeys } from './test-keys';
 import { keepUserData } from './user-data';
 
 const DESKTOP = path.resolve(__dirname, '..');
 const OUT = path.join(DESKTOP, 'test-output');
-// The app keeps its data under its product name. A test build may be given another name, to
-// run beside an installed copy.
-const PRODUCT = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'package.json'), 'utf-8')) as { productName: string }).productName;
-const USER = path.join(process.env.APPDATA!, PRODUCT);
-const PRIVATE_KEY = fs.readFileSync(path.join(DESKTOP, 'keys', 'licence-private.pem'), 'utf-8');
+const USER = path.join(process.env.APPDATA!, 'QA Practice Training Studio');
 
 let failures = 0;
 function expect(ok: boolean, what: string, detail = ''): void {
@@ -48,78 +46,82 @@ async function setupStep(app: ElectronApplication): Promise<{ page: Page; step: 
 }
 
 async function main(): Promise<void> {
-  const file = process.argv[2];
-  if (!file) throw new Error('Usage: npm run test:customer -- <the licence the build was made with>');
-  fs.mkdirSync(OUT, { recursive: true });
   keepUserData(USER, 'QA Practice Training Studio.exe');
-  const text = fs.readFileSync(file, 'utf-8');
-  const customer = (JSON.parse(text) as LicenceFile).licence;
-  const carried = fs.existsSync(path.join(DESKTOP, 'build', 'app', 'licence.lic'));
+  fs.mkdirSync(OUT, { recursive: true });
+  const keys = testKeys();
+  const logoFile = process.argv[2] ?? path.join(DESKTOP, 'assets', 'icon.png');
+  const customer: Licence = {
+    id: 'EVK-C0570001',
+    licensee: 'Customer Test University',
+    email: null,
+    issued: '2026-09-24',
+    expires: null,
+    machine: null,
+    product: 'learning-studio',
+    logo: 'data:image/png;base64,' + fs.readFileSync(logoFile).toString('base64'),
+    seal: crypto.randomBytes(32).toString('hex'),
+  };
+  const licenceText = JSON.stringify(sign(customer, keys.privateKey));
+  const licenceFile = path.join(OUT, 'customer-test.lic');
+  fs.writeFileSync(licenceFile, licenceText);
+  console.log('Building a copy for ' + customer.licensee + ', sealed to its licence, obfuscated like a release...');
+  await build({ release: false, obfuscate: true, licenceFile, carryLicence: false, publicKeyFile: keys.publicKeyFile });
+  expect(!fs.existsSync(path.join(DESKTOP, 'build', 'app', 'licence.lic')), 'the build does not carry the licence');
   const exe = await packedApp();
   const launch = () => electron.launch({ executablePath: exe, args: [], timeout: 60_000 });
-  console.log('A build for ' + customer.licensee + ' (' + customer.id + '), ' + (carried ? 'carrying' : 'not carrying') + ' the licence');
 
   // A valid licence, for someone else: this copy is not theirs.
-  const other = JSON.stringify(
-    sign({ id: 'EVK-0DDC0FFE', licensee: 'Another Customer', email: null, issued: '2026-09-24', expires: null, machine: machineCode(), product: 'learning-studio' }, PRIVATE_KEY),
-  );
-  const publicKey = fs.readFileSync(path.join(DESKTOP, 'src', 'licence-public.pem'), 'utf-8');
-  const verdict = verify(other, publicKey, { onlyId: customer.id, machine: machineCode() });
+  const otherLicence: Licence = { ...customer, id: 'EVK-0DDC0FFE', licensee: 'Another Customer', logo: null, seal: crypto.randomBytes(32).toString('hex'), machine: machineCode() };
+  const other = JSON.stringify(sign(otherLicence, keys.privateKey));
+  const verdict = verify(other, keys.publicKey, { onlyId: customer.id, machine: machineCode() });
   expect(!verdict.ok && /not the one this copy was made for/.test(verdict.reason), 'the check refuses other licences', verdict.ok ? '' : verdict.reason);
 
-  if (!carried) {
-    reset(null);
-    let app = await launch();
-    let s = await setupStep(app);
-    expect(s.step === 'licence', 'with no licence, it asks for one and opens nothing');
-    await app.close();
-    reset(other);
-    app = await launch();
-    s = await setupStep(app);
-    expect(s.step === 'licence' && /not the one this copy was made for/.test(s.reason), 'another customer\'s valid licence is refused', s.reason);
-    await s.page.screenshot({ path: path.join(OUT, 'customer-1-other-licence.png') });
-    await app.close();
-  } else {
-    reset(other);
-    const app = await launch();
-    const s = await setupStep(app);
-    const licensee = s.step === 'eula' ? await s.page.textContent('#licensee') : null;
-    expect(licensee === customer.licensee, 'another customer\'s licence does not make it theirs', String(licensee));
-    await app.close();
-  }
+  reset(null);
+  let app = await launch();
+  let s = await setupStep(app);
+  expect(s.step === 'licence', 'with no licence, it asks for one and opens nothing');
+  await app.close();
 
-  reset(carried ? null : text);
-  const app = await launch();
-  const s = await setupStep(app);
+  reset(other);
+  app = await launch();
+  s = await setupStep(app);
+  expect(s.step === 'licence' && /not the one this copy was made for/.test(s.reason), 'another customer\'s valid licence is refused', s.reason);
+  await s.page.screenshot({ path: path.join(OUT, 'customer-1-other-licence.png') });
+  await app.close();
+
+  // The course is sealed: the key built into the app opens it only with this customer's seal.
+  const pack = fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'content.pack'));
+  const mainJs = fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'main.js'), 'utf-8');
+  expect(pack.subarray(0, 4).toString('latin1') === 'SPK1' && !mainJs.includes(customer.seal!), 'the seal is not in the app: it comes only with the licence');
+
+  reset(licenceText);
+  app = await launch();
+  s = await setupStep(app);
   expect(s.step === 'eula' && (await s.page.textContent('#licensee')) === customer.licensee, 'with its own licence, it shows the agreement', customer.licensee);
   await s.page.check('#agree');
   const opened = app.waitForEvent('window');
   await s.page.click('#accept');
   const page = await opened;
   await page.waitForSelector('text=Week 1', { timeout: 30_000 });
+  expect(true, 'with its own licence, the sealed course opens');
   const day = await page.evaluate(() => fetch('/api/course/1/3').then((r) => r.text()));
   const marks = [...new Set(decodeAll(day))];
-  expect(marks.length === 1 && marks[0] === customer.id, 'the lessons carry this customer\'s watermark', marks.join(', '));
+  expect(marks.length === 1 && marks[0] === customer.id, 'the lessons carry this customer\'s watermark only', marks.join(', '));
 
   const logo = page.locator('.hdr-customer img');
-  if (customer.logo) {
-    await logo.waitFor({ timeout: 10_000 });
-    const shown = await logo.evaluate((img: HTMLImageElement) => ({
-      width: img.naturalWidth,
-      alt: img.alt,
-      rightOfTheme:
-        img.closest('.hdr-customer')!.getBoundingClientRect().left >=
-        document.querySelector('.app-header .hdr-btn.icon')!.getBoundingClientRect().right,
-    }));
-    expect(shown.width > 0 && shown.alt === customer.licensee, 'the header shows the customer\'s logo', shown.width + 'px wide, "' + shown.alt + '"');
-    expect(shown.rightOfTheme, 'the logo sits right of the theme switch');
-    await page.screenshot({ path: path.join(OUT, 'customer-2-course-index.png') });
-    await page.goto(new URL(page.url()).origin + '/learn/w1/d3');
-    await page.waitForTimeout(2500);
-    expect(await logo.isVisible(), 'the logo stays on a lesson page');
-  } else {
-    expect((await logo.count()) === 0, 'no licence logo, no logo in the header');
-  }
+  await logo.waitFor({ timeout: 10_000 });
+  const shown = await logo.evaluate((img: HTMLImageElement) => ({
+    width: img.naturalWidth,
+    alt: img.alt,
+    rightOfTheme:
+      img.closest('.hdr-customer')!.getBoundingClientRect().left >= document.querySelector('.app-header .hdr-btn.icon')!.getBoundingClientRect().right,
+  }));
+  expect(shown.width > 0 && shown.alt === customer.licensee, 'the header shows the customer\'s logo', shown.width + 'px wide, "' + shown.alt + '"');
+  expect(shown.rightOfTheme, 'the logo sits right of the theme switch');
+  await page.screenshot({ path: path.join(OUT, 'customer-2-course-index.png') });
+  await page.goto(new URL(page.url()).origin + '/learn/w1/d3');
+  await page.waitForTimeout(2500);
+  expect(await logo.isVisible(), 'the logo stays on a lesson page');
   await page.screenshot({ path: path.join(OUT, 'customer-3-lesson.png') });
   await app.close();
 

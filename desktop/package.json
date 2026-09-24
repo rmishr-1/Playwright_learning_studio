@@ -15,7 +15,10 @@
         "test:app": "node ../node_modules/tsx/dist/cli.mjs tests/app-smoke.ts",
         "test:release": "node ../node_modules/tsx/dist/cli.mjs tests/release-checks.ts",
         "test:customer": "node ../node_modules/tsx/dist/cli.mjs tests/customer-build.ts",
-        "new-customer": "node ../node_modules/tsx/dist/cli.mjs scripts/new-customer.ts"
+        "new-customer": "node ../node_modules/tsx/dist/cli.mjs scripts/new-customer.ts",
+        "licence:backup-key": "node ../node_modules/tsx/dist/cli.mjs scripts/backup-key.ts backup",
+        "licence:restore-key": "node ../node_modules/tsx/dist/cli.mjs scripts/backup-key.ts restore",
+        "licence:revoke": "node ../node_modules/tsx/dist/cli.mjs scripts/revoke-licence.ts"
     },
     "devDependencies": {
         "@fontsource/ibm-plex-mono": "5.3.0",

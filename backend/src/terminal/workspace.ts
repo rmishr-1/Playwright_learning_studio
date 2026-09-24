@@ -89,26 +89,34 @@ import { test as base } from ${real};
 export * from ${real};
 
 const FRAME_URL = process.env.STUDIO_FRAME_URL;
+const FRAME_KEY = process.env.STUDIO_FRAME_KEY ?? '';
 // The same fail-closed allowlist a Run uses (Data/Config/studio.config.json): a page may only
-// navigate to the course's practice sites. The backend always sets it; unset, nothing is gated.
-const ALLOWED: string[] | null = process.env.STUDIO_ALLOWED_ORIGINS ? JSON.parse(process.env.STUDIO_ALLOWED_ORIGINS) : null;
+// navigate to the course's practice sites. The backend always sets it; unset, nothing is allowed.
+const ALLOWED: string[] = process.env.STUDIO_ALLOWED_ORIGINS ? JSON.parse(process.env.STUDIO_ALLOWED_ORIGINS) : [];
+
+// The same scheme and host as an allowed origin; any port, unless the entry names one.
+function allowed(url: string): boolean {
+  let u: URL;
+  try { u = new URL(url); } catch { return false; }
+  return ALLOWED.some((a) => {
+    let e: URL;
+    try { e = new URL(a); } catch { return false; }
+    return u.protocol === e.protocol && u.hostname === e.hostname && (e.port === '' || u.port === e.port);
+  });
+}
 
 export const test = base.extend({
   context: async ({ context }, use) => {
-    if (ALLOWED) {
-      await context.route('**/*', (route) => {
-        const request = route.request();
-        const url = request.url();
-        const topLevel = request.isNavigationRequest() && request.frame().parentFrame() === null;
-        let origin = '';
-        try { origin = new URL(url).origin; } catch {}
-        if (!topLevel || url.startsWith('data:') || url.startsWith('about:') || ALLOWED.some((a) => origin === a || origin.startsWith(a))) {
-          return route.fallback();
-        }
-        console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
-        return route.abort('blockedbyclient');
-      });
-    }
+    await context.route('**/*', (route) => {
+      const request = route.request();
+      const url = request.url();
+      const topLevel = request.isNavigationRequest() && request.frame().parentFrame() === null;
+      if (!topLevel || url.startsWith('data:') || url.startsWith('about:') || allowed(url)) {
+        return route.fallback();
+      }
+      console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
+      return route.abort('blockedbyclient');
+    });
     await use(context);
   },
   page: async ({ page, browserName }, use) => {
@@ -124,7 +132,7 @@ export const test = base.extend({
           sending = true;
           fetch(FRAME_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Studio-Frame-Key': FRAME_KEY },
             body: JSON.stringify({ data: f.data, width: f.metadata?.deviceWidth ?? 1280, height: f.metadata?.deviceHeight ?? 720 }),
           })
             .catch(() => {})
@@ -208,26 +216,31 @@ export function prepareWorkspace(name: Workspace): void {
       )
     : LEGACY_SEEDS;
   const seeds = readSeeds()[name]?.files ?? {};
-  const fileOf = (rel: string): string => path.join(dir, ...rel.split('/'));
+  // Every path, from the course or from .studio/seeded.json (which the learner's code can write),
+  // must stay inside tests/ or ts-basics/ of this workspace; anything else is skipped.
+  const fileOf = (rel: string): string | null => resolveInside(name, rel);
   const current = (rel: string): string | null => {
     const file = fileOf(rel);
-    return fs.existsSync(file) ? fingerprint(fs.readFileSync(file, 'utf-8')) : null;
+    return file && fs.existsSync(file) ? fingerprint(fs.readFileSync(file, 'utf-8')) : null;
   };
 
   // The course dropped a file the studio wrote, and the learner never changed it: remove it.
   for (const [rel, prints] of Object.entries(before)) {
-    if (rel in seeds) continue;
+    const file = fileOf(rel);
+    if (rel in seeds || !file) continue;
     const now = current(rel);
-    if (now && prints.includes(now)) fs.rmSync(fileOf(rel), { force: true });
+    if (now && prints.includes(now)) fs.rmSync(file, { force: true });
   }
 
   const after: Record<string, string> = {};
   for (const [rel, text] of Object.entries(seeds)) {
+    const file = fileOf(rel);
+    if (!file) continue;
     const now = current(rel);
     const untouched = now !== null && (before[rel] ?? []).includes(now);
     if (now === null || untouched) {
-      fs.mkdirSync(path.dirname(fileOf(rel)), { recursive: true });
-      fs.writeFileSync(fileOf(rel), text);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, text);
       after[rel] = fingerprint(text);
     } else if (now === fingerprint(text)) {
       after[rel] = now;

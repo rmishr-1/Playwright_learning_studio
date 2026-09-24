@@ -10,10 +10,10 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as zlib from 'node:zlib';
-import { markMarkdown } from '../src/watermark';
+import { markDay } from '../../shared/watermark';
+import { sealMask } from '../../backend/src/content';
 
 const CONTENT = path.resolve(__dirname, '..', '..', 'Data', 'Content');
-const MARKED = new Set(['markdown', 'callout', 'at-a-glance', 'recap', 'reference']);
 
 type Block = { type: string; text: string };
 type Day = { parts: { blocks: Block[]; problems?: { statement: string }[] }[] };
@@ -24,29 +24,20 @@ function files(dir: string, prefix = ''): string[] {
   );
 }
 
-/** Writes the pack, and returns the key as two halves that XOR to it. */
-export function packContent(out: string, mark: string): { key: [string, string]; files: number; marks: number } {
+/**
+ * Writes the pack, and returns the key as two halves that XOR to it; with a seal (a build for one
+ * customer), to the key XORed with the seal's mask, so the licence is needed to open it.
+ */
+export function packContent(out: string, mark: string, seal: string | null = null): { key: [string, string]; files: number; marks: number } {
   const entries: Record<string, string> = {};
   let marks = 0;
   for (const rel of files(CONTENT)) {
     if (!rel.endsWith('.json') || rel === 'course-plan.json') continue;
     let text = fs.readFileSync(path.join(CONTENT, ...rel.split('/')), 'utf-8');
     if (rel.startsWith('weeks/')) {
-      const day = JSON.parse(text) as Day;
-      for (const part of day.parts) {
-        for (const block of part.blocks) {
-          if (!MARKED.has(block.type) || typeof block.text !== 'string') continue;
-          const marked = markMarkdown(block.text, mark);
-          if (marked !== block.text) marks++;
-          block.text = marked;
-        }
-        for (const problem of part.problems ?? []) {
-          const marked = markMarkdown(problem.statement, mark);
-          if (marked !== problem.statement) marks++;
-          problem.statement = marked;
-        }
-      }
-      text = JSON.stringify(day);
+      const marked = markDay(JSON.parse(text) as Day, mark);
+      marks += marked.marks;
+      text = JSON.stringify(marked.day);
     } else {
       text = JSON.stringify(JSON.parse(text));
     }
@@ -63,6 +54,7 @@ export function packContent(out: string, mark: string): { key: [string, string];
 
   const a = crypto.randomBytes(32);
   const b = Buffer.alloc(32);
-  for (let i = 0; i < 32; i++) b[i] = key[i] ^ a[i];
+  const mask = seal ? sealMask(seal) : Buffer.alloc(32);
+  for (let i = 0; i < 32; i++) b[i] = key[i] ^ a[i] ^ mask[i];
   return { key: [a.toString('hex'), b.toString('hex')], files: Object.keys(entries).length, marks };
 }

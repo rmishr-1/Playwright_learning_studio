@@ -11,13 +11,13 @@
  * It is sized for an internal training tool on a trusted network. Exposing it to the public
  * internet needs a container per run - see the README.
  */
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import * as ts from 'typescript';
 import { NODE_BIN, config, onDisk } from './config';
+import { learnerEnv, systemExe } from './child-env';
 import type { RunRequest, RunResult, RunStreamEvent } from '../../shared/contracts/run';
 
 /**
@@ -106,11 +106,16 @@ let _browser = null;
 let _page = null;
 let _lastShot = null;
 
-function originOf(url) { try { return new URL(url).origin; } catch { return null; } }
+// The same scheme and host as an allowed origin; any port, unless the entry names one.
+// Exact, so https://playwright.dev.example.com is not https://playwright.dev.
 function allowed(url) {
-  const o = originOf(url);
-  if (!o) return false;
-  return ALLOWED.some((a) => o === a || o.startsWith(a));
+  let u;
+  try { u = new URL(url); } catch { return false; }
+  return ALLOWED.some((a) => {
+    let e;
+    try { e = new URL(a); } catch { return false; }
+    return u.protocol === e.protocol && u.hostname === e.hostname && (e.port === '' || u.port === e.port);
+  });
 }
 
 async function launch(headless = true) {
@@ -199,23 +204,53 @@ function stripAnsi(text: string): string {
 
 /**
  * The editor is a TypeScript editor - learners write type annotations, interfaces and Page
- * Object classes. The program is executed with a plain `node run.js`, and a .js file gets none
- * of Node's own TypeScript support, so real course TypeScript (`(n: number) =>`, `private
- * readonly page: Page`, `import { type Page }`) threw a SyntaxError before a single line of the
- * learner's own code ran. Transpiling through the real compiler - not relying on Node's own
- * strip-only mode, which additionally rejects parameter properties and enums outright - removes
- * that whole class of failure. This is a syntax-only pass with no project type-checking, so it
- * does not reject anything `tsc` would merely warn about.
+ * Object classes. A plain .js file gets none of Node's own TypeScript support, so real course
+ * TypeScript (`(n: number) =>`, `private readonly page: Page`, `import { type Page }`) threw a
+ * SyntaxError before a single line of the learner's own code ran. Transpiling through the real
+ * compiler - not relying on Node's own strip-only mode, which additionally rejects parameter
+ * properties and enums outright - removes that whole class of failure. This is a syntax-only pass
+ * with no project type-checking, so it does not reject anything `tsc` would merely warn about.
+ *
+ * The transpiling happens in the run's own process (run.js below), not in the studio's: in the
+ * desktop app the compiler sits outside app.asar, where the app's integrity check does not reach,
+ * and the studio must not load code from there.
  */
-function transpile(program: string): string {
-  const out = ts.transpileModule(program, {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2022,
-      esModuleInterop: true,
-    },
-  });
-  return out.outputText;
+const TYPESCRIPT = JSON.stringify(onDisk(require.resolve('typescript')));
+const BOOTSTRAP = `
+const fs = require('fs');
+const path = require('path');
+const Module = require('module');
+const ts = require(${TYPESCRIPT});
+const file = path.join(__dirname, 'program.js');
+const out = ts.transpileModule(fs.readFileSync(path.join(__dirname, 'program.ts'), 'utf-8'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
+}).outputText;
+const m = new Module(file, module);
+m.filename = file;
+m.paths = Module._nodeModulePaths(__dirname);
+m._compile(out, file);
+`;
+
+/** A run's output kept for its result: enough for any lesson, and never enough to exhaust memory. */
+const MAX_OUTPUT = 1_000_000;
+/** The longest line kept while waiting for its end (a live-view frame is about 100 KB). */
+const MAX_LINE = 8_000_000;
+
+/** Runs in flight, so the app can stop them, with their browsers, as it closes. */
+const children = new Set<ChildProcess>();
+
+/** Stops a run's process with everything it started. On Windows only taskkill /T reaches the browsers. */
+function killTree(child: ChildProcess): void {
+  if (process.platform === 'win32' && child.pid) {
+    spawn(systemExe('taskkill.exe'), ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true }).on('error', () => child.kill('SIGKILL'));
+  } else {
+    child.kill('SIGKILL');
+  }
+}
+
+/** Stops every run in flight: the desktop app calls this as it closes. */
+export function stopRuns(): void {
+  for (const child of children) killTree(child);
 }
 
 export type StartedRun = { run_id: string; done: Promise<RunResult> };
@@ -245,7 +280,8 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
 
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-run-'));
   const program = path.join(scratch, 'run.js');
-  fs.writeFileSync(program, transpile(buildProgram(req.code)));
+  fs.writeFileSync(path.join(scratch, 'program.ts'), buildProgram(req.code));
+  fs.writeFileSync(program, BOOTSTRAP);
 
   const started = Date.now();
   let stdout = '';
@@ -255,36 +291,43 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   let error: RunResult['error'] = null;
   let blockedUrl: string | null = null;
 
-  // Chromium needs a real Windows environment (SystemRoot, TEMP, LOCALAPPDATA) to start at
-  // all, so the child gets the parent's env minus the secrets. Env is not the security
-  // boundary here - the separate process, the timeout and the navigation allowlist are.
-  const childEnv: NodeJS.ProcessEnv = { ...process.env };
-  for (const key of Object.keys(childEnv)) {
-    if (/ANTHROPIC|API_KEY|TOKEN|SECRET|PASSWORD/i.test(key)) delete childEnv[key];
-  }
-
+  // Chromium needs a real Windows environment (SystemRoot, TEMP, LOCALAPPDATA) to start at all,
+  // and gets only that (child-env.ts). Env is not the security boundary here - the separate
+  // process, the timeout and the navigation allowlist are.
   const child = spawn(NODE_BIN, [program], {
     cwd: scratch,
-    env: childEnv,
+    env: learnerEnv(),
     stdio: ['ignore', 'pipe', 'pipe'],
+    windowsHide: true,
   });
+  children.add(child);
+  let truncated = false;
+  const keep = (text: string): void => {
+    if (stdout.length + text.length <= MAX_OUTPUT) stdout += text;
+    else if (!truncated) {
+      truncated = true;
+      stdout += '[output cut short: over ' + MAX_OUTPUT + ' characters]\n';
+    }
+  };
 
   const done = new Promise<RunResult>((resolve) => {
     const timer = setTimeout(() => {
       status = 'timeout';
-      child.kill('SIGKILL');
+      killTree(child);
     }, config.run.timeout_ms);
 
     let buffer = '';
     child.stdout.on('data', (chunk: Buffer) => {
       buffer += chunk.toString('utf-8');
+      // A line that never ends is dropped rather than held without limit.
+      if (buffer.length > MAX_LINE && !buffer.includes('\n')) buffer = '';
       const lines = buffer.split('\n');
       buffer = lines.pop() ?? '';
       for (const line of lines) {
         const marker = line.indexOf(SENTINEL);
         if (marker === -1) {
           if (line.length) {
-            stdout += line + '\n';
+            keep(line + '\n');
             emit(runId, { event: 'stdout', text: line });
           }
           continue;
@@ -292,7 +335,7 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
         // Anything before the marker is genuine learner output on the same line.
         const pre = line.slice(0, marker);
         if (pre.length) {
-          stdout += pre + '\n';
+          keep(pre + '\n');
           emit(runId, { event: 'stdout', text: pre });
         }
         try {
@@ -300,7 +343,7 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
           if (evt.event === 'frame') {
             emit(runId, { event: 'frame', data: evt.data, width: evt.width, height: evt.height });
           } else if (evt.event === 'stdout') {
-            stdout += evt.text + '\n';
+            keep(evt.text + '\n');
             emit(runId, { event: 'stdout', text: evt.text });
           } else if (evt.event === 'blocked') {
             blockedUrl = evt.url;
@@ -323,11 +366,12 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
     });
 
     child.stderr.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString('utf-8');
+      if (stderr.length < MAX_OUTPUT) stderr += chunk.toString('utf-8');
     });
 
     child.on('close', () => {
       clearTimeout(timer);
+      children.delete(child);
       active--;
       // On Windows the browser can still hold a file in the scratch folder for a moment after the
       // child exits, and rmSync then throws EPERM. Retry, and never let cleanup fail the run.

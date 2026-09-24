@@ -1,14 +1,16 @@
-import express, { Router, type Request, type Response } from 'express';
+import { Router, type Response } from 'express';
 import { z } from 'zod';
 import { config } from './config';
 import { lastFrame, prepareRun, startRun } from './runner';
-import { currentReportDir, receiveFrame, startCommand, stopCommand } from './terminal';
+import { receiveFrame, startCommand, stopCommand } from './terminal';
 import { courseDay, courseIndex, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { CheckRequest } from '../../shared/contracts/check';
 import { checkAnswer } from './check';
 import { getBranding } from './branding';
+import { serveMark } from './content';
+import { markDay } from '../../shared/watermark';
 import { Workspace } from '../../shared/contracts/course_day';
 import type { ErrorCode } from '../../shared/contracts/problem_error';
 
@@ -27,6 +29,22 @@ const badRequest = (res: Response, code: ErrorCode, e: unknown): void =>
   fail(res, 400, code, e instanceof z.ZodError ? e.issues[0]?.message ?? 'invalid request' : String(e));
 
 export const router = Router();
+
+/**
+ * A locked day is closed on every route, not just when its lessons are read: a check would give
+ * away its expected output, and a run or progress record would count work on a day that is not open.
+ */
+function refuseLocked(res: Response, week: number, day: number): boolean {
+  const found = courseDay(week, day);
+  if (!found?.locked) return false;
+  fail(res, 423, 'DAY_LOCKED', found.title);
+  return true;
+}
+
+/** Progress is bookkeeping: when recording it fails, the request it came with still succeeds. */
+const recordQuietly = (update: Parameters<typeof recordProgress>[0]): void => {
+  recordProgress(update).catch((e: unknown) => console.error('[studio] progress not recorded: ' + (e as Error).message));
+};
 
 // ---------------------------------------------------------------- content
 
@@ -53,7 +71,9 @@ router.get('/course/:week/:day', (req, res) => {
     // rather than a 404. The SPA renders the locked state from this.
     return fail(res, 423, 'DAY_LOCKED', found.title);
   }
-  res.json(found);
+  // Every day leaves marked with the licence the app runs under (shared/watermark.ts).
+  const mark = serveMark();
+  res.json(mark ? markDay(found, mark).day : found);
 });
 
 /** Who the studio is licensed to, and their logo, for the header (branding.ts). */
@@ -61,7 +81,13 @@ router.get('/branding', (_req, res) => res.json(getBranding()));
 
 // ---------------------------------------------------------------- progress
 
-router.get('/progress', (_req, res) => res.json(readProgress()));
+router.get('/progress', (_req, res) => {
+  try {
+    res.json(readProgress());
+  } catch {
+    fail(res, 500, 'INTERNAL_ERROR', 'The progress record could not be read.');
+  }
+});
 
 router.post('/progress', async (req, res) => {
   let parsed;
@@ -70,7 +96,12 @@ router.post('/progress', async (req, res) => {
   } catch (e) {
     return badRequest(res, 'PART_NOT_FOUND', e);
   }
-  res.json(await recordProgress(parsed));
+  if (refuseLocked(res, parsed.week, parsed.day)) return;
+  try {
+    res.json(await recordProgress(parsed));
+  } catch {
+    fail(res, 500, 'INTERNAL_ERROR', 'The progress record could not be saved.');
+  }
 });
 
 // ---------------------------------------------------------------- run
@@ -82,6 +113,7 @@ router.post('/run', async (req, res) => {
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
+  if (refuseLocked(res, parsed.week, parsed.day)) return;
   const started = startRun(parsed);
   if ('queue_full' in started) {
     return fail(
@@ -95,7 +127,7 @@ router.post('/run', async (req, res) => {
   // Attempting an exercise is not reading the part, so it does not count the part as read -
   // every frontend records that separately.
   if (parsed.problem_number) {
-    void recordProgress({
+    recordQuietly({
       week: parsed.week,
       day: parsed.day,
       part: parsed.part,
@@ -134,6 +166,7 @@ router.post('/check', async (req, res) => {
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
+  if (refuseLocked(res, parsed.week, parsed.day)) return;
   const problem = courseDay(parsed.week, parsed.day)
     ?.parts.find((p) => p.part === parsed.part)
     ?.problems.find((q) => q.number === parsed.problem);
@@ -141,14 +174,18 @@ router.post('/check', async (req, res) => {
     return fail(res, 404, 'EXERCISE_NOT_FOUND', 'This exercise has no automatic check.');
   }
   // Checking an answer is an attempt at the exercise, not reading the part.
-  void recordProgress({
+  recordQuietly({
     week: parsed.week,
     day: parsed.day,
     part: parsed.part,
     attempted_problem: parsed.problem,
     viewed: false,
   });
-  res.json(await checkAnswer(problem, parsed));
+  try {
+    res.json(await checkAnswer(problem, parsed));
+  } catch {
+    fail(res, 500, 'INTERNAL_ERROR', 'The check could not run.');
+  }
 });
 
 // ---------------------------------------------------------------- terminal
@@ -182,13 +219,11 @@ router.post('/terminal/:run_id/stop', (req, res) => res.json({ stopped: stopComm
 
 /**
  * Live-view frames from the Workspace's test wrapper, which runs inside the test runner on this
- * same computer. Only a loopback caller is accepted, and only for the command that is running.
+ * same computer. Only a loopback caller is accepted, only for the command that is running, and only
+ * with the key that command was given (terminal/index.ts).
  */
 router.post('/terminal/:run_id/frame', (req, res) => {
   const from = req.socket.remoteAddress ?? '';
   if (!/^(::1|127\.|::ffff:127\.)/.test(from)) return res.status(403).end();
-  res.status(receiveFrame(req.params.run_id, req.body ?? {}) ? 204 : 410).end();
+  res.status(receiveFrame(req.params.run_id, req.get('x-studio-frame-key'), req.body ?? {}) ? 204 : 410).end();
 });
-
-/** The HTML report of the last Terminal command, opened by `npx playwright show-report`. */
-router.use('/terminal/report', (req, res, next) => express.static(currentReportDir())(req, res, next));

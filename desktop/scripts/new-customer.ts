@@ -14,6 +14,7 @@
  *                                                             and run QA Practice Training Studio.exe
  *   <customer> licence.lic                                    their licence
  *   READ ME FIRST.txt                                         how to start
+ *   SHA256SUMS.txt                                            the fingerprints of the two above
  *
  * The app in the zip opens only with that licence: it refuses every other one, even a valid
  * licence Evoke issued to someone else. It does not carry the licence, so the zip alone opens
@@ -23,6 +24,7 @@
  * Takes about 10 minutes, most of it compressing the browsers into the zip.
  */
 import { execFileSync, spawn } from 'node:child_process';
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as readline from 'node:readline';
@@ -30,6 +32,7 @@ import { issueLicence, problemWith, type IssueOptions } from './issue-licence';
 import type { LicenceFile } from '../src/licence';
 import { packageApp } from './package';
 import { DESKTOP, PRODUCT, VERSION } from './build';
+import { PRIVATE_FILE, hasPrivateKey } from './signing-key';
 
 function arg(name: string): string | null {
   const i = process.argv.indexOf('--' + name);
@@ -86,11 +89,11 @@ async function ask(): Promise<IssueOptions | null> {
 }
 
 async function main(): Promise<void> {
-  if (!fs.existsSync(path.join(DESKTOP, 'keys', 'licence-private.pem'))) {
-    throw new Error("Evoke's licence signing key is not on this computer (desktop/keys/licence-private.pem). Licences can only be issued where it is.");
-  }
   const rebuild = arg('rebuild');
   if (rebuild) return deliver(path.resolve(cleanPath(rebuild)));
+  if (!hasPrivateKey()) {
+    throw new Error("Evoke's licence signing key is not on this computer (" + PRIVATE_FILE + '). Licences can only be issued where it is.');
+  }
   const fromArgs = arg('licensee');
   const options: IssueOptions | null = fromArgs
     ? {
@@ -122,7 +125,7 @@ async function deliver(licenceFile: string): Promise<void> {
   const licence = (JSON.parse(fs.readFileSync(licenceFile, 'utf-8')) as LicenceFile).licence;
 
   // Node and the browsers the app ships, the first time.
-  if (!fs.existsSync(path.join(DESKTOP, 'runtime', 'node', 'node.exe')) || !fs.existsSync(path.join(DESKTOP, 'runtime', 'ms-playwright'))) {
+  if (!fs.existsSync(path.join(DESKTOP, 'runtime', 'MANIFEST.sha256'))) {
     console.log('\n> Gathering Node and the browsers the app ships (first time only)');
     execFileSync(process.execPath, [path.join(DESKTOP, '..', 'node_modules', 'tsx', 'dist', 'cli.mjs'), path.join(__dirname, 'runtime.ts')], {
       stdio: 'inherit',
@@ -166,12 +169,19 @@ async function deliver(licenceFile: string): Promise<void> {
     ].join('\r\n'),
   );
 
+  // The zip's and the licence's fingerprints, for the customer to check what they received.
+  const sums = [zipOut, licenceOut]
+    .map((f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex') + '  ' + path.basename(f))
+    .join('\r\n');
+  fs.writeFileSync(path.join(out, 'SHA256SUMS.txt'), sums + '\r\n');
+
   console.log('\n' + '='.repeat(70));
   console.log('  DONE. Ready to send, in ' + out);
   console.log('='.repeat(70));
   console.log('  ' + path.basename(zipOut) + '  (' + Math.round(fs.statSync(zipOut).size / 1024 / 1024) + ' MB)');
   console.log('  ' + path.basename(licenceOut));
   console.log('  READ ME FIRST.txt');
+  console.log('  SHA256SUMS.txt');
   if (!process.argv.includes('--no-open')) spawn('explorer.exe', [out], { detached: true, stdio: 'ignore' }).unref();
 }
 

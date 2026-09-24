@@ -31,7 +31,9 @@ import {
 } from 'electron';
 import { startServer, type RunningServer } from '../../backend/src/server';
 import { stopAll } from '../../backend/src/terminal';
+import { stopRuns } from '../../backend/src/runner';
 import { setBranding } from '../../backend/src/branding';
+import { useLicence } from '../../backend/src/content';
 import { machineCode, verify, type Licence, type Verdict } from './licence';
 
 declare const __STUDIO_RELEASE__: boolean;
@@ -41,6 +43,8 @@ declare const __STUDIO_BUILD__: {
   publicKey: string;
   /** Set in a build made for one customer: the only licence it accepts. */
   onlyId: string | null;
+  /** Fingerprints of licence files Evoke has withdrawn (desktop/revoked.json). */
+  revoked: string[];
 };
 
 const RELEASE = __STUDIO_RELEASE__;
@@ -49,13 +53,11 @@ const COPYRIGHT = 'Copyright © 2026 Evoke Technologies. All rights reserved.';
 
 // ---------------------------------------------------------------- start-up guards
 
-if (RELEASE) {
-  const debugging =
-    ['remote-debugging-port', 'remote-debugging-pipe', 'inspect', 'inspect-brk', 'inspect-port', 'js-flags'].some((s) =>
-      app.commandLine.hasSwitch(s),
-    ) || process.argv.some((a) => /^--(inspect|remote-debugging|js-flags|debug)/.test(a));
-  if (debugging) app.exit(1);
-}
+// A release build takes no command-line switches at all. Electron's and Chromium's switches can
+// attach a debugger, route the app's traffic through a proxy, or write it all to a log file
+// (--remote-debugging-port, --proxy-server, --log-net-log, ...), and any of those would hand out
+// the token and the decrypted course. The app itself never needs one: its shortcut passes none.
+if (RELEASE && process.argv.slice(1).some((a) => a.startsWith('-'))) app.exit(1);
 if (!app.requestSingleInstanceLock()) app.exit(0);
 
 Menu.setApplicationMenu(null);
@@ -67,6 +69,8 @@ Menu.setApplicationMenu(null);
  */
 const SETUP_ORIGIN = 'studio://app';
 const SETUP_FILES: Record<string, string> = { '/setup.html': 'text/html; charset=utf-8', '/logo.png': 'image/png' };
+/** The setup windows' contents, the only ones that may show studio:// pages. */
+const setupContents = new Set<number>();
 protocol.registerSchemesAsPrivileged([{ scheme: 'studio', privileges: { standard: true, secure: true } }]);
 
 function serveSetupFiles(): void {
@@ -86,7 +90,31 @@ const EULA_FILE = path.join(APP_DIR, 'EULA.txt');
 const ACCEPTED_FILE = path.join(USER_DIR, 'eula-accepted.json');
 const MACHINE = machineCode();
 
-const check = (text: string): Verdict => verify(text, BUILD.publicKey, { onlyId: BUILD.onlyId, machine: MACHINE });
+/**
+ * Today, as far as the licence is concerned: never earlier than the latest day the app has seen, so
+ * turning the computer's clock back does not bring an expired licence back to life.
+ */
+const LAST_SEEN_FILE = path.join(USER_DIR, 'last-seen.json');
+function licenceToday(): string {
+  const now = new Date().toISOString().slice(0, 10);
+  let seen = '';
+  try {
+    seen = (JSON.parse(fs.readFileSync(LAST_SEEN_FILE, 'utf-8')) as { day: string }).day;
+  } catch {
+    seen = '';
+  }
+  const today = /^\d{4}-\d{2}-\d{2}$/.test(seen) && seen > now ? seen : now;
+  try {
+    fs.mkdirSync(USER_DIR, { recursive: true });
+    fs.writeFileSync(LAST_SEEN_FILE, JSON.stringify({ day: today }));
+  } catch {
+    // Not being able to record the day must not stop the app.
+  }
+  return today;
+}
+
+const check = (text: string): Verdict =>
+  verify(text, BUILD.publicKey, { onlyId: BUILD.onlyId, machine: MACHINE, today: licenceToday(), revoked: BUILD.revoked });
 
 /** The licence the learner added, else the one built into a customer's copy. */
 function currentLicence(): Verdict {
@@ -165,8 +193,17 @@ function runSetup(): Promise<{ licence: Licence; close: () => void }> {
       webPreferences: { ...SAFE, preload: path.join(APP_DIR, 'setup-preload.js') },
     });
     let done = false;
-    ipcMain.handle('setup:state', () => setupState());
-    ipcMain.handle('setup:choose', async () => {
+    setupContents.add(win.webContents.id);
+    // Only the setup page, in the setup window, may call these.
+    const fromSetup = (e: Electron.IpcMainInvokeEvent): boolean =>
+      e.sender.id === win.webContents.id && (e.senderFrame?.url ?? '') === SETUP_ORIGIN + '/setup.html';
+    const handle = (channel: string, fn: () => unknown): void =>
+      ipcMain.handle(channel, (e) => {
+        if (!fromSetup(e)) throw new Error('Not allowed.');
+        return fn();
+      });
+    handle('setup:state', () => setupState());
+    handle('setup:choose', async () => {
       const picked = await dialog.showOpenDialog(win, {
         title: 'Choose your licence file',
         filters: [{ name: 'Licence', extensions: ['lic', 'json'] }],
@@ -180,8 +217,8 @@ function runSetup(): Promise<{ licence: Licence; close: () => void }> {
       fs.writeFileSync(LICENCE_FILE, text);
       return setupState();
     });
-    ipcMain.handle('setup:copy-machine', () => clipboard.writeText(MACHINE));
-    ipcMain.handle('setup:accept', () => {
+    handle('setup:copy-machine', () => clipboard.writeText(MACHINE));
+    handle('setup:accept', () => {
       const verdict = currentLicence();
       if (!verdict.ok) return setupState();
       fs.writeFileSync(
@@ -196,7 +233,7 @@ function runSetup(): Promise<{ licence: Licence; close: () => void }> {
       resolve({ licence: verdict.licence, close: () => win.close() });
       return null;
     });
-    ipcMain.handle('setup:quit', () => app.quit());
+    handle('setup:quit', () => app.quit());
     win.on('closed', () => {
       if (!done) app.quit();
     });
@@ -259,6 +296,8 @@ async function openStudio(licence: Licence): Promise<void> {
   const token = crypto.randomBytes(32).toString('hex');
   // The page shows the customer's logo, when their licence carries one, beside the theme switch.
   setBranding({ licensee: licence.licensee, logo: licence.logo ?? null });
+  // The seal opens a pack made for this customer; the ID marks every lesson the app serves.
+  useLicence({ seal: licence.seal ?? null, mark: licence.id });
   server = await startBackend(token);
   const origin = 'http://127.0.0.1:' + server.port;
   await session.defaultSession.cookies.set({
@@ -296,15 +335,21 @@ async function openStudio(licence: Licence): Promise<void> {
 // ---------------------------------------------------------------- every window
 
 let studioOrigin = '';
-const sameOrigin = (url: string): boolean => studioOrigin !== '' && (url === studioOrigin || url.startsWith(studioOrigin + '/'));
+/** The studio's own address, over http or, for the live view, ws. */
+const sameOrigin = (url: string): boolean => {
+  if (studioOrigin === '') return false;
+  const u = url.replace(/^ws:/, 'http:');
+  return u === studioOrigin || u.startsWith(studioOrigin + '/');
+};
 
 function openOutside(url: string): void {
   if (/^https?:\/\//i.test(url)) void shell.openExternal(url);
 }
 
 function lockDown(contents: WebContents): void {
-  // Pop-outs (the detached live view starts as about:blank) and the test report open in the app;
-  // anything else opens in the learner's own browser.
+  // Pop-outs (the detached live view starts as about:blank) open in the app; anything else, the
+  // test report included (it is served apart from the studio, see server.ts), opens in the
+  // learner's own browser.
   contents.setWindowOpenHandler(({ url }) => {
     if (url === '' || url === 'about:blank' || sameOrigin(url)) {
       return { action: 'allow', overrideBrowserWindowOptions: { autoHideMenuBar: true, webPreferences: SAFE } };
@@ -312,10 +357,16 @@ function lockDown(contents: WebContents): void {
     openOutside(url);
     return { action: 'deny' };
   });
-  contents.on('will-navigate', (e, url) => {
-    if (sameOrigin(url) || url.startsWith(SETUP_ORIGIN + '/')) return;
+  // The studio's windows stay on the studio; the setup window on its own page.
+  const stay = (e: { preventDefault: () => void }, url: string): void => {
+    if (sameOrigin(url) || (url.startsWith(SETUP_ORIGIN + '/') && setupContents.has(contents.id))) return;
     e.preventDefault();
     openOutside(url);
+  };
+  contents.on('will-navigate', stay);
+  contents.on('will-redirect', stay);
+  contents.on('will-frame-navigate', (e) => {
+    if (!e.isMainFrame && !sameOrigin(e.url) && !e.url.startsWith('about:') && !e.url.startsWith('blob:') && !e.url.startsWith('data:')) e.preventDefault();
   });
   contents.on('will-attach-webview', (e) => e.preventDefault());
   if (RELEASE) {
@@ -335,23 +386,53 @@ app.on('second-instance', () => {
 
 app.on('before-quit', () => {
   stopAll();
+  stopRuns();
   void server?.close();
+  void session.defaultSession.clearCache();
 });
 
 app.on('window-all-closed', () => app.quit());
 
+/**
+ * The session every window uses: no proxy (so nothing can route the studio's traffic elsewhere),
+ * no cache of what earlier versions kept, no request to anything but the studio and the app's own
+ * pages (the app works offline, and nothing it shows may reach out), no studio token sent anywhere
+ * but the studio, and no permissions beyond the clipboard.
+ */
+async function lockSession(): Promise<void> {
+  const s = session.defaultSession;
+  await s.setProxy({ mode: 'direct' });
+  await s.clearCache();
+  const local = (url: string): boolean =>
+    sameOrigin(url) || url.startsWith(SETUP_ORIGIN + '/') || /^(data|blob|about|devtools|chrome-extension):/.test(url);
+  s.webRequest.onBeforeRequest((details, callback) => callback({ cancel: !local(details.url) }));
+  s.webRequest.onBeforeSendHeaders((details, callback) => {
+    const headers = { ...details.requestHeaders };
+    if (!sameOrigin(details.url)) {
+      for (const name of Object.keys(headers)) if (name.toLowerCase() === 'cookie') delete headers[name];
+    }
+    callback({ requestHeaders: headers });
+  });
+  const allowedPermission = (permission: string): boolean => permission === 'clipboard-sanitized-write' || permission === 'fullscreen';
+  s.setPermissionRequestHandler((_wc, permission, callback) => callback(allowedPermission(permission)));
+  s.setPermissionCheckHandler((_wc, permission) => allowedPermission(permission));
+}
+
 void app.whenReady().then(async () => {
   serveSetupFiles();
-  // The studio asks for nothing: no camera, microphone, location or notifications. Copy buttons
-  // may write to the clipboard.
-  session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) =>
-    callback(permission === 'clipboard-sanitized-write' || permission === 'fullscreen'),
-  );
+  await lockSession();
   const verdict = currentLicence();
   const setup = verdict.ok && eulaAccepted(verdict.licence) ? { licence: verdict.licence, close: () => {} } : await runSetup();
   try {
     await openStudio(setup.licence);
     setup.close();
+    // A licence can expire, or be seen to have expired, while the app is open.
+    setInterval(() => {
+      const now = currentLicence();
+      if (now.ok) return;
+      dialog.showErrorBox(BUILD.product, now.reason + ' The studio will close.');
+      app.quit();
+    }, 60 * 60 * 1000);
   } catch (e) {
     dialog.showErrorBox(BUILD.product, 'The studio could not start: ' + (e as Error).message);
     app.quit();
