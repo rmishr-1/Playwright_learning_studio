@@ -49,6 +49,7 @@ echo ===========================================================================
 echo.
 
 call :ensure_git || goto :die
+call :ensure_credentials
 
 :: --------------------------------------------------------------------------
 :: First run: nothing here yet. Clone the repository so a collaborator can
@@ -302,6 +303,26 @@ git config --global user.name  "!GIT_NAME!"
 git config --global user.email "!GIT_MAIL!"
 echo   [ OK ] saved - git will remember this on this machine.
 echo.
+exit /b 0
+
+:ensure_credentials
+rem  Without a credential helper git asks for the GitHub sign-in on every network command - several
+rem  times in a single run, and again on every run. Git Credential Manager, part of Git for Windows,
+rem  keeps the sign-in in Windows Credential Manager after the first time. Any helper already set is kept.
+set "CRED_HELPER="
+for /f "delims=" %%h in ('git config --get credential.helper 2^>nul') do set "CRED_HELPER=%%h"
+if defined CRED_HELPER exit /b 0
+set "GCM="
+git credential-manager --version >nul 2>&1 && set "GCM=manager"
+if not defined GCM git credential-manager-core --version >nul 2>&1 && set "GCM=manager-core"
+if defined GCM (
+    git config --global credential.helper %GCM%
+    echo   [setup] Git will now remember your GitHub sign-in after the first time.
+    exit /b 0
+)
+echo   [WARN] Git cannot remember your GitHub sign-in on this computer, so it may ask more than once.
+echo          Install the current Git for Windows - it includes Git Credential Manager:
+echo            https://git-scm.com/download/win
 exit /b 0
 
 :die

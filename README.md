@@ -16,6 +16,12 @@ setup.bat
 launcher.bat
 ```
 
+- `setup.bat` stops with a message and waits for a key when something is wrong, so a
+  double-clicked window never closes before you can read why. `/nopause` skips the wait.
+- `launcher.bat` reuses a backend or studio that is already running instead of starting a second
+  copy, waits until the servers answer before opening the browser, and keeps each server's window
+  open if it crashes, so the error stays readable. `/noopen` starts without opening the browser.
+
 ### Git
 
 The repository is <https://github.com/rmishr-1/Playwright_learning_studio>. Three batch scripts
@@ -30,6 +36,10 @@ wrap the usual flows, carried over from the assessment portal and retargeted her
 They set the git identity **repo-locally** to `rmishr-1 <rmishra@evoketechnologies.com>`, taken
 from the global config on this machine. Change those lines if someone else works in this clone,
 or their commits will carry the wrong name.
+
+Each one also makes sure git **remembers the GitHub sign-in**: on a machine with no credential
+helper it turns on Git Credential Manager (part of Git for Windows), so you sign in once instead
+of on every command. A helper that is already set up is left alone.
 
 **Nothing secret is committed.** `.gitignore` covers `Data/Progress/` (the one progress record a
 clone keeps for whoever runs it) and `Data/Config/*.json`. Only `studio.config.example.json`

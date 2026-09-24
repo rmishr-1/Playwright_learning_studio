@@ -1547,3 +1547,8 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 
 .day-tiles .day-tile .tile-badge { background: #f1f4f9; color: #334a73; border: 1px solid #dde3ee; padding: 2px 6px; }
 :root[data-theme='dark'] .day-tiles .day-tile .tile-badge { background: #202a3d; color: #b8c6ea; border-color: #334a73; }
+
+/* ---- diagrams: mermaid sizes each label's box for its own 14px text, so the lesson's paragraph
+   style (15.5px, tall line height) must not reach the paragraphs inside a label - it made the text
+   bigger than its box and clipped it. */
+.lesson .diagram p, .lesson .diagram li { margin: 0; font-size: inherit; line-height: inherit; }
