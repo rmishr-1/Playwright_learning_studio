@@ -1,6 +1,8 @@
 node_modules/
 dist/
 Data/Progress/
+# The module guard the backend writes for learner processes (backend/src/child-env.ts).
+Data/Runtime/
 Data/Config/*.json
 !Data/Config/*.example.json
 .run-scratch/
