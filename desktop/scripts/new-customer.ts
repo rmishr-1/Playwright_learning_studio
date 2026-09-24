@@ -5,6 +5,8 @@
  *   npm run new-customer                        asks for each detail
  *   npm run new-customer -- --licensee "Boston University" --logo bu.png [--email x]
  *                           [--expires 2027-09-30] [--machine XXXX-XXXX-XXXX-XXXX]   (no questions)
+ *   npm run new-customer -- --rebuild licences/<id>-<name>.lic   a new zip for a licence already
+ *                                                                 issued (after a course update)
  *
  * Makes desktop/deliveries/<licence id>-<customer>/:
  *
@@ -25,6 +27,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as readline from 'node:readline';
 import { issueLicence, problemWith, type IssueOptions } from './issue-licence';
+import type { LicenceFile } from '../src/licence';
 import { packageApp } from './package';
 import { DESKTOP, PRODUCT, VERSION } from './build';
 
@@ -86,6 +89,8 @@ async function main(): Promise<void> {
   if (!fs.existsSync(path.join(DESKTOP, 'keys', 'licence-private.pem'))) {
     throw new Error("Evoke's licence signing key is not on this computer (desktop/keys/licence-private.pem). Licences can only be issued where it is.");
   }
+  const rebuild = arg('rebuild');
+  if (rebuild) return deliver(path.resolve(cleanPath(rebuild)));
   const fromArgs = arg('licensee');
   const options: IssueOptions | null = fromArgs
     ? {
@@ -103,6 +108,19 @@ async function main(): Promise<void> {
   const problem = problemWith(options);
   if (problem) throw new Error(problem);
 
+  const { licence, file: licenceFile } = issueLicence(options);
+  console.log('\n> Issued ' + licence.id + ' to ' + licence.licensee + (licence.logo ? ', with their logo' : ''));
+  return deliver(licenceFile);
+}
+
+/**
+ * Builds the customer's zip for a licence already issued, and puts it, the licence and a read-me in
+ * deliveries/<licence id>-<customer>/. --rebuild <licence file> does only this: a new zip for the
+ * same licence, such as after the course has changed.
+ */
+async function deliver(licenceFile: string): Promise<void> {
+  const licence = (JSON.parse(fs.readFileSync(licenceFile, 'utf-8')) as LicenceFile).licence;
+
   // Node and the browsers the app ships, the first time.
   if (!fs.existsSync(path.join(DESKTOP, 'runtime', 'node', 'node.exe')) || !fs.existsSync(path.join(DESKTOP, 'runtime', 'ms-playwright'))) {
     console.log('\n> Gathering Node and the browsers the app ships (first time only)');
@@ -111,9 +129,9 @@ async function main(): Promise<void> {
     });
   }
 
-  const { licence, file: licenceFile } = issueLicence(options);
-  console.log('\n> Issued ' + licence.id + ' to ' + licence.licensee + (licence.logo ? ', with their logo' : ''));
-
+  console.log('\n  Building their app: about 10 minutes, the last 5 of them making the zip, when the');
+  console.log('  window shows little. Keep this window open until it says DONE. The zip is moved into');
+  console.log('  the deliveries folder only when it is complete.');
   const made = await packageApp({ licenceFile, carryLicence: false, target: 'zip' });
   const zip = made.find((f) => f.endsWith('.zip'));
   if (!zip) throw new Error('The build made no zip.');
@@ -148,7 +166,9 @@ async function main(): Promise<void> {
     ].join('\r\n'),
   );
 
-  console.log('\n> Ready to send: ' + out);
+  console.log('\n' + '='.repeat(70));
+  console.log('  DONE. Ready to send, in ' + out);
+  console.log('='.repeat(70));
   console.log('  ' + path.basename(zipOut) + '  (' + Math.round(fs.statSync(zipOut).size / 1024 / 1024) + ' MB)');
   console.log('  ' + path.basename(licenceOut));
   console.log('  READ ME FIRST.txt');

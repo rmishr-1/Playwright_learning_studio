@@ -104,7 +104,6 @@ Chromium and the libraries it contains are LICENSES.chromium.html, both in the i
 
 Node.js (MIT, with bundled components under their own licences), in resources/node/, runs the
 learner's code. Licence: https://github.com/nodejs/node/blob/${process.version}/LICENSE
-npm (Artistic-2.0), with Node.js: resources/node/node_modules/npm/LICENSE.
 [REVIEW] Ship Node's LICENSE file itself in resources/node/ for an external release.
 
 The browsers in resources/ms-playwright/, which Playwright downloads and drives, are separate

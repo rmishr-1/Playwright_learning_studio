@@ -67,11 +67,18 @@ const containsTest = (code: string): boolean => /\btest\s*(\.\w+\s*)?\(/.test(co
 function npmVersion(): string {
   const agent = /npm\/([\d.]+)/.exec(process.env.npm_config_user_agent ?? '');
   if (agent) return agent[1];
+  // A Node installation has npm beside it. The desktop app ships Node without npm, which no
+  // command runs, and records the version npm would have had in npm-version.txt instead.
+  const home = path.dirname(NODE_BIN);
   try {
-    const file = path.join(path.dirname(NODE_BIN), 'node_modules', 'npm', 'package.json');
+    const file = path.join(home, 'node_modules', 'npm', 'package.json');
     return (JSON.parse(fs.readFileSync(file, 'utf-8')) as { version: string }).version;
   } catch {
-    return 'unknown';
+    try {
+      return fs.readFileSync(path.join(home, 'npm-version.txt'), 'utf-8').trim();
+    } catch {
+      return 'unknown';
+    }
   }
 }
 

@@ -51,6 +51,8 @@ export async function packageApp(opts: {
     npmRebuild: false,
     nodeGypRebuild: false,
     asar: true,
+    // The app's own screens are in English: Electron's other 54 languages are left out.
+    electronLanguages: ['en-US'],
     // Node (outside the app) runs the learner's code, and it cannot read inside app.asar.
     asarUnpack: ['node_modules/**'],
     files: ['**/*'],
@@ -89,7 +91,7 @@ export async function packageApp(opts: {
     },
   };
 
-  console.log('\n> The ' + (target === 'zip' ? 'zip' : 'installer'));
+  console.log('\n> The ' + (target === 'zip' ? 'zip' : 'installer') + ': about 5 minutes, compressing the browsers');
   const out = await electronBuild({ targets: Platform.WINDOWS.createTarget(), config, projectDir: DESKTOP });
   for (const f of out) console.log('  ' + f);
   return out.filter((f) => !f.endsWith('.blockmap'));

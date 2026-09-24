@@ -1,7 +1,8 @@
 /**
  * Gathers what the app ships so it runs with no Node and no internet on the learner's computer:
  *
- *   desktop/runtime/node/          node.exe and npm, from the Node this script runs on (24.x)
+ *   desktop/runtime/node/          node.exe, from the Node this script runs on (24.x), and the
+ *                                  version of its npm (npm itself is not shipped)
  *   desktop/runtime/ms-playwright/ Chromium, Firefox and WebKit at the revisions the studio's
  *                                  Playwright expects, from this computer's browser cache, or
  *                                  downloaded by `playwright install` when they are not there
@@ -26,20 +27,23 @@ function node(): void {
   }
   const dir = path.join(OUT, 'node');
   const exe = path.join(dir, 'node.exe');
+  const home = path.dirname(process.execPath);
+  // No command runs npm itself, so only its version ships, for `npm --version`.
+  const npm = (JSON.parse(fs.readFileSync(path.join(home, 'node_modules', 'npm', 'package.json'), 'utf-8')) as { version: string }).version;
   const have = fs.existsSync(exe) ? execFileSync(exe, ['--version'], { encoding: 'utf-8' }).trim() : null;
-  if (have === process.version) {
-    console.log('node      ' + have + ' (already there)');
+  if (have === process.version && !fs.existsSync(path.join(dir, 'node_modules'))) {
+    fs.writeFileSync(path.join(dir, 'npm-version.txt'), npm + '\n');
+    console.log('node      ' + have + ', npm ' + npm + ' (already there)');
     return;
   }
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
   fs.copyFileSync(process.execPath, exe);
-  const home = path.dirname(process.execPath);
-  fs.cpSync(path.join(home, 'node_modules', 'npm'), path.join(dir, 'node_modules', 'npm'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'npm-version.txt'), npm + '\n');
   for (const f of ['LICENSE']) {
     if (fs.existsSync(path.join(home, f))) fs.copyFileSync(path.join(home, f), path.join(dir, f));
   }
-  console.log('node      ' + process.version + ' (' + major + '.' + minor + ') copied from ' + home);
+  console.log('node      ' + process.version + ' (' + major + '.' + minor + '), npm ' + npm + ', copied from ' + home);
 }
 
 function browsers(): void {

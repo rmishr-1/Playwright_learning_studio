@@ -188,6 +188,14 @@ export async function build(opts: {
     stdio: 'inherit',
   });
 
+  // The backend uses one file of the typescript package, to turn a Run's TypeScript into
+  // JavaScript. Its type definitions and language server are left out.
+  const ts = path.join(APP, 'node_modules', 'typescript');
+  for (const entry of fs.readdirSync(path.join(ts, 'lib'))) {
+    if (entry !== 'typescript.js') fs.rmSync(path.join(ts, 'lib', entry), { recursive: true, force: true });
+  }
+  fs.rmSync(path.join(ts, 'bin'), { recursive: true, force: true });
+
   step('Notices');
   const backendDirs = Object.keys(result.metafile.inputs)
     .map((f) => packageDirOf(path.resolve(DESKTOP, f)))
