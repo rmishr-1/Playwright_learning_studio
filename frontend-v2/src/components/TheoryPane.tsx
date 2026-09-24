@@ -208,6 +208,8 @@ export function TheoryPane({
   weeksShown,
   onToggleWeeks,
   courseTitle,
+  prevDay,
+  nextDay,
 }: {
   parts: CoursePart[];
   active: number;
@@ -223,6 +225,9 @@ export function TheoryPane({
   onToggleWeeks?: () => void;
   /** The course's title, from its course index. */
   courseTitle?: string;
+  /** The day before / after this one, for the buttons on the first / last tab. */
+  prevDay?: DayLink | null;
+  nextDay?: DayLink | null;
 }) {
   const part = parts.find((p) => p.part === active) ?? parts[0];
 
@@ -324,38 +329,68 @@ export function TheoryPane({
           ))}
 
         {/* Previous / next tab, so a learner can move through the day without scrolling back up. */}
-        <PartNav parts={parts} current={part.part} onSelect={onSelect} />
+        <PartNav parts={parts} current={part.part} onSelect={onSelect} prevDay={prevDay ?? null} nextDay={nextDay ?? null} />
       </div>
     </div>
   );
 }
 
-/** The Previous / Next buttons at the foot of every tab. */
-function PartNav({ parts, current, onSelect }: { parts: CoursePart[]; current: number; onSelect: (part: number) => void }) {
+/** A link to another day: what to show on the button, and how to get there. */
+export type DayLink = { label: string; go: () => void };
+
+/**
+ * The Previous / Next buttons at the foot of every tab.
+ * Inside a day they move between tabs; on the first tab "Previous" goes to the day before,
+ * and on the last tab (Practice) "Next" goes to the next day.
+ */
+function PartNav({
+  parts,
+  current,
+  onSelect,
+  prevDay,
+  nextDay,
+}: {
+  parts: CoursePart[];
+  current: number;
+  onSelect: (part: number) => void;
+  prevDay: DayLink | null;
+  nextDay: DayLink | null;
+}) {
   const i = parts.findIndex((p) => p.part === current);
   const prev = parts[i - 1];
   const next = parts[i + 1];
-  if (!prev && !next) return null;
 
-  // Scroll the lesson pane back to the top after switching tab.
-  const go = (part: number): void => {
-    onSelect(part);
+  // Scroll the lesson pane back to the top after moving.
+  const top = (): void => {
     document.querySelector('.pane-theory')?.scrollTo({ top: 0 });
   };
 
   return (
     <div className="part-nav">
       {prev ? (
-        <button className="part-nav-btn" onClick={() => go(prev.part)}>
+        <button className="part-nav-btn" onClick={() => { onSelect(prev.part); top(); }}>
           <span className="dir">← Previous</span>
           <span className="name">{prev.tab_label}</span>
         </button>
+      ) : prevDay ? (
+        <button className="part-nav-btn" onClick={() => { prevDay.go(); top(); }}>
+          <span className="dir">← Previous day</span>
+          <span className="name">{prevDay.label}</span>
+        </button>
       ) : <span />}
-      {next && (
-        <button className="part-nav-btn next" onClick={() => go(next.part)}>
+
+      {next ? (
+        <button className="part-nav-btn next" onClick={() => { onSelect(next.part); top(); }}>
           <span className="dir">Next →</span>
           <span className="name">{next.tab_label}</span>
         </button>
+      ) : nextDay ? (
+        <button className="part-nav-btn next day" onClick={() => { nextDay.go(); top(); }}>
+          <span className="dir">Next day →</span>
+          <span className="name">{nextDay.label}</span>
+        </button>
+      ) : (
+        <span className="part-nav-end">🎉 You have reached the last available day.</span>
       )}
     </div>
   );

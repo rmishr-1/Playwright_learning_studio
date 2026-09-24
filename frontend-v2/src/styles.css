@@ -908,3 +908,50 @@ a.day-link:hover .go { opacity: 1; transform: translateX(2px); color: var(--acce
 :root[data-theme='dark'] .sidebar::-webkit-scrollbar-thumb:hover,
 :root[data-theme='dark'] .pane-theory::-webkit-scrollbar-thumb:hover,
 :root[data-theme='dark'] .editor-body .cm-scroller::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ================================================================ dashboard slider + next day */
+/* The sidebar width now comes from the slider (inline style), so drop the fixed 250px. */
+.sidebar { flex-grow: 0; flex-shrink: 0; min-width: 200px; max-width: 520px; }
+/* The slider on the Learners Dashboard's right edge. */
+.side-gutter {
+  flex: 0 0 6px; cursor: col-resize; background: var(--rule-soft);
+  border-right: 1px solid var(--rule); position: relative;
+}
+/* Three grip dots so it reads as something to drag. */
+.side-gutter::after {
+  content: '⋮'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  color: var(--muted); font-size: 14px; line-height: 1;
+}
+.side-gutter:hover, body.dragging-side .side-gutter { background: var(--brand-orange); }
+.side-gutter:hover::after, body.dragging-side .side-gutter::after { color: #fff; }
+body.dragging-side { cursor: col-resize; user-select: none; }
+/* Wider dashboard = more of each day title visible. */
+.sidebar .daytitle { white-space: nowrap; }
+
+/* "Next day" stands out from the in-day Next: navy fill. */
+.part-nav-btn.next.day { background: var(--ink); border-color: var(--ink); }
+.part-nav-btn.next.day .dir { color: #aebbd6; }
+.part-nav-btn.next.day .name { color: #fff; }
+.part-nav-btn.next.day:hover { background: var(--ink-2); }
+.part-nav-btn.next.day:hover .name { color: #fff; }
+:root[data-theme='dark'] .part-nav-btn.next.day { background: var(--accent); border-color: var(--accent); }
+.part-nav-end { margin-left: auto; align-self: center; color: var(--muted); font-size: 14px; }
+@media (max-width: 900px) {
+  .side-gutter { display: none; }
+  .sidebar { width: auto !important; flex-basis: auto !important; max-width: none; }
+}
+
+/* ================================================================ dashboard title -> index */
+/* The row is now a container: a small hide button + the title button that opens the index. */
+.sidebar .wk-all { padding: 0; gap: 0; }
+.sidebar .wk-all:hover { background: none; }
+.sidebar .wk-all button {
+  background: none; border: none; color: inherit; font: inherit; letter-spacing: inherit;
+  text-transform: inherit; display: flex; align-items: center; padding: 12px 10px;
+}
+.sidebar .wk-hide { flex: 0 0 auto; padding-left: 14px !important; font-size: 11px !important; }
+.sidebar .wk-hide:hover { color: var(--heading); background: var(--rule-soft) !important; }
+.sidebar .wk-home { flex: 1; gap: 8px; min-width: 0; text-align: left; }
+.sidebar .wk-home:hover { color: var(--accent); background: var(--accent-wash) !important; }
+.sidebar .wk-home:hover > span:first-child { text-decoration: underline; }
+.sidebar .wk-home .spacer { flex: 1; }

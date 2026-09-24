@@ -29,12 +29,28 @@ await show(page);
 await browser.close();
 `;
 
+// Learners Dashboard width limits (px) and where the chosen width is remembered.
+const SIDE_KEY = 'studio.v2.sidebar_width';
+const SIDE_MIN = 200;
+const SIDE_MAX = 520;
+const SIDE_DEFAULT = 250;
+
+function readSideWidth(): number {
+  try {
+    const n = Number(localStorage.getItem(SIDE_KEY));
+    return n >= SIDE_MIN && n <= SIDE_MAX ? n : SIDE_DEFAULT;
+  } catch {
+    return SIDE_DEFAULT;
+  }
+}
+
 function Sidebar({
   index,
   progress,
   week,
   day,
   onHide,
+  width,
 }: {
   index: CourseIndex;
   progress: Progress | null;
@@ -42,6 +58,8 @@ function Sidebar({
   day: number;
   /** Collapses the entire week list so the lesson gets the space. */
   onHide: () => void;
+  /** Width in px, set by dragging the slider on the sidebar's right edge. */
+  width: number;
 }) {
   const navigate = useNavigate();
   // Weeks collapse. Only the week you are in is open to begin with, so the whole 8-week
@@ -64,18 +82,26 @@ function Sidebar({
     .reduce((n, w) => n + w.days.length, 0);
 
   return (
-    <nav className="sidebar">
-      {/* The master control: one click hides every week and hands the width to the lesson. */}
-      <button className="wk-all" onClick={onHide} title="Hide the learners dashboard">
-        <span className="chev-left" aria-hidden="true">
+    <nav className="sidebar" style={{ width, flexBasis: width }}>
+      {/* Top row: clicking "Learners Dashboard" opens the course index page.
+          The small ◂ button beside it still hides the sidebar. */}
+      <div className="wk-all">
+        <button
+          className="wk-hide"
+          onClick={onHide}
+          title="Hide the learners dashboard"
+          aria-label="Hide the learners dashboard"
+        >
           ◂
-        </span>
-        <span>Learners Dashboard</span>
-        <span className="spacer" />
-        <span className="count">
-          {totalDone}/{totalAvailable}
-        </span>
-      </button>
+        </button>
+        <button className="wk-home" onClick={() => navigate('/')} title="Go to the course index">
+          <span>Learners Dashboard</span>
+          <span className="spacer" />
+          <span className="count">
+            {totalDone}/{totalAvailable}
+          </span>
+        </button>
+      </div>
 
       {index.weeks.map((w) => {
         const isOpen = open.includes(w.week);
@@ -186,6 +212,9 @@ export function Day({
   const setWeeksShown = onSetWeeksOpen;
   const problemRef = useRef<number | null>(null);
   const draggingRef = useRef(false);
+  // Learners Dashboard width: dragged with the slider on its right edge, remembered per viewer.
+  const [sideWidth, setSideWidth] = useState<number>(readSideWidth);
+  const sideDragRef = useRef(false);
 
   useEffect(() => {
     getCourse()
@@ -229,6 +258,14 @@ export function Day({
 
   useEffect(() => {
     const move = (e: MouseEvent): void => {
+      // Dragging the Learners Dashboard slider: width follows the mouse, kept between the limits.
+      if (sideDragRef.current) {
+        const nav = document.querySelector('.sidebar');
+        if (!nav) return;
+        const left = nav.getBoundingClientRect().left;
+        setSideWidth(Math.min(SIDE_MAX, Math.max(SIDE_MIN, Math.round(e.clientX - left))));
+        return;
+      }
       if (!draggingRef.current) return;
       const host = document.querySelector('.split');
       if (!host) return;
@@ -238,6 +275,10 @@ export function Day({
     };
     const up = (): void => {
       draggingRef.current = false;
+      if (sideDragRef.current) {
+        sideDragRef.current = false;
+        document.body.classList.remove('dragging-side');
+      }
     };
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', up);
@@ -246,6 +287,15 @@ export function Day({
       window.removeEventListener('mouseup', up);
     };
   }, []);
+
+  // Remember the dashboard width (a convenience - never required).
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDE_KEY, String(sideWidth));
+    } catch {
+      // ignore
+    }
+  }, [sideWidth]);
 
   const loadIntoEditor = useCallback((snippet: string, meta?: EditorFile) => {
     problemRef.current = null;
@@ -343,7 +393,22 @@ export function Day({
     return (
       <div className="body">
         {index && weeksShown && (
-          <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} />
+          <>
+            <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} width={sideWidth} />
+            {/* The slider: drag to widen or narrow the Learners Dashboard, double-click to reset. */}
+            <div
+              className="side-gutter"
+              role="separator"
+              aria-orientation="vertical"
+              title="Drag to resize the Learners Dashboard (double-click to reset)"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                sideDragRef.current = true;
+                document.body.classList.add('dragging-side');
+              }}
+              onDoubleClick={() => setSideWidth(SIDE_DEFAULT)}
+            />
+          </>
         )}
         <div className="centered">
           {!weeksShown && (
@@ -371,13 +436,39 @@ export function Day({
   if (!content || !index) return <div className="centered muted">Loading…</div>;
 
   const activePart = content.parts.find((p) => p.part === part) ?? content.parts[0];
+
+  // Every open day in course order, so the last tab can link to the next day (and the first
+  // tab back to the previous one).
+  const allDays = index.weeks
+    .filter((w) => !w.locked)
+    .flatMap((w) => w.days.filter((d) => !d.locked).map((d) => ({ week: w.week, day: d.day, title: d.title })));
+  const here = allDays.findIndex((d) => d.week === week && d.day === day);
+  const toLink = (d: { week: number; day: number; title: string } | undefined) =>
+    d ? { label: 'Day ' + d.day + ' · ' + d.title, go: () => navigate('/learn/w' + d.week + '/d' + d.day + '/p1') } : null;
+  const prevDay = here > 0 ? toLink(allDays[here - 1]) : null;
+  const nextDay = here >= 0 ? toLink(allDays[here + 1]) : null;
   const viewed = progress?.progress['w' + week + 'd' + day]?.parts_viewed ?? [];
 
   return (
     <OpenWeeks.Provider value={openWeeks}>
     <div className="body">
       {weeksShown && (
-        <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} />
+        <>
+            <Sidebar index={index} progress={progress} week={week} day={day} onHide={() => setWeeksShown(false)} width={sideWidth} />
+            {/* The slider: drag to widen or narrow the Learners Dashboard, double-click to reset. */}
+            <div
+              className="side-gutter"
+              role="separator"
+              aria-orientation="vertical"
+              title="Drag to resize the Learners Dashboard (double-click to reset)"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                sideDragRef.current = true;
+                document.body.classList.add('dragging-side');
+              }}
+              onDoubleClick={() => setSideWidth(SIDE_DEFAULT)}
+            />
+          </>
       )}
       <div className="split">
         <div style={{ flex: '0 0 ' + split + '%', minWidth: 0, display: 'flex' }}>
@@ -392,6 +483,8 @@ export function Day({
             weeksShown={weeksShown}
             onToggleWeeks={() => setWeeksShown(!weeksShown)}
             courseTitle={index.title}
+            prevDay={prevDay}
+            nextDay={nextDay}
           />
         </div>
         <div className="gutter" onMouseDown={() => (draggingRef.current = true)} />
