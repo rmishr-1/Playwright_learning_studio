@@ -1481,20 +1481,20 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
    title's side. The grain is noise, not lines, so it looks the same at any display scaling (lines a
    pixel apart turn into an uneven grid at 125% or 150%). Each theme has its own tints. */
 :root {
-  --hero-grain: .06;
-  --hero-rings: rgba(14, 31, 69, .06);
+  --hero-grain: .1;
+  --hero-rings: rgba(14, 31, 69, .09);
   --hero-glow: rgba(255, 255, 255, .8);
   --hero-shade: rgba(14, 31, 69, .045);
 }
 :root[data-theme='paper'] {
-  --hero-grain: .08;
-  --hero-rings: rgba(120, 90, 50, .09);
+  --hero-grain: .13;
+  --hero-rings: rgba(120, 90, 50, .13);
   --hero-glow: rgba(255, 251, 240, .75);
   --hero-shade: rgba(120, 90, 50, .06);
 }
 :root[data-theme='dark'] {
-  --hero-grain: .05;
-  --hero-rings: rgba(143, 176, 242, .07);
+  --hero-grain: .08;
+  --hero-rings: rgba(143, 176, 242, .1);
   --hero-glow: rgba(111, 155, 255, .07);
   --hero-shade: rgba(0, 0, 0, .22);
 }
@@ -1530,14 +1530,17 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   mask-image: radial-gradient(circle, #000 0 90px, transparent 420px);
 }
 
-/* ---- Your path: week numbers, day labels and the module chip.
-   A week's number is a solid green circle once every day in it is done, and a green ring until then.
-   A day tile's "DAY N" label is navy blue; the module chip has gently rounded corners. */
-.dash .dash-path .path .path-week .path-num { background: var(--paper); border-color: var(--good); color: var(--good); }
-.dash .dash-path .path .path-week.complete .path-num { background: var(--good); border-color: var(--good); color: #fff; }
-:root[data-theme='dark'] .dash .dash-path .path .path-week.complete .path-num { color: #0f1e3d; }
+/* ---- Your path: week numbers, day labels and module chips, in the header's blue (--ink).
+   A week's number has a header-blue ring, and fills green once every day in the week is done.
+   Day labels ("DAY N") and module chips ("Foundation" and the rest) are header blue with white
+   text, the chips with gently rounded corners. On the dark theme the header blue would vanish as
+   a line, so the rings and numbers there use a lighter tint of it; the fills stay header blue. */
+.dash .dash-path .path .path-week .path-num { background: var(--paper); border-color: var(--ink); color: var(--ink); }
+.dash .dash-path .path .path-week.complete .path-num { background: var(--good); border-color: var(--ink); color: #fff; }
+:root[data-theme='dark'] .dash .dash-path .path .path-week .path-num { border-color: #7d93cc; color: #b8c6ea; }
+:root[data-theme='dark'] .dash .dash-path .path .path-week.complete .path-num { border-color: #7d93cc; color: #0f1e3d; }
 
-.mod-chip { border-radius: 4px; }
+.path-card-head .mod-chip,
+:root[data-theme='dark'] .path-card-head .mod-chip { border-radius: 4px; background: var(--ink); color: #fff; }
 
-.day-tiles .day-tile .tile-badge { background: #1e3a8a; color: #fff; }
-:root[data-theme='dark'] .day-tiles .day-tile .tile-badge { background: #2a4aa8; }
+.day-tiles .day-tile .tile-badge { background: var(--ink); color: #fff; }
