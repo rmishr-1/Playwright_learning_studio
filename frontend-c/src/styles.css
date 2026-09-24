@@ -1067,18 +1067,14 @@ a.day-tile:focus-visible { outline: 3px solid var(--action); outline-offset: 2px
 
 
 /* ---- Option C header: thinner, the white Evoke logo straight on the navy, and on a lesson the
-   week, day and title that used to sit in a strip of their own above the lesson. */
+   week and day that used to sit in a strip of their own above the lesson. */
 .app-header { flex: 0 0 64px; height: 64px; gap: 16px; padding: 0 20px; }
 .hdr-logo-white { display: block; height: 38px; width: auto; }
 .hdr-sep { height: 28px; }
 .hdr-where { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-width: 0; }
-.hdr-crumbs { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #a9b6d3; white-space: nowrap; }
+.hdr-crumbs { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; }
 .hdr-crumbs b { color: #fff; font-weight: 600; }
-.hdr-crumbs .crumb-sep { color: #5f7196; }
-.hdr-title {
-  margin: 0; font-family: var(--serif); font-size: 17px; line-height: 1.25; font-weight: 700; color: #fff;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.hdr-crumbs .crumb-sep { color: #fff; }
 .hdr-tab { height: 38px; }
 .hdr-btn.icon { width: 38px; height: 38px; border-radius: 19px; }
 
@@ -1172,13 +1168,11 @@ body.resizing { cursor: col-resize; user-select: none; }
   .app-header.in-lesson .hdr-course,
   .app-header.in-lesson .hdr-course-sep { display: none; }
 }
-/* 3. The week line goes too, leaving the day's title; the logo and course name come down a size. */
+/* 3. The logo and course name come down a size. */
 @media (max-width: 640px) {
   .app-header { gap: 10px; padding: 0 12px; }
-  .hdr-crumbs { display: none; }
   .hdr-logo-white { height: 30px; }
   .hdr-course { font-size: 17px; }
-  .hdr-title { font-size: 15px; }
 }
 
 /* On a narrow window the panes stack (see the 900px rules above), so the week list goes full width
@@ -1530,17 +1524,26 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   mask-image: radial-gradient(circle, #000 0 90px, transparent 420px);
 }
 
-/* ---- Your path: week numbers, day labels and module chips, in the header's blue (--ink).
+/* ---- Your path: week numbers, card borders, module chips and day labels, keyed to the header's
+   blue (--ink).
    A week's number has a header-blue ring, and fills green once every day in the week is done.
-   Day labels ("DAY N") and module chips ("Foundation" and the rest) are header blue with white
-   text, the chips with gently rounded corners. On the dark theme the header blue would vanish as
-   a line, so the rings and numbers there use a lighter tint of it; the fills stay header blue. */
+   Week cards and day tiles have a header-blue border (a hovered tile still turns orange).
+   Module chips ("Foundation" and the rest) are slate, a step lighter than the header, with white
+   text; day labels ("DAY N") are a pale frost with slate text. On the dark theme the header blue
+   would vanish as a line, so the rings, numbers and borders there use lighter tints of it. */
 .dash .dash-path .path .path-week .path-num { background: var(--paper); border-color: var(--ink); color: var(--ink); }
 .dash .dash-path .path .path-week.complete .path-num { background: var(--good); border-color: var(--ink); color: #fff; }
 :root[data-theme='dark'] .dash .dash-path .path .path-week .path-num { border-color: #7d93cc; color: #b8c6ea; }
 :root[data-theme='dark'] .dash .dash-path .path .path-week.complete .path-num { border-color: #7d93cc; color: #0f1e3d; }
 
-.path-card-head .mod-chip,
-:root[data-theme='dark'] .path-card-head .mod-chip { border-radius: 4px; background: var(--ink); color: #fff; }
+.path .path-card,
+.day-tiles .day-tile { border-color: var(--ink); }
+:root[data-theme='dark'] .path .path-card,
+:root[data-theme='dark'] .day-tiles .day-tile { border-color: #4f6399; }
+:root[data-theme='dark'] .day-tiles a.day-tile:hover { border-color: #e8a57a; }
 
-.day-tiles .day-tile .tile-badge { background: var(--ink); color: #fff; }
+.path-card-head .mod-chip,
+:root[data-theme='dark'] .path-card-head .mod-chip { border-radius: 6px; background: #334a73; color: #fff; }
+
+.day-tiles .day-tile .tile-badge { background: #f1f4f9; color: #334a73; border: 1px solid #dde3ee; padding: 2px 6px; }
+:root[data-theme='dark'] .day-tiles .day-tile .tile-badge { background: #202a3d; color: #b8c6ea; border-color: #334a73; }

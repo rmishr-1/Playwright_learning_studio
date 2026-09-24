@@ -29,7 +29,7 @@ function ThemeIcon({ theme }: { theme: Theme }) {
 /**
  * Option C’s navy bar across the top of every screen: the white Evoke logo straight on the navy,
  * the product name on the course index - or on a lesson the course name and where you are (week and
- * module, day, and the day’s title) - a Lessons tab on the course index and a Course index tab on a
+ * module, and day) - a Lessons tab on the course index and a Course index tab on a
  * lesson, the theme switch (light,
  * warm paper, dark), and in the desktop app the logo of the customer it is licensed to, when their
  * licence carries one. "Where you are" is read from the URL and the index.
@@ -51,7 +51,6 @@ export function AppHeader({
   const m = /^\/learn\/w(\d+)\/d(\d+)/.exec(pathname);
   const where = m ? { week: Number(m[1]), day: Number(m[2]) } : null;
   const week = where ? planWeeks(index).find((w) => w.week === where.week) : undefined;
-  const title = where ? week?.days.find((d) => d.day === where.day)?.title : undefined;
   // The customer's logo, when the studio is licensed to someone whose licence carries one.
   const [branding, setBranding] = useState<Branding | null>(null);
   useEffect(() => {
@@ -75,10 +74,9 @@ export function AppHeader({
             <span className="hdr-crumbs">
               Week {where.week}
               {week ? ' · ' + week.module.name : ''}
-              <span className="crumb-sep" aria-hidden="true">/</span>
+              <span className="crumb-sep" aria-hidden="true">›</span>
               <b>Day {where.day}</b>
             </span>
-            {title && <h1 className="hdr-title">{title}</h1>}
           </div>
         </>
       )}
