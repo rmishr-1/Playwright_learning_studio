@@ -1474,3 +1474,55 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 .path-fold { width: 30px; height: 30px; }
 .path-fold svg { transition: transform .15s ease; }
 .path-fold.closed svg { transform: rotate(-90deg); }
+
+/* ---- course index hero: texture. Three quiet layers over the theme's grey, drawn in CSS so nothing
+   is downloaded: a linen weave of hairlines, thin concentric rings spreading out from behind the
+   progress ring and fading away, and soft light behind the progress panel with a faint shade on the
+   title's side. Each theme has its own tints; none of it is loud enough to compete with the text. */
+:root {
+  --hero-weave: rgba(14, 31, 69, .02);
+  --hero-rings: rgba(14, 31, 69, .06);
+  --hero-glow: rgba(255, 255, 255, .8);
+  --hero-shade: rgba(14, 31, 69, .045);
+}
+:root[data-theme='paper'] {
+  --hero-weave: rgba(90, 70, 40, .03);
+  --hero-rings: rgba(120, 90, 50, .09);
+  --hero-glow: rgba(255, 251, 240, .75);
+  --hero-shade: rgba(120, 90, 50, .06);
+}
+:root[data-theme='dark'] {
+  --hero-weave: rgba(255, 255, 255, .022);
+  --hero-rings: rgba(143, 176, 242, .07);
+  --hero-glow: rgba(111, 155, 255, .07);
+  --hero-shade: rgba(0, 0, 0, .22);
+}
+.dash-hero {
+  /* Where the progress ring sits: the right edge of the centred content, less half the panel. */
+  --ring-x: calc(50% + min(664px, 50% - 56px) - 155px);
+  --ring-y: 42%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 34% 95% at var(--ring-x) var(--ring-y), var(--hero-glow), transparent 72%),
+    linear-gradient(100deg, var(--hero-shade), transparent 48%),
+    var(--hero-bg);
+}
+.dash-hero::before,
+.dash-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+/* The linen weave. */
+.dash-hero::before {
+  background:
+    repeating-linear-gradient(0deg, var(--hero-weave) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, var(--hero-weave) 0 1px, transparent 1px 4px);
+}
+/* The rings, fading out from the progress ring. */
+.dash-hero::after {
+  background: repeating-radial-gradient(circle at var(--ring-x) var(--ring-y), transparent 0 27px, var(--hero-rings) 27px 28px);
+  -webkit-mask-image: radial-gradient(circle at var(--ring-x) var(--ring-y), #000 0 90px, transparent 420px);
+  mask-image: radial-gradient(circle at var(--ring-x) var(--ring-y), #000 0 90px, transparent 420px);
+}
+@media (max-width: 640px) {
+  .dash-hero { --ring-x: 50%; --ring-y: 72%; }
+}
