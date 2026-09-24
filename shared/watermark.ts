@@ -73,7 +73,7 @@ export function markMarkdown(text: string, id: string): string {
     const body = t.replace(/^([*+-]|\d+[.)])\s+/, '').replace(/^(\[[ xX]\]\s*|[*_`"'(\[]+)+/, '');
     if (body.length < 20 || !/[A-Za-z]/.test(body[0])) continue;
     if (/:\/\/|www\./i.test(t)) continue;
-    lines[i] = line.replace(/(\s*)$/, encode(id) + '$1');
+    lines[i] = append(line, id);
     paragraphMarked = true;
     changed = true;
   }
@@ -85,7 +85,17 @@ function markOption(text: string, id: string): string {
   const t = strip(text).trim();
   // An option that is only code is left alone: a learner may copy it into the editor.
   const codeOnly = /^`[^`]*`$/.test(t);
-  return !codeOnly && t.includes(' ') && /[A-Za-z]/.test(t) && !/:\/\/|www\./i.test(t) ? text.replace(/(\s*)$/, encode(id) + '$1') : text;
+  return !codeOnly && t.includes(' ') && /[A-Za-z]/.test(t) && !/:\/\/|www\./i.test(t) ? append(text, id) : text;
+}
+
+/**
+ * A line with the mark at its end, before any trailing spaces (Markdown reads two as a line break).
+ * After a closing *, _, ` or ~ the mark follows a space: straight after one, Markdown would not see
+ * the emphasis or code close there ("**Before you start:**" would show its asterisks).
+ */
+function append(line: string, id: string): string {
+  const closes = /[*_`~]$/.test(line.replace(/\s+$/, ''));
+  return line.replace(/(\s*)$/, (_all, trailing: string) => (closes ? ' ' : '') + encode(id) + trailing);
 }
 
 /** The block types whose text is prose to mark (a checkpoint's text is its question). */

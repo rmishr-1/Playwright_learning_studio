@@ -29,7 +29,8 @@ function ThemeIcon({ theme }: { theme: Theme }) {
 /**
  * Option C’s navy bar across the top of every screen: the white Evoke logo straight on the navy,
  * the product name on the course index - or on a lesson the course name and where you are (week and
- * module, day, and the day’s title) - the Course index / Lessons tabs, the theme switch (light,
+ * module, day, and the day’s title) - a Lessons tab on the course index and a Course index tab on a
+ * lesson, the theme switch (light,
  * warm paper, dark), and in the desktop app the logo of the customer it is licensed to, when their
  * licence carries one. "Where you are" is read from the URL and the index.
  */
@@ -84,26 +85,24 @@ export function AppHeader({
 
       <span className="hdr-spacer" />
 
+      {/* Each screen offers the way to the other one: Lessons on the course index, Course index on a lesson. */}
       <nav className="hdr-nav" aria-label="Main">
-        <Link to="/" className={'hdr-tab' + (where ? '' : ' on')} aria-current={where ? undefined : 'page'} aria-label="Course index" title="Course index">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-          </svg>
-          <span className="hdr-tab-label">Course index</span>
-        </Link>
-        <Link
-          to={where ? pathname : lessonsTo}
-          className={'hdr-tab' + (where ? ' on' : '')}
-          aria-current={where ? 'page' : undefined}
-          aria-label="Lessons"
-          title="Lessons"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 19V5" /><path d="M8 7h7" />
-          </svg>
-          <span className="hdr-tab-label">Lessons</span>
-        </Link>
+        {where ? (
+          <Link to="/" className="hdr-tab" aria-label="Course index" title="Course index">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span className="hdr-tab-label">Course index</span>
+          </Link>
+        ) : (
+          <Link to={lessonsTo} className="hdr-tab" aria-label="Lessons" title="Lessons">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 19V5" /><path d="M8 7h7" />
+            </svg>
+            <span className="hdr-tab-label">Lessons</span>
+          </Link>
+        )}
       </nav>
 
       {/* One button steps through the themes; its icon shows the theme you are on now. */}

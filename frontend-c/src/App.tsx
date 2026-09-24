@@ -98,7 +98,7 @@ export function App() {
 
   return (
     <div className="app">
-      {/* Navy header on every screen: logo, where you are on a lesson, Course index / Lessons, theme switch. */}
+      {/* Navy header on every screen: logo, where you are on a lesson, the tab to the other screen, theme switch. */}
       <AppHeader
         index={index}
         lessonsTo={lessonsTo}

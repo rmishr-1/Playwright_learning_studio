@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError, getCourse, getMyProgress } from '../api/client';
-import { courseDescription, planWeeks } from '../lib/coursePlan';
+import { planWeeks } from '../lib/coursePlan';
 import { PRODUCT_NAME } from '../components/AppHeader';
 import { YourPath, type PathWeek } from '../components/YourPath';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
@@ -13,7 +13,7 @@ const PARTS_PER_DAY = 4;
 const dayUrl = (week: number, day: number, part = 1): string => '/learn/w' + week + '/d' + day + '/p' + part;
 
 /**
- * The course index: a navy hero with the course's name and description and what to do next, then
+ * The course index: a navy hero with the course's name and what to do next, then
  * "Your path" - one line per week of the plan, each open week with its days beneath it, each of
  * which opens that day. The days are the week's key topics; a week not built yet says so.
  */
@@ -65,10 +65,9 @@ export function Dashboard() {
     <div className="dash">
       <section className="dash-hero">
         <div className="dash-in dash-hero-in">
-          {/* The course: its name and what it covers (the description lives in course-plan.json). */}
+          {/* The course: its name. */}
           <div className="dash-intro">
             <h1>{index.title}</h1>
-            {courseDescription && <p className="dash-desc">{courseDescription}</p>}
           </div>
 
           {next && (
