@@ -289,7 +289,7 @@ async function main(): Promise<void> {
   });
   const show = await terminal(page, 'npx playwright show-report', 'project');
   const reportUrl = show.openUrl ?? '';
-  expect(/^http:\/\/127\.0\.0\.1:\d+\/index\.html$/.test(reportUrl) && !reportUrl.startsWith(origin), 'the report is served apart from the studio', reportUrl);
+  expect(/^http:\/\/127\.0\.0\.1:\d+\/[0-9a-f]{32}\/index\.html$/.test(reportUrl) && !reportUrl.startsWith(origin), 'the report is served apart from the studio, under a path new every start', reportUrl);
   await page.evaluate((url) => void window.open(url, '_blank', 'noopener'), reportUrl);
   await page.waitForTimeout(500);
   let opened = await app.evaluate(() => (globalThis as { opened?: string[] }).opened ?? []);
@@ -298,6 +298,8 @@ async function main(): Promise<void> {
   expect(report.status === 200 && /Playwright Test Report/i.test(report.body), 'the report server serves the report', String(report.status));
   const noApi = await get(reportUrl.replace('/index.html', '/api/course'));
   expect(noApi.status === 404, 'the report server has no API', String(noApi.status));
+  const unguessed = await get(reportUrl.replace(/\/[0-9a-f]{32}\//, '/'));
+  expect(unguessed.status === 404, 'the report is not found without its path', String(unguessed.status));
   await page.evaluate(() => void window.open('https://playwright.dev/docs/intro', '_blank'));
   await page.waitForTimeout(500);
   opened = await app.evaluate(() => (globalThis as { opened?: string[] }).opened ?? []);
