@@ -75,6 +75,7 @@ export function Dashboard() {
 
   // Only open weeks have days to fold away.
   const foldable = weeks.filter((w) => w.open).map((w) => w.week);
+  const allCollapsed = foldable.length > 0 && foldable.every((n) => collapsed.has(n));
   const toggleWeek = (week: number): void =>
     setCollapsed((c) => {
       const n = new Set(c);
@@ -113,25 +114,16 @@ export function Dashboard() {
           <div className="path-head">
             <h2>Your path</h2>
             <div className="path-tools">
+              {/* One button: it collapses every week while any is open, and expands them all once none is. */}
               <button
                 type="button"
                 className="path-tool"
-                onClick={() => setCollapsed(new Set(foldable))}
-                disabled={foldable.every((n) => collapsed.has(n))}
-                aria-label="Collapse all weeks"
-                title="Collapse all"
+                onClick={() => setCollapsed(allCollapsed ? new Set() : new Set(foldable))}
+                disabled={foldable.length === 0}
+                aria-label={allCollapsed ? 'Expand all weeks' : 'Collapse all weeks'}
+                title={allCollapsed ? 'Expand all' : 'Collapse all'}
               >
-                <CollapseAllIcon />
-              </button>
-              <button
-                type="button"
-                className="path-tool"
-                onClick={() => setCollapsed(new Set())}
-                disabled={collapsed.size === 0}
-                aria-label="Expand all weeks"
-                title="Expand all"
-              >
-                <ExpandAllIcon />
+                {allCollapsed ? <ExpandAllIcon /> : <CollapseAllIcon />}
               </button>
             </div>
           </div>
@@ -142,7 +134,7 @@ export function Dashboard() {
               return (
                 <li
                   key={w.week}
-                  className={'path-week' + (w.open ? ' open' : ' soon')}
+                  className={'path-week' + (w.open ? ' open' : ' soon') + (w.open && done === w.days.length ? ' complete' : '')}
                   style={{ ['--mod' as string]: w.module.color }}
                 >
                   <div className="path-rail" aria-hidden="true">

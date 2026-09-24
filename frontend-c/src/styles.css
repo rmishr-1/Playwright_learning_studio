@@ -1498,31 +1498,48 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   --hero-shade: rgba(0, 0, 0, .22);
 }
 .dash-hero {
-  /* Where the progress ring sits: the right edge of the centred content, less half the panel. */
-  --ring-x: calc(50% + min(664px, 50% - 56px) - 155px);
-  --ring-y: 42%;
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 34% 95% at var(--ring-x) var(--ring-y), var(--hero-glow), transparent 72%),
-    linear-gradient(100deg, var(--hero-shade), transparent 48%),
-    var(--hero-bg);
+  background: linear-gradient(100deg, var(--hero-shade), transparent 48%), var(--hero-bg);
 }
-.dash-hero::before,
-.dash-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 /* The linen weave. */
 .dash-hero::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background:
     repeating-linear-gradient(0deg, var(--hero-weave) 0 1px, transparent 1px 4px),
     repeating-linear-gradient(90deg, var(--hero-weave) 0 1px, transparent 1px 4px);
 }
-/* The rings, fading out from the progress ring. */
-.dash-hero::after {
-  background: repeating-radial-gradient(circle at var(--ring-x) var(--ring-y), transparent 0 27px, var(--hero-rings) 27px 28px);
-  -webkit-mask-image: radial-gradient(circle at var(--ring-x) var(--ring-y), #000 0 90px, transparent 420px);
-  mask-image: radial-gradient(circle at var(--ring-x) var(--ring-y), #000 0 90px, transparent 420px);
+/* The glow and the rings are drawn from the progress ring itself, centred on it wherever the
+   layout puts it, and sit behind everything in the hero (its isolation keeps them above its
+   background). */
+.dash-hero .ring { position: relative; }
+.dash-hero .ring::before,
+.dash-hero .ring::after {
+  content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  border-radius: 50%; z-index: -1; pointer-events: none;
 }
-@media (max-width: 640px) {
-  .dash-hero { --ring-x: 50%; --ring-y: 72%; }
+.dash-hero .ring::before { width: 620px; height: 460px; background: radial-gradient(closest-side, var(--hero-glow), transparent); }
+.dash-hero .ring::after {
+  width: 840px; height: 840px;
+  background: repeating-radial-gradient(circle, transparent 0 27px, var(--hero-rings) 27px 28px);
+  -webkit-mask-image: radial-gradient(circle, #000 0 90px, transparent 420px);
+  mask-image: radial-gradient(circle, #000 0 90px, transparent 420px);
 }
+
+/* ---- Your path: week numbers, day tiles and the module chip.
+   A week's number is a solid green circle once every day in it is done, and a green ring until then.
+   The day tiles are navy with light text; the module chip has gently rounded corners. */
+.dash .dash-path .path .path-week .path-num { background: var(--paper); border-color: var(--good); color: var(--good); }
+.dash .dash-path .path .path-week.complete .path-num { background: var(--good); border-color: var(--good); color: #fff; }
+:root[data-theme='dark'] .dash .dash-path .path .path-week.complete .path-num { color: #0f1e3d; }
+
+.mod-chip { border-radius: 4px; }
+
+.day-tiles .day-tile { --tile: var(--ink); background: var(--tile); border-color: var(--tile); color: #fff; }
+:root[data-theme='dark'] .day-tiles .day-tile { --tile: #1b2d57; }
+.day-tiles a.day-tile:hover { box-shadow: 0 8px 20px rgba(14, 31, 69, .28); border-color: #e8a57a; }
+.day-tiles .day-tile .tile-badge { background: rgba(255, 255, 255, .14); color: #fff; }
+.day-tiles .day-tile .tile-done { color: #5ee08f; }
+.day-tiles .day-tile .here { color: #ff9a5c; border-color: #ff9a5c; }
+.day-tiles .day-tile.locked { color: rgba(255, 255, 255, .6); opacity: .7; }
