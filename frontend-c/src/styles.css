@@ -1475,24 +1475,25 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 .path-fold svg { transition: transform .15s ease; }
 .path-fold.closed svg { transform: rotate(-90deg); }
 
-/* ---- course index hero: texture. Three quiet layers over the theme's grey, drawn in CSS so nothing
-   is downloaded: a linen weave of hairlines, thin concentric rings spreading out from behind the
+/* ---- course index hero: texture. Three quiet layers over the theme's grey, all in the stylesheet so
+   nothing is downloaded: a fine paper grain, thin concentric rings spreading out from behind the
    progress ring and fading away, and soft light behind the progress panel with a faint shade on the
-   title's side. Each theme has its own tints; none of it is loud enough to compete with the text. */
+   title's side. The grain is noise, not lines, so it looks the same at any display scaling (lines a
+   pixel apart turn into an uneven grid at 125% or 150%). Each theme has its own tints. */
 :root {
-  --hero-weave: rgba(14, 31, 69, .02);
+  --hero-grain: .06;
   --hero-rings: rgba(14, 31, 69, .06);
   --hero-glow: rgba(255, 255, 255, .8);
   --hero-shade: rgba(14, 31, 69, .045);
 }
 :root[data-theme='paper'] {
-  --hero-weave: rgba(90, 70, 40, .03);
+  --hero-grain: .08;
   --hero-rings: rgba(120, 90, 50, .09);
   --hero-glow: rgba(255, 251, 240, .75);
   --hero-shade: rgba(120, 90, 50, .06);
 }
 :root[data-theme='dark'] {
-  --hero-weave: rgba(255, 255, 255, .022);
+  --hero-grain: .05;
   --hero-rings: rgba(143, 176, 242, .07);
   --hero-glow: rgba(111, 155, 255, .07);
   --hero-shade: rgba(0, 0, 0, .22);
@@ -1503,13 +1504,14 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   overflow: hidden;
   background: linear-gradient(100deg, var(--hero-shade), transparent 48%), var(--hero-bg);
 }
-/* The linen weave. */
+/* The paper grain: dark specks on light themes, light ones (the same noise, inverted) on dark. */
 .dash-hero::before {
   content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, var(--hero-weave) 0 1px, transparent 1px 4px),
-    repeating-linear-gradient(90deg, var(--hero-weave) 0 1px, transparent 1px 4px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+  opacity: var(--hero-grain);
 }
+:root[data-theme='dark'] .dash-hero::before { filter: invert(1); }
 /* The glow and the rings are drawn from the progress ring itself, centred on it wherever the
    layout puts it, and sit behind everything in the hero (its isolation keeps them above its
    background). */
@@ -1522,24 +1524,20 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 .dash-hero .ring::before { width: 620px; height: 460px; background: radial-gradient(closest-side, var(--hero-glow), transparent); }
 .dash-hero .ring::after {
   width: 840px; height: 840px;
-  background: repeating-radial-gradient(circle, transparent 0 27px, var(--hero-rings) 27px 28px);
+  /* Each ring fades in and out over a pixel, so it stays smooth at any scaling. */
+  background: repeating-radial-gradient(circle, transparent 0 26.25px, var(--hero-rings) 27px 27.75px, transparent 28.5px);
   -webkit-mask-image: radial-gradient(circle, #000 0 90px, transparent 420px);
   mask-image: radial-gradient(circle, #000 0 90px, transparent 420px);
 }
 
-/* ---- Your path: week numbers, day tiles and the module chip.
+/* ---- Your path: week numbers, day labels and the module chip.
    A week's number is a solid green circle once every day in it is done, and a green ring until then.
-   The day tiles are navy with light text; the module chip has gently rounded corners. */
+   A day tile's "DAY N" label is navy blue; the module chip has gently rounded corners. */
 .dash .dash-path .path .path-week .path-num { background: var(--paper); border-color: var(--good); color: var(--good); }
 .dash .dash-path .path .path-week.complete .path-num { background: var(--good); border-color: var(--good); color: #fff; }
 :root[data-theme='dark'] .dash .dash-path .path .path-week.complete .path-num { color: #0f1e3d; }
 
 .mod-chip { border-radius: 4px; }
 
-.day-tiles .day-tile { --tile: var(--ink); background: var(--tile); border-color: var(--tile); color: #fff; }
-:root[data-theme='dark'] .day-tiles .day-tile { --tile: #1b2d57; }
-.day-tiles a.day-tile:hover { box-shadow: 0 8px 20px rgba(14, 31, 69, .28); border-color: #e8a57a; }
-.day-tiles .day-tile .tile-badge { background: rgba(255, 255, 255, .14); color: #fff; }
-.day-tiles .day-tile .tile-done { color: #5ee08f; }
-.day-tiles .day-tile .here { color: #ff9a5c; border-color: #ff9a5c; }
-.day-tiles .day-tile.locked { color: rgba(255, 255, 255, .6); opacity: .7; }
+.day-tiles .day-tile .tile-badge { background: #1e3a8a; color: #fff; }
+:root[data-theme='dark'] .day-tiles .day-tile .tile-badge { background: #2a4aa8; }
