@@ -41,7 +41,21 @@ type Stream = {
    */
   lastFrame: string | null;
   status: string | null;
+  /** The size of what is buffered, so a run with no viewer holds a bounded amount. */
+  bufferedBytes: number;
 };
+
+/** What a stream holds for a viewer that has not attached yet, at most. */
+const MAX_BUFFERED_BYTES = 16_000_000;
+/** The largest live-view frame passed on (a frame is about 100 KB). */
+const MAX_FRAME = 4_000_000;
+/** The longest line of output passed on as one event. */
+const MAX_EVENT_TEXT = 20_000;
+
+const sizeOf = (event: RunStreamEvent): number =>
+  event.event === 'frame' ? event.data.length : event.event === 'stdout' ? event.text.length : event.event === 'term' ? event.data.length : 100;
+
+const newStream = (): Stream => ({ listeners: new Set(), buffered: [], lastFrame: null, status: null, bufferedBytes: 0 });
 
 /** Frames arrive before the client may have attached, so buffer until it does. */
 const streams = new Map<string, Stream>();
@@ -52,6 +66,7 @@ export function attachStream(runId: string, listener: Listener): () => void {
   if (!s) return () => {};
   for (const e of s.buffered) listener(e);
   s.buffered.length = 0;
+  s.bufferedBytes = 0;
   s.listeners.add(listener);
   return () => s.listeners.delete(listener);
 }
@@ -70,11 +85,18 @@ export function lastFrame(runId: string): { frame: string | null; status: string
 export function emit(runId: string, event: RunStreamEvent): void {
   const s = streams.get(runId);
   if (!s) return;
-  if (event.event === 'frame') s.lastFrame = event.data;
-  else if (event.event === 'ended') s.status = event.status;
+  if (event.event === 'frame') {
+    if (typeof event.data !== 'string' || event.data.length > MAX_FRAME) return;
+    s.lastFrame = event.data;
+  } else if (event.event === 'ended') s.status = event.status;
   if (s.listeners.size === 0) {
-    // Cap the buffer: a long run with no viewer must not grow without bound.
-    if (s.buffered.length < 200) s.buffered.push(event);
+    // Cap the buffer, in events and in bytes: a long run with no viewer must not grow without
+    // bound. The run's end is always kept.
+    const size = sizeOf(event);
+    if ((s.buffered.length < 200 && s.bufferedBytes + size <= MAX_BUFFERED_BYTES) || event.event === 'ended' || event.event === 'exit') {
+      s.buffered.push(event);
+      s.bufferedBytes += size;
+    }
     return;
   }
   for (const l of s.listeners) l(event);
@@ -216,6 +238,12 @@ function stripAnsi(text: string): string {
  * and the studio must not load code from there.
  */
 const TYPESCRIPT = JSON.stringify(onDisk(require.resolve('typescript')));
+/**
+ * Where the program's own require() looks: the packages the studio ships, and nowhere else. Node's
+ * usual search would climb from the temp folder through every parent's node_modules, where
+ * anything could be waiting under a package's name.
+ */
+const PACKAGES = JSON.stringify(path.resolve(onDisk(require.resolve('playwright/package.json')), '..', '..'));
 const BOOTSTRAP = `
 const fs = require('fs');
 const path = require('path');
@@ -227,7 +255,7 @@ const out = ts.transpileModule(fs.readFileSync(path.join(__dirname, 'program.ts'
 }).outputText;
 const m = new Module(file, module);
 m.filename = file;
-m.paths = Module._nodeModulePaths(__dirname);
+m.paths = [${PACKAGES}];
 m._compile(out, file);
 `;
 
@@ -262,7 +290,7 @@ export type StartedRun = { run_id: string; done: Promise<RunResult> };
  */
 export function prepareRun(): string {
   const runId = crypto.randomUUID();
-  streams.set(runId, { listeners: new Set(), buffered: [], lastFrame: null, status: null });
+  streams.set(runId, newStream());
   // An id nobody uses must not leak a stream entry.
   setTimeout(() => {
     const s = streams.get(runId);
@@ -275,13 +303,19 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   if (active >= config.run.max_concurrent) return { queue_full: true };
 
   const runId = req.run_id;
-  if (!streams.has(runId)) streams.set(runId, { listeners: new Set(), buffered: [], lastFrame: null, status: null });
-  active++;
+  if (!streams.has(runId)) streams.set(runId, newStream());
 
+  // Nothing is counted as running until the run's files are in place.
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-run-'));
   const program = path.join(scratch, 'run.js');
-  fs.writeFileSync(path.join(scratch, 'program.ts'), buildProgram(req.code));
-  fs.writeFileSync(program, BOOTSTRAP);
+  try {
+    fs.writeFileSync(path.join(scratch, 'program.ts'), buildProgram(req.code));
+    fs.writeFileSync(program, BOOTSTRAP);
+  } catch (e) {
+    fs.rmSync(scratch, { recursive: true, force: true });
+    throw e;
+  }
+  active++;
 
   const started = Date.now();
   let stdout = '';
@@ -292,8 +326,10 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   let blockedUrl: string | null = null;
 
   // Chromium needs a real Windows environment (SystemRoot, TEMP, LOCALAPPDATA) to start at all,
-  // and gets only that (child-env.ts). Env is not the security boundary here - the separate
-  // process, the timeout and the navigation allowlist are.
+  // and gets only that (child-env.ts), so no secret of the studio's reaches the learner's code. The
+  // learner's code runs as the learner, like code they write anywhere: the separate process and the
+  // timeout keep a run from hurting the studio, and the navigation allowlist keeps lessons on the
+  // course's sites; neither is a sandbox.
   const child = spawn(NODE_BIN, [program], {
     cwd: scratch,
     env: learnerEnv(),
@@ -302,12 +338,19 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   });
   children.add(child);
   let truncated = false;
-  const keep = (text: string): void => {
-    if (stdout.length + text.length <= MAX_OUTPUT) stdout += text;
+  let shown = 0;
+  /** A line of the learner's output: kept for the result, and shown live, each within its limit. */
+  const out = (text: string): void => {
+    if (stdout.length + text.length + 1 <= MAX_OUTPUT) stdout += text + '\n';
     else if (!truncated) {
       truncated = true;
       stdout += '[output cut short: over ' + MAX_OUTPUT + ' characters]\n';
+      emit(runId, { event: 'stdout', text: '[output cut short: over ' + MAX_OUTPUT + ' characters]' });
     }
+    if (shown > MAX_OUTPUT) return;
+    const line = text.length > MAX_EVENT_TEXT ? text.slice(0, MAX_EVENT_TEXT) + ' [line cut short]' : text;
+    shown += line.length;
+    emit(runId, { event: 'stdout', text: line });
   };
 
   const done = new Promise<RunResult>((resolve) => {
@@ -326,35 +369,30 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
       for (const line of lines) {
         const marker = line.indexOf(SENTINEL);
         if (marker === -1) {
-          if (line.length) {
-            keep(line + '\n');
-            emit(runId, { event: 'stdout', text: line });
-          }
+          if (line.length) out(line);
           continue;
         }
         // Anything before the marker is genuine learner output on the same line.
         const pre = line.slice(0, marker);
-        if (pre.length) {
-          keep(pre + '\n');
-          emit(runId, { event: 'stdout', text: pre });
-        }
+        if (pre.length) out(pre);
         try {
           const evt = JSON.parse(line.slice(marker + SENTINEL.length));
           if (evt.event === 'frame') {
-            emit(runId, { event: 'frame', data: evt.data, width: evt.width, height: evt.height });
+            if (typeof evt.data === 'string' && typeof evt.width === 'number' && typeof evt.height === 'number') {
+              emit(runId, { event: 'frame', data: evt.data, width: evt.width, height: evt.height });
+            }
           } else if (evt.event === 'stdout') {
-            keep(evt.text + '\n');
-            emit(runId, { event: 'stdout', text: evt.text });
+            out(String(evt.text));
           } else if (evt.event === 'blocked') {
-            blockedUrl = evt.url;
+            blockedUrl = String(evt.url).slice(0, 2_000);
             status = 'blocked';
           } else if (evt.event === 'result') {
-            screenshot = evt.screenshot ?? null;
+            screenshot = typeof evt.screenshot === 'string' && evt.screenshot.length <= MAX_FRAME ? evt.screenshot : null;
             if (evt.status === 'error') {
               // A blocked navigation CAUSES the error that follows it, so keep reporting the
               // block - it is the thing the learner can act on.
               if (status !== 'blocked') status = 'error';
-              error = { message: stripAnsi(evt.message), stack: cleanStack(evt.stack ?? '') };
+              error = { message: stripAnsi(String(evt.message)).slice(0, MAX_EVENT_TEXT), stack: cleanStack(String(evt.stack ?? '')).slice(0, MAX_EVENT_TEXT) };
             } else if (status !== 'blocked') {
               status = 'ok';
             }
@@ -369,7 +407,17 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
       if (stderr.length < MAX_OUTPUT) stderr += chunk.toString('utf-8');
     });
 
-    child.on('close', () => {
+    // A process that cannot start reports an error, and may never close: either ends the run, once.
+    let finished = false;
+    child.on('error', (e) => {
+      if (status === 'ok') status = 'error';
+      if (!error) error = { message: 'The run could not start: ' + e.message, stack: '' };
+      finish();
+    });
+    child.on('close', () => finish());
+    const finish = (): void => {
+      if (finished) return;
+      finished = true;
       clearTimeout(timer);
       children.delete(child);
       active--;
@@ -395,7 +443,7 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
         duration_ms: Date.now() - started,
         blocked_url: blockedUrl,
       });
-    });
+    };
   });
 
   emit(runId, { event: 'started' });

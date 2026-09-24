@@ -12,8 +12,10 @@
  *   STUDIO_PORT           0 picks a free port
  *   PLAYWRIGHT_BROWSERS_PATH   the browsers the app ships; every learner process inherits it
  */
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { z } from 'zod';
 
 export const ROOT = path.resolve(__dirname, '..', '..');
 export const DATA = process.env.STUDIO_DATA_DIR ? path.resolve(process.env.STUDIO_DATA_DIR) : path.join(ROOT, 'Data');
@@ -52,8 +54,10 @@ export type StudioConfig = {
      */
     terminal_timeout_ms: number;
     /**
-     * Origins the browser may navigate to. Fail-closed: an empty list blocks every navigation
-     * rather than allowing everything.
+     * Origins a Run's browser, and the Terminal's tests, may navigate to. Fail-closed: an empty list
+     * blocks every navigation rather than allowing everything. It keeps lessons on the sites the
+     * course uses; it is a guide rail for the browser, not a sandbox. The learner's code itself runs
+     * as the learner, with their rights, as code they write in any editor would.
      */
     allowed_origins: string[];
   };
@@ -75,10 +79,36 @@ const DEFAULTS: StudioConfig = {
   },
 };
 
+/** What a config file may hold: anything else, or anything out of range, is refused. */
+const ConfigFile = z
+  .object({
+    port: z.number().int().min(0).max(65_535),
+    run: z
+      .object({
+        timeout_ms: z.number().int().min(1_000).max(600_000),
+        max_concurrent: z.number().int().min(1).max(16),
+        terminal_timeout_ms: z.number().int().min(1_000).max(3_600_000),
+        allowed_origins: z.array(z.string().regex(/^https?:\/\/[a-z0-9.-]+(:\d{1,5})?$/i)).max(100),
+      })
+      .strict()
+      .partial(),
+  })
+  .strict()
+  .partial();
+
 function load(): StudioConfig {
   const file = path.join(DATA, 'Config', 'studio.config.json');
-  const raw = fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, 'utf-8')) as Partial<StudioConfig>) : {};
-  const port = process.env.STUDIO_PORT ? Number(process.env.STUDIO_PORT) : null;
+  let raw: z.infer<typeof ConfigFile> = {};
+  if (fs.existsSync(file)) {
+    try {
+      raw = ConfigFile.parse(JSON.parse(fs.readFileSync(file, 'utf-8')));
+    } catch (e) {
+      // The defaults are safe; a damaged or edited file must not stop the studio, nor loosen it.
+      console.error('[studio] ' + file + ' is not a valid config, so the defaults are used: ' + (e as Error).message.slice(0, 300));
+    }
+  }
+  const envPort = process.env.STUDIO_PORT;
+  const port = envPort !== undefined && /^\d{1,5}$/.test(envPort) && Number(envPort) <= 65_535 ? Number(envPort) : null;
   return {
     ...DEFAULTS,
     ...raw,
@@ -93,4 +123,4 @@ export const config = load();
  * The ports the servers are actually listening on, once they are: config.port may be 0, and the
  * test report's server (server.ts) always takes a free one.
  */
-export const listening = { port: config.port, reportPort: 0 };
+export const listening = { port: config.port, reportPort: 0, reportPath: '/' + crypto.randomBytes(16).toString('hex') };

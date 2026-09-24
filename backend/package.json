@@ -1,5 +1,5 @@
 {
-    "name": "studio-backend",
+    "name": "@evoke-internal/studio-backend",
     "private": true,
     "version": "0.1.0",
     "description": "Learning Studio backend - serves imported course content, records learner progress, and executes learner code against a real browser.",

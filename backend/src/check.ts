@@ -22,6 +22,9 @@ const programOutput = (out: string): string =>
     .join('\n')
     .trim();
 
+/** What a check keeps of a command's output: its end, where the summary and the verdict are. */
+const MAX_CHECK_OUTPUT = 2_000_000;
+
 /** The last lines of a long output: where a test runner puts its summary and the first failure. */
 const tail = (s: string, lines = 40): string => s.split('\n').slice(-lines).join('\n');
 
@@ -30,7 +33,10 @@ function run(command: string, code: string, file: string, req: CheckRequest): Pr
     const runId = prepareRun();
     let out = '';
     const detach = attachStream(runId, (e) => {
-      if (e.event === 'term') out += e.data;
+      if (e.event === 'term') {
+        out += e.data;
+        if (out.length > MAX_CHECK_OUTPUT) out = out.slice(-MAX_CHECK_OUTPUT / 2);
+      }
       if (e.event === 'exit') {
         detach();
         resolve({ exit: e.code, out });

@@ -12,7 +12,15 @@ export default defineConfig({
     dedupe: ['@codemirror/state', '@codemirror/view', '@codemirror/language', 'codemirror'],
   },
   server: {
+    host: '127.0.0.1',
     port: 5185,
+    // No other site may read from the dev server, and it serves only the page's own files.
+    cors: false,
+    fs: {
+      strict: true,
+      allow: ['.', '../shared', '../Data/Content/course-plan.json'],
+      deny: ['.env', '.env.*', '*.{pem,key,pfx,p12,dpapi,lic,crt}', '**/.git/**'],
+    },
     // Fail rather than drift to another port: the port is how v1, v2, A, B and C are told apart.
     strictPort: true,
     proxy: {

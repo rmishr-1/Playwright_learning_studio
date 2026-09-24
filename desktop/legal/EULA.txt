@@ -44,10 +44,13 @@ under. Evoke may use these marks to find the source of an unauthorised copy.
 To enforce this licence, the Software:
  (a) reads Windows' identifier of the computer it runs on, and keeps only a one-way hash of it
      (the "machine code" it shows), to check a licence that is limited to one computer;
- (b) records the latest date on which it ran, so that a licence period cannot be extended by
-     changing the computer's clock;
- (c) keeps the course content encrypted, and refuses to start with debugging, logging or proxy
-     options, or when its files have been changed.
+ (b) records the latest date on which it ran, and reads the dates its own files were last
+     written, so that a licence period cannot be extended by changing the computer's clock;
+ (c) keeps the course content encrypted and its program code obfuscated, and refuses to start
+     with debugging, logging or proxy options, or when its files have been changed;
+ (d) checks the licence while it runs: it tells you two weeks before a licence period ends, and
+     when a licence ends or is withdrawn during a session, it tells you and closes ten minutes
+     later. Your progress is kept, and is there again when a valid licence is added.
 The Software works offline. It does not send the machine code, your progress, your code or any
 other information about you or your computer to Evoke or to anyone else.
 

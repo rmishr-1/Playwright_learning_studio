@@ -178,7 +178,7 @@ async function main(): Promise<void> {
   let first = await app.firstWindow();
   await first.waitForSelector('#product:not(:empty)');
   const rolled = (await first.isVisible('#reason')) ? await first.textContent('#reason') : '';
-  expect(/expired/.test(rolled ?? ''), 'turning the clock back does not revive an expired licence', rolled ?? '');
+  expect(/clock says .* already been used on 2099-06-01/.test(rolled ?? ''), 'turning the clock back does not revive an expired licence, and says it is the clock', rolled ?? '');
   await app.close();
 
   console.log('\nAgreement and studio');

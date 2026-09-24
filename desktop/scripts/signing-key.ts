@@ -5,10 +5,14 @@
  * command, sync script or zip of the project can ever take it along:
  *
  *   licence-private.dpapi   the private key, encrypted by Windows for this user on this computer
- *                           (DPAPI): the file is useless to anyone who copies it elsewhere
- *   public-key.sha256       the fingerprint of the matching public key; a build refuses a
- *                           desktop/src/licence-public.pem that does not match it
- *   issued.csv              the record of every licence issued
+ *                           (DPAPI): the file is useless to anyone who copies it elsewhere. With a
+ *                           passphrase set (npm run licence:set-passphrase), it is also encrypted
+ *                           with that passphrase inside, so a program running as this Windows user
+ *                           cannot open it without asking the person issuing a licence.
+ *   public-key.sha256       the fingerprint of the matching public key; a release build refuses a
+ *                           desktop/src/licence-public.pem that does not match it, or a computer
+ *                           without it
+ *   issued.csv, seals.json  the record of every licence issued, and each licence ID's seal
  *
  * Because the DPAPI file opens only for this Windows user, keep a backup made with
  * `npm run licence:backup-key` (encrypted with a passphrase you choose) somewhere safe and offline.
@@ -19,44 +23,88 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { systemExe } from '../../backend/src/child-env';
+import { secret } from './prompt';
 
 export const DESKTOP = path.resolve(__dirname, '..');
 export const KEY_DIR = process.env.STUDIO_KEY_DIR || path.join(os.homedir(), '.evoke-studio');
 export const PRIVATE_FILE = path.join(KEY_DIR, 'licence-private.dpapi');
 export const FINGERPRINT_FILE = path.join(KEY_DIR, 'public-key.sha256');
 export const ISSUED_CSV = path.join(KEY_DIR, 'issued.csv');
+/** Each licence ID's seal, so a reissue keeps it even where desktop/licences/ is not. */
+export const SEALS_FILE = path.join(KEY_DIR, 'seals.json');
 export const PUBLIC_KEY_FILE = path.join(DESKTOP, 'src', 'licence-public.pem');
+/**
+ * The fingerprint of Evoke's public key. A release is built only with the key that matches both this
+ * and the fingerprint kept beside the private key: changing the key takes a change here, in review.
+ */
+export const EVOKE_KEY_FINGERPRINT = '7809eed2cd769b9e2b4b75a4e1a49945514ac6c610a246a8f5eb0a80af05c42a';
 /** Where the key used to be kept, inside the project. Moved out on first use (migrate()). */
 const LEGACY_DIR = path.join(DESKTOP, 'keys');
 
 const POWERSHELL = systemExe(path.join('WindowsPowerShell', 'v1.0', 'powershell.exe'));
 
-/** Runs DPAPI on base64 text through Windows PowerShell; the data goes by stdin, never argv. */
-function dpapi(action: 'Protect' | 'Unprotect', base64: string): string {
+/**
+ * Runs DPAPI through Windows PowerShell. The data goes in by stdin and comes back as raw bytes on
+ * the output stream, never as a PowerShell value: PowerShell's logging, which an organisation may
+ * switch on, records values passed along its pipeline, and the decrypted key must not be one.
+ */
+function dpapi(action: 'Protect' | 'Unprotect', data: Buffer): Buffer {
   const script =
     'Add-Type -AssemblyName System.Security; ' +
     '$in = [Convert]::FromBase64String([Console]::In.ReadToEnd().Trim()); ' +
     '$out = [Security.Cryptography.ProtectedData]::' + action + "($in, $null, 'CurrentUser'); " +
-    '[Convert]::ToBase64String($out)';
+    '$s = [Console]::OpenStandardOutput(); $s.Write($out, 0, $out.Length); $s.Flush(); ' +
+    '[Array]::Clear($out, 0, $out.Length); [Array]::Clear($in, 0, $in.Length)';
   return execFileSync(POWERSHELL, ['-NoProfile', '-NonInteractive', '-Command', script], {
-    input: base64,
-    encoding: 'utf-8',
+    input: data.toString('base64'),
     windowsHide: true,
-  }).trim();
+    maxBuffer: 1024 * 1024,
+  });
 }
 
 export const publicFingerprint = (pem: string): string =>
   crypto.createHash('sha256').update(crypto.createPublicKey(pem).export({ type: 'spki', format: 'der' })).digest('hex');
 
-/** Stores a private key (PEM) encrypted for this Windows user, with its public key's fingerprint. */
-export function storePrivateKey(pem: string): void {
+// ---------------------------------------------------------------- the optional passphrase layer
+
+const LAYER = Buffer.from('SPW1', 'latin1');
+
+/** The key encrypted with a passphrase: 'SPW1', salt, IV, GCM tag, then AES-256-GCM (scrypt N=2^17). */
+function wrap(pem: string, passphrase: string): Buffer {
+  const salt = crypto.randomBytes(16);
+  const iv = crypto.randomBytes(12);
+  const key = crypto.scryptSync(passphrase, salt, 32, { N: 2 ** 17, r: 8, p: 1, maxmem: 256 * 1024 * 1024 });
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const body = Buffer.concat([cipher.update(pem, 'utf-8'), cipher.final()]);
+  return Buffer.concat([LAYER, salt, iv, cipher.getAuthTag(), body]);
+}
+
+function unwrap(data: Buffer, passphrase: string): string {
+  const key = crypto.scryptSync(passphrase, data.subarray(4, 20), 32, { N: 2 ** 17, r: 8, p: 1, maxmem: 256 * 1024 * 1024 });
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, data.subarray(20, 32));
+  decipher.setAuthTag(data.subarray(32, 48));
+  try {
+    return Buffer.concat([decipher.update(data.subarray(48)), decipher.final()]).toString('utf-8');
+  } catch {
+    throw new Error('That passphrase does not open the signing key.');
+  }
+}
+
+// ---------------------------------------------------------------- storing and loading
+
+/**
+ * Stores a private key (PEM) encrypted for this Windows user, with its public key's fingerprint,
+ * and with a passphrase inside when one is given.
+ */
+export function storePrivateKey(pem: string, passphrase: string | null = null): void {
   fs.mkdirSync(KEY_DIR, { recursive: true });
-  const sealed = dpapi('Protect', Buffer.from(pem, 'utf-8').toString('base64'));
-  fs.writeFileSync(PRIVATE_FILE, sealed + '\n');
+  const inner = passphrase ? wrap(pem, passphrase) : Buffer.from(pem, 'utf-8');
+  const sealed = dpapi('Protect', inner);
+  // Proves the stored copy opens before anything relies on it.
+  if (!dpapi('Unprotect', sealed).equals(inner)) throw new Error('The signing key could not be stored safely.');
+  fs.writeFileSync(PRIVATE_FILE, sealed.toString('base64') + '\n');
   const publicPem = crypto.createPublicKey(pem).export({ type: 'spki', format: 'pem' }).toString();
   fs.writeFileSync(FINGERPRINT_FILE, publicFingerprint(publicPem) + '\n');
-  // Proves the stored copy opens before anything relies on it.
-  if (loadPrivateKey() !== pem) throw new Error('The signing key could not be stored safely.');
 }
 
 /**
@@ -80,30 +128,56 @@ export function hasPrivateKey(): boolean {
   return fs.existsSync(PRIVATE_FILE);
 }
 
-/** The private key, decrypted in memory. */
-export function loadPrivateKey(): string {
+/** Whether the stored key also needs its passphrase. */
+export function needsPassphrase(): boolean {
+  if (!hasPrivateKey()) return false;
+  return dpapi('Unprotect', Buffer.from(fs.readFileSync(PRIVATE_FILE, 'utf-8').trim(), 'base64')).subarray(0, 4).equals(LAYER);
+}
+
+/** The private key, decrypted in memory; asks for the passphrase when one is set. */
+export async function loadPrivateKey(): Promise<string> {
   migrate();
   if (!fs.existsSync(PRIVATE_FILE)) {
     throw new Error("Evoke's licence signing key is not on this computer (" + PRIVATE_FILE + '). Licences can only be issued where it is.');
   }
-  return Buffer.from(dpapi('Unprotect', fs.readFileSync(PRIVATE_FILE, 'utf-8').trim()), 'base64').toString('utf-8');
+  const inner = dpapi('Unprotect', Buffer.from(fs.readFileSync(PRIVATE_FILE, 'utf-8').trim(), 'base64'));
+  if (!inner.subarray(0, 4).equals(LAYER)) return inner.toString('utf-8');
+  return unwrap(inner, await secret('Passphrase of the licence signing key: '));
 }
 
 /**
  * The public key a build puts into the app, checked against the fingerprint kept with the private
- * key: a licence-public.pem swapped in the repository would let someone else's licences in.
+ * key: a licence-public.pem swapped in the repository would let someone else's licences in. A
+ * release build is made only where that fingerprint is: on a computer without it, nothing could
+ * tell a swapped key from the real one.
  */
 export function checkedPublicKey(file = PUBLIC_KEY_FILE): string {
   const pem = fs.readFileSync(file, 'utf-8');
   migrate();
-  if (file === PUBLIC_KEY_FILE && fs.existsSync(FINGERPRINT_FILE)) {
-    const want = fs.readFileSync(FINGERPRINT_FILE, 'utf-8').trim();
-    if (publicFingerprint(pem) !== want) {
-      throw new Error(
-        'desktop/src/licence-public.pem is not the public half of the signing key kept in ' + KEY_DIR + '. ' +
-          'Someone may have replaced it; the build stops.',
-      );
-    }
+  if (file !== PUBLIC_KEY_FILE) return pem;
+  if (!fs.existsSync(FINGERPRINT_FILE)) {
+    throw new Error(
+      'This computer has no record of the licence key\'s fingerprint (' + FINGERPRINT_FILE + '), so it cannot tell whether ' +
+        'desktop/src/licence-public.pem is the real one. Build releases on the computer that holds the signing key.',
+    );
+  }
+  const want = fs.readFileSync(FINGERPRINT_FILE, 'utf-8').trim();
+  if (publicFingerprint(pem) !== want || want !== EVOKE_KEY_FINGERPRINT) {
+    throw new Error(
+      'desktop/src/licence-public.pem is not the public half of the signing key kept in ' + KEY_DIR + '. ' +
+        'Someone may have replaced it; the build stops.',
+    );
   }
   return pem;
 }
+
+// ---------------------------------------------------------------- passphrase and backups
+
+/** Encrypts the key with a passphrase, for a backup kept away from this computer. */
+export const backupOf = (pem: string, passphrase: string): Buffer => wrap(pem, passphrase);
+
+/** A key from such a backup. */
+export const fromBackup = (data: Buffer, passphrase: string): string => {
+  if (!data.subarray(0, 4).equals(LAYER)) throw new Error('That file is not a signing key backup.');
+  return unwrap(data, passphrase);
+};

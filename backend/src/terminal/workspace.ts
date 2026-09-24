@@ -26,6 +26,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { DATA, onDisk } from '../config';
 import { readContent } from '../content';
+import { lockedDayNumbers } from '../store';
 import { WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
 
 // STUDIO_WORKSPACE_ROOT lets `npm run verify:content` work in a folder of its own, so a check never
@@ -160,7 +161,17 @@ const PACKAGE = JSON.stringify({ name: 'studio-workspace', private: true }, null
 function readSeeds(): WorkspaceSeeds['workspaces'] {
   const text = readContent('workspaces.json');
   if (text === null) return { demo: { files: {} }, project: { files: {} } };
-  return WorkspaceSeeds.parse(JSON.parse(text)).workspaces;
+  const seeds = WorkspaceSeeds.parse(JSON.parse(text)).workspaces;
+  // A locked day's starting files (tests/day9/..., ts-basics/day8/...) wait until it opens.
+  const locked = lockedDayNumbers();
+  if (locked.size === 0) return seeds;
+  const open = (rel: string): boolean => {
+    const m = /(?:^|\/)day(\d+)(?:\/|$)/.exec(rel);
+    return !m || !locked.has(Number(m[1]));
+  };
+  return Object.fromEntries(
+    Object.entries(seeds).map(([name, ws]) => [name, { files: Object.fromEntries(Object.entries(ws.files).filter(([rel]) => open(rel))) }]),
+  ) as WorkspaceSeeds['workspaces'];
 }
 
 /**

@@ -65,6 +65,36 @@ export function courseDay(week: number, day: number): CourseDay | null {
   return parsed;
 }
 
+/** Whether a day is locked: by itself, or because its whole week is. */
+export function isLocked(week: number, day: number): boolean {
+  if (courseDay(week, day)?.locked) return true;
+  try {
+    return courseIndex().weeks.find((w) => w.week === week)?.locked === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The days that are locked, numbered through the course as the workspaces' folders are (day1 to
+ * day10), so a locked day's starting files stay out of the workspaces too.
+ */
+export function lockedDayNumbers(): Set<number> {
+  const locked = new Set<number>();
+  let n = 0;
+  try {
+    for (const w of [...courseIndex().weeks].sort((a, b) => a.week - b.week)) {
+      for (const d of [...w.days].sort((a, b) => a.day - b.day)) {
+        n++;
+        if (w.locked || d.locked || courseDay(w.week, d.day)?.locked) locked.add(n);
+      }
+    }
+  } catch {
+    // No course: nothing to seed either.
+  }
+  return locked;
+}
+
 // ---------------------------------------------------------------- progress
 
 const EMPTY_PROGRESS: Progress = { schema: 'progress/v1', resume: null, progress: {} };

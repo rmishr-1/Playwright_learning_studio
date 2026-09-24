@@ -112,7 +112,10 @@ export function Markdown({
     if (!host) return;
     // Lessons are Evoke's own, and still pass through DOMPurify: no script, event handler or
     // javascript: link can reach the page, whatever a lesson contains.
-    host.innerHTML = DOMPurify.sanitize(marked.parse(text) as string);
+    host.innerHTML = DOMPurify.sanitize(marked.parse(text) as string, {
+      FORBID_TAGS: ['style', 'form', 'iframe', 'frame', 'object', 'embed', 'svg', 'math', 'meta', 'link', 'base'],
+      FORBID_ATTR: ['style', 'srcset', 'formaction', 'action'],
+    });
 
     for (const block of Array.from(host.querySelectorAll('pre > code'))) {
       const code = block.textContent ?? '';

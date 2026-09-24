@@ -30,7 +30,8 @@ import * as path from 'node:path';
 import * as readline from 'node:readline';
 import { issueLicence, problemWith, type IssueOptions } from './issue-licence';
 import type { LicenceFile } from '../src/licence';
-import { packageApp } from './package';
+import { hasCertificate, packageApp } from './package';
+import { systemExe } from '../../backend/src/child-env';
 import { DESKTOP, PRODUCT, VERSION } from './build';
 import { PRIVATE_FILE, hasPrivateKey } from './signing-key';
 
@@ -111,7 +112,7 @@ async function main(): Promise<void> {
   const problem = problemWith(options);
   if (problem) throw new Error(problem);
 
-  const { licence, file: licenceFile } = issueLicence(options);
+  const { licence, file: licenceFile } = await issueLicence(options);
   console.log('\n> Issued ' + licence.id + ' to ' + licence.licensee + (licence.logo ? ', with their logo' : ''));
   return deliver(licenceFile);
 }
@@ -135,7 +136,12 @@ async function deliver(licenceFile: string): Promise<void> {
   console.log('\n  Building their app: about 10 minutes, the last 5 of them making the zip, when the');
   console.log('  window shows little. Keep this window open until it says DONE. The zip is moved into');
   console.log('  the deliveries folder only when it is complete.');
-  const made = await packageApp({ licenceFile, carryLicence: false, target: 'zip' });
+  const unsigned = !hasCertificate();
+  if (unsigned) {
+    console.log('\n  Note: no code-signing certificate is set (CSC_LINK), so the app is not signed. Windows will');
+    console.log('  warn the customer ("Windows protected your PC") until Evoke signs its copies.');
+  }
+  const made = await packageApp({ licenceFile, carryLicence: false, target: 'zip', unsigned });
   const zip = made.find((f) => f.endsWith('.zip'));
   if (!zip) throw new Error('The build made no zip.');
 
@@ -182,7 +188,7 @@ async function deliver(licenceFile: string): Promise<void> {
   console.log('  ' + path.basename(licenceOut));
   console.log('  READ ME FIRST.txt');
   console.log('  SHA256SUMS.txt');
-  if (!process.argv.includes('--no-open')) spawn('explorer.exe', [out], { detached: true, stdio: 'ignore' }).unref();
+  if (!process.argv.includes('--no-open')) spawn(systemExe(path.join('..', 'explorer.exe')), [out], { detached: true, stdio: 'ignore' }).unref();
 }
 
 main().catch((e) => {

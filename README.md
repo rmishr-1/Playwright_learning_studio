@@ -185,9 +185,10 @@ That is the feature, not an oversight. The guards are load-bearing:
   document navigation, so an allowed app's own fonts and scripts still load
 - a concurrency cap, so one learner cannot exhaust the box
 - a per-run scratch directory, removed afterwards
-- the child's environment is stripped of anything matching `ANTHROPIC|API_KEY|TOKEN|SECRET|PASSWORD`
+- the child gets an allowlisted environment only (`backend/src/child-env.ts`): the system paths
+  and the browsers' folder, nothing of the studio's own (no token, key or secret)
 - the Terminal accepts Playwright commands only, never through a shell, and applies the same
-  allowlist, timeout, and environment stripping
+  allowlist, timeout, and environment
 
 **This is sized for an internal training tool on a trusted network.** Do not put it on the public
 internet without a container per run: process isolation alone does not contain code running as

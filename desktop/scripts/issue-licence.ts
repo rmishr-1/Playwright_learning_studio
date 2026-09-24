@@ -10,8 +10,11 @@
  *
  * Give the same --id to reissue a licence (a new expiry date, or a machine-bound one): it must be
  * for the same licensee, it keeps the licence's seal (so the customer's build still opens with it),
- * and the earlier file is revoked (revoke-licence.ts). --logo puts the customer's logo (PNG or
- * JPEG) into the licence; the app shows it in its header.
+ * and the earlier file is revoked (revoke-licence.ts). An ID with no record of its seal is refused,
+ * rather than given a new seal the customer's build would not open with. Add --new-seal when the
+ * licence leaked: the old file then cannot decrypt the customer's next build either, so they need
+ * a new build too. --logo puts the customer's logo (PNG or JPEG) into the licence; the app shows it
+ * in its header.
  *
  * new-customer.ts uses issueLicence() to issue a licence and build the customer's app in one go.
  */
@@ -19,7 +22,7 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { LOGO_MAX_BYTES, PRODUCT, sign, verify, type Licence, type LicenceFile } from '../src/licence';
-import { DESKTOP, ISSUED_CSV, checkedPublicKey, loadPrivateKey } from './signing-key';
+import { DESKTOP, ISSUED_CSV, SEALS_FILE, checkedPublicKey, loadPrivateKey } from './signing-key';
 import { revoke } from './revoke-licence';
 
 export const LICENCES_DIR = path.join(DESKTOP, 'licences');
@@ -32,6 +35,8 @@ export type IssueOptions = {
   /** A PNG or JPEG file. */
   logoFile?: string | null;
   id?: string | null;
+  /** A reissue with a new seal, for a licence that leaked. */
+  newSeal?: boolean;
 };
 
 /** Checks the options, and says what is wrong with them in words; null when they are fine. */
@@ -64,6 +69,9 @@ function issuedUnder(id: string): { file: string; licence: LicenceFile }[] {
     .sort((a, b) => fs.statSync(b.file).mtimeMs - fs.statSync(a.file).mtimeMs);
 }
 
+type Seals = Record<string, { licensee: string; seal: string }>;
+const readSeals = (): Seals => (fs.existsSync(SEALS_FILE) ? (JSON.parse(fs.readFileSync(SEALS_FILE, 'utf-8')) as Seals) : {});
+
 /** A spreadsheet cell: quoted, and never read as a formula. */
 const csv = (v: string | null | undefined): string => {
   let s = (v ?? '').replace(/"/g, '""');
@@ -72,18 +80,25 @@ const csv = (v: string | null | undefined): string => {
 };
 
 /** Issues the licence, writes it, records it, and returns it with the file it was written to. */
-export function issueLicence(o: IssueOptions): { licence: Licence; file: string } {
+export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence; file: string }> {
   const problem = problemWith(o);
   if (problem) throw new Error(problem);
-  const privateKey = loadPrivateKey();
   const publicKey = checkedPublicKey();
+  const privateKey = await loadPrivateKey();
 
   // A reissue keeps the seal, and must be for the same licensee.
+  const seals = readSeals();
   const earlier = o.id ? issuedUnder(o.id) : [];
-  if (earlier.length && earlier[0].licence.licence.licensee !== o.licensee.trim()) {
-    throw new Error(o.id + ' was issued to ' + earlier[0].licence.licence.licensee + ', not ' + o.licensee.trim() + '.');
+  const known = o.id ? seals[o.id] : undefined;
+  const firstLicensee = known?.licensee ?? earlier[0]?.licence.licence.licensee;
+  if (o.id && firstLicensee === undefined) {
+    throw new Error('There is no record of ' + o.id + ' on this computer, so it cannot be reissued. Issue a new licence instead.');
   }
-  const seal = earlier.find((e) => e.licence.licence.seal)?.licence.licence.seal ?? crypto.randomBytes(32).toString('hex');
+  if (firstLicensee !== undefined && firstLicensee !== o.licensee.trim()) {
+    throw new Error(o.id + ' was issued to ' + firstLicensee + ', not ' + o.licensee.trim() + '.');
+  }
+  const kept = known?.seal ?? earlier.find((e) => e.licence.licence.seal)?.licence.licence.seal;
+  const seal = !o.newSeal && kept ? kept : crypto.randomBytes(32).toString('hex');
 
   const logo = o.logoFile
     ? 'data:image/' + (/\.png$/i.test(o.logoFile) ? 'png' : 'jpeg') + ';base64,' + fs.readFileSync(o.logoFile).toString('base64')
@@ -98,6 +113,7 @@ export function issueLicence(o: IssueOptions): { licence: Licence; file: string 
     product: PRODUCT,
     ...(logo ? { logo } : {}),
     seal,
+    serial: crypto.randomBytes(8).toString('hex'),
   };
   const text = JSON.stringify(sign(licence, privateKey), null, 2) + '\n';
 
@@ -110,6 +126,8 @@ export function issueLicence(o: IssueOptions): { licence: Licence; file: string 
     revoke(e.file, 'reissued ' + licence.issued);
     fs.renameSync(e.file, e.file.replace(/\.lic$/, '.revoked-' + Date.now() + '.lic.old'));
   }
+
+  fs.writeFileSync(SEALS_FILE, JSON.stringify({ ...seals, [licence.id]: { licensee: licence.licensee, seal } }, null, 2) + '\n');
 
   const slug = licence.licensee.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const file = path.join(LICENCES_DIR, licence.id + '-' + slug + '.lic');
@@ -129,20 +147,21 @@ function arg(name: string): string | null {
   return i === -1 ? null : (process.argv[i + 1] ?? null);
 }
 
-if (require.main === module) {
+async function main(): Promise<void> {
   const licensee = arg('licensee');
   if (!licensee) {
-    console.error('Usage: npm run licence:issue -- --licensee "Name" [--email x] [--expires YYYY-MM-DD] [--machine CODE] [--logo file.png] [--id EVK-...]');
+    console.error('Usage: npm run licence:issue -- --licensee "Name" [--email x] [--expires YYYY-MM-DD] [--machine CODE] [--logo file.png] [--id EVK-... [--new-seal]]');
     process.exit(1);
   }
   try {
-    const { licence, file } = issueLicence({
+    const { licence, file } = await issueLicence({
       licensee,
       email: arg('email'),
       expires: arg('expires'),
       machine: arg('machine'),
       logoFile: arg('logo') ? path.resolve(arg('logo')!) : null,
       id: arg('id'),
+      newSeal: process.argv.includes('--new-seal'),
     });
     console.log(
       'Issued ' + licence.id + ' to ' + licence.licensee + (licence.expires ? ', until ' + licence.expires : '') +
@@ -154,3 +173,5 @@ if (require.main === module) {
     process.exit(1);
   }
 }
+
+if (require.main === module) void main();

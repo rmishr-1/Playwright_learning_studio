@@ -53,11 +53,35 @@ const COPYRIGHT = 'Copyright © 2026 Evoke Technologies. All rights reserved.';
 
 // ---------------------------------------------------------------- start-up guards
 
-// A release build takes no command-line switches at all. Electron's and Chromium's switches can
+// A release build takes no command-line arguments at all. Electron's and Chromium's switches can
 // attach a debugger, route the app's traffic through a proxy, or write it all to a log file
 // (--remote-debugging-port, --proxy-server, --log-net-log, ...), and any of those would hand out
-// the token and the decrypted course. The app itself never needs one: its shortcut passes none.
-if (RELEASE && process.argv.slice(1).some((a) => a.startsWith('-'))) app.exit(1);
+// the token and the decrypted course. On Windows Chromium also reads /switch, so nothing is let
+// through by its first character; and Chromium's own parser is asked too. The app never needs an
+// argument: its shortcut passes none.
+const DANGEROUS_SWITCHES = [
+  'remote-debugging-port',
+  'remote-debugging-pipe',
+  'remote-debugging-address',
+  'inspect',
+  'inspect-brk',
+  'inspect-port',
+  'js-flags',
+  'proxy-server',
+  'proxy-pac-url',
+  'proxy-bypass-list',
+  'log-net-log',
+  'net-log-capture-mode',
+  'enable-logging',
+  'v',
+  'vmodule',
+  'host-rules',
+  'host-resolver-rules',
+  'user-data-dir',
+  'disable-web-security',
+  'ignore-certificate-errors',
+];
+if (RELEASE && (process.argv.length > 1 || DANGEROUS_SWITCHES.some((s) => app.commandLine.hasSwitch(s)))) app.exit(1);
 if (!app.requestSingleInstanceLock()) app.exit(0);
 
 Menu.setApplicationMenu(null);
@@ -92,29 +116,51 @@ const MACHINE = machineCode();
 
 /**
  * Today, as far as the licence is concerned: never earlier than the latest day the app has seen, so
- * turning the computer's clock back does not bring an expired licence back to life.
+ * turning the computer's clock back does not bring an expired licence back to life. That day is
+ * read from more than one mark: the day it records, and the days the app's own files were last
+ * written, so deleting one file does not reset it.
  */
 const LAST_SEEN_FILE = path.join(USER_DIR, 'last-seen.json');
-function licenceToday(): string {
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+function licenceToday(): { today: string; now: string } {
   const now = new Date().toISOString().slice(0, 10);
-  let seen = '';
+  const marks: string[] = [];
   try {
-    seen = (JSON.parse(fs.readFileSync(LAST_SEEN_FILE, 'utf-8')) as { day: string }).day;
+    marks.push((JSON.parse(fs.readFileSync(LAST_SEEN_FILE, 'utf-8')) as { day: string }).day);
   } catch {
-    seen = '';
+    // No record yet.
   }
-  const today = /^\d{4}-\d{2}-\d{2}$/.test(seen) && seen > now ? seen : now;
+  try {
+    for (const e of fs.readdirSync(USER_DIR, { withFileTypes: true })) {
+      if (e.isFile()) marks.push(fs.statSync(path.join(USER_DIR, e.name)).mtime.toISOString().slice(0, 10));
+    }
+  } catch {
+    // No folder yet.
+  }
+  const today = marks.filter((d) => DAY.test(d)).reduce((a, b) => (b > a ? b : a), now);
   try {
     fs.mkdirSync(USER_DIR, { recursive: true });
     fs.writeFileSync(LAST_SEEN_FILE, JSON.stringify({ day: today }));
   } catch {
     // Not being able to record the day must not stop the app.
   }
-  return today;
+  return { today, now };
 }
 
-const check = (text: string): Verdict =>
-  verify(text, BUILD.publicKey, { onlyId: BUILD.onlyId, machine: MACHINE, today: licenceToday(), revoked: BUILD.revoked });
+function check(text: string): Verdict {
+  const { today, now } = licenceToday();
+  const verdict = verify(text, BUILD.publicKey, { onlyId: BUILD.onlyId, machine: MACHINE, today, revoked: BUILD.revoked });
+  // Said plainly when it is the clock, not the licence, that is wrong.
+  if (!verdict.ok && verdict.licence?.expires && now <= verdict.licence.expires && today > verdict.licence.expires) {
+    return {
+      ...verdict,
+      reason:
+        "This computer's clock says " + now + ', but the studio has already been used on ' + today + ', after the licence ' +
+        'ended (' + verdict.licence.expires + '). Set the clock to the right date, or ask Evoke for a renewed licence.',
+    };
+  }
+  return verdict;
+}
 
 /** The licence the learner added, else the one built into a customer's copy. */
 function currentLicence(): Verdict {
@@ -332,6 +378,21 @@ async function openStudio(licence: Licence): Promise<void> {
   await win.loadURL(origin + '/');
 }
 
+/** Tells the learner, when the studio opens, that their licence ends within two weeks. */
+function warnOfExpiry(licence: Licence): void {
+  if (!licence.expires) return;
+  const days = Math.round((Date.parse(licence.expires + 'T00:00:00Z') - Date.parse(licenceToday().today + 'T00:00:00Z')) / 86_400_000);
+  if (days > 14) return;
+  const win = BrowserWindow.getAllWindows()[0];
+  const message = {
+    type: 'info' as const,
+    title: BUILD.product,
+    message: days <= 0 ? 'Your licence ends today.' : 'Your licence ends in ' + days + (days === 1 ? ' day' : ' days') + ', on ' + licence.expires + '.',
+    detail: 'Ask your training contact, or Evoke, for a renewed licence to keep using the studio after that.',
+  };
+  void (win ? dialog.showMessageBox(win, message) : dialog.showMessageBox(message));
+}
+
 // ---------------------------------------------------------------- every window
 
 let studioOrigin = '';
@@ -404,7 +465,7 @@ async function lockSession(): Promise<void> {
   await s.setProxy({ mode: 'direct' });
   await s.clearCache();
   const local = (url: string): boolean =>
-    sameOrigin(url) || url.startsWith(SETUP_ORIGIN + '/') || /^(data|blob|about|devtools|chrome-extension):/.test(url);
+    sameOrigin(url) || url.startsWith(SETUP_ORIGIN + '/') || /^(data|blob|about):/.test(url) || (!RELEASE && /^(devtools|chrome-extension):/.test(url));
   s.webRequest.onBeforeRequest((details, callback) => callback({ cancel: !local(details.url) }));
   s.webRequest.onBeforeSendHeaders((details, callback) => {
     const headers = { ...details.requestHeaders };
@@ -426,12 +487,18 @@ void app.whenReady().then(async () => {
   try {
     await openStudio(setup.licence);
     setup.close();
-    // A licence can expire, or be seen to have expired, while the app is open.
+    warnOfExpiry(setup.licence);
+    // A licence can expire, or be seen to have expired, while the app is open: the learner is told,
+    // and has ten minutes to finish what they are doing before the studio closes.
+    let closing = false;
     setInterval(() => {
       const now = currentLicence();
-      if (now.ok) return;
-      dialog.showErrorBox(BUILD.product, now.reason + ' The studio will close.');
-      app.quit();
+      if (now.ok || closing) return;
+      closing = true;
+      const win = BrowserWindow.getAllWindows()[0];
+      const message = { type: 'warning' as const, title: BUILD.product, message: now.reason, detail: 'The studio will close in 10 minutes. Your progress is saved.' };
+      void (win ? dialog.showMessageBox(win, message) : dialog.showMessageBox(message));
+      setTimeout(() => app.quit(), 10 * 60 * 1000);
     }, 60 * 60 * 1000);
   } catch (e) {
     dialog.showErrorBox(BUILD.product, 'The studio could not start: ' + (e as Error).message);

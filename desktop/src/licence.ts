@@ -17,7 +17,12 @@
  * as a PNG or JPEG data URL; the app shows it in its header. `seal` is a random secret of the
  * customer's: a build made for them can only decrypt its course with it (see content.ts), so their
  * copy of the app opens nothing without their licence file. A licence reissued under the same ID
- * keeps its seal. All of it is signed, so none of it can be changed.
+ * keeps its seal, unless it was reissued because it leaked. `serial` is random, so no two licence
+ * files are ever the same, even with the same terms on the same day. All of it is signed, so none of
+ * it can be changed.
+ *
+ * The signature must be written exactly one way (88 characters of standard base64): a licence that
+ * has been revoked cannot be made to look new by writing the same signature differently.
  */
 import * as crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -35,6 +40,7 @@ export type Licence = {
   product: string;
   logo?: string | null;
   seal?: string | null;
+  serial?: string | null;
 };
 
 /** A logo a licence may carry: a PNG or JPEG, as a data URL, up to 300 KB. */
@@ -42,6 +48,9 @@ export const LOGO = /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+=*$/;
 export const LOGO_MAX_BYTES = 300 * 1024;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SEAL = /^[0-9a-f]{64}$/;
+const SERIAL = /^[0-9a-f]{16}$/;
+/** An Ed25519 signature in standard base64, written the one way Node writes it. */
+const SIGNATURE = /^[A-Za-z0-9+/]{86}==$/;
 
 export type LicenceFile = { licence: Licence; signature: string };
 
@@ -62,6 +71,7 @@ export function canonical(l: Licence): string {
     product: l.product,
     ...(l.logo ? { logo: l.logo } : {}),
     ...(l.seal ? { seal: l.seal } : {}),
+    ...(l.serial ? { serial: l.serial } : {}),
   });
 }
 
@@ -70,8 +80,12 @@ export function sign(l: Licence, privateKeyPem: string): LicenceFile {
   return { licence: l, signature };
 }
 
-/** How a revocation list names a licence file: the hash of its signature, so reissues differ. */
-export const fingerprint = (file: LicenceFile): string => crypto.createHash('sha256').update(file.signature).digest('hex');
+/**
+ * How a revocation list names a licence file: the hash of its signature's bytes. A signature is
+ * accepted only in its one standard spelling (SIGNATURE), so this is the same for every copy.
+ */
+export const fingerprint = (file: LicenceFile): string =>
+  crypto.createHash('sha256').update(Buffer.from(file.signature, 'base64')).digest('hex');
 
 /**
  * Checks a licence file's text. `onlyId` is set in a build made for one customer, which accepts
@@ -93,6 +107,11 @@ export function verify(
   if (!l || typeof l.id !== 'string' || typeof l.licensee !== 'string' || typeof file.signature !== 'string') {
     return { ok: false, reason: 'The file is not a licence.' };
   }
+  // One spelling only: base64 decoding would otherwise ignore spaces, missing padding and the URL
+  // alphabet, and a revoked licence could be written anew with the same signature.
+  if (!SIGNATURE.test(file.signature) || Buffer.from(file.signature, 'base64').length !== 64) {
+    return { ok: false, reason: 'The licence is not valid: it was not issued by Evoke, or it has been changed.' };
+  }
   let valid = false;
   try {
     valid = crypto.verify(null, Buffer.from(canonical(l)), crypto.createPublicKey(publicKeyPem), Buffer.from(file.signature, 'base64'));
@@ -103,6 +122,7 @@ export function verify(
   if (l.product !== PRODUCT) return { ok: false, reason: 'The licence is for a different product.', licence: l };
   if (l.logo && !LOGO.test(l.logo)) return { ok: false, reason: "The licence's logo is not a PNG or JPEG image.", licence: l };
   if (l.seal && !SEAL.test(l.seal)) return { ok: false, reason: 'The licence is damaged.', licence: l };
+  if (l.serial && !SERIAL.test(l.serial)) return { ok: false, reason: 'The licence is damaged.', licence: l };
   if (opts.revoked?.includes(fingerprint(file))) return { ok: false, reason: 'The licence (' + l.id + ') has been withdrawn.', licence: l };
   if (opts.onlyId && l.id !== opts.onlyId) {
     return { ok: false, reason: 'The licence (' + l.id + ') is not the one this copy was made for.', licence: l };

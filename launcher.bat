@@ -1,7 +1,7 @@
 @echo off
 setlocal
 set "NoDefaultCurrentDirectoryInExePath=1"
-cd /d "%~dp0"
+cd /d "%~dp0" || (echo [ERROR] Could not open the folder this file is in. & pause & exit /b 1)
 
 if not exist "node_modules" ( echo Run setup.bat first. & exit /b 1 )
 

@@ -5,9 +5,10 @@
  */
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
+import { systemExe } from '../../backend/src/child-env';
 
 export function keepUserData(dir: string, exeName: string): void {
-  const running = execFileSync('tasklist', ['/FI', 'IMAGENAME eq ' + exeName, '/NH'], { encoding: 'utf-8' });
+  const running = execFileSync(systemExe('tasklist.exe'), ['/FI', 'IMAGENAME eq ' + exeName, '/NH'], { encoding: 'utf-8' });
   if (running.toLowerCase().includes(exeName.toLowerCase())) {
     console.error('Close ' + exeName.replace(/\.exe$/i, '') + ' first: the test uses its data folder.');
     process.exit(1);

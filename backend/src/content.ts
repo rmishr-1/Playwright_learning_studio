@@ -28,6 +28,8 @@ declare const __STUDIO_PACK_SEALED__: boolean | undefined;
 let pack: Map<string, string> | null = null;
 let seal: string | null = null;
 let servingMark: string | null = null;
+/** Changes with every licence the app runs under, so no cache keeps content across licences. */
+let generation = 1;
 
 /** What the key of a sealed pack is XORed with: a hash of the licence's seal. */
 export const sealMask = (s: string): Buffer => crypto.createHash('sha256').update('learning-studio:content:' + s).digest();
@@ -40,6 +42,7 @@ export function useLicence(opts: { seal: string | null; mark: string | null }): 
   seal = opts.seal;
   servingMark = opts.mark;
   pack = null;
+  generation++;
 }
 
 /** The licence ID the served lessons are marked with, when the app runs under a licence. */
@@ -74,10 +77,11 @@ export function readContent(rel: string): string | null {
 
 /**
  * When a content file last changed, so a cache can tell an edited file from the one it holds.
- * null when there is no such file. A pack never changes while the app runs.
+ * null when there is no such file. A pack never changes while the app runs, but the licence it is
+ * read under can, and a new one makes every cached file stale.
  */
 export function contentStamp(rel: string): number | null {
-  if (CONTENT_PACK) return openPack(CONTENT_PACK).has(rel) ? 1 : null;
+  if (CONTENT_PACK) return openPack(CONTENT_PACK).has(rel) ? generation : null;
   const file = path.join(CONTENT, ...rel.split('/'));
   return fs.existsSync(file) ? fs.statSync(file).mtimeMs : null;
 }

@@ -20,6 +20,9 @@ export function encode(id: string): string {
   return START + bits.replace(/0/g, ZERO).replace(/1/g, ONE) + END;
 }
 
+/** A text without its marks. */
+export const strip = (text: string): string => text.replace(new RegExp(START + '[' + ZERO + ONE + ']*' + END, 'g'), '');
+
 /** Every mark in a text, decoded. */
 export function decodeAll(text: string): string[] {
   const found: string[] = [];
@@ -37,6 +40,8 @@ export function decodeAll(text: string): string[] {
  * Marks one markdown text: after the first ordinary sentence, outside code, headings, lists and
  * tables, so nothing a learner copies to run and nothing the page matches on is touched. A line
  * with a web address is skipped: a mark right after a bare link would become part of the link.
+ * A line already marked (the build's mark) takes the new mark after its own, so the text carries
+ * both, always in the same place, however many times it is marked.
  */
 export function markMarkdown(text: string, id: string): string {
   const lines = text.split('\n');
@@ -48,7 +53,7 @@ export function markMarkdown(text: string, id: string): string {
       continue;
     }
     if (fence) continue;
-    const t = line.trim();
+    const t = strip(line).trim();
     if (t.length < 40 || /^([#>|*+-]|\d+[.)]\s|<)/.test(t) || !/[A-Za-z]/.test(t[0]) || !/[.!?:]$/.test(t)) continue;
     if (/:\/\/|www\./i.test(t)) continue;
     lines[i] = line + encode(id);
@@ -87,10 +92,9 @@ export function markDay<T extends MarkableDay>(day: T, id: string): { day: T; ma
     for (const problem of part.problems ?? []) {
       problem.statement = mark(problem.statement);
       if (problem.hints) problem.hints = problem.hints.map(mark);
-      // A solution is marked only when it is Markdown: code outside a fence would take the mark
-      // into the editor, and break.
-      const bareCode = typeof problem.solution === 'string' && !problem.solution.includes('```') && /[;{}]\s*$/m.test(problem.solution);
-      if (typeof problem.solution === 'string' && !bareCode) problem.solution = mark(problem.solution);
+      // A solution is marked only when its code is fenced Markdown: code outside a fence would take
+      // the mark into the editor, and break.
+      if (typeof problem.solution === 'string' && /^\s*(```|~~~)/m.test(problem.solution)) problem.solution = mark(problem.solution);
     }
   }
   return { day: copy, marks };

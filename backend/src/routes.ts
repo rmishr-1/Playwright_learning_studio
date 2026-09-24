@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { config } from './config';
 import { lastFrame, prepareRun, startRun } from './runner';
 import { receiveFrame, startCommand, stopCommand } from './terminal';
-import { courseDay, courseIndex, readProgress, recordProgress } from './store';
+import { courseDay, courseIndex, isLocked, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { CheckRequest } from '../../shared/contracts/check';
@@ -35,9 +35,8 @@ export const router = Router();
  * away its expected output, and a run or progress record would count work on a day that is not open.
  */
 function refuseLocked(res: Response, week: number, day: number): boolean {
-  const found = courseDay(week, day);
-  if (!found?.locked) return false;
-  fail(res, 423, 'DAY_LOCKED', found.title);
+  if (!isLocked(week, day)) return false;
+  fail(res, 423, 'DAY_LOCKED', courseDay(week, day)?.title ?? 'This day is not open yet.');
   return true;
 }
 
@@ -66,8 +65,8 @@ router.get('/course/:week/:day', (req, res) => {
   const day = Number(req.params.day);
   const found = courseDay(week, day);
   if (!found) return fail(res, 404, 'DAY_NOT_FOUND', 'Week ' + week + ' day ' + day + ' does not exist.');
-  if (found.locked) {
-    // A locked day still answers, with its title, so a link into it lands somewhere honest
+  if (found.locked || isLocked(week, day)) {
+    // A locked day (or a day of a locked week) still answers, with its title, so a link into it lands somewhere honest
     // rather than a 404. The SPA renders the locked state from this.
     return fail(res, 423, 'DAY_LOCKED', found.title);
   }
@@ -114,7 +113,12 @@ router.post('/run', async (req, res) => {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
   if (refuseLocked(res, parsed.week, parsed.day)) return;
-  const started = startRun(parsed);
+  let started;
+  try {
+    started = startRun(parsed);
+  } catch {
+    return fail(res, 500, 'INTERNAL_ERROR', 'The run could not start.');
+  }
   if ('queue_full' in started) {
     return fail(
       res,
@@ -210,7 +214,11 @@ router.post('/terminal', (req, res) => {
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
-  startCommand(parsed.run_id, parsed.command, parsed.code, parsed.file, parsed.workspace);
+  try {
+    startCommand(parsed.run_id, parsed.command, parsed.code, parsed.file, parsed.workspace);
+  } catch {
+    return fail(res, 500, 'INTERNAL_ERROR', 'The command could not start.');
+  }
   res.json({ ok: true });
 });
 

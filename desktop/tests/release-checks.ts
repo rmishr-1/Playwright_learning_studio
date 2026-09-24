@@ -197,6 +197,10 @@ async function main(): Promise<void> {
     ['--proxy-server=127.0.0.1:9341', 'a proxy that would capture its traffic'],
     ['--log-net-log=' + netlog, 'a network log of its traffic'],
     ['--enable-logging', 'Chromium logging'],
+    // Windows-style and plain arguments are refused too: a release takes no argument at all.
+    ['/inspect', 'a Windows-style switch'],
+    ['C:\\Users\\Public\\somewhere', 'a plain argument (a file or a folder)'],
+    ['studio://app/setup.html', 'an address'],
   ];
   for (const [arg, what] of switches) {
     reset(given, true);

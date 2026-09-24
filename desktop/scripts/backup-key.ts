@@ -1,68 +1,57 @@
 /**
- * Backs up Evoke's licence signing key, or restores it from a backup.
+ * Backs up Evoke's licence signing key, restores it, or puts a passphrase on it.
  *
  *   npm run licence:backup-key -- <file>     writes the key encrypted with a passphrase you choose
  *   npm run licence:restore-key -- <file>    puts a backup back, on this computer, for this user
+ *   npm run licence:set-passphrase           also asks for a passphrase whenever a licence is issued
  *
- * The key is kept encrypted for one Windows user on one computer (signing-key.ts), so this backup
+ * The key is kept encrypted for one Windows user on one computer (signing-key.ts), so the backup
  * is the only way to issue licences again after a new computer or a new Windows profile. Keep it,
- * and the passphrase, somewhere safe and offline, and apart from each other. Without both, no new
+ * and its passphrase, somewhere safe and offline, and apart from each other. Without both, no new
  * licence will ever work with the copies already given out.
+ *
+ * Backups are encrypted with AES-256-GCM under a key derived from the passphrase with scrypt
+ * (N=2^17), which makes guessing a passphrase slow. They are refused inside the project folder,
+ * where a sync script could take them along.
  */
-import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { hasPrivateKey, loadPrivateKey, storePrivateKey } from './signing-key';
+import { DESKTOP, backupOf, fromBackup, hasPrivateKey, loadPrivateKey, storePrivateKey } from './signing-key';
+import { secret } from './prompt';
 
-/** Reads a line without showing it. */
-function secret(prompt: string): Promise<string> {
-  return new Promise((resolve) => {
-    process.stdout.write(prompt);
-    const stdin = process.stdin;
-    let value = '';
-    const raw = stdin.isTTY;
-    if (raw) stdin.setRawMode(true);
-    stdin.resume();
-    stdin.setEncoding('utf-8');
-    const onData = (chunk: string): void => {
-      for (const ch of chunk) {
-        if (ch === '\r' || ch === '\n') {
-          stdin.off('data', onData);
-          if (raw) stdin.setRawMode(false);
-          stdin.pause();
-          process.stdout.write('\n');
-          resolve(value);
-          return;
-        }
-        if (ch === '\u0003') process.exit(130);
-        if (ch === '\u0008' || ch === '\u007f') value = value.slice(0, -1);
-        else value += ch;
-      }
-    };
-    stdin.on('data', onData);
-  });
+const PROJECT = path.resolve(DESKTOP, '..');
+
+async function newPassphrase(what: string): Promise<string> {
+  const pass = await secret('New passphrase for ' + what + ' (at least 14 characters): ');
+  if (pass.length < 14) throw new Error('Use a passphrase of at least 14 characters: several unrelated words work well.');
+  if ((await secret('The same passphrase again: ')) !== pass) throw new Error('The two passphrases differ. Nothing was written.');
+  return pass;
 }
 
 async function main(): Promise<void> {
   const [mode, file] = [process.argv[2], process.argv[3]];
+  if (mode === 'passphrase') {
+    const pem = await loadPrivateKey();
+    storePrivateKey(pem, await newPassphrase('the signing key'));
+    console.log('The signing key now also needs its passphrase. Make a new backup too: npm run licence:backup-key -- <file>');
+    return;
+  }
   if ((mode !== 'backup' && mode !== 'restore') || !file) {
     console.error('Usage: npm run licence:backup-key -- <file>   or   npm run licence:restore-key -- <file>');
     process.exit(1);
   }
   const target = path.resolve(file);
   if (mode === 'backup') {
-    const pem = loadPrivateKey();
-    const pass = await secret('Passphrase for the backup (at least 12 characters): ');
-    if (pass.length < 12) throw new Error('Use a passphrase of at least 12 characters.');
-    if ((await secret('The same passphrase again: ')) !== pass) throw new Error('The two passphrases differ. Nothing was written.');
-    const encrypted = crypto.createPrivateKey(pem).export({ type: 'pkcs8', format: 'pem', cipher: 'aes-256-cbc', passphrase: pass });
-    fs.writeFileSync(target, encrypted);
-    console.log('Backup written: ' + target + '. Keep it, and the passphrase, safe and offline, apart from each other.');
+    if (target.toLowerCase().startsWith(PROJECT.toLowerCase() + path.sep)) {
+      throw new Error('Write the backup outside the project folder (for example to a USB drive), where no sync script can take it.');
+    }
+    const pem = await loadPrivateKey();
+    fs.writeFileSync(target, backupOf(pem, await newPassphrase('the backup')));
+    console.log('Backup written: ' + target + '. Keep it, and its passphrase, safe and offline, apart from each other.');
   } else {
     if (hasPrivateKey()) throw new Error('This computer already has a signing key. Move it away first if you really mean to replace it.');
-    const pass = await secret('Passphrase of the backup: ');
-    const key = crypto.createPrivateKey({ key: fs.readFileSync(target, 'utf-8'), format: 'pem', passphrase: pass });
-    storePrivateKey(key.export({ type: 'pkcs8', format: 'pem' }).toString());
+    const pem = fromBackup(fs.readFileSync(target), await secret('Passphrase of the backup: '));
+    storePrivateKey(pem);
     console.log('The signing key is restored for this Windows user.');
   }
 }

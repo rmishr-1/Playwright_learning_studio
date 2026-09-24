@@ -21,6 +21,13 @@ Data/Workspace/
 issued.csv
 .env
 .env.*
+seals.json
+*.bak
+*.backup
+id_rsa*
+id_ed25519*
+credentials*.json
+secrets*.json
 **/keys/
 **/licences/
 **/deliveries/

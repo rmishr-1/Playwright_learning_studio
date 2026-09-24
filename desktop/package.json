@@ -1,5 +1,5 @@
 {
-    "name": "studio-desktop",
+    "name": "@evoke-internal/studio-desktop",
     "private": true,
     "version": "1.0.0",
     "description": "Packages the Learning Studio (Option C) as an offline Windows desktop app.",
@@ -18,6 +18,7 @@
         "new-customer": "node ../node_modules/tsx/dist/cli.mjs scripts/new-customer.ts",
         "licence:backup-key": "node ../node_modules/tsx/dist/cli.mjs scripts/backup-key.ts backup",
         "licence:restore-key": "node ../node_modules/tsx/dist/cli.mjs scripts/backup-key.ts restore",
+        "licence:set-passphrase": "node ../node_modules/tsx/dist/cli.mjs scripts/backup-key.ts passphrase",
         "licence:revoke": "node ../node_modules/tsx/dist/cli.mjs scripts/revoke-licence.ts"
     },
     "devDependencies": {

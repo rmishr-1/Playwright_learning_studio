@@ -26,7 +26,7 @@ import type { Workspace } from '../../../shared/contracts/course_day';
  * Where the last HTML report is served: a server of its own (server.ts), outside the studio's
  * origin, so the report cannot use the studio's API.
  */
-const reportUrl = (): string => 'http://127.0.0.1:' + listening.reportPort + '/index.html';
+const reportUrl = (): string => 'http://127.0.0.1:' + listening.reportPort + listening.reportPath + '/index.html';
 
 /** The workspace whose report show-report opens: the one the last test run used. */
 let reportFrom: Workspace = 'project';

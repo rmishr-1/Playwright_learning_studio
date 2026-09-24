@@ -20,7 +20,7 @@ set "MAINBRANCH=main"
 set "GITCMD=%ProgramFiles%\Git\cmd"
 set "GITCMD2=%LocalAppData%\Programs\Git\cmd"
 
-cd /d "%~dp0"
+cd /d "%~dp0" || (echo [ERROR] Could not open the folder this file is in. & pause & exit /b 1)
 
 echo ============================================
 echo  Playwright Learning Studio - SYNC with GitHub
@@ -61,14 +61,27 @@ if errorlevel 1 (
     goto :fail
 )
 
+REM Files that must never be committed, as git pathspecs (any folder, any case), and the text of
+REM tokens and private keys that must never be committed inside any file.
+set SECRET_FILES=":(glob,icase)**/*.pem" ":(glob,icase)**/*.pfx" ":(glob,icase)**/*.p12" ":(glob,icase)**/*.key" ":(glob,icase)**/*.dpapi" ":(glob,icase)**/*.lic" ":(glob,icase)**/*.lic.old" ":(glob,icase)**/issued.csv" ":(glob,icase)**/seals.json" ":(glob,icase)**/.env" ":(glob,icase)**/.env.*" ":(glob,icase)**/*.bak" ":(glob,icase)**/*.backup" ":(glob,icase)**/id_rsa*" ":(glob,icase)**/id_ed25519*" ":(glob,icase)**/credentials*.json" ":(glob,icase)**/secrets*.json" ":(exclude)desktop/src/licence-public.pem"
+set "SECRET_TEXT=(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-ant-[A-Za-z0-9_-]{20,})"
+
 REM ---------- step 1: commit everything local ----------
 echo [ 1/3 ] Committing local changes...
 git add -A
-git diff --cached --name-only | findstr /i /r "\.pem$ \.pfx$ \.p12$ \.key$ \.dpapi$ \.lic$ issued\.csv$ \.env$ \.env\." >nul && (
+git diff --cached --quiet -- %SECRET_FILES% || (
     echo.
-    echo [STOP] These staged files look like keys, certificates, licences or secrets:
-    git diff --cached --name-only | findstr /i /r "\.pem$ \.pfx$ \.p12$ \.key$ \.dpapi$ \.lic$ issued\.csv$ \.env$ \.env\."
+    echo [STOP] These staged files look like keys, certificates, licences, backups or secrets:
+    git diff --cached --name-only -- %SECRET_FILES%
     echo        Nothing was committed. Move them out of the project, or add them to .gitignore.
+    git reset -q
+    goto :fail
+)
+git diff --cached --quiet -G "%SECRET_TEXT%" || (
+    echo.
+    echo [STOP] These staged files contain what looks like an access token or a private key:
+    git diff --cached --name-only -G "%SECRET_TEXT%"
+    echo        Nothing was committed. Take the secret out of the file ^(and revoke it if it was real^).
     git reset -q
     goto :fail
 )
@@ -78,7 +91,7 @@ git diff --cached --quiet && (
     echo         These changes will be committed and pushed to GitHub:
     git diff --cached --stat
     choice /c YN /n /m "        Commit and push them? [Y/N] "
-    if errorlevel 2 (
+    if !errorlevel! neq 1 (
         git reset -q
         echo         Nothing was committed or pushed.
         goto :fail
@@ -199,8 +212,10 @@ if exist "%GITCMD%\git.exe"  ( set "PATH=%GITCMD%;%PATH%" & exit /b 0 )
 if exist "%GITCMD2%\git.exe" ( set "PATH=%GITCMD2%;%PATH%" & exit /b 0 )
 
 echo [setup] Git is not installed.
+echo [setup] Installing it accepts the Git for Windows licence ^(GPL v2^) and, through winget,
+echo         the winget source agreements.
 choice /c YN /n /m "[setup] Install Git for Windows now? [Y/N] "
-if errorlevel 2 (
+if not "%errorlevel%"=="1" (
     echo [setup] Git was not installed. Install it from https://git-scm.com/download/win and run this again.
     exit /b 1
 )
@@ -212,7 +227,7 @@ where winget >nul 2>&1 && (
     REM The download goes to a folder of its own, and runs only when Windows confirms it is
     REM signed by the Git for Windows project.
     powershell -NoProfile -NonInteractive -Command ^
-      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Johannes Schindelin') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
+      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '^Git-[\d.]+-64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch '^CN=Johannes Schindelin,') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
 )
 
 set "PATH=%GITCMD%;%GITCMD2%;%PATH%"

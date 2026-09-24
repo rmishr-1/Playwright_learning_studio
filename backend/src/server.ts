@@ -49,7 +49,7 @@ const CSP = [
   "font-src 'self' data:",
   "connect-src 'self'",
   "worker-src 'self' blob:",
-  "frame-src 'self' blob: data:",
+  "frame-src 'none'",
   "object-src 'none'",
   "base-uri 'none'",
   "form-action 'self'",
@@ -77,8 +77,12 @@ function hostsFor(port: number, strict: boolean): string[] {
   return strict ? ['127.0.0.1:' + port] : ['127.0.0.1:' + port, 'localhost:' + port];
 }
 
-/** A browser's Origin, when it sends one, must be a page on this computer. */
-const loopbackOrigin = (origin: string): boolean => /^http:\/\/(127\.0\.0\.1|localhost)(:\d{1,5})?$/.test(origin);
+/** The Vite dev server's page (frontend-c/vite.config.ts), which proxies to this server in development. */
+const DEV_PAGE_PORT = 5185;
+
+/** In development, a browser's Origin, when it sends one, must be this server or the dev page. */
+const devOrigin = (origin: string, port: number): boolean =>
+  [port, DEV_PAGE_PORT].some((p) => origin === 'http://127.0.0.1:' + p || origin === 'http://localhost:' + p);
 
 /** No caching anywhere, and the usual hardening headers. */
 function noStore(_req: Request, res: Response, next: NextFunction): void {
@@ -97,26 +101,48 @@ function problem(err: unknown, _req: Request, res: Response, _next: NextFunction
   const status = typeof (err as { status?: unknown })?.status === 'number' ? (err as { status: number }).status : 500;
   if (status >= 500) console.error('[studio] ' + ((err as Error)?.message ?? String(err)));
   if (res.headersSent) return;
+  // A request the studio cannot read (malformed JSON, a body over the limit) is the caller's error.
+  const code = status >= 500 ? 'INTERNAL_ERROR' : 'BAD_REQUEST';
   res
     .status(status)
     .type('application/problem+json')
-    .json({ type: 'about:blank', title: 'INTERNAL_ERROR', status, code: 'INTERNAL_ERROR', detail: status >= 500 ? 'The studio hit an error.' : 'Bad request.' });
+    .json({ type: 'about:blank', title: code, status, code, detail: status >= 500 ? 'The studio hit an error.' : 'The request could not be read.' });
 }
 
 /**
  * The HTML report of the last test run, on a port of its own. It serves the report's files and
- * nothing else; it has no token because it holds nothing but the learner's own test results, and
- * it checks the Host header like the studio does.
+ * nothing else, under a path that is new every time the studio starts (listening.reportPath), so
+ * only the studio, which opens it, knows where it is. It checks the Host header like the studio
+ * does, and serves no file that resolves (through a link the learner's tests made, say) to
+ * anywhere outside the report.
  */
 function reportServer(): Promise<http.Server> {
   const app = express();
   app.disable('x-powered-by');
+  app.use(noStore);
   app.use((req, res, next) => {
     if (!hostsFor(listening.reportPort, false).includes(req.headers.host ?? '')) return void res.status(403).end();
     next();
   });
-  app.use(noStore);
-  app.use((req, res, next) => express.static(currentReportDir(), { cacheControl: false })(req, res, next));
+  app.use(listening.reportPath, (req, res, next) => {
+    let root: string;
+    let file: string;
+    try {
+      root = fs.realpathSync(currentReportDir());
+      file = path.join(root, ...decodeURIComponent(req.path).split('/'));
+    } catch {
+      return void res.status(404).end();
+    }
+    let real: string;
+    try {
+      real = fs.realpathSync(file);
+    } catch {
+      return void res.status(404).end();
+    }
+    if (real !== root && !real.startsWith(root + path.sep)) return void res.status(403).end();
+    express.static(root, { cacheControl: false, dotfiles: 'deny' })(req, res, next);
+  });
+  app.use((_req, res) => void res.status(404).end());
   const server = http.createServer(app);
   return new Promise((resolve, reject) => {
     server.once('error', reject);
@@ -140,18 +166,19 @@ export async function startServer(opts: ServerOptions): Promise<RunningServer> {
     if (!hostsFor(listening.port, token !== null).includes(req.headers.host ?? '')) return false;
     const origin = req.headers.origin;
     if (origin !== undefined) {
-      if (token ? origin !== 'http://127.0.0.1:' + listening.port : !loopbackOrigin(origin)) return false;
+      if (token ? origin !== 'http://127.0.0.1:' + listening.port : !devOrigin(origin, listening.port)) return false;
     }
     if (!token) return true;
     // The frame endpoint checks its own key, which only the running command has (routes.ts).
     if (req.method === 'POST' && FRAME_POST.test(req.url ?? '')) return true;
     return sameSecret(cookie(req, 'studio_token'), token);
   };
+  // Even a refusal is not cached.
+  app.use(noStore);
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (allowed(req)) return next();
     res.status(401).type('text/plain').send('Unauthorized');
   });
-  app.use(noStore);
 
   app.use(express.json({ limit: '2mb' }));
   app.use('/api', router);

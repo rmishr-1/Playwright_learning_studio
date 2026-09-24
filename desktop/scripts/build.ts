@@ -13,13 +13,15 @@
  *   npm run build                                  release build, for any valid Evoke licence
  *   npm run build -- --licence licences/X.lic      release build for one customer, who adds the licence
  *   ... --licence licences/X.lic --carry            for one customer, carrying their licence
- *   ... --public-key <file>                         built for another public key (the tests' own)
+ *   ... --dev --public-key <file>                   built for another public key (the tests' own);
+ *                                                  a release is only ever built for Evoke's
  *   npm run build -- --dev                         readable, with DevTools, for working on the app
  *   npm run build -- --dev --obfuscate             obfuscated like a release, but with DevTools and a
  *                                                  debugger allowed, so test:app can drive the
  *                                                  release's code (a release refuses Playwright)
  */
 import { execFileSync } from 'node:child_process';
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as esbuild from 'esbuild';
@@ -28,6 +30,7 @@ import { verify, type Licence } from '../src/licence';
 import { packContent } from './pack-content';
 import { packageDirOf, withDependencies, writeNotices } from './notices';
 import { checkedPublicKey } from './signing-key';
+import { systemExe } from '../../backend/src/child-env';
 import { readRevoked } from './revoke-licence';
 
 export const DESKTOP = path.resolve(__dirname, '..');
@@ -45,8 +48,37 @@ const BANNER =
 
 /** The packages the learner's code runs on, at the versions the studio is built and tested with. */
 const RUNTIME_PACKAGES = ['@playwright/test', 'playwright', 'playwright-core', 'typescript', 'typescript-learner'];
-/** What they need, with their dependencies, copied from the root install that package-lock.json verified. */
+/**
+ * What they need, with their dependencies. Each is taken from its npm tarball, checked against the
+ * integrity package-lock.json records for it, never from node_modules, where anything on this
+ * computer could have changed a file since `npm ci`.
+ */
 const RUNTIME_COPY = [...RUNTIME_PACKAGES, '@typescript/typescript-win32-x64'];
+
+type LockEntry = { name?: string; version: string; integrity?: string };
+
+/** Copies a package into the app from its tarball, after checking the tarball's integrity. */
+function packageFromLock(name: string, into: string, work: string): void {
+  const lock = (JSON.parse(fs.readFileSync(path.join(ROOT, 'package-lock.json'), 'utf-8')) as { packages: Record<string, LockEntry> })
+    .packages['node_modules/' + name];
+  if (!lock?.integrity?.startsWith('sha512-')) throw new Error(name + ' has no sha512 integrity in package-lock.json.');
+  const spec = (lock.name ?? name) + '@' + lock.version;
+  const npm = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
+  const dir = path.join(work, name.replace(/[@/]/g, '_'));
+  fs.mkdirSync(dir, { recursive: true });
+  const packed = JSON.parse(
+    execFileSync(process.execPath, [npm, 'pack', spec, '--pack-destination', dir, '--prefer-offline', '--ignore-scripts', '--json'], {
+      cwd: work,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'inherit'],
+    }),
+  ) as { filename: string }[];
+  const tgz = path.join(dir, path.basename(packed[0].filename));
+  const got = 'sha512-' + crypto.createHash('sha512').update(fs.readFileSync(tgz)).digest('base64');
+  if (got !== lock.integrity) throw new Error(spec + ' does not match the integrity in package-lock.json. It will not be shipped.');
+  execFileSync(systemExe('tar.exe'), ['-xzf', tgz, '-C', dir], { stdio: 'inherit' });
+  fs.cpSync(path.join(dir, 'package'), into, { recursive: true });
+}
 
 export type BuildInfo = { release: boolean; licence: Licence | null; mark: string };
 
@@ -74,6 +106,7 @@ export async function build(opts: {
   publicKeyFile?: string | null;
 }): Promise<BuildInfo> {
   const obfuscate = opts.obfuscate ?? opts.release;
+  if (opts.release && opts.publicKeyFile) throw new Error('A release is built only for Evoke\'s public key: --public-key goes with --dev.');
   const publicKey = checkedPublicKey(opts.publicKeyFile ?? undefined);
   const revoked = readRevoked().revoked.map((r) => r.fingerprint);
 
@@ -199,11 +232,9 @@ export async function build(opts: {
   step('The packages the learner\'s code runs on');
   // Copied from the root install, which npm checked against package-lock.json's hashes, rather
   // than installed again: nothing is fetched, and no install script runs.
-  for (const name of RUNTIME_COPY) {
-    const from = path.join(ROOT, 'node_modules', ...name.split('/'));
-    if (!fs.existsSync(path.join(from, 'package.json'))) throw new Error('Missing ' + name + ' in node_modules. Run `npm ci` at the root.');
-    fs.cpSync(from, path.join(APP, 'node_modules', ...name.split('/')), { recursive: true, dereference: true });
-  }
+  const packs = path.join(BUILD, 'packs');
+  for (const name of RUNTIME_COPY) packageFromLock(name, path.join(APP, 'node_modules', ...name.split('/')), packs);
+  fs.rmSync(packs, { recursive: true, force: true });
   console.log('  ' + RUNTIME_COPY.join(', '));
 
   // A Run's own process uses one file of the typescript package, to turn the learner's TypeScript

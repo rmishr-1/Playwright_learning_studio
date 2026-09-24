@@ -1,21 +1,25 @@
 /**
  * Builds the app and its Windows installer: desktop/release/<product> Setup <version>[-<licence>].exe
  *
- *   npm run package                                an internal installer, for any valid Evoke licence
+ *   npm run package -- --internal                  an internal installer, for any valid Evoke licence
+ *                                                  (never for a customer: any licence opens it)
  *   npm run package -- --licence licences/X.lic    an installer for one customer: it accepts only
  *                                                  that licence, which is sent apart from it, and its
  *                                                  course carries that licence's watermark
  *   ... --carry                                    the installer carries the licence (it then opens
  *                                                  for anyone who has it)
  *   ... --zip                                      a zip of the app instead of an installer
+ *   ... --unsigned                                 without a code-signing certificate (see below)
  *
  * new-customer.ts issues a licence and makes a customer's zip in one go.
  *
  * Needs `npm run runtime` once first (Node and the browsers the app ships).
  *
- * Code signing: set CSC_LINK (the .pfx certificate, or its path) and CSC_KEY_PASSWORD and the app
- * and installer are signed. Without them the installer is unsigned, and Windows SmartScreen warns
- * whoever runs it. Sign every installer that leaves Evoke.
+ * Code signing: set CSC_LINK (or WIN_CSC_LINK: the .pfx certificate, or its path) and
+ * CSC_KEY_PASSWORD, and the app and installer are signed; anything left unsigned is then a failure.
+ * Without a certificate, packaging stops unless --unsigned says that is intended: an unsigned app
+ * makes Windows SmartScreen warn whoever runs it, and nothing proves it came from Evoke. Sign every
+ * copy that leaves Evoke.
  *
  * The Electron fuses below switch off the ways of running the app as something else: as plain
  * Node, with a debugger, with NODE_OPTIONS, or with its code loaded from outside app.asar; and
@@ -31,11 +35,24 @@ import { verifyManifest } from './runtime';
  * Builds the app and packs it: an installer (nsis), or a zip of the app that runs where it is
  * unzipped (zip). Returns the files it made.
  */
+/** Whether a code-signing certificate is given, for electron-builder to sign with. */
+export const hasCertificate = (): boolean => Boolean(process.env.CSC_LINK || process.env.WIN_CSC_LINK);
+
 export async function packageApp(opts: {
   licenceFile: string | null;
   carryLicence?: boolean;
   target?: 'nsis' | 'zip';
+  /** Build with no licence named: a copy any valid licence opens. */
+  internal?: boolean;
+  /** Package without a certificate. */
+  unsigned?: boolean;
 }): Promise<string[]> {
+  if (!opts.licenceFile && !opts.internal) {
+    throw new Error('Name the customer\'s licence (--licence licences/X.lic), or say --internal for a copy any licence opens.');
+  }
+  if (!hasCertificate() && !opts.unsigned) {
+    throw new Error('No code-signing certificate is set (CSC_LINK). Set it, or add --unsigned to package without one.');
+  }
   for (const need of ['runtime/node/node.exe', 'runtime/ms-playwright']) {
     if (!fs.existsSync(path.join(DESKTOP, need))) throw new Error('Missing ' + need + '. Run `npm run runtime` first.');
   }
@@ -76,13 +93,13 @@ export async function packageApp(opts: {
       grantFileProtocolExtraPrivileges: false,
     },
     // With a certificate given (CSC_LINK), an unsigned result is a failure, not a warning.
-    forceCodeSigning: Boolean(process.env.CSC_LINK),
+    forceCodeSigning: hasCertificate(),
     win: {
       target: [{ target, arch: ['x64'] }],
       // Short, because Windows unzips into a folder of the zip's name, and the browsers' deepest
       // files are 149 characters in: a long folder name takes paths past Windows' 260 limit.
       artifactName: (target === 'zip' ? 'QA-Studio-' : 'QA-Practice-Training-Studio-') + VERSION + '-' + suffix + '.${ext}',
-      icon: 'assets/icon.png',
+      icon: 'assets/icon.ico',
       executableName: 'QA Practice Training Studio',
       legalTrademarks: 'Evoke Technologies',
     },
@@ -109,6 +126,8 @@ if (require.main === module) {
     licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]),
     carryLicence: process.argv.includes('--carry'),
     target: process.argv.includes('--zip') ? 'zip' : 'nsis',
+    internal: process.argv.includes('--internal'),
+    unsigned: process.argv.includes('--unsigned'),
   }).catch((e) => {
     console.error(e instanceof Error ? e.stack : e);
     process.exit(1);

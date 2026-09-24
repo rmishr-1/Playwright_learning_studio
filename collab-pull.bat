@@ -29,7 +29,7 @@ set "REPO_DIR=Playwright_learning_studio"
 set "GITCMD=%ProgramFiles%\Git\cmd"
 set "GITCMD2=%LocalAppData%\Programs\Git\cmd"
 
-cd /d "%~dp0"
+cd /d "%~dp0" || (echo [ERROR] Could not open the folder this file is in. & pause & exit /b 1)
 
 set "DO_STASH=no"
 if /i "%~1"=="/stash" set "DO_STASH=yes"
@@ -55,7 +55,7 @@ call :ensure_git || goto :die
 if exist ".git" goto :have_repo
 if exist "%REPO_DIR%\.git" (
   echo   Using the existing clone in "%REPO_DIR%".
-  cd /d "%REPO_DIR%"
+  cd /d "%REPO_DIR%" || goto :die
   goto :have_repo
 )
 echo   No repository here yet - cloning it now.
@@ -72,7 +72,7 @@ if errorlevel 1 (
   echo     - no network connection
   goto :die
 )
-cd /d "%REPO_DIR%"
+cd /d "%REPO_DIR%" || goto :die
 echo.
 echo   [ OK ] Repository cloned to:
 echo            %CD%
@@ -251,8 +251,10 @@ if exist "%GITCMD%\git.exe"  ( set "PATH=%GITCMD%;%PATH%" & exit /b 0 )
 if exist "%GITCMD2%\git.exe" ( set "PATH=%GITCMD2%;%PATH%" & exit /b 0 )
 
 echo   [setup] Git is not installed.
+echo   [setup] Installing it accepts the Git for Windows licence ^(GPL v2^) and, through winget,
+echo           the winget source agreements.
 choice /c YN /n /m "  [setup] Install Git for Windows now? [Y/N] "
-if errorlevel 2 (
+if not "%errorlevel%"=="1" (
     echo   [setup] Git was not installed. Install it from https://git-scm.com/download/win and run this again.
     exit /b 1
 )
@@ -264,7 +266,7 @@ where winget >nul 2>&1 && (
     REM The download goes to a folder of its own, and runs only when Windows confirms it is
     REM signed by the Git for Windows project.
     powershell -NoProfile -NonInteractive -Command ^
-      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Johannes Schindelin') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
+      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '^Git-[\d.]+-64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch '^CN=Johannes Schindelin,') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
 )
 
 set "PATH=%GITCMD%;%GITCMD2%;%PATH%"

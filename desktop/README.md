@@ -45,10 +45,12 @@ be forged or edited.
 
 The private key lives **outside this project**, in `%USERPROFILE%\.evoke-studio\`, encrypted by
 Windows for this user on this computer (DPAPI): a copy of the file is useless anywhere else. The
-record of issued licences (`issued.csv`, with the customers' emails) is kept beside it.
+record of issued licences (`issued.csv`, with the customers' emails) and each licence's seal
+(`seals.json`) are kept beside it. `npm run licence:set-passphrase` adds a passphrase, asked for
+whenever a licence is issued, so another program running as you cannot sign one.
 
 ```bash
-npm run licence:backup-key -- D:\safe\evoke-signing-key.pem
+npm run licence:backup-key -- D:\safe\evoke-signing-key.backup
 ```
 
 **Do this now, and keep the backup and its passphrase safe, offline, and apart.** Because the key
@@ -59,7 +61,7 @@ licence will ever work with the copies already given out.
 | Command | What it does |
 |---|---|
 | `npm run licence:issue -- --licensee "Acme Ltd" [--email x] [--expires 2027-09-30] [--machine CODE] [--logo x.png]` | Issues a licence into `licences/` |
-| `... --id EVK-1A2B3C4D` | Reissues a licence (a new expiry, or bound to one computer). Same licensee only; it keeps the seal, so the customer's build still opens, and the old file is revoked. |
+| `... --id EVK-1A2B3C4D` | Reissues a licence (a new expiry, or bound to one computer). Same licensee only; it keeps the seal, so the customer's build still opens, and the old file is revoked. Add `--new-seal` when the licence leaked: the customer then needs a new build too. |
 | `npm run licence:revoke -- licences/<file>.lic` | Withdraws a licence file: builds made from now on refuse it (`revoked.json`, committed). |
 | `npm run licence:keygen` | Makes the key pair. Once, ever; it refuses to replace a key. |
 | `npm run watermark:find -- copied-text.txt` | Prints the licence ID hidden in copied course text; `issued.csv` names the customer. |
@@ -71,17 +73,22 @@ In this folder, with Node 24:
 ```bash
 npm ci
 npm run runtime -- --fresh
-npm run package
+npm run package -- --internal
 ```
 
 - `npm run runtime` gathers the Node the app ships (it must carry the OpenJS Foundation's valid
   signature) and the browsers at the revisions Playwright pins, and writes a SHA-256 manifest of
   it all. `--fresh` downloads the browsers again rather than copying this computer's cache: use
-  it for anything that leaves Evoke. Packaging refuses a runtime that has changed since.
-- `npm run package` builds the internal installer
+  it for anything that leaves Evoke. Every browser must match its hash in `runtime-pins.json`
+  (committed); after upgrading Playwright, `npm run runtime -- --fresh --pin` records the new
+  ones. Packaging refuses a runtime that has changed since.
+- `npm run package -- --internal` builds the internal installer
   (`release/QA-Practice-Training-Studio-Setup-<version>-internal.exe`), for any valid licence.
-  `--licence <file>` builds one customer's; `--carry` puts the licence inside it (then anyone
-  with the installer can open it, so it is off by default); `--zip` makes a zip instead.
+  `--licence <file>` builds one customer's instead; `--carry` puts the licence inside it (then
+  anyone with the installer can open it, so it is off by default); `--zip` makes a zip.
+  Without a code-signing certificate (below) add `--unsigned`.
+- The app's own packages for the learner's code (Playwright, TypeScript) are taken from their npm
+  tarballs, checked against `package-lock.json`, not from `node_modules`.
 - It takes the course from `../Data/Content/`: run `npm run build:content` at the root first
   when the course has changed. The build refuses a `src/licence-public.pem` that does not match
   the signing key's fingerprint.
@@ -91,7 +98,7 @@ npm run package
 | Layer | What it does |
 |---|---|
 | Licence agreement | Shown and accepted on first start, including the technical measures (section 4A). `legal/EULA.txt` is a **draft for legal review**. |
-| Licence | Ed25519-signed; optional expiry (the clock cannot be turned back) and one-computer limit; revocation list; re-checked every hour. |
+| Licence | Ed25519-signed; optional expiry (the clock cannot be turned back, and the learner is warned two weeks ahead) and one-computer limit; revocation list; re-checked every hour, with ten minutes' notice before the studio closes. |
 | Encrypted, sealed course | `content.pack`, AES-256-GCM, a new key every build, decrypted in memory only and never cached; a customer's build needs their licence to decrypt it. |
 | Locked API | 127.0.0.1 only; answers only the app's window (a new random token every start), and only to its own host name, so neither another program nor a web page can read it. |
 | Locked app | No command-line switches in a release (debuggers, proxies, network logs); Electron fuses; DevTools off; nothing leaves the computer; the test report is served apart from the studio; the learner's code gets none of the app's environment. |
@@ -109,7 +116,7 @@ The tests use a throwaway key pair of their own; Evoke's signing key is never to
 ```bash
 npm run test:app
 npm run test:customer
-npm run package
+npm run package -- --internal --unsigned
 npm run test:release -- licences/<a licence the build accepts>.lic
 ```
 
@@ -131,8 +138,8 @@ put it back after, and refuse to start while the app is open.
 
 - **Back up the signing key** (above).
 - **Code signing.** Buy a Windows code-signing certificate; set `CSC_LINK` and `CSC_KEY_PASSWORD`
-  when running `npm run package` (with them set, an unsigned build fails). Unsigned, SmartScreen
-  warns on install.
+  when running `npm run package` or `new-customer.bat` (with them set, an unsigned build fails;
+  without them, `package` needs `--unsigned`). Unsigned, SmartScreen warns on install.
 - **GitHub branch protection** for `main` (Settings → Branches): require a reviewed pull request.
   `collab-push.bat` no longer pushes to `main`, but only GitHub can enforce it.
 - **Legal review** of `legal/EULA.txt` (placeholders in brackets) and of the `[REVIEW]` notes in

@@ -14,6 +14,7 @@ export const ErrorCode = z.enum([
   'EXERCISE_NOT_FOUND',
   'TRAINER_CODE_REQUIRED',
   'TRAINER_CODE_INCORRECT',
+  'BAD_REQUEST',
   'INTERNAL_ERROR',
 ]);
 
