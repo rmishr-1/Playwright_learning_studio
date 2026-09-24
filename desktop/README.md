@@ -51,6 +51,13 @@ swapped. Their lessons carry the licence ID as an invisible watermark.
 The same without questions:
 `npm run new-customer -- --licensee "Boston University" --logo bu.png --expires 2027-09-30`
 
+A new zip for a customer who already has a licence (after a course update), without issuing a
+new one: `npm run new-customer -- --rebuild licences/<id>-<customer>.lic`
+
+The zip is about 700 MB, almost all of it the three browsers the course tests in (Chromium in both
+its forms, Firefox and WebKit), which the app ships so it works offline. The app itself is 3.5 MB.
+The tool says DONE when the zip is in `deliveries/`; the last 5 minutes are the zip being made.
+
 ## Licences
 
 Every copy needs a licence file from Evoke. Evoke signs licences with its private key; the app
