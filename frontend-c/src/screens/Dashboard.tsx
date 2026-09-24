@@ -8,6 +8,23 @@ import type { Progress } from '../../../shared/contracts/progress';
 
 const dayUrl = (week: number, day: number, part = 1): string => '/learn/w' + week + '/d' + day + '/p' + part;
 
+/** Chevrons for the path's collapse controls: two pointing together (collapse), or apart (expand). */
+const CollapseAllIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M7 4l5 5 5-5" /><path d="M7 20l5-5 5 5" />
+  </svg>
+);
+const ExpandAllIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M7 9l5-5 5 5" /><path d="M7 15l5 5 5-5" />
+  </svg>
+);
+const ChevronIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+);
+
 const LockIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
@@ -23,6 +40,8 @@ export function Dashboard() {
   const [index, setIndex] = useState<CourseIndex | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [error, setError] = useState('');
+  /** The weeks whose days are folded away in Your path. Every week starts open. */
+  const [collapsed, setCollapsed] = useState<Set<number>>(() => new Set());
 
   useEffect(() => {
     getCourse()
@@ -54,6 +73,16 @@ export function Dashboard() {
   const next = resumedDay || openDays[0];
   const resumed = r && resumedDay ? r : null;
 
+  // Only open weeks have days to fold away.
+  const foldable = weeks.filter((w) => w.open).map((w) => w.week);
+  const toggleWeek = (week: number): void =>
+    setCollapsed((c) => {
+      const n = new Set(c);
+      if (n.has(week)) n.delete(week);
+      else n.add(week);
+      return n;
+    });
+
   return (
     <div className="dash">
       <section className="dash-hero">
@@ -83,7 +112,28 @@ export function Dashboard() {
         <div className="dash-in">
           <div className="path-head">
             <h2>Your path</h2>
-            <span className="muted">Choose a day to open its lesson</span>
+            <div className="path-tools">
+              <button
+                type="button"
+                className="path-tool"
+                onClick={() => setCollapsed(new Set(foldable))}
+                disabled={foldable.every((n) => collapsed.has(n))}
+                aria-label="Collapse all weeks"
+                title="Collapse all"
+              >
+                <CollapseAllIcon />
+              </button>
+              <button
+                type="button"
+                className="path-tool"
+                onClick={() => setCollapsed(new Set())}
+                disabled={collapsed.size === 0}
+                aria-label="Expand all weeks"
+                title="Expand all"
+              >
+                <ExpandAllIcon />
+              </button>
+            </div>
           </div>
 
           <ol className="path">
@@ -110,10 +160,23 @@ export function Dashboard() {
                       ) : (
                         <span className="soon-chip"><LockIcon />Opens soon</span>
                       )}
+                      {w.open && (
+                        <button
+                          type="button"
+                          className={'path-tool path-fold' + (collapsed.has(w.week) ? ' closed' : '')}
+                          onClick={() => toggleWeek(w.week)}
+                          aria-expanded={!collapsed.has(w.week)}
+                          aria-controls={'week-' + w.week + '-days'}
+                          aria-label={(collapsed.has(w.week) ? 'Expand' : 'Collapse') + ' Week ' + w.week}
+                          title={collapsed.has(w.week) ? 'Expand' : 'Collapse'}
+                        >
+                          <ChevronIcon />
+                        </button>
+                      )}
                     </div>
 
-                    {w.open && (
-                      <div className="day-tiles">
+                    {w.open && !collapsed.has(w.week) && (
+                      <div className="day-tiles" id={'week-' + w.week + '-days'}>
                         {w.days.map((d) => {
                           const tileDone = isDone(w.week, d.day);
                           const here = next?.week === w.week && next.day.day === d.day;

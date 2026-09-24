@@ -1460,3 +1460,17 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 }
 .hdr-customer img { display: block; max-height: 34px; max-width: 180px; width: auto; object-fit: contain; }
 @media (max-width: 700px) { .hdr-customer { height: 36px; max-width: 120px; } .hdr-customer img { max-height: 26px; max-width: 100px; } }
+
+/* ---- Your path: collapse and expand, icon-only buttons */
+.path-head { align-items: center; }
+.path-tools { margin-left: auto; display: flex; gap: 6px; }
+.path-tool {
+  width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border-radius: 8px;
+  border: 1px solid var(--rule); background: var(--paper); color: var(--heading); cursor: pointer;
+}
+.path-tool:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.path-tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.path-tool:disabled { opacity: .4; cursor: default; }
+.path-fold { width: 30px; height: 30px; }
+.path-fold svg { transition: transform .15s ease; }
+.path-fold.closed svg { transform: rotate(-90deg); }
