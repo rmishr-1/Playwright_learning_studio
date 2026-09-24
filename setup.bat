@@ -42,7 +42,7 @@ if defined UNKNOWN (
 
 echo.
 echo Installing dependencies...
-call npm ci --no-audit --no-fund
+call npm ci --no-audit --no-fund --strict-allow-scripts --no-dangerously-allow-all-scripts
 if errorlevel 1 ( echo [BLOCKING] npm ci failed. & exit /b 1 )
 
 echo.

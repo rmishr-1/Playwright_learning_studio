@@ -204,7 +204,8 @@ router.post('/check', async (req, res) => {
   });
   try {
     res.json(await checkAnswer(problem, parsed));
-  } catch {
+  } catch (e) {
+    if ((e as { code?: string }).code === 'RUN_QUEUE_FULL') return fail(res, 429, 'RUN_QUEUE_FULL', 'Too many runs are waiting. Try again in a moment.');
     fail(res, 500, 'INTERNAL_ERROR', 'The check could not run.');
   }
 });

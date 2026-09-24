@@ -31,8 +31,17 @@ function files(dir: string, prefix = ''): string[] {
 export function packContent(out: string, mark: string, seal: string | null = null): { key: [string, string]; files: number; marks: number } {
   const entries: Record<string, string> = {};
   let marks = 0;
+  // A locked day (or a day of a locked week) is not shipped at all: the app only answers that it
+  // is locked, from the index, so its lessons need not be in the pack to be kept from the learner.
+  const index = JSON.parse(fs.readFileSync(path.join(CONTENT, 'course-index.json'), 'utf-8')) as {
+    weeks: { week: number; locked?: boolean; days: { day: number; locked?: boolean }[] }[];
+  };
+  const locked = new Set(
+    index.weeks.flatMap((w) => w.days.filter((d) => w.locked || d.locked).map((d) => 'weeks/week-' + w.week + '/day-' + d.day + '.json')),
+  );
   for (const rel of files(CONTENT)) {
     if (!rel.endsWith('.json') || rel === 'course-plan.json') continue;
+    if (locked.has(rel)) continue;
     let text = fs.readFileSync(path.join(CONTENT, ...rel.split('/')), 'utf-8');
     if (rel.startsWith('weeks/')) {
       const marked = markDay(JSON.parse(text) as Day, mark);

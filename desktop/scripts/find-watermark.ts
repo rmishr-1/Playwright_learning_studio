@@ -4,7 +4,8 @@
  *   npm run watermark:find -- <file>     a file with the copied text (saved from a web page, a
  *                                        document, an email...)
  *
- * Prints each licence ID it finds, with how often; look the ID up in desktop/keys/issued.csv.
+ * Prints each licence ID it finds, with how often; look the ID up in issued.csv, kept beside the
+ * signing key in %USERPROFILE%\.evoke-studio\.
  * Text that went through something that drops invisible characters (a screenshot, retyping)
  * carries no mark.
  */

@@ -21,7 +21,7 @@ export default defineConfig({
       allow: ['.', '../shared', '../Data/Content/course-plan.json'],
       deny: ['.env', '.env.*', '*.{pem,key,pfx,p12,dpapi,lic,crt}', '**/.git/**'],
     },
-    // Fail rather than drift to another port: the port is how v1, v2, A, B and C are told apart.
+    // Fail rather than drift to another port: the backend accepts only this page's origin in development.
     strictPort: true,
     proxy: {
       '/api': {

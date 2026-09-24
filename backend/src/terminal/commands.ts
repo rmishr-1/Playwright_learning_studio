@@ -148,7 +148,7 @@ function parseTest(words: string[]): Parsed {
   const paths: string[] = [];
   for (let i = 0; i < words.length; i++) {
     const w = words[i];
-    if (NOT_HERE[w]) return { kind: 'refused', message: NOT_HERE[w] };
+    if (Object.hasOwn(NOT_HERE, w)) return { kind: 'refused', message: NOT_HERE[w] };
     if (FLAGS.has(w)) {
       args.push(w);
       continue;
@@ -211,7 +211,7 @@ export function parse(line: string): Parsed {
   const sub = pw[1];
   if (sub === undefined || sub === '--help' || sub === '-h') return { kind: 'help' };
   if (sub === '--version' || sub === '-V') return { kind: 'version', program: 'playwright' };
-  if (NOT_HERE[sub]) return { kind: 'refused', message: NOT_HERE[sub] };
+  if (Object.hasOwn(NOT_HERE, sub)) return { kind: 'refused', message: NOT_HERE[sub] };
   if (sub === 'show-report') {
     return pw.length === 2
       ? { kind: 'show-report' }

@@ -12,9 +12,9 @@ echo   backend  http://127.0.0.1:3010   (loopback only)
 echo   studio   http://localhost:5185
 echo.
 start "studio-backend" cmd /c "npm run dev:backend"
-%SYS%	imeout.exe /t 3 /nobreak >nul
+%SYS%\timeout.exe /t 3 /nobreak >nul
 start "studio-frontend" cmd /c "npm run dev:frontend"
-%SYS%	imeout.exe /t 4 /nobreak >nul
+%SYS%\timeout.exe /t 4 /nobreak >nul
 start "" "http://localhost:5185"
 echo Both processes started in their own windows. Close them to stop.
 endlocal

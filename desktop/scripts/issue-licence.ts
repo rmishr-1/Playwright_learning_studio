@@ -23,7 +23,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { LOGO_MAX_BYTES, PRODUCT, sign, verify, type Licence, type LicenceFile } from '../src/licence';
 import { DESKTOP, ISSUED_CSV, SEALS_FILE, checkedPublicKey, loadPrivateKey } from './signing-key';
-import { revoke } from './revoke-licence';
+import { readRevoked, revoke } from './revoke-licence';
 
 export const LICENCES_DIR = path.join(DESKTOP, 'licences');
 
@@ -84,6 +84,7 @@ function knownIds(seals: Seals): Set<string> {
   const ids = new Set(Object.keys(seals));
   if (fs.existsSync(ISSUED_CSV)) for (const m of fs.readFileSync(ISSUED_CSV, 'utf-8').matchAll(/EVK-[0-9A-F]{8}/g)) ids.add(m[0]);
   if (fs.existsSync(LICENCES_DIR)) for (const n of fs.readdirSync(LICENCES_DIR)) ids.add(n.slice(0, 12));
+  for (const r of readRevoked().revoked) ids.add(r.id);
   return ids;
 }
 
@@ -107,6 +108,20 @@ export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence;
   }
   if (firstLicensee !== undefined && firstLicensee !== o.licensee.trim()) {
     throw new Error(o.id + ' was issued to ' + firstLicensee + ', not ' + o.licensee.trim() + '.');
+  }
+  // A licence that was withdrawn (not just reissued) comes back only with a new seal: with its old
+  // seal, a new file would open the withdrawn copy again.
+  const withdrawn = o.id ? readRevoked().revoked.some((r) => r.id === o.id && !r.reason.startsWith('reissued')) : false;
+  if (withdrawn && !o.newSeal) {
+    throw new Error(o.id + ' was withdrawn. Reissue it only with --new-seal (the customer then needs a new build), or issue a new licence.');
+  }
+  // Every earlier file must be revoked; one that is not here any more cannot be, so the old seal
+  // is kept only when they all are.
+  if (o.id && known && earlier.length === 0 && !o.newSeal) {
+    throw new Error(
+      'The earlier licence files for ' + o.id + ' are not in desktop/licences/, so they cannot be revoked. ' +
+        'Put them back, or reissue with --new-seal (the customer then needs a new build).',
+    );
   }
   const kept = known?.seal ?? earlier.find((e) => e.licence.licence.seal)?.licence.licence.seal;
   const seal = !o.newSeal && kept ? kept : crypto.randomBytes(32).toString('hex');
@@ -157,10 +172,14 @@ export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence;
   // accepts the earlier file until it is rebuilt.
   const warnings: string[] = [];
   const before = earlier[0]?.licence.licence;
-  if (before && ((licence.machine && !before.machine) || (licence.expires && (!before.expires || licence.expires < before.expires)))) {
+  const narrower =
+    before &&
+    ((licence.machine && licence.machine !== before.machine) || (licence.expires && (!before.expires || licence.expires < before.expires)));
+  if (narrower) {
     warnings.push(
-      'This reissue narrows the licence, but the copy the customer already has still accepts the earlier file. ' +
-        'Send them a new build: npm run new-customer -- --rebuild "' + file + '" (add --new-seal to the reissue if the earlier file must stop working even for that copy).',
+      'This reissue narrows the licence, but the copy the customer already has still accepts the earlier file, for good ' +
+        '(or until its end date). Send them a new build: npm run new-customer -- --rebuild "' + file + '". Nothing can ' +
+        'reach the copy they already have: --new-seal only stops the earlier file opening builds made from now on.',
     );
   }
 

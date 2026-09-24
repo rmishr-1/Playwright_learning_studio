@@ -69,7 +69,8 @@ export function courseDay(week: number, day: number): CourseDay | null {
 export function isLocked(week: number, day: number): boolean {
   try {
     if (courseDay(week, day)?.locked) return true;
-    return courseIndex().weeks.find((w) => w.week === week)?.locked === true;
+    const w = courseIndex().weeks.find((x) => x.week === week);
+    return w?.locked === true || w?.days.find((d) => d.day === day)?.locked === true;
   } catch {
     return true;
   }
@@ -104,7 +105,18 @@ const EMPTY_PROGRESS: Progress = { schema: 'progress/v1', resume: null, progress
  */
 export function readProgress(): Progress {
   if (!fs.existsSync(PROGRESS_FILE)) return EMPTY_PROGRESS;
-  return Progress.parse(JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf-8')));
+  try {
+    return Progress.parse(JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf-8')));
+  } catch {
+    // A damaged record is kept aside, never overwritten, and the learner starts again rather than
+    // getting an error on every page.
+    try {
+      fs.renameSync(PROGRESS_FILE, PROGRESS_FILE.replace(/\.json$/, '.damaged-' + Date.now() + '.json'));
+    } catch {
+      // Left where it is; read as a fresh start all the same.
+    }
+    return EMPTY_PROGRESS;
+  }
 }
 
 function writeProgressFile(p: Progress): void {

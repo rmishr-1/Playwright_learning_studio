@@ -43,6 +43,8 @@ type Stream = {
   status: string | null;
   /** The size of what is buffered, so a run with no viewer holds a bounded amount. */
   bufferedBytes: number;
+  /** Set once the run or command has ended: such a stream is kept only for late viewers. */
+  done: boolean;
 };
 
 /** What a stream holds for a viewer that has not attached yet, at most. */
@@ -57,7 +59,20 @@ const MAX_STREAMS = 64;
 const sizeOf = (event: RunStreamEvent): number =>
   event.event === 'frame' ? event.data.length : event.event === 'stdout' ? event.text.length : event.event === 'term' ? event.data.length : 100;
 
-const newStream = (): Stream => ({ listeners: new Set(), buffered: [], lastFrame: null, status: null, bufferedBytes: 0 });
+const newStream = (): Stream => ({ listeners: new Set(), buffered: [], lastFrame: null, status: null, bufferedBytes: 0, done: false });
+
+/**
+ * Makes room for one more stream: streams whose run has ended go first, oldest first, since they
+ * are kept only for a late viewer. Throws when every stream is still in use.
+ */
+function roomForStream(): void {
+  if (streams.size < MAX_STREAMS) return;
+  for (const [id, s] of streams) {
+    if (streams.size < MAX_STREAMS) return;
+    if (s.done) streams.delete(id);
+  }
+  if (streams.size >= MAX_STREAMS) throw Object.assign(new Error('Too many runs are waiting.'), { code: 'RUN_QUEUE_FULL' });
+}
 
 /** Frames arrive before the client may have attached, so buffer until it does. */
 const streams = new Map<string, Stream>();
@@ -91,6 +106,7 @@ export function emit(runId: string, event: RunStreamEvent): void {
     if (typeof event.data !== 'string' || event.data.length > MAX_FRAME) return;
     s.lastFrame = event.data;
   } else if (event.event === 'ended') s.status = event.status;
+  if (event.event === 'ended' || event.event === 'exit') s.done = true;
   if (s.listeners.size === 0) {
     // Cap the buffer, in events and in bytes: a long run with no viewer must not grow without
     // bound. The run's end is always kept.
@@ -254,10 +270,11 @@ function stripAnsi(text: string): string {
  */
 const TYPESCRIPT = JSON.stringify(onDisk(require.resolve('typescript')));
 /**
- * Where the program's own require() looks: the packages the studio ships, and nowhere else. Node's
- * usual search would climb from the temp folder through every parent's node_modules, and then try
- * its global folders (%USERPROFILE%\.node_modules and the like), where anything could be waiting
- * under a package's name; the bootstrap below empties both lists.
+ * Where the program's own require() may find a package: the packages the studio ships, and nowhere
+ * else. Node's usual search would climb from the temp folder through every parent's node_modules,
+ * and then try its global folders (%USERPROFILE%\.node_modules and the like), where anything could
+ * be waiting under a package's name. The bootstrap below starts the search in the shipped packages,
+ * and refuses anything the program asks for that resolves elsewhere (Node's own modules aside).
  */
 const PACKAGES = JSON.stringify(path.resolve(onDisk(require.resolve('playwright/package.json')), '..', '..'));
 const BOOTSTRAP = `
@@ -272,7 +289,15 @@ const out = ts.transpileModule(fs.readFileSync(path.join(__dirname, 'program.ts'
 const m = new Module(file, module);
 m.filename = file;
 m.paths = [${PACKAGES}];
-Module.globalPaths.length = 0;
+const shipped = ${PACKAGES} + path.sep;
+const resolve = Module._resolveFilename;
+Module._resolveFilename = function (request, parent, ...rest) {
+  const found = resolve.call(this, request, parent, ...rest);
+  if (parent === m && !Module.isBuiltin(found) && !found.startsWith(shipped)) {
+    throw new Error("A Run can use Playwright and the modules built into Node; " + request + " is not one of them.");
+  }
+  return found;
+};
 m._compile(out, file);
 `;
 
@@ -306,7 +331,7 @@ export type StartedRun = { run_id: string; done: Promise<RunResult> };
  * socket is open and the first frames are lost.
  */
 export function prepareRun(): string {
-  if (streams.size >= MAX_STREAMS) throw Object.assign(new Error('Too many runs are waiting.'), { code: 'RUN_QUEUE_FULL' });
+  roomForStream();
   const runId = crypto.randomUUID();
   streams.set(runId, newStream());
   // An id nobody uses must not leak a stream entry.
@@ -321,7 +346,10 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   if (active >= config.run.max_concurrent) return { queue_full: true };
 
   const runId = req.run_id;
-  if (!streams.has(runId)) streams.set(runId, newStream());
+  if (!streams.has(runId)) {
+    roomForStream();
+    streams.set(runId, newStream());
+  }
 
   // Nothing is counted as running until the run's files are in place.
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-run-'));
@@ -434,7 +462,9 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
     });
     child.on('close', () => finish());
     // Something the run started may keep its output open after it exits: two seconds on, the run
-    // is over all the same, and its slot is free.
+    // is over all the same, and its slot is free. (What the program started and left running is
+    // then out of the studio's reach: Node cannot find a process's grandchildren once it has gone.
+    // The studio's own browser is closed by the program itself; a timeout kills the whole tree.)
     child.on('exit', () => {
       setTimeout(() => {
         child.stdout.destroy();

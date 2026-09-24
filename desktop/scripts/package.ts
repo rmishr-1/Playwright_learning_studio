@@ -26,10 +26,15 @@
  * --unsigned says that is intended: an unsigned app makes Windows SmartScreen warn whoever runs it,
  * and nothing proves it came from Evoke. Sign every copy that leaves Evoke.
  *
- * Electron itself, the largest part of the app, is downloaded fresh for every package from
- * Electron's own releases, into a cache of this run's own, and checked against the SHA-256 that
- * desktop/node_modules/electron/checksums.json (which package-lock.json vouches for) gives it: no
- * copy left in a cache, and no mirror named in the environment, is used.
+ * Electron itself, the largest part of the app, is downloaded here, fresh for every package, from
+ * Electron's own releases on GitHub, into a folder of this run's own, and must match the SHA-256
+ * that desktop/node_modules/electron/checksums.json gives it (package-lock.json vouches for that
+ * file). electron-builder is then handed that zip (electronDist) and downloads no Electron itself:
+ * no copy left in a cache, no mirror named in the environment, and no checksum file fetched from
+ * the same release as the zip is ever trusted.
+ *
+ * A signed build must be signed by Evoke: the signer's name must contain STUDIO_SIGNER (by default
+ * "Evoke"), and no environment variable may swap in another signing program.
  *
  * desktop/release/ is emptied first, so nothing older is ever mistaken for this build.
  *
@@ -40,9 +45,31 @@
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { build as electronBuild, Platform, type Configuration } from 'electron-builder';
 import { DESKTOP, PRODUCT, VERSION, build } from './build';
+import * as crypto from 'node:crypto';
 import { signature, verifyManifest } from './runtime';
+
+/** Electron's own releases: the only place its zip is taken from. */
+const ELECTRON_RELEASES = 'https://github.com/electron/electron/releases/download/';
+
+/** Downloads a file to disk, following GitHub's redirect to its download host. */
+async function download(url: string, file: string): Promise<void> {
+  const response = await fetch(url, { redirect: 'follow' });
+  if (!response.ok || !response.body) throw new Error('Could not download ' + url + ' (' + response.status + ').');
+  await pipeline(Readable.fromWeb(response.body as import('node:stream/web').ReadableStream), fs.createWriteStream(file));
+}
+
+const sha256Of = (file: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    fs.createReadStream(file)
+      .on('data', (chunk) => hash.update(chunk))
+      .on('error', reject)
+      .on('end', () => resolve(hash.digest('hex')));
+  });
 
 type Signing = Pick<NonNullable<Configuration['win']>, 'signtoolOptions' | 'azureSignOptions'>;
 
@@ -101,9 +128,22 @@ export async function packageApp(opts: {
   const electronZip = 'electron-v' + electronVersion + '-win32-x64.zip';
   const known = JSON.parse(fs.readFileSync(path.join(DESKTOP, 'node_modules', 'electron', 'checksums.json'), 'utf-8')) as Record<string, string>;
   if (!/^[0-9a-f]{64}$/.test(known[electronZip] ?? '')) throw new Error('desktop/node_modules/electron/checksums.json has no checksum for ' + electronZip + '.');
-  for (const key of Object.keys(process.env)) if (/electron/i.test(key)) delete process.env[key];
+  // Nothing in the environment may point electron-builder at another Electron, another download
+  // host, or another signing program.
+  for (const key of Object.keys(process.env)) {
+    if (/electron|signtool|signcode|^custom_|^use_system_|^app_builder_tmp_dir$/i.test(key)) delete process.env[key];
+  }
   const cache = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-electron-'));
   process.env.ELECTRON_BUILDER_CACHE = cache;
+  const electronDist = path.join(cache, electronZip);
+  console.log('\n> Electron ' + electronVersion + ', from its own releases');
+  await download(ELECTRON_RELEASES + 'v' + electronVersion + '/' + electronZip, electronDist);
+  const got = await sha256Of(electronDist);
+  if (got !== known[electronZip]) {
+    fs.rmSync(cache, { recursive: true, force: true });
+    throw new Error(electronZip + ' does not match its checksum in desktop/node_modules/electron/checksums.json (' + got + '). It will not be shipped.');
+  }
+  console.log('  ' + electronZip + ' matches its checksum');
   const release = path.join(DESKTOP, 'release');
   fs.rmSync(release, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
 
@@ -112,10 +152,8 @@ export async function packageApp(opts: {
     productName: PRODUCT,
     copyright: 'Copyright © 2026 Evoke Technologies. All rights reserved.',
     electronVersion,
-    electronDownload: {
-      mirrorOptions: { mirror: 'https://github.com/electron/electron/releases/download/' },
-      checksums: { [electronZip]: known[electronZip] },
-    },
+    // The zip downloaded and checked above: electron-builder downloads no Electron of its own.
+    electronDist: electronDist,
     directories: { app: 'build/app', output: 'release', buildResources: 'assets' },
     npmRebuild: false,
     nodeGypRebuild: false,
@@ -174,11 +212,15 @@ export async function packageApp(opts: {
   for (const f of out) console.log('  ' + f);
   // Signed means signed: the app's own program and every installer made carry a valid signature.
   if (sign) {
+    const signer = process.env.STUDIO_SIGNER || 'Evoke';
     const exes = [path.join(release, 'win-unpacked', 'QA Practice Training Studio.exe'), ...out.filter((f) => f.endsWith('.exe'))];
     for (const exe of exes) {
-      if (!fs.existsSync(exe)) continue;
+      if (!fs.existsSync(exe)) throw new Error(exe + ' is missing, so its signature cannot be checked. Nothing made here may be sent.');
       const s = signature(exe);
       if (s.status !== 'Valid') throw new Error(exe + ' is not validly signed (' + s.status + '). Nothing made here may be sent.');
+      if (!s.signer.toLowerCase().includes(signer.toLowerCase())) {
+        throw new Error(exe + ' is signed by ' + s.signer + ', not by ' + signer + '. Nothing made here may be sent.');
+      }
     }
   }
   return out.filter((f) => !f.endsWith('.blockmap'));

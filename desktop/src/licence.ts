@@ -55,7 +55,8 @@ const SIGNATURE = /^[A-Za-z0-9+/]{85}[AQgw]==$/;
 
 export type LicenceFile = { licence: Licence; signature: string };
 
-export type Verdict = { ok: true; licence: Licence } | { ok: false; reason: string; licence?: Licence };
+/** expired: set only when the licence is refused because its end date has passed. */
+export type Verdict = { ok: true; licence: Licence } | { ok: false; reason: string; licence?: Licence; expired?: true };
 
 /**
  * The exact bytes that are signed: the licence's fields in a fixed order. `logo` and `seal` are
@@ -133,7 +134,7 @@ export function verify(
     // Never earlier than the day the licence was issued: a clock set back before that is wrong.
     const given = opts.today ?? new Date().toISOString().slice(0, 10);
     const today = DATE.test(l.issued) && l.issued > given ? l.issued : given;
-    if (today > l.expires) return { ok: false, reason: 'The licence expired on ' + l.expires + '.', licence: l };
+    if (today > l.expires) return { ok: false, reason: 'The licence expired on ' + l.expires + ' (UTC).', licence: l, expired: true };
   }
   if (l.machine) {
     if (opts.machine === 'UNKNOWN') return { ok: false, reason: "This computer's machine code cannot be read, and the licence is for one computer.", licence: l };

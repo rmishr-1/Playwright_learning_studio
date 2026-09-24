@@ -59,6 +59,9 @@ type Running = { runId: string; child: ChildProcess; stopping: boolean; timedOut
 let running: Running | null = null;
 
 const say = (runId: string, text: string): void => emit(runId, { event: 'term', data: text.replace(/\n/g, '\r\n') + '\r\n' });
+/** The most a command's output fills the Terminal with. */
+const MAX_TERMINAL_OUTPUT = 2_000_000;
+
 /** Text from the page, shown in the Terminal: no control characters, so no escape sequences. */
 const printable = (s: string): string => s.replace(/[\x00-\x1f\x7f]/g, '?');
 const done = (runId: string, code: number | null, openUrl?: string): void => {
@@ -161,7 +164,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
     return done(runId, 0);
   }
   if (parsed.kind === 'refused') {
-    say(runId, YELLOW(parsed.message));
+    say(runId, YELLOW(printable(parsed.message)));
     return done(runId, 1);
   }
   if (parsed.kind === 'version') {
@@ -226,7 +229,16 @@ export function startCommand(runId: string, line: string, code: string, file: st
   const current: Running = { runId, child, stopping: false, timedOut: false, frameKey };
   running = current;
 
-  const forward = (chunk: Buffer): void => emit(runId, { event: 'term', data: chunk.toString('utf-8').replace(/\r?\n/g, '\r\n') });
+  // A command's output is shown up to a limit (an endless console.log loop would otherwise fill
+  // the app's memory); past it, the rest is dropped and the command keeps running to its end.
+  let shown = 0;
+  const forward = (chunk: Buffer): void => {
+    if (shown > MAX_TERMINAL_OUTPUT) return;
+    const text = chunk.toString('utf-8').replace(/\r?\n/g, '\r\n');
+    shown += text.length;
+    emit(runId, { event: 'term', data: text });
+    if (shown > MAX_TERMINAL_OUTPUT) say(runId, YELLOW('\n[output cut short: over ' + MAX_TERMINAL_OUTPUT + ' characters. Press Ctrl+C to stop the command.]'));
+  };
   child.stdout?.on('data', forward);
   child.stderr?.on('data', forward);
 

@@ -24,8 +24,17 @@ export function readRevoked(): Revoked {
   return fs.existsSync(REVOKED_FILE) ? (JSON.parse(fs.readFileSync(REVOKED_FILE, 'utf-8')) as Revoked) : { revoked: [] };
 }
 
+/** A reason is a few plain words ("reissued 2026-09-24", "withdrawn"), never a name. */
+const REASON = /^[a-z0-9 .:-]{1,40}$/;
+
 export function revoke(file: string, reason: string): boolean {
   const licenceFile = JSON.parse(fs.readFileSync(file, 'utf-8')) as LicenceFile;
+  const words = reason.trim().toLowerCase();
+  const name = licenceFile.licence.licensee.toLowerCase();
+  if (!REASON.test(words) || words.includes(name) || name.split(/\s+/).some((w) => w.length > 3 && words.includes(w))) {
+    throw new Error('Give the reason in a few plain words, such as "withdrawn" or "leaked", with no names: revoked.json is committed, and issued.csv says whose licence it was.');
+  }
+  reason = words;
   const list = readRevoked();
   const print = fingerprint(licenceFile);
   if (list.revoked.some((r) => r.fingerprint === print)) return false;
@@ -47,7 +56,13 @@ if (require.main === module) {
     process.exit(1);
   }
   const i = process.argv.indexOf('--reason');
-  const done = revoke(path.resolve(file), i === -1 ? 'withdrawn' : process.argv[i + 1] ?? 'withdrawn');
+  let done = false;
+  try {
+    done = revoke(path.resolve(file), i === -1 ? 'withdrawn' : process.argv[i + 1] ?? 'withdrawn');
+  } catch (e) {
+    console.error((e as Error).message);
+    process.exit(1);
+  }
   console.log(
     done
       ? 'Revoked. Builds made from now on refuse this licence file. Copies already sent still accept it until the customer gets a new build.'

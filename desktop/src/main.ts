@@ -172,7 +172,7 @@ function check(text: string): Verdict {
   const { today, now } = licenceToday();
   const verdict = verify(text, BUILD.publicKey, { onlyId: BUILD.onlyId, machine: MACHINE, today, revoked: BUILD.revoked });
   // Said plainly when it is the clock, not the licence, that is wrong.
-  if (!verdict.ok && verdict.licence?.expires && now <= verdict.licence.expires && today > verdict.licence.expires) {
+  if (!verdict.ok && verdict.expired && verdict.licence?.expires && now <= verdict.licence.expires) {
     return {
       ...verdict,
       reason:

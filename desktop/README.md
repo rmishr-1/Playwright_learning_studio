@@ -73,17 +73,18 @@ licence will ever work with the copies already given out.
 | Command | What it does |
 |---|---|
 | `npm run licence:issue -- --licensee "Acme Ltd" [--email x] [--expires 2027-09-30] [--machine CODE] [--logo x.png]` | Issues a licence into `licences/` |
-| `... --id EVK-1A2B3C4D` | Reissues a licence (a new expiry, or bound to one computer). Same licensee only; it keeps the seal, so the customer's build still opens, and the old file is revoked. Add `--new-seal` when the licence leaked: the customer then needs a new build too. |
-| `npm run licence:revoke -- licences/<file>.lic` | Withdraws a licence file: builds made from now on refuse it (`revoked.json`, committed; licence IDs only, never names). |
-
-**Revoking reaches only builds made afterwards.** A copy already sent keeps the revocation list it
-was built with, so it still opens with the old file. A reissue that narrows a licence (a computer
-limit, an earlier end date) therefore needs a new build for the customer
-(`npm run new-customer -- --rebuild <new licence>`); `licence:issue` says so when it happens. When
-the old file must stop working even in the copy they have, reissue with `--new-seal`: the old
-file then cannot decrypt the new build, and the old build is replaced.
+| `... --id EVK-1A2B3C4D` | Reissues a licence (a new expiry, or bound to one computer). Same licensee only; it keeps the seal, so the customer's build still opens, and every earlier file is revoked (all of them must still be in `licences/`). Add `--new-seal` when the licence leaked: the customer then needs a new build too. A withdrawn licence can come back only with `--new-seal`. |
+| `npm run licence:revoke -- licences/<file>.lic [--reason withdrawn]` | Withdraws a licence file: builds made from now on refuse it (`revoked.json`, committed). The reason is a few plain words; a customer's name is refused. |
 | `npm run licence:keygen` | Makes the key pair. Once, ever; it refuses to replace a key. |
 | `npm run watermark:find -- copied-text.txt` | Prints the licence ID hidden in copied course text; `issued.csv` names the customer. |
+
+**Revoking reaches only builds made afterwards.** A copy already sent keeps its own key, seal and
+revocation list, so it opens with the old licence file for good, or until that file's end date:
+nothing Evoke does later can reach it. A reissue that narrows a licence (a computer limit, a new
+computer, an earlier end date) therefore needs a new build for the customer
+(`npm run new-customer -- --rebuild <new licence>`); `licence:issue` says so when it happens.
+`--new-seal` stops the old file opening any build made from now on; it does nothing to the copy
+already sent. An end date is the only limit that holds for a copy once it has left Evoke.
 
 ## Build
 
@@ -101,6 +102,8 @@ npm run package -- --internal
   it for anything that leaves Evoke. Every browser must match its hash in `runtime-pins.json`
   (committed); after upgrading Playwright, `npm run runtime -- --fresh --pin` records the new
   ones. Packaging refuses a runtime that has changed since.
+- **An internal build never leaves Evoke.** It is not sealed, so its course can be decrypted
+  without any licence, and it opens with every customer's licence.
 - `npm run package -- --internal` builds the internal installer
   (`release/QA-Practice-Training-Studio-Setup-<version>-internal.exe`), for any valid licence.
   `--licence <file>` builds one customer's instead; `--carry` puts the licence inside it (then
@@ -118,12 +121,12 @@ npm run package -- --internal
 |---|---|
 | Licence agreement | Shown and accepted on first start, including the technical measures (section 4A). `legal/EULA.txt` is a **draft for legal review**. |
 | Licence | Ed25519-signed; optional expiry and one-computer limit; revocation list (builds made after the revocation); re-checked every hour, with ten minutes' notice before the studio closes once a licence has ended; the learner is warned two weeks ahead. |
-| Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, or the latest date of the app's own files (two folders deep). Turning the clock back after that takes deleting the app's data, progress included; it does not stop someone who does. |
+| Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, or the latest date of the app's own files (two folders deep). It stops the clock simply being turned back; someone who also edits or re-dates the app's files can get past it. |
 | Encrypted, sealed course | `content.pack`, AES-256-GCM, a new key every build, decrypted in memory only and never cached; a customer's build needs their licence to decrypt it. |
 | Locked API | 127.0.0.1 only; answers only the app's window (a new random token every start), and only to its own host name, so neither another program nor a web page can read it. |
 | Locked app | No command-line switches in a release (debuggers, proxies, network logs); Electron fuses; DevTools off; nothing leaves the computer; the test report is served apart from the studio; the learner's code gets none of the app's environment. |
 | Obfuscated code | The main process, backend and page code are obfuscated; no source maps. |
-| Watermarks | The licence ID, in zero-width characters, in every paragraph and list of the lessons (about seven blocks in ten; blocks that are only code or a table carry none), quiz questions, options and explanations, exercise statements, hints and fenced solutions, added again as each lesson is served with the licence in use. They travel with copied and pasted text; retyping, screenshots or a deliberate clean-up remove them. The window title names the licensee. |
+| Watermarks | The licence ID, in zero-width characters, in every paragraph and list of the lessons (about eight blocks in ten; blocks that are only code or a table carry none), quiz questions, options (unless only code) and explanations, exercise statements and hints (solutions are code only, and carry none), added again as each lesson is served with the licence in use. They travel with copied and pasted text; retyping, screenshots or a deliberate clean-up remove them. The window title names the licensee. |
 
 What it does **not** stop: someone reading lessons on screen and retyping them, screenshots, or a
 skilled person spending days extracting the course from a licensed copy running on their own

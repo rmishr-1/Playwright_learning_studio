@@ -18,8 +18,8 @@
  *
  * The app in the zip opens only with that licence: it refuses every other one, even a valid
  * licence Evoke issued to someone else. It does not carry the licence, so the zip alone opens
- * nothing; send the licence file with it (or separately). Its lessons carry the licence ID as an
- * invisible watermark, and when the licence has a logo, the app shows it in its header.
+ * nothing; send the licence file by a different route from the zip. Its lessons carry the licence
+ * ID as an invisible watermark, and when the licence has a logo, the app shows it in its header.
  *
  * Takes about 10 minutes, most of it compressing the browsers into the zip.
  */
@@ -137,6 +137,9 @@ async function main(): Promise<void> {
  * deliveries/<licence id>-<customer>/. --rebuild <licence file> does only this: a new zip for the
  * same licence, such as after the course has changed.
  */
+/** Whether the copy just built is unsigned: the read-me then says what Windows will show. */
+let deliverUnsigned = false;
+
 async function deliver(licenceFile: string): Promise<void> {
   const licence = (JSON.parse(fs.readFileSync(licenceFile, 'utf-8')) as LicenceFile).licence;
 
@@ -156,6 +159,7 @@ async function deliver(licenceFile: string): Promise<void> {
     throw new Error('No code-signing certificate is set, and building unsigned was not confirmed. Nothing was built.');
   }
   const made = await packageApp({ licenceFile, carryLicence: false, target: 'zip', unsigned });
+  deliverUnsigned = unsigned;
   const zip = made.find((f) => f.endsWith('.zip'));
   if (!zip) throw new Error('The build made no zip.');
 
@@ -177,12 +181,21 @@ async function deliver(licenceFile: string): Promise<void> {
       '   folder such as C:\\QA Studio: the app has files deep inside, and Windows cannot extract them',
       '   into a long folder path.',
       '2. In the extracted folder, double-click "QA Practice Training Studio.exe".',
-      '   If Windows says "Windows protected your PC", choose "More info", then "Run anyway".',
+      ...(deliverUnsigned
+        ? [
+            '   This copy is not code-signed yet, so Windows says "Windows protected your PC". Check the',
+            '   fingerprint first (below); if it matches, choose "More info", then "Run anyway".',
+          ]
+        : ['   It is signed by Evoke Technologies. If Windows warns that it is not, do not run it: ask Evoke.']),
       '3. Choose "Choose licence file..." and pick "' + path.basename(licenceOut) + '".',
       '4. Read the licence agreement, tick the box, and choose "Accept and open".',
       '',
       'This copy works only with this licence. Keep the licence file safe, and do not share it',
       'or the application.',
+      '',
+      'To check the zip is the one Evoke sent, run this in a Command Prompt in its folder, and',
+      'compare the result with the fingerprint Evoke gave you separately:',
+      '   certutil -hashfile ' + path.basename(zipOut) + ' SHA256',
       '',
       'Copyright (c) 2026 Evoke Technologies. All rights reserved.',
       '',

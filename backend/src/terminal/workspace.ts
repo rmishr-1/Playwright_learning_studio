@@ -179,9 +179,10 @@ function readSeeds(): WorkspaceSeeds['workspaces'] {
   const locked = lockedDayNumbers();
   if (locked === null) return { demo: { files: {} }, project: { files: {} } };
   if (locked.size === 0) return seeds;
-  // day9/, day09/, day9.spec.ts, day9-login.spec.ts: any name that says which day it belongs to.
+  // day9/, day09/, day_9/, day9.spec.ts, day9-login.spec.ts, day9Login.spec.ts: any name that says
+  // which day it belongs to.
   const open = (rel: string): boolean => {
-    const days = [...rel.matchAll(/(?:^|[\/._-])day0*(\d+)(?=[\/._-]|$)/gi)].map((m) => Number(m[1]));
+    const days = [...rel.matchAll(/(?:^|[\/._-])day[_-]?0*(\d+)(?!\d)/gi)].map((m) => Number(m[1]));
     return !days.some((d) => locked.has(d));
   };
   return Object.fromEntries(
@@ -235,12 +236,21 @@ export function prepareWorkspace(name: Workspace): void {
   fs.mkdirSync(path.join(dir, 'tests'), { recursive: true });
 
   const recordFile = path.join(dir, '.studio', 'seeded.json');
-  const hadRecord = fs.existsSync(recordFile);
-  const before: Record<string, readonly string[]> = hadRecord
-    ? Object.fromEntries(
-        Object.entries(JSON.parse(fs.readFileSync(recordFile, 'utf-8')) as Record<string, string>).map(([k, v]) => [k, [v]]),
-      )
-    : LEGACY_SEEDS;
+  // The record is the learner's to damage (their code can write here): one that cannot be read is
+  // treated as none.
+  let before: Record<string, readonly string[]> = LEGACY_SEEDS;
+  try {
+    const record = JSON.parse(fs.readFileSync(recordFile, 'utf-8')) as unknown;
+    if (record && typeof record === 'object' && !Array.isArray(record)) {
+      before = Object.fromEntries(
+        Object.entries(record as Record<string, unknown>)
+          .filter((e): e is [string, string] => typeof e[1] === 'string')
+          .map(([k, v]) => [k, [v]]),
+      );
+    }
+  } catch {
+    // No record yet, or a damaged one.
+  }
   const seeds = readSeeds()[name]?.files ?? {};
   // Every path, from the course or from .studio/seeded.json (which the learner's code can write),
   // must stay inside tests/ or ts-basics/ of this workspace; anything else is skipped.
@@ -273,7 +283,8 @@ export function prepareWorkspace(name: Workspace): void {
     }
     // Otherwise the learner has changed it: it is theirs now, and it is not recorded.
   }
-  fs.writeFileSync(recordFile, JSON.stringify(after, null, 2) + '\n');
+  fs.writeFileSync(recordFile + '.tmp', JSON.stringify(after, null, 2) + '\n');
+  fs.renameSync(recordFile + '.tmp', recordFile);
 }
 
 /** Saves the editor's code as a file in the workspace, and returns its path there. */

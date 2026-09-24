@@ -30,11 +30,11 @@ rem Every build starts from exactly what the lockfiles list: nothing left over o
 rem node_modules goes into a customer's app.
 echo Installing the studio's packages as package-lock.json lists them...
 pushd .. || (echo [BLOCKING] Could not open the studio folder. & pause & exit /b 1)
-call npm ci --no-audit --no-fund
+call npm ci --no-audit --no-fund --strict-allow-scripts --no-dangerously-allow-all-scripts
 if errorlevel 1 ( popd & echo [BLOCKING] npm ci failed in the studio folder. & pause & exit /b 1 )
 popd
 echo Installing the build tools as desktop\package-lock.json lists them...
-call npm ci --no-audit --no-fund
+call npm ci --no-audit --no-fund --strict-allow-scripts --no-dangerously-allow-all-scripts
 if errorlevel 1 ( echo [BLOCKING] npm ci failed in desktop. & pause & exit /b 1 )
 
 call npm run new-customer --silent

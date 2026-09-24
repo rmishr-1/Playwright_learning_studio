@@ -224,8 +224,9 @@ export async function startServer(opts: ServerOptions): Promise<RunningServer> {
     wss.handleUpgrade(req, socket, head, (ws) => {
       const detach = attachStream(match[1], (event) => {
         if (ws.readyState !== ws.OPEN) return;
-        // A window that has stopped reading gets no more frames until it catches up.
-        if (event.event === 'frame' && ws.bufferedAmount > 8_000_000) return;
+        // A window that has stopped reading gets nothing more until it catches up, except the
+        // end of the run, which it must always get.
+        if (ws.bufferedAmount > 8_000_000 && event.event !== 'ended' && event.event !== 'exit') return;
         ws.send(JSON.stringify(event));
       });
       ws.on('close', detach);

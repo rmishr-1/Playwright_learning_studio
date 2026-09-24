@@ -65,8 +65,10 @@ export function markMarkdown(text: string, id: string): string {
     // Indented code (four spaces or a tab) is code, not prose.
     if (/^( {4}|\t)/.test(line)) continue;
     // A list item's words count, after its marker; headings, quotes, tables and HTML never.
-    const body = t.replace(/^([*+-]|\d+[.)])\s+/, '');
-    if (body.length < 20 || /^[#>|<*+-]/.test(body) || !/[A-Za-z]/.test(body[0])) continue;
+    if (/^[#>|<]/.test(t)) continue;
+    // After a list marker and any opening emphasis, code, quote, bracket or checkbox, the words.
+    const body = t.replace(/^([*+-]|\d+[.)])\s+/, '').replace(/^(\[[ xX]\]\s*|[*_`"'(\[]+)+/, '');
+    if (body.length < 20 || !/[A-Za-z]/.test(body[0])) continue;
     if (/:\/\/|www\./i.test(t)) continue;
     lines[i] = line.replace(/(\s*)$/, encode(id) + '$1');
     paragraphMarked = true;
@@ -78,7 +80,9 @@ export function markMarkdown(text: string, id: string): string {
 /** Marks a quiz option that reads as words (it has a space), at its end. Answers are indexes, so a mark changes nothing. */
 function markOption(text: string, id: string): string {
   const t = strip(text).trim();
-  return t.includes(' ') && /[A-Za-z]/.test(t) && !/:\/\/|www\./i.test(t) ? text.replace(/(\s*)$/, encode(id) + '$1') : text;
+  // An option that is only code is left alone: a learner may copy it into the editor.
+  const codeOnly = /^`[^`]*`$/.test(t);
+  return !codeOnly && t.includes(' ') && /[A-Za-z]/.test(t) && !/:\/\/|www\./i.test(t) ? text.replace(/(\s*)$/, encode(id) + '$1') : text;
 }
 
 /** The block types whose text is prose to mark (a checkpoint's text is its question). */
