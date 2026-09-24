@@ -8,15 +8,24 @@ import * as fs from 'node:fs';
 import { systemExe } from '../../backend/src/system-exe';
 
 export function keepUserData(dir: string, exeName: string): void {
-  const running = execFileSync(systemExe('tasklist.exe'), ['/FI', 'IMAGENAME eq ' + exeName, '/NH'], { encoding: 'utf-8' });
-  if (running.toLowerCase().includes(exeName.toLowerCase())) {
-    console.error('Close ' + exeName.replace(/\.exe$/i, '') + ' first: the test uses its data folder.');
+  // CSV, because tasklist's table cuts program names at 25 characters ("QA Practice Training Stud").
+  const running = execFileSync(systemExe('tasklist.exe'), ['/FI', 'IMAGENAME eq ' + exeName, '/FO', 'CSV', '/NH'], { encoding: 'utf-8' });
+  if (running.toLowerCase().includes('"' + exeName.toLowerCase() + '"')) {
+    console.error('Close ' + exeName.replace(/\.exe$/i, '') + ' first (every copy of it): the test uses its data folder.');
     process.exit(1);
   }
   const backup = dir + '.before-test';
   if (fs.existsSync(backup)) {
-    // A test that was killed before it could put the folder back: put it back now.
-    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    // A test that was killed before it could put the folder back. Put it back only when nothing has
+    // taken its place: a data folder there now belongs to a copy of the app that has run since, and
+    // is never deleted to make room.
+    if (fs.existsSync(dir)) {
+      console.error(
+        'Both "' + dir + '" and "' + backup + '" exist: an earlier test was stopped before it put the folder back, and ' +
+          'the app has run since. Decide which one to keep, rename the other, and run the test again.',
+      );
+      process.exit(1);
+    }
     fs.renameSync(backup, dir);
   }
   if (fs.existsSync(dir)) fs.renameSync(dir, backup);

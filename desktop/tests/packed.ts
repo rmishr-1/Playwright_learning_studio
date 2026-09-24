@@ -10,6 +10,7 @@
  * app.isPackaged, resourcesPath, the other fuses) behaves as installed. A window that only fails
  * inside app.asar, as the setup window once did, fails here too.
  */
+import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as asar from '@electron/asar';
@@ -17,11 +18,28 @@ import { flipFuses, FuseV1Options, FuseVersion } from '@electron/fuses';
 
 const DESKTOP = path.resolve(__dirname, '..');
 
+/**
+ * Electron's own program, for the tests (a package ships its own copy, downloaded and checked in
+ * scripts/package.ts). Electron no longer downloads it when installed, so `npm ci` leaves none: its
+ * installer fetches it here, checked against the checksums in the electron package, with nothing in
+ * the environment able to point it at another copy or another checksum.
+ */
+function electronDist(): string {
+  const dist = path.join(DESKTOP, 'node_modules', 'electron', 'dist');
+  if (!fs.existsSync(path.join(dist, 'electron.exe'))) {
+    const env: NodeJS.ProcessEnv = {};
+    for (const [k, v] of Object.entries(process.env)) if (!/electron|force_no_cache/i.test(k)) env[k] = v;
+    console.log('Downloading Electron for the tests (checked against its checksums)...');
+    execFileSync(process.execPath, [path.join(DESKTOP, 'node_modules', 'electron', 'install.js')], { stdio: 'inherit', env });
+  }
+  return dist;
+}
+
 export async function packedApp(): Promise<string> {
   const dir = path.join(DESKTOP, 'build', 'test-app');
   const resources = path.join(dir, 'resources');
   fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-  fs.cpSync(path.join(DESKTOP, 'node_modules', 'electron', 'dist'), dir, { recursive: true });
+  fs.cpSync(electronDist(), dir, { recursive: true });
   const exe = path.join(dir, 'QA Practice Training Studio.exe');
   fs.renameSync(path.join(dir, 'electron.exe'), exe);
   fs.rmSync(path.join(resources, 'default_app.asar'), { force: true });
