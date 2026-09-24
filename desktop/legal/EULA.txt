@@ -40,6 +40,17 @@ The code you write yourself while doing the exercises is yours.
 Each copy of the Software and its content carries marks that identify the licence it was issued
 under. Evoke may use these marks to find the source of an unauthorised copy.
 
+4A. TECHNICAL MEASURES
+To enforce this licence, the Software:
+ (a) reads Windows' identifier of the computer it runs on, and keeps only a one-way hash of it
+     (the "machine code" it shows), to check a licence that is limited to one computer;
+ (b) records the latest date on which it ran, so that a licence period cannot be extended by
+     changing the computer's clock;
+ (c) keeps the course content encrypted, and refuses to start with debugging, logging or proxy
+     options, or when its files have been changed.
+The Software works offline. It does not send the machine code, your progress, your code or any
+other information about you or your computer to Evoke or to anyone else.
+
 5. THIRD-PARTY SOFTWARE
 The Software includes third-party components (among them Electron, Node.js, Playwright and the
 Chromium, Firefox and WebKit browsers) that are licensed under their own terms, listed in

@@ -1,3 +1,28 @@
 {
-  "revoked": []
+  "revoked": [
+    {
+      "fingerprint": "65a88d77db3370dae7609a6ce3f165ca34ab36cb55c355c40eba594e4e0222a0",
+      "id": "EVK-0B26108A",
+      "licensee": "Evoke Internal Test",
+      "issued": "2026-09-23",
+      "reason": "reissued 2026-09-24",
+      "date": "2026-09-24"
+    },
+    {
+      "fingerprint": "e050c7592f043bdf30d90780f1554f3b2010d4bf5d49b1d316d781483b33674f",
+      "id": "EVK-A8964507",
+      "licensee": "Boston University",
+      "issued": "2026-09-24",
+      "reason": "reissued 2026-09-24",
+      "date": "2026-09-24"
+    },
+    {
+      "fingerprint": "b46ebe974dda3981f0f479c21ceabee3e656e05539d0a66ac613505d56e9a793",
+      "id": "EVK-04EC89E8",
+      "licensee": "Acme Training Ltd",
+      "issued": "2026-09-23",
+      "reason": "sample licence, never sent",
+      "date": "2026-09-24"
+    }
+  ]
 }

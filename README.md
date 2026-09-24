@@ -23,9 +23,9 @@ wrap the usual flows, carried over from the assessment portal and retargeted her
 
 | Script | What it does |
 |---|---|
-| `git-sync.bat` | For the owner: commit everything, pull, then push, in one go |
+| `git-sync.bat` | For the owner: shows what changed and asks, then commits, pulls and pushes. It refuses keys, licences and other secrets |
 | `collab-pull.bat` | Sync your own branch, then rebase it onto `main` |
-| `collab-push.bat` | Push your branch and open a PR against `main` |
+| `collab-push.bat` | Push your branch, and get the link for a pull request into `main`; it never pushes to `main` itself |
 
 They set the git identity **repo-locally** to `rmishr-1 <rmishra@evoketechnologies.com>`, taken
 from the global config on this machine. Change those lines if someone else works in this clone,

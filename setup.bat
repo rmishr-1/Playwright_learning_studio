@@ -22,8 +22,8 @@ if errorlevel 1 (
 
 echo.
 echo Installing dependencies...
-call npm install --no-audit --no-fund
-if errorlevel 1 ( echo [BLOCKING] npm install failed. & exit /b 1 )
+call npm ci --no-audit --no-fund
+if errorlevel 1 ( echo [BLOCKING] npm ci failed. & exit /b 1 )
 
 echo.
 echo Installing the browsers the lessons test in: Chromium, Firefox and WebKit...

@@ -7,11 +7,11 @@ rem read-me, in desktop\deliveries\. Needs Evoke's signing key (desktop\keys) on
 
 if not exist "..\node_modules" (
   echo Installing the studio's packages, first time only...
-  pushd .. & call npm install --no-audit --no-fund & popd
+  pushd .. & call npm ci --no-audit --no-fund & popd
 )
 if not exist "node_modules" (
   echo Installing the build tools, first time only...
-  call npm install --no-audit --no-fund
+  call npm ci --no-audit --no-fund
 )
 
 call npm run new-customer --silent
