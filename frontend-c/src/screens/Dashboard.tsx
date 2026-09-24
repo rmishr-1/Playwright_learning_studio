@@ -7,9 +7,6 @@ import { YourPath, type PathWeek } from '../components/YourPath';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
 import type { Progress } from '../../../shared/contracts/progress';
 
-/** Every day is built as four tabs: Prerequisites, Fundamentals, Implementation, Practice. */
-const PARTS_PER_DAY = 4;
-
 const dayUrl = (week: number, day: number, part = 1): string => '/learn/w' + week + '/d' + day + '/p' + part;
 
 /**
@@ -42,10 +39,15 @@ export function Dashboard() {
   const isDone = (w: number, d: number): boolean => !!dayRecord(w, d)?.completed;
   const openDays = weeks.filter((w) => w.open).flatMap((w) => w.days.filter((d) => !d.locked).map((d) => ({ week: w.week, day: d })));
 
-  // Up next: the saved resume point, else the first open day.
+  // Overall progress, counted over open days only.
+  const doneCount = openDays.filter((x) => isDone(x.week, x.day.day)).length;
+  const pct = openDays.length ? Math.round((doneCount / openDays.length) * 100) : 0;
+
+  // Where the button goes: the saved resume point when it is an open day, else the first open day.
   const r = progress?.resume;
-  const next = (r && openDays.find((x) => x.week === r.week && x.day.day === r.day)) || openDays[0];
-  const viewed = next ? dayRecord(next.week, next.day.day)?.parts_viewed.length ?? 0 : 0;
+  const resumedDay = r ? openDays.find((x) => x.week === r.week && x.day.day === r.day) : undefined;
+  const next = resumedDay || openDays[0];
+  const resumed = r && resumedDay ? r : null;
 
   // Every week of the plan for Your path, each day resolved against progress and "Up next".
   const pathWeeks: PathWeek[] = weeks.map((w) => {
@@ -70,29 +72,18 @@ export function Dashboard() {
             <h1>{index.title}</h1>
           </div>
 
-          {next && (
-            <div className="upnext">
-              <div className="upnext-top">
-                <span className="eyebrow">Up next</span>
-                <span className="mono">Week {next.week} · Day {next.day.day}</span>
-              </div>
-              <div className="upnext-title">{next.day.title}</div>
-              <div className="upnext-progress">
-                <div className="upnext-bar" aria-hidden="true">
-                  {Array.from({ length: PARTS_PER_DAY }, (_, i) => (
-                    <span key={i} className={i < viewed ? 'on' : ''} />
-                  ))}
-                </div>
-                <span className="muted small">{Math.min(viewed, PARTS_PER_DAY)} of {PARTS_PER_DAY} parts viewed</span>
-              </div>
-              <Link
-                className="btn action"
-                to={dayUrl(next.week, next.day.day, r && r.week === next.week && r.day === next.day.day ? r.part : 1)}
-              >
-                {viewed > 0 ? 'Continue' : 'Start'} Day {next.day.day} →
-              </Link>
+          {/* Progress, as frontend v2 shows it: a ring, the days complete, and one clear next step. */}
+          <div className="index-progress">
+            <div className="ring" style={{ ['--pct' as string]: pct + '%' }}>
+              <span>{pct}%</span>
             </div>
-          )}
+            <div className="muted small">{doneCount} of {openDays.length} days complete</div>
+            {next && (
+              <Link className="btn" to={dayUrl(next.week, next.day.day, resumed ? resumed.part : 1)}>
+                {resumed ? 'Continue: Week ' + resumed.week + ', Day ' + resumed.day : 'Start Day ' + next.day.day} →
+              </Link>
+            )}
+          </div>
         </div>
       </section>
 
