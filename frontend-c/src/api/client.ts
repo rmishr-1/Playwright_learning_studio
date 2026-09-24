@@ -1,6 +1,6 @@
 /**
  * The ONLY place in the SPA that calls fetch(). Enforced by the verification checklist:
- *   grep -r "fetch(" frontend/src   must match this file and nothing else.
+ *   grep -r "fetch(" frontend-c/src   must match this file and nothing else.
  *
  * There is no session cookie and no learner id in any of this - there are no accounts, and the
  * server keeps exactly one progress record for whoever is running this clone.

@@ -36,7 +36,7 @@ reads `Data/Content/` and never writes it. With no `course-index.json`, the API 
 
 ## Format index and consumers
 
-Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **S** = the build,
+Legend: **F** = frontend (`frontend-c/src`), **B** = backend (`backend/src`), **S** = the build,
 `scripts/build-content.ts`, from `Data/Source/`.
 
 | Format | Direction | Producer → Consumer | Endpoint |
@@ -87,7 +87,7 @@ Legend: **F** = frontend (`frontend/src`), **B** = backend (`backend/src`), **S*
 - [ ] `shared/contracts/` reflects the change and `npm run typecheck` passes in both workspaces.
 - [ ] `npm run build:content` builds every day, and `npm run verify:content` passes: every lesson file
       and every whole-file solution runs through the Terminal with the result the lesson shows.
-- [ ] `grep -r "fetch(" frontend/src` matches only `api/client.ts`.
+- [ ] `grep -r "fetch(" frontend-c/src` matches only `api/client.ts`.
 - [ ] A content edit is visible **without restarting the backend**. `store.ts` caches a day against
       that day's own mtime; anything that caches on a different file's stamp will serve stale content
       to whichever writer it is not watching.

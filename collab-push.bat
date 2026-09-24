@@ -16,7 +16,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 ::  that genuinely needs a human decision.
 ::
 ::  No repo on this machine yet? Run collab-pull.bat first - it clones it.
-::  Owner pushing to main directly? Use git-push.bat or git-sync.bat.
+::  Owner pushing to main directly? Use git-sync.bat.
 :: ===========================================================================
 
 set "REMOTE_URL=https://github.com/rmishr-1/Playwright_learning_studio.git"

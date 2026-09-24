@@ -18,14 +18,12 @@ launcher.bat
 
 ### Git
 
-The repository is <https://github.com/rmishr-1/Playwright_learning_studio>. Five batch scripts
+The repository is <https://github.com/rmishr-1/Playwright_learning_studio>. Three batch scripts
 wrap the usual flows, carried over from the assessment portal and retargeted here:
 
 | Script | What it does |
 |---|---|
-| `git-pull.bat` | Fetch and fast-forward `main` |
-| `git-push.bat` | Stage, commit and push to `main` |
-| `git-sync.bat` | Pull then push, in one go |
+| `git-sync.bat` | For the owner: commit everything, pull, then push, in one go |
 | `collab-pull.bat` | Sync your own branch, then rebase it onto `main` |
 | `collab-push.bat` | Push your branch and open a PR against `main` |
 
@@ -87,7 +85,7 @@ process that touches `Data/`, so a keyed mutex is enough and there is no CAS or 
 |---|---|
 | `shared/contracts/` | zod schemas mirroring `Data/Formats/`, imported by **both** sides so they cannot drift |
 | `backend/` | Express on `127.0.0.1:3010` — content, progress, the code runner, the Terminal |
-| `frontend/` | Vite + React on `5180`, proxying `/api` to the backend |
+| `frontend-c/` | The studio's page (design Option C): Vite + React on `5185`, proxying `/api` to the backend |
 | `Data/Formats/` | The wire contracts + [FORMAT-REGISTRY.md](Data/Formats/FORMAT-REGISTRY.md) |
 | `Data/Content/` | The course content, written by hand |
 | `Data/Progress/` | **Generated.** The one progress record, for whoever runs this clone |
@@ -119,7 +117,7 @@ The overlay over the editor has three panels: **Browser**, **Console**, and **Te
 has a toggle in the overlay's header, so any of them can show at the same time, side by side, with
 draggable dividers between them. The **⇱** button on a panel pops it out into a window of its own,
 which stays live and, for the Terminal, typeable; **Back to the studio**, or closing the window,
-puts it back. The panel is a React portal into that window (`frontend/src/components/PopOut.tsx`),
+puts it back. The panel is a React portal into that window (`frontend-c/src/components/PopOut.tsx`),
 so no state is copied between windows. Which panels show, their widths, and the overlay's height
 are remembered in the browser's local storage. Popped-out windows are not reopened on the next
 visit, because a browser opens a window only when the learner clicks something.
@@ -155,7 +153,7 @@ command. **Run** beside a command in a lesson types that command into the Termin
   allowlist.
 - **Output** streams with its colors over the same WebSocket a Run uses. **Ctrl+C** stops the
   command, with its workers and browsers. The Terminal's state lives in a session object
-  (`frontend/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command. A command is stopped at `terminal_timeout_ms` (5 minutes
+  (`frontend-c/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command. A command is stopped at `terminal_timeout_ms` (5 minutes
   by default), and one command runs at a time.
 - **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
   block in a lesson offers **Load into editor** for this.
@@ -252,7 +250,7 @@ fails on purpose; a test must pass, or fail when it is meant to. Add a filter to
 
 Also worth walking by hand before a cohort uses it:
 
-- `grep -r "fetch(" frontend/src` should match only `api/client.ts`
+- `grep -r "fetch(" frontend-c/src` should match only `api/client.ts`
 - a day with an example → Load into editor → Run: the overlay should paint live frames and finish `ok`
 - a part with no code should show the editor's empty state, not a broken pane
 - a link into a locked week should land on the locked page, not a 404

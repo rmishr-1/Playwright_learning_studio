@@ -1,5 +1,5 @@
 {
-  "_comment": "The course plan: the course description, which module each week belongs to and its focus area. Read by frontend-a, frontend-b and frontend-c for the course index. A week's days (its key topics) come from course-index.json, so a week listed here with no built days shows as 'opens soon'. Edit freely; the index updates on save.",
+  "_comment": "The course plan: the course description, which module each week belongs to and its focus area. Read by the page (frontend-c) for the course index. A week's days (its key topics) come from course-index.json, so a week listed here with no built days shows as 'opens soon'. Edit freely; the index updates on save.",
   "schema": "course-plan/v1",
   "description": "Learn to automate web testing with Playwright and TypeScript. Set up your tools, learn just enough TypeScript, then write, run and debug real tests — building up to a maintainable test framework and a real-world project that runs in CI.",
   "modules": {

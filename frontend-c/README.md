@@ -1,24 +1,22 @@
-# frontend-c (design Option C)
+# frontend-c: the studio's page
 
-A mix of the two design options: **Option B's learner dashboard** as the course index, and
-**Option A's lesson screen** everywhere else. It started as a copy of `frontend-a/` with B's
-dashboard brought in. v1, v2, A and B are unchanged.
+The studio's only page (design Option C): **the learner dashboard** as the course index, and **the
+lesson screen** everywhere else.
 
-## What it takes from each
-- From Option B: the home page. Course numbers, an "Up next" card, and "Your path" - one card per
-  week of the plan, with each open week's days as tiles (`src/screens/Dashboard.tsx`, and the
-  dashboard rules at the end of `src/styles.css`)
-- From Option A: the navy header with Course index / Lessons tabs, and the lesson screen - the
-  breadcrumb and day title, the week list with day badges, the lesson and editor side by side
-- Module names, colours and focus areas come from `Data/Content/course-plan.json`, shared with A and B
+- The home page: course numbers, an "Up next" card, and "Your path" - one card per week of the
+  plan, with each open week's days as tiles (`src/screens/Dashboard.tsx`, and the dashboard rules
+  at the end of `src/styles.css`)
+- The navy header with Course index / Lessons tabs, and the lesson screen - the breadcrumb and day
+  title, the week list with day badges, the lesson and editor side by side
+- Module names, colours and focus areas come from `Data/Content/course-plan.json`
 
 ## Run it (port 5185)
-Start the backend as usual, then from the repo root:
+
+`launcher.bat` starts the backend and this page. Or, from the repo root, start the backend and:
 
 ```bash
-npm run dev:frontend-c
+npm run dev:frontend
 ```
 
-Open http://localhost:5185. `launcher-ab.bat` starts the backend with A, B and C together.
-
-It has no `node_modules` of its own: it resolves everything from the repo root, like `frontend/`.
+and open http://localhost:5185. It is an npm workspace of the repo root, so `npm install` at the
+root installs its packages. The desktop app (`desktop/`) builds this page into the app.

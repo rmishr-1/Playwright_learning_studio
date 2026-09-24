@@ -3,7 +3,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 :: ===========================================================================
 ::  git-sync.bat - one-click sync for the REPO OWNER.
 ::  ---------------------------------------------------------------------
-::  Handles the situations where git-push.bat / git-pull.bat get stuck:
+::  Handles the situations where a plain pull or push gets stuck:
 ::    - you have uncommitted local changes        -> commits them
 ::    - collaborators' work landed on GitHub      -> merges it in
 ::    - local and remote main have diverged       -> merges, then pushes
