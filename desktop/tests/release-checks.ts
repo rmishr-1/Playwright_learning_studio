@@ -3,7 +3,8 @@
  * it. `npm run package` first; this uses desktop/release/win-unpacked, the files the installer
  * installs.
  *
- *   npm run test:release     (uses the learner's real app data folder, and empties it)
+ *   npm run test:release                  (moves the app's data folder aside, and puts it back)
+ *   npm run test:release -- <licence>     a build for one customer that does not carry its licence
  *
  *   - the fuses are set: no running as Node, no NODE_OPTIONS, no debugger, app.asar only, and
  *     app.asar is checked against the hash built into the program
@@ -22,9 +23,11 @@ import * as path from 'node:path';
 import * as asar from '@electron/asar';
 import { FuseV1Options, getCurrentFuseWire } from '@electron/fuses';
 import { machineCode, sign, type Licence, type LicenceFile } from '../src/licence';
+import { keepUserData } from './user-data';
 
 const DESKTOP = path.resolve(__dirname, '..');
-const UNPACKED = path.join(DESKTOP, 'release', 'win-unpacked');
+// STUDIO_TEST_APP_DIR checks another copy, such as a customer's zip, extracted.
+const UNPACKED = process.env.STUDIO_TEST_APP_DIR || path.join(DESKTOP, 'release', 'win-unpacked');
 const EXE = path.join(UNPACKED, 'QA Practice Training Studio.exe');
 const ASAR = path.join(UNPACKED, 'resources', 'app.asar');
 const USER = path.join(process.env.APPDATA!, 'QA Practice Training Studio');
@@ -87,7 +90,11 @@ function reset(licence: Licence | null, accepted: boolean): void {
   fs.rmSync(USER, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   fs.mkdirSync(USER, { recursive: true });
   if (!licence) return;
-  if (!builtInLicence()) fs.writeFileSync(path.join(USER, 'licence.lic'), JSON.stringify(sign(licence, PRIVATE_KEY)));
+  if (!builtInLicence()) {
+    // A customer's licence as it was issued (its logo and signature included), else a test one.
+    const given = process.argv[2] ? fs.readFileSync(process.argv[2], 'utf-8') : null;
+    fs.writeFileSync(path.join(USER, 'licence.lic'), given ?? JSON.stringify(sign(licence, PRIVATE_KEY)));
+  }
   if (accepted) {
     const eula = asar.extractFile(ASAR, 'EULA.txt');
     fs.writeFileSync(
@@ -99,6 +106,7 @@ function reset(licence: Licence | null, accepted: boolean): void {
 
 async function main(): Promise<void> {
   if (!fs.existsSync(EXE)) throw new Error('No packaged app. Run `npm run package` first.');
+  keepUserData(USER, 'QA Practice Training Studio.exe');
 
   console.log('Fuses');
   const wire = await getCurrentFuseWire(EXE);
@@ -138,7 +146,8 @@ async function main(): Promise<void> {
     'until there is a licence and the agreement is accepted, the backend never starts',
   );
 
-  const licence: Licence = carried ?? {
+  const given = process.argv[2] ? (JSON.parse(fs.readFileSync(process.argv[2], 'utf-8')) as LicenceFile) : null;
+  const licence: Licence = carried ?? given?.licence ?? {
     id: 'EVK-RELEASE1',
     licensee: 'Release Check Ltd',
     email: null,

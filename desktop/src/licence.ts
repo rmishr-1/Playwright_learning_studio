@@ -12,7 +12,9 @@
  *   }
  *
  * `expires` and `machine` are optional limits: a date after which the licence stops working, and
- * the machine code of the one computer it works on.
+ * the machine code of the one computer it works on. `logo`, also optional, is the customer's logo
+ * as a PNG or JPEG data URL; the app shows it in its header. It is signed with the rest, so it
+ * cannot be swapped.
  */
 import * as crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -27,13 +29,21 @@ export type Licence = {
   expires: string | null;
   machine: string | null;
   product: string;
+  logo?: string | null;
 };
+
+/** A logo a licence may carry: a PNG or JPEG, as a data URL, up to 300 KB. */
+export const LOGO = /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+=*$/;
+export const LOGO_MAX_BYTES = 300 * 1024;
 
 export type LicenceFile = { licence: Licence; signature: string };
 
 export type Verdict = { ok: true; licence: Licence } | { ok: false; reason: string; licence?: Licence };
 
-/** The exact bytes that are signed: the licence's fields in a fixed order. */
+/**
+ * The exact bytes that are signed: the licence's fields in a fixed order. `logo` is there only when
+ * the licence has one, so a licence issued before logos existed still verifies.
+ */
 export function canonical(l: Licence): string {
   return JSON.stringify({
     id: l.id,
@@ -43,6 +53,7 @@ export function canonical(l: Licence): string {
     expires: l.expires,
     machine: l.machine,
     product: l.product,
+    ...(l.logo ? { logo: l.logo } : {}),
   });
 }
 
@@ -78,6 +89,7 @@ export function verify(
   }
   if (!valid) return { ok: false, reason: 'The licence is not valid: it was not issued by Evoke, or it has been changed.' };
   if (l.product !== PRODUCT) return { ok: false, reason: 'The licence is for a different product.', licence: l };
+  if (l.logo && !LOGO.test(l.logo)) return { ok: false, reason: "The licence's logo is not a PNG or JPEG image.", licence: l };
   if (opts.onlyId && l.id !== opts.onlyId) {
     return { ok: false, reason: 'The licence (' + l.id + ') is not the one this copy was made for.', licence: l };
   }

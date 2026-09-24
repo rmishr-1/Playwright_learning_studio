@@ -5,6 +5,10 @@
  *   npm run package -- --licence licences/X.lic    an installer for one customer: it accepts only
  *                                                  that licence, carries it, and its course carries
  *                                                  that licence's watermark
+ *   ... --no-carry                                 the customer adds the licence themselves
+ *   ... --zip                                      a zip of the app instead of an installer
+ *
+ * new-customer.ts issues a licence and makes a customer's zip in one go.
  *
  * Needs `npm run runtime` once first (Node and the browsers the app ships).
  *
@@ -21,12 +25,20 @@ import * as path from 'node:path';
 import { build as electronBuild, Platform, type Configuration } from 'electron-builder';
 import { DESKTOP, PRODUCT, VERSION, build } from './build';
 
-async function main(): Promise<void> {
+/**
+ * Builds the app and packs it: an installer (nsis), or a zip of the app that runs where it is
+ * unzipped (zip). Returns the files it made.
+ */
+export async function packageApp(opts: {
+  licenceFile: string | null;
+  carryLicence?: boolean;
+  target?: 'nsis' | 'zip';
+}): Promise<string[]> {
   for (const need of ['runtime/node/node.exe', 'runtime/ms-playwright']) {
     if (!fs.existsSync(path.join(DESKTOP, need))) throw new Error('Missing ' + need + '. Run `npm run runtime` first.');
   }
-  const i = process.argv.indexOf('--licence');
-  const info = await build({ release: true, licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]) });
+  const target = opts.target ?? 'nsis';
+  const info = await build({ release: true, licenceFile: opts.licenceFile, carryLicence: opts.carryLicence });
   const electronVersion = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'node_modules', 'electron', 'package.json'), 'utf-8')) as { version: string }).version;
   const suffix = info.licence ? info.licence.id : 'internal';
 
@@ -58,7 +70,10 @@ async function main(): Promise<void> {
       grantFileProtocolExtraPrivileges: false,
     },
     win: {
-      target: [{ target: 'nsis', arch: ['x64'] }],
+      target: [{ target, arch: ['x64'] }],
+      // Short, because Windows unzips into a folder of the zip's name, and the browsers' deepest
+      // files are 149 characters in: a long folder name takes paths past Windows' 260 limit.
+      artifactName: (target === 'zip' ? 'QA-Studio-' : 'QA-Practice-Training-Studio-') + VERSION + '-' + suffix + '.${ext}',
       icon: 'assets/icon.png',
       executableName: 'QA Practice Training Studio',
       legalTrademarks: 'Evoke Technologies',
@@ -74,12 +89,20 @@ async function main(): Promise<void> {
     },
   };
 
-  console.log('\n> The installer');
+  console.log('\n> The ' + (target === 'zip' ? 'zip' : 'installer'));
   const out = await electronBuild({ targets: Platform.WINDOWS.createTarget(), config, projectDir: DESKTOP });
   for (const f of out) console.log('  ' + f);
+  return out.filter((f) => !f.endsWith('.blockmap'));
 }
 
-main().catch((e) => {
-  console.error(e instanceof Error ? e.stack : e);
-  process.exit(1);
-});
+if (require.main === module) {
+  const i = process.argv.indexOf('--licence');
+  packageApp({
+    licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]),
+    carryLicence: !process.argv.includes('--no-carry'),
+    target: process.argv.includes('--zip') ? 'zip' : 'nsis',
+  }).catch((e) => {
+    console.error(e instanceof Error ? e.stack : e);
+    process.exit(1);
+  });
+}

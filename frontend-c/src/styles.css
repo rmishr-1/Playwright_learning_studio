@@ -1454,3 +1454,12 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   white-space: normal; overflow: visible; text-overflow: clip; text-wrap: balance;
   font-size: clamp(15px, 6.8cqi, 20px); line-height: 1.25;
 }
+
+/* The customer's logo, right of the theme switch, in the desktop app (from their licence). On a
+   white card, so any logo reads on the navy bar whatever its own colours. */
+.hdr-customer {
+  flex: 0 0 auto; display: flex; align-items: center; height: 44px; max-width: 200px;
+  padding: 5px 10px; margin-left: 4px; background: #fff; border-radius: 10px;
+}
+.hdr-customer img { display: block; max-height: 34px; max-width: 180px; width: auto; object-fit: contain; }
+@media (max-width: 700px) { .hdr-customer { height: 36px; max-width: 120px; } .hdr-customer img { max-height: 26px; max-width: 100px; } }

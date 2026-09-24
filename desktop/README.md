@@ -30,6 +30,27 @@ npm run package
 
 `npm start` builds a development copy (readable code, DevTools on) and runs it without packaging.
 
+## A new customer
+
+Double-click **`new-customer.bat`** (in this folder). It asks for the customer's name, an optional
+email, expiry date, logo (a PNG or JPEG, up to 300 KB; drag the file into the window) and machine
+code, then issues their licence and builds their app, in about 10 minutes. What to send them is in
+`deliveries/<licence id>-<customer>/`:
+
+- `QA-Studio-<version>-<licence id>.zip`: the app. They unzip it to a short folder (such as
+  `C:\QA Studio`: the browsers' deepest files are 149 characters in, and Windows cannot extract
+  past 260) and run `QA Practice Training Studio.exe`; nothing to install.
+- `<customer> licence.lic`: their licence.
+- `READ ME FIRST.txt`: the four steps to start.
+
+That app opens **only** with that licence: it refuses every other one, even a valid licence
+issued to someone else, and without the licence it opens nothing. Their logo, when given, shows
+in the header right of the theme switch; it is part of the signed licence, so it cannot be
+swapped. Their lessons carry the licence ID as an invisible watermark.
+
+The same without questions:
+`npm run new-customer -- --licensee "Boston University" --logo bu.png --expires 2027-09-30`
+
 ## Licences
 
 Every copy needs a licence file from Evoke. Evoke signs licences with its private key; the app
@@ -45,7 +66,8 @@ npm run licence:issue -- --licensee "Acme Ltd" --email lead@acme.com --expires 2
   given out) and `src/licence-public.pem` (committed, built into the app).
 - `licence:issue` writes `licences/<id>-<licensee>.lic` and records it in `keys/issued.csv`.
   `--machine XXXX-XXXX-XXXX-XXXX` limits it to one computer (the learner sees the machine code
-  on the licence screen); `--id` reissues an existing licence ID.
+  on the licence screen); `--logo file.png` adds the customer's logo; `--id` reissues an existing
+  licence ID.
 
 The learner chooses the file on first start, then accepts the licence agreement.
 
@@ -100,7 +122,9 @@ npm run test:release
 - `npm run build -- --dev --licence <file>` then `npm run test:customer -- <file>` checks a
   customer's build: it opens with its licence, refuses others, and carries that watermark.
 
-They use the real app data folder (`%APPDATA%\QA Practice Training Studio`) and empty it.
+They use the app's data folder (`%APPDATA%\QA Practice Training Studio`): they move it aside while
+they run and put it back after, and refuse to start while the app is open.
+`npm run test:release -- <licence>` checks a customer's zip build, which does not carry its licence.
 
 ## Before the first external release
 

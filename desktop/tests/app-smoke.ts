@@ -10,7 +10,7 @@
  *   - the Terminal runs the bundled Node, and Check my answer passes a model answer in all three
  *     bundled browsers
  *
- *   npm run test:app     (in desktop/; uses the learner's real app data folder, and empties it)
+ *   npm run test:app     (in desktop/; moves the app's data folder aside, and puts it back)
  *
  * Build with `npm run build -- --dev --obfuscate` to test the release's obfuscated code.
  *
@@ -23,6 +23,7 @@ import { _electron as electron, type ElectronApplication, type Page } from 'play
 import { machineCode, sign, type Licence } from '../src/licence';
 import { decodeAll } from '../src/watermark';
 import { packedApp } from './packed';
+import { keepUserData } from './user-data';
 
 const DESKTOP = path.resolve(__dirname, '..');
 const ROOT = path.resolve(DESKTOP, '..');
@@ -130,6 +131,7 @@ async function checkAnswer(page: Page, week: number, day: number, dayNumber: num
 async function main(): Promise<void> {
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
+  keepUserData(USER, 'QA Practice Training Studio.exe');
   EXE = await packedApp();
   const machine = machineCode();
 

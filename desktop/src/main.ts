@@ -31,6 +31,7 @@ import {
 } from 'electron';
 import { startServer, type RunningServer } from '../../backend/src/server';
 import { stopAll } from '../../backend/src/terminal';
+import { setBranding } from '../../backend/src/branding';
 import { machineCode, verify, type Licence, type Verdict } from './licence';
 
 declare const __STUDIO_RELEASE__: boolean;
@@ -256,6 +257,8 @@ function about(win: BrowserWindow, licence: Licence): void {
 
 async function openStudio(licence: Licence): Promise<void> {
   const token = crypto.randomBytes(32).toString('hex');
+  // The page shows the customer's logo, when their licence carries one, beside the theme switch.
+  setBranding({ licensee: licence.licensee, logo: licence.logo ?? null });
   server = await startBackend(token);
   const origin = 'http://127.0.0.1:' + server.port;
   await session.defaultSession.cookies.set({

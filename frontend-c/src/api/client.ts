@@ -53,6 +53,10 @@ export const getDay = (week: number, day: number): Promise<CourseDay> =>
 
 export const getMyProgress = (): Promise<Progress> => call('/progress');
 
+/** Who the studio is licensed to, and their logo. Both null outside the desktop app. */
+export type Branding = { licensee: string | null; logo: string | null };
+export const getBranding = (): Promise<Branding> => call('/branding');
+
 export const recordProgress = (update: ProgressUpdate): Promise<Progress> =>
   call('/progress', { method: 'POST', body: JSON.stringify(update) });
 

@@ -11,7 +11,8 @@
  * and desktop/build/legal (EULA.txt, THIRD-PARTY-NOTICES.txt), which is installed beside the app.
  *
  *   npm run build                                  release build, for any valid Evoke licence
- *   npm run build -- --licence licences/X.lic      release build for one customer
+ *   npm run build -- --licence licences/X.lic      release build for one customer, carrying the licence
+ *   ... --licence licences/X.lic --no-carry         for one customer, who adds the licence themselves
  *   npm run build -- --dev                         readable, with DevTools, for working on the app
  *   npm run build -- --dev --obfuscate             obfuscated like a release, but with DevTools and a
  *                                                  debugger allowed, so test:app can drive the
@@ -54,7 +55,13 @@ function installedVersion(name: string): string {
   return p.name === name ? p.version : 'npm:' + p.name + '@' + p.version;
 }
 
-export async function build(opts: { release: boolean; licenceFile: string | null; obfuscate?: boolean }): Promise<BuildInfo> {
+export async function build(opts: {
+  release: boolean;
+  licenceFile: string | null;
+  obfuscate?: boolean;
+  /** A customer's build carries their licence, unless this is false: then they add it themselves. */
+  carryLicence?: boolean;
+}): Promise<BuildInfo> {
   const obfuscate = opts.obfuscate ?? opts.release;
   const publicKeyFile = path.join(DESKTOP, 'src', 'licence-public.pem');
   if (!fs.existsSync(publicKeyFile)) throw new Error('No licence key yet. Run `npm run licence:keygen` once.');
@@ -151,7 +158,7 @@ export async function build(opts: { release: boolean; licenceFile: string | null
   fs.copyFileSync(path.join(ROOT, 'frontend-c', 'public', 'evoke-logo.png'), path.join(APP, 'logo.png'));
   fs.copyFileSync(path.join(DESKTOP, 'legal', 'EULA.txt'), path.join(APP, 'EULA.txt'));
   fs.copyFileSync(path.join(DESKTOP, 'legal', 'EULA.txt'), path.join(LEGAL, 'EULA.txt'));
-  if (licence && opts.licenceFile) fs.copyFileSync(opts.licenceFile, path.join(APP, 'licence.lic'));
+  if (licence && opts.licenceFile && opts.carryLicence !== false) fs.copyFileSync(opts.licenceFile, path.join(APP, 'licence.lic'));
   const dependencies = Object.fromEntries(
     ['@playwright/test', 'playwright', 'typescript', 'typescript-learner'].map((n) => [n, installedVersion(n)]),
   );
@@ -209,6 +216,7 @@ if (require.main === module) {
   build({
     release: !process.argv.includes('--dev'),
     obfuscate: process.argv.includes('--obfuscate') || undefined,
+    carryLicence: !process.argv.includes('--no-carry'),
     licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]),
   }).catch((e) => {
     console.error(e instanceof Error ? e.message : e);

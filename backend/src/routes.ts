@@ -8,6 +8,7 @@ import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { CheckRequest } from '../../shared/contracts/check';
 import { checkAnswer } from './check';
+import { getBranding } from './branding';
 import { Workspace } from '../../shared/contracts/course_day';
 import type { ErrorCode } from '../../shared/contracts/problem_error';
 
@@ -54,6 +55,9 @@ router.get('/course/:week/:day', (req, res) => {
   }
   res.json(found);
 });
+
+/** Who the studio is licensed to, and their logo, for the header (branding.ts). */
+router.get('/branding', (_req, res) => res.json(getBranding()));
 
 // ---------------------------------------------------------------- progress
 

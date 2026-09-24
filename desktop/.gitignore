@@ -10,3 +10,5 @@ keys/
 licences/
 # Screenshots and results of the app tests.
 test-output/
+# What new-customer.bat makes: each customer's zip, licence and read-me, ready to send.
+deliveries/

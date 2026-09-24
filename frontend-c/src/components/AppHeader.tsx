@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { getBranding, type Branding } from '../api/client';
 import { planWeeks } from '../lib/coursePlan';
 import { nextTheme, THEME_NAMES, type Theme } from '../lib/theme';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
@@ -27,8 +29,9 @@ function ThemeIcon({ theme }: { theme: Theme }) {
 /**
  * Option C’s navy bar across the top of every screen: the white Evoke logo straight on the navy,
  * the product name on the course index - or on a lesson the course name and where you are (week and
- * module, day, and the day’s title) - the Course index / Lessons tabs, and the theme switch (light,
- * warm paper, dark). "Where you are" is read from the URL and the index.
+ * module, day, and the day’s title) - the Course index / Lessons tabs, the theme switch (light,
+ * warm paper, dark), and in the desktop app the logo of the customer it is licensed to, when their
+ * licence carries one. "Where you are" is read from the URL and the index.
  */
 export function AppHeader({
   index,
@@ -48,6 +51,11 @@ export function AppHeader({
   const where = m ? { week: Number(m[1]), day: Number(m[2]) } : null;
   const week = where ? planWeeks(index).find((w) => w.week === where.week) : undefined;
   const title = where ? week?.days.find((d) => d.day === where.day)?.title : undefined;
+  // The customer's logo, when the studio is licensed to someone whose licence carries one.
+  const [branding, setBranding] = useState<Branding | null>(null);
+  useEffect(() => {
+    getBranding().then(setBranding, () => setBranding(null));
+  }, []);
 
   return (
     <header className={'app-header' + (where ? ' in-lesson' : '')}>
@@ -107,6 +115,12 @@ export function AppHeader({
       >
         <ThemeIcon theme={theme} />
       </button>
+
+      {branding?.logo && (
+        <span className="hdr-customer" title={'Licensed to ' + (branding.licensee ?? '')}>
+          <img src={branding.logo} alt={branding.licensee ?? 'Customer logo'} />
+        </span>
+      )}
     </header>
   );
 }
