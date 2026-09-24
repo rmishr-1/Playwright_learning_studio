@@ -8,10 +8,16 @@ import type { Progress } from '../../../shared/contracts/progress';
 
 const dayUrl = (week: number, day: number, part = 1): string => '/learn/w' + week + '/d' + day + '/p' + part;
 
+const LockIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
+  </svg>
+);
+
 /**
- * The course index: a hero with the course's name and progress, then "Your path", Option A's
- * schedule table - one row per week of the plan (Duration | Module | Focus Area | Key Topics). A
- * week's key topics are its days, and each opens that day; a week not built yet says so.
+ * The course index: a hero with the course's name and progress, then "Your path", Option B's
+ * timeline - one card per week of the plan, each open week showing its days as tiles that open that
+ * day. The days are the week's key topics; a week not built yet says it opens soon.
  */
 export function Dashboard() {
   const [index, setIndex] = useState<CourseIndex | null>(null);
@@ -72,78 +78,75 @@ export function Dashboard() {
         </div>
       </section>
 
-      {/* Your path: Option A's schedule table, in the same shape as the course plan sheet. */}
+      {/* Your path: Option B's timeline, one card per week of the plan with its days as tiles. */}
       <main className="dash-path">
         <div className="dash-in">
-          <div className="yp-top">
-            <h2 className="yp-title">Your path</h2>
+          <div className="path-head">
+            <h2>Your path</h2>
+            <span className="muted">Choose a day to open its lesson</span>
           </div>
-          <div className="index-table-wrap">
-            <table className="index-table">
-              <thead>
-                <tr>
-                  <th style={{ width: '12%' }}>Duration</th>
-                  <th style={{ width: '14%' }}>Module</th>
-                  <th style={{ width: '18%' }}>Focus Area</th>
-                  <th>Key Topics Covered</th>
-                </tr>
-              </thead>
-              <tbody>
-                {weeks.map((w) => {
-                  const doneInWeek = w.days.filter((d) => isDone(w.week, d.day)).length;
-                  return (
-                    <tr key={w.week} className={w.open ? '' : 'soon'}>
-                      <td className="duration">
-                        <b>Week {w.week}</b>
-                        <span className={'wk-count' + (w.open && doneInWeek === w.days.length ? ' all' : '')}>
-                          {w.open ? doneInWeek + '/' + w.days.length + ' done' : 'soon'}
-                        </span>
-                      </td>
-                      <td className="module" style={{ background: w.module.color }}>{w.module.name}</td>
-                      <td className="focus">{w.focus}</td>
-                      <td className="topics">
-                        {w.open ? (
-                          <ul>
-                            {w.days.map((d) => {
-                              const done = isDone(w.week, d.day);
-                              const current = resumed?.week === w.week && resumed?.day === d.day;
-                              return (
-                                <li key={d.day}>
-                                  {d.locked ? (
-                                    <span className="day-link locked">
-                                      <span className="day-state" aria-hidden="true" />
-                                      <span className="day-no">Day {d.day}</span>
-                                      <span className="day-title">{d.title}</span>
-                                    </span>
-                                  ) : (
-                                    // Clicking a day lands on that day's first tab.
-                                    <Link to={dayUrl(w.week, d.day)} className={'day-link' + (done ? ' done' : '')}>
-                                      <span className="day-state" aria-hidden="true">{done ? '✓' : ''}</span>
-                                      <span className="day-no">Day {d.day}</span>
-                                      <span className="day-title">{d.title}</span>
-                                      {current && <span className="here">You are here</span>}
-                                      <span className="go" aria-hidden="true">→</span>
-                                    </Link>
-                                  )}
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        ) : (
-                          <div className="lock-line">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
-                            </svg>
-                            Days are listed here once Week {w.week} is published
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+
+          <ol className="path">
+            {weeks.map((w, i) => {
+              const done = w.days.filter((d) => isDone(w.week, d.day)).length;
+              return (
+                <li
+                  key={w.week}
+                  className={'path-week' + (w.open ? ' open' : ' soon')}
+                  style={{ ['--mod' as string]: w.module.color }}
+                >
+                  <div className="path-rail" aria-hidden="true">
+                    <span className="path-num">{w.week}</span>
+                    {i < weeks.length - 1 && <span className="path-line" />}
+                  </div>
+                  <section className="path-card" aria-label={'Week ' + w.week}>
+                    <div className="path-card-head">
+                      <h3>Week {w.week}</h3>
+                      <span className="mod-chip">{w.module.name}</span>
+                      <span className="focus">{w.focus}</span>
+                      <span className="spacer" />
+                      {w.open ? (
+                        <span className="done-pill">{done}/{w.days.length} done</span>
+                      ) : (
+                        <span className="soon-chip"><LockIcon />Opens soon</span>
+                      )}
+                    </div>
+
+                    {w.open && (
+                      <div className="day-tiles">
+                        {w.days.map((d) => {
+                          const tileDone = isDone(w.week, d.day);
+                          const here = next?.week === w.week && next.day.day === d.day;
+                          const body = (
+                            <>
+                              <span className="tile-top">
+                                <span className="tile-badge">DAY {d.day}</span>
+                                {tileDone && <span className="tile-done">✓ Done</span>}
+                              </span>
+                              <span className="tile-title">{d.title}</span>
+                              {here && <span className="here">You are here</span>}
+                            </>
+                          );
+                          return d.locked ? (
+                            <span key={d.day} className="day-tile locked">{body}</span>
+                          ) : (
+                            <Link
+                              key={d.day}
+                              to={dayUrl(w.week, d.day)}
+                              className={'day-tile' + (tileDone ? ' done' : '')}
+                              aria-label={'Open Week ' + w.week + ' Day ' + d.day + ': ' + d.title}
+                            >
+                              {body}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </section>
+                </li>
+              );
+            })}
+          </ol>
         </div>
       </main>
     </div>
