@@ -39,6 +39,12 @@ export const onDisk = (file: string): string => file.replace(/([\\/])app\.asar([
  * single local instance keeps for whoever is using it.
  */
 export const PROGRESS_FILE = path.join(DATA, 'Progress', 'progress.json');
+/**
+ * Where the Terminal's workspaces live. STUDIO_WORKSPACE_ROOT lets `npm run verify:content` work in
+ * a folder of its own, so a check never touches the files a learner has saved (the desktop app
+ * clears it).
+ */
+export const WORKSPACE_ROOT = process.env.STUDIO_WORKSPACE_ROOT || path.join(DATA, 'Workspace');
 
 export type StudioConfig = {
   /** 0 picks a free port. The port in use is `listening.port`. */

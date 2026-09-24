@@ -36,14 +36,35 @@ export function packContent(out: string, mark: string, seal: string | null = nul
   const index = JSON.parse(fs.readFileSync(path.join(CONTENT, 'course-index.json'), 'utf-8')) as {
     weeks: { week: number; locked?: boolean; days: { day: number; locked?: boolean }[] }[];
   };
-  const locked = new Set(
-    index.weeks.flatMap((w) => w.days.filter((d) => w.locked || d.locked).map((d) => 'weeks/week-' + w.week + '/day-' + d.day + '.json')),
+  // The same rule the app keeps (store.ts isLocked): the week, the index's day, or the day's own file.
+  const dayFile = (w: number, d: number): string => 'weeks/week-' + w + '/day-' + d + '.json';
+  const ownLock = (rel: string): boolean => {
+    try {
+      return (JSON.parse(fs.readFileSync(path.join(CONTENT, ...rel.split('/')), 'utf-8')) as { locked?: boolean }).locked === true;
+    } catch {
+      return false;
+    }
+  };
+  const lockedDays = index.weeks.flatMap((w) =>
+    w.days.filter((d) => w.locked || d.locked || ownLock(dayFile(w.week, d.day))).map((d) => ({ rel: dayFile(w.week, d.day), number: (d as { number?: number }).number })),
   );
+  const locked = new Set(lockedDays.map((d) => d.rel));
+  const lockedNumbers = new Set(lockedDays.map((d) => d.number).filter((n): n is number => typeof n === 'number'));
   for (const rel of files(CONTENT)) {
     if (!rel.endsWith('.json') || rel === 'course-plan.json') continue;
     if (locked.has(rel)) continue;
     let text = fs.readFileSync(path.join(CONTENT, ...rel.split('/')), 'utf-8');
-    if (rel.startsWith('weeks/')) {
+    if (rel === 'workspaces.json' && lockedNumbers.size) {
+      // A locked day's starting files stay out too (the same names the app filters by).
+      const seeds = JSON.parse(text) as { workspaces: Record<string, { files: Record<string, string> }> };
+      for (const ws of Object.values(seeds.workspaces)) {
+        for (const name of Object.keys(ws.files)) {
+          const days = [...name.matchAll(/(?:^|[\/._-])day[_-]?0*(\d+)(?!\d)/gi)].map((m) => Number(m[1]));
+          if (days.some((d) => lockedNumbers.has(d))) delete ws.files[name];
+        }
+      }
+      text = JSON.stringify(seeds);
+    } else if (rel.startsWith('weeks/')) {
       const marked = markDay(JSON.parse(text) as Day, mark);
       marks += marked.marks;
       text = JSON.stringify(marked.day);

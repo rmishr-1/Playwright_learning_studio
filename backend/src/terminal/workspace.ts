@@ -24,14 +24,12 @@
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { DATA, onDisk } from '../config';
+import { WORKSPACE_ROOT, onDisk } from '../config';
 import { readContent } from '../content';
 import { lockedDayNumbers } from '../store';
 import { WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
 
-// STUDIO_WORKSPACE_ROOT lets `npm run verify:content` work in a folder of its own, so a check never
-// touches the files a learner has saved.
-const ROOT = process.env.STUDIO_WORKSPACE_ROOT || path.join(DATA, 'Workspace');
+const ROOT = WORKSPACE_ROOT;
 export const workspaceDir = (name: Workspace): string => path.join(ROOT, name);
 export const reportDir = (name: Workspace): string => path.join(workspaceDir(name), 'playwright-report');
 
@@ -283,6 +281,7 @@ export function prepareWorkspace(name: Workspace): void {
     }
     // Otherwise the learner has changed it: it is theirs now, and it is not recorded.
   }
+  fs.rmSync(recordFile + '.tmp', { recursive: true, force: true });
   fs.writeFileSync(recordFile + '.tmp', JSON.stringify(after, null, 2) + '\n');
   fs.renameSync(recordFile + '.tmp', recordFile);
 }

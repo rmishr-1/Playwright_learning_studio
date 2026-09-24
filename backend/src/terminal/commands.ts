@@ -156,7 +156,7 @@ function parseTest(words: string[]): Parsed {
     if (w.startsWith('-')) {
       const eq = w.indexOf('=');
       const name = eq === -1 ? w : w.slice(0, eq);
-      const check = WITH_VALUE[name];
+      const check = Object.hasOwn(WITH_VALUE, name) ? WITH_VALUE[name] : undefined;
       if (!check) return { kind: 'refused', message: 'The option ' + name + ' is not available here. Type help to see the options you can use.' };
       const value = eq !== -1 ? w.slice(eq + 1) : words[++i];
       if (value === undefined || !check(value)) return { kind: 'refused', message: 'The option ' + name + ' needs a valid value.' };

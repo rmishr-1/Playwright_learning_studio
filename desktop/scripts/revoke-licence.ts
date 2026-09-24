@@ -18,7 +18,14 @@ import { DESKTOP } from './signing-key';
 
 export const REVOKED_FILE = path.join(DESKTOP, 'revoked.json');
 
-export type Revoked = { revoked: { fingerprint: string; id: string; issued: string; reason: string; date: string }[] };
+/**
+ * kind: 'reissued' when licence:issue replaced the file with a new one for the same customer (it
+ * writes that itself); 'withdrawn' for every other revocation. Only a withdrawn ID needs --new-seal
+ * to be issued again. An entry without a kind counts as withdrawn.
+ */
+export type Revoked = {
+  revoked: { fingerprint: string; id: string; issued: string; kind?: 'reissued' | 'withdrawn'; reason: string; date: string }[];
+};
 
 export function readRevoked(): Revoked {
   return fs.existsSync(REVOKED_FILE) ? (JSON.parse(fs.readFileSync(REVOKED_FILE, 'utf-8')) as Revoked) : { revoked: [] };
@@ -27,12 +34,27 @@ export function readRevoked(): Revoked {
 /** A reason is a few plain words ("reissued 2026-09-24", "withdrawn"), never a name. */
 const REASON = /^[a-z0-9 .:-]{1,40}$/;
 
-export function revoke(file: string, reason: string): boolean {
+export function revoke(file: string, reason: string, kind: 'reissued' | 'withdrawn' = 'withdrawn'): boolean {
   const licenceFile = JSON.parse(fs.readFileSync(file, 'utf-8')) as LicenceFile;
   const words = reason.trim().toLowerCase();
-  const name = licenceFile.licence.licensee.toLowerCase();
-  if (!REASON.test(words) || words.includes(name) || name.split(/\s+/).some((w) => w.length > 3 && words.includes(w))) {
-    throw new Error('Give the reason in a few plain words, such as "withdrawn" or "leaked", with no names: revoked.json is committed, and issued.csv says whose licence it was.');
+  if (kind === 'withdrawn') {
+    // Typed by a person: a few plain words, and never the customer's name, or its initials.
+    const name = licenceFile.licence.licensee.toLowerCase();
+    const parts = name.split(/[^a-z0-9]+/).filter((w) => w && !/^\d+$/.test(w));
+    const initials = parts.map((w) => w[0]).join('');
+    const said = words.split(/[^a-z0-9]+/);
+    if (
+      !REASON.test(words) ||
+      words.startsWith('reissued') ||
+      words.includes(name) ||
+      parts.some((w) => w.length > 3 && words.includes(w)) ||
+      (initials.length > 1 && said.includes(initials))
+    ) {
+      throw new Error(
+        'Give the reason in a few plain words, such as "withdrawn" or "leaked", with no names and not starting "reissued": ' +
+          'revoked.json is committed, and issued.csv says whose licence it was.',
+      );
+    }
   }
   reason = words;
   const list = readRevoked();
@@ -42,6 +64,7 @@ export function revoke(file: string, reason: string): boolean {
     fingerprint: print,
     id: licenceFile.licence.id,
     issued: licenceFile.licence.issued,
+    kind,
     reason,
     date: new Date().toISOString().slice(0, 10),
   });

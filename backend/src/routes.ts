@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { config } from './config';
 import { lastFrame, prepareRun, startRun } from './runner';
 import { receiveFrame, startCommand, stopCommand } from './terminal';
-import { courseDay, courseIndex, isLocked, readProgress, recordProgress } from './store';
+import { courseDay, courseIndex, indexDayTitle, isLocked, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { CheckRequest } from '../../shared/contracts/check';
@@ -69,6 +69,10 @@ router.get('/course/:week/:day', (req, res) => {
   const week = Number(req.params.week);
   const day = Number(req.params.day);
   const found = courseDay(week, day);
+  // A locked day is not in the app's content pack at all: the index still knows it, and its title.
+  if (!found && isLocked(week, day) && indexDayTitle(week, day) !== null) {
+    return fail(res, 423, 'DAY_LOCKED', indexDayTitle(week, day)!);
+  }
   if (!found) return fail(res, 404, 'DAY_NOT_FOUND', 'Week ' + week + ' day ' + day + ' does not exist.');
   if (found.locked || isLocked(week, day)) {
     // A locked day (or a day of a locked week) still answers, with its title, so a link into it lands somewhere honest
@@ -121,7 +125,8 @@ router.post('/run', async (req, res) => {
   let started;
   try {
     started = startRun(parsed);
-  } catch {
+  } catch (e) {
+    if ((e as { code?: string }).code === 'RUN_QUEUE_FULL') return fail(res, 429, 'RUN_QUEUE_FULL', 'Too many runs are waiting. Try again in a moment.');
     return fail(res, 500, 'INTERNAL_ERROR', 'The run could not start.');
   }
   if ('queue_full' in started) {

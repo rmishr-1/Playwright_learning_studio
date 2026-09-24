@@ -70,8 +70,8 @@ goto :die
 
 REM Files that must never be committed, as git pathspecs (any folder, any case), and the text of
 REM tokens and private keys that must never be committed inside any file.
-set SECRET_FILES=":(glob,icase)**/*.pem" ":(glob,icase)**/*.pfx" ":(glob,icase)**/*.p12" ":(glob,icase)**/*.key" ":(glob,icase)**/*.dpapi" ":(glob,icase)**/*.lic" ":(glob,icase)**/*.lic.old" ":(glob,icase)**/issued.csv" ":(glob,icase)**/seals.json" ":(glob,icase)**/.env" ":(glob,icase)**/.env.*" ":(glob,icase)**/*.bak" ":(glob,icase)**/*.backup" ":(glob,icase)**/id_rsa*" ":(glob,icase)**/id_ed25519*" ":(glob,icase)**/credentials*.json" ":(glob,icase)**/secrets*.json" ":(glob,icase)**/deliveries/**" ":(glob,icase)**/licences/**" ":(glob,icase)**/keys/**" ":(exclude)desktop/src/licence-public.pem"
-set "SECRET_TEXT=(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-ant-[A-Za-z0-9_-]{20,}|npm_[A-Za-z0-9]{36}|_auth[T]oken=)"
+set SECRET_FILES=":(glob,icase)**/*.pem" ":(glob,icase)**/*.pfx" ":(glob,icase)**/*.p12" ":(glob,icase)**/*.key" ":(glob,icase)**/*.dpapi" ":(glob,icase)**/*.lic" ":(glob,icase)**/*.lic.old" ":(glob,icase)**/issued.csv" ":(glob,icase)**/seals.json" ":(glob,icase)**/.env" ":(glob,icase)**/.env.*" ":(glob,icase)**/*.bak" ":(glob,icase)**/*.backup" ":(glob,icase)**/id_rsa*" ":(glob,icase)**/id_ed25519*" ":(glob,icase)**/credentials*.json" ":(glob,icase)**/secrets*.json" ":(glob,icase)**/deliveries/**" ":(glob,icase)**/licences/**" ":(glob,icase)**/keys/**" ":(glob,icase)**/*.ppk" ":(glob,icase)**/*.jks" ":(glob,icase)**/*.keystore" ":(glob,icase)**/*.asc" ":(exclude)desktop/src/licence-public.pem"
+set "SECRET_TEXT=(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY( BLOCK)?-----|PuTTY-User-Key-File-[0-9]|AccountKey=[A-Za-z0-9+/]{20,}|AKIA[0-9A-Z]{16}|sk-ant-[A-Za-z0-9_-]{20,}|npm_[A-Za-z0-9]{36}|_auth[T]oken=)"
 
 :: Identity ------------------------------------------------------------------
 call :ensure_identity || goto :die
@@ -170,10 +170,10 @@ git diff --cached --quiet -- %SECRET_FILES% || (
     git reset -q
     goto :die
 )
-git diff --cached --quiet -G "%SECRET_TEXT%" || (
+git diff --cached --quiet --text -G "%SECRET_TEXT%" || (
     echo.
     echo [STOP] These staged files contain what looks like an access token or a private key:
-    git diff --cached --name-only -G "%SECRET_TEXT%"
+    git diff --cached --name-only --text -G "%SECRET_TEXT%"
     echo        Nothing was committed. Take the secret out of the file ^(and revoke it if it was real^).
     git reset -q
     goto :die
@@ -331,21 +331,34 @@ git rev-list "%RANGE%" >nul 2>&1 || (
 :: Merge commits are scanned too (against their first parent: a secret added while resolving a
 :: conflict lives only in the merge), and so is every commit of a merged side branch (--full-history:
 :: git would otherwise skip one whose files end up as they started).
-git log --full-history --diff-merges=first-parent --no-patch --format=%%h --diff-filter=AMR "%RANGE%" -- %SECRET_FILES% 2>nul | %SYS%\findstr.exe . >nul && (
+set "SCAN=%TEMP%\studio-scan-%RANDOM%%RANDOM%.txt"
+git log --full-history --diff-merges=first-parent --no-patch --format=%%h --diff-filter=AMR "%RANGE%" -- %SECRET_FILES% >"%SCAN%" 2>nul || goto :scan_failed
+%SYS%\findstr.exe . "%SCAN%" >nul && (
+    del "%SCAN%" >nul 2>&1
     echo.
     echo [STOP] Commits about to be pushed add files that look like keys, certificates, licences or secrets:
     git log --full-history --diff-merges=first-parent --format= --name-only --diff-filter=AMR "%RANGE%" -- %SECRET_FILES%
     echo        Nothing was pushed. Take them out of those commits first.
     exit /b 1
 )
-git log --full-history --diff-merges=first-parent --no-patch --format=%%h -G "%SECRET_TEXT%" "%RANGE%" 2>nul | %SYS%\findstr.exe . >nul && (
+git log --full-history --diff-merges=first-parent --no-patch --text --format=%%h -G "%SECRET_TEXT%" "%RANGE%" >"%SCAN%" 2>nul || goto :scan_failed
+%SYS%\findstr.exe . "%SCAN%" >nul && (
+    del "%SCAN%" >nul 2>&1
     echo.
     echo [STOP] Commits about to be pushed contain what looks like an access token or a private key:
-    git log --full-history --diff-merges=first-parent --no-patch --format="        %%h %%s" -G "%SECRET_TEXT%" "%RANGE%"
+    git log --full-history --diff-merges=first-parent --no-patch --text --format="        %%h %%s" -G "%SECRET_TEXT%" "%RANGE%"
     echo        Nothing was pushed. Take the secret out of those commits ^(and revoke it if it was real^).
     exit /b 1
 )
+del "%SCAN%" >nul 2>&1
 exit /b 0
+:: git could not search the commits (too old a git, or a range it cannot read): nothing is pushed.
+:scan_failed
+del "%SCAN%" >nul 2>&1
+echo.
+echo [STOP] git could not check the commits about to be pushed for secrets. Nothing was pushed.
+echo        Update Git for Windows ^(2.31 or later^) and run this again.
+exit /b 1
 
 :: ================= helpers =================
 :ensure_git

@@ -6,7 +6,7 @@
  * the check's command runs in the Terminal's workspace, through the same code a Run uses
  * (terminal/index.ts), with the same limits: one command at a time, and a time limit.
  */
-import { attachStream, prepareRun } from './runner';
+import { attachStream, prepareRun, retireStream } from './runner';
 import { startCommand } from './terminal';
 import type { CheckRequest, CheckResult } from '../../shared/contracts/check';
 import type { PracticeProblem } from '../../shared/contracts/course_day';
@@ -42,7 +42,13 @@ function run(command: string, code: string, file: string, req: CheckRequest): Pr
         resolve({ exit: e.code, out });
       }
     });
-    startCommand(runId, command, code, file, req.workspace);
+    try {
+      startCommand(runId, command, code, file, req.workspace);
+    } catch (e) {
+      detach();
+      retireStream(runId, 0);
+      throw e;
+    }
   });
 }
 

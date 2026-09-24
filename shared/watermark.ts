@@ -66,6 +66,9 @@ export function markMarkdown(text: string, id: string): string {
     if (/^( {4}|\t)/.test(line)) continue;
     // A list item's words count, after its marker; headings, quotes, tables and HTML never.
     if (/^[#>|<]/.test(t)) continue;
+    // A line that is only code (a hint such as `await expect(page).toHaveTitle(/x/)`) is left alone:
+    // a learner may copy it into the editor.
+    if (/^([*+-]\s+|\d+[.)]\s+)?`[^`]*`[.:;,]?$/.test(t)) continue;
     // After a list marker and any opening emphasis, code, quote, bracket or checkbox, the words.
     const body = t.replace(/^([*+-]|\d+[.)])\s+/, '').replace(/^(\[[ xX]\]\s*|[*_`"'(\[]+)+/, '');
     if (body.length < 20 || !/[A-Za-z]/.test(body[0])) continue;
@@ -91,7 +94,7 @@ const MARKED = new Set(['markdown', 'callout', 'at-a-glance', 'recap', 'referenc
 type MarkableDay = {
   parts: {
     blocks: { type: string; text: string; checkpoint?: { explanation: string; options?: string[] } | null }[];
-    problems?: { statement: string; hints?: string[]; solution?: string | null }[];
+    problems?: { statement: string; hints?: string[]; solution?: string | null; kind?: string }[];
   }[];
 };
 
@@ -123,9 +126,10 @@ export function markDay<T extends MarkableDay>(day: T, id: string): { day: T; ma
     for (const problem of part.problems ?? []) {
       problem.statement = mark(problem.statement);
       if (problem.hints) problem.hints = problem.hints.map(mark);
-      // A solution is marked only when its code is fenced Markdown: code outside a fence would take
-      // the mark into the editor, and break.
-      if (typeof problem.solution === 'string' && /^\s*(```|~~~)/m.test(problem.solution)) problem.solution = mark(problem.solution);
+      // A solution is marked when it is written in words (a written or predict exercise), or when its
+      // code is fenced Markdown; code outside a fence would take the mark into the editor, and break.
+      const prose = problem.kind === 'written' || problem.kind === 'predict';
+      if (typeof problem.solution === 'string' && (prose || /^\s*(```|~~~)/m.test(problem.solution))) problem.solution = mark(problem.solution);
     }
   }
   return { day: copy, marks };

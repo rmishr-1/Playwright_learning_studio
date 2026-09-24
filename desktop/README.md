@@ -2,7 +2,8 @@
 
 Packages the studio (the Option C page, the backend and the course) as a Windows app that runs
 **fully offline**: it ships its own Node and its own Chromium, Firefox and WebKit, so the learner's
-computer needs neither Node nor the internet.
+computer needs neither Node nor the internet. (Two lessons open playwright.dev, and need the
+internet for that page only.)
 
 It is proprietary software, and it is built so that copying it is **forbidden, slow and
 traceable**. No packaging can make copying impossible: everything the app needs to run is on the
@@ -121,17 +122,22 @@ npm run package -- --internal
 |---|---|
 | Licence agreement | Shown and accepted on first start, including the technical measures (section 4A). `legal/EULA.txt` is a **draft for legal review**. |
 | Licence | Ed25519-signed; optional expiry and one-computer limit; revocation list (builds made after the revocation); re-checked every hour, with ten minutes' notice before the studio closes once a licence has ended; the learner is warned two weeks ahead. |
-| Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, or the latest date of the app's own files (two folders deep). It stops the clock simply being turned back; someone who also edits or re-dates the app's files can get past it. |
+| Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, or the latest date of the files in the app's data folder (two folders deep, not the learner's workspaces, where their own code writes). It stops the clock simply being turned back; someone who also edits or re-dates those files can get past it. |
 | Encrypted, sealed course | `content.pack`, AES-256-GCM, a new key every build, decrypted in memory only and never cached; a customer's build needs their licence to decrypt it. |
 | Locked API | 127.0.0.1 only; answers only the app's window (a new random token every start), and only to its own host name, so neither another program nor a web page can read it. |
 | Locked app | No command-line switches in a release (debuggers, proxies, network logs); Electron fuses; DevTools off; nothing leaves the computer; the test report is served apart from the studio; the learner's code gets none of the app's environment. |
 | Obfuscated code | The main process, backend and page code are obfuscated; no source maps. |
-| Watermarks | The licence ID, in zero-width characters, in every paragraph and list of the lessons (about eight blocks in ten; blocks that are only code or a table carry none), quiz questions, options (unless only code) and explanations, exercise statements and hints (solutions are code only, and carry none), added again as each lesson is served with the licence in use. They travel with copied and pasted text; retyping, screenshots or a deliberate clean-up remove them. The window title names the licensee. |
+| Watermarks | The licence ID, in zero-width characters, in every paragraph and list of the lessons (about eight blocks in ten; blocks that are only code or a table carry none), quiz questions, options (unless only code) and explanations, exercise statements and hints, and written answers (a solution that is code carries none, so it can be pasted into the editor), added again as each lesson is served with the licence in use. They travel with copied and pasted text; retyping, screenshots or a deliberate clean-up remove them. The window title names the licensee. |
 
 What it does **not** stop: someone reading lessons on screen and retyping them, screenshots, or a
 skilled person spending days extracting the course from a licensed copy running on their own
 computer. The watermark traces text copied and pasted out of the app; for screenshots, the window
-title shows the licensee. Neither survives a deliberate effort to remove it.
+title shows the licensee. Neither survives a deliberate effort to remove it, and a mark only says
+which licence ID it names: someone who knows the scheme could write another customer's ID in.
+
+Two things are on the learner's disk by design: each open day's starting files (the example and
+lesson tests the Terminal starts with) are written to their workspace as plain files, since they
+edit and run them; and whatever the page shows is, while it shows it, in the app's memory.
 
 ## Tests
 

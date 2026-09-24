@@ -27,7 +27,7 @@
  */
 import * as crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { systemExe } from '../../backend/src/child-env';
+import { systemExe } from '../../backend/src/system-exe';
 
 export const PRODUCT = 'learning-studio';
 

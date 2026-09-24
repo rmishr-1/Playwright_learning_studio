@@ -30,7 +30,7 @@ import { verify, type Licence } from '../src/licence';
 import { packContent } from './pack-content';
 import { packageDirOf, withDependencies, writeNotices } from './notices';
 import { checkedPublicKey } from './signing-key';
-import { systemExe } from '../../backend/src/child-env';
+import { systemExe } from '../../backend/src/system-exe';
 import { readRevoked } from './revoke-licence';
 
 export const DESKTOP = path.resolve(__dirname, '..');
@@ -108,6 +108,10 @@ export async function build(opts: {
   allowUnsealed?: boolean;
 }): Promise<BuildInfo> {
   const obfuscate = opts.obfuscate ?? opts.release;
+  // esbuild compiles the code that ships: no other esbuild binary may stand in for it.
+  for (const key of ['ESBUILD_BINARY_PATH', 'ESBUILD_WORKER_THREADS']) {
+    if (process.env[key]) throw new Error(key + ' is set, which would make esbuild use another binary to build the app. Unset it.');
+  }
   if (opts.release && opts.publicKeyFile) throw new Error('A release is built only for Evoke\'s public key: --public-key goes with --dev.');
   const publicKey = checkedPublicKey(opts.publicKeyFile ?? undefined);
   const revoked = readRevoked().revoked.map((r) => r.fingerprint);

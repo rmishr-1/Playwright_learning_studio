@@ -31,7 +31,7 @@ import * as readline from 'node:readline';
 import { issueLicence, problemWith, type IssueOptions } from './issue-licence';
 import type { LicenceFile } from '../src/licence';
 import { hasCertificate, packageApp } from './package';
-import { systemExe } from '../../backend/src/child-env';
+import { systemExe } from '../../backend/src/system-exe';
 import { DESKTOP, PRODUCT, VERSION } from './build';
 import { PRIVATE_FILE, hasPrivateKey } from './signing-key';
 

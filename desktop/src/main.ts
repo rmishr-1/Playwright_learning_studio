@@ -136,8 +136,16 @@ function licenceToday(): { today: string; now: string } {
     // No record yet.
   }
   marks.push(BUILD.built);
-  // The files the app writes, two folders deep (Progress/progress.json, Workspace/<name>/...), at
-  // most a few hundred of them.
+  // The files the app itself writes: the ones it always has first, then others two folders deep,
+  // at most a few hundred. Never the workspaces: the learner's own code writes there, and a date it
+  // set would lock them out.
+  for (const known of ['Progress/progress.json', 'Local State', 'Preferences', 'eula-accepted.json', 'licence.lic']) {
+    try {
+      marks.push(fs.statSync(path.join(USER_DIR, known)).mtime.toISOString().slice(0, 10));
+    } catch {
+      // Not there yet.
+    }
+  }
   let seen = 0;
   const walk = (dir: string, depth: number): void => {
     let entries: fs.Dirent[];
@@ -148,6 +156,7 @@ function licenceToday(): { today: string; now: string } {
     }
     for (const e of entries) {
       if (++seen > 400) return;
+      if (depth === 0 && e.name.toLowerCase() === 'workspace') continue;
       const full = path.join(dir, e.name);
       try {
         marks.push(fs.statSync(full).mtime.toISOString().slice(0, 10));

@@ -5,7 +5,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
-import { systemExe } from '../../backend/src/child-env';
+import { systemExe } from '../../backend/src/system-exe';
 
 export function keepUserData(dir: string, exeName: string): void {
   const running = execFileSync(systemExe('tasklist.exe'), ['/FI', 'IMAGENAME eq ' + exeName, '/NH'], { encoding: 'utf-8' });

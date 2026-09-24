@@ -8,9 +8,56 @@
  *
  * Windows' own tools are run by their full path: by bare name, Windows looks in the current
  * folder first, where a planted reg.exe or taskkill.exe would run instead.
+ *
+ * Every learner process also loads a small guard first (NODE_OPTIONS --require, so the test
+ * runner's workers load it too): Node then finds packages only inside the studio's own folders
+ * (the packages it ships, and the Terminal's workspaces). Node's usual search climbs through every
+ * parent folder's node_modules up to C:\node_modules, which any account on the computer can
+ * create, and tries global folders in the user's profile; a package planted there under a name
+ * Playwright or a lesson asks for would otherwise run as the learner.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { DATA, WORKSPACE_ROOT, onDisk } from './config';
+export { systemExe } from './system-exe';
+
+/** The guard every learner process loads first. Plain CommonJS; it is written, not bundled. */
+const GUARD = `// Written by the Learning Studio, and replaced when it starts. Loaded first in every process that
+// runs the learner's code: packages are found only inside the folders in STUDIO_MODULE_ROOTS.
+'use strict';
+const Module = require('module');
+const path = require('path');
+const roots = JSON.parse(process.env.STUDIO_MODULE_ROOTS || '[]').map((r) => path.resolve(r).toLowerCase() + path.sep);
+const inside = (dir) => roots.some((r) => (path.resolve(dir).toLowerCase() + path.sep).startsWith(r));
+const nodeModulePaths = Module._nodeModulePaths;
+Module._nodeModulePaths = function (from) {
+  return nodeModulePaths.call(this, from).filter((p) => inside(path.dirname(p)));
+};
+const globals = new Set(Module.globalPaths);
+const lookup = Module._resolveLookupPaths;
+Module._resolveLookupPaths = function (request, parent) {
+  const paths = lookup.call(this, request, parent);
+  return Array.isArray(paths) ? paths.filter((p) => !globals.has(p)) : paths;
+};
+`;
+
+const GUARD_FILE = path.join(DATA, 'Runtime', 'module-guard.cjs');
+
+/** The folders packages may come from: the one holding the shipped node_modules, and the workspaces. */
+function moduleRoots(): string[] {
+  const packagesHome = path.resolve(onDisk(require.resolve('playwright/package.json')), '..', '..', '..');
+  return [packagesHome, WORKSPACE_ROOT];
+}
+
+let guardWritten = false;
+function guardFile(): string {
+  if (!guardWritten) {
+    fs.mkdirSync(path.dirname(GUARD_FILE), { recursive: true });
+    fs.writeFileSync(GUARD_FILE, GUARD);
+    guardWritten = true;
+  }
+  return GUARD_FILE;
+}
 
 const KEEP = new Set(
   [
@@ -53,18 +100,22 @@ const KEEP = new Set(
   ].map((k) => k.toUpperCase()),
 );
 
-/** The environment for a learner's process: the allowlist above, and what the studio adds. */
+/**
+ * The environment for a learner's process: the allowlist above, the module guard, and what the
+ * studio adds. ws (inside Playwright) is also told not to look for its optional native helpers.
+ */
 export function learnerEnv(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   for (const [key, value] of Object.entries(process.env)) {
     if (value !== undefined && KEEP.has(key.toUpperCase())) env[key] = value;
   }
-  return { ...env, ...extra };
-}
-
-/** A program in Windows' System32, by its full path. */
-export function systemExe(name: string): string {
-  const standard = path.join('C:\\Windows', 'System32', name);
-  if (fs.existsSync(standard)) return standard;
-  return path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', name);
+  return {
+    ...env,
+    // Forward slashes: inside NODE_OPTIONS, Node reads a backslash in quotes as an escape.
+    NODE_OPTIONS: '--require "' + guardFile().split(path.sep).join('/') + '"',
+    STUDIO_MODULE_ROOTS: JSON.stringify(moduleRoots()),
+    WS_NO_BUFFER_UTIL: '1',
+    WS_NO_UTF_8_VALIDATE: '1',
+    ...extra,
+  };
 }

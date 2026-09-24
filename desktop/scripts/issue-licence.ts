@@ -111,16 +111,21 @@ export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence;
   }
   // A licence that was withdrawn (not just reissued) comes back only with a new seal: with its old
   // seal, a new file would open the withdrawn copy again.
-  const withdrawn = o.id ? readRevoked().revoked.some((r) => r.id === o.id && !r.reason.startsWith('reissued')) : false;
+  const revokedHere = o.id ? readRevoked().revoked.filter((r) => r.id === o.id) : [];
+  const withdrawn = revokedHere.some((r) => r.kind !== 'reissued');
   if (withdrawn && !o.newSeal) {
     throw new Error(o.id + ' was withdrawn. Reissue it only with --new-seal (the customer then needs a new build), or issue a new licence.');
   }
   // Every earlier file must be revoked; one that is not here any more cannot be, so the old seal
   // is kept only when they all are.
-  if (o.id && known && earlier.length === 0 && !o.newSeal) {
+  // Each licence issued under the ID is either here, to be revoked now, or revoked already.
+  const issuedCount = o.id && fs.existsSync(ISSUED_CSV)
+    ? fs.readFileSync(ISSUED_CSV, 'utf-8').split('\n').filter((l) => l.startsWith('"' + o.id + '"')).length
+    : 0;
+  if (o.id && known && (earlier.length === 0 || issuedCount > earlier.length + revokedHere.length) && !o.newSeal) {
     throw new Error(
-      'The earlier licence files for ' + o.id + ' are not in desktop/licences/, so they cannot be revoked. ' +
-        'Put them back, or reissue with --new-seal (the customer then needs a new build).',
+      'Not every licence file issued as ' + o.id + ' is in desktop/licences/ or already revoked, so the missing ones ' +
+        'cannot be revoked. Put them back, or reissue with --new-seal (the customer then needs a new build).',
     );
   }
   const kept = known?.seal ?? earlier.find((e) => e.licence.licence.seal)?.licence.licence.seal;
@@ -157,7 +162,7 @@ export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence;
 
   // The files it replaces are withdrawn, and kept aside as a record.
   for (const e of earlier) {
-    revoke(e.file, 'reissued ' + licence.issued);
+    revoke(e.file, 'reissued ' + licence.issued, 'reissued');
     fs.renameSync(e.file, e.file.replace(/\.lic$/, '.revoked-' + Date.now() + '.lic.old'));
   }
 

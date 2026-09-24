@@ -65,6 +65,15 @@ export function courseDay(week: number, day: number): CourseDay | null {
   return parsed;
 }
 
+/** The title the index gives a day, for a day whose own file is not there (a locked day is not in the pack). */
+export function indexDayTitle(week: number, day: number): string | null {
+  try {
+    return courseIndex().weeks.find((w) => w.week === week)?.days.find((d) => d.day === day)?.title ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** Whether a day is locked: by itself, or because its whole week is. A course that cannot be read keeps it locked. */
 export function isLocked(week: number, day: number): boolean {
   try {
@@ -107,9 +116,11 @@ export function readProgress(): Progress {
   if (!fs.existsSync(PROGRESS_FILE)) return EMPTY_PROGRESS;
   try {
     return Progress.parse(JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf-8')));
-  } catch {
+  } catch (e) {
     // A damaged record is kept aside, never overwritten, and the learner starts again rather than
-    // getting an error on every page.
+    // getting an error on every page. A file that could not be read (held by another program for a
+    // moment) is left alone, and the request fails instead.
+    if (!(e instanceof SyntaxError) && (e as Error).name !== 'ZodError') throw e;
     try {
       fs.renameSync(PROGRESS_FILE, PROGRESS_FILE.replace(/\.json$/, '.damaged-' + Date.now() + '.json'));
     } catch {

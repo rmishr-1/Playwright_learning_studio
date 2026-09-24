@@ -11,9 +11,9 @@ echo Starting the Learning Studio...
 echo   backend  http://127.0.0.1:3010   (loopback only)
 echo   studio   http://localhost:5185
 echo.
-start "studio-backend" cmd /c "npm run dev:backend"
+start "studio-backend" %SYS%\cmd.exe /c "npm run dev:backend"
 %SYS%\timeout.exe /t 3 /nobreak >nul
-start "studio-frontend" cmd /c "npm run dev:frontend"
+start "studio-frontend" %SYS%\cmd.exe /c "npm run dev:frontend"
 %SYS%\timeout.exe /t 4 /nobreak >nul
 start "" "http://localhost:5185"
 echo Both processes started in their own windows. Close them to stop.

@@ -28,13 +28,13 @@
  *
  * Electron itself, the largest part of the app, is downloaded here, fresh for every package, from
  * Electron's own releases on GitHub, into a folder of this run's own, and must match the SHA-256
- * that desktop/node_modules/electron/checksums.json gives it (package-lock.json vouches for that
- * file). electron-builder is then handed that zip (electronDist) and downloads no Electron itself:
+ * that the electron npm package's checksums.json gives it, read from that package's tarball after
+ * checking the tarball against package-lock.json. electron-builder is then handed that zip (electronDist) and downloads no Electron itself:
  * no copy left in a cache, no mirror named in the environment, and no checksum file fetched from
  * the same release as the zip is ever trusted.
  *
- * A signed build must be signed by Evoke: the signer's name must contain STUDIO_SIGNER (by default
- * "Evoke"), and no environment variable may swap in another signing program.
+ * A signed build must be signed by Evoke: the certificate's name (its CN) must begin "Evoke
+ * Technologies", and no environment variable may swap in another signing program or change that.
  *
  * desktop/release/ is emptied first, so nothing older is ever mistaken for this build.
  *
@@ -50,6 +50,8 @@ import { pipeline } from 'node:stream/promises';
 import { build as electronBuild, Platform, type Configuration } from 'electron-builder';
 import { DESKTOP, PRODUCT, VERSION, build } from './build';
 import * as crypto from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { systemExe } from '../../backend/src/system-exe';
 import { signature, verifyManifest } from './runtime';
 
 /** Electron's own releases: the only place its zip is taken from. */
@@ -60,6 +62,35 @@ async function download(url: string, file: string): Promise<void> {
   const response = await fetch(url, { redirect: 'follow' });
   if (!response.ok || !response.body) throw new Error('Could not download ' + url + ' (' + response.status + ').');
   await pipeline(Readable.fromWeb(response.body as import('node:stream/web').ReadableStream), fs.createWriteStream(file));
+}
+
+/**
+ * Electron's checksums, from its npm tarball checked against desktop/package-lock.json: never from
+ * node_modules, where anything on this computer could have changed the file since npm ci.
+ */
+function electronChecksums(version: string): Record<string, string> {
+  const lock = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'package-lock.json'), 'utf-8')) as {
+    packages: Record<string, { version: string; integrity?: string }>;
+  }).packages['node_modules/electron'];
+  if (lock?.version !== version || !lock.integrity?.startsWith('sha512-')) throw new Error('desktop/package-lock.json does not pin electron ' + version + '.');
+  const work = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-electron-sums-'));
+  try {
+    const npm = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
+    const packed = JSON.parse(
+      execFileSync(process.execPath, [npm, 'pack', 'electron@' + version, '--pack-destination', work, '--prefer-offline', '--ignore-scripts', '--json'], {
+        cwd: work,
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'inherit'],
+      }),
+    ) as { filename: string }[];
+    const tgz = path.join(work, path.basename(packed[0].filename));
+    const got = 'sha512-' + crypto.createHash('sha512').update(fs.readFileSync(tgz)).digest('base64');
+    if (got !== lock.integrity) throw new Error('The electron ' + version + ' package does not match desktop/package-lock.json.');
+    execFileSync(systemExe('tar.exe'), ['-xzf', tgz, '-C', work, 'package/checksums.json'], { stdio: 'inherit' });
+    return JSON.parse(fs.readFileSync(path.join(work, 'package', 'checksums.json'), 'utf-8')) as Record<string, string>;
+  } finally {
+    fs.rmSync(work, { recursive: true, force: true });
+  }
 }
 
 const sha256Of = (file: string): Promise<string> =>
@@ -126,8 +157,8 @@ export async function packageApp(opts: {
 
   // Electron: from its own releases only, fresh, and checked against the lockfile's checksums.
   const electronZip = 'electron-v' + electronVersion + '-win32-x64.zip';
-  const known = JSON.parse(fs.readFileSync(path.join(DESKTOP, 'node_modules', 'electron', 'checksums.json'), 'utf-8')) as Record<string, string>;
-  if (!/^[0-9a-f]{64}$/.test(known[electronZip] ?? '')) throw new Error('desktop/node_modules/electron/checksums.json has no checksum for ' + electronZip + '.');
+  const known = electronChecksums(electronVersion);
+  if (!/^[0-9a-f]{64}$/.test(known[electronZip] ?? '')) throw new Error('Electron ' + electronVersion + ' lists no checksum for ' + electronZip + '.');
   // Nothing in the environment may point electron-builder at another Electron, another download
   // host, or another signing program.
   for (const key of Object.keys(process.env)) {
@@ -154,6 +185,10 @@ export async function packageApp(opts: {
     electronVersion,
     // The zip downloaded and checked above: electron-builder downloads no Electron of its own.
     electronDist: electronDist,
+    // Electron's own sample app, which a zip given this way still carries, is left out.
+    afterPack: async (context) => {
+      for (const f of ['default_app.asar']) fs.rmSync(path.join(context.appOutDir, 'resources', f), { force: true });
+    },
     directories: { app: 'build/app', output: 'release', buildResources: 'assets' },
     npmRebuild: false,
     nodeGypRebuild: false,
@@ -212,14 +247,14 @@ export async function packageApp(opts: {
   for (const f of out) console.log('  ' + f);
   // Signed means signed: the app's own program and every installer made carry a valid signature.
   if (sign) {
-    const signer = process.env.STUDIO_SIGNER || 'Evoke';
+    const signer = /^CN="?Evoke Technologies\b/i;
     const exes = [path.join(release, 'win-unpacked', 'QA Practice Training Studio.exe'), ...out.filter((f) => f.endsWith('.exe'))];
     for (const exe of exes) {
       if (!fs.existsSync(exe)) throw new Error(exe + ' is missing, so its signature cannot be checked. Nothing made here may be sent.');
       const s = signature(exe);
       if (s.status !== 'Valid') throw new Error(exe + ' is not validly signed (' + s.status + '). Nothing made here may be sent.');
-      if (!s.signer.toLowerCase().includes(signer.toLowerCase())) {
-        throw new Error(exe + ' is signed by ' + s.signer + ', not by ' + signer + '. Nothing made here may be sent.');
+      if (!signer.test(s.signer)) {
+        throw new Error(exe + ' is signed by ' + s.signer + ', not by Evoke Technologies. Nothing made here may be sent.');
       }
     }
   }

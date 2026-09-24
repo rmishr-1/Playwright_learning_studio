@@ -22,7 +22,7 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { systemExe } from '../../backend/src/child-env';
+import { systemExe } from '../../backend/src/system-exe';
 import { secret } from './prompt';
 
 export const DESKTOP = path.resolve(__dirname, '..');

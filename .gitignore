@@ -28,6 +28,10 @@ id_rsa*
 id_ed25519*
 credentials*.json
 secrets*.json
+*.ppk
+*.jks
+*.keystore
+*.asc
 **/keys/
 **/licences/
 **/deliveries/
