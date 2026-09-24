@@ -2,7 +2,7 @@
  * Builds Option C (frontend-c/) for the desktop app, without changing frontend-c itself:
  *
  *   - the fonts come from the app (src/web/fonts.ts), not from Google Fonts, so it works offline
- *   - the page is titled with the product name
+ *   - the page is titled, and names itself, with the variant's name (STUDIO_PRODUCT)
  *   - in a release build, the studio's own modules (frontend-c/src, shared/) are obfuscated before
  *     they are bundled; the third-party packages are left as they are
  *
@@ -21,6 +21,8 @@ const ours = [path.resolve(here, '..', 'frontend-c', 'src'), path.resolve(here, 
   p.split(path.sep).join('/'),
 );
 const release = process.env.STUDIO_RELEASE === '1';
+/** The variant's name (desktop/variants.json), which scripts/build.ts passes in. */
+const product = process.env.STUDIO_PRODUCT || 'Evoke Training Studio';
 
 function offline(): Plugin {
   const fonts = path.join(here, 'src', 'web', 'fonts.ts').split(path.sep).join('/');
@@ -30,7 +32,7 @@ function offline(): Plugin {
       return html
         .replace(/\s*<link[^>]*fonts\.(googleapis|gstatic)\.com[^>]*>/g, '')
         .replace(/\s*<link\s+href="https:\/\/fonts\.googleapis\.com[\s\S]*?\/>/g, '')
-        .replace(/<title>[^<]*<\/title>/, '<title>' + (process.env.STUDIO_PRODUCT ?? 'Studio') + '</title>');
+        .replace(/<title>[^<]*<\/title>/, '<title>' + product + '</title>');
     },
     transform(code, id) {
       if (id.split('?')[0].replace(/\\/g, '/').endsWith('/frontend-c/src/main.tsx')) {
@@ -95,6 +97,8 @@ export default defineConfig({
   base: '/',
   logLevel: 'warn',
   plugins: [react(), offline(), protect(), packages()],
+  // The page shows the variant's name (frontend-c/src/product.ts).
+  define: { __STUDIO_PRODUCT__: JSON.stringify(product) },
   resolve: {
     dedupe: ['@codemirror/state', '@codemirror/view', '@codemirror/language', 'codemirror'],
   },

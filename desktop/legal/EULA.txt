@@ -1,4 +1,4 @@
-QA PRACTICE TRAINING STUDIO
+{{PRODUCT_UPPER}}
 END-USER LICENCE AGREEMENT
 
 [DRAFT FOR LEGAL REVIEW. This text was prepared as a starting point and has not been reviewed by
@@ -10,7 +10,7 @@ the person or organisation named in the licence ("you"). By selecting "I accept"
 If you do not agree, select Quit and do not use the software.
 
 1. WHAT IS LICENSED
-The "Software" is the QA Practice Training Studio application, its course content (lessons,
+The "Software" is the {{PRODUCT}} application, its course content (lessons,
 exercises, quizzes, solutions, diagrams, example code and practice pages) and its documentation,
 including every update Evoke provides. The Software is licensed to you, not sold. Evoke and its
 licensors own it and all intellectual property rights in it.

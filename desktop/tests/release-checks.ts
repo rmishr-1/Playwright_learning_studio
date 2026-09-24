@@ -31,10 +31,12 @@ import { keepUserData } from './user-data';
 
 const DESKTOP = path.resolve(__dirname, '..');
 const UNPACKED = process.env.STUDIO_TEST_APP_DIR || path.join(DESKTOP, 'release', 'win-unpacked');
-const EXE_NAME = 'QA Practice Training Studio.exe';
-const EXE = path.join(UNPACKED, EXE_NAME);
 const ASAR = path.join(UNPACKED, 'resources', 'app.asar');
-const USER = path.join(process.env.APPDATA!, 'QA Practice Training Studio');
+/** The variant this build is (its package.json): its program and data folder are named after it. */
+const PRODUCT = (JSON.parse(asar.extractFile(ASAR, 'package.json').toString('utf-8')) as { productName: string }).productName;
+const EXE_NAME = PRODUCT + '.exe';
+const EXE = path.join(UNPACKED, EXE_NAME);
+const USER = path.join(process.env.APPDATA!, PRODUCT);
 
 let failures = 0;
 function expect(ok: boolean, what: string, detail = ''): void {
@@ -157,7 +159,7 @@ async function main(): Promise<void> {
   expect(!files.some((f) => /Data\/(Source|Content)|course-index\.json|day-\d+\.json|workspaces\.json/.test(f)), 'no course files in plain form');
   expect(files.includes('/content.pack'), 'the course is there as content.pack');
   const main = asar.extractFile(ASAR, 'main.js').toString('utf-8');
-  expect(main.startsWith('/*! QA Practice Training Studio'), 'main.js starts with the copyright notice');
+  expect(main.startsWith('/*! ' + PRODUCT + ' '), 'main.js starts with the copyright notice');
   const readable = ['studio_token', 'aes-256-gcm', 'SPK1', 'licence.lic', 'eula-accepted', 'courseIndex', 'recordProgress', 'setup:accept', 'last-seen'];
   const found = readable.filter((s) => main.includes(s));
   expect(found.length === 0, 'main.js is obfuscated: none of the studio\'s names are readable', found.join(', '));

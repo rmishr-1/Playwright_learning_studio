@@ -4,9 +4,10 @@ import { getBranding, type Branding } from '../api/client';
 import { planWeeks } from '../lib/coursePlan';
 import { nextTheme, THEME_NAMES, type Theme } from '../lib/theme';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
+import { PRODUCT_NAME } from '../product';
 
-/** The product's name: in the top strip on the course index, and heading the week list. */
-export const PRODUCT_NAME = 'QA Practice Training Studio';
+/** The product's name (product.ts): in the top strip on the course index, and heading the week list. */
+export { PRODUCT_NAME };
 
 /** Sun for light, a sheet of paper for warm paper, moon for dark. */
 function ThemeIcon({ theme }: { theme: Theme }) {

@@ -16,6 +16,7 @@
         "test:release": "node ../node_modules/tsx/dist/cli.mjs tests/release-checks.ts",
         "test:customer": "node ../node_modules/tsx/dist/cli.mjs tests/customer-build.ts",
         "new-customer": "node ../node_modules/tsx/dist/cli.mjs scripts/new-customer.ts",
+        "build-variant": "node ../node_modules/tsx/dist/cli.mjs scripts/build-variant.ts",
         "licence:backup-key": "node ../node_modules/tsx/dist/cli.mjs scripts/backup-key.ts backup",
         "licence:restore-key": "node ../node_modules/tsx/dist/cli.mjs scripts/backup-key.ts restore",
         "licence:set-passphrase": "node ../node_modules/tsx/dist/cli.mjs scripts/backup-key.ts passphrase",

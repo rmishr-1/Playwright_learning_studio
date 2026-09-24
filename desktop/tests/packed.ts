@@ -1,7 +1,7 @@
 /**
  * Lays out desktop/build/app the way the installer installs it, for the tests to drive:
  *
- *   build/test-app/QA Practice Training Studio.exe     Electron, with the release's fuses
+ *   build/test-app/<product>.exe                       Electron, with the release's fuses
  *   build/test-app/resources/app.asar                  the app, packed
  *   build/test-app/resources/node, ms-playwright       desktop/runtime, linked
  *
@@ -35,12 +35,17 @@ function electronDist(): string {
   return dist;
 }
 
+/** The name of the app in build/app (its variant's): its program and data folder are named after it. */
+export function builtProduct(): string {
+  return (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'package.json'), 'utf-8')) as { productName: string }).productName;
+}
+
 export async function packedApp(): Promise<string> {
   const dir = path.join(DESKTOP, 'build', 'test-app');
   const resources = path.join(dir, 'resources');
   fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   fs.cpSync(electronDist(), dir, { recursive: true });
-  const exe = path.join(dir, 'QA Practice Training Studio.exe');
+  const exe = path.join(dir, builtProduct() + '.exe');
   fs.renameSync(path.join(dir, 'electron.exe'), exe);
   fs.rmSync(path.join(resources, 'default_app.asar'), { force: true });
   await asar.createPackageWithOptions(path.join(DESKTOP, 'build', 'app'), path.join(resources, 'app.asar'), {

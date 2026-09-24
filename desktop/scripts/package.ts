@@ -1,17 +1,22 @@
 /**
- * Builds the app and its Windows installer: desktop/release/<product> Setup <version>[-<licence>].exe
+ * Builds one variant of the app (variants.json) and its Windows installer, into desktop/release/:
+ * <Name-With-Dashes>-Setup-<version>.exe. Each variant has its own name and appId, so its installer
+ * installs beside the others, never over them.
  *
- *   npm run package -- --internal                  an internal installer, for any valid Evoke licence
+ *   npm run package -- --variant internal          "Evoke Training Studio", for any valid Evoke licence
  *                                                  (never for a customer: any licence opens it)
- *   npm run package -- --licence licences/X.lic    an installer for one customer: it accepts only
- *                                                  that licence, which is sent apart from it, and its
- *                                                  course carries that licence's watermark
+ *   npm run package -- --internal                  the same
+ *   npm run package -- --variant BU                a customer's, "Evoke Training Studio BU": it accepts
+ *                                                  only their licence, which is sent apart from it, and
+ *                                                  its course carries that licence's watermark
+ *   npm run package -- --licence licences/X.lic    the variant that licence belongs to
  *   ... --carry                                    the installer carries the licence (it then opens
  *                                                  for anyone who has it)
  *   ... --zip                                      a zip of the app instead of an installer
  *   ... --unsigned                                 without a code-signing certificate (see below)
  *
- * new-customer.ts issues a licence and makes a customer's zip in one go.
+ * Most of the time use build-variant.ts, which does this and puts what to send in
+ * deliveries/<code>/; new-customer.ts adds a customer's variant and licence, then builds it.
  *
  * Needs `npm run runtime` once first (Node and the browsers the app ships).
  *
@@ -48,11 +53,13 @@ import * as path from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { build as electronBuild, Platform, type Configuration } from 'electron-builder';
-import { DESKTOP, PRODUCT, VERSION, build } from './build';
+import { DESKTOP, VERSION, build } from './build';
+import { INTERNAL_CODE, artifactBase, licencePath, variantByCode, variantByLicenceId, type Variant } from './variants';
 import * as crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { systemExe } from '../../backend/src/system-exe';
 import { signature, verifyManifest } from './runtime';
+import { uninstallScript } from './uninstaller';
 
 /** Electron's own releases: the only place its zip is taken from. */
 const ELECTRON_RELEASES = 'https://github.com/electron/electron/releases/download/';
@@ -122,6 +129,22 @@ function signing(): Signing | null {
   return null;
 }
 
+/**
+ * assets/installer.nsh replaces electron-builder's check for a running copy of the app with one that
+ * tells the variants apart, copied from electron-builder 26.15.3. Another version may have changed
+ * the original: compare the two, update the copy, then this version.
+ */
+const INSTALLER_MACRO_FOR = '26.15.3';
+function checkInstallerMacroVersion(): void {
+  const lib = JSON.parse(fs.readFileSync(path.join(DESKTOP, 'node_modules', 'app-builder-lib', 'package.json'), 'utf-8')) as { version: string };
+  if (lib.version !== INSTALLER_MACRO_FOR) {
+    throw new Error(
+      'electron-builder is ' + lib.version + ', but assets/installer.nsh was copied from ' + INSTALLER_MACRO_FOR + '. Compare it with ' +
+        'node_modules/app-builder-lib/templates/nsis/include/allowOnlyOneInstallerInstance.nsh, update it, then INSTALLER_MACRO_FOR.',
+    );
+  }
+}
+
 /** Whether a code-signing certificate is given, by any of the ways above. */
 export const hasCertificate = (): boolean => signing() !== null;
 
@@ -130,17 +153,15 @@ export const hasCertificate = (): boolean => signing() !== null;
  * unzipped (zip). Returns the files it made.
  */
 export async function packageApp(opts: {
-  licenceFile: string | null;
+  /** Which app (variants.json): its name, appId and, for a customer, the licence it is sealed to. */
+  variant: Variant;
   carryLicence?: boolean;
   target?: 'nsis' | 'zip';
-  /** Build with no licence named: a copy any valid licence opens. */
-  internal?: boolean;
   /** Package without a certificate. */
   unsigned?: boolean;
 }): Promise<string[]> {
-  if (!opts.licenceFile && !opts.internal) {
-    throw new Error('Name the customer\'s licence (--licence licences/X.lic), or say --internal for a copy any licence opens.');
-  }
+  const variant = opts.variant;
+  const licenceFile = licencePath(variant);
   const sign = signing();
   if (!sign && !opts.unsigned) {
     throw new Error('No code-signing certificate is set (CSC_LINK, STUDIO_SIGN_SUBJECT or STUDIO_AZURE_*). Set one, or add --unsigned to package without one.');
@@ -151,9 +172,11 @@ export async function packageApp(opts: {
   // What ships from desktop/runtime is exactly what `npm run runtime` gathered and checked.
   verifyManifest();
   const target = opts.target ?? 'nsis';
-  const info = await build({ release: true, licenceFile: opts.licenceFile, carryLicence: opts.carryLicence });
+  checkInstallerMacroVersion();
+  await build({ release: true, licenceFile, carryLicence: opts.carryLicence, variant });
   const electronVersion = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'node_modules', 'electron', 'package.json'), 'utf-8')) as { version: string }).version;
-  const suffix = info.licence ? info.licence.id : 'internal';
+  const product = variant.name;
+  const base = artifactBase(variant);
 
   // Electron: from its own releases only, fresh, and checked against the lockfile's checksums.
   const electronZip = 'electron-v' + electronVersion + '-win32-x64.zip';
@@ -178,9 +201,12 @@ export async function packageApp(opts: {
   const release = path.join(DESKTOP, 'release');
   fs.rmSync(release, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
 
+  // The variant's identity. appId names the installer's registry entries (its uninstall entry in
+  // Windows' Apps list), and productName and executableName its program, install folder and data
+  // folder, so each variant installs beside the others instead of over them.
   const config: Configuration = {
-    appId: 'com.evoketechnologies.qapractice.studio',
-    productName: PRODUCT,
+    appId: variant.appId,
+    productName: product,
     copyright: 'Copyright © 2026 Evoke Technologies. All rights reserved.',
     electronVersion,
     // The zip downloaded and checked above: electron-builder downloads no Electron of its own.
@@ -188,6 +214,12 @@ export async function packageApp(opts: {
     // Electron's own sample app, which a zip given this way still carries, is left out.
     afterPack: async (context) => {
       for (const f of ['default_app.asar']) fs.rmSync(path.join(context.appOutDir, 'resources', f), { force: true });
+      // A zip has no uninstaller of its own (the installer brings one): Uninstall.bat, which
+      // removes exactly what is in the app's folder now.
+      if (target === 'zip') {
+        const entries = fs.readdirSync(context.appOutDir).sort();
+        fs.writeFileSync(path.join(context.appOutDir, 'Uninstall.bat'), uninstallScript(product, entries));
+      }
     },
     directories: { app: 'build/app', output: 'release', buildResources: 'assets' },
     npmRebuild: false,
@@ -217,11 +249,12 @@ export async function packageApp(opts: {
     forceCodeSigning: sign !== null,
     win: {
       target: [{ target, arch: ['x64'] }],
-      // Short, because Windows unzips into a folder of the zip's name, and the browsers' deepest
-      // files are 149 characters in: a long folder name takes paths past Windows' 260 limit.
-      artifactName: (target === 'zip' ? 'QA-Studio-' : 'QA-Practice-Training-Studio-') + VERSION + '-' + suffix + '.${ext}',
+      // Windows unzips into a folder of the zip's name, and the browsers' deepest files are 149
+      // characters in: variants.ts keeps names short enough to stay under Windows' 260 limit.
+      artifactName: base + '-' + VERSION + '.${ext}',
       icon: 'assets/icon.ico',
-      executableName: 'QA Practice Training Studio',
+      // The program is named after the variant: Uninstall.bat and the installer find it by name.
+      executableName: product,
       legalTrademarks: 'Evoke Technologies',
       ...(sign ?? {}),
     },
@@ -232,9 +265,11 @@ export async function packageApp(opts: {
       // could be changed by every account on the computer, and the app refuses to start from one.
       allowToChangeInstallationDirectory: false,
       license: 'build/legal/EULA.txt',
-      shortcutName: PRODUCT,
-      artifactName: 'QA-Practice-Training-Studio-Setup-' + VERSION + '-' + suffix + '.${ext}',
+      shortcutName: product,
+      artifactName: base + '-Setup-' + VERSION + '.${ext}',
       deleteAppDataOnUninstall: false,
+      // assets/installer.nsh: tells a running copy of this variant from one of another.
+      include: 'installer.nsh',
     },
   };
 
@@ -250,7 +285,7 @@ export async function packageApp(opts: {
   // Signed means signed: the app's own program and every installer made carry a valid signature.
   if (sign) {
     const signer = /^CN="?Evoke Technologies\b/i;
-    const exes = [path.join(release, 'win-unpacked', 'QA Practice Training Studio.exe'), ...out.filter((f) => f.endsWith('.exe'))];
+    const exes = [path.join(release, 'win-unpacked', product + '.exe'), ...out.filter((f) => f.endsWith('.exe'))];
     for (const exe of exes) {
       if (!fs.existsSync(exe)) throw new Error(exe + ' is missing, so its signature cannot be checked. Nothing made here may be sent.');
       const s = signature(exe);
@@ -263,16 +298,37 @@ export async function packageApp(opts: {
   return out.filter((f) => !f.endsWith('.blockmap'));
 }
 
+/** The variant a command line names: --variant <code>, --internal, or --licence <file> (by its licence id). */
+function variantFromArgs(argv: string[]): Variant {
+  const v = argv.indexOf('--variant');
+  if (v !== -1) return variantByCode(argv[v + 1] ?? '');
+  if (argv.includes('--internal')) return variantByCode(INTERNAL_CODE);
+  const i = argv.indexOf('--licence');
+  if (i !== -1) {
+    const file = path.resolve(argv[i + 1] ?? '');
+    const id = (JSON.parse(fs.readFileSync(file, 'utf-8')) as { licence?: { id?: string } }).licence?.id ?? '';
+    const found = variantByLicenceId(id);
+    if (!found) throw new Error(id + ' has no variant in variants.json. Add the customer with new-customer.bat, which gives them one.');
+    if (path.resolve(licencePath(found) ?? '') !== file) {
+      throw new Error(file + ' is not the licence variants.json names for "' + found.name + '" (' + found.licence + ').');
+    }
+    return found;
+  }
+  throw new Error('Name the app: --variant <code> (see variants.json), or --internal for the copy any licence opens.');
+}
+
 if (require.main === module) {
-  const i = process.argv.indexOf('--licence');
-  packageApp({
-    licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]),
-    carryLicence: process.argv.includes('--carry'),
-    target: process.argv.includes('--zip') ? 'zip' : 'nsis',
-    internal: process.argv.includes('--internal'),
-    unsigned: process.argv.includes('--unsigned'),
-  }).catch((e) => {
-    console.error(e instanceof Error ? e.stack : e);
-    process.exit(1);
-  });
+  Promise.resolve()
+    .then(() =>
+      packageApp({
+        variant: variantFromArgs(process.argv),
+        carryLicence: process.argv.includes('--carry'),
+        target: process.argv.includes('--zip') ? 'zip' : 'nsis',
+        unsigned: process.argv.includes('--unsigned'),
+      }),
+    )
+    .catch((e) => {
+      console.error(e instanceof Error ? e.stack : e);
+      process.exit(1);
+    });
 }

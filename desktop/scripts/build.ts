@@ -10,8 +10,12 @@
  *
  * and desktop/build/legal (EULA.txt, THIRD-PARTY-NOTICES.txt), which is installed beside the app.
  *
+ * The app's name and appId come from its variant (variants.json): "internal" unless --variant says
+ * otherwise. package.ts and build-variant.ts pick the variant and its licence for a real build.
+ *
  *   npm run build                                  release build, for any valid Evoke licence
- *   npm run build -- --licence licences/X.lic      release build for one customer, who adds the licence
+ *   npm run build -- --variant BU --licence licences/X.lic
+ *                                                  release build of a customer's variant, who adds the licence
  *   ... --licence licences/X.lic --carry            for one customer, carrying their licence
  *   ... --dev --public-key <file>                   built for another public key (the tests' own);
  *                                                  a release is only ever built for Evoke's
@@ -32,6 +36,7 @@ import { packageDirOf, withDependencies, writeNotices } from './notices';
 import { checkedPublicKey } from './signing-key';
 import { systemExe } from '../../backend/src/system-exe';
 import { readRevoked } from './revoke-licence';
+import { internalVariant, packageName, variantByCode, type Variant } from './variants';
 
 export const DESKTOP = path.resolve(__dirname, '..');
 const ROOT = path.resolve(DESKTOP, '..');
@@ -39,12 +44,21 @@ const BUILD = path.join(DESKTOP, 'build');
 const APP = path.join(BUILD, 'app');
 const LEGAL = path.join(BUILD, 'legal');
 
-export const PRODUCT = 'QA Practice Training Studio';
 export const VERSION = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'package.json'), 'utf-8')) as { version: string }).version;
-const BANNER =
-  '/*! ' + PRODUCT + ' ' + VERSION + '. Copyright (c) 2026 Evoke Technologies. All rights reserved. Proprietary and ' +
+const banner = (product: string): string =>
+  '/*! ' + product + ' ' + VERSION + '. Copyright (c) 2026 Evoke Technologies. All rights reserved. Proprietary and ' +
   'confidential: use is subject to the licence agreement; copying, reverse engineering and redistribution are ' +
   'prohibited. Third-party components are under their own licences, see THIRD-PARTY-NOTICES.txt. */';
+
+/** The licence agreement, naming the variant: {{PRODUCT}} and {{PRODUCT_UPPER}} in legal/EULA.txt. */
+function renderEula(product: string): string {
+  const text = fs
+    .readFileSync(path.join(DESKTOP, 'legal', 'EULA.txt'), 'utf-8')
+    .replace(/\{\{PRODUCT_UPPER\}\}/g, product.toUpperCase())
+    .replace(/\{\{PRODUCT\}\}/g, product);
+  if (text.includes('{{')) throw new Error('legal/EULA.txt has a {{...}} this build does not fill in.');
+  return text;
+}
 
 /** The packages the learner's code runs on, at the versions the studio is built and tested with. */
 const RUNTIME_PACKAGES = ['@playwright/test', 'playwright', 'playwright-core', 'typescript', 'typescript-learner'];
@@ -80,7 +94,7 @@ function packageFromLock(name: string, into: string, work: string): void {
   fs.cpSync(path.join(dir, 'package'), into, { recursive: true });
 }
 
-export type BuildInfo = { release: boolean; licence: Licence | null; mark: string };
+export type BuildInfo = { release: boolean; licence: Licence | null; mark: string; variant: Variant };
 
 function step(text: string): void {
   console.log('\n> ' + text);
@@ -106,7 +120,14 @@ export async function build(opts: {
   publicKeyFile?: string | null;
   /** Build for a licence that has no seal (issued before seals existed): its course opens without it. */
   allowUnsealed?: boolean;
+  /**
+   * Which app this is (variants.json): its name and appId. The internal variant by default, which
+   * is what `npm start` and the tests build.
+   */
+  variant?: Variant;
 }): Promise<BuildInfo> {
+  const variant = opts.variant ?? internalVariant();
+  const product = variant.name;
   const obfuscate = opts.obfuscate ?? opts.release;
   // esbuild compiles the code that ships: no other esbuild binary may stand in for it.
   for (const key of ['ESBUILD_BINARY_PATH', 'ESBUILD_WORKER_THREADS']) {
@@ -130,8 +151,12 @@ export async function build(opts: {
       );
     }
   }
+  // A customer's variant is built only with that customer's licence.
+  if (variant.licenceId && licence?.id !== variant.licenceId) {
+    throw new Error('"' + product + '" is built for licence ' + variant.licenceId + ', not ' + (licence?.id ?? 'none') + '.');
+  }
   const mark = licence?.id ?? 'EVK-INTERNAL';
-  console.log(PRODUCT + ' ' + VERSION + ', ' + (opts.release ? 'release' : 'development') + ' build' +
+  console.log(product + ' ' + VERSION + ', ' + (opts.release ? 'release' : 'development') + ' build' +
     (licence ? ' for ' + licence.licensee + ' (' + licence.id + ')' : ', for any valid licence'));
 
   fs.rmSync(BUILD, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
@@ -147,8 +172,8 @@ export async function build(opts: {
       ...process.env,
       STUDIO_WEB_OUT: path.join(APP, 'web'),
       STUDIO_RELEASE: obfuscate ? '1' : '0',
-      STUDIO_BANNER: obfuscate ? BANNER : '',
-      STUDIO_PRODUCT: PRODUCT,
+      STUDIO_BANNER: obfuscate ? banner(product) : '',
+      STUDIO_PRODUCT: product,
       STUDIO_WEB_PACKAGES: webPackages,
     },
   });
@@ -173,7 +198,8 @@ export async function build(opts: {
     define: {
       __STUDIO_RELEASE__: JSON.stringify(opts.release),
       __STUDIO_BUILD__: JSON.stringify({
-        product: PRODUCT,
+        product,
+        appId: variant.appId,
         version: VERSION,
         publicKey,
         onlyId: licence?.id ?? null,
@@ -216,15 +242,20 @@ export async function build(opts: {
       unicodeEscapeSequence: false,
       sourceMap: false,
     }).getObfuscatedCode();
-    fs.writeFileSync(mainJs, BANNER + '\n' + obfuscated);
+    fs.writeFileSync(mainJs, banner(product) + '\n' + obfuscated);
     console.log('  ' + Math.round(obfuscated.length / 1024) + ' KB in ' + Math.round((Date.now() - started) / 1000) + 's');
   }
 
   step('App files');
-  fs.copyFileSync(path.join(DESKTOP, 'src', 'setup.html'), path.join(APP, 'setup.html'));
+  // The setup window's title comes from its page (only the main window keeps its own title).
+  fs.writeFileSync(
+    path.join(APP, 'setup.html'),
+    fs.readFileSync(path.join(DESKTOP, 'src', 'setup.html'), 'utf-8').replace(/<title>[^<]*<\/title>/, '<title>' + product + '</title>'),
+  );
   fs.copyFileSync(path.join(ROOT, 'frontend-c', 'public', 'evoke-logo.png'), path.join(APP, 'logo.png'));
-  fs.copyFileSync(path.join(DESKTOP, 'legal', 'EULA.txt'), path.join(APP, 'EULA.txt'));
-  fs.copyFileSync(path.join(DESKTOP, 'legal', 'EULA.txt'), path.join(LEGAL, 'EULA.txt'));
+  const eula = renderEula(product);
+  fs.writeFileSync(path.join(APP, 'EULA.txt'), eula);
+  fs.writeFileSync(path.join(LEGAL, 'EULA.txt'), eula);
   if (licence && opts.licenceFile && opts.carryLicence === true) fs.copyFileSync(opts.licenceFile, path.join(APP, 'licence.lic'));
   const dependencies = Object.fromEntries(
     ['@playwright/test', 'playwright', 'typescript', 'typescript-learner'].map((n) => [n, installedVersion(n)]),
@@ -233,10 +264,13 @@ export async function build(opts: {
     path.join(APP, 'package.json'),
     JSON.stringify(
       {
-        name: 'qa-practice-training-studio',
-        productName: PRODUCT,
+        name: packageName(variant),
+        // Electron keeps the app's data in %APPDATA%\<productName>, and holds its one-copy-running
+        // lock there: a variant of its own name has its own of both.
+        productName: product,
         version: VERSION,
-        description: PRODUCT,
+        // Windows shows this as the program's description (Task Manager, for one).
+        description: product,
         author: 'Evoke Technologies',
         license: 'UNLICENSED',
         private: true,
@@ -279,17 +313,19 @@ export async function build(opts: {
       { title: 'In the app: the backend', dirs: [...new Set(backendDirs)] },
       { title: 'Run by the learner\'s code: Playwright and TypeScript', dirs: runtimeDirs },
     ],
-    PRODUCT,
+    product,
   );
   console.log('  ' + count + ' packages');
   fs.rmSync(webPackages, { force: true });
 
-  return { release: opts.release, licence, mark };
+  return { release: opts.release, licence, mark, variant };
 }
 
 if (require.main === module) {
   const i = process.argv.indexOf('--licence');
+  const v = process.argv.indexOf('--variant');
   build({
+    variant: v === -1 ? undefined : variantByCode(process.argv[v + 1] ?? ''),
     release: !process.argv.includes('--dev'),
     obfuscate: process.argv.includes('--obfuscate') || undefined,
     carryLicence: process.argv.includes('--carry'),

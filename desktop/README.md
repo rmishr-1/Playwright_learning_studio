@@ -10,26 +10,70 @@ traceable**. No packaging can make copying impossible: everything the app needs 
 learner's computer. The aim is that taking the course out in bulk needs real skill and time, and
 that a copy that does get out points to the licence it came from.
 
+## The apps: one per audience
+
+Every build is a **variant**, listed in `variants.json` (committed), and each has its own name:
+
+| Code | App | Opens with |
+|---|---|---|
+| `internal` | Evoke Training Studio | any valid Evoke licence. **Never leaves Evoke**: it is not sealed. |
+| `BU` | Evoke Training Studio BU | only Boston University's licence |
+
+A variant's name is its program (`Evoke Training Studio BU.exe`), its install folder
+(`%LOCALAPPDATA%ProgramsEvoke Training Studio BU`), its Start-menu and desktop shortcuts, its
+entry in Windows' Apps list, its windows and its page, and its data folder
+(`%APPDATA%Evoke Training Studio BU`: progress, work, licence). Its `appId` names its installer's
+registry entries and its taskbar button. So **every variant installs and runs beside the others**
+on one computer, each with its own progress. A variant's name and appId are stored, not worked out
+at build time: once one has been installed anywhere, changing either would make a different app
+with none of the learner's progress.
+
+```bash
+npm run build-variant -- internal
+npm run build-variant -- BU
+```
+
+Each builds the variant's installer and puts what to send in `deliveries/<code>/`, replacing that
+variant's previous delivery only once the new one is complete. `--zip` makes a zip that runs where
+it is unzipped instead; `--unsigned` builds without a code-signing certificate without asking;
+`--carry` puts the licence inside the app (anyone with it can then open it, so it is off by
+default). A customer's variant builds only on the computer that holds their licence
+(`licences/` is not committed).
+
+The studio run with `launcher.bat` (the Option C page and backend, from the repository) is plain
+"Evoke Training Studio" too, and needs no licence: licences are the desktop app's alone.
+
 ## A new customer
 
-Double-click **`new-customer.bat`** (in this folder). It asks for the customer's name, an optional
-email, expiry date, logo (a PNG or JPEG, up to 300 KB; drag the file into the window) and machine
-code, then issues their licence and builds their app, in about 10 minutes. Keep the window open
-until it says **DONE**. What to send them is in `deliveries/<licence id>-<customer>/`:
+Double-click **`new-customer.bat`** (in this folder). It asks for the customer's **short code**
+(2 to 8 capital letters or digits, such as `BWP`: their app will be "Evoke Training Studio BWP"),
+their name, an optional email, expiry date, logo (a PNG or JPEG, up to 300 KB; drag the file into
+the window) and machine code. It then issues their licence, adds their variant to `variants.json`,
+and builds their app, in about 10 minutes. Keep the window open until it says **DONE**, then
+**commit `variants.json`**, so their app keeps its name and identity in every later build. What
+to send them is in `deliveries/<code>/`:
 
-- `QA-Studio-<version>-<licence id>.zip`: the app. They unzip it to their own Programs folder,
-  `%LOCALAPPDATA%\Programs\QA Studio` (short enough for the browsers' deepest files, 149
-  characters in, to stay under Windows' 260), and run `QA Practice Training Studio.exe`; nothing to
-  install. A release refuses to start from a folder other accounts on the computer can change (one
-  made directly under `C:\`, for example): another account could put its own code in the app's.
+- `Evoke-Training-Studio-<code>-Setup-<version>.exe`: the installer. It installs for the user
+  only, with no administrator rights, into `%LOCALAPPDATA%ProgramsEvoke Training Studio <code>`
+  (a folder other accounts cannot change: a release refuses to start from one they can), with
+  Start-menu and desktop shortcuts. It is removed from Settings > Apps, which keeps the learner's
+  progress, work and licence.
 - `<customer> licence.lic`: their licence.
-- `READ ME FIRST.txt`: the four steps to start.
-- `SHA256SUMS.txt`: the fingerprints of the zip and the licence, so they can check what arrived.
+- `READ ME FIRST.txt`: how to install, start and remove the app.
+- `SHA256SUMS.txt`: the fingerprints of the installer and the licence, so they can check what arrived.
 
-**Send the licence by a different route from the zip** (for example the zip as a download link,
-the licence by email to the named contact), and the fingerprints by a third, or read them out:
-the seal only helps while the zip and the licence travel apart, and fingerprints that travel with
-the zip prove nothing about it until the app is code-signed.
+With `--zip`, the app comes as `Evoke-Training-Studio-<code>-<version>.zip` instead, to extract to
+`%LOCALAPPDATA%ProgramsEvoke Training Studio <code>`. Its folder carries **`Uninstall.bat`**
+(a zip has no uninstaller of its own). It removes exactly the files and folders the zip put there,
+named one by one when the app was packed, then the folder only if nothing else is left in it, so a
+copy unzipped straight into Downloads takes nothing else with it. It refuses while the studio is
+open, and asks before deleting the learner's progress, work and licence, which it keeps unless
+told otherwise.
+
+**Send the licence by a different route from the installer** (for example the installer as a
+download link, the licence by email to the named contact), and the fingerprints by a third, or read
+them out: the seal only helps while the app and the licence travel apart, and fingerprints that
+travel with the app prove nothing about it until it is code-signed.
 
 A licence with no end date and no computer limit opens the customer's copy on any number of
 computers, for good. For a customer with several learners, consider one licence per learner, or
@@ -41,17 +85,19 @@ cannot even decrypt it (a customer build is refused for a licence without a seal
 shows in the header right of the theme switch; it is part of the signed licence, so it cannot be
 swapped. The lessons carry the licence ID as an invisible watermark.
 
-If no code-signing certificate is set, `new-customer` asks before building an unsigned copy
+If no code-signing certificate is set, the build asks before making an unsigned copy
 (`--unsigned` answers yes when it runs without questions).
 
 The same without questions:
-`npm run new-customer -- --licensee "Boston University" --logo bu.png --expires 2027-09-30`
+`npm run new-customer -- --code BWP --licensee "BWP Group" --logo bwp.png --expires 2027-09-30`
 
-A new zip for a customer who already has a licence (after a course update), without issuing a
-new one: `npm run new-customer -- --rebuild licences/<id>-<customer>.lic`
+A new build for a customer who already has a licence (after a course update):
+`npm run build-variant -- <code>`, or `npm run new-customer -- --rebuild licences/<id>-<customer>.lic`,
+which finds the variant by the licence (after a reissue, add `--code <their code>` if the licence
+file's name changed; a licence with no variant yet gets one with `--code`).
 
-The zip is about 700 MB, almost all of it the three browsers the course tests in, which the app
-ships so it works offline. The app itself is 3.5 MB.
+The installer is about 700 MB, almost all of it the three browsers the course tests in, which the
+app ships so it works offline. The app itself is 3.5 MB.
 
 ## Licences and the signing key
 
@@ -96,7 +142,7 @@ In this folder, with Node 24:
 ```bash
 npm ci
 npm run runtime -- --fresh
-npm run package -- --internal
+npm run build-variant -- internal
 ```
 
 - `npm run runtime` gathers the Node the app ships (it must carry the OpenJS Foundation's valid
@@ -109,11 +155,15 @@ npm run package -- --internal
   without any licence, and it opens with every customer's licence.
 - Run `npm ci` (here and at the root) before `npm run package`: the app's own code is bundled from
   `node_modules` as it is. `new-customer.bat` always does.
-- `npm run package -- --internal` builds the internal installer
-  (`release/QA-Practice-Training-Studio-Setup-<version>-internal.exe`), for any valid licence.
-  `--licence <file>` builds one customer's instead; `--carry` puts the licence inside it (then
-  anyone with the installer can open it, so it is off by default); `--zip` makes a zip.
-  Without a code-signing certificate (below) add `--unsigned`.
+- `npm run build-variant -- <code>` builds that variant's installer into `deliveries/<code>/`
+  (above). Under it, `npm run package -- --variant <code>` builds it into `release/`
+  (`<Name-With-Dashes>-Setup-<version>.exe`, and `release/win-unpacked`, which `test:release`
+  checks); `--internal` is the internal variant, and `--licence <file>` the variant that licence
+  belongs to. Without a code-signing certificate (below) add `--unsigned`.
+- The installer's check for a running copy is replaced (`assets/installer.nsh`) so that one
+  variant's installer never closes another variant that is open: electron-builder's own matches
+  any program whose path merely starts with the install folder. It is a copy of electron-builder
+  26.15.3's; packaging stops at any other version until it is compared again.
 - The app's own packages for the learner's code (Playwright, TypeScript) are taken from their npm
   tarballs, checked against `package-lock.json`, not from `node_modules`.
 - It takes the course from `../Data/Content/`: run `npm run build:content` at the root first
@@ -166,8 +216,10 @@ npm run test:release -- licences/<a licence the build accepts>.lic
   modules are refused, that a copy in a folder other accounts can change will not start, and that
   the API refuses everything but the window.
 
-They move the app's data folder (`%APPDATA%\QA Practice Training Studio`) aside while they run and
-put it back after, and refuse to start while the app is open.
+They move the app's data folder aside while they run and put it back after, and refuse to start
+while the app is open: `test:app` and `test:customer` build the internal variant
+(`%APPDATA%\Evoke Training Studio`), and `test:release` uses the data folder of whichever variant
+it checks.
 
 ## Before the first external release
 

@@ -40,7 +40,10 @@ import { execFileSync } from 'node:child_process';
 
 declare const __STUDIO_RELEASE__: boolean;
 declare const __STUDIO_BUILD__: {
+  /** The variant's name (desktop/variants.json): "Evoke Training Studio", "Evoke Training Studio BU". */
   product: string;
+  /** The variant's Windows identity, the same as its installer's shortcuts carry. */
+  appId: string;
   version: string;
   publicKey: string;
   /** Set in a build made for one customer: the only licence it accepts. */
@@ -87,6 +90,9 @@ const DANGEROUS_SWITCHES = [
   'ignore-certificate-errors',
 ];
 if (RELEASE && (process.argv.length > 1 || DANGEROUS_SWITCHES.some((s) => app.commandLine.hasSwitch(s)))) app.exit(1);
+// The taskbar groups and pins windows by this ID: each variant keeps its own button, matching the
+// shortcuts its installer made.
+app.setAppUserModelId(BUILD.appId);
 if (!app.requestSingleInstanceLock()) app.exit(0);
 
 Menu.setApplicationMenu(null);
@@ -547,7 +553,7 @@ void app.whenReady().then(async () => {
       BUILD.product,
       'The studio is in a folder that other people who use this computer can change (' + path.dirname(process.execPath) + '), ' +
         'so it will not start there. Move the whole folder into your own Programs folder, for example ' +
-        '%LOCALAPPDATA%\\Programs\\QA Studio, and start it from there.',
+        '%LOCALAPPDATA%\\Programs\\' + BUILD.product + ', and start it from there.',
     );
     app.quit();
     return;

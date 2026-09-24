@@ -20,10 +20,13 @@ import { build } from '../scripts/build';
 import { packedApp } from './packed';
 import { testKeys } from './test-keys';
 import { keepUserData } from './user-data';
+import { internalVariant } from '../scripts/variants';
 
 const DESKTOP = path.resolve(__dirname, '..');
 const OUT = path.join(DESKTOP, 'test-output');
-const USER = path.join(process.env.APPDATA!, 'QA Practice Training Studio');
+/** The tests build the internal variant (variants.json): its data folder is %APPDATA%\<its name>. */
+const PRODUCT = internalVariant().name;
+const USER = path.join(process.env.APPDATA!, PRODUCT);
 
 let failures = 0;
 function expect(ok: boolean, what: string, detail = ''): void {
@@ -46,7 +49,7 @@ async function setupStep(app: ElectronApplication): Promise<{ page: Page; step: 
 }
 
 async function main(): Promise<void> {
-  keepUserData(USER, 'QA Practice Training Studio.exe');
+  keepUserData(USER, PRODUCT + '.exe');
   fs.mkdirSync(OUT, { recursive: true });
   const keys = testKeys();
   const logoFile = process.argv[2] ?? path.join(DESKTOP, 'assets', 'icon.png');

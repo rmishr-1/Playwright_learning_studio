@@ -4,8 +4,10 @@ set "NoDefaultCurrentDirectoryInExePath=1"
 rem Windows' own programs, by their full path: a folder early in PATH cannot stand in for them.
 set "SYS=%SystemRoot%\System32"
 cd /d "%~dp0" || (echo [ERROR] Could not open the folder this file is in. & pause & exit /b 1)
-rem Issues a licence to a new customer and builds the app they get: a zip, their licence file and a
-rem read-me, in desktop\deliveries\. Needs Evoke's signing key on this computer: it is kept, encrypted
+rem Adds a new customer and builds the app they get: asks for their short code (BWP), issues their
+rem licence, adds "Evoke Training Studio <code>" to variants.json and builds its installer, which goes
+rem with their licence file and a read-me into desktop\deliveries\<code>\. Commit variants.json
+rem afterwards. Needs Evoke's signing key on this computer: it is kept, encrypted
 rem for the Windows user, in %USERPROFILE%\.evoke-studio\ (see desktop\README.md).
 
 rem Packages' install scripts run only where package.json allows them (allowScripts, with

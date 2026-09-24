@@ -1,0 +1,20 @@
+{
+    "variants": [
+        {
+            "code": "internal",
+            "name": "Evoke Training Studio",
+            "appId": "com.evoketechnologies.trainingstudio",
+            "licensee": null,
+            "licenceId": null,
+            "licence": null
+        },
+        {
+            "code": "BU",
+            "name": "Evoke Training Studio BU",
+            "appId": "com.evoketechnologies.trainingstudio.bu",
+            "licensee": "Boston University",
+            "licenceId": "EVK-5D0D8FF5",
+            "licence": "licences/EVK-5D0D8FF5-boston-university.lic"
+        }
+    ]
+}
