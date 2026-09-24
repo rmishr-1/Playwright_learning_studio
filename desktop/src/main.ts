@@ -23,6 +23,7 @@ import {
   dialog,
   ipcMain,
   Menu,
+  protocol,
   session,
   shell,
   type WebContents,
@@ -57,6 +58,24 @@ if (RELEASE) {
 if (!app.requestSingleInstanceLock()) app.exit(0);
 
 Menu.setApplicationMenu(null);
+
+/**
+ * The setup window's page and logo come out of app.asar through the app's own studio:// address.
+ * A file:// page cannot read inside app.asar once the GrantFileProtocolExtraPrivileges fuse is off
+ * (the window would stay blank), and only these two files can be asked for.
+ */
+const SETUP_ORIGIN = 'studio://app';
+const SETUP_FILES: Record<string, string> = { '/setup.html': 'text/html; charset=utf-8', '/logo.png': 'image/png' };
+protocol.registerSchemesAsPrivileged([{ scheme: 'studio', privileges: { standard: true, secure: true } }]);
+
+function serveSetupFiles(): void {
+  protocol.handle('studio', (request) => {
+    const { host, pathname } = new URL(request.url);
+    const type = SETUP_FILES[pathname];
+    if (host !== 'app' || !type) return new Response('Not found', { status: 404 });
+    return new Response(new Uint8Array(fs.readFileSync(path.join(APP_DIR, pathname.slice(1)))), { headers: { 'content-type': type } });
+  });
+}
 
 // ---------------------------------------------------------------- licence and agreement
 
@@ -181,7 +200,7 @@ function runSetup(): Promise<{ licence: Licence; close: () => void }> {
       if (!done) app.quit();
     });
     win.once('ready-to-show', () => win.show());
-    void win.loadFile(path.join(APP_DIR, 'setup.html'));
+    void win.loadURL(SETUP_ORIGIN + '/setup.html');
   });
 }
 
@@ -291,7 +310,7 @@ function lockDown(contents: WebContents): void {
     return { action: 'deny' };
   });
   contents.on('will-navigate', (e, url) => {
-    if (sameOrigin(url) || url.startsWith('file:')) return;
+    if (sameOrigin(url) || url.startsWith(SETUP_ORIGIN + '/')) return;
     e.preventDefault();
     openOutside(url);
   });
@@ -319,6 +338,7 @@ app.on('before-quit', () => {
 app.on('window-all-closed', () => app.quit());
 
 void app.whenReady().then(async () => {
+  serveSetupFiles();
   // The studio asks for nothing: no camera, microphone, location or notifications. Copy buttons
   // may write to the clipboard.
   session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) =>

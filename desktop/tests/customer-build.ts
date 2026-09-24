@@ -12,10 +12,13 @@ import * as path from 'node:path';
 import { _electron as electron } from 'playwright';
 import { machineCode, sign, verify, type LicenceFile } from '../src/licence';
 import { decodeAll } from '../src/watermark';
+import { packedApp } from './packed';
 
 const DESKTOP = path.resolve(__dirname, '..');
-const USER = path.join(process.env.APPDATA!, 'QA Practice Training Studio');
-const ELECTRON = path.join(DESKTOP, 'node_modules', 'electron', 'dist', 'electron.exe');
+// The app keeps its data under its product name. A test build may be given another name, to
+// run beside an installed copy.
+const PRODUCT = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'package.json'), 'utf-8')) as { productName: string }).productName;
+const USER = path.join(process.env.APPDATA!, PRODUCT);
 const PRIVATE_KEY = fs.readFileSync(path.join(DESKTOP, 'keys', 'licence-private.pem'), 'utf-8');
 
 let failures = 0;
@@ -33,7 +36,8 @@ async function main(): Promise<void> {
   const file = process.argv[2];
   if (!file) throw new Error('Usage: npm run test:customer -- <the licence the build was made with>');
   const customer = (JSON.parse(fs.readFileSync(file, 'utf-8')) as LicenceFile).licence;
-  const launch = () => electron.launch({ executablePath: ELECTRON, args: [path.join(DESKTOP, 'build', 'app')], timeout: 60_000 });
+  const exe = await packedApp();
+  const launch = () => electron.launch({ executablePath: exe, args: [], timeout: 60_000 });
 
   reset();
   let app = await launch();

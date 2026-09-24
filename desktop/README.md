@@ -89,7 +89,8 @@ npm run package
 npm run test:release
 ```
 
-- `test:app` drives a development build with Playwright: every licence case, the agreement, the
+- `test:app` drives a development build with Playwright, laid out as installed (packed into
+  `app.asar`, with the release's fuses, see `tests/packed.ts`): every licence case, the agreement, the
   locked API, offline fonts, watermarks, the Terminal on the bundled Node, the editor's Run, and
   Check my answer with tests in all three bundled browsers. `--obfuscate` makes the build's code
   exactly a release's, so this tests the code that ships; a real release refuses Playwright.

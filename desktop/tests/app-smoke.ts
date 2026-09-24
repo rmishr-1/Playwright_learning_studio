@@ -1,6 +1,7 @@
 /**
  * Drives the built app (desktop/build/app, from `npm run build -- --dev`) end to end with
- * Playwright's Electron support:
+ * Playwright's Electron support, laid out as installed: packed into app.asar, with the release's
+ * fuses (see packed.ts):
  *
  *   - the licence screen: no licence, a changed licence, an expired one, one for another computer
  *   - the licence agreement, then the studio itself
@@ -21,12 +22,15 @@ import * as path from 'node:path';
 import { _electron as electron, type ElectronApplication, type Page } from 'playwright';
 import { machineCode, sign, type Licence } from '../src/licence';
 import { decodeAll } from '../src/watermark';
+import { packedApp } from './packed';
 
 const DESKTOP = path.resolve(__dirname, '..');
 const ROOT = path.resolve(DESKTOP, '..');
 const OUT = path.join(DESKTOP, 'test-output');
-const USER = path.join(process.env.APPDATA!, 'QA Practice Training Studio');
-const ELECTRON = path.join(DESKTOP, 'node_modules', 'electron', 'dist', 'electron.exe');
+// The app keeps its data under its product name. A test build may be given another name, to
+// run beside an installed copy.
+const PRODUCT = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'package.json'), 'utf-8')) as { productName: string }).productName;
+const USER = path.join(process.env.APPDATA!, PRODUCT);
 const PRIVATE_KEY = fs.readFileSync(path.join(DESKTOP, 'keys', 'licence-private.pem'), 'utf-8');
 
 let failures = 0;
@@ -54,8 +58,8 @@ function reset(licenceText: string | null): void {
   if (licenceText !== null) fs.writeFileSync(path.join(USER, 'licence.lic'), licenceText);
 }
 
-const launch = (): Promise<ElectronApplication> =>
-  electron.launch({ executablePath: ELECTRON, args: [path.join(DESKTOP, 'build', 'app')], timeout: 60_000 });
+let EXE = '';
+const launch = (): Promise<ElectronApplication> => electron.launch({ executablePath: EXE, args: [], timeout: 60_000 });
 
 async function setupScreen(name: string, text: string | null): Promise<{ step: string; reason: string }> {
   reset(text);
@@ -126,6 +130,7 @@ async function checkAnswer(page: Page, week: number, day: number, dayNumber: num
 async function main(): Promise<void> {
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
+  EXE = await packedApp();
   const machine = machineCode();
 
   console.log('Licence screen');
