@@ -23,11 +23,23 @@ until it says **DONE**. What to send them is in `deliveries/<licence id>-<custom
 - `READ ME FIRST.txt`: the four steps to start.
 - `SHA256SUMS.txt`: the fingerprints of the zip and the licence, so they can check what arrived.
 
+**Send the licence by a different route from the zip** (for example the zip as a download link,
+the licence by email to the named contact), and the fingerprints by a third, or read them out:
+the seal only helps while the zip and the licence travel apart, and fingerprints that travel with
+the zip prove nothing about it until the app is code-signed.
+
+A licence with no end date and no computer limit opens the customer's copy on any number of
+computers, for good. For a customer with several learners, consider one licence per learner, or
+at least an end date.
+
 That app opens **only** with that licence: it refuses every other one, even a valid licence
 issued to someone else. Its course is **sealed** to the licence: without the licence file the app
-cannot even decrypt it. Their logo shows in the header right of the theme switch; it is part of
-the signed licence, so it cannot be swapped. Every lesson carries the licence ID as an invisible
-watermark.
+cannot even decrypt it (a customer build is refused for a licence without a seal). Their logo
+shows in the header right of the theme switch; it is part of the signed licence, so it cannot be
+swapped. The lessons carry the licence ID as an invisible watermark.
+
+If no code-signing certificate is set, `new-customer` asks before building an unsigned copy
+(`--unsigned` answers yes when it runs without questions).
 
 The same without questions:
 `npm run new-customer -- --licensee "Boston University" --logo bu.png --expires 2027-09-30`
@@ -62,7 +74,14 @@ licence will ever work with the copies already given out.
 |---|---|
 | `npm run licence:issue -- --licensee "Acme Ltd" [--email x] [--expires 2027-09-30] [--machine CODE] [--logo x.png]` | Issues a licence into `licences/` |
 | `... --id EVK-1A2B3C4D` | Reissues a licence (a new expiry, or bound to one computer). Same licensee only; it keeps the seal, so the customer's build still opens, and the old file is revoked. Add `--new-seal` when the licence leaked: the customer then needs a new build too. |
-| `npm run licence:revoke -- licences/<file>.lic` | Withdraws a licence file: builds made from now on refuse it (`revoked.json`, committed). |
+| `npm run licence:revoke -- licences/<file>.lic` | Withdraws a licence file: builds made from now on refuse it (`revoked.json`, committed; licence IDs only, never names). |
+
+**Revoking reaches only builds made afterwards.** A copy already sent keeps the revocation list it
+was built with, so it still opens with the old file. A reissue that narrows a licence (a computer
+limit, an earlier end date) therefore needs a new build for the customer
+(`npm run new-customer -- --rebuild <new licence>`); `licence:issue` says so when it happens. When
+the old file must stop working even in the copy they have, reissue with `--new-seal`: the old
+file then cannot decrypt the new build, and the old build is replaced.
 | `npm run licence:keygen` | Makes the key pair. Once, ever; it refuses to replace a key. |
 | `npm run watermark:find -- copied-text.txt` | Prints the licence ID hidden in copied course text; `issued.csv` names the customer. |
 
@@ -98,16 +117,18 @@ npm run package -- --internal
 | Layer | What it does |
 |---|---|
 | Licence agreement | Shown and accepted on first start, including the technical measures (section 4A). `legal/EULA.txt` is a **draft for legal review**. |
-| Licence | Ed25519-signed; optional expiry (the clock cannot be turned back, and the learner is warned two weeks ahead) and one-computer limit; revocation list; re-checked every hour, with ten minutes' notice before the studio closes. |
+| Licence | Ed25519-signed; optional expiry and one-computer limit; revocation list (builds made after the revocation); re-checked every hour, with ten minutes' notice before the studio closes once a licence has ended; the learner is warned two weeks ahead. |
+| Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, or the latest date of the app's own files (two folders deep). Turning the clock back after that takes deleting the app's data, progress included; it does not stop someone who does. |
 | Encrypted, sealed course | `content.pack`, AES-256-GCM, a new key every build, decrypted in memory only and never cached; a customer's build needs their licence to decrypt it. |
 | Locked API | 127.0.0.1 only; answers only the app's window (a new random token every start), and only to its own host name, so neither another program nor a web page can read it. |
 | Locked app | No command-line switches in a release (debuggers, proxies, network logs); Electron fuses; DevTools off; nothing leaves the computer; the test report is served apart from the studio; the learner's code gets none of the app's environment. |
 | Obfuscated code | The main process, backend and page code are obfuscated; no source maps. |
-| Watermarks | The licence ID in lessons, hints, solutions and explanations, added again as each lesson is served with the licence in use; the window title names the licensee. |
+| Watermarks | The licence ID, in zero-width characters, in every paragraph and list of the lessons (about seven blocks in ten; blocks that are only code or a table carry none), quiz questions, options and explanations, exercise statements, hints and fenced solutions, added again as each lesson is served with the licence in use. They travel with copied and pasted text; retyping, screenshots or a deliberate clean-up remove them. The window title names the licensee. |
 
 What it does **not** stop: someone reading lessons on screen and retyping them, screenshots, or a
 skilled person spending days extracting the course from a licensed copy running on their own
-computer. The watermark is there for those.
+computer. The watermark traces text copied and pasted out of the app; for screenshots, the window
+title shows the licensee. Neither survives a deliberate effort to remove it.
 
 ## Tests
 
@@ -137,9 +158,13 @@ put it back after, and refuse to start while the app is open.
 ## Before the first external release
 
 - **Back up the signing key** (above).
-- **Code signing.** Buy a Windows code-signing certificate; set `CSC_LINK` and `CSC_KEY_PASSWORD`
-  when running `npm run package` or `new-customer.bat` (with them set, an unsigned build fails;
-  without them, `package` needs `--unsigned`). Unsigned, SmartScreen warns on install.
+- **Code signing.** Buy a Windows code-signing certificate. Certificates now live on a hardware
+  token or in a cloud service; set whichever applies before `npm run package` or `new-customer.bat`:
+  `STUDIO_SIGN_SUBJECT` (the certificate's subject name, for one in Windows' store or on a token),
+  `STUDIO_AZURE_ENDPOINT`, `STUDIO_AZURE_ACCOUNT`, `STUDIO_AZURE_PROFILE` and
+  `STUDIO_AZURE_PUBLISHER` (Azure Trusted Signing), or `CSC_LINK` and `CSC_KEY_PASSWORD` (a .pfx
+  file). With one set, everything is signed with SHA-256 and each file made is checked to be
+  validly signed. Without one, `package` needs `--unsigned`. Unsigned, SmartScreen warns on install.
 - **GitHub branch protection** for `main` (Settings → Branches): require a reviewed pull request.
   `collab-push.bat` no longer pushes to `main`, but only GitHub can enforce it.
 - **Legal review** of `legal/EULA.txt` (placeholders in brackets) and of the `[REVIEW]` notes in

@@ -21,8 +21,9 @@
  * files are ever the same, even with the same terms on the same day. All of it is signed, so none of
  * it can be changed.
  *
- * The signature must be written exactly one way (88 characters of standard base64): a licence that
- * has been revoked cannot be made to look new by writing the same signature differently.
+ * The signature must be written exactly one way (88 characters of standard base64, its unused last
+ * bits zero, as Node writes it): a licence that has been revoked cannot be made to look new by
+ * writing the same signature differently. Revocation hashes the signature's bytes in any case.
  */
 import * as crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -49,8 +50,8 @@ export const LOGO_MAX_BYTES = 300 * 1024;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SEAL = /^[0-9a-f]{64}$/;
 const SERIAL = /^[0-9a-f]{16}$/;
-/** An Ed25519 signature in standard base64, written the one way Node writes it. */
-const SIGNATURE = /^[A-Za-z0-9+/]{86}==$/;
+/** An Ed25519 signature (64 bytes) in standard base64, written the one way Node writes it. */
+const SIGNATURE = /^[A-Za-z0-9+/]{85}[AQgw]==$/;
 
 export type LicenceFile = { licence: Licence; signature: string };
 
@@ -129,7 +130,9 @@ export function verify(
   }
   if (l.expires) {
     if (!DATE.test(l.expires)) return { ok: false, reason: 'The licence is damaged.', licence: l };
-    const today = opts.today ?? new Date().toISOString().slice(0, 10);
+    // Never earlier than the day the licence was issued: a clock set back before that is wrong.
+    const given = opts.today ?? new Date().toISOString().slice(0, 10);
+    const today = DATE.test(l.issued) && l.issued > given ? l.issued : given;
     if (today > l.expires) return { ok: false, reason: 'The licence expired on ' + l.expires + '.', licence: l };
   }
   if (l.machine) {

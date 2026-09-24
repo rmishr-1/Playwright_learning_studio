@@ -11,10 +11,14 @@
  *   npm run runtime                (in desktop/)
  *   npm run runtime -- --fresh     downloads the browsers again rather than copying the cache: do
  *                                  this for a build that leaves Evoke
- *   npm run runtime -- --fresh --pin   after upgrading Playwright: downloads the browsers, and
- *                                  records their hashes in desktop/runtime-pins.json, to commit
+ *   npm run runtime -- --fresh --pin   after upgrading Playwright or Node: downloads the browsers,
+ *                                  and records their hashes, and the Node version and its hash, in
+ *                                  desktop/runtime-pins.json, to commit (--pin needs --fresh: a
+ *                                  pin is never taken from this computer's cache)
  *
- * node.exe must carry the OpenJS Foundation's valid signature. The browsers are Playwright's own
+ * node.exe must carry the OpenJS Foundation's valid signature, be the version and file pinned in
+ * runtime-pins.json, and have nothing beside it but its licence and npm's version number (Windows
+ * loads a DLL from beside a program before its own). The browsers are Playwright's own
  * builds, which are not signed: each must match the hash of its whole folder that
  * runtime-pins.json records, so a browser changed in this computer's cache, or on its way from the
  * internet, is refused. Packaging checks the manifest and the pins again (verifyManifest), so
@@ -36,7 +40,7 @@ const MANIFEST = path.join(OUT, 'MANIFEST.sha256');
 const PINS = path.join(DESKTOP, 'runtime-pins.json');
 
 /** Windows' verdict on a program's signature, and who signed it. */
-function signature(file: string): { status: string; signer: string } {
+export function signature(file: string): { status: string; signer: string } {
   const script =
     '$s = Get-AuthenticodeSignature -LiteralPath $env:STUDIO_SIGNED_FILE; ' +
     "Write-Output ($s.Status.ToString() + '|' + $s.SignerCertificate.Subject)";
@@ -54,6 +58,24 @@ function requireNodeSignature(file: string): void {
   if (s.status !== 'Valid' || !/^CN="?OpenJS Foundation"?,/.test(s.signer)) {
     throw new Error(file + ' does not carry the OpenJS Foundation\'s valid signature (' + s.status + ', ' + s.signer + '). It will not be shipped.');
   }
+}
+
+/** All that runtime/node may hold. */
+const NODE_FILES = ['node.exe', 'npm-version.txt', 'LICENSE'];
+
+const sha256 = (file: string): string => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+
+/** Throws unless runtime/node holds only NODE_FILES, and its node.exe is the pinned one. */
+function checkNode(): void {
+  const dir = path.join(OUT, 'node');
+  const extra = fs.readdirSync(dir).filter((n) => !NODE_FILES.includes(n));
+  if (extra.length) throw new Error('desktop/runtime/node holds files that must not ship (' + extra.join(', ') + '). Run `npm run runtime -- --fresh`.');
+  const want = readPins()['node.exe'];
+  if (!want) throw new Error('desktop/runtime-pins.json has no pin for node.exe. Run `npm run runtime -- --fresh --pin` and commit the file.');
+  const exe = path.join(dir, 'node.exe');
+  requireNodeSignature(exe);
+  const got = execFileSync(exe, ['--version'], { encoding: 'utf-8' }).trim() + ' ' + sha256(exe);
+  if (got !== want) throw new Error('desktop/runtime/node/node.exe is not the pinned Node (' + want.split(' ')[0] + '). Run `npm run runtime -- --fresh` with that Node, or pin a new one.');
 }
 
 function node(): void {
@@ -77,7 +99,8 @@ function node(): void {
       have = null;
     }
   }
-  if (have === process.version && !fs.existsSync(path.join(dir, 'node_modules'))) {
+  const extra = fs.existsSync(dir) ? fs.readdirSync(dir).filter((n) => !NODE_FILES.includes(n)) : [];
+  if (have === process.version && extra.length === 0) {
     fs.writeFileSync(path.join(dir, 'npm-version.txt'), npm + '\n');
     console.log('node      ' + have + ', npm ' + npm + ', signed by the OpenJS Foundation (already there)');
     return;
@@ -182,7 +205,12 @@ function browsers(fresh: boolean, pin: boolean): string[] {
     }
   }
   if (pin) {
-    fs.writeFileSync(PINS, JSON.stringify(Object.fromEntries(wanted.map((n) => [n, treeHash(path.join(dir, n))])), null, 2) + '\n');
+    const exe = path.join(OUT, 'node', 'node.exe');
+    const pins = {
+      'node.exe': execFileSync(exe, ['--version'], { encoding: 'utf-8' }).trim() + ' ' + sha256(exe),
+      ...Object.fromEntries(wanted.map((n) => [n, treeHash(path.join(dir, n))])),
+    };
+    fs.writeFileSync(PINS, JSON.stringify(pins, null, 2) + '\n');
     console.log('pins      ' + PINS + ' (commit it)');
   }
   checkPins(dir, wanted);
@@ -213,14 +241,21 @@ export function verifyManifest(): void {
     const changed = got.split('\n').filter((l) => l && !w.has(l)).map((l) => l.slice(66)).slice(0, 5);
     throw new Error('desktop/runtime has changed since it was gathered (' + (changed.join(', ') || 'files removed') + '). Run `npm run runtime -- --fresh`.');
   }
-  requireNodeSignature(path.join(OUT, 'node', 'node.exe'));
+  checkNode();
   const dir = path.join(OUT, 'ms-playwright');
   checkPins(dir, fs.readdirSync(dir));
 }
 
 if (require.main === module) {
+  const fresh = process.argv.includes('--fresh');
+  const pin = process.argv.includes('--pin');
+  if (pin && !fresh) {
+    console.error('--pin records what it downloads, never what is in this computer\'s cache: use --fresh --pin.');
+    process.exit(1);
+  }
   node();
-  browsers(process.argv.includes('--fresh'), process.argv.includes('--pin'));
+  browsers(fresh, pin);
+  checkNode();
   fs.writeFileSync(MANIFEST, hashes());
   console.log('manifest  ' + MANIFEST);
 }

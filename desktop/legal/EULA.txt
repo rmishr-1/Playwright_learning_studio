@@ -45,12 +45,13 @@ To enforce this licence, the Software:
  (a) reads Windows' identifier of the computer it runs on, and keeps only a one-way hash of it
      (the "machine code" it shows), to check a licence that is limited to one computer;
  (b) records the latest date on which it ran, and reads the dates its own files were last
-     written, so that a licence period cannot be extended by changing the computer's clock;
+     written, and treats that date as the earliest the current date can be, to make it harder to
+     extend a licence period by changing the computer's clock;
  (c) keeps the course content encrypted and its program code obfuscated, and refuses to start
-     with debugging, logging or proxy options, or when its files have been changed;
+     with debugging, logging or proxy options, or when its main program files have been changed;
  (d) checks the licence while it runs: it tells you two weeks before a licence period ends, and
-     when a licence ends or is withdrawn during a session, it tells you and closes ten minutes
-     later. Your progress is kept, and is there again when a valid licence is added.
+     when a licence period ends during a session, it tells you and closes ten minutes later.
+     Your progress is kept, and is there again when a valid licence is added.
 The Software works offline. It does not send the machine code, your progress, your code or any
 other information about you or your computer to Evoke or to anyone else.
 

@@ -29,7 +29,7 @@ import { WebSocketServer } from 'ws';
 import { listening } from './config';
 import { router } from './routes';
 import { attachStream } from './runner';
-import { currentReportDir } from './terminal';
+import { currentReportDir, frameExpected } from './terminal';
 
 export type ServerOptions = { port: number; token?: string | null; webDir?: string | null };
 export type RunningServer = { port: number; close: () => Promise<void> };
@@ -180,6 +180,14 @@ export async function startServer(opts: ServerOptions): Promise<RunningServer> {
     res.status(401).type('text/plain').send('Unauthorized');
   });
 
+  // A live-view frame's body is read only for the command that is running, with its key.
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.method === 'POST' && FRAME_POST.test(req.url ?? '')) {
+      const runId = (req.url ?? '').split('/')[3];
+      if (!frameExpected(runId, req.get('x-studio-frame-key'))) return void res.status(410).end();
+    }
+    next();
+  });
   app.use(express.json({ limit: '2mb' }));
   app.use('/api', router);
   app.get('/health', (_req, res) => res.json({ ok: true }));
@@ -215,7 +223,10 @@ export async function startServer(opts: ServerOptions): Promise<RunningServer> {
     }
     wss.handleUpgrade(req, socket, head, (ws) => {
       const detach = attachStream(match[1], (event) => {
-        if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(event));
+        if (ws.readyState !== ws.OPEN) return;
+        // A window that has stopped reading gets no more frames until it catches up.
+        if (event.event === 'frame' && ws.bufferedAmount > 8_000_000) return;
+        ws.send(JSON.stringify(event));
       });
       ws.on('close', detach);
       ws.on('error', detach);

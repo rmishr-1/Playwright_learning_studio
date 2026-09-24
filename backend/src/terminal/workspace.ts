@@ -107,6 +107,8 @@ function allowed(url: string): boolean {
 }
 
 export const test = base.extend({
+  // No service workers: their requests would not pass through the gate below.
+  serviceWorkers: 'block',
   context: async ({ context }, use) => {
     await context.route('**/*', (route) => {
       const request = route.request();
@@ -117,6 +119,17 @@ export const test = base.extend({
       }
       console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
       return route.abort('blockedbyclient');
+    });
+    // Playwright routes only the first request of a redirect: a redirect to a site not allowed is
+    // caught where it lands, and the page is taken back to a blank one.
+    context.on('page', (page) => {
+      page.on('framenavigated', (frame) => {
+        if (frame !== page.mainFrame()) return;
+        const url = frame.url();
+        if (url === '' || url.startsWith('about:') || url.startsWith('data:') || url.startsWith('chrome-error:') || allowed(url)) return;
+        console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
+        page.goto('about:blank').catch(() => {});
+      });
     });
     await use(context);
   },
@@ -164,10 +177,12 @@ function readSeeds(): WorkspaceSeeds['workspaces'] {
   const seeds = WorkspaceSeeds.parse(JSON.parse(text)).workspaces;
   // A locked day's starting files (tests/day9/..., ts-basics/day8/...) wait until it opens.
   const locked = lockedDayNumbers();
+  if (locked === null) return { demo: { files: {} }, project: { files: {} } };
   if (locked.size === 0) return seeds;
+  // day9/, day09/, day9.spec.ts, day9-login.spec.ts: any name that says which day it belongs to.
   const open = (rel: string): boolean => {
-    const m = /(?:^|\/)day(\d+)(?:\/|$)/.exec(rel);
-    return !m || !locked.has(Number(m[1]));
+    const days = [...rel.matchAll(/(?:^|[\/._-])day0*(\d+)(?=[\/._-]|$)/gi)].map((m) => Number(m[1]));
+    return !days.some((d) => locked.has(d));
   };
   return Object.fromEntries(
     Object.entries(seeds).map(([name, ws]) => [name, { files: Object.fromEntries(Object.entries(ws.files).filter(([rel]) => open(rel))) }]),

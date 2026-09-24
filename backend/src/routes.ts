@@ -34,9 +34,14 @@ export const router = Router();
  * A locked day is closed on every route, not just when its lessons are read: a check would give
  * away its expected output, and a run or progress record would count work on a day that is not open.
  */
+/** Answers for a locked day, or for one whose course cannot be read, and says it did. Never throws. */
 function refuseLocked(res: Response, week: number, day: number): boolean {
-  if (!isLocked(week, day)) return false;
-  fail(res, 423, 'DAY_LOCKED', courseDay(week, day)?.title ?? 'This day is not open yet.');
+  try {
+    if (!isLocked(week, day)) return false;
+    fail(res, 423, 'DAY_LOCKED', courseDay(week, day)?.title ?? 'This day is not open yet.');
+  } catch {
+    fail(res, 500, 'INTERNAL_ERROR', 'The course could not be read.');
+  }
   return true;
 }
 
@@ -146,7 +151,13 @@ router.post('/run', async (req, res) => {
  * Mints the run id BEFORE the run so the client can attach the WebSocket first. Without this
  * the first second of frames is missed on every run.
  */
-router.post('/run/prepare', (_req, res) => res.json({ run_id: prepareRun() }));
+router.post('/run/prepare', (_req, res) => {
+  try {
+    res.json({ run_id: prepareRun() });
+  } catch {
+    fail(res, 429, 'RUN_QUEUE_FULL', 'Too many runs are waiting. Try again in a moment.');
+  }
+});
 
 /**
  * What the Detach window shows the instant it opens, before (or instead of) anything arrives
@@ -164,19 +175,25 @@ router.get('/run/:run_id/last-frame', (req, res) => {
  * code and which exercise it is; the check itself is read from the course here.
  */
 router.post('/check', async (req, res) => {
-  let parsed;
+  let parsed: CheckRequest;
   try {
     parsed = CheckRequest.parse(req.body);
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
   if (refuseLocked(res, parsed.week, parsed.day)) return;
-  const problem = courseDay(parsed.week, parsed.day)
-    ?.parts.find((p) => p.part === parsed.part)
-    ?.problems.find((q) => q.number === parsed.problem);
-  if (!problem?.check || !problem.file) {
+  let found;
+  try {
+    found = courseDay(parsed.week, parsed.day);
+  } catch {
+    return fail(res, 500, 'INTERNAL_ERROR', 'The course could not be read.');
+  }
+  const problem = found?.parts.find((p) => p.part === parsed.part)?.problems.find((q) => q.number === parsed.problem);
+  if (!found || !problem?.check || !problem.file) {
     return fail(res, 404, 'EXERCISE_NOT_FOUND', 'This exercise has no automatic check.');
   }
+  // The check runs in the day's own workspace, whatever the page says.
+  parsed = { ...parsed, workspace: found.workspace };
   // Checking an answer is an attempt at the exercise, not reading the part.
   recordQuietly({
     week: parsed.week,

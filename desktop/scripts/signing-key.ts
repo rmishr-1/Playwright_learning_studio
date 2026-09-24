@@ -102,7 +102,10 @@ export function storePrivateKey(pem: string, passphrase: string | null = null): 
   const sealed = dpapi('Protect', inner);
   // Proves the stored copy opens before anything relies on it.
   if (!dpapi('Unprotect', sealed).equals(inner)) throw new Error('The signing key could not be stored safely.');
-  fs.writeFileSync(PRIVATE_FILE, sealed.toString('base64') + '\n');
+  // Written beside the old file, then moved over it: a crash half-way never leaves no key at all.
+  const temp = PRIVATE_FILE + '.new';
+  fs.writeFileSync(temp, sealed.toString('base64') + '\n');
+  fs.renameSync(temp, PRIVATE_FILE);
   const publicPem = crypto.createPublicKey(pem).export({ type: 'spki', format: 'pem' }).toString();
   fs.writeFileSync(FINGERPRINT_FILE, publicFingerprint(publicPem) + '\n');
 }

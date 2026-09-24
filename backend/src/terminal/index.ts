@@ -59,6 +59,8 @@ type Running = { runId: string; child: ChildProcess; stopping: boolean; timedOut
 let running: Running | null = null;
 
 const say = (runId: string, text: string): void => emit(runId, { event: 'term', data: text.replace(/\n/g, '\r\n') + '\r\n' });
+/** Text from the page, shown in the Terminal: no control characters, so no escape sequences. */
+const printable = (s: string): string => s.replace(/[\x00-\x1f\x7f]/g, '?');
 const done = (runId: string, code: number | null, openUrl?: string): void => {
   emit(runId, openUrl ? { event: 'exit', code, open_url: openUrl } : { event: 'exit', code });
   retireStream(runId);
@@ -109,7 +111,7 @@ function saveEditor(runId: string, ws: Workspace, parsed: Parsed, code: string, 
   if (file) {
     const saved = saveFile(ws, file, code);
     if (!saved) {
-      say(runId, YELLOW('The editor holds ' + file + ', which is not a file the Terminal can save.'));
+      say(runId, YELLOW('The editor holds ' + printable(file) + ', which is not a file the Terminal can save.'));
       return false;
     }
     say(runId, DIM('Saved the editor as ' + saved));
@@ -233,10 +235,12 @@ export function startCommand(runId: string, line: string, code: string, file: st
     kill(current, true);
   }, config.run.terminal_timeout_ms);
 
-  child.on('error', (e) => {
-    say(runId, YELLOW('The command could not start: ' + e.message));
-  });
-  child.on('close', (exitCode) => {
+  // The command ends once, whichever comes first: its output closing, or (when something it
+  // started keeps its output open) two seconds after it exits, or its failing to start at all.
+  let ended = false;
+  const end = (exitCode: number | null): void => {
+    if (ended) return;
+    ended = true;
     clearTimeout(timer);
     if (running === current) running = null;
     if (current.timedOut) {
@@ -245,7 +249,19 @@ export function startCommand(runId: string, line: string, code: string, file: st
       say(runId, DIM('^C'));
     }
     done(runId, current.stopping ? 130 : exitCode);
+  };
+  child.on('error', (e) => {
+    say(runId, YELLOW('The command could not start: ' + e.message));
+    end(1);
   });
+  child.on('exit', (exitCode) => {
+    setTimeout(() => {
+      child.stdout?.destroy();
+      child.stderr?.destroy();
+      end(exitCode);
+    }, 2_000).unref();
+  });
+  child.on('close', (exitCode) => end(exitCode));
 }
 
 /** Stops whatever is running, with its browsers: the desktop app calls this as it closes. */
@@ -288,11 +304,16 @@ function kill(r: Running, hard: boolean): void {
  * One live-view frame from the workspace's test wrapper, which sends the key only the running
  * command was given. Frames for a finished command, or without that key, are dropped.
  */
-export function receiveFrame(runId: string, key: string | undefined, body: { data?: unknown; width?: unknown; height?: unknown }): boolean {
-  if (!running || running.runId !== runId || typeof body.data !== 'string') return false;
+/** Whether a frame for this run, with this key, would be taken: checked before its body is read. */
+export function frameExpected(runId: string, key: string | undefined): boolean {
+  if (!running || running.runId !== runId) return false;
   const want = Buffer.from(running.frameKey);
   const got = Buffer.from(key ?? '');
-  if (got.length !== want.length || !crypto.timingSafeEqual(got, want)) return false;
+  return got.length === want.length && crypto.timingSafeEqual(got, want);
+}
+
+export function receiveFrame(runId: string, key: string | undefined, body: { data?: unknown; width?: unknown; height?: unknown }): boolean {
+  if (!frameExpected(runId, key) || typeof body.data !== 'string') return false;
   emit(runId, {
     event: 'frame',
     data: body.data,

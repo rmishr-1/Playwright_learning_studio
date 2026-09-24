@@ -51,6 +51,8 @@ const MAX_BUFFERED_BYTES = 16_000_000;
 const MAX_FRAME = 4_000_000;
 /** The longest line of output passed on as one event. */
 const MAX_EVENT_TEXT = 20_000;
+/** Streams held at once, used or waiting: each can hold MAX_BUFFERED_BYTES. */
+const MAX_STREAMS = 64;
 
 const sizeOf = (event: RunStreamEvent): number =>
   event.event === 'frame' ? event.data.length : event.event === 'stdout' ? event.text.length : event.event === 'term' ? event.data.length : 100;
@@ -142,12 +144,15 @@ function allowed(url) {
 
 async function launch(headless = true) {
   _browser = await chromium.launch({ headless: true });
-  const context = await _browser.newContext({ viewport: { width: 1280, height: 720 } });
+  // No service workers: their requests would not pass through the gate below.
+  const context = await _browser.newContext({ viewport: { width: 1280, height: 720 }, serviceWorkers: 'block' });
 
-  // Fail-closed navigation gate, at the network layer so it catches redirects too, not just
-  // explicit goto() calls. It gates TOP-LEVEL DOCUMENT navigation only: once the main frame is
-  // on an allowed app, that app's own fonts, scripts and images are allowed to load, otherwise
-  // every demo site renders broken and every run reports itself blocked.
+  // Fail-closed navigation gate, at the network layer. It gates TOP-LEVEL DOCUMENT navigation
+  // only: once the main frame is on an allowed app, that app's own fonts, scripts and images are
+  // allowed to load, otherwise every demo site renders broken and every run reports itself
+  // blocked. Playwright routes only the first request of a redirect, so a redirect is caught
+  // where it lands instead (framenavigated, below), and the page is taken back to a blank one.
+  // It keeps lessons on the course's sites; it is a guide rail, not a sandbox.
   await context.route('**/*', (route) => {
     const request = route.request();
     const url = request.url();
@@ -158,6 +163,16 @@ async function launch(headless = true) {
     return route.abort();
   });
 
+  const watch = (page) => {
+    page.on('framenavigated', (frame) => {
+      if (frame !== page.mainFrame()) return;
+      const url = frame.url();
+      if (url === '' || url.startsWith('about:') || url.startsWith('data:') || url.startsWith('chrome-error:') || allowed(url)) return;
+      send({ event: 'blocked', url });
+      page.goto('about:blank').catch(() => {});
+    });
+  };
+  context.on('page', watch);
   _page = await context.newPage();
 
   // Live view: CDP screencast, forwarded frame by frame to the overlay.
@@ -240,8 +255,9 @@ function stripAnsi(text: string): string {
 const TYPESCRIPT = JSON.stringify(onDisk(require.resolve('typescript')));
 /**
  * Where the program's own require() looks: the packages the studio ships, and nowhere else. Node's
- * usual search would climb from the temp folder through every parent's node_modules, where
- * anything could be waiting under a package's name.
+ * usual search would climb from the temp folder through every parent's node_modules, and then try
+ * its global folders (%USERPROFILE%\.node_modules and the like), where anything could be waiting
+ * under a package's name; the bootstrap below empties both lists.
  */
 const PACKAGES = JSON.stringify(path.resolve(onDisk(require.resolve('playwright/package.json')), '..', '..'));
 const BOOTSTRAP = `
@@ -256,6 +272,7 @@ const out = ts.transpileModule(fs.readFileSync(path.join(__dirname, 'program.ts'
 const m = new Module(file, module);
 m.filename = file;
 m.paths = [${PACKAGES}];
+Module.globalPaths.length = 0;
 m._compile(out, file);
 `;
 
@@ -289,6 +306,7 @@ export type StartedRun = { run_id: string; done: Promise<RunResult> };
  * socket is open and the first frames are lost.
  */
 export function prepareRun(): string {
+  if (streams.size >= MAX_STREAMS) throw Object.assign(new Error('Too many runs are waiting.'), { code: 'RUN_QUEUE_FULL' });
   const runId = crypto.randomUUID();
   streams.set(runId, newStream());
   // An id nobody uses must not leak a stream entry.
@@ -415,6 +433,15 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
       finish();
     });
     child.on('close', () => finish());
+    // Something the run started may keep its output open after it exits: two seconds on, the run
+    // is over all the same, and its slot is free.
+    child.on('exit', () => {
+      setTimeout(() => {
+        child.stdout.destroy();
+        child.stderr.destroy();
+        finish();
+      }, 2_000).unref();
+    });
     const finish = (): void => {
       if (finished) return;
       finished = true;
@@ -422,12 +449,9 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
       children.delete(child);
       active--;
       // On Windows the browser can still hold a file in the scratch folder for a moment after the
-      // child exits, and rmSync then throws EPERM. Retry, and never let cleanup fail the run.
-      try {
-        fs.rmSync(scratch, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-      } catch {
-        // Leave the folder to the OS temp cleanup rather than report a learner's run as broken.
-      }
+      // child exits. Retry in the background (never blocking the app's windows), and never let
+      // cleanup fail the run: a folder left behind goes with the OS temp cleanup.
+      void fs.promises.rm(scratch, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }).catch(() => {});
       if (status === 'ok' && stderr.trim() && !screenshot) status = 'error';
       emit(runId, { event: 'ended', status });
       // Long enough that pressing Detach a little while after a run finished still has a last

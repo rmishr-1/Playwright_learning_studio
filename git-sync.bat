@@ -1,6 +1,8 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 set "NoDefaultCurrentDirectoryInExePath=1"
+rem Windows' own programs, by their full path: a folder early in PATH cannot stand in for them.
+set "SYS=%SystemRoot%\System32"
 :: ===========================================================================
 ::  git-sync.bat - one-click sync for the REPO OWNER.
 ::  ---------------------------------------------------------------------
@@ -36,13 +38,20 @@ if not exist ".git" (
     git init -b main 2>nul || (git init && git checkout -B main)
 )
 
-REM The owner's identity, set in this repository only when none is set yet, so a
-REM collaborator who runs this by mistake keeps their own name on their commits.
+REM Who is committing: asked once, when git does not know yet, and kept for this repository. Never
+REM assumed, so nobody's commits go out under someone else's name.
 set "HAVE_MAIL="
 for /f "tokens=*" %%v in ('git config user.email 2^>nul') do set "HAVE_MAIL=%%v"
 if not defined HAVE_MAIL (
-    git config user.email "rmishra@evoketechnologies.com"
-    git config user.name  "rmishr-1"
+    echo [setup] Git does not know who is committing on this computer. Asked once, then remembered.
+    set "NEW_NAME="
+    set "NEW_MAIL="
+    set /p "NEW_NAME=        Your full name                    : "
+    set /p "NEW_MAIL=        Email linked to your GitHub login : "
+    if not defined NEW_NAME goto :fail
+    if not defined NEW_MAIL goto :fail
+    git config user.name "!NEW_NAME!"
+    git config user.email "!NEW_MAIL!"
 )
 
 git remote get-url origin >nul 2>nul && (
@@ -64,7 +73,7 @@ if errorlevel 1 (
 REM Files that must never be committed, as git pathspecs (any folder, any case), and the text of
 REM tokens and private keys that must never be committed inside any file.
 set SECRET_FILES=":(glob,icase)**/*.pem" ":(glob,icase)**/*.pfx" ":(glob,icase)**/*.p12" ":(glob,icase)**/*.key" ":(glob,icase)**/*.dpapi" ":(glob,icase)**/*.lic" ":(glob,icase)**/*.lic.old" ":(glob,icase)**/issued.csv" ":(glob,icase)**/seals.json" ":(glob,icase)**/.env" ":(glob,icase)**/.env.*" ":(glob,icase)**/*.bak" ":(glob,icase)**/*.backup" ":(glob,icase)**/id_rsa*" ":(glob,icase)**/id_ed25519*" ":(glob,icase)**/credentials*.json" ":(glob,icase)**/secrets*.json" ":(exclude)desktop/src/licence-public.pem"
-set "SECRET_TEXT=(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-ant-[A-Za-z0-9_-]{20,})"
+set "SECRET_TEXT=(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-ant-[A-Za-z0-9_-]{20,}|npm_[A-Za-z0-9]{36}|_auth[T]oken=)"
 
 REM ---------- step 1: commit everything local ----------
 echo [ 1/3 ] Committing local changes...
@@ -90,7 +99,7 @@ git diff --cached --quiet && (
 ) || (
     echo         These changes will be committed and pushed to GitHub:
     git diff --cached --stat
-    choice /c YN /n /m "        Commit and push them? [Y/N] "
+    %SYS%\choice.exe /c YN /n /m "        Commit and push them? [Y/N] "
     if !errorlevel! neq 1 (
         git reset -q
         echo         Nothing was committed or pushed.
@@ -139,6 +148,7 @@ goto :push
 
 :push
 echo [ 3/3 ] Pushing to GitHub...
+call :scan_outgoing || goto :fail
 git push -u origin %MAINBRANCH%
 if errorlevel 1 (
     echo         Push rejected - the remote moved while we were merging. Retrying...
@@ -151,6 +161,30 @@ echo [ OK  ] Sync complete - local folder and GitHub now match.
 git log -1 --pretty=format:"        HEAD: %%h  %%s"
 echo.
 pause
+exit /b 0
+
+
+:: ================= everything about to be pushed =================
+:: Not only what this script staged: commits made in an editor or a terminal are checked too,
+:: against the same file list and the same token pattern. %1 is the branch being pushed.
+:scan_outgoing
+set "RANGE=HEAD"
+git rev-parse --verify --quiet "refs/remotes/origin/%MAINBRANCH%" >nul 2>&1 && set "RANGE=origin/%MAINBRANCH%..HEAD"
+if not "%~1"=="" git rev-parse --verify --quiet "refs/remotes/origin/%~1" >nul 2>&1 && set "RANGE=origin/%~1..HEAD"
+git log --format=%%h --diff-filter=AMR %RANGE% -- %SECRET_FILES% 2>nul | %SYS%\findstr.exe . >nul && (
+    echo.
+    echo [STOP] Commits about to be pushed add files that look like keys, certificates, licences or secrets:
+    git log --format= --name-only --diff-filter=AMR %RANGE% -- %SECRET_FILES%
+    echo        Nothing was pushed. Take them out of those commits first.
+    exit /b 1
+)
+git log --format=%%h -G "%SECRET_TEXT%" %RANGE% 2>nul | %SYS%\findstr.exe . >nul && (
+    echo.
+    echo [STOP] Commits about to be pushed contain what looks like an access token or a private key:
+    git log --format="        %%h %%s" -G "%SECRET_TEXT%" %RANGE%
+    echo        Nothing was pushed. Take the secret out of those commits ^(and revoke it if it was real^).
+    exit /b 1
+)
 exit /b 0
 
 REM ================= conflict handling =================
@@ -168,7 +202,7 @@ echo    M = keep MY version of the conflicting parts
 echo    G = take the GITHUB ^(collaborator's^) version
 echo    X = stop; I will open the files and resolve by hand
 echo.
-choice /c MGX /n /m "  Your choice [M/G/X]: "
+%SYS%\choice.exe /c MGX /n /m "  Your choice [M/G/X]: "
 set "PICK=!errorlevel!"
 
 REM start clean, then redo the merge with the chosen side winning conflicts
@@ -207,31 +241,31 @@ goto :fail
 
 REM ================= helpers =================
 :ensure_git
-where git >nul 2>&1 && exit /b 0
+%SYS%\where.exe git >nul 2>&1 && exit /b 0
 if exist "%GITCMD%\git.exe"  ( set "PATH=%GITCMD%;%PATH%" & exit /b 0 )
 if exist "%GITCMD2%\git.exe" ( set "PATH=%GITCMD2%;%PATH%" & exit /b 0 )
 
 echo [setup] Git is not installed.
 echo [setup] Installing it accepts the Git for Windows licence ^(GPL v2^) and, through winget,
 echo         the winget source agreements.
-choice /c YN /n /m "[setup] Install Git for Windows now? [Y/N] "
+%SYS%\choice.exe /c YN /n /m "[setup] Install Git for Windows now? [Y/N] "
 if not "%errorlevel%"=="1" (
     echo [setup] Git was not installed. Install it from https://git-scm.com/download/win and run this again.
     exit /b 1
 )
-where winget >nul 2>&1 && (
+%SYS%\where.exe winget >nul 2>&1 && (
     echo [setup] Installing via winget...
     winget install --id Git.Git -e --source winget --silent --accept-package-agreements --accept-source-agreements
 ) || (
     echo [setup] winget not available - downloading the Git installer, and checking its signature...
     REM The download goes to a folder of its own, and runs only when Windows confirms it is
     REM signed by the Git for Windows project.
-    powershell -NoProfile -NonInteractive -Command ^
+    %SYS%\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -Command ^
       "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '^Git-[\d.]+-64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch '^CN=Johannes Schindelin,') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
 )
 
 set "PATH=%GITCMD%;%GITCMD2%;%PATH%"
-where git >nul 2>&1 && ( echo [setup] Git installed successfully. & exit /b 0 )
+%SYS%\where.exe git >nul 2>&1 && ( echo [setup] Git installed successfully. & exit /b 0 )
 echo [ERROR] Git could not be installed automatically.
 echo         Install it manually from https://git-scm.com/download/win and run this again.
 exit /b 1

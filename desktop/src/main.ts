@@ -45,6 +45,8 @@ declare const __STUDIO_BUILD__: {
   onlyId: string | null;
   /** Fingerprints of licence files Evoke has withdrawn (desktop/revoked.json). */
   revoked: string[];
+  /** The day the app was built (YYYY-MM-DD): no licence check counts a day before it. */
+  built: string;
 };
 
 const RELEASE = __STUDIO_RELEASE__;
@@ -57,8 +59,9 @@ const COPYRIGHT = 'Copyright © 2026 Evoke Technologies. All rights reserved.';
 // attach a debugger, route the app's traffic through a proxy, or write it all to a log file
 // (--remote-debugging-port, --proxy-server, --log-net-log, ...), and any of those would hand out
 // the token and the decrypted course. On Windows Chromium also reads /switch, so nothing is let
-// through by its first character; and Chromium's own parser is asked too. The app never needs an
-// argument: its shortcut passes none.
+// through by its first character. The app never needs an argument: its shortcut passes none.
+// Chromium's own parser is asked about the worst switches as well: that second check matters only
+// if a switch ever reaches Chromium some other way than the command line.
 const DANGEROUS_SWITCHES = [
   'remote-debugging-port',
   'remote-debugging-pipe',
@@ -117,8 +120,10 @@ const MACHINE = machineCode();
 /**
  * Today, as far as the licence is concerned: never earlier than the latest day the app has seen, so
  * turning the computer's clock back does not bring an expired licence back to life. That day is
- * read from more than one mark: the day it records, and the days the app's own files were last
- * written, so deleting one file does not reset it.
+ * read from several marks: the day the app built into it was made, the day it records, and the
+ * days its own files were last written, down into the progress and workspace folders, so deleting
+ * or editing a few files does not reset it. (verify() also never counts a day before the licence
+ * was issued.)
  */
 const LAST_SEEN_FILE = path.join(USER_DIR, 'last-seen.json');
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -130,13 +135,29 @@ function licenceToday(): { today: string; now: string } {
   } catch {
     // No record yet.
   }
-  try {
-    for (const e of fs.readdirSync(USER_DIR, { withFileTypes: true })) {
-      if (e.isFile()) marks.push(fs.statSync(path.join(USER_DIR, e.name)).mtime.toISOString().slice(0, 10));
+  marks.push(BUILD.built);
+  // The files the app writes, two folders deep (Progress/progress.json, Workspace/<name>/...), at
+  // most a few hundred of them.
+  let seen = 0;
+  const walk = (dir: string, depth: number): void => {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
     }
-  } catch {
-    // No folder yet.
-  }
+    for (const e of entries) {
+      if (++seen > 400) return;
+      const full = path.join(dir, e.name);
+      try {
+        marks.push(fs.statSync(full).mtime.toISOString().slice(0, 10));
+      } catch {
+        continue;
+      }
+      if (e.isDirectory() && depth < 2 && !e.isSymbolicLink()) walk(full, depth + 1);
+    }
+  };
+  walk(USER_DIR, 0);
   const today = marks.filter((d) => DAY.test(d)).reduce((a, b) => (b > a ? b : a), now);
   try {
     fs.mkdirSync(USER_DIR, { recursive: true });
@@ -156,7 +177,8 @@ function check(text: string): Verdict {
       ...verdict,
       reason:
         "This computer's clock says " + now + ', but the studio has already been used on ' + today + ', after the licence ' +
-        'ended (' + verdict.licence.expires + '). Set the clock to the right date, or ask Evoke for a renewed licence.',
+        'ended (' + verdict.licence.expires + '). Set the clock to the right date. If it was ever set ahead by mistake, ' +
+        'ask Evoke for a renewed licence: the studio keeps the latest date it has seen.',
     };
   }
   return verdict;

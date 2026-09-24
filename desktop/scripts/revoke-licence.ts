@@ -4,9 +4,12 @@
  *   npm run licence:revoke -- licences/<id>-<customer>.lic [--reason "reissued with a new expiry"]
  *
  * Adds the file's fingerprint (the hash of its signature, so only that file, not every licence with
- * its ID) to desktop/revoked.json, which is committed and built into every copy. Copies already
- * given out do not change; send the customer a new build if they must stop accepting it. Revoke the
- * old file whenever a licence is reissued under the same ID.
+ * its ID) to desktop/revoked.json, which is committed and built into every copy. It records the
+ * licence ID, never the customer's name: issued.csv, kept beside the signing key, says whose it is.
+ *
+ * Copies already given out do not change: they keep the list they were built with. A customer must
+ * get a new build (npm run new-customer -- --rebuild <their new licence>) before their copy refuses
+ * the old file. Revoke the old file whenever a licence is reissued under the same ID.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -15,7 +18,7 @@ import { DESKTOP } from './signing-key';
 
 export const REVOKED_FILE = path.join(DESKTOP, 'revoked.json');
 
-export type Revoked = { revoked: { fingerprint: string; id: string; licensee: string; issued: string; reason: string; date: string }[] };
+export type Revoked = { revoked: { fingerprint: string; id: string; issued: string; reason: string; date: string }[] };
 
 export function readRevoked(): Revoked {
   return fs.existsSync(REVOKED_FILE) ? (JSON.parse(fs.readFileSync(REVOKED_FILE, 'utf-8')) as Revoked) : { revoked: [] };
@@ -29,7 +32,6 @@ export function revoke(file: string, reason: string): boolean {
   list.revoked.push({
     fingerprint: print,
     id: licenceFile.licence.id,
-    licensee: licenceFile.licence.licensee,
     issued: licenceFile.licence.issued,
     reason,
     date: new Date().toISOString().slice(0, 10),
@@ -46,5 +48,9 @@ if (require.main === module) {
   }
   const i = process.argv.indexOf('--reason');
   const done = revoke(path.resolve(file), i === -1 ? 'withdrawn' : process.argv[i + 1] ?? 'withdrawn');
-  console.log(done ? 'Revoked. Builds made from now on refuse this licence file.' : 'That licence file was already revoked.');
+  console.log(
+    done
+      ? 'Revoked. Builds made from now on refuse this licence file. Copies already sent still accept it until the customer gets a new build.'
+      : 'That licence file was already revoked.',
+  );
 }

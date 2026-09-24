@@ -79,8 +79,19 @@ const csv = (v: string | null | undefined): string => {
   return '"' + s + '"';
 };
 
-/** Issues the licence, writes it, records it, and returns it with the file it was written to. */
-export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence; file: string }> {
+/** Every licence ID this computer has a record of: in seals.json, issued.csv and licences/. */
+function knownIds(seals: Seals): Set<string> {
+  const ids = new Set(Object.keys(seals));
+  if (fs.existsSync(ISSUED_CSV)) for (const m of fs.readFileSync(ISSUED_CSV, 'utf-8').matchAll(/EVK-[0-9A-F]{8}/g)) ids.add(m[0]);
+  if (fs.existsSync(LICENCES_DIR)) for (const n of fs.readdirSync(LICENCES_DIR)) ids.add(n.slice(0, 12));
+  return ids;
+}
+
+/**
+ * Issues the licence, writes it, records it, and returns it with the file it was written to, and
+ * any warning for whoever issued it.
+ */
+export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence; file: string; warnings: string[] }> {
   const problem = problemWith(o);
   if (problem) throw new Error(problem);
   const publicKey = checkedPublicKey();
@@ -100,11 +111,19 @@ export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence;
   const kept = known?.seal ?? earlier.find((e) => e.licence.licence.seal)?.licence.licence.seal;
   const seal = !o.newSeal && kept ? kept : crypto.randomBytes(32).toString('hex');
 
+  // A new licence gets an ID no licence has had: two customers must never share a seal record or a watermark.
+  let id = o.id ?? '';
+  if (!id) {
+    const taken = knownIds(seals);
+    do id = 'EVK-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    while (taken.has(id));
+  }
+
   const logo = o.logoFile
     ? 'data:image/' + (/\.png$/i.test(o.logoFile) ? 'png' : 'jpeg') + ';base64,' + fs.readFileSync(o.logoFile).toString('base64')
     : null;
   const licence: Licence = {
-    id: o.id ?? 'EVK-' + crypto.randomBytes(4).toString('hex').toUpperCase(),
+    id,
     licensee: o.licensee.trim(),
     email: null,
     issued: new Date().toISOString().slice(0, 10),
@@ -134,12 +153,23 @@ export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence;
   fs.mkdirSync(LICENCES_DIR, { recursive: true });
   fs.writeFileSync(file, text);
 
+  // A reissue that narrows the terms reaches only builds made from now on: the customer's copy
+  // accepts the earlier file until it is rebuilt.
+  const warnings: string[] = [];
+  const before = earlier[0]?.licence.licence;
+  if (before && ((licence.machine && !before.machine) || (licence.expires && (!before.expires || licence.expires < before.expires)))) {
+    warnings.push(
+      'This reissue narrows the licence, but the copy the customer already has still accepts the earlier file. ' +
+        'Send them a new build: npm run new-customer -- --rebuild "' + file + '" (add --new-seal to the reissue if the earlier file must stop working even for that copy).',
+    );
+  }
+
   if (!fs.existsSync(ISSUED_CSV)) fs.writeFileSync(ISSUED_CSV, 'id,licensee,email,issued,expires,machine\n');
   fs.appendFileSync(
     ISSUED_CSV,
     [licence.id, licence.licensee, o.email?.trim() || null, licence.issued, licence.expires, licence.machine].map(csv).join(',') + '\n',
   );
-  return { licence, file };
+  return { licence, file, warnings };
 }
 
 function arg(name: string): string | null {
@@ -154,7 +184,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   try {
-    const { licence, file } = await issueLicence({
+    const { licence, file, warnings } = await issueLicence({
       licensee,
       email: arg('email'),
       expires: arg('expires'),
@@ -168,6 +198,7 @@ async function main(): Promise<void> {
         (licence.machine ? ', for machine ' + licence.machine : '') + (licence.logo ? ', with their logo' : ''),
     );
     console.log(file);
+    for (const w of warnings) console.log('\nWARNING: ' + w);
   } catch (e) {
     console.error((e as Error).message);
     process.exit(1);

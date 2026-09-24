@@ -1,6 +1,8 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 set "NoDefaultCurrentDirectoryInExePath=1"
+rem Windows' own programs, by their full path: a folder early in PATH cannot stand in for them.
+set "SYS=%SystemRoot%\System32"
 :: ===========================================================================
 ::  collab-pull.bat - for COLLABORATORS, not the repo owner.
 ::  ---------------------------------------------------------------------
@@ -99,7 +101,7 @@ echo   Branch : !CURBRANCH!
 :: front rather than discovering it mid-operation.
 :: --------------------------------------------------------------------------
 set /a NDIRTY=0
-for /f %%n in ('git status --porcelain 2^>nul ^| find /c /v ""') do set /a NDIRTY=%%n
+for /f %%n in ('git status --porcelain 2^>nul ^| %SYS%\find.exe /c /v ""') do set /a NDIRTY=%%n
 
 set "STASHED=no"
 if !NDIRTY! EQU 0 goto :fetch
@@ -246,31 +248,31 @@ endlocal & exit /b 0
 
 :: ================= helpers =================
 :ensure_git
-where git >nul 2>&1 && exit /b 0
+%SYS%\where.exe git >nul 2>&1 && exit /b 0
 if exist "%GITCMD%\git.exe"  ( set "PATH=%GITCMD%;%PATH%" & exit /b 0 )
 if exist "%GITCMD2%\git.exe" ( set "PATH=%GITCMD2%;%PATH%" & exit /b 0 )
 
 echo   [setup] Git is not installed.
 echo   [setup] Installing it accepts the Git for Windows licence ^(GPL v2^) and, through winget,
 echo           the winget source agreements.
-choice /c YN /n /m "  [setup] Install Git for Windows now? [Y/N] "
+%SYS%\choice.exe /c YN /n /m "  [setup] Install Git for Windows now? [Y/N] "
 if not "%errorlevel%"=="1" (
     echo   [setup] Git was not installed. Install it from https://git-scm.com/download/win and run this again.
     exit /b 1
 )
-where winget >nul 2>&1 && (
+%SYS%\where.exe winget >nul 2>&1 && (
     echo   [setup] Installing via winget...
     winget install --id Git.Git -e --source winget --silent --accept-package-agreements --accept-source-agreements
 ) || (
     echo   [setup] winget not available - downloading the Git installer, and checking its signature...
     REM The download goes to a folder of its own, and runs only when Windows confirms it is
     REM signed by the Git for Windows project.
-    powershell -NoProfile -NonInteractive -Command ^
+    %SYS%\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -Command ^
       "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '^Git-[\d.]+-64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch '^CN=Johannes Schindelin,') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
 )
 
 set "PATH=%GITCMD%;%GITCMD2%;%PATH%"
-where git >nul 2>&1 && ( echo   [setup] Git installed successfully. & exit /b 0 )
+%SYS%\where.exe git >nul 2>&1 && ( echo   [setup] Git installed successfully. & exit /b 0 )
 echo   [FAIL] Git could not be installed automatically.
 echo          Install it from https://git-scm.com/download/win and run this again.
 exit /b 1

@@ -37,15 +37,18 @@ export function decodeAll(text: string): string[] {
 }
 
 /**
- * Marks one markdown text: after the first ordinary sentence, outside code, headings, lists and
- * tables, so nothing a learner copies to run and nothing the page matches on is touched. A line
- * with a web address is skipped: a mark right after a bare link would become part of the link.
+ * Marks one markdown text: every paragraph and list, on its first line of ordinary prose, outside
+ * code, headings and tables, so nothing a learner copies to run and nothing the page matches on
+ * is touched. A line with a web address is skipped: a mark right after a bare link would become
+ * part of the link. The mark goes before any trailing spaces, which Markdown reads as a line break.
  * A line already marked (the build's mark) takes the new mark after its own, so the text carries
  * both, always in the same place, however many times it is marked.
  */
 export function markMarkdown(text: string, id: string): string {
   const lines = text.split('\n');
   let fence = false;
+  let paragraphMarked = false;
+  let changed = false;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (/^\s*(```|~~~)/.test(line)) {
@@ -54,27 +57,44 @@ export function markMarkdown(text: string, id: string): string {
     }
     if (fence) continue;
     const t = strip(line).trim();
-    if (t.length < 40 || /^([#>|*+-]|\d+[.)]\s|<)/.test(t) || !/[A-Za-z]/.test(t[0]) || !/[.!?:]$/.test(t)) continue;
+    if (t === '') {
+      paragraphMarked = false;
+      continue;
+    }
+    if (paragraphMarked) continue;
+    // Indented code (four spaces or a tab) is code, not prose.
+    if (/^( {4}|\t)/.test(line)) continue;
+    // A list item's words count, after its marker; headings, quotes, tables and HTML never.
+    const body = t.replace(/^([*+-]|\d+[.)])\s+/, '');
+    if (body.length < 20 || /^[#>|<*+-]/.test(body) || !/[A-Za-z]/.test(body[0])) continue;
     if (/:\/\/|www\./i.test(t)) continue;
-    lines[i] = line + encode(id);
-    return lines.join('\n');
+    lines[i] = line.replace(/(\s*)$/, encode(id) + '$1');
+    paragraphMarked = true;
+    changed = true;
   }
-  return text;
+  return changed ? lines.join('\n') : text;
 }
 
-/** The block types whose text is prose to mark. */
-const MARKED = new Set(['markdown', 'callout', 'at-a-glance', 'recap', 'reference']);
+/** Marks a quiz option that reads as words (it has a space), at its end. Answers are indexes, so a mark changes nothing. */
+function markOption(text: string, id: string): string {
+  const t = strip(text).trim();
+  return t.includes(' ') && /[A-Za-z]/.test(t) && !/:\/\/|www\./i.test(t) ? text.replace(/(\s*)$/, encode(id) + '$1') : text;
+}
+
+/** The block types whose text is prose to mark (a checkpoint's text is its question). */
+const MARKED = new Set(['markdown', 'callout', 'at-a-glance', 'recap', 'reference', 'checkpoint']);
 
 type MarkableDay = {
   parts: {
-    blocks: { type: string; text: string; checkpoint?: { explanation: string } | null }[];
+    blocks: { type: string; text: string; checkpoint?: { explanation: string; options?: string[] } | null }[];
     problems?: { statement: string; hints?: string[]; solution?: string | null }[];
   }[];
 };
 
 /**
- * Marks a whole day: its prose blocks, quiz explanations, and each exercise's statement, hints and
- * written solution. Returns a new day and how many marks went in; the day given is not changed.
+ * Marks a whole day: its prose blocks, quiz questions, options and explanations, and each
+ * exercise's statement, hints and written solution. Returns a new day and how many marks went in;
+ * the day given is not changed.
  */
 export function markDay<T extends MarkableDay>(day: T, id: string): { day: T; marks: number } {
   const copy = JSON.parse(JSON.stringify(day)) as T;
@@ -88,6 +108,13 @@ export function markDay<T extends MarkableDay>(day: T, id: string): { day: T; ma
     for (const block of part.blocks) {
       if (MARKED.has(block.type) && typeof block.text === 'string') block.text = mark(block.text);
       if (block.checkpoint && typeof block.checkpoint.explanation === 'string') block.checkpoint.explanation = mark(block.checkpoint.explanation);
+      if (block.checkpoint && Array.isArray(block.checkpoint.options)) {
+        block.checkpoint.options = block.checkpoint.options.map((o) => {
+          const marked = typeof o === 'string' ? markOption(o, id) : o;
+          if (marked !== o) marks++;
+          return marked;
+        });
+      }
     }
     for (const problem of part.problems ?? []) {
       problem.statement = mark(problem.statement);

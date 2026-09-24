@@ -89,6 +89,21 @@ async function ask(): Promise<IssueOptions | null> {
   return go === '' || go === 'y' || go === 'yes' ? options : null;
 }
 
+/**
+ * With no code-signing certificate set, asks whether to build an unsigned copy anyway. Without a
+ * console to ask in, the answer is no: --unsigned must say so.
+ */
+async function confirmUnsigned(): Promise<boolean> {
+  console.log('\n  No code-signing certificate is set (see desktop/README.md, "Code signing"), so this copy');
+  console.log('  will not be signed: Windows will warn the customer ("Windows protected your PC"), and nothing');
+  console.log('  proves the app came from Evoke.');
+  if (!process.stdin.isTTY) return false;
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const answer = await new Promise<string>((resolve) => rl.question('  Build it unsigned? [y/N] ', resolve));
+  rl.close();
+  return /^y(es)?$/i.test(answer.trim());
+}
+
 async function main(): Promise<void> {
   const rebuild = arg('rebuild');
   if (rebuild) return deliver(path.resolve(cleanPath(rebuild)));
@@ -137,9 +152,8 @@ async function deliver(licenceFile: string): Promise<void> {
   console.log('  window shows little. Keep this window open until it says DONE. The zip is moved into');
   console.log('  the deliveries folder only when it is complete.');
   const unsigned = !hasCertificate();
-  if (unsigned) {
-    console.log('\n  Note: no code-signing certificate is set (CSC_LINK), so the app is not signed. Windows will');
-    console.log('  warn the customer ("Windows protected your PC") until Evoke signs its copies.');
+  if (unsigned && !process.argv.includes('--unsigned') && !(await confirmUnsigned())) {
+    throw new Error('No code-signing certificate is set, and building unsigned was not confirmed. Nothing was built.');
   }
   const made = await packageApp({ licenceFile, carryLicence: false, target: 'zip', unsigned });
   const zip = made.find((f) => f.endsWith('.zip'));
@@ -188,6 +202,10 @@ async function deliver(licenceFile: string): Promise<void> {
   console.log('  ' + path.basename(licenceOut));
   console.log('  READ ME FIRST.txt');
   console.log('  SHA256SUMS.txt');
+  console.log('');
+  console.log('  Send the licence by a different route from the zip (for example the zip as a download link,');
+  console.log('  the licence by email to the named contact), and the fingerprints in SHA256SUMS.txt by a third');
+  console.log('  route, or read them out: the seal only protects the course while the two travel apart.');
   if (!process.argv.includes('--no-open')) spawn(systemExe(path.join('..', 'explorer.exe')), [out], { detached: true, stdio: 'ignore' }).unref();
 }
 

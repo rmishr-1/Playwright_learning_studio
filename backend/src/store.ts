@@ -65,32 +65,31 @@ export function courseDay(week: number, day: number): CourseDay | null {
   return parsed;
 }
 
-/** Whether a day is locked: by itself, or because its whole week is. */
+/** Whether a day is locked: by itself, or because its whole week is. A course that cannot be read keeps it locked. */
 export function isLocked(week: number, day: number): boolean {
-  if (courseDay(week, day)?.locked) return true;
   try {
+    if (courseDay(week, day)?.locked) return true;
     return courseIndex().weeks.find((w) => w.week === week)?.locked === true;
   } catch {
-    return false;
+    return true;
   }
 }
 
 /**
- * The days that are locked, numbered through the course as the workspaces' folders are (day1 to
- * day10), so a locked day's starting files stay out of the workspaces too.
+ * The days that are locked, by their number through the course (IndexDay.number), which is how
+ * the workspaces' folders are named (day1 to day10), so a locked day's starting files stay out of
+ * the workspaces too. null when the course cannot be read: then nothing is seeded.
  */
-export function lockedDayNumbers(): Set<number> {
+export function lockedDayNumbers(): Set<number> | null {
   const locked = new Set<number>();
-  let n = 0;
   try {
-    for (const w of [...courseIndex().weeks].sort((a, b) => a.week - b.week)) {
-      for (const d of [...w.days].sort((a, b) => a.day - b.day)) {
-        n++;
-        if (w.locked || d.locked || courseDay(w.week, d.day)?.locked) locked.add(n);
+    for (const w of courseIndex().weeks) {
+      for (const d of w.days) {
+        if (w.locked || d.locked || courseDay(w.week, d.day)?.locked) locked.add(d.number);
       }
     }
   } catch {
-    // No course: nothing to seed either.
+    return null;
   }
   return locked;
 }

@@ -104,6 +104,8 @@ export async function build(opts: {
   carryLicence?: boolean;
   /** The public key to build in, when not Evoke's (the tests use their own). */
   publicKeyFile?: string | null;
+  /** Build for a licence that has no seal (issued before seals existed): its course opens without it. */
+  allowUnsealed?: boolean;
 }): Promise<BuildInfo> {
   const obfuscate = opts.obfuscate ?? opts.release;
   if (opts.release && opts.publicKeyFile) throw new Error('A release is built only for Evoke\'s public key: --public-key goes with --dev.');
@@ -117,6 +119,12 @@ export async function build(opts: {
     const verdict = verify(text, publicKey, { onlyId: null, machine: parsed.licence?.machine ?? '', revoked });
     if (!verdict.ok) throw new Error(opts.licenceFile + ': ' + verdict.reason);
     licence = verdict.licence;
+    if (!licence.seal && !opts.allowUnsealed) {
+      throw new Error(
+        opts.licenceFile + ' has no seal, so its build would open without the licence. Reissue it with ' +
+          '`npm run licence:issue -- --id ' + licence.id + ' --licensee "' + licence.licensee + '" --new-seal`, or add --allow-unsealed.',
+      );
+    }
   }
   const mark = licence?.id ?? 'EVK-INTERNAL';
   console.log(PRODUCT + ' ' + VERSION + ', ' + (opts.release ? 'release' : 'development') + ' build' +
@@ -160,7 +168,14 @@ export async function build(opts: {
     alias: { bufferutil: path.join(DESKTOP, 'src', 'stubs', 'absent.js'), 'utf-8-validate': path.join(DESKTOP, 'src', 'stubs', 'absent.js') },
     define: {
       __STUDIO_RELEASE__: JSON.stringify(opts.release),
-      __STUDIO_BUILD__: JSON.stringify({ product: PRODUCT, version: VERSION, publicKey, onlyId: licence?.id ?? null, revoked }),
+      __STUDIO_BUILD__: JSON.stringify({
+        product: PRODUCT,
+        version: VERSION,
+        publicKey,
+        onlyId: licence?.id ?? null,
+        revoked,
+        built: new Date().toISOString().slice(0, 10),
+      }),
       __STUDIO_PACK_KEY__: JSON.stringify(packed.key),
       __STUDIO_PACK_SEALED__: JSON.stringify(seal !== null),
     },
@@ -274,6 +289,7 @@ if (require.main === module) {
     release: !process.argv.includes('--dev'),
     obfuscate: process.argv.includes('--obfuscate') || undefined,
     carryLicence: process.argv.includes('--carry'),
+    allowUnsealed: process.argv.includes('--allow-unsealed'),
     publicKeyFile: process.argv.includes('--public-key') ? path.resolve(process.argv[process.argv.indexOf('--public-key') + 1]) : null,
     licenceFile: i === -1 ? null : path.resolve(process.argv[i + 1]),
   }).catch((e) => {

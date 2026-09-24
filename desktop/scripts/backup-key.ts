@@ -11,19 +11,38 @@
  * licence will ever work with the copies already given out.
  *
  * Backups are encrypted with AES-256-GCM under a key derived from the passphrase with scrypt
- * (N=2^17), which makes guessing a passphrase slow. They are refused inside the project folder,
- * where a sync script could take them along.
+ * (N=2^17), which makes guessing a passphrase slow. A backup's name must end in .backup (which git
+ * ignores), it is never written inside a git repository (where a sync script could take it along,
+ * however the path is spelled), and it never replaces a file already there unless --force says so.
+ * A restored key keeps the backup's passphrase, and must be Evoke's own key.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { DESKTOP, backupOf, fromBackup, hasPrivateKey, loadPrivateKey, storePrivateKey } from './signing-key';
+import { EVOKE_KEY_FINGERPRINT, backupOf, fromBackup, hasPrivateKey, loadPrivateKey, publicFingerprint, storePrivateKey } from './signing-key';
 import { secret } from './prompt';
+import * as crypto from 'node:crypto';
 
-const PROJECT = path.resolve(DESKTOP, '..');
+/** The git repository a path is inside, if any: its real path is checked, however it was spelled. */
+function repositoryOf(target: string): string | null {
+  let dir: string;
+  try {
+    dir = fs.realpathSync.native(path.dirname(target));
+  } catch {
+    throw new Error('The folder ' + path.dirname(target) + ' does not exist.');
+  }
+  for (;;) {
+    if (fs.existsSync(path.join(dir, '.git'))) return dir;
+    const up = path.dirname(dir);
+    if (up === dir) return null;
+    dir = up;
+  }
+}
 
 async function newPassphrase(what: string): Promise<string> {
   const pass = await secret('New passphrase for ' + what + ' (at least 14 characters): ');
-  if (pass.length < 14) throw new Error('Use a passphrase of at least 14 characters: several unrelated words work well.');
+  if (pass.length < 14 || new Set(pass).size < 8) {
+    throw new Error('Use a passphrase of at least 14 characters, with at least 8 different ones: several unrelated words work well.');
+  }
   if ((await secret('The same passphrase again: ')) !== pass) throw new Error('The two passphrases differ. Nothing was written.');
   return pass;
 }
@@ -42,17 +61,22 @@ async function main(): Promise<void> {
   }
   const target = path.resolve(file);
   if (mode === 'backup') {
-    if (target.toLowerCase().startsWith(PROJECT.toLowerCase() + path.sep)) {
-      throw new Error('Write the backup outside the project folder (for example to a USB drive), where no sync script can take it.');
-    }
+    if (!/\.backup$/i.test(target)) throw new Error('Name the backup file so it ends in .backup, for example E:\\evoke-signing-key.backup.');
+    const repo = repositoryOf(target);
+    if (repo) throw new Error('That folder is inside a git repository (' + repo + '). Write the backup somewhere no sync can take it, such as a USB drive.');
+    if (fs.existsSync(target) && !process.argv.includes('--force')) throw new Error(target + ' already exists. Choose another name, or add --force to replace it.');
     const pem = await loadPrivateKey();
-    fs.writeFileSync(target, backupOf(pem, await newPassphrase('the backup')));
+    fs.writeFileSync(target, backupOf(pem, await newPassphrase('the backup')), { flag: process.argv.includes('--force') ? 'w' : 'wx' });
     console.log('Backup written: ' + target + '. Keep it, and its passphrase, safe and offline, apart from each other.');
   } else {
     if (hasPrivateKey()) throw new Error('This computer already has a signing key. Move it away first if you really mean to replace it.');
-    const pem = fromBackup(fs.readFileSync(target), await secret('Passphrase of the backup: '));
-    storePrivateKey(pem);
-    console.log('The signing key is restored for this Windows user.');
+    const passphrase = await secret('Passphrase of the backup: ');
+    const pem = fromBackup(fs.readFileSync(target), passphrase);
+    const got = publicFingerprint(crypto.createPublicKey(pem).export({ type: 'spki', format: 'pem' }).toString());
+    if (got !== EVOKE_KEY_FINGERPRINT) throw new Error('That backup holds a different key from the one the app trusts. Nothing was restored.');
+    // The restored key keeps the backup's passphrase: it is asked for whenever a licence is issued.
+    storePrivateKey(pem, passphrase);
+    console.log('The signing key is restored for this Windows user. It asks for the backup\'s passphrase whenever a licence is issued.');
   }
 }
 
