@@ -17,9 +17,11 @@ email, expiry date, logo (a PNG or JPEG, up to 300 KB; drag the file into the wi
 code, then issues their licence and builds their app, in about 10 minutes. Keep the window open
 until it says **DONE**. What to send them is in `deliveries/<licence id>-<customer>/`:
 
-- `QA-Studio-<version>-<licence id>.zip`: the app. They unzip it to a short folder (such as
-  `C:\QA Studio`: the browsers' deepest files are 149 characters in, and Windows cannot extract
-  past 260) and run `QA Practice Training Studio.exe`; nothing to install.
+- `QA-Studio-<version>-<licence id>.zip`: the app. They unzip it to their own Programs folder,
+  `%LOCALAPPDATA%\Programs\QA Studio` (short enough for the browsers' deepest files, 149
+  characters in, to stay under Windows' 260), and run `QA Practice Training Studio.exe`; nothing to
+  install. A release refuses to start from a folder other accounts on the computer can change (one
+  made directly under `C:\`, for example): another account could put its own code in the app's.
 - `<customer> licence.lic`: their licence.
 - `READ ME FIRST.txt`: the four steps to start.
 - `SHA256SUMS.txt`: the fingerprints of the zip and the licence, so they can check what arrived.
@@ -105,6 +107,8 @@ npm run package -- --internal
   ones. Packaging refuses a runtime that has changed since.
 - **An internal build never leaves Evoke.** It is not sealed, so its course can be decrypted
   without any licence, and it opens with every customer's licence.
+- Run `npm ci` (here and at the root) before `npm run package`: the app's own code is bundled from
+  `node_modules` as it is. `new-customer.bat` always does.
 - `npm run package -- --internal` builds the internal installer
   (`release/QA-Practice-Training-Studio-Setup-<version>-internal.exe`), for any valid licence.
   `--licence <file>` builds one customer's instead; `--carry` puts the licence inside it (then
@@ -159,7 +163,8 @@ npm run test:release -- licences/<a licence the build accepts>.lic
   opens with its own, carries its watermark and shows its logo.
 - `test:release` checks the packaged app from outside: the fuses, what it contains, that nothing
   in it is readable, that every switch, a changed `app.asar`, a planted `reg.exe` and planted
-  modules are refused, and that the API refuses everything but the window.
+  modules are refused, that a copy in a folder other accounts can change will not start, and that
+  the API refuses everything but the window.
 
 They move the app's data folder (`%APPDATA%\QA Practice Training Studio`) aside while they run and
 put it back after, and refuse to start while the app is open.
@@ -173,7 +178,9 @@ put it back after, and refuse to start while the app is open.
   `STUDIO_AZURE_ENDPOINT`, `STUDIO_AZURE_ACCOUNT`, `STUDIO_AZURE_PROFILE` and
   `STUDIO_AZURE_PUBLISHER` (Azure Trusted Signing), or `CSC_LINK` and `CSC_KEY_PASSWORD` (a .pfx
   file). With one set, everything is signed with SHA-256 and each file made is checked to be
-  validly signed. Without one, `package` needs `--unsigned`. Unsigned, SmartScreen warns on install.
+  validly signed by a certificate named "Evoke Technologies". When the certificate arrives, pin
+  its exact name (and ideally its thumbprint) in `scripts/package.ts`. Without one, `package` needs
+  `--unsigned`. Unsigned, SmartScreen warns on install.
 - **GitHub branch protection** for `main` (Settings → Branches): require a reviewed pull request.
   `collab-push.bat` no longer pushes to `main`, but only GitHub can enforce it.
 - **Legal review** of `legal/EULA.txt` (placeholders in brackets) and of the `[REVIEW]` notes in

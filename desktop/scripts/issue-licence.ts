@@ -120,7 +120,7 @@ export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence;
   // is kept only when they all are.
   // Each licence issued under the ID is either here, to be revoked now, or revoked already.
   const issuedCount = o.id && fs.existsSync(ISSUED_CSV)
-    ? fs.readFileSync(ISSUED_CSV, 'utf-8').split('\n').filter((l) => l.startsWith('"' + o.id + '"')).length
+    ? fs.readFileSync(ISSUED_CSV, 'utf-8').split(/\r?\n/).filter((l) => new RegExp('^"?' + o.id + '"?,').test(l)).length
     : 0;
   if (o.id && known && (earlier.length === 0 || issuedCount > earlier.length + revokedHere.length) && !o.newSeal) {
     throw new Error(

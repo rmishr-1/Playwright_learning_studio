@@ -35,6 +35,8 @@ import { stopRuns } from '../../backend/src/runner';
 import { setBranding } from '../../backend/src/branding';
 import { useLicence } from '../../backend/src/content';
 import { machineCode, verify, type Licence, type Verdict } from './licence';
+import { systemExe } from '../../backend/src/system-exe';
+import { execFileSync } from 'node:child_process';
 
 declare const __STUDIO_RELEASE__: boolean;
 declare const __STUDIO_BUILD__: {
@@ -121,8 +123,8 @@ const MACHINE = machineCode();
  * Today, as far as the licence is concerned: never earlier than the latest day the app has seen, so
  * turning the computer's clock back does not bring an expired licence back to life. That day is
  * read from several marks: the day the app built into it was made, the day it records, and the
- * days its own files were last written, down into the progress and workspace folders, so deleting
- * or editing a few files does not reset it. (verify() also never counts a day before the licence
+ * days its own files were last written (two folders deep, but never the workspaces, where the
+ * learner's own code writes), so deleting or editing a few files does not reset it. (verify() also never counts a day before the licence
  * was issued.)
  */
 const LAST_SEEN_FILE = path.join(USER_DIR, 'last-seen.json');
@@ -510,7 +512,46 @@ async function lockSession(): Promise<void> {
   s.setPermissionCheckHandler((_wc, permission) => allowedPermission(permission));
 }
 
+/**
+ * Whether accounts other than this one can change the app's own files: a folder made directly
+ * under C:\ lets every signed-in account modify what is in it, and the app's Node, its packages and
+ * its own program would then run whatever another account put there. Asked of Windows by SID, so
+ * the answer does not depend on the language Windows is in. null when Windows could not be asked.
+ */
+function othersCanChange(dir: string): boolean | null {
+  const script =
+    '$acl = Get-Acl -LiteralPath $env:STUDIO_APP_DIR; ' +
+    // Everyone, Authenticated Users, Users, Interactive, Network.
+    "$broad = 'S-1-1-0','S-1-5-11','S-1-5-32-545','S-1-5-4','S-1-5-2'; " +
+    // Write data, append, write attributes (extended too), delete, change permissions or owner, and the generic write and all.
+    '$write = 0x2 -bor 0x4 -bor 0x10 -bor 0x40 -bor 0x100 -bor 0x10000 -bor 0x40000 -bor 0x80000 -bor 0x10000000 -bor 0x40000000; ' +
+    'foreach ($r in $acl.Access) { if ($r.AccessControlType -ne "Allow") { continue }; ' +
+    'try { $sid = $r.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value } catch { continue }; ' +
+    "if (($broad -contains $sid) -and ([int64]$r.FileSystemRights -band $write)) { 'SHARED'; exit } }; 'OWN'";
+  try {
+    const out = execFileSync(systemExe('WindowsPowerShell\\v1.0\\powershell.exe'), ['-NoProfile', '-NonInteractive', '-Command', script], {
+      env: { ...process.env, STUDIO_APP_DIR: dir },
+      encoding: 'utf-8',
+      windowsHide: true,
+      timeout: 20_000,
+    });
+    return out.trim().endsWith('SHARED');
+  } catch {
+    return null;
+  }
+}
+
 void app.whenReady().then(async () => {
+  if (RELEASE && othersCanChange(path.dirname(process.execPath)) === true) {
+    dialog.showErrorBox(
+      BUILD.product,
+      'The studio is in a folder that other people who use this computer can change (' + path.dirname(process.execPath) + '), ' +
+        'so it will not start there. Move the whole folder into your own Programs folder, for example ' +
+        '%LOCALAPPDATA%\\Programs\\QA Studio, and start it from there.',
+    );
+    app.quit();
+    return;
+  }
   serveSetupFiles();
   await lockSession();
   const verdict = currentLicence();

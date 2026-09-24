@@ -351,12 +351,14 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
     streams.set(runId, newStream());
   }
 
-  // Nothing is counted as running until the run's files are in place.
+  // Nothing is counted as running until the run's files and its environment are in place.
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-run-'));
   const program = path.join(scratch, 'run.js');
+  let env: NodeJS.ProcessEnv;
   try {
     fs.writeFileSync(path.join(scratch, 'program.ts'), buildProgram(req.code));
     fs.writeFileSync(program, BOOTSTRAP);
+    env = learnerEnv();
   } catch (e) {
     fs.rmSync(scratch, { recursive: true, force: true });
     throw e;
@@ -378,7 +380,7 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   // course's sites; neither is a sandbox.
   const child = spawn(NODE_BIN, [program], {
     cwd: scratch,
-    env: learnerEnv(),
+    env,
     stdio: ['ignore', 'pipe', 'pipe'],
     windowsHide: true,
   });

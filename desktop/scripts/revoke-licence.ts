@@ -41,13 +41,16 @@ export function revoke(file: string, reason: string, kind: 'reissued' | 'withdra
     // Typed by a person: a few plain words, and never the customer's name, or its initials.
     const name = licenceFile.licence.licensee.toLowerCase();
     const parts = name.split(/[^a-z0-9]+/).filter((w) => w && !/^\d+$/.test(w));
+    // Words that name no one: a customer called "IBM Ltd" is refused for "ibm", not for "ltd".
+    const generic = new Set(['ltd', 'inc', 'llc', 'plc', 'co', 'the', 'and', 'of', 'pvt', 'gmbh', 'sa', 'ag', 'bv', 'llp']);
+    const named = parts.filter((w) => w.length > 1 && !generic.has(w));
     const initials = parts.map((w) => w[0]).join('');
     const said = words.split(/[^a-z0-9]+/);
     if (
       !REASON.test(words) ||
       words.startsWith('reissued') ||
       words.includes(name) ||
-      parts.some((w) => w.length > 3 && words.includes(w)) ||
+      named.some((w) => (w.length > 3 ? words.includes(w) : words.split(/[^a-z0-9]+/).includes(w))) ||
       (initials.length > 1 && said.includes(initials))
     ) {
       throw new Error(

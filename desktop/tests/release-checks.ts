@@ -244,6 +244,17 @@ async function main(): Promise<void> {
   await sleep(2000);
   fs.rmSync(marker, { force: true });
 
+  // A copy in a folder made directly under C:\, which every account on the computer can change:
+  // the app must refuse to start there.
+  const shared = path.join(path.parse(os.homedir()).root, 'studio-shared-test-' + Date.now());
+  fs.cpSync(copy, shared, { recursive: true });
+  reset(given, true);
+  // It says why in a message box, which waits for a click: what counts is that the studio never
+  // opened (with the licence in place, it would have written port.json within seconds).
+  r = await runFor(path.join(shared, EXE_NAME), [], 15000, { cwd: shared });
+  expect(!fs.existsSync(path.join(USER, 'port.json')), 'a copy in a folder other accounts can change refuses to start', r.alive ? 'waiting on its message' : 'exited');
+  fs.rmSync(shared, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 });
+
   // One byte of main.js changed: the app must refuse to start.
   const raw = asar.getRawHeader(path.join(copy, 'resources', 'app.asar')) as { headerSize: number; header: { files: Record<string, { offset: string }> } };
   const copyAsar = path.join(copy, 'resources', 'app.asar');

@@ -10,8 +10,8 @@
  *
  * Makes desktop/deliveries/<licence id>-<customer>/:
  *
- *   QA-Studio-<version>-<licence id>.zip                     the app. Unzip it to a short folder
- *                                                             and run QA Practice Training Studio.exe
+ *   QA-Studio-<version>-<licence id>.zip                     the app. Unzip it to %LOCALAPPDATA%\Programs\
+ *                                                             QA Studio and run QA Practice Training Studio.exe
  *   <customer> licence.lic                                    their licence
  *   READ ME FIRST.txt                                         how to start
  *   SHA256SUMS.txt                                            the fingerprints of the two above
@@ -177,9 +177,10 @@ async function deliver(licenceFile: string): Promise<void> {
       'Licensed to ' + licence.licensee + ' (licence ' + licence.id + (licence.expires ? ', valid until ' + licence.expires : '') + ')',
       '',
       'To start:',
-      '1. Right-click ' + path.basename(zipOut) + ' and choose "Extract All". Extract it to a short',
-      '   folder such as C:\\QA Studio: the app has files deep inside, and Windows cannot extract them',
-      '   into a long folder path.',
+      '1. Right-click ' + path.basename(zipOut) + ' and choose "Extract All". As the folder, type',
+      '      %LOCALAPPDATA%\\Programs\\QA Studio',
+      '   (your own Programs folder: the app will not start from a folder other people who use this',
+      '   computer can change, such as one made directly under C:\\).',
       '2. In the extracted folder, double-click "QA Practice Training Studio.exe".',
       ...(deliverUnsigned
         ? [

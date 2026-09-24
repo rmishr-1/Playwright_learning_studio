@@ -180,8 +180,13 @@ git rev-list "%RANGE%" >nul 2>&1 || (
 :: Merge commits are scanned too (against their first parent: a secret added while resolving a
 :: conflict lives only in the merge), and so is every commit of a merged side branch (--full-history:
 :: git would otherwise skip one whose files end up as they started).
-set "SCAN=%TEMP%\studio-scan-%RANDOM%%RANDOM%.txt"
+:: The scan file lives in this repository's own .git folder (a relative path, so no "!" in a folder
+:: name can upset it), with a name no other run shares.
+set "SCAN=.git\studio-scan-%RANDOM%-%RANDOM%-%TIME::=%.txt"
+set "SCAN=%SCAN:,=%"
+set "SCAN=%SCAN: =0%"
 git log --full-history --diff-merges=first-parent --no-patch --format=%%h --diff-filter=AMR "%RANGE%" -- %SECRET_FILES% >"%SCAN%" 2>nul || goto :scan_failed
+if not exist "%SCAN%" goto :scan_failed
 %SYS%\findstr.exe . "%SCAN%" >nul && (
     del "%SCAN%" >nul 2>&1
     echo.
@@ -191,6 +196,7 @@ git log --full-history --diff-merges=first-parent --no-patch --format=%%h --diff
     exit /b 1
 )
 git log --full-history --diff-merges=first-parent --no-patch --text --format=%%h -G "%SECRET_TEXT%" "%RANGE%" >"%SCAN%" 2>nul || goto :scan_failed
+if not exist "%SCAN%" goto :scan_failed
 %SYS%\findstr.exe . "%SCAN%" >nul && (
     del "%SCAN%" >nul 2>&1
     echo.

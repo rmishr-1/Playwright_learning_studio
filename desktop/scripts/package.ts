@@ -172,7 +172,7 @@ export async function packageApp(opts: {
   const got = await sha256Of(electronDist);
   if (got !== known[electronZip]) {
     fs.rmSync(cache, { recursive: true, force: true });
-    throw new Error(electronZip + ' does not match its checksum in desktop/node_modules/electron/checksums.json (' + got + '). It will not be shipped.');
+    throw new Error(electronZip + ' does not match the checksum in the electron ' + electronVersion + ' package package-lock.json vouches for (' + got + '). It will not be shipped.');
   }
   console.log('  ' + electronZip + ' matches its checksum');
   const release = path.join(DESKTOP, 'release');
@@ -228,7 +228,9 @@ export async function packageApp(opts: {
     nsis: {
       oneClick: false,
       perMachine: false,
-      allowToChangeInstallationDirectory: true,
+      // Always the user's own %LOCALAPPDATA%\Programs: a folder chosen elsewhere (under C:\, say)
+      // could be changed by every account on the computer, and the app refuses to start from one.
+      allowToChangeInstallationDirectory: false,
       license: 'build/legal/EULA.txt',
       shortcutName: PRODUCT,
       artifactName: 'QA-Practice-Training-Studio-Setup-' + VERSION + '-' + suffix + '.${ext}',

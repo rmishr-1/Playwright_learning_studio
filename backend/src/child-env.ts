@@ -26,9 +26,14 @@ const GUARD = `// Written by the Learning Studio, and replaced when it starts. L
 // runs the learner's code: packages are found only inside the folders in STUDIO_MODULE_ROOTS.
 'use strict';
 const Module = require('module');
+const fs = require('fs');
 const path = require('path');
-const roots = JSON.parse(process.env.STUDIO_MODULE_ROOTS || '[]').map((r) => path.resolve(r).toLowerCase() + path.sep);
-const inside = (dir) => roots.some((r) => (path.resolve(dir).toLowerCase() + path.sep).startsWith(r));
+const { fileURLToPath } = require('url');
+// Real paths, so a short (8.3) name, a different case or a junction is compared as the folder it is.
+const real = (p) => { try { return fs.realpathSync.native(p); } catch { return path.resolve(p); } };
+const roots = JSON.parse(process.env.STUDIO_MODULE_ROOTS || '[]').map((r) => real(r).toLowerCase() + path.sep);
+const inside = (p) => roots.some((r) => (real(p).toLowerCase() + path.sep).startsWith(r));
+// require(): search only node_modules folders inside the roots, and none of Node's global folders.
 const nodeModulePaths = Module._nodeModulePaths;
 Module._nodeModulePaths = function (from) {
   return nodeModulePaths.call(this, from).filter((p) => inside(path.dirname(p)));
@@ -39,6 +44,22 @@ Module._resolveLookupPaths = function (request, parent) {
   const paths = lookup.call(this, request, parent);
   return Array.isArray(paths) ? paths.filter((p) => !globals.has(p)) : paths;
 };
+// import (and require again, as Node 24 runs both through these hooks): a package, named rather than
+// given as a path, may resolve only to a file inside the roots.
+const bare = (s) => !/^(\\.{1,2}([\\\\/]|$)|[\\\\/]|[a-zA-Z]:[\\\\/]|file:|node:|data:)/.test(s) && !Module.isBuiltin(s);
+if (typeof Module.registerHooks === 'function') {
+  Module.registerHooks({
+    resolve(specifier, context, nextResolve) {
+      const result = nextResolve(specifier, context);
+      if (bare(specifier) && result.url && result.url.startsWith('file:') && !inside(fileURLToPath(result.url))) {
+        const e = new Error("Cannot find package '" + specifier + "': packages are used only from the studio's own folders.");
+        e.code = 'ERR_MODULE_NOT_FOUND';
+        throw e;
+      }
+      return result;
+    },
+  });
+}
 `;
 
 const GUARD_FILE = path.join(DATA, 'Runtime', 'module-guard.cjs');

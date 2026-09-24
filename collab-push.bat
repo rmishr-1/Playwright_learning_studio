@@ -110,10 +110,9 @@ goto :have_target
 :: Turn "Ada Lovelace" into "ada-lovelace/work". Done in PowerShell because
 :: batch string munging on arbitrary names is a bug factory.
 :: The caret is inside double quotes, where cmd passes it as it is, so PowerShell
-:: gets [^^a-z0-9]: every character that is not a letter, a digit or a caret.
-:: (A caret in a name is kept; nothing else depends on it.)
+:: gets [^a-z0-9]: every character that is not a letter or a digit becomes a dash.
 set "SLUG="
-for /f "usebackq delims=" %%S in (`%SYS%\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -Command "$n=[regex]::Replace($env:GIT_NAME.ToLower(),'[^^a-z0-9]+','-').Trim('-'); if($n -eq ''){'collab'}else{$n}" 2^>nul`) do set "SLUG=%%S"
+for /f "usebackq delims=" %%S in (`%SYS%\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -Command "$n=[regex]::Replace($env:GIT_NAME.ToLower(),'[^a-z0-9]+','-').Trim('-'); if($n -eq ''){'collab'}else{$n}" 2^>nul`) do set "SLUG=%%S"
 set "SLUG=!SLUG: =!"
 if not defined SLUG set "SLUG=collab"
 set "TARGET=!SLUG!/work"
@@ -331,8 +330,13 @@ git rev-list "%RANGE%" >nul 2>&1 || (
 :: Merge commits are scanned too (against their first parent: a secret added while resolving a
 :: conflict lives only in the merge), and so is every commit of a merged side branch (--full-history:
 :: git would otherwise skip one whose files end up as they started).
-set "SCAN=%TEMP%\studio-scan-%RANDOM%%RANDOM%.txt"
+:: The scan file lives in this repository's own .git folder (a relative path, so no "!" in a folder
+:: name can upset it), with a name no other run shares.
+set "SCAN=.git\studio-scan-%RANDOM%-%RANDOM%-%TIME::=%.txt"
+set "SCAN=%SCAN:,=%"
+set "SCAN=%SCAN: =0%"
 git log --full-history --diff-merges=first-parent --no-patch --format=%%h --diff-filter=AMR "%RANGE%" -- %SECRET_FILES% >"%SCAN%" 2>nul || goto :scan_failed
+if not exist "%SCAN%" goto :scan_failed
 %SYS%\findstr.exe . "%SCAN%" >nul && (
     del "%SCAN%" >nul 2>&1
     echo.
@@ -342,6 +346,7 @@ git log --full-history --diff-merges=first-parent --no-patch --format=%%h --diff
     exit /b 1
 )
 git log --full-history --diff-merges=first-parent --no-patch --text --format=%%h -G "%SECRET_TEXT%" "%RANGE%" >"%SCAN%" 2>nul || goto :scan_failed
+if not exist "%SCAN%" goto :scan_failed
 %SYS%\findstr.exe . "%SCAN%" >nul && (
     del "%SCAN%" >nul 2>&1
     echo.
