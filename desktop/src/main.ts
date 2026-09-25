@@ -446,7 +446,33 @@ function openOutside(url: string): void {
   if (/^https?:\/\//i.test(url)) void shell.openExternal(url);
 }
 
+/**
+ * Zoom, as a browser has it: Ctrl with +, - and 0, and Ctrl with the mouse wheel (a touchpad pinch
+ * sends the same). The app has no menu, which is where Electron keeps those shortcuts, so every
+ * window handles them itself. From 50% to 200%, a tenth at a time; Ctrl+0 is 100% again.
+ */
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2;
+const ZOOM_STEP = 0.1;
+function zoomBy(contents: WebContents, step: number | null): void {
+  const next = step === null ? 1 : Math.round((contents.getZoomFactor() + step) * 10) / 10;
+  contents.setZoomFactor(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next)));
+}
+
+function allowZoom(contents: WebContents): void {
+  contents.on('before-input-event', (e, input) => {
+    if (input.type !== 'keyDown' || !(input.control || input.meta) || input.alt) return;
+    if (input.key === '+' || input.key === '=' || input.code === 'NumpadAdd') zoomBy(contents, ZOOM_STEP);
+    else if (input.key === '-' || input.key === '_' || input.code === 'NumpadSubtract') zoomBy(contents, -ZOOM_STEP);
+    else if (input.key === '0' || input.code === 'Numpad0') zoomBy(contents, null);
+    else return;
+    e.preventDefault();
+  });
+  contents.on('zoom-changed', (_e, direction) => zoomBy(contents, direction === 'in' ? ZOOM_STEP : -ZOOM_STEP));
+}
+
 function lockDown(contents: WebContents): void {
+  allowZoom(contents);
   // Pop-outs (the detached live view starts as about:blank) open in the app; anything else, the
   // test report included (it is served apart from the studio, see server.ts), opens in the
   // learner's own browser.
