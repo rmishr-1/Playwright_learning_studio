@@ -3,7 +3,7 @@
   "week": 1,
   "day": 4,
   "number": 4,
-  "title": "Configuring & Running Tests",
+  "title": "JavaScript / TypeScript Fundamentals",
   "locked": false,
   "workspace": "project",
   "parts": [
@@ -16,7 +16,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 4 · Prerequisites\n\n",
+          "text": "# Day 4 · Prerequisites",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -26,7 +26,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "**Configuring & Running Tests**\n\n*The settings file, the command-line cheat sheet, reading a failure, npm shortcuts — and the framework structure you'll grow into*\n\n**Time:** 2.5 hours\n\n**Where you work:** pw-course/\n\n**By the end of the day you can:**\n\n- Explain the main settings in `playwright.config.ts` — testDir, projects, retries, workers, reporter, use\n- Run tests headless, headed, per browser, per file and by name; list tests without running them\n- Read a failing test's error message and fix it\n- Add npm scripts and prepare a scalable folder structure\n- Describe the layers of a real automation framework: tests, pages, fixtures, test data, utils\n\n**From earlier days:**\n\n- Day 3: the pw-course project, running tests, the HTML report",
+          "text": "**JavaScript / TypeScript Fundamentals**\n\n*What JavaScript and TypeScript are, how TypeScript code runs, and your first programs — including how to read the errors TypeScript gives you*\n\n**Time:** 3 hours\n\n**Where you work:** pw-course/ts-basics/ (you create it today)\n\n**By the end of the day you can:**\n\n- Explain what a program is, and the basic rules for writing code (statements, quotes, comments, case)\n- Describe what JavaScript is, where it runs, and why it matters for testing\n- Explain what TypeScript adds to JavaScript and name its three parts (language, compiler, language service)\n- Explain static vs dynamic typing and why errors caught \"before running\" matter\n- Tell the difference between running a TypeScript file and type-checking it — and know that Playwright runs tests without type-checking\n- Use the three everyday types — string, number, boolean — with type annotations and type inference\n- Set up a TypeScript playground, run and check programs, and read TypeScript error messages\n\n**From earlier days:**\n\n- Day 3: the terminal (pwd, cd, ls, mkdir), npm and npx, the pw-course project",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -36,69 +36,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P1 · Checklist before you start\n\nYou're ready for today if all of these are true (revisit the Day 3 lesson in brackets if not):\n\n- [ ] `pw-course/` exists with `package.json`, `playwright.config.ts` and `tests/example.spec.ts` (Day 3 · I2–I3)\n- [ ] `npx playwright test` ran 6 green runs and `npx playwright show-report` opened the report (Day 3 · I4)\n- [ ] You know what `node_modules/` is and why it is never committed (Day 3 · P1, F4)\n- [ ] You can use `cd`, `ls`, `pwd` and `Ctrl + C` in the terminal (Day 3 · P2)\n\nQuick check:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "You cloned a project that has package.json but no node_modules. What do you run first?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`npx playwright test`",
-              "`npm install`",
-              "`node package.json`"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`npm install` downloads every dependency listed in package.json into node_modules."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "With the default 3 browser projects, how many runs does example.spec.ts (2 tests) produce?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "2",
-              "3",
-              "6"
-            ],
-            "answers": [
-              2
-            ],
-            "kind": "single",
-            "explanation": "Every test runs once per project — 2 × 3 = 6."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        }
-      ],
-      "problems": []
-    },
-    {
-      "part": 2,
-      "kind": "concept",
-      "title": "Fundamentals",
-      "tab_label": "Fundamentals",
-      "has_runnable_code": false,
-      "blocks": [
-        {
-          "type": "markdown",
-          "text": "# Day 4 · Fundamentals\n\n\n\n## F1 · `playwright.config.ts` explained\n\nThis file controls **how** all your tests run. Here is the generated file with the comments shortened (the full file has more commented-out examples):",
+          "text": "## P1 · What a program is\n\nA **program** is a list of instructions that a computer carries out **from top to bottom**, one after another — just like the steps of a test case. Each instruction is called a **statement**.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -108,7 +46,7 @@
         },
         {
           "type": "code",
-          "text": "import { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',                        // where to look for *.spec.ts files\n  fullyParallel: true,                       // run tests in parallel, even inside one file\n  forbidOnly: !!process.env.CI,              // on CI, fail if someone left test.only in the code\n  retries: process.env.CI ? 2 : 0,           // retry failed tests twice on CI, never locally\n  workers: process.env.CI ? 1 : undefined,   // 1 worker on CI; locally Playwright decides (half your CPU cores)\n  reporter: 'html',                          // produce the HTML report\n\n  use: {                                     // settings shared by every test\n    // baseURL: 'http://localhost:3000',     // lets you write page.goto('/login')\n    trace: 'on-first-retry',                 // record a trace when a test is retried\n  },\n\n  projects: [                                // one \"project\" per browser\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox',  use: { ...devices['Desktop Firefox'] } },\n    { name: 'webkit',   use: { ...devices['Desktop Safari'] } },\n    // Commented examples: 'Mobile Chrome' (Pixel 5), 'Mobile Safari' (iPhone 12),\n    // branded 'Microsoft Edge' and 'Google Chrome' via channel: 'msedge' / 'chrome'\n  ],\n\n  // webServer: { ... }                      // optionally start your app before the tests\n});",
+          "text": "console.log('Step 1: open the login page');\nconsole.log('Step 2: enter the username');\nconsole.log('Step 3: click Log in');",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -125,116 +63,7 @@
         },
         {
           "type": "markdown",
-          "text": "**Learn these four now** — you'll touch them this week:\n\n1. **`testDir`** — the folder Playwright searches for test files.\n2. **`projects`** — one entry per browser (or device). Every test runs once per project. `devices['Desktop Chrome']` is a ready-made preset (engine, screen size, user agent).\n3. **`reporter`** — how results are shown: `'list'` in the terminal, `'html'` for the report.\n4. **`use`** — default options for every test, such as `baseURL` and `headless`.\n\nEverything else can wait until you need it:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "reference",
-          "text": "| Setting | In one line |\n|---|---|\n| `fullyParallel` | `true` = tests inside the same file may also run at the same time |\n| `retries` | How many times to re-run a failed test before calling it failed |\n| `workers` | How many tests run at the same time (each worker is a separate process) |\n| `forbidOnly` | Fail the run if a `test.only` was left in the code (used on CI) |\n| `timeout` | Time limit per test (default 30 s) |\n| `use.trace` / `use.screenshot` / `use.video` | What to record for debugging: `'on'`, `'off'`, `'on-first-retry'`, `'only-on-failure'`… |\n| `use.viewport` | Browser window size, e.g. `{ width: 1280, height: 720 }` |\n| `webServer` | Start your app before the tests and stop it afterwards |\n| Reporter names | `'list'`, `'line'`, `'dot'`, `'html'`, `'json'`, `'junit'`, `'github'` |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": "The rest of the settings, for later"
-        },
-        {
-          "type": "callout",
-          "text": "CI servers (GitHub Actions, Jenkins, Azure DevOps…) set an environment variable called `CI`. The config uses it to behave differently on the build server (retries, one worker) than on your laptop. You'll learn the `condition ? a : b` syntax on Day 5.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "note",
-            "title": "What is `process.env.CI`?"
-          },
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "You want every test to use `https://staging.shop.com` as its starting address so tests can write `page.goto('/login')`. Which setting do you use?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`testDir`",
-              "`use: { baseURL: 'https://staging.shop.com' }`",
-              "`projects: ['https://staging.shop.com']`",
-              "`reporter: 'https://staging.shop.com'`"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`baseURL` inside `use` is prepended to relative URLs, so `page.goto('/login')` opens `https://staging.shop.com/login`."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "The config has 3 projects and `retries: process.env.CI ? 2 : 0`. On your LAPTOP, a test fails once. What happens?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "It is retried twice",
-              "It is reported as failed immediately (0 retries)",
-              "It is skipped",
-              "It runs on a 4th browser"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Your laptop doesn't set the `CI` variable, so `retries` is 0. On a CI server the same test would be retried up to 2 times."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F2 · Running tests — the command cheat sheet\n\n| Goal | Command |\n|---|---|\n| Run **all** tests, all projects, headless | `npx playwright test` |\n| Watch the browser | `npx playwright test --headed` |\n| One browser only | `npx playwright test --project=chromium` |\n| One file | `npx playwright test tests/example.spec.ts` |\n| Files whose path contains a word | `npx playwright test example` |\n| One line in a file | `npx playwright test tests/example.spec.ts:3` |\n| Tests whose **title** matches | `npx playwright test -g \"has title\"` |\n| List tests without running them | `npx playwright test --list` |\n| Run tests one at a time | `npx playwright test --workers=1` |\n| Only re-run what failed last time | `npx playwright test --last-failed` |\n| Step through with the Inspector | `npx playwright test --debug` |\n| Visual UI Mode | `npx playwright test --ui` |\n| Open the last HTML report | `npx playwright show-report` |\n| Record a test by clicking | `npx playwright codegen https://playwright.dev` |\n\nOptions can be combined: `npx playwright test tests/example.spec.ts --project=firefox --headed`.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which command runs ONLY the test titled \"get started link\", in Firefox, with the browser visible?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`npx playwright test --headed firefox get started link`",
-              "`npx playwright test -g \"get started link\" --project=firefox --headed`",
-              "`npx playwright show-report --project=firefox`",
-              "`npx playwright codegen \"get started link\"`"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`-g` filters by test title, `--project` picks the browser project, and `--headed` shows the window."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F3 · Framework structure overview — where you're heading\n\nThe generated project is the *starting point*. Real automation frameworks add layers so that hundreds of tests stay easy to maintain. Over the coming weeks you'll build this structure:",
+          "text": "`console.log(…)` is the first instruction everyone learns: it **prints** whatever is inside the brackets. In our course platform, it appears in the terminal or console pane.\n\nThe things a program works with are **values**:\n\n| Value | Kind of value |\n|---|---|\n| `'Log in'`, `\"asha@example.com\"` | Text |\n| `42`, `3.5`, `30000` | Numbers |\n| `true`, `false` | Yes/no answers |\n\nA program can also *calculate*: `console.log(2 + 3)` prints `5`. With text, `+` **joins** instead: `console.log('Hello, ' + 'Asha')` prints `Hello, Asha`.\n\nTo use a value more than once, you give it a **name** with `const`:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -244,7 +73,141 @@
         },
         {
           "type": "code",
-          "text": "pw-course/\n├── playwright.config.ts        ← global settings: browsers, baseURL, retries, reporters\n├── package.json                ← dependencies + npm scripts (npm test, npm run test:headed)\n├── tests/                      ← WHAT to test: spec files grouped by feature\n│   ├── auth/login.spec.ts\n│   └── cart/checkout.spec.ts\n├── pages/                      ← HOW to use each page (Page Object Model — later weeks)\n│   ├── LoginPage.ts\n│   └── CartPage.ts\n├── fixtures/                   ← reusable setup, e.g. \"a logged-in page\" (later weeks)\n├── test-data/                  ← input data: users.json, products.json\n└── utils/                      ← small helpers: random emails, date formatting",
+          "text": "const tester = 'Asha';               // the name \"tester\" now means 'Asha'\nconsole.log('Tester: ' + tester);    // prints Tester: Asha",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "That's all you need today — Day 5 is entirely about named values (*variables*).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "You already write programs — in plain English. A test case is a program for a human: ordered steps, specific inputs, expected outputs. Today you start writing them for a computer.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "In what order does a program run these statements? (1) `console.log('A')` (2) `console.log('B')` (3) `console.log('C')`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "In a random order",
+              "All at the same time",
+              "A, then B, then C — top to bottom",
+              "C, then B, then A"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "Statements run from top to bottom, one after another, unless the code says otherwise (you'll learn how on Days 7–8)."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P2 · The rules of writing code\n\nComputers are strict readers. Five rules prevent most beginners' mistakes:\n\n| Rule | Right | Wrong |\n|---|---|---|\n| **Text goes in quotes** — single `'…'` or double `\"…\"` (a third kind, backticks, comes on Day 5) | `'Log in'` | `Log in` |\n| **Quotes and brackets come in pairs** | `console.log('Hi')` | `console.log('Hi)` |\n| **Case matters** | `console.log` | `Console.Log` |\n| **Comments are notes for people** — the computer ignores them | `// open the page` | — |\n| **A semicolon ends a statement** (optional in most places, but we always write it) | `console.log('Hi');` | — |\n\nTwo kinds of comments:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// A one-line comment\n\n/*\n  A comment that spans\n  several lines\n*/",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Word processors, PDFs and chat apps often turn `'` into curly quotes `‘ ’`. Code needs straight quotes. If you see an \"Invalid character\" error after pasting, retype the quotes.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "warning",
+            "title": "Straight quotes only"
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which line is written correctly?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`console.log('Test passed');`",
+              "`Console.log('Test passed');`",
+              "`console.log(Test passed);`",
+              "`console.log('Test passed);`"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "The wrong ones have a capital C in Console (case matters), a missing closing quote, or text without quotes."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P3 · Errors are normal — and helpful\n\nEvery programmer sees errors all day. An error message is not a failure — it's the computer telling you exactly what it didn't understand, and where. Most messages have the same three parts:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "day4/example.ts(3,7): error TS2322: Type 'string' is not assignable to type 'number'.\n└──── where ──┘ └┬─┘  └──┬──┘ └──────────────── what ─────────────────────────────┘\n   file (line,column)  code",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -260,18 +223,8 @@
           "title": null
         },
         {
-          "type": "diagram",
-          "text": "flowchart TD\n  T[\"tests/<br/>test scenarios\"] --> P[\"pages/<br/>page objects\"]\n  T --> D[\"test-data/<br/>inputs\"]\n  T --> U[\"utils/<br/>helpers\"]\n  P --> PW[\"@playwright/test<br/>page, locators, expect\"]\n  C[\"playwright.config.ts<br/>browsers, baseURL, reporters\"] -. controls .-> T",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
           "type": "markdown",
-          "text": "The rule of thumb: **tests describe *what* the user does and expects; everything else describes *how*.** When the login page changes, you fix one page object instead of 50 tests.",
+          "text": "| Part | Meaning |\n|---|---|\n| `day4/example.ts(3,7)` | **Where** — the file, line 3, character 7 |\n| `error TS2322` | The error's **code** — searchable online |\n| `Type 'string' is not assignable…` | **What** went wrong, in (fairly) plain English |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -281,7 +234,7 @@
         },
         {
           "type": "callout",
-          "text": "This mirrors good manual-testing practice: test cases (tests/) are separate from test data (test-data/) and from detailed navigation instructions (pages/).",
+          "text": "Read an error the way you'd read a bug report: *where*, then *what*. You'll practise this all through today's Implementation.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -291,24 +244,476 @@
             "title": null
           },
           "title": null
+        }
+      ],
+      "problems": []
+    },
+    {
+      "part": 2,
+      "kind": "concept",
+      "title": "Fundamentals",
+      "tab_label": "Fundamentals",
+      "has_runnable_code": false,
+      "blocks": [
+        {
+          "type": "markdown",
+          "text": "# Day 4 · Fundamentals\n\n## F1 · JavaScript: the language of the web\n\n**JavaScript (JS)** was created in **1995** at Netscape, to make web pages interactive. Today it's the only programming language that **every web browser** runs. Whenever a page shows an error message without reloading, opens a menu, or loads more results as you scroll, that's JavaScript at work — the \"electricity and plumbing\" from Day 1.\n\nFor a long time JavaScript lived only inside browsers. In 2009 **Node.js** took it outside: Node.js runs JavaScript on computers and servers. That's what you installed on Day 3, and it's what runs Playwright.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "diagram",
+          "text": "flowchart LR\n  JS[\"JavaScript code\"] --> BR[\"In the browser<br/>makes pages interactive<br/>(the app you test)\"]\n  JS --> NODE[\"In Node.js<br/>runs programs on a computer<br/>(your Playwright tests)\"]",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "JavaScript is standardised under the name **ECMAScript**, and a new edition comes out every year (ES2023, ES2024, …). You don't need to track editions — just know that \"modern JavaScript\" keeps gaining features.\n\n**Why a tester cares:** the app you test runs JavaScript in the browser, and your tests run JavaScript in Node.js. Understanding the language helps on both sides — writing tests, and understanding why a page behaves the way it does.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
         },
         {
           "type": "checkpoint",
-          "text": "The \"Log in\" button's text changes to \"Sign in\". In a well-structured framework, where would you ideally update this — once?",
+          "text": "Which program runs your Playwright tests on your computer?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "In every test file that logs in",
-              "In the login page object (pages/LoginPage.ts)",
-              "In package.json",
-              "In .gitignore"
+              "The web browser",
+              "Node.js",
+              "npm",
+              "VS Code"
             ],
             "answers": [
               1
             ],
             "kind": "single",
-            "explanation": "Page objects hold the \"how\" (locators and steps for a page). Change it once there and every test that uses it keeps working."
+            "explanation": "Node.js runs JavaScript (and TypeScript) outside the browser. npm installs packages; VS Code is the editor; the browser is what the tests control."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F2 · TypeScript: JavaScript plus types\n\n**TypeScript (TS)** was released by **Microsoft in 2012**, designed by Anders Hejlsberg. It's open source and free.\n\nTypeScript is a **superset** of JavaScript: it contains *all* of JavaScript and adds one big thing — **types**. A type says *what kind of value* something is: text, a number, true/false, a list of users, and so on. Any JavaScript code is allowed in a TypeScript file — though the type checker may point out mistakes in it that JavaScript would have let slip.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// In a JavaScript file:\nconst timeout = 30000;",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// The same line in a TypeScript file, with a type added — \": number\"\nconst timeout: number = 30000;",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "TypeScript files end in `.ts` (JavaScript files end in `.js`). That's why your test files are called `example.spec.ts`.\n\n### The three parts of TypeScript\n\n| Part | What it does |\n|---|---|\n| **The language** | JavaScript plus type syntax such as `: number` and `: string` |\n| **The compiler (`tsc`)** | Checks your types for mistakes and reports them, and can turn TypeScript into plain JavaScript — because browsers and Node.js ultimately run JavaScript |\n| **The language service** | Powers your editor: red underlines under mistakes, suggestions as you type (*IntelliSense*), \"go to definition\" |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "diagram",
+          "text": "flowchart LR\n  TS[\"hello.ts<br/>(TypeScript)\"] --> C[\"tsc\"]\n  C --> E[\"1 · a report of type mistakes<br/>(empty if all is well)\"]\n  C --> J[\"2 · hello.js — types removed<br/>(written even if there were mistakes,<br/>unless you ask it not to)\"]\n  J --> R[\"runs in Node.js<br/>or a browser\"]",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "\"Compiling\" TypeScript mostly means *checking* the types and then *removing* them. What's left is ordinary JavaScript. Note that the check doesn't *stop* the JavaScript being written — your job is to read the report and fix it.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which statement about TypeScript is TRUE?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Browsers run TypeScript directly, without any conversion",
+              "TypeScript was created by Google",
+              "Every valid JavaScript program is also valid TypeScript; TypeScript adds types on top",
+              "TypeScript is a completely different language from JavaScript"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "TypeScript is a superset of JavaScript made by Microsoft. The types are checked and removed before the code runs as JavaScript."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which part of TypeScript draws the red underlines and suggestions in your editor?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "The language",
+              "Node.js",
+              "The language service",
+              "The compiler's JavaScript output"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "The language service gives editors like VS Code their error underlines and IntelliSense suggestions."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F3 · Static vs dynamic typing — why types help\n\nJavaScript is **dynamically typed**: types are only looked at while the program runs. If a value that should be a number arrives as text, nobody complains until something goes wrong *while the program is running* — maybe in front of a customer.\n\nTypeScript is **statically typed**: types are checked **before** the program runs. If you put text where a number belongs, you're told immediately, with the file and line.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// A price that accidentally arrived as text\nconst price: number = '499';   // TypeScript: ❌ Type 'string' is not assignable to type 'number'",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "In plain JavaScript, that mistake slips through, and later `price + 1` gives `'4991'` instead of `500` — text glued together instead of added. You'll see this happen for real in Implementation I4.\n\n| | Dynamic typing (JavaScript) | Static typing (TypeScript) |\n|---|---|---|\n| When type mistakes are found | While the program runs | While you write the code, before it runs |\n| Where you find out | A crash — or worse, a silently wrong result | A red underline and an error message with file and line |\n| Extra typing effort | None | A little (you add `: number` and similar) |\n| Editor help | Limited | Strong: suggestions for everything you can type next |\n\n### Why Playwright tests are written in TypeScript\n\n| Benefit | What it means for you |\n|---|---|\n| **Mistakes caught early** | Typos and wrong values are underlined in red *before* you run a 10-minute suite |\n| **Autocomplete** | Type `page.` and VS Code lists every action — `click`, `fill`, `goto`… |\n| **Readable** | `function login(email: string, password: string)` documents itself |\n| **The default** | `npm init playwright@latest` chooses TypeScript by default, and most examples online use it |\n\nThe costs are small: a little more to type, and one more concept (types) to learn — which is what Days 4–8 are for.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What is the main advantage of static typing?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "The program runs faster in the browser",
+              "The code no longer needs to be converted to JavaScript",
+              "Type mistakes are found while you write the code, before it runs",
+              "Type mistakes are found while the program runs, with a clearer crash message"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "Static typing moves the discovery of type mistakes from \"while running\" to \"while writing\"."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F4 · How your TypeScript code actually runs\n\nThree tools handle your `.ts` files. Only one of them checks the types — and it doesn't run anything. The other two run your code **without checking the types**. This is the single most important fact on today's list.\n\n| Tool | Checks types? | What it does |\n|---|---|---|\n| **`tsc`** (the TypeScript compiler) | ✅ Yes | Reports every type mistake; can also produce `.js` files. It never *runs* your program |\n| **Node.js** (22.18 and newer) — `node file.ts` | ❌ No | Removes the type annotations and runs what's left. Fast, but type mistakes slip through. (It can only remove simple annotations; a few rarer TypeScript features need other tools — this course avoids them.) |\n| **Playwright** — `npx playwright test` | ❌ No | Converts your `.ts` test files to JavaScript on the fly and runs them, without checking types (so tests start fast) |\n\nSo who catches type mistakes? **Your editor**, which checks constantly as you type (the red underlines), and **`tsc`** when you run it.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "diagram",
+          "text": "flowchart TD\n  F[\"your-file.ts\"] --> ED[\"VS Code<br/>checks as you type<br/>🔴 red underlines\"]\n  F --> TSC[\"tsc --noEmit<br/>checks, prints errors\"]\n  F --> NODE[\"node your-file.ts<br/>runs it — no checking\"]\n  F --> PW[\"npx playwright test<br/>runs tests — no checking\"]",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "A test with a type mistake may still run — and fail in a confusing way, or pass when it shouldn't. Treat every red underline in VS Code as a bug in your test.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "warning",
+            "title": "Always fix the red underlines"
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "In today's playground you'll therefore use **two** commands for every file:\n\n| You want to… | Command |\n|---|---|\n| **Run** the file and see its output | `node day4/hello.ts` |\n| **Check** the file for type mistakes | `npm run check -- day4/hello.ts` (this runs `tsc` for you) |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "When you run `npx playwright test`, Playwright refuses to start if a test file has a type error.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "True",
+              "False"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "truefalse",
+            "explanation": "Playwright converts TypeScript to JavaScript without checking types. The mistake may cause a confusing failure at runtime — or no failure at all. Use your editor or `tsc` to catch it."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You run `node price.ts` and it prints a result — no errors. Can you be sure the file has no type mistakes?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Yes — Node.js would have stopped",
+              "No — Node.js removes the types without checking them; run the type checker to be sure",
+              "Yes, if the output looks right"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Node.js only strips the types. The check has to come from `tsc` (or your editor)."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F5 · Values and types: string, number, boolean\n\nThree types cover most everyday values:\n\n| Type | Values | In testing |\n|---|---|---|\n| `string` | Text in quotes: `'Asha'`, `\"Log in\"` | Usernames, URLs, expected messages |\n| `number` | Whole numbers and decimals: `42`, `3.5`, `-7` | Counts, prices, timeouts in milliseconds (`5000` = 5 s) |\n| `boolean` | `true` or `false` | Is the box ticked? Did the test pass? |\n\nJavaScript can tell you a value's type while running, with `typeof`:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "console.log(typeof 'hello');   // string\nconsole.log(typeof 42);        // number\nconsole.log(typeof true);      // boolean",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Giving a value a name\n\nTo use a value more than once, give it a **name** with `const`:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const tester = 'Asha';       // the name \"tester\" now means 'Asha'\nconsole.log(tester);         // prints Asha",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "(Tomorrow, Day 5, is all about these named values — *variables*. For today, `const name = value` is all you need.)\n\n### Type annotations and type inference\n\nThere are two ways a name gets its type:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const tester: string = 'Asha';   // ANNOTATION: you write the type after a colon\nconst attempts = 3;              // INFERENCE: TypeScript works out \"number\" from the value",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "| | Type annotation | Type inference |\n|---|---|---|\n| Who decides the type | You write it: `: string` | TypeScript works it out from the value |\n| Looks like | `const count: number = 3;` | `const count = 3;` |\n| When to use it | When the type isn't obvious, or to document intent (you'll use it a lot for function inputs on Day 8) | When the value makes the type obvious |\n\nEither way, the type is **fixed**: once TypeScript knows `attempts` is a number, it won't let you treat it as text.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "In VS Code, hover your mouse over any name to see the type TypeScript has inferred for it.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": "Hover to see a type"
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const isLoggedIn = true;` — what type does TypeScript infer?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "string",
+              "It has no type",
+              "boolean",
+              "number"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "`true` is a boolean value, so TypeScript infers `boolean`."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const retries: number = 'two';` — what happens when you type-check it?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "The value becomes 0",
+              "TypeScript changes the type to string",
+              "It's fine — 'two' means 2",
+              "An error: Type 'string' is not assignable to type 'number'"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "The annotation says number, but 'two' is text. TypeScript reports the mismatch."
           },
           "code": null,
           "callout": null,
@@ -326,7 +731,27 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 4 · Implementation\n\n\n\n## I1 · Tune the config for learning\n\nTwo small changes make the next weeks smoother:\n\n1. See **each test** in the terminal as it finishes (the `list` reporter) *and* still get the HTML report.\n2. Stop the HTML report from **opening automatically** after a failure (it would block your terminal until you press `Ctrl + C`).\n\nIn `playwright.config.ts`, replace the `reporter` line:",
+          "text": "# Day 4 · Implementation\n\n## I1 · Set up your TypeScript playground\n\nYou'll practise TypeScript in a small folder inside your course project, called `ts-basics`. It gets its own settings, separate from your Playwright tests. From the `pw-course` folder, run:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "mkdir ts-basics\ncd ts-basics\nnpm init -y\nnpm pkg set type=module\nnpm pkg set scripts.check=\"tsc --noEmit --strict --target esnext --module nodenext --allowImportingTsExtensions --ignoreConfig --pretty false\"\nnpm install -D typescript@7\nmkdir day4 day5 day6 day7 day8",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "| Command | What it does |\n|---|---|\n| `npm init -y` | Creates a `package.json` for the playground (`-y` = accept the defaults) |\n| `npm pkg set type=module` | Uses modern JavaScript file handling (needed on Day 8, when files share code) |\n| `npm pkg set scripts.check=…` | Adds the `check` shortcut (explained below) |\n| `npm install -D typescript@7` | Installs the TypeScript compiler, `tsc` — version 7, which this course was written with |\n| `mkdir day4 … day8` | One folder per TypeScript day |\n\nThe `check` shortcut looks long, but you'll never type it — you'll type `npm run check -- day4/hello.ts`. The `--` passes the file name through to the command. The options inside it mean:\n\n| Option | Meaning |\n|---|---|\n| `--noEmit` | Only check — don't write any `.js` files |\n| `--strict` | Use TypeScript's strictest, most helpful checks |\n| `--target esnext --module nodenext` | Assume modern JavaScript running in modern Node.js |\n| `--allowImportingTsExtensions` | Allow files to share code the way Node.js expects (Day 8) |\n| `--ignoreConfig` | Check exactly the file you name, even if a settings file is nearby |\n| `--pretty false` | Print each error on one line — the same in every terminal |\n\nFinally, create a small settings file so that **VS Code** checks your files with the same rules. Create `ts-basics/tsconfig.json`:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -336,15 +761,15 @@
         },
         {
           "type": "code",
-          "text": "  // BEFORE\n  reporter: 'html',\n\n  // AFTER: list in the terminal + HTML report on demand\n  reporter: [['list'], ['html', { open: 'never' }]],",
+          "text": "{\n  \"compilerOptions\": {\n    \"strict\": true,\n    \"target\": \"esnext\",\n    \"module\": \"nodenext\",\n    \"noEmit\": true,\n    \"allowImportingTsExtensions\": true,\n    \"moduleDetection\": \"force\"\n  }\n}",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
-            "language": "ts",
-            "file": null,
+            "language": "json",
+            "file": "ts-basics/tsconfig.json",
             "run": null,
-            "mode": "read",
+            "mode": "editor",
             "expect_error": false,
             "network": false
           },
@@ -353,99 +778,7 @@
         },
         {
           "type": "markdown",
-          "text": "Run again, this time only on Chromium:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test --project=chromium",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nRunning 2 tests using 2 workers\n\n  ✓  1 [chromium] › tests/example.spec.ts:3:5 › has title (1.1s)\n  ✓  2 [chromium] › tests/example.spec.ts:10:5 › get started link (1.6s)\n\n  2 passed (2.5s)\n```\n\n## I2 · Headed, one file, one test, one browser\n\nTry each command and notice the difference:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "terminal",
-          "text": "# watch the browser work\nnpx playwright test --project=chromium --headed\n# only one file\nnpx playwright test tests/example.spec.ts --project=firefox\n# only tests whose title contains \"title\"\nnpx playwright test -g \"title\" --project=webkit\n# list what WOULD run, without running anything\nnpx playwright test --list",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nListing tests:\n  [chromium] › example.spec.ts:3:5 › has title\n  [chromium] › example.spec.ts:10:5 › get started link\n  [firefox] › example.spec.ts:3:5 › has title\n  [firefox] › example.spec.ts:10:5 › get started link\n  [webkit] › example.spec.ts:3:5 › has title\n  [webkit] › example.spec.ts:10:5 › get started link\nTotal: 6 tests in 1 file\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "What does `npx playwright test --list` do?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Runs all tests and lists failures",
-              "Shows which tests would run (per project) without running them",
-              "Lists installed browsers",
-              "Opens the HTML report"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`--list` is a quick way to check that your filters (`-g`, `--project`, file names) select the tests you expect."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## I3 · Break it on purpose — and read the error\n\nA tester's superpower is reading failures. Let's create one.\n\n1. In `tests/example.spec.ts`, change `/Playwright/` to `/Selenium/` in the first test.\n2. Run just that test:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx playwright test -g \"has title\" --project=chromium",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nRunning 1 test using 1 worker\n\n  ✘  1 [chromium] › tests/example.spec.ts:3:5 › has title (5.9s)\n\n  1) [chromium] › tests/example.spec.ts:3:5 › has title ─────────────────────────\n\n    Error: expect(page).toHaveTitle(expected) failed\n\n    Expected pattern: /Selenium/\n    Received string:  \"Fast and reliable end-to-end testing for modern web apps | Playwright\"\n    Timeout: 5000ms\n\n    Call log:\n      - Expect \"toHaveTitle\" with timeout 5000ms\n        9 × locator resolved to <html lang=\"en\" dir=\"ltr\" …>…</html>\n          - unexpected value \"Fast and reliable end-to-end testing for modern web apps | Playwright\"\n\n       4 |   await page.goto('https://playwright.dev/');\n       5 |   // Expect a title \"to contain\" a substring.\n    >  6 |   await expect(page).toHaveTitle(/Selenium/);\n         |                      ^\n       7 | });\n\n  1 failed\n    [chromium] › tests/example.spec.ts:3:5 › has title ──────────────────────────\n```\n\nHow to read it — top to bottom:\n\n| Part | What it tells you |\n|---|---|\n| `✘ … has title (5.9s)` | Which test failed and on which browser |\n| `Expected pattern: /Selenium/` | What the test expected |\n| `Received string: \"… | Playwright\"` | What the page actually had |\n| `Timeout: 5000ms` / `9 × … unexpected value` | Playwright retried the check for 5 seconds before giving up (web-first assertion!) |\n| `> 6 | … ^` | The exact line and position in your code |\n\n3. Change `/Selenium/` back to `/Playwright/` and run again — green.",
+          "text": "(`moduleDetection: force` makes VS Code treat every file separately, so a name used in two different practice files doesn't cause a false alarm.)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -455,7 +788,256 @@
         },
         {
           "type": "callout",
-          "text": "This is a defect report written for you: **expected**, **actual**, **where**. When a test fails, first decide: is it a bug in the app, or a problem in the test?",
+          "text": "From now until Day 8, run all TypeScript commands from inside `pw-course/ts-basics`. If a command says it can't find a file, check with `pwd`.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I2 · Your first program\n\nCreate `day4/hello.ts`:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// My first TypeScript program\nconsole.log('Hello from TypeScript!');\nconsole.log('Today I start learning to write test code.');\nconsole.log(2 + 3);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day4/hello.ts",
+            "run": "node day4/hello.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Run it, then check it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "node day4/hello.ts\nnpm run check -- day4/hello.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nHello from TypeScript!\nToday I start learning to write test code.\n5\n```\n\nThe check prints two lines that start with `>` — that's npm telling you which command it ran — and then **nothing else**. For a type check, silence means success: no mistakes found.\n\n```output\n> ts-basics@1.0.0 check\n> tsc --noEmit --strict --target esnext --module nodenext --allowImportingTsExtensions --ignoreConfig --pretty false day4/hello.ts\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "`node file.ts` works on Node.js 22.18 and newer. On Node.js 22.6–22.17, use `node --experimental-strip-types day4/hello.ts`. Older versions can't run `.ts` files directly — upgrade Node.js.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": "Older Node.js versions"
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I3 · See the compiler turn TypeScript into JavaScript\n\nCreate `day4/greeting.ts`, which uses a type annotation:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// A named value with a type annotation\nconst course: string = 'Playwright with TypeScript';\nconsole.log('Welcome to ' + course + '!');",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day4/greeting.ts",
+            "run": "node day4/greeting.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nWelcome to Playwright with TypeScript!\n```\n\nNow ask the compiler to produce the JavaScript version:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npx tsc day4/greeting.ts --target esnext --ignoreConfig\ncat day4/greeting.js",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\n// A named value with a type annotation\nconst course = 'Playwright with TypeScript';\nconsole.log('Welcome to ' + course + '!');\n```\n\nCompare the two files. The only difference is that `: string` is gone. That's all compiling did here: it **checked** the type, then **removed** it. Delete the `.js` file afterwards — you won't need it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "rm day4/greeting.js",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What did the compiler remove when it turned greeting.ts into greeting.js?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "The type annotation `: string`",
+              "The comment",
+              "The console.log line",
+              "Nothing — the files are identical"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "Type annotations exist only for checking. The JavaScript output is the same program without them."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I4 · A type mistake that Node.js doesn't notice\n\nThis file stores a price as **text** by mistake. Look closely at line 2:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// A type mistake that Node.js does NOT notice\nconst price: number = '499';\nconst quantity: number = 2;\nconsole.log('Total:', price * quantity);\nconsole.log('Price + 1:', price + 1);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day4/runs-anyway.ts",
+            "run": "node day4/runs-anyway.ts",
+            "mode": "editor",
+            "expect_error": true,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "(`console.log` can print several things separated by commas; it puts a space between them.)\n\nFirst **run** it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "node day4/runs-anyway.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nTotal: 998\nPrice + 1: 4991\n```\n\nNo error! The total even looks right — JavaScript quietly turned `'499'` into a number for the multiplication. But `price + 1` gave **4991**: with text, `+` *glues* instead of adding. A test using this value would check the wrong number, and nobody would know why.\n\nNow **check** it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm run check -- day4/runs-anyway.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\n> ts-basics@1.0.0 check\n> tsc --noEmit --strict --target esnext --module nodenext --allowImportingTsExtensions --ignoreConfig --pretty false day4/runs-anyway.ts\n\nday4/runs-anyway.ts(2,7): error TS2322: Type 'string' is not assignable to type 'number'.\n```\n\nThe checker points straight at line 2. Fix it — change `'499'` to `499` (no quotes) — then check and run again. Now `Price + 1` prints `500`.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "This is the whole case for TypeScript in one example: a *silent* wrong result is far worse than a loud error. It's also why you should never trust \"it ran without errors\" — check it.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -468,27 +1050,7 @@
         },
         {
           "type": "markdown",
-          "text": "## I4 · Add npm script shortcuts\n\nTyping long commands gets old. Add **scripts** to `package.json` with the terminal (or edit the file by hand):",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "terminal",
-          "text": "npm pkg set scripts.test=\"playwright test\"\nnpm pkg set scripts.test:headed=\"playwright test --headed\"\nnpm pkg set scripts.test:chromium=\"playwright test --project=chromium\"\nnpm pkg set scripts.report=\"playwright show-report\"",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "Your `package.json` now contains:",
+          "text": "## I5 · Read three kinds of errors\n\nThis file has **three mistakes**. Don't fix anything yet — check it first:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -498,15 +1060,52 @@
         },
         {
           "type": "code",
-          "text": "\"scripts\": {\n  \"test\": \"playwright test\",\n  \"test:headed\": \"playwright test --headed\",\n  \"test:chromium\": \"playwright test --project=chromium\",\n  \"report\": \"playwright show-report\"\n}",
+          "text": "// This program has three mistakes. Check it and read each error.\nconst testerName: string = 'Asha';\nconst yearsOfTesting: number = 'four';\nconsol.log('Tester: ' + testerName.toUppercase());\nconsole.log('Experience: ' + yearsOfTesting + ' years');",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
-            "language": "json",
-            "file": null,
-            "run": null,
-            "mode": "read",
+            "language": "ts",
+            "file": "ts-basics/day4/three-mistakes.ts",
+            "run": "npm run check -- day4/three-mistakes.ts",
+            "mode": "editor",
+            "expect_error": true,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm run check -- day4/three-mistakes.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nday4/three-mistakes.ts(3,7): error TS2322: Type 'string' is not assignable to type 'number'.\nday4/three-mistakes.ts(4,1): error TS2552: Cannot find name 'consol'. Did you mean 'console'?\nday4/three-mistakes.ts(4,36): error TS2551: Property 'toUppercase' does not exist on type 'string'. Did you mean 'toUpperCase'?\n```\n\n(Above the errors, npm prints its two `>` lines as before.)\n\n| Error | Line | What it means | Fix |\n|---|---|---|---|\n| `TS2322` | 3 | Text `'four'` where a number was promised | `4` |\n| `TS2552` | 4 | There's nothing called `consol` — a typo. TypeScript even suggests `console` | `console` |\n| `TS2551` | 4 | Text has no ability called `toUppercase`. Case matters: it's `toUpperCase` | `toUpperCase` |\n\nFix all three, then check (silence!) and run:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// The same program with all three mistakes fixed\nconst testerName: string = 'Asha';\nconst yearsOfTesting: number = 4;\nconsole.log('Tester: ' + testerName.toUpperCase());\nconsole.log('Experience: ' + yearsOfTesting + ' years');",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day4/three-fixed.ts",
+            "run": "node day4/three-fixed.ts",
+            "mode": "editor",
             "expect_error": false,
             "network": false
           },
@@ -515,7 +1114,7 @@
         },
         {
           "type": "markdown",
-          "text": "Use them:",
+          "text": "```output\nTester: ASHA\nExperience: 4 years\n```\n\n`toUpperCase()` turns text into capitals. You'll meet more of these abilities (called *methods*) on Days 5 and 6.\n\n### Three kinds of errors\n\nWhat would have happened if you had *run* the broken file instead of checking it?",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -525,7 +1124,17 @@
         },
         {
           "type": "terminal",
-          "text": "npm test\nnpm run test:chromium\n# pass extra options after --\nnpm run test:chromium -- -g \"get started\"\nnpm run report",
+          "text": "node day4/three-mistakes.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nfile:///…/ts-basics/day4/three-mistakes.ts:4\nconsol.log('Tester: ' + testerName.toUppercase());\n^\n\nReferenceError: consol is not defined\n    at file:///…/ts-basics/day4/three-mistakes.ts:4:1\n```\n\nA **crash while running**. Node.js didn't notice line 3's type mistake at all; it only stopped when it reached something impossible on line 4. Programmers name three kinds of errors:\n\n| Kind | When it's found | Example |\n|---|---|---|\n| **Syntax error** | Before anything else — the code can't even be read | A missing quote: `'TC-205;` → `error TS1002: Unterminated string literal.` |\n| **Type error** | By the checker (`tsc`, VS Code), before running | `'four'` where a number was promised → `TS2322` |\n| **Runtime error** | While the program runs — a crash | `ReferenceError: consol is not defined` |\n\nThe checker catches the first two kinds *before* you run anything. That's why you check first.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -535,30 +1144,69 @@
         },
         {
           "type": "callout",
-          "text": "`test` is special — `npm test` works without `run`. Every other script needs `npm run <name>`. Inside scripts you don't need `npx`; npm finds the `playwright` command in `node_modules` automatically.",
+          "text": "In VS Code, all three mistakes are underlined in red the moment you type them, and the suggestions (`console`, `toUpperCase`) pop up as you type. VS Code uses its own built-in copy of TypeScript, so the wording of a message can differ slightly from the checker's — the mistakes it finds are the same.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
           "callout": {
-            "variant": "note",
+            "variant": "tip",
             "title": null
           },
           "title": null
         },
         {
+          "type": "checkpoint",
+          "text": "`error TS2552: Cannot find name 'consol'. Did you mean 'console'?` — what kind of mistake is this?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "A typo in a name",
+              "A missing quote",
+              "A wrong type",
+              "A problem with Node.js"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "The name `consol` doesn't exist. TypeScript suggests the closest real name."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
           "type": "markdown",
-          "text": "## I5 · Prepare your framework folders\n\nCreate the folders from lesson F3 so your project is ready to grow (they'll stay empty until Day 9):",
+          "text": "## I6 · Types in action\n\nA short program that uses all three everyday types, with both annotations and inference, and prints each value's type:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Annotated types — written by us\nconst testCaseId: string = 'TC-101';\nconst durationInSeconds: number = 4.2;\nconst passed: boolean = true;\n\n// Inferred types — TypeScript works them out from the values\nconst browser = 'chromium';\nconst retries = 0;\nconst isHeadless = false;\n\n// typeof tells us the type while the program runs\nconsole.log(testCaseId, '->', typeof testCaseId);\nconsole.log(durationInSeconds, '->', typeof durationInSeconds);\nconsole.log(passed, '->', typeof passed);\nconsole.log(browser, '->', typeof browser);\nconsole.log(retries, '->', typeof retries);\nconsole.log(isHeadless, '->', typeof isHeadless);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day4/types.ts",
+            "run": "node day4/types.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
           "callout": null,
           "title": null
         },
         {
           "type": "terminal",
-          "text": "mkdir -p pages fixtures test-data utils tests/day9 tests/day10\nls",
+          "text": "node day4/types.ts\nnpm run check -- day4/types.ts",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -567,21 +1215,8 @@
           "title": null
         },
         {
-          "type": "callout",
-          "text": "`mkdir -p` creates several folders at once (and nested ones such as `tests/day5`) without complaining if one already exists. In Windows PowerShell, `mkdir pages, fixtures, test-data, utils, tests/day9, tests/day10` does the same.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "note",
-            "title": null
-          },
-          "title": null
-        },
-        {
           "type": "markdown",
-          "text": "## I6 · (Own computer) Run tests from VS Code\n\nWith the **Playwright Test for VS Code** extension installed:\n\n1. Open the `pw-course` folder in VS Code (**File → Open Folder**)\n2. Click the **Testing** (flask) icon — your tests appear in a tree\n3. Click ▶ next to a test to run it; tick **Show browser** at the bottom of the panel to watch it\n4. Green ✓ / red ✗ icons also appear next to each `test(...)` line in the editor\n5. **Record new** opens a browser and records your clicks into a new test file (Codegen)",
+          "text": "```output\nTC-101 -> string\n4.2 -> number\ntrue -> boolean\nchromium -> string\n0 -> number\nfalse -> boolean\n```\n\n**Try it:** add the line `const timeout: boolean = 5000;` at the end, and check the file. Read the error, predict it before you look, then remove the line.\n\n## I7 · (Your own computer) Let VS Code catch mistakes as you type\n\n1. In VS Code, **File → Open Folder** and open your `pw-course` folder. Open `ts-basics/day4/types.ts`.\n2. **Hover** over `browser` on line 7. A box shows `const browser: \"chromium\"` — the type TypeScript worked out. (It's even more precise than `string`: it knows the exact text. You'll see why that's useful on Day 6.)\n3. On a new line, type `console.` — a list of everything `console` can do pops up. That's the *language service* from F2.\n4. Type `const x: number = 'oops';` — a red squiggle appears at once. Hover over it to read the same TS2322 message the checker prints.\n5. Delete the line. The squiggle disappears.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -601,7 +1236,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 4 · Practice\n\n\n\n## Quiz · Day 4 check",
+          "text": "# Day 4 · Practice\n\n## Quiz · Day 4 check",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -611,21 +1246,21 @@
         },
         {
           "type": "checkpoint",
-          "text": "In the config, what does a \"project\" usually represent?",
+          "text": "A colleague says, \"My test file ran with npx playwright test, so it has no TypeScript mistakes.\" What's the best reply?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "A Git repository",
-              "A browser or device configuration that every test runs against",
-              "A single test file",
-              "A team of testers"
+              "Only if the HTML report is green",
+              "Only if it ran in all three browsers",
+              "Right — Playwright would have refused to run it",
+              "Not necessarily — Playwright runs tests without checking types; check the red underlines or run tsc"
             ],
             "answers": [
-              1
+              3
             ],
             "kind": "single",
-            "explanation": "Projects are sets of settings — typically one per browser/device. Each test runs once per project."
+            "explanation": "Playwright converts TypeScript to JavaScript without checking types. A test can run — and even pass — with type mistakes in it."
           },
           "code": null,
           "callout": null,
@@ -633,21 +1268,21 @@
         },
         {
           "type": "checkpoint",
-          "text": "You run `npm run test:chromium -- -g \"login\"`. What does the `--` do?",
+          "text": "What does \"TypeScript is a superset of JavaScript\" mean?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "Comments out the rest of the line",
-              "Passes the options after it (`-g \"login\"`) on to the Playwright command inside the script",
-              "Runs the tests twice",
-              "Disables Chromium"
+              "TypeScript contains all of JavaScript, plus types",
+              "TypeScript is faster than JavaScript",
+              "TypeScript is a smaller, simpler JavaScript",
+              "TypeScript replaces JavaScript in browsers"
             ],
             "answers": [
-              1
+              0
             ],
             "kind": "single",
-            "explanation": "Everything after `--` is forwarded to the script's command, so it becomes `playwright test --project=chromium -g \"login\"`."
+            "explanation": "Everything that is valid JavaScript is valid TypeScript; TypeScript adds type syntax on top."
           },
           "code": null,
           "callout": null,
@@ -655,23 +1290,132 @@
         },
         {
           "type": "checkpoint",
-          "text": "The failure output says: Expected pattern: /Dashboard/, Received string: \"Login\", Timeout: 5000ms. What can you conclude? (Select all that apply)",
+          "text": "Which of these check your types? (Select all that apply)",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "The page title was \"Login\" instead of containing \"Dashboard\"",
-              "Playwright retried the assertion for about 5 seconds",
-              "The test definitely found a real bug in the app",
-              "The login step may have failed, or the test's expectation may be wrong — investigate"
+              "VS Code, as you type",
+              "`tsc` (e.g. `npm run check -- file.ts`)",
+              "`npx playwright test`",
+              "`node file.ts`"
             ],
             "answers": [
               0,
-              1,
-              3
+              1
             ],
             "kind": "multiple",
-            "explanation": "The message shows expected vs actual and that the assertion retried for 5 s. Whether it's an app bug or a test problem needs investigation — never assume."
+            "explanation": "Node.js and Playwright run TypeScript without checking types. The compiler and the editor's language service do the checking."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `console.log(typeof 'false');` print?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "string",
+              "boolean",
+              "false",
+              "undefined"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "'false' is in quotes, so it's text that happens to contain the word false."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`day5/login.ts(12,3): error TS2322: …` — where is the problem?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Line 3, character 12",
+              "Line 12, character 3",
+              "In the file TS2322",
+              "Error number 12"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "The numbers in brackets are (line, character)."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which is a type ANNOTATION?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`// count is a number`",
+              "`console.log(typeof count);`",
+              "`const count: number = 3;`",
+              "`const count = 3;`"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "The `: number` after the name is an annotation. `const count = 3;` relies on inference, and `// count is a number` is only a comment."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Why is `const price: number = '499';` dangerous if nobody checks it?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Node.js refuses to run the file",
+              "It crashes the program on that line",
+              "It can produce silently wrong results — for example `price + 1` gives 4991",
+              "It turns the price into 0"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "With text, `+` glues instead of adds. The program runs, but the answer is wrong — the worst kind of bug."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Your test file has a red underline in VS Code, but `npx playwright test` runs it. What should you do?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Fix the underlined mistake; the test may be doing something different from what you think",
+              "Run the test twice to be sure",
+              "Ignore it — the test ran, so it must be fine",
+              "Run the test in headed mode to make the underline go away"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "Playwright doesn't type-check. The red underline is a real mistake that can make a test fail confusingly — or pass when it shouldn't."
           },
           "code": null,
           "callout": null,
@@ -679,7 +1423,7 @@
         },
         {
           "type": "markdown",
-          "text": "## Exercises",
+          "text": "## Predict the output",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -708,6 +1452,16 @@
           "title": null
         },
         {
+          "type": "markdown",
+          "text": "## Exercises",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
@@ -718,8 +1472,48 @@
           "title": null
         },
         {
+          "type": "problem-ref",
+          "text": "4",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "5",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "6",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "7",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
           "type": "markdown",
-          "text": "## Reflection\n\n1. Which file would you open to add a fourth browser, change retries, or set a base URL?\n2. When a test fails, which three pieces of information in the error do you look at first?\n3. What goes into `tests/`, `pages/` and `test-data/` in a well-structured framework?",
+          "text": "## Reflection\n\n1. What is the difference between JavaScript and TypeScript, in one sentence?\n2. Name the three parts of TypeScript and what each one does.\n3. Which tools check types, and which run code without checking?\n4. What's the difference between a type annotation and type inference?\n5. In `day4/x.ts(7,12): error TS2322`, what do 7 and 12 mean?",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -729,7 +1523,7 @@
         },
         {
           "type": "callout",
-          "text": "Playwright tests are written in **TypeScript**. Over the next four days you'll learn exactly enough programming to read and write them confidently — starting with your first program, variables and simple data types.",
+          "text": "Variables and operators: storing values with `let` and `const`, naming them well, and calculating, comparing and combining values — the building blocks of every test.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -739,66 +1533,127 @@
             "title": "Coming up on Day 5"
           },
           "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## Week 1 wrap-up\n\nYou started the week as a manual tester. You can now:\n\n- ✅ Explain what test automation is for and which tests to automate\n- ✅ Describe how a web page is built and how Playwright finds elements in it\n- ✅ Explain Playwright's architecture and why it reduces flaky tests\n- ✅ Create a Playwright project, explain every file, run tests in many ways and read a failure\n\nWeek 2 is where you start writing code yourself.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
         }
       ],
       "problems": [
         {
           "number": 1,
           "difficulty": "Easy",
-          "title": "Write the command",
-          "kind": "terminal",
-          "statement": "Write the single command for each situation (run them to check):\n\n1. Run every test, only in WebKit.\n2. Run only `tests/example.spec.ts`, in Chromium, with the browser visible.\n3. Run only tests whose title contains `link`, in all browsers.\n4. Show which tests would run in Firefox without running them.\n5. Re-run only the tests that failed in the previous run.",
+          "title": "Predict — numbers and text",
+          "kind": "predict",
+          "statement": "Without running it, write down the four lines this program prints. Then run it with `node` to check.\n\n```ts\nconsole.log(10 + 5);\nconsole.log('10' + 5);\nconsole.log(typeof 10);\nconsole.log(typeof '10');\n```",
           "stub": null,
-          "hints": [
-            "`--project=<name>` picks a browser project.",
-            "`-g` filters by title; `--list` lists; `--last-failed` re-runs failures."
-          ],
+          "hints": [],
           "file": null,
           "run": null,
           "check": null,
-          "solution": "```bash\nnpx playwright test --project=webkit\nnpx playwright test tests/example.spec.ts --project=chromium --headed\nnpx playwright test -g \"link\"\nnpx playwright test --project=firefox --list\nnpx playwright test --last-failed\n```"
+          "solution": "15\n105\nnumber\nstring\n\nWith a number, `+` adds. With text on either side, `+` glues: `'10' + 5` becomes `'105'`."
         },
         {
           "number": 2,
           "difficulty": "Medium",
-          "title": "Customise the config",
-          "kind": "code",
-          "statement": "Edit `playwright.config.ts` so that:\n\n1. Only **chromium** and **firefox** projects remain (remove or comment out webkit).\n2. Failed tests are retried **once** locally and **twice** on CI.\n3. Tests run **headed** by default (hint: `headless: false` inside `use`).\n\nThen run `npx playwright test --list` and check that only 4 runs are listed (2 tests × 2 projects). Afterwards, set `headless` back (or remove the line) so tests run headless again.",
+          "title": "Predict — what does the checker say?",
+          "kind": "predict",
+          "statement": "This file runs with `node` without any error. Will `npm run check` report a problem? If so, on which line, and why?\n\n```ts\nconst firstName: string = 'Ravi';\nconst age: number = 31;\nconst isAdmin: boolean = 'no';\nconsole.log(firstName, age, isAdmin);\n```",
           "stub": null,
-          "hints": [
-            "`retries` uses the same `process.env.CI ? a : b` pattern that is already there — just change the numbers.",
-            "Projects are objects inside the `projects: [ … ]` list. Put `//` in front of lines to comment them out."
-          ],
-          "file": "playwright.config.ts",
-          "run": null,
-          "check": null,
-          "solution": "```ts\nimport { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',\n  fullyParallel: true,\n  forbidOnly: !!process.env.CI,\n  retries: process.env.CI ? 2 : 1,          // 2 on CI, 1 locally\n  workers: process.env.CI ? 1 : undefined,\n  reporter: [['list'], ['html', { open: 'never' }]],\n  use: {\n    trace: 'on-first-retry',\n    headless: false,                         // show the browser for every run\n  },\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n    // { name: 'webkit', use: { ...devices['Desktop Safari'] } },\n  ],\n});\n```"
-        },
-        {
-          "number": 3,
-          "difficulty": "Challenge",
-          "title": "Record a test with Codegen (own computer)",
-          "kind": "terminal",
-          "statement": "On your own computer, run `npx playwright codegen https://playwright.dev`.\n\n1. In the browser that opens, click **Docs**, then use the search box to search for `locators`.\n2. Watch the Playwright Inspector window write code as you click.\n3. Copy the generated code into `tests/day4/recorded.spec.ts` and run it.\n4. Write down two things in the generated code you *don't* understand yet — you'll recognise them by the end of Day 9.",
-          "stub": null,
-          "hints": [
-            "Close the Codegen browser window when you're finished recording.",
-            "Codegen code often needs small clean-ups; that's normal."
-          ],
+          "hints": [],
           "file": null,
           "run": null,
           "check": null,
-          "solution": "```bash\nnpx playwright codegen https://playwright.dev\n# …record, copy the code into tests/day4/recorded.spec.ts, then:\nnpx playwright test tests/day4/recorded.spec.ts --project=chromium --headed\n```"
+          "solution": "Yes — line 3: `Type 'string' is not assignable to type 'boolean'`.\n\n`'no'` is text, but `isAdmin` was declared as a boolean, so it must be `true` or `false`. Node.js runs the file anyway (it prints `Ravi 31 no`) because it never checks types."
+        },
+        {
+          "number": 3,
+          "difficulty": "Easy",
+          "title": "A test-run banner",
+          "kind": "code",
+          "statement": "Create `day4/banner.ts` that prints exactly these four lines, using one `console.log` per line:\n```\n=====================\nNightly regression run\nBrowsers: 3\n=====================\n```\nThen run the type check — it must print nothing after npm's two `>` lines.",
+          "stub": "// Print the four banner lines here",
+          "hints": [
+            "Text goes in quotes; the number 3 can be part of the text ('Browsers: 3') or joined with + ('Browsers: ' + 3)."
+          ],
+          "file": "ts-basics/day4/banner.ts",
+          "run": "node day4/banner.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day4/banner.ts",
+            "expected": "=====================\nNightly regression run\nBrowsers: 3\n====================="
+          },
+          "solution": "```ts\n// A banner for the start of a test run\nconsole.log('=====================');\nconsole.log('Nightly regression run');\nconsole.log('Browsers: ' + 3);\nconsole.log('=====================');\n```\n\n**Output**\n\n```output\n=====================\nNightly regression run\nBrowsers: 3\n=====================\n```"
+        },
+        {
+          "number": 4,
+          "difficulty": "Medium",
+          "title": "Fix four mistakes",
+          "kind": "code",
+          "statement": "Save this as `day4/fix-me.ts`, run `npm run check -- day4/fix-me.ts`, and fix every mistake until the check is silent. Then run it — it must print:\n```\nTest: TC-205\nPassed: true\nDuration: 3.5 seconds\n```",
+          "stub": "const testId: string = 'TC-205;\nconst didPass: boolean = 'true';\nconst duration: number = 3.5;\nConsole.log('Test: ' + testId);\nconsole.log('Passed: ' + didpass);\nconsole.log('Duration: ' + duration + ' seconds');",
+          "hints": [
+            "Look for a missing closing quote on line 1 — fix that first, because it confuses the checker about everything after it.",
+            "Booleans are written without quotes: `true`, not `'true'`.",
+            "Case matters — in `Console` and in `didpass`."
+          ],
+          "file": "ts-basics/day4/fix-me.ts",
+          "run": "node day4/fix-me.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day4/fix-me.ts",
+            "expected": "Test: TC-205\nPassed: true\nDuration: 3.5 seconds"
+          },
+          "solution": "```ts\nconst testId: string = 'TC-205';          // fix 1: closing quote\nconst didPass: boolean = true;            // fix 2: a boolean, not text\nconst duration: number = 3.5;\nconsole.log('Test: ' + testId);           // fix 3: lowercase console\nconsole.log('Passed: ' + didPass);        // fix 4: didPass, with a capital P\nconsole.log('Duration: ' + duration + ' seconds');\n```\n\n**Output**\n\n```output\nTest: TC-205\nPassed: true\nDuration: 3.5 seconds\n```"
+        },
+        {
+          "number": 5,
+          "difficulty": "Easy",
+          "title": "Annotate everything",
+          "kind": "code",
+          "statement": "Create `day4/annotated.ts`. Declare these named values **with type annotations**, then print each one with its type using `typeof`, like I6:\n\n- `siteUrl` — `'https://shop.example.com'`\n- `maxWaitMs` — `5000`\n- `runHeaded` — `false`\n\nExpected output:\n```\nhttps://shop.example.com -> string\n5000 -> number\nfalse -> boolean\n```",
+          "stub": "// Annotate everything\n// Save this as ts-basics/day4/annotated.ts\n",
+          "hints": [
+            "An annotation goes after the name: `const siteUrl: string = …`",
+            "Print like this: `console.log(siteUrl, '->', typeof siteUrl);`"
+          ],
+          "file": "ts-basics/day4/annotated.ts",
+          "run": "node day4/annotated.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day4/annotated.ts",
+            "expected": "https://shop.example.com -> string\n5000 -> number\nfalse -> boolean"
+          },
+          "solution": "```ts\n// Three named values, each with a type annotation\nconst siteUrl: string = 'https://shop.example.com';\nconst maxWaitMs: number = 5000;\nconst runHeaded: boolean = false;\n\n// Print each value and its type\nconsole.log(siteUrl, '->', typeof siteUrl);\nconsole.log(maxWaitMs, '->', typeof maxWaitMs);\nconsole.log(runHeaded, '->', typeof runHeaded);\n```\n\n**Output**\n\n```output\nhttps://shop.example.com -> string\n5000 -> number\nfalse -> boolean\n```"
+        },
+        {
+          "number": 6,
+          "difficulty": "Medium",
+          "title": "JavaScript or TypeScript?",
+          "kind": "written",
+          "statement": "Explain to a manual-testing colleague, in 4–6 sentences:\n\n1. what JavaScript is and where it runs,\n2. what TypeScript adds,\n3. why Playwright tests are usually written in TypeScript, and\n4. the one thing they must remember: which tools check types and which don't.",
+          "stub": null,
+          "hints": [],
+          "file": null,
+          "run": null,
+          "check": null,
+          "solution": "JavaScript is the programming language every web browser runs — it makes pages interactive — and Node.js runs it outside the browser, which is how our Playwright tests run. TypeScript is JavaScript plus types: it lets us say what kind of value something is, like text, a number or true/false. The TypeScript checker finds mistakes such as a price stored as text before the code runs, and VS Code underlines them in red and suggests what to type next. That's why Playwright tests are usually written in TypeScript: fewer silly mistakes, better autocomplete, and easier-to-read tests. The catch is that Node.js and Playwright run TypeScript *without* checking the types, so we must fix every red underline in the editor (or run `tsc`) ourselves."
+        },
+        {
+          "number": 7,
+          "difficulty": "Challenge",
+          "title": "Challenge: a silent bug",
+          "kind": "code",
+          "statement": "This file runs with `node` and prints a wrong answer without any error. It contains **two** separate mistakes — the type checker finds only one of them. Save it as `day4/silent-bug.ts`.\n\n1. Run it and note the wrong line.\n2. Run the type check, read the error and fix it. Run again — is the output right now?\n3. Find and fix the second mistake, so that the output is:\n```\nItems in cart: 3\nAfter adding one more: 4\n```",
+          "stub": "// The number of items was read from the page as text\nconst itemsInCart: number = '3';\nconsole.log('Items in cart: ' + itemsInCart);\nconsole.log('After adding one more: ' + itemsInCart + 1);",
+          "hints": [
+            "After fixing the type, the second line still prints 31. Why? `+` works from left to right: first `'After adding one more: ' + 3` makes text, then that text + 1 glues a 1 on.",
+            "Brackets make part of a calculation happen first — just like in maths."
+          ],
+          "file": "ts-basics/day4/silent-bug.ts",
+          "run": "node day4/silent-bug.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day4/silent-bug.ts",
+            "expected": "Items in cart: 3\nAfter adding one more: 4"
+          },
+          "solution": "```ts\n// The number of items, stored as a real number\nconst itemsInCart: number = 3;\nconsole.log('Items in cart: ' + itemsInCart);\nconsole.log('After adding one more: ' + (itemsInCart + 1));   // brackets: add first, then join\n```\n\n**Output**\n\n```output\nItems in cart: 3\nAfter adding one more: 4\n```"
         }
       ]
     }

@@ -1,266 +1,190 @@
 ---
 day: 5
 week: 1
-title: 'TypeScript I: Your First Program, Variables & Operators'
-subtitle: Just enough programming to read Playwright tests — running and checking a file, storing values, simple data types and operators
-estimatedTime: 2.5–3 hours
+title: Variables and Operators
+subtitle: Store test data in variables, name them well, and calculate, compare and combine values — the building blocks of every test
+estimatedTime: 3 hours
 topics:
-- JavaScript / TypeScript Fundamentals
-- Variables
-- Operators
-- Data Types (primitives)
+  - Variables (let, const, var)
+  - Operators
 objectives:
-- Run a TypeScript file with Node.js and type-check it with the TypeScript compiler
-- Explain the difference between JavaScript and TypeScript and why Playwright uses TypeScript
-- Declare variables with `let` and `const` (and know why to avoid `var`)
-- Use string, number, boolean, null and undefined with type annotations and inference
-- Use arithmetic, assignment, comparison, logical, ternary and nullish operators correctly
-- Read TypeScript error messages and fix type errors
+  - Declare variables with `let` and `const`, with and without type annotations, and explain when to use each
+  - Explain why modern code avoids `var`
+  - Describe block scope — where a variable exists and where it doesn't
+  - Name variables clearly using the rules and the camelCase convention
+  - Build text with template literals
+  - Use arithmetic, assignment, comparison and logical operators, and the ternary operator
+  - Convert between text and numbers, and avoid comparison traps
+  - Read and fix the TypeScript errors caused by variable mistakes
 prerequisitesFromEarlierDays:
-- 'Day 3–4: the terminal, npm, the pw-course project'
-workspace: pw-course/ts-basics/ (you create it today)
+  - "Day 4: running vs checking a .ts file, string/number/boolean, type annotations and inference, reading error messages"
+  - "Day 4: the ts-basics playground (node day5/file.ts and npm run check -- day5/file.ts)"
+workspace: pw-course/ts-basics/day5/
 ---
 
 # Prerequisites
 
-## P1 · What a program is
+## P1 · Quick recap from Day 4
 
-A **program** is a list of instructions (called **statements**) that the computer runs **from top to bottom**, one after another — exactly like the steps in a test case.
+Before starting, make sure you can do each of these (the Day 4 lesson is in brackets):
 
-```ts mode=read
-console.log('Step 1: open the login page');   // prints a line of text
-console.log('Step 2: enter the username');
-console.log('Step 3: click Log in');
+- [ ] Run a file with `node day5/file.ts` and type-check it with `npm run check -- day5/file.ts`, from inside `pw-course/ts-basics` (Day 4 · I1–I2)
+- [ ] Explain why Node.js and Playwright don't catch type mistakes, but `tsc` and VS Code do (Day 4 · F4)
+- [ ] Read an error like `day5/x.ts(3,7): error TS2322: …` — file, line, character, code, message (Day 4 · P3)
+
+```quiz
+id: d5-p1-q1
+type: single
+question: "`const retries = 2;` — which type does TypeScript infer, and how?"
+options:
+  - string, because everything is text in JavaScript
+  - number, worked out from the value 2 (type inference)
+  - boolean, because 2 is "true"
+  - No type until you write one
+answer: b
+explanation: With no annotation, TypeScript infers the type from the value. 2 is a number.
 ```
 
-Five rules to know before you write any code:
-
-| Rule | Example |
-|---|---|
-| **`console.log(…)` prints** something to the console/terminal | `console.log('Hello')` |
-| **Text goes in quotes** — single `'…'`, double `"…"` or backticks `` `…` `` | `'Log in'`, `"Log in"` |
-| **Comments** are notes for humans; the computer ignores them | `// one line` and `/* several lines */` |
-| **Semicolons** `;` end a statement (optional in most cases, but we use them for clarity) | `console.log('Hi');` |
-| **Case matters** — `Console.log` is not `console.log` | `userName` ≠ `username` |
-
-> [!WARNING] Straight quotes only
-> Copying code from Word, PDFs or chat apps can turn `'` into curly quotes `‘ ’`. Code needs straight quotes. If you see a strange "Invalid character" error, retype the quotes.
-
-## P2 · Set up your TypeScript playground
-
-You'll practise TypeScript in a small separate folder inside your course project, called `ts-basics`. Run these commands from the `pw-course` folder:
-
-```bash terminal
-mkdir ts-basics
-cd ts-basics
-npm init -y
-npm pkg set type=module
-npm pkg set scripts.check="tsc --noEmit --strict --target esnext --module nodenext --allowImportingTsExtensions --ignoreConfig"
-npm install -D typescript
-mkdir day5 day6 day7 day8
+```quiz
+id: d5-p1-q2
+type: single
+question: "What does `console.log('5' + 5);` print?"
+options:
+  - "10"
+  - "55"
+  - An error
+  - "5 5"
+answer: b
+explanation: When either side of `+` is text, `+` joins instead of adding. You'll learn to avoid this trap today.
 ```
 
-What these do:
+## P2 · Why tests need variables
 
-| Command | Purpose |
-|---|---|
-| `npm init -y` | Creates a `package.json` for the playground (`-y` = accept all defaults) |
-| `npm pkg set type=module` | Uses modern `import`/`export` syntax (needed on Day 8) |
-| `npm pkg set scripts.check=…` | Adds a `check` shortcut that runs the TypeScript **type checker** in strict mode (`--ignoreConfig` makes it check just the file you name, even if a `tsconfig.json` exists higher up) |
-| `npm install -D typescript` | Installs the TypeScript compiler (`tsc`) |
+Look at any manual test case and you'll find values that are used more than once, values that change, and values worked out from other values:
 
-From now on, for every `.ts` file you'll do two things:
+| In a test case | Example | In code |
+|---|---|---|
+| **Test data** used in several steps | The email `asha@example.com` is typed in step 2 and appears on the profile page in step 7 | A variable that stores it once |
+| **Things that change** during the test | The number of items in the cart goes from 0 to 3 | A variable that's updated |
+| **Values worked out** from others | Expected total = price × quantity | A variable calculated with operators |
+| **Settings** | The site's address, a time limit | A variable that never changes |
 
-| You want to… | Command (inside `ts-basics`) |
-|---|---|
-| **Run** the file and see its output | `node day5/hello.ts` |
-| **Check** the file for type errors | `npm run check -- day5/hello.ts` |
-
-> [!NOTE] Why can Node run `.ts` files?
-> Modern Node.js (22.18 and newer, 24, 26) can run TypeScript directly: it simply **removes the type annotations** and runs the JavaScript that's left. It does **not** check your types — that's the job of `npm run check` (the TypeScript compiler). On older Node 22 versions, use `node --experimental-strip-types day5/hello.ts`.
-
-Create your first file, `day5/hello.ts`:
-
-```ts file=ts-basics/day5/hello.ts mode=editor run="node day5/hello.ts"
-// My first TypeScript program
-const course: string = 'Playwright with TypeScript';
-console.log('Welcome to ' + course + '!');
-```
-
-```bash terminal
-node day5/hello.ts
-npm run check -- day5/hello.ts
-```
-
-```output console
-Welcome to Playwright with TypeScript!
-```
-
-The `check` command prints nothing when there are **no errors** — silence is success.
-
-## P3 · How to read an error message
-
-Errors are normal. Professionals see dozens a day. Here's one — change `hello.ts` so the course is a number:
-
-```ts file=ts-basics/day5/broken.ts mode=editor expect=error run="npm run check -- day5/broken.ts"
-const course: string = 2026;   // a number stored where a string is expected
-console.log(course);
-```
-
-```bash terminal
-npm run check -- day5/broken.ts
-```
-
-```output terminal
-day5/broken.ts(1,7): error TS2322: Type 'number' is not assignable to type 'string'.
-```
-
-| Part | Meaning |
-|---|---|
-| `day5/broken.ts` | The file |
-| `(1,7)` | Line 1, character 7 |
-| `TS2322` | The error code (searchable online) |
-| `Type 'number' is not assignable to type 'string'` | The explanation: you put a number where a string belongs |
-
-> [!TESTER]
-> Treat an error message like a bug report: **where** (file, line), **what** (the message), then investigate. Read it slowly — it usually tells you exactly what's wrong.
-
-# Fundamentals
-
-## F1 · JavaScript vs TypeScript
-
-**JavaScript (JS)** is the programming language of the web. Every browser runs it, and Node.js runs it outside the browser. Playwright itself is used from JavaScript/TypeScript.
-
-**TypeScript (TS)** is JavaScript **plus types**. It was created by Microsoft (first released in 2012) and is a **superset** of JavaScript: every valid JavaScript program is also valid TypeScript. TypeScript adds a way to say *what kind of value* each thing holds — text, number, true/false, list… — so mistakes are caught **before** the code runs.
+A **variable** is a named box that holds a value. You give the box a name, put a value in it, and use the name wherever you need the value.
 
 ```mermaid
 flowchart LR
-  TS["your-test.ts<br/>(TypeScript: JS + types)"] -- "type-check<br/>(tsc / VS Code)" --> OK{"errors?"}
-  OK -- "no" --> JS["JavaScript<br/>(types removed)"]
-  OK -- "yes" --> FIX["fix the code"]
-  JS --> RUN["runs in Node.js<br/>or the browser"]
+  N1["email"] --- V1["'asha@example.com'"]
+  N2["itemsInCart"] --- V2["3"]
+  N3["isLoggedIn"] --- V3["true"]
 ```
 
-### Static vs dynamic typing
+> [!TESTER]
+> A variable is like a named cell in your test-data spreadsheet. Change the cell once, and every step that refers to it uses the new value — no hunting for copies.
 
-JavaScript is **dynamically typed** — a variable can hold a string now and a number later, and nobody complains until something breaks while the program is running. TypeScript is **statically typed** — once a variable is a string it must stay a string, and the editor warns you immediately.
+An **operator** is a symbol that does something with values: `+` adds, `>` compares, `&&` combines true/false answers. A piece of code that produces a value — like `price * quantity` or `age >= 18` — is called an **expression**.
+
+```quiz
+id: d5-p2-q1
+type: single
+question: "Which of these is an expression (it produces a value)?"
+options:
+  - "`price * quantity`"
+  - "`const price`"
+  - "`// price times quantity`"
+  - "`let total;`"
+answer: a
+explanation: "`price * quantity` calculates a value. `const price` and `let total;` only create a name (a declaration), and a comment is ignored."
+```
+
+# Fundamentals
+
+## F1 · Declaring variables
+
+Creating a variable is called **declaring** it. The full form has five parts:
+
+```text mode=read
+let   passedTests :  number  =  0 ;
+└┬┘   └────┬────┘   └──┬──┘    └┬┘
+keyword   name        type    value
+```
+
+- **keyword** — `let` or `const` (F2 explains which)
+- **name** — how you'll refer to it
+- **type** — optional; TypeScript infers it from the value if you leave it out (Day 4 · F5)
+- **value** — the first value you put in the box
+
+There are four ways to write a declaration:
+
+| Form | Example | Result |
+|---|---|---|
+| Type **and** value | `let status: string = 'passed';` | A string box holding `'passed'` |
+| Value only (type inferred) | `let status = 'passed';` | Same — TypeScript infers `string` |
+| Type only, value later | `let status: string;` then `status = 'passed';` | Must be given a value before it's used |
+| Neither | `let status;` | Avoid — it's unclear what the box is for |
+
+### Assigning and reassigning
+
+`=` means **"put this value in the box"** — it's not "equals" as in maths.
 
 ```ts mode=read
-// JavaScript: allowed, bug discovered later (maybe in production)
-let retries = 'three';
-retries = 3;
-
-// TypeScript: the editor flags it instantly
-let timeout: number = 30000;
-timeout = 'thirty seconds';   // ❌ Type 'string' is not assignable to type 'number'
+let itemsInCart = 0;    // declare, with a first value
+itemsInCart = 1;        // reassign: put a new value in the same box
+itemsInCart = 2;        // and again
 ```
 
-### Why TypeScript for test automation?
+Only the first line has `let`. After that you just use the name. Writing `let` again with the same name is an error — the box already exists.
 
-| Benefit | What it means for you |
-|---|---|
-| **Catches mistakes early** | Typos and wrong values are underlined in red *before* you run a 10-minute suite |
-| **Autocomplete** | Type `page.` and VS Code lists every Playwright action — `click`, `fill`, `goto`… |
-| **Readable** | `function login(user: string, password: string)` documents itself |
-| **Default in Playwright** | `npm init playwright@latest` picks TypeScript by default; most Playwright examples are TypeScript |
+### Using a variable before it has a value
 
-Drawbacks: a little more to type, and types are one more concept to learn. For test suites that grow to hundreds of tests, the benefits win.
-
-> [!WARNING] Important: Playwright runs TypeScript, but does not type-check it
-> When you run `npx playwright test`, Playwright converts your `.ts` files to JavaScript on the fly and runs them — **without** checking types (so your tests start fast). Type errors are shown by **VS Code** (red underlines) and by running `npx tsc --noEmit`. Always fix the red underlines!
-
-### See the compiler in action (optional)
-
-The classic TypeScript workflow is: compile `.ts` → `.js`, then run the `.js`. Try it once:
-
-```bash terminal
-npx tsc day5/hello.ts --target esnext --ignoreConfig
-node day5/hello.js
+```ts mode=read
+let status: string;
+console.log(status);    // ❌ error TS2454: Variable 'status' is used before being assigned.
 ```
 
-Open the new `day5/hello.js` — it's the same code **with the `: string` removed**. That's all "compiling" TypeScript mostly does. You can delete `hello.js` afterwards.
+TypeScript notices that the box is still empty. A running program would print `undefined` — JavaScript's word for "no value yet" (more on Day 6).
 
 ```quiz
 id: d5-f1-q1
 type: single
-question: Which statement about TypeScript is TRUE?
+question: "What does `=` do in `score = score + 10;`?"
 options:
-  - TypeScript is a completely different language from JavaScript
-  - Every valid JavaScript program is also valid TypeScript; TypeScript adds types on top
-  - Browsers run TypeScript directly without any conversion
-  - TypeScript was created by Google
+  - It checks whether score equals score + 10
+  - It works out score + 10, then puts the result into score
+  - It is a syntax error
+  - It creates a second variable called score
 answer: b
-explanation: TypeScript is a superset of JavaScript made by Microsoft. Browsers run JavaScript, so types are removed (compiled away) before code runs.
+explanation: "The right-hand side is worked out first, then `=` stores the result in the variable on the left."
 ```
 
-```quiz
-id: d5-f1-q2
-type: truefalse
-question: When you run `npx playwright test`, Playwright stops and refuses to run if your test file has a type error.
-answer: false
-explanation: Playwright strips the types and runs the JavaScript without type-checking. The type error may still cause a failure at runtime — or silently do the wrong thing. Use VS Code's red underlines or `npx tsc --noEmit` to catch type errors.
-```
+## F2 · `const`, `let` — and why not `var`
 
-## F2 · Variables: `let`, `const` (and why not `var`)
-
-A **variable** is a named box that stores a value so you can use it later.
-
-```ts mode=read
-const siteUrl = 'https://shop.example.com';   // create a box called siteUrl and put a URL in it
-let attempts = 0;                              // a box whose value will change
-attempts = attempts + 1;                       // put a new value in the box
-```
-
-### The three keywords
-
-| Keyword | Can you change the value later? | Use it when… |
+| Keyword | Can the value be replaced? | Use it for |
 |---|---|---|
-| `const` | ❌ No — "constant" | The value should never be replaced (URLs, test data, locators). **Use by default.** |
-| `let` | ✅ Yes | The value must change (counters, results that update) |
-| `var` | ✅ Yes | **Avoid** — the old way (before 2015). It has confusing scoping rules and lets you redeclare the same name by accident |
-
-```ts file=ts-basics/day5/variables.ts mode=editor run="node day5/variables.ts"
-// const: a value that never changes
-const baseUrl = 'https://shop.example.com';
-
-// let: a value that will change
-let loginAttempts = 0;
-loginAttempts = loginAttempts + 1;   // first attempt
-loginAttempts = loginAttempts + 1;   // second attempt
-
-console.log('Testing', baseUrl);
-console.log('Login attempts:', loginAttempts);
-
-// Uncomment the next line and run `npm run check -- day5/variables.ts`:
-// baseUrl = 'https://other.example.com';   // ❌ Cannot assign to 'baseUrl' because it is a constant
-```
-
-```output console
-Testing https://shop.example.com
-Login attempts: 2
-```
-
-> [!NOTE]
-> `console.log` can print several things separated by commas — it adds a space between them.
-
-### Declaring now, assigning later
+| `const` | ❌ No — "constant" | Values that shouldn't change: test data, URLs, expected messages. **Use by default.** |
+| `let` | ✅ Yes | Values that must change: counters, running totals, results |
+| `var` | ✅ Yes | **Nothing** — the old keyword from before 2015. Avoid it |
 
 ```ts mode=read
-let testResult: string;       // declared with a type, no value yet
-testResult = 'passed';        // assigned later
+const siteUrl = 'https://shop.example.com';
+siteUrl = 'https://other.example.com';     // ❌ error TS2588: Cannot assign to 'siteUrl' because it is a constant.
+
+let attempts = 1;
+attempts = 2;                               // ✅ fine — let allows it
 ```
 
-A `const` must get its value immediately: `const x;` is an error.
+**Rule of thumb:** start with `const`. Change it to `let` only when you find you need to replace the value. Code full of `const` is easier to trust — you know those values never change halfway through a test.
 
-### Naming rules
+### Why not `var`?
 
-| ✅ Allowed | ❌ Not allowed |
-|---|---|
-| `userName`, `user_name`, `$price`, `_temp`, `test2` | `2test` (can't start with a digit) |
-| Letters, digits, `_`, `$` | `user-name` (no hyphens), `user name` (no spaces) |
-| | `let`, `const`, `class`, `return` … (reserved words) |
+`var` was JavaScript's only keyword until 2015, when `let` and `const` arrived. It has surprising behaviours:
 
-**Convention:** use **camelCase** — first word lowercase, each next word capitalised: `loginButton`, `maxRetryCount`, `isLoggedIn`. Choose names that explain the value: `expectedTitle` beats `t`.
+| `var` problem | What happens | `let` / `const` |
+|---|---|---|
+| **Redeclaring is allowed** | `var browser = 'chromium';` … later `var browser = 'firefox';` silently replaces the first — even if someone else wrote it far away | ❌ error: *Cannot redeclare…* |
+| **Ignores blocks** | A `var` created inside `{ … }` leaks out and is visible outside it | Stays inside its block (F3) |
+| **Usable before its line** | It exists — as `undefined` — even before the line that declares it, so typos in order go unnoticed | ❌ error: *used before its declaration* |
+
+You'll still see `var` in old tutorials and old test code. Read it as "an old `let`", and write `let` or `const` yourself.
 
 ```quiz
 id: d5-f2-q1
@@ -272,244 +196,175 @@ options:
   - "`let name: string; name = 'Asha';`"
   - "`const maxRetries = 3;`"
 answer: b
-explanation: A `const` cannot be reassigned. Use `let` if the value must change.
+explanation: A `const` can't be given a new value. Use `let` if the value must change.
 ```
 
 ```quiz
 id: d5-f2-q2
+type: single
+question: You store the expected page title for a test. It never changes during the test. Which keyword?
+options:
+  - "`const`"
+  - "`let`"
+  - "`var`"
+  - "`let`, in case the title changes one day"
+answer: a
+explanation: A value that never changes is a `const`. Storing it once also means you change it in one place if the title changes.
+```
+
+## F3 · Scope and naming
+
+### Scope: where a variable exists
+
+Curly braces `{ }` make a **block** — a group of statements. A `let` or `const` declared **inside** a block exists **only inside** that block. That area is the variable's **scope**.
+
+```ts mode=read
+const suite = 'Checkout';            // outside any block: visible to everything below
+
+{
+  const step = 'Enter card details';   // only exists inside these braces
+  console.log(suite, step);            // ✅ both visible here
+}
+
+console.log(step);                     // ❌ error TS2304: Cannot find name 'step'.
+```
+
+You'll see blocks everywhere from Day 7 — after `if`, around loops, as the body of functions and Playwright tests. Block scope keeps each block's variables private, so two tests can both have a variable called `email` without clashing.
+
+> [!NOTE]
+> Indenting the code inside a block (moving it right) is a convention that makes blocks easy to see. The computer ignores it — but people don't.
+
+### Naming rules — what's allowed
+
+| ✅ Allowed | ❌ Not allowed |
+|---|---|
+| Letters, digits, `_` and `$`: `user1`, `max_retries`, `$price` | Starting with a digit: `2ndUser` |
+| Any length | Spaces or hyphens: `user name`, `user-name` |
+| | Reserved words: `let`, `const`, `class`, `return`, `if`… |
+
+Names are **case-sensitive**: `userName` and `username` are two different variables.
+
+### Naming conventions — what's good
+
+| Convention | Example |
+|---|---|
+| **camelCase**: first word lower-case, each following word capitalised | `loginButton`, `expectedPageTitle`, `maxRetryCount` |
+| Say what it holds — clarity beats brevity | `expectedTotal` rather than `t` or `x2` |
+| Yes/no values read like a question | `isLoggedIn`, `hasItems`, `shouldRetry` |
+| Include units when it helps | `timeoutMs`, `priceInRupees` |
+
+> [!TESTER]
+> Good names make a test readable by someone who has never seen it — like a good test-case title. `expect(cartTotal).toBe(expectedTotal)` explains itself; `expect(a).toBe(b)` doesn't.
+
+```quiz
+id: d5-f3-q1
 type: multiple
-question: Which are valid AND follow the camelCase convention? (Select all that apply)
+question: Which names are valid AND follow the camelCase convention? (Select all that apply)
 options:
   - "`loginButton`"
   - "`login-button`"
   - "`expectedPageTitle`"
   - "`2ndUser`"
 answer: [a, c]
-explanation: Hyphens aren't allowed in names, and names can't start with a digit. `loginButton` and `expectedPageTitle` are valid camelCase.
-```
-
-## F3 · Primitive data types
-
-A **data type** says what kind of value something is. TypeScript's everyday **primitive** (simple) types:
-
-| Type | Examples | Used in testing for… |
-|---|---|---|
-| `string` | `'Asha'`, `"Log in"`, `` `Hello ${name}` `` | URLs, usernames, expected text |
-| `number` | `42`, `3.14`, `-7`, `30000` | Counts, prices, timeouts (ms) |
-| `boolean` | `true`, `false` | Is the checkbox ticked? Did the test pass? |
-| `undefined` | `undefined` | "No value has been given yet" |
-| `null` | `null` | "Intentionally empty" |
-
-(There are also `bigint` for huge whole numbers and `symbol` for unique ids — you won't need them for testing.)
-
-### Type annotations vs type inference
-
-You can **annotate** a type with `: type` after the name — or let TypeScript **infer** (work out) the type from the value:
-
-```ts mode=read
-let username: string = 'asha';   // annotation: explicitly says "string"
-let password = 'Secret@123';     // inference: TypeScript sees a string, so password is a string
-
-password = 12345;                // ❌ error — TypeScript inferred string
-```
-
-Rule of thumb: when you give a value immediately, inference is enough. Annotate when you declare without a value, and for function parameters (Day 7).
-
-### Strings in detail
-
-```ts file=ts-basics/day5/strings.ts mode=editor run="node day5/strings.ts"
-const firstName: string = 'Asha';
-const product = "Wireless Mouse";
-
-// Template literal: backticks + ${ } to insert values into text
-const greeting = `Hello, ${firstName}! You added ${product} to the cart.`;
-console.log(greeting);
-
-// Useful string tools
-console.log(product.length);              // number of characters
-console.log(product.toUpperCase());       // WIRELESS MOUSE
-console.log(product.includes('Mouse'));   // does it contain "Mouse"?
-console.log('  padded  '.trim());         // remove spaces at both ends
-```
-
-```output console
-Hello, Asha! You added Wireless Mouse to the cart.
-14
-WIRELESS MOUSE
-true
-padded
-```
-
-> [!TIP]
-> Template literals (backticks) are everywhere in Playwright tests — for building URLs (`` `${baseUrl}/login` ``) and expected messages (`` `Welcome, ${user}` ``).
-
-### Numbers
-
-TypeScript has **one** number type for whole numbers and decimals. Timeouts in Playwright are numbers in **milliseconds**: `5000` = 5 seconds.
-
-```ts mode=read
-const price = 499.99;
-const quantity = 2;
-const timeoutMs = 30_000;   // underscores make big numbers readable (same as 30000)
-```
-
-### null vs undefined
-
-```ts mode=read
-let couponCode: string | undefined;   // not set yet → undefined
-console.log(couponCode);              // undefined
-
-let middleName: string | null = null; // deliberately "no middle name"
-```
-
-`undefined` usually means *"not set (yet)"*; `null` means *"set to nothing on purpose"*. You'll see both when a value may be missing.
-
-### Checking a type at runtime: `typeof`
-
-```ts mode=read
-console.log(typeof 'hello');   // "string"
-console.log(typeof 42);        // "number"
-console.log(typeof true);      // "boolean"
-```
-
-```quiz
-id: d5-f3-q1
-type: single
-question: "What does this print? `` const user = 'Ravi'; console.log(`Welcome back, ${user}!`); ``"
-options:
-  - "`Welcome back, ${user}!`"
-  - "`Welcome back, Ravi!`"
-  - "`Welcome back, user!`"
-  - An error
-answer: b
-explanation: Inside backticks, `${ }` inserts the value of the expression — here the value of `user`.
+explanation: Hyphens aren't allowed, and names can't start with a digit.
 ```
 
 ```quiz
 id: d5-f3-q2
 type: single
-question: "`let isVisible = true;` — what type does TypeScript infer for isVisible?"
+question: "A variable `token` is declared with `const` inside `{ … }`. Where can you use it?"
 options:
-  - string
-  - number
-  - boolean
-  - any
-answer: c
-explanation: "`true` and `false` are boolean values, so TypeScript infers `boolean`."
+  - Anywhere in the file
+  - Only inside those braces, after the line that declares it
+  - Only on the line where it's declared
+  - Anywhere, but only after the braces close
+answer: b
+explanation: "`let` and `const` are block-scoped: they exist inside their block, from their declaration onward."
 ```
 
-## F4 · Operators
+## F4 · Building text with template literals
 
-**Operators** are symbols that do something with values: calculate, compare, combine.
+On Day 4 you joined text with `+`. It works, but gets messy:
+
+```ts mode=read
+const firstName = 'Asha';
+const items = 3;
+console.log('Welcome back, ' + firstName + '! You have ' + items + ' items in your cart.');
+```
+
+A **template literal** is text written between **backticks** `` ` `` (the key under `Esc` on most keyboards). Inside it, `${ … }` inserts any value or expression:
+
+```ts mode=read
+console.log(`Welcome back, ${firstName}! You have ${items} items in your cart.`);
+console.log(`Next week you'll have ${items + 2} items.`);    // any expression works inside ${ }
+```
+
+Both print `Welcome back, Asha! You have 3 items in your cart.` — the template literal is simply easier to read and harder to get wrong (no missing spaces or `+` signs).
+
+Template literals appear constantly in Playwright tests:
+
+```ts mode=read
+const baseUrl = 'https://shop.example.com';
+const productId = 42;
+const productUrl = `${baseUrl}/products/${productId}`;      // https://shop.example.com/products/42
+const searchTerm = 'wireless mouse';
+const expectedHeading = `Results for "${searchTerm}"`;     // Results for "wireless mouse"
+```
+
+A few handy tools that every piece of text has. You write them after a dot; the ones with brackets are called *methods*, and `.length` (no brackets) is a *property* — a stored fact about the text:
+
+| Method | Example | Result |
+|---|---|---|
+| `.length` (no brackets) | `'Asha'.length` | `4` |
+| `.toUpperCase()` / `.toLowerCase()` | `'Asha'.toUpperCase()` | `'ASHA'` |
+| `.trim()` | `'  a@b.com  '.trim()` | `'a@b.com'` — spaces removed from both ends |
+| `.includes('…')` | `'Order confirmed'.includes('confirmed')` | `true` |
+
+```quiz
+id: d5-f4-q1
+type: single
+question: "`const user = 'Ravi';` — what does `` console.log(`Hi ${user}, you have ${2 * 3} messages`) `` print?"
+options:
+  - "`Hi ${user}, you have ${2 * 3} messages`"
+  - "`Hi Ravi, you have 6 messages`"
+  - "`Hi user, you have 2 * 3 messages`"
+  - An error
+answer: b
+explanation: Inside backticks, `${ }` is replaced by the value of what's inside — the variable's value, or the result of the calculation.
+```
+
+## F5 · Arithmetic and assignment operators
 
 ### Arithmetic
 
 | Operator | Meaning | Example | Result |
 |---|---|---|---|
-| `+` | add (also joins strings) | `5 + 2` | `7` |
-| `-` | subtract | `5 - 2` | `3` |
-| `*` | multiply | `5 * 2` | `10` |
-| `/` | divide | `5 / 2` | `2.5` |
-| `%` | remainder (modulo) | `5 % 2` | `1` |
-| `**` | power | `5 ** 2` | `25` |
+| `+` | add | `7 + 2` | `9` |
+| `-` | subtract | `7 - 2` | `5` |
+| `*` | multiply | `7 * 2` | `14` |
+| `/` | divide | `7 / 2` | `3.5` |
+| `%` | remainder (*modulo*) | `7 % 2` | `1` |
+| `**` | power | `2 ** 10` | `1024` |
 
-### Assignment and increment
+`*`, `/` and `%` happen before `+` and `-`, just like in maths: `2 + 3 * 4` is `14`. **Brackets go first**: `(2 + 3) * 4` is `20`. When in doubt, add brackets — they make the order obvious to readers too.
 
-| Operator | Same as |
-|---|---|
-| `x = 5` | put 5 in x |
-| `x += 2` | `x = x + 2` |
-| `x -= 2` | `x = x - 2` |
-| `x *= 2` | `x = x * 2` |
-| `x++` | `x = x + 1` |
-| `x--` | `x = x - 1` |
+Two surprises worth knowing:
 
-### Comparison — always produce `true` or `false`
+- Decimals aren't always exact: `0.1 + 0.2` gives `0.30000000000000004`. Round for display with `.toFixed(2)` → `'0.30'` (note: it gives *text*).
+- Dividing a number by zero gives `Infinity`, and converting text that isn't a number with `Number(…)` gives `NaN` ("Not a Number") — see F6.
 
-| Operator | Meaning |
-|---|---|
-| `===` | equal (value **and** type) — **use this** |
-| `!==` | not equal (value or type) — **use this** |
-| `==` / `!=` | "loose" equal / not equal — converts types first. **Avoid** |
-| `>` `<` `>=` `<=` | greater, less, greater-or-equal, less-or-equal |
+### Assignment shortcuts
 
-```ts file=ts-basics/day5/comparison.ts mode=editor run="node day5/comparison.ts"
-const expectedCount: number = 3;   // e.g. how many items we expect in the cart
-const actualCount: number = 3;     // e.g. how many items the page shows
-const fromTextBox = '3';           // text from an input box is always a string!
-
-console.log(actualCount === expectedCount);    // same value, same type
-console.log(actualCount > 5);
-console.log(actualCount !== 0);
-
-// Why we avoid == : it converts types behind your back
-console.log(fromTextBox == (actualCount as any));    // loose: '3' becomes 3 → true
-console.log(fromTextBox === (actualCount as any));   // strict: string vs number → false
-```
-
-```output console
-true
-false
-true
-true
-false
-```
-
-> [!NOTE]
-> The `as any` above only exists to let TypeScript compile this deliberately bad comparison. In real code, TypeScript would stop you from comparing a string with a number — one more reason to love it.
-
-### Logical — combine true/false values
-
-| Operator | Name | Result is `true` when… |
+| Shortcut | Same as | Typical use |
 |---|---|---|
-| `&&` | AND | **both** sides are true |
-| `\|\|` | OR | **at least one** side is true |
-| `!` | NOT | flips true ↔ false |
+| `x += 5` | `x = x + 5` | Add to a running total |
+| `x -= 5` | `x = x - 5` | Subtract from stock |
+| `x *= 2` | `x = x * 2` | Double a wait time |
+| `x /= 2` | `x = x / 2` | Halve something |
+| `x++` | `x = x + 1` | Count one more pass |
+| `x--` | `x = x - 1` | Count down attempts |
 
-```ts mode=read
-const isLoggedIn = true;
-const hasItemsInCart = false;
-
-console.log(isLoggedIn && hasItemsInCart);   // false — both needed
-console.log(isLoggedIn || hasItemsInCart);   // true  — one is enough
-console.log(!isLoggedIn);                    // false — flipped
-```
-
-### `+` with strings — joining text
-
-```ts mode=read
-console.log('Order ' + 1045);   // "Order 1045"  — number is turned into text
-console.log(5 + '5');           // "55"          — careful: text wins!
-console.log(5 + 5);             // 10
-```
-
-### Ternary — a one-line if/else
-
-`condition ? valueIfTrue : valueIfFalse`
-
-```ts mode=read
-const failedTests = 0;
-const status = failedTests === 0 ? 'PASS' : 'FAIL';   // "PASS"
-```
-
-This is exactly what you saw in `playwright.config.ts` on Day 4: `retries: process.env.CI ? 2 : 0`.
-
-### Nullish coalescing `??` and optional chaining `?.`
-
-```ts mode=read
-// ?? gives a fallback when the left side is null or undefined
-const envUrl: string | undefined = undefined;
-const url = envUrl ?? 'http://localhost:3000';   // "http://localhost:3000"
-
-// ?. reads a property only if the object exists (otherwise gives undefined, no crash)
-type Order = { coupon?: { code: string } };
-const order: Order = {};
-console.log(order.coupon?.code);   // undefined — no error
-```
-
-### Order of operations
-
-`*` and `/` happen before `+` and `-`, just like in maths: `2 + 3 * 4` is `14`. When in doubt, add parentheses: `(2 + 3) * 4` is `20`.
+These all *change* the variable — so they only work on `let`, never on `const`.
 
 ```quiz
 id: d5-f5-q1
@@ -521,111 +376,255 @@ options:
   - "1"
   - "30"
 answer: c
-explanation: "`%` gives the remainder: 10 ÷ 3 = 3 remainder 1."
+explanation: "`%` gives the remainder: 10 ÷ 3 = 3, remainder 1."
 ```
 
 ```quiz
 id: d5-f5-q2
 type: single
-question: "What does `console.log('2' + 2);` print?"
+question: "`let total = 100; total += 50; total -= 30;` — what is total now?"
 options:
-  - "4"
-  - "22"
-  - An error
-  - NaN
+  - "100"
+  - "120"
+  - "150"
+  - "180"
 answer: b
-explanation: When one side of `+` is a string, `+` joins text. '2' + 2 becomes '22'.
+explanation: 100 + 50 = 150, then 150 − 30 = 120.
+```
+
+## F6 · Comparison operators
+
+Comparisons always produce `true` or `false` — exactly what an assertion needs.
+
+| Operator | Meaning | Example | Result |
+|---|---|---|---|
+| `===` | equal (value **and** type) | `3 === 3` | `true` |
+| `!==` | not equal | `3 !== 4` | `true` |
+| `>` / `<` | greater / less than | `5 > 3` | `true` |
+| `>=` / `<=` | greater or equal / less or equal | `18 >= 18` | `true` |
+| `==` / `!=` | "loose" equal / not equal — converts types first | `'3' == 3` | `true` (!) |
+
+### Always use `===` and `!==`
+
+In plain JavaScript, the loose `==` quietly converts values before comparing, so `'3' == 3` is `true` and `'' == 0` is `true`. That hides bugs: a page showing the text `"3"` would pass a check for the number `3` by accident. The strict `===` compares **value and type**, so `'3' === 3` is `false` — no surprises.
+
+TypeScript goes one step further: when the two sides clearly have different types, it flags the comparison — with `==` *or* `===` — before you even run the code (you'll see it in I4). But values without a known type (for example data read from a file) slip past that check, so make `===` your habit.
+
+### Text read from a page is always text
+
+When a test reads what's on the screen — a price, a count, a badge — it usually gets **text**, even if it looks like a number. To compare it with a number, convert it:
+
+| Conversion | Example | Result |
+|---|---|---|
+| Text → number | `Number('1499')` | `1499` |
+| Text that isn't a number | `Number('₹1,499')` | `NaN` — clean it up first (Day 6) |
+| Empty text | `Number('')` | `0` — careful! An empty badge silently becomes 0, not NaN |
+| Number → text | `String(3)` | `'3'` |
+| Which type is it? | `typeof badgeText` | `'string'` — the `typeof` operator from Day 4 gives the type's name, e.g. `'string'`, `'number'`, `'boolean'` |
+
+### Comparing text
+
+Text is compared letter by letter, and **case matters**: `'Login' === 'login'` is `false`. When the case shouldn't matter, compare lower-cased versions: `a.toLowerCase() === b.toLowerCase()`.
+
+```quiz
+id: d5-f6-q1
+type: single
+question: Why should you prefer `===` over `==`?
+options:
+  - "`===` runs faster"
+  - "`===` doesn't convert types, so `'5' === 5` is false"
+  - "`==` doesn't work in TypeScript"
+  - "`===` ignores upper/lower case"
+answer: b
+explanation: "`==` converts types before comparing, which hides bugs. `===` is strict and predictable."
 ```
 
 ```quiz
-id: d5-f5-q3
+id: d5-f6-q2
 type: single
-question: "`const passed = 8; const total = 10;` — what is `passed === total ? 'All green' : 'Some failed'`?"
+question: "A test reads the cart count from the page as `countText = '3'`. How do you check it equals the number 3?"
+options:
+  - "`countText === 3`"
+  - "`Number(countText) === 3`"
+  - "`countText == 3`"
+  - "`countText + 0 === 3`"
+answer: b
+explanation: "Convert the text to a number first, then compare strictly. (`countText + 0` would give `'30'` — text joined with 0.)"
+```
+
+## F7 · Logical operators and the ternary operator
+
+### Combining true/false values
+
+| Operator | Name | `true` when… | Example |
+|---|---|---|---|
+| `&&` | AND | **both** sides are true | `isLoggedIn && hasItems` |
+| `\|\|` | OR | **at least one** side is true | `isAdmin \|\| isManager` |
+| `!` | NOT | flips true ↔ false | `!isLoggedIn` |
+
+Their full "truth tables":
+
+| A | B | `A && B` | `A \|\| B` | `!A` |
+|---|---|---|---|---|
+| true | true | true | true | false |
+| true | false | false | true | false |
+| false | true | false | true | true |
+| false | false | false | false | true |
+
+Business rules are full of these: *"Show the Checkout button if the user is logged in **and** the cart isn't empty."*
+
+```ts mode=read
+const isLoggedIn = true;
+const itemsInCart = 0;
+const showCheckout = isLoggedIn && itemsInCart > 0;   // true && false → false
+```
+
+### The ternary operator — a one-line either/or
+
+`condition ? valueIfTrue : valueIfFalse`
+
+```ts mode=read
+const failedTests: number = 0;
+const status = failedTests === 0 ? 'PASS' : 'FAIL';   // 'PASS'
+```
+
+Read it as: *"Is `failedTests === 0`? If yes, `'PASS'`; otherwise `'FAIL'`."* (The `: number` tells TypeScript that `failedTests` could be any number — without it, TypeScript sees it's always 0 and would call the comparison pointless. I3 explains this.)
+
+On Day 10 you'll meet this line in Playwright's settings file: `retries: process.env.CI ? 2 : 0` — "on a CI server, 2 retries; otherwise 0".
+
+```quiz
+id: d5-f7-q1
+type: single
+question: "`const age = 16; const hasConsent = true;` — what is `age >= 18 || hasConsent`?"
+options:
+  - "true"
+  - "false"
+  - "16"
+  - An error
+answer: a
+explanation: "`age >= 18` is false, but `hasConsent` is true. With OR, one true side is enough."
+```
+
+```quiz
+id: d5-f7-q2
+type: single
+question: "`const passed: number = 8; const total: number = 10;` — what is `passed === total ? 'All green' : 'Some failed'`?"
 options:
   - "'All green'"
   - "'Some failed'"
   - "true"
   - "false"
 answer: b
-explanation: 8 === 10 is false, so the ternary returns the value after the colon.
-```
-
-```quiz
-id: d5-f5-q4
-type: single
-question: Why should you prefer `===` over `==`?
-options:
-  - "`===` is faster to type"
-  - "`===` compares value AND type without converting, so `'5' === 5` is false — no surprises"
-  - "`==` doesn't work in TypeScript"
-  - They are exactly the same
-answer: b
-explanation: "`==` converts types before comparing (`'5' == 5` is true), which hides bugs. `===` is strict and predictable."
+explanation: 8 === 10 is false, so the ternary gives the value after the colon.
 ```
 
 # Implementation
 
-## I1 · Build expected messages with strings
+All files today go in `ts-basics/day5`. Run each with `node day5/<file>.ts` and check it with `npm run check -- day5/<file>.ts`, from inside `pw-course/ts-basics`.
 
-Tests constantly build **expected text**: welcome messages, error messages, URLs. Let's practise with strings, template literals and a few string methods.
+## I1 · Test data and values built from it
 
-```ts file=ts-basics/day5/messages.ts mode=editor run="node day5/messages.ts"
-// Test data
-const firstName: string = 'Meera';
-const lastName: string = 'Iyer';
-const email: string = '  Meera.Iyer@Example.com  ';   // typed with extra spaces and capitals
-const itemsInCart: number = 3;
+A registration test needs test data, plus values worked out from it. Everything here is a `const` — none of it changes during the test.
 
-// Build the values a test would check
+```ts file=ts-basics/day5/test-data.ts mode=editor run="node day5/test-data.ts"
+// Test data for a registration test
+const firstName = 'Meera';
+const lastName = 'Iyer';
+const email = '  Meera.Iyer@Example.com  ';   // typed by a user, with extra spaces and capitals
+const age: number = 27;
+const acceptsTerms = true;
+
+// Values built from the test data
 const fullName = `${firstName} ${lastName}`;
-const cleanEmail = email.trim().toLowerCase();         // what a good app should store
-const welcome = `Welcome back, ${firstName}!`;
-const cartLabel = `Cart (${itemsInCart})`;
+const cleanEmail = email.trim().toLowerCase();          // what a good app should store
+const expectedWelcome = `Welcome, ${firstName}!`;
 const profileUrl = `https://shop.example.com/users/${cleanEmail}`;
 
-console.log(welcome);
-console.log(cartLabel);
-console.log(`Full name has ${fullName.length} characters`);
+// Print a summary
+console.log(`Full name: ${fullName} (${fullName.length} characters)`);
 console.log(`Clean email: ${cleanEmail}`);
-console.log(`Profile URL: ${profileUrl}`);
-console.log(`Email looks valid: ${cleanEmail.includes('@')}`);
+console.log(`Adult: ${age >= 18}`);
+console.log(`Terms accepted: ${acceptsTerms}`);
+console.log(`Expected message: ${expectedWelcome}`);
+console.log(`Profile page: ${profileUrl}`);
 ```
 
 ```bash terminal
-node day5/messages.ts
-npm run check -- day5/messages.ts
+node day5/test-data.ts
+npm run check -- day5/test-data.ts
 ```
 
 ```output console
-Welcome back, Meera!
-Cart (3)
-Full name has 10 characters
+Full name: Meera Iyer (10 characters)
 Clean email: meera.iyer@example.com
-Profile URL: https://shop.example.com/users/meera.iyer@example.com
-Email looks valid: true
+Adult: true
+Terms accepted: true
+Expected message: Welcome, Meera!
+Profile page: https://shop.example.com/users/meera.iyer@example.com
 ```
 
-**Try it:** change `itemsInCart` to `0` and make the cart label print `Cart (empty)` when there are no items. (Hint: you'll need the ternary operator from lesson F4: `` itemsInCart === 0 ? 'Cart (empty)' : `Cart (${itemsInCart})` ``.)
+Notice `email.trim().toLowerCase()`: methods can be **chained** — `trim()` runs first, then `toLowerCase()` runs on its result.
 
-## I2 · Calculate test-run metrics
+**Try it:** change `firstName` to `'Priya'` and run again. Three lines change, because three values were built from it — that's the "change the cell once" benefit from P2.
 
-Use arithmetic, comparison, logical and ternary operators to summarise a test run — the kind of numbers you'd put in a test-summary report.
+## I2 · Counting results with `let`
+
+This program tracks a test run as it happens, so its counters must be `let`:
+
+```ts file=ts-basics/day5/counters.ts mode=editor run="node day5/counters.ts"
+// Counting results as a test run progresses
+let passed = 0;
+let failed = 0;
+let totalTimeMs = 0;
+
+// Test 1: login — passed in 1200 ms
+passed++;
+totalTimeMs += 1200;
+
+// Test 2: search — failed in 5300 ms
+failed++;
+totalTimeMs += 5300;
+
+// Test 3: checkout — passed in 2500 ms
+passed += 1;
+totalTimeMs = totalTimeMs + 2500;
+
+// Summary
+const total = passed + failed;
+console.log(`Ran ${total} tests: ${passed} passed, ${failed} failed`);
+console.log(`Total time: ${totalTimeMs} ms (${totalTimeMs / 1000} seconds)`);
+console.log(`Average per test: ${totalTimeMs / total} ms`);
+```
+
+```output console
+Ran 3 tests: 2 passed, 1 failed
+Total time: 9000 ms (9 seconds)
+Average per test: 3000 ms
+```
+
+`passed++`, `passed += 1` and `passed = passed + 1` all do the same thing — use whichever reads best.
+
+**Try it:** change `let passed = 0;` to `const passed = 0;` and check the file. Read the errors (one for each line that changes `passed`), then change it back.
+
+## I3 · Test-run metrics and a release decision
+
+Arithmetic, comparison, logical and ternary operators together — the kind of numbers you'd put in a test-summary report:
 
 ```ts file=ts-basics/day5/metrics.ts mode=editor run="node day5/metrics.ts"
 // Results from a test run (typed as number: in real life they come from a report)
 const total: number = 48;
 const passed: number = 42;
 const failed: number = 4;
-const skipped = total - passed - failed;       // whatever is left over
+const skipped = total - passed - failed;          // whatever is left over
 
 // Percentages
-const passRate = (passed / total) * 100;       // brackets first, then × 100
-const passRateText = passRate.toFixed(1);      // round to 1 decimal place → a string
+const passRate = (passed / total) * 100;          // brackets first, then × 100
+const passRateText = passRate.toFixed(1);         // round to 1 decimal place (gives text)
 
 // Decisions
 const allPassed = failed === 0;
 const releaseReady = passRate >= 90 && failed <= 5;   // both rules must be true
-const status = allPassed ? '✅ GREEN' : '❌ RED';
+const status = allPassed ? 'GREEN' : 'RED';
 
 console.log(`Total: ${total} | Passed: ${passed} | Failed: ${failed} | Skipped: ${skipped}`);
 console.log(`Pass rate: ${passRateText}%`);
@@ -636,24 +635,137 @@ console.log(`Ready for release? ${releaseReady}`);
 ```output console
 Total: 48 | Passed: 42 | Failed: 4 | Skipped: 2
 Pass rate: 87.5%
-Status: ❌ RED
+Status: RED
 Ready for release? false
 ```
 
-**Try it:** change `passed` to `44` and `failed` to `2`. Predict the four lines *before* you run it.
+> [!NOTE] Why `: number` on the first three lines?
+> Without it, TypeScript would notice that `failed` is *always* exactly 4, and flag `failed === 0` as a comparison that can never be true. Real results come from a report and can be any number, so we tell TypeScript "this is some number".
+
+**Try it:** change `passed` to `44` and `failed` to `2`. Predict all four lines *before* running.
 
 ```quiz
 id: d5-i3-q1
 type: single
-question: With passed = 44, failed = 2, total = 48, what is `releaseReady`? (Pass rate ≈ 91.7%)
+question: With passed = 44, failed = 2 and total = 48 (a pass rate of about 91.7%), what is `releaseReady`?
 options:
-  - "true — the pass rate is at least 90 AND failures are at most 5"
-  - "false — some tests failed"
-  - "true — because failed is not 0"
+  - "true"
+  - "false — because some tests failed"
+  - "false — because the pass rate is below 95"
   - An error
 answer: a
-explanation: 91.7 >= 90 is true and 2 <= 5 is true; true && true is true.
+explanation: 91.7 >= 90 is true and 2 <= 5 is true; true && true is true. Failures don't matter as long as there are at most 5.
 ```
+
+## I4 · The text-versus-number trap
+
+A test reads the cart badge from the page. The badge shows **3** — but text read from a page is always a string. Check this file before running it:
+
+```ts file=ts-basics/day5/compare-trap.ts mode=editor expect=error run="npm run check -- day5/compare-trap.ts"
+// The cart badge on the page shows "3". Text read from a page is always a string.
+const badgeText = '3';
+const expectedItems = 3;
+
+console.log(badgeText === expectedItems);
+```
+
+```bash terminal
+npm run check -- day5/compare-trap.ts
+```
+
+```output terminal
+day5/compare-trap.ts(5,13): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+```
+
+TypeScript spotted that a string can **never** be strictly equal to a number — the check would always be `false`, and the test would fail for the wrong reason. The fix is to convert first:
+
+```ts file=ts-basics/day5/compare-fixed.ts mode=editor run="node day5/compare-fixed.ts"
+// Convert text from the page to a number before comparing
+const badgeText = '3';
+const expectedItems = 3;
+const badgeNumber = Number(badgeText);            // '3' → 3
+
+console.log(badgeNumber === expectedItems);       // now both are numbers
+console.log(typeof badgeText, typeof badgeNumber);
+
+// Conversions you'll need when reading prices and counts
+console.log(Number('1499') + 1);                  // a real number: adds
+console.log(Number('₹1,499'));                    // not a plain number: NaN
+console.log(String(expectedItems) + ' items');    // number → text
+```
+
+```output console
+true
+string number
+1500
+NaN
+3 items
+```
+
+> [!TESTER]
+> `NaN` is a classic source of confusing test failures. If a price on the page includes a currency symbol or a comma, remove them before converting — you'll learn how to clean text on Day 6.
+
+## I5 · Fix three variable mistakes
+
+This file has three classic variable mistakes. Check it and read each error:
+
+```ts file=ts-basics/day5/scope-errors.ts mode=editor expect=error run="npm run check -- day5/scope-errors.ts"
+// Three variable mistakes. Check this file and read each error.
+const baseUrl = 'https://shop.example.com';
+baseUrl = 'https://staging.shop.example.com';
+
+console.log(attempts);
+let attempts = 0;
+
+{
+  const secretToken = 'abc123';
+}
+console.log(secretToken);
+```
+
+```bash terminal
+npm run check -- day5/scope-errors.ts
+```
+
+```output terminal
+day5/scope-errors.ts(3,1): error TS2588: Cannot assign to 'baseUrl' because it is a constant.
+day5/scope-errors.ts(5,13): error TS2448: Block-scoped variable 'attempts' used before its declaration.
+day5/scope-errors.ts(5,13): error TS2454: Variable 'attempts' is used before being assigned.
+day5/scope-errors.ts(11,13): error TS2304: Cannot find name 'secretToken'.
+```
+
+| Line | Mistake | Fix |
+|---|---|---|
+| 3 | Reassigning a `const` | Use `let` if it must change — or, better, make a second `const` with a different name |
+| 5 | Using `attempts` before the line that creates it (two errors for the same mistake) | Move the `console.log` below the declaration |
+| 11 | `secretToken` only exists inside its block | Use it inside the block, or declare it outside |
+
+The fixed version:
+
+```ts file=ts-basics/day5/scope-fixed.ts mode=editor run="node day5/scope-fixed.ts"
+// The same program, fixed
+const baseUrl = 'https://shop.example.com';
+const stagingUrl = 'https://staging.shop.example.com';   // a second const instead of reassigning
+
+let attempts = 0;
+console.log(attempts);                                    // used after it's declared
+
+const secretToken = 'abc123';                             // declared outside the block
+{
+  console.log(`Inside the block: ${secretToken}`);
+}
+console.log(`Outside the block: ${secretToken}`);
+console.log(baseUrl, stagingUrl);
+```
+
+```output console
+0
+Inside the block: abc123
+Outside the block: abc123
+https://shop.example.com https://staging.shop.example.com
+```
+
+Notice that a block can see variables from **outside** it — scope only stops variables leaking *out*.
 
 # Practice
 
@@ -662,12 +774,12 @@ explanation: 91.7 >= 90 is true and 2 <= 5 is true; true && true is true.
 ```quiz
 id: d5-pr-q1
 type: single
-question: Which keyword should you use by default for a variable whose value never changes?
+question: Which keyword should you use by default for a new variable?
 options:
-  - var
-  - let
-  - const
-  - static
+  - "`var`"
+  - "`let`"
+  - "`const`"
+  - "`let` for text, `const` for numbers"
 answer: c
 explanation: Use `const` by default and switch to `let` only when the value must change. Avoid `var`.
 ```
@@ -675,37 +787,51 @@ explanation: Use `const` by default and switch to `let` only when the value must
 ```quiz
 id: d5-pr-q2
 type: single
-question: What is the type of `30000` in `const timeout = 30000;`?
+question: "`let x = 5; let x = 6;` in the same block — what happens?"
 options:
-  - string
-  - number
-  - boolean
-  - time
+  - x becomes 6
+  - An error — `let` doesn't allow declaring the same name twice
+  - x becomes 11
+  - Both values are kept
 answer: b
-explanation: It's a number (30,000 milliseconds = 30 seconds).
+explanation: "Redeclaring is an error with `let` and `const`. To change the value, just write `x = 6;`. (Old `var` would have allowed it silently.)"
 ```
 
 ```quiz
 id: d5-pr-q3
 type: single
-question: "What does `console.log(typeof 'false');` print?"
+question: "What does `console.log(2 + 3 * 4);` print?"
 options:
-  - boolean
-  - string
-  - "false"
-  - undefined
+  - "20"
+  - "14"
+  - "24"
+  - "9"
 answer: b
-explanation: "'false' is in quotes, so it's a string that happens to contain the word false."
+explanation: Multiplication happens before addition — 3 × 4 = 12, then 2 + 12 = 14. Use brackets `(2 + 3) * 4` for 20.
+```
+
+```quiz
+id: d5-pr-q4
+type: single
+question: "`const product = 'Mouse'; const price = 799;` — which line prints `Mouse costs ₹799`?"
+options:
+  - "`` console.log('${product} costs ₹${price}'); ``"
+  - "`` console.log(`${product} costs ₹${price}`); ``"
+  - "`` console.log(`product costs ₹price`); ``"
+  - "`` console.log(${product} + ' costs ₹' + ${price}); ``"
+answer: b
+explanation: "`${ }` only works inside backticks. Inside single quotes it's printed literally."
 ```
 
 ```quiz
 id: d5-pr-q5
 type: single
-question: "What does `true && !false` evaluate to?"
+question: "What is `true && !false`?"
 options:
   - "true"
   - "false"
   - An error
+  - "undefined"
 answer: a
 explanation: "`!false` is true, and true && true is true."
 ```
@@ -713,24 +839,50 @@ explanation: "`!false` is true, and true && true is true."
 ```quiz
 id: d5-pr-q6
 type: single
-question: "`const port = process.env.PORT ?? '3000';` — if PORT is not set (undefined), what is port?"
+question: "`Number('12 items')` gives…"
 options:
-  - undefined
-  - "'3000'"
-  - "null"
-  - An empty string
+  - "12"
+  - "'12 items'"
+  - "NaN"
+  - "0"
+answer: c
+explanation: The whole text must be a number. Anything extra — words, currency symbols, commas — gives NaN.
+```
+
+```quiz
+id: d5-pr-q7
+type: single
+question: "Which error do you get for `const limit = 5; limit++;`?"
+options:
+  - "Cannot find name 'limit'"
+  - "Cannot assign to 'limit' because it is a constant"
+  - "limit is used before being assigned"
+  - No error — ++ is allowed on constants
 answer: b
-explanation: "`??` returns the right-hand fallback when the left side is null or undefined."
+explanation: "`limit++` means `limit = limit + 1`, which changes the variable. A const can't change."
+```
+
+```quiz
+id: d5-pr-q8
+type: multiple
+question: "`const isLoggedIn = true; const cartCount: number = 2;` — which of these are true? (Select all that apply)"
+options:
+  - "`isLoggedIn && cartCount > 0`"
+  - "`!isLoggedIn || cartCount === 0`"
+  - "`cartCount >= 2`"
+  - "`cartCount !== 2`"
+answer: [a, c]
+explanation: "`isLoggedIn && cartCount > 0` is true && true. `!isLoggedIn || cartCount === 0` is false || false. `cartCount >= 2` is true. `cartCount !== 2` is false."
 ```
 
 ## Predict the output
 
 ````exercise
 id: d5-pr-p1
-title: Predict — strings and numbers
+title: Predict — text and numbers
 level: easy
 type: predict
-prompt: Without running it, write down the four lines this program prints. Then run it to check.
+prompt: Write down the four lines this program prints, then run it to check.
 code: |
   const a = 10;
   const b = '10';
@@ -744,28 +896,91 @@ answer: |
   true
   10 items
 
-  `b + 5` joins text ('10' + 5 → '105'). `Number(b)` converts the string '10' to the number 10, so the strict comparison is true.
+  `b + 5` joins text ('10' + 5 → '105'). `Number(b)` turns '10' into 10, so the strict comparison is true.
 ````
 
 ````exercise
 id: d5-pr-p2
-title: Predict — let and const
+title: Predict — let and shortcuts
 level: easy
 type: predict
-prompt: What is printed? Is there any line the type checker would reject?
+prompt: What is printed?
 code: |
   let count = 1;
   count += 4;
   count--;
-  const label = count > 3 ? 'many' : 'few';
+  count *= 2;
+  const label = count > 6 ? 'many' : 'few';
   console.log(count, label);
 answer: |
-  `4 many`
+  `8 many`
 
-  count: 1 → 5 (after `+= 4`) → 4 (after `--`). 4 > 3 is true, so label is 'many'. No errors — `count` uses `let`, so it may change.
+  count: 1 → 5 (`+= 4`) → 4 (`--`) → 8 (`*= 2`). 8 > 6 is true, so label is 'many'.
+````
+
+````exercise
+id: d5-pr-p3
+title: Predict — the order of operations
+level: medium
+type: predict
+prompt: What is printed?
+code: |
+  const price = 200;
+  const qty = 3;
+  console.log('Total: ' + price * qty);
+  console.log('Total: ' + price + qty);
+  console.log('Total: ' + (price + qty));
+answer: |
+  Total: 600
+  Total: 2003
+  Total: 203
+
+  Line 1: `*` happens before `+`, so 200 × 3 = 600, then it's joined to the text. Line 2: `+` works left to right — the text joins 200, then joins 3. Line 3: the brackets add 200 + 3 first.
 ````
 
 ## Exercises
+
+````exercise
+id: d5-ex1
+title: Tester profile card
+level: easy
+type: code
+prompt: |
+  Create `day5/profile.ts`. Declare **constants** for your name (string), years of testing experience (number), favourite browser (string) and whether you've used automation before (boolean).
+
+  Print exactly this format, using **one template literal per line** (with your own values):
+  ```
+  Tester: Priya Sharma
+  Experience: 3 years
+  Favourite browser: firefox
+  Automation before: false
+  ```
+file: ts-basics/day5/profile.ts
+run: node day5/profile.ts
+starter: |
+  // 1. Declare your four constants here
+
+  // 2. Print the four lines with template literals
+hints:
+  - "A template literal uses backticks: `` console.log(`Tester: ${testerName}`); ``"
+solution: |
+  // 1. Four constants
+  const testerName = 'Priya Sharma';
+  const yearsOfExperience = 3;
+  const favouriteBrowser = 'firefox';
+  const usedAutomation = false;
+
+  // 2. Print with template literals
+  console.log(`Tester: ${testerName}`);
+  console.log(`Experience: ${yearsOfExperience} years`);
+  console.log(`Favourite browser: ${favouriteBrowser}`);
+  console.log(`Automation before: ${usedAutomation}`);
+expectedOutput: |
+  Tester: Priya Sharma
+  Experience: 3 years
+  Favourite browser: firefox
+  Automation before: false
+````
 
 ````exercise
 id: d5-ex2
@@ -773,9 +988,9 @@ title: Shopping-cart calculator
 level: medium
 type: code
 prompt: |
-  Create `day5/cart.ts`. A cart has: unit price **1299**, quantity **3**, discount **10%**, and shipping **99** that is **free when the discounted subtotal is 3000 or more**.
+  Create `day5/cart.ts`. A cart has: unit price **1299**, quantity **3**, a **10%** discount, and shipping of **99**, which is **free when the discounted amount is 3000 or more**.
 
-  Calculate and print:
+  Print:
   ```
   Subtotal: 3897
   Discount: 389.7
@@ -783,7 +998,7 @@ prompt: |
   Shipping: 0
   Total to pay: 3507.30
   ```
-  Use `const` for the inputs, arithmetic operators for the maths, a **ternary** for shipping and `toFixed(2)` for the final line.
+  Use `const` for everything, arithmetic operators for the maths, a **ternary** for shipping, and `.toFixed(2)` for the last line.
 file: ts-basics/day5/cart.ts
 run: node day5/cart.ts
 hints:
@@ -796,10 +1011,10 @@ solution: |
   const discountPercent = 10;
 
   // Calculations
-  const subtotal = unitPrice * quantity;                      // 3897
-  const discount = (subtotal * discountPercent) / 100;        // 389.7
-  const afterDiscount = subtotal - discount;                  // 3507.3
-  const shipping = afterDiscount >= 3000 ? 0 : 99;            // free above 3000
+  const subtotal = unitPrice * quantity;                   // 3897
+  const discount = (subtotal * discountPercent) / 100;     // 389.7
+  const afterDiscount = subtotal - discount;               // 3507.3
+  const shipping = afterDiscount >= 3000 ? 0 : 99;         // free above 3000
   const totalToPay = afterDiscount + shipping;
 
   // Output
@@ -817,47 +1032,140 @@ expectedOutput: |
 ````
 
 ````exercise
-id: d5-ex4
-title: Fix the config-style code
+id: d5-ex3
+title: Check the page's numbers
 level: medium
 type: code
 prompt: |
-  The file below mimics settings from `playwright.config.ts`, but has **four** type errors. Save it as `day5/settings.ts`, run `npm run check -- day5/settings.ts`, and fix every error so that it checks cleanly and prints:
+  A test read three values from an order page — all as **text**:
+  ```ts
+  const itemCountText = '4';
+  const unitPriceText = '250';
+  const totalText = '1000';
+  ```
+  Create `day5/order-check.ts` that converts them to numbers, calculates the expected total (item count × unit price), and prints:
+  ```
+  Expected total: 1000
+  Page total: 1000
+  Totals match: true
+  ```
+  Use `Number(…)` and `===`. The type check must pass.
+file: ts-basics/day5/order-check.ts
+run: node day5/order-check.ts
+hints:
+  - "Convert each text value with `Number(itemCountText)` and so on, into new constants."
+  - Compare the page total (as a number) with your calculated total using `===`.
+solution: |
+  // Values read from the page — always text
+  const itemCountText = '4';
+  const unitPriceText = '250';
+  const totalText = '1000';
+
+  // Convert to numbers
+  const itemCount = Number(itemCountText);
+  const unitPrice = Number(unitPriceText);
+  const pageTotal = Number(totalText);
+
+  // Calculate and compare
+  const expectedTotal = itemCount * unitPrice;
+  console.log(`Expected total: ${expectedTotal}`);
+  console.log(`Page total: ${pageTotal}`);
+  console.log(`Totals match: ${pageTotal === expectedTotal}`);
+expectedOutput: |
+  Expected total: 1000
+  Page total: 1000
+  Totals match: true
+````
+
+````exercise
+id: d5-ex4
+title: Fix the settings file
+level: medium
+type: code
+prompt: |
+  This file mimics settings from `playwright.config.ts` but has **four** mistakes. Save it as `day5/settings.ts`, check it, and fix it until the check is silent and it prints:
   ```
   Retries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000
   ```
-  (Assume the `isCI` variable is `false`.)
 file: ts-basics/day5/settings.ts
 run: node day5/settings.ts
 starter: |
   const isCI: boolean = 'false';
-  const retries: number = isCI ? 2 : '0';
-  const workers: number = isCI ? 1 : 4;
-  const headless: boolean = 'true';
-  let baseURL: string | undefined;
-  const finalUrl: number = baseURL ?? 'http://localhost:3000';
-  console.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${finalUrl}`);
+  const retries = isCI ? 2 : 0;
+  const workers = isCI ? 1 : 4;
+  const headless: boolean = true;
+  headless = !isCI;
+  const baseUrl = http://localhost:3000;
+  console.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${baseURL}`);
 hints:
+  - "The checker reports *syntax* mistakes (like missing quotes) first. Fix those, check again, and the *type* mistakes appear — errors can come in waves."
   - Booleans are written without quotes.
-  - Both sides of the ternary should be numbers for `retries`.
-  - What type does `baseURL ?? 'http://…'` produce?
+  - A const can't be reassigned — do you need that line at all? (What is `!isCI` when isCI is false?)
+  - Text needs quotes, and names are case-sensitive.
 solution: |
-  const isCI: boolean = false;                              // fix 1: boolean, not text
-  const retries: number = isCI ? 2 : 0;                     // fix 2: number on both sides
-  const workers: number = isCI ? 1 : 4;
-  const headless: boolean = true;                           // fix 3: boolean, not text
-  let baseURL: string | undefined;
-  const finalUrl: string = baseURL ?? 'http://localhost:3000';   // fix 4: the result is a string
-  console.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${finalUrl}`);
+  const isCI: boolean = false;                 // fix 1: a boolean, not text
+  const retries = isCI ? 2 : 0;
+  const workers = isCI ? 1 : 4;
+  const headless: boolean = !isCI;             // fix 2: set it once instead of reassigning a const
+  const baseUrl = 'http://localhost:3000';     // fix 3: text needs quotes
+  console.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${baseUrl}`);   // fix 4: baseUrl, not baseURL
 expectedOutput: |
   Retries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000
 ````
 
+````exercise
+id: d5-ex5
+title: "Challenge: build a URL and a test title"
+level: challenge
+type: code
+prompt: |
+  Create `day5/url-builder.ts`. Given:
+  ```ts
+  const baseUrl = 'https://shop.example.com';
+  const category = 'Laptops';
+  const brand = 'Acme Tech';
+  const page = 2;
+  const sortBy = 'price';
+  ```
+  1. Make a URL-friendly **brand slug**: lower-case, and the space replaced by `-` → `acme-tech`. (Text has a method `.replace(' ', '-')` that replaces the first space.)
+  2. Build: `https://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price` (note the category is lower-cased too).
+  3. Build a test title: `[P2] Laptops by Acme Tech, sorted by price`.
+  4. Print the URL, then the title.
+file: ts-basics/day5/url-builder.ts
+run: node day5/url-builder.ts
+hints:
+  - "`brand.toLowerCase().replace(' ', '-')` chains two methods."
+  - "Build both lines with template literals: `${baseUrl}/c/${…}?brand=${…}&page=${page}&sort=${sortBy}`"
+solution: |
+  const baseUrl = 'https://shop.example.com';
+  const category = 'Laptops';
+  const brand = 'Acme Tech';
+  const page = 2;
+  const sortBy = 'price';
+
+  // 1. URL-friendly pieces
+  const brandSlug = brand.toLowerCase().replace(' ', '-');   // 'acme-tech'
+  const categorySlug = category.toLowerCase();                // 'laptops'
+
+  // 2 + 3. Build the URL and the title with template literals
+  const url = `${baseUrl}/c/${categorySlug}?brand=${brandSlug}&page=${page}&sort=${sortBy}`;
+  const title = `[P${page}] ${category} by ${brand}, sorted by ${sortBy}`;
+
+  // 4. Print
+  console.log(url);
+  console.log(title);
+expectedOutput: |
+  https://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price
+  [P2] Laptops by Acme Tech, sorted by price
+````
+
 ## Reflection
 
-1. Explain in one sentence the difference between *running* a `.ts` file with Node and *checking* it with `tsc`.
-2. When do you choose `let` instead of `const`?
-3. Why is `'5' === 5` false, and why is that a good thing?
+1. When do you choose `let` instead of `const` — and why never `var`?
+2. What is block scope? Give an example of a variable you can't use outside its block.
+3. Rewrite `'Hello ' + name + ', you have ' + n + ' items'` as a template literal.
+4. Why is `'5' === 5` false, and why is that a good thing?
+5. A test reads the price "₹1,499" from a page. What will `Number()` give, and why?
 
 > [!TIP] Coming up on Day 6
-> Lists and records: arrays, tuples and objects — the way you'll store test data — plus union and literal types and why `any` is a trap.
+> Data types in depth: the rest of the simple types (`null`, `undefined`), and the ones you'll store test data in — arrays for lists, objects for records, tuples, union and literal types — plus why `any` is a trap.

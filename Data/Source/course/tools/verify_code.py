@@ -29,7 +29,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-CHECK_FLAGS = ["--noEmit", "--strict", "--target", "esnext", "--module", "nodenext", "--allowImportingTsExtensions", "--ignoreConfig"]
+# folders of a Playwright project (Day 10's framework layers) whose files are checked and run together
+FRAMEWORK_ROOTS = ("tests/", "pages/", "fixtures/", "test-data/", "utils/")
+
+CHECK_FLAGS = ["--noEmit", "--strict", "--target", "esnext", "--module", "nodenext", "--allowImportingTsExtensions", "--ignoreConfig", "--pretty", "false"]
 
 
 def run(cmd, cwd, timeout=300):
@@ -79,14 +82,14 @@ def main():
 import {{ defineConfig }} from '@playwright/test';
 export default defineConfig({{
   testDir: './tests', fullyParallel: true, reporter: [['list'], ['json', {{ outputFile: 'results.json' }}]],
-  use: {{ {launch} }},
+  use: {{ baseURL: 'https://qa-academy.test', {launch} }},
   projects: [{{ name: 'chromium' }}],
 }});
 """)
     (pw / "tsconfig.json").write_text(json.dumps({
         "compilerOptions": {"strict": True, "noEmit": True, "target": "esnext", "module": "preserve",
                             "moduleResolution": "bundler", "types": ["node"], "skipLibCheck": True},
-        "include": ["tests/**/*.ts", "typecheck/**/*.ts"],
+        "include": ["tests/**/*.ts", "pages/**/*.ts", "fixtures/**/*.ts", "test-data/**/*.ts", "utils/**/*.ts", "typecheck/**/*.ts"],
     }))
     (tsb / "package.json").write_text(json.dumps({"name": "ts-basics", "type": "module"}))
     os.symlink(Path(args.ts_modules), tsb / "node_modules")
@@ -110,10 +113,14 @@ export default defineConfig({{
         if b["type"] == "code" and b.get("file"):
             label = f"Day {day} · {lesson} · {b['file']}"
             f = b["file"]
+            if f.startswith("ts-basics/") and not f.endswith(".ts"):
+                continue  # e.g. ts-basics/tsconfig.json — a settings file, nothing to run
             if f.startswith("ts-basics/"):
                 ts_items.append((label, f[len("ts-basics/"):], b["content"], b.get("expectError", False),
                                  b.get("expectedOutput"), b.get("expectedOutputTarget"), bool(b.get("run"))))
-            elif f.startswith("tests/"):
+            elif f == "playwright.config.ts":
+                typecheck_only.append((label, "typecheck/config-" + re.sub(r"\W+", "-", label) + ".ts", b["content"]))
+            elif f.startswith(FRAMEWORK_ROOTS):
                 if b.get("network"):
                     typecheck_only.append((label, f, b["content"]))
                 else:
@@ -125,7 +132,10 @@ export default defineConfig({{
             if et == "code" and f.startswith("ts-basics/"):
                 ts_items.append((label, f[len("ts-basics/"):], b["solution"], False,
                                  b.get("expectedOutput"), "console", True))
-            elif et == "code" and f.startswith("tests/") and "import {" in b["solution"]:
+            elif et == "code" and f.startswith(FRAMEWORK_ROOTS) and ("import {" in b["solution"] or not f.startswith("tests/")):
+                if f in pw_files:
+                    # the solution rewrites a lesson file: check both, side by side
+                    f = f.replace(".spec.ts", f".{b['id']}-solution.spec.ts")
                 if b.get("network"):
                     typecheck_only.append((label, f, b["solution"]))
                 else:
@@ -146,10 +156,21 @@ export default defineConfig({{
         if expect_error:
             if rc == 0:
                 fail(label, "expected a type error, but the check passed")
-            elif expected and norm(expected) != tsc_out:
-                fail(label, f"type-check output differs.\n--- expected\n{expected}\n--- actual\n{tsc_out}")
-            else:
-                ok()
+                continue
+            if expected and target == "terminal":
+                # compare only the "error TS…" lines (npm's "> …" header lines are not part of tsc's output)
+                want = [ln.strip() for ln in expected.splitlines() if "error TS" in ln]
+                got = [ln.strip() for ln in tsc_out.splitlines() if "error TS" in ln]
+                if want != got:
+                    fail(label, f"type-check errors differ.\n--- expected\n" + "\n".join(want) + "\n--- actual\n" + "\n".join(got))
+                    continue
+            if expected and target == "console":
+                # a file with type errors that still runs: its output must match too
+                rc2, out2, err2 = run(["node", rel], cwd=tsb)
+                if norm(out2) != norm(expected):
+                    fail(label, f"output differs.\n--- expected\n{expected}\n--- actual\n{out2}")
+                    continue
+            ok()
             continue
         if rc != 0:
             fail(label, f"type-check failed:\n{tsc_out}")
@@ -216,7 +237,8 @@ export default defineConfig({{
     def walk(suite):
         for spec in suite.get("specs", []):
             for t in spec["tests"]:
-                st = t["results"][-1]["status"] if t["results"] else t.get("status", "skipped")
+                # the test-level status already accounts for test.fail(): expected / unexpected / flaky / skipped
+                st = t.get("status", "skipped")
                 status_by_file.setdefault(spec["file"], []).append((spec["title"], st))
         for s in suite.get("suites", []):
             walk(s)
@@ -232,7 +254,7 @@ export default defineConfig({{
         if not statuses:
             fail(label, "no tests were collected")
             continue
-        bad = [(t, s) for t, s in statuses if s not in ("passed", "skipped")]
+        bad = [(t, s) for t, s in statuses if s not in ("expected", "skipped")]
         if expect_error:
             if not bad:
                 fail(label, "expected failures, but everything passed")

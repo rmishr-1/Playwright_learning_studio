@@ -3,7 +3,7 @@
   "week": 1,
   "day": 5,
   "number": 5,
-  "title": "TypeScript I: Your First Program, Variables & Operators",
+  "title": "Variables and Operators",
   "locked": false,
   "workspace": "project",
   "parts": [
@@ -12,11 +12,11 @@
       "kind": "prerequisite",
       "title": "Prerequisites",
       "tab_label": "Prerequisites",
-      "has_runnable_code": true,
+      "has_runnable_code": false,
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 5 · Prerequisites\n\n",
+          "text": "# Day 5 · Prerequisites",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -26,7 +26,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "**TypeScript I: Your First Program, Variables & Operators**\n\n*Just enough programming to read Playwright tests — running and checking a file, storing values, simple data types and operators*\n\n**Time:** 2.5–3 hours\n\n**Where you work:** pw-course/ts-basics/ (you create it today)\n\n**By the end of the day you can:**\n\n- Run a TypeScript file with Node.js and type-check it with the TypeScript compiler\n- Explain the difference between JavaScript and TypeScript and why Playwright uses TypeScript\n- Declare variables with `let` and `const` (and know why to avoid `var`)\n- Use string, number, boolean, null and undefined with type annotations and inference\n- Use arithmetic, assignment, comparison, logical, ternary and nullish operators correctly\n- Read TypeScript error messages and fix type errors\n\n**From earlier days:**\n\n- Day 3–4: the terminal, npm, the pw-course project",
+          "text": "**Variables and Operators**\n\n*Store test data in variables, name them well, and calculate, compare and combine values — the building blocks of every test*\n\n**Time:** 3 hours\n\n**Where you work:** pw-course/ts-basics/day5/\n\n**By the end of the day you can:**\n\n- Declare variables with `let` and `const`, with and without type annotations, and explain when to use each\n- Explain why modern code avoids `var`\n- Describe block scope — where a variable exists and where it doesn't\n- Name variables clearly using the rules and the camelCase convention\n- Build text with template literals\n- Use arithmetic, assignment, comparison and logical operators, and the ternary operator\n- Convert between text and numbers, and avoid comparison traps\n- Read and fix the TypeScript errors caused by variable mistakes\n\n**From earlier days:**\n\n- Day 4: running vs checking a .ts file, string/number/boolean, type annotations and inference, reading error messages\n- Day 4: the ts-basics playground (node day5/file.ts and npm run check -- day5/file.ts)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -36,7 +36,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P1 · What a program is\n\nA **program** is a list of instructions (called **statements**) that the computer runs **from top to bottom**, one after another — exactly like the steps in a test case.",
+          "text": "## P1 · Quick recap from Day 4\n\nBefore starting, make sure you can do each of these (the Day 4 lesson is in brackets):\n\n- [ ] Run a file with `node day5/file.ts` and type-check it with `npm run check -- day5/file.ts`, from inside `pw-course/ts-basics` (Day 4 · I1–I2)\n- [ ] Explain why Node.js and Playwright don't catch type mistakes, but `tsc` and VS Code do (Day 4 · F4)\n- [ ] Read an error like `day5/x.ts(3,7): error TS2322: …` — file, line, character, code, message (Day 4 · P3)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -45,25 +45,62 @@
           "title": null
         },
         {
-          "type": "code",
-          "text": "console.log('Step 1: open the login page');   // prints a line of text\nconsole.log('Step 2: enter the username');\nconsole.log('Step 3: click Log in');",
+          "type": "checkpoint",
+          "text": "`const retries = 2;` — which type does TypeScript infer, and how?",
           "starter": null,
           "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
+          "checkpoint": {
+            "options": [
+              "boolean, because 2 is \"true\"",
+              "No type until you write one",
+              "number, worked out from the value 2 (type inference)",
+              "string, because everything is text in JavaScript"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "With no annotation, TypeScript infers the type from the value. 2 is a number."
           },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `console.log('5' + 5);` print?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "An error",
+              "5 5",
+              "55",
+              "10"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "When either side of `+` is text, `+` joins instead of adding. You'll learn to avoid this trap today."
+          },
+          "code": null,
           "callout": null,
           "title": null
         },
         {
           "type": "markdown",
-          "text": "Five rules to know before you write any code:\n\n| Rule | Example |\n|---|---|\n| **`console.log(…)` prints** something to the console/terminal | `console.log('Hello')` |\n| **Text goes in quotes** — single `'…'`, double `\"…\"` or backticks `` `…` `` | `'Log in'`, `\"Log in\"` |\n| **Comments** are notes for humans; the computer ignores them | `// one line` and `/* several lines */` |\n| **Semicolons** `;` end a statement (optional in most cases, but we use them for clarity) | `console.log('Hi');` |\n| **Case matters** — `Console.log` is not `console.log` | `userName` ≠ `username` |",
+          "text": "## P2 · Why tests need variables\n\nLook at any manual test case and you'll find values that are used more than once, values that change, and values worked out from other values:\n\n| In a test case | Example | In code |\n|---|---|---|\n| **Test data** used in several steps | The email `asha@example.com` is typed in step 2 and appears on the profile page in step 7 | A variable that stores it once |\n| **Things that change** during the test | The number of items in the cart goes from 0 to 3 | A variable that's updated |\n| **Values worked out** from others | Expected total = price × quantity | A variable calculated with operators |\n| **Settings** | The site's address, a time limit | A variable that never changes |\n\nA **variable** is a named box that holds a value. You give the box a name, put a value in it, and use the name wherever you need the value.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "diagram",
+          "text": "flowchart LR\n  N1[\"email\"] --- V1[\"'asha@example.com'\"]\n  N2[\"itemsInCart\"] --- V2[\"3\"]\n  N3[\"isLoggedIn\"] --- V3[\"true\"]",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -73,147 +110,7 @@
         },
         {
           "type": "callout",
-          "text": "Copying code from Word, PDFs or chat apps can turn `'` into curly quotes `‘ ’`. Code needs straight quotes. If you see a strange \"Invalid character\" error, retype the quotes.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "warning",
-            "title": "Straight quotes only"
-          },
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## P2 · Set up your TypeScript playground\n\nYou'll practise TypeScript in a small separate folder inside your course project, called `ts-basics`. Run these commands from the `pw-course` folder:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "terminal",
-          "text": "mkdir ts-basics\ncd ts-basics\nnpm init -y\nnpm pkg set type=module\nnpm pkg set scripts.check=\"tsc --noEmit --strict --target esnext --module nodenext --allowImportingTsExtensions --ignoreConfig\"\nnpm install -D typescript\nmkdir day5 day6 day7 day8",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "What these do:\n\n| Command | Purpose |\n|---|---|\n| `npm init -y` | Creates a `package.json` for the playground (`-y` = accept all defaults) |\n| `npm pkg set type=module` | Uses modern `import`/`export` syntax (needed on Day 8) |\n| `npm pkg set scripts.check=…` | Adds a `check` shortcut that runs the TypeScript **type checker** in strict mode (`--ignoreConfig` makes it check just the file you name, even if a `tsconfig.json` exists higher up) |\n| `npm install -D typescript` | Installs the TypeScript compiler (`tsc`) |\n\nFrom now on, for every `.ts` file you'll do two things:\n\n| You want to… | Command (inside `ts-basics`) |\n|---|---|\n| **Run** the file and see its output | `node day5/hello.ts` |\n| **Check** the file for type errors | `npm run check -- day5/hello.ts` |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "callout",
-          "text": "Modern Node.js (22.18 and newer, 24, 26) can run TypeScript directly: it simply **removes the type annotations** and runs the JavaScript that's left. It does **not** check your types — that's the job of `npm run check` (the TypeScript compiler). On older Node 22 versions, use `node --experimental-strip-types day5/hello.ts`.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "note",
-            "title": "Why can Node run `.ts` files?"
-          },
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "Create your first file, `day5/hello.ts`:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "// My first TypeScript program\nconst course: string = 'Playwright with TypeScript';\nconsole.log('Welcome to ' + course + '!');",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day5/hello.ts",
-            "run": "node day5/hello.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "terminal",
-          "text": "node day5/hello.ts\nnpm run check -- day5/hello.ts",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nWelcome to Playwright with TypeScript!\n```\n\nThe `check` command prints nothing when there are **no errors** — silence is success.\n\n## P3 · How to read an error message\n\nErrors are normal. Professionals see dozens a day. Here's one — change `hello.ts` so the course is a number:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "const course: string = 2026;   // a number stored where a string is expected\nconsole.log(course);",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day5/broken.ts",
-            "run": "npm run check -- day5/broken.ts",
-            "mode": "editor",
-            "expect_error": true,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "terminal",
-          "text": "npm run check -- day5/broken.ts",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nday5/broken.ts(1,7): error TS2322: Type 'number' is not assignable to type 'string'.\n```\n\n| Part | Meaning |\n|---|---|\n| `day5/broken.ts` | The file |\n| `(1,7)` | Line 1, character 7 |\n| `TS2322` | The error code (searchable online) |\n| `Type 'number' is not assignable to type 'string'` | The explanation: you put a number where a string belongs |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "callout",
-          "text": "Treat an error message like a bug report: **where** (file, line), **what** (the message), then investigate. Read it slowly — it usually tells you exactly what's wrong.",
+          "text": "A variable is like a named cell in your test-data spreadsheet. Change the cell once, and every step that refers to it uses the new value — no hunting for copies.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -222,6 +119,38 @@
             "variant": "tester",
             "title": null
           },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "An **operator** is a symbol that does something with values: `+` adds, `>` compares, `&&` combines true/false answers. A piece of code that produces a value — like `price * quantity` or `age >= 18` — is called an **expression**.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which of these is an expression (it produces a value)?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`price * quantity`",
+              "`let total;`",
+              "`const price`",
+              "`// price times quantity`"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "`price * quantity` calculates a value. `const price` and `let total;` only create a name (a declaration), and a comment is ignored."
+          },
+          "code": null,
+          "callout": null,
           "title": null
         }
       ],
@@ -232,31 +161,11 @@
       "kind": "concept",
       "title": "Fundamentals",
       "tab_label": "Fundamentals",
-      "has_runnable_code": true,
+      "has_runnable_code": false,
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 5 · Fundamentals\n\n\n\n## F1 · JavaScript vs TypeScript\n\n**JavaScript (JS)** is the programming language of the web. Every browser runs it, and Node.js runs it outside the browser. Playwright itself is used from JavaScript/TypeScript.\n\n**TypeScript (TS)** is JavaScript **plus types**. It was created by Microsoft (first released in 2012) and is a **superset** of JavaScript: every valid JavaScript program is also valid TypeScript. TypeScript adds a way to say *what kind of value* each thing holds — text, number, true/false, list… — so mistakes are caught **before** the code runs.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "diagram",
-          "text": "flowchart LR\n  TS[\"your-test.ts<br/>(TypeScript: JS + types)\"] -- \"type-check<br/>(tsc / VS Code)\" --> OK{\"errors?\"}\n  OK -- \"no\" --> JS[\"JavaScript<br/>(types removed)\"]\n  OK -- \"yes\" --> FIX[\"fix the code\"]\n  JS --> RUN[\"runs in Node.js<br/>or the browser\"]",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "### Static vs dynamic typing\n\nJavaScript is **dynamically typed** — a variable can hold a string now and a number later, and nobody complains until something breaks while the program is running. TypeScript is **statically typed** — once a variable is a string it must stay a string, and the editor warns you immediately.",
+          "text": "# Day 5 · Fundamentals\n\n## F1 · Declaring variables\n\nCreating a variable is called **declaring** it. The full form has five parts:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -266,7 +175,34 @@
         },
         {
           "type": "code",
-          "text": "// JavaScript: allowed, bug discovered later (maybe in production)\nlet retries = 'three';\nretries = 3;\n\n// TypeScript: the editor flags it instantly\nlet timeout: number = 30000;\ntimeout = 'thirty seconds';   // ❌ Type 'string' is not assignable to type 'number'",
+          "text": "let   passedTests :  number  =  0 ;\n└┬┘   └────┬────┘   └──┬──┘    └┬┘\nkeyword   name        type    value",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "text",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "- **keyword** — `let` or `const` (F2 explains which)\n- **name** — how you'll refer to it\n- **type** — optional; TypeScript infers it from the value if you leave it out (Day 4 · F5)\n- **value** — the first value you put in the box\n\nThere are four ways to write a declaration:\n\n| Form | Example | Result |\n|---|---|---|\n| Type **and** value | `let status: string = 'passed';` | A string box holding `'passed'` |\n| Value only (type inferred) | `let status = 'passed';` | Same — TypeScript infers `string` |\n| Type only, value later | `let status: string;` then `status = 'passed';` | Must be given a value before it's used |\n| Neither | `let status;` | Avoid — it's unclear what the box is for |\n\n### Assigning and reassigning\n\n`=` means **\"put this value in the box\"** — it's not \"equals\" as in maths.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "let itemsInCart = 0;    // declare, with a first value\nitemsInCart = 1;        // reassign: put a new value in the same box\nitemsInCart = 2;        // and again",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -283,7 +219,7 @@
         },
         {
           "type": "markdown",
-          "text": "### Why TypeScript for test automation?\n\n| Benefit | What it means for you |\n|---|---|\n| **Catches mistakes early** | Typos and wrong values are underlined in red *before* you run a 10-minute suite |\n| **Autocomplete** | Type `page.` and VS Code lists every Playwright action — `click`, `fill`, `goto`… |\n| **Readable** | `function login(user: string, password: string)` documents itself |\n| **Default in Playwright** | `npm init playwright@latest` picks TypeScript by default; most Playwright examples are TypeScript |\n\nDrawbacks: a little more to type, and types are one more concept to learn. For test suites that grow to hundreds of tests, the benefits win.",
+          "text": "Only the first line has `let`. After that you just use the name. Writing `let` again with the same name is an error — the box already exists.\n\n### Using a variable before it has a value",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -292,41 +228,25 @@
           "title": null
         },
         {
-          "type": "callout",
-          "text": "When you run `npx playwright test`, Playwright converts your `.ts` files to JavaScript on the fly and runs them — **without** checking types (so your tests start fast). Type errors are shown by **VS Code** (red underlines) and by running `npx tsc --noEmit`. Always fix the red underlines!",
+          "type": "code",
+          "text": "let status: string;\nconsole.log(status);    // ❌ error TS2454: Variable 'status' is used before being assigned.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "warning",
-            "title": "Important: Playwright runs TypeScript, but does not type-check it"
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
           },
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "### See the compiler in action (optional)\n\nThe classic TypeScript workflow is: compile `.ts` → `.js`, then run the `.js`. Try it once:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "terminal",
-          "text": "npx tsc day5/hello.ts --target esnext --ignoreConfig\nnode day5/hello.js",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
           "callout": null,
           "title": null
         },
         {
           "type": "markdown",
-          "text": "Open the new `day5/hello.js` — it's the same code **with the `: string` removed**. That's all \"compiling\" TypeScript mostly does. You can delete `hello.js` afterwards.",
+          "text": "TypeScript notices that the box is still empty. A running program would print `undefined` — JavaScript's word for \"no value yet\" (more on Day 6).",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -336,41 +256,21 @@
         },
         {
           "type": "checkpoint",
-          "text": "Which statement about TypeScript is TRUE?",
+          "text": "What does `=` do in `score = score + 10;`?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "TypeScript is a completely different language from JavaScript",
-              "Every valid JavaScript program is also valid TypeScript; TypeScript adds types on top",
-              "Browsers run TypeScript directly without any conversion",
-              "TypeScript was created by Google"
+              "It creates a second variable called score",
+              "It is a syntax error",
+              "It checks whether score equals score + 10",
+              "It works out score + 10, then puts the result into score"
             ],
             "answers": [
-              1
+              3
             ],
             "kind": "single",
-            "explanation": "TypeScript is a superset of JavaScript made by Microsoft. Browsers run JavaScript, so types are removed (compiled away) before code runs."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "When you run `npx playwright test`, Playwright stops and refuses to run if your test file has a type error.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "True",
-              "False"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "truefalse",
-            "explanation": "Playwright strips the types and runs the JavaScript without type-checking. The type error may still cause a failure at runtime — or silently do the wrong thing. Use VS Code's red underlines or `npx tsc --noEmit` to catch type errors."
+            "explanation": "The right-hand side is worked out first, then `=` stores the result in the variable on the left."
           },
           "code": null,
           "callout": null,
@@ -378,7 +278,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F2 · Variables: `let`, `const` (and why not `var`)\n\nA **variable** is a named box that stores a value so you can use it later.",
+          "text": "## F2 · `const`, `let` — and why not `var`\n\n| Keyword | Can the value be replaced? | Use it for |\n|---|---|---|\n| `const` | ❌ No — \"constant\" | Values that shouldn't change: test data, URLs, expected messages. **Use by default.** |\n| `let` | ✅ Yes | Values that must change: counters, running totals, results |\n| `var` | ✅ Yes | **Nothing** — the old keyword from before 2015. Avoid it |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -388,7 +288,7 @@
         },
         {
           "type": "code",
-          "text": "const siteUrl = 'https://shop.example.com';   // create a box called siteUrl and put a URL in it\nlet attempts = 0;                              // a box whose value will change\nattempts = attempts + 1;                       // put a new value in the box",
+          "text": "const siteUrl = 'https://shop.example.com';\nsiteUrl = 'https://other.example.com';     // ❌ error TS2588: Cannot assign to 'siteUrl' because it is a constant.\n\nlet attempts = 1;\nattempts = 2;                               // ✅ fine — let allows it",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -405,84 +305,7 @@
         },
         {
           "type": "markdown",
-          "text": "### The three keywords\n\n| Keyword | Can you change the value later? | Use it when… |\n|---|---|---|\n| `const` | ❌ No — \"constant\" | The value should never be replaced (URLs, test data, locators). **Use by default.** |\n| `let` | ✅ Yes | The value must change (counters, results that update) |\n| `var` | ✅ Yes | **Avoid** — the old way (before 2015). It has confusing scoping rules and lets you redeclare the same name by accident |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "// const: a value that never changes\nconst baseUrl = 'https://shop.example.com';\n\n// let: a value that will change\nlet loginAttempts = 0;\nloginAttempts = loginAttempts + 1;   // first attempt\nloginAttempts = loginAttempts + 1;   // second attempt\n\nconsole.log('Testing', baseUrl);\nconsole.log('Login attempts:', loginAttempts);\n\n// Uncomment the next line and run `npm run check -- day5/variables.ts`:\n// baseUrl = 'https://other.example.com';   // ❌ Cannot assign to 'baseUrl' because it is a constant",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day5/variables.ts",
-            "run": "node day5/variables.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nTesting https://shop.example.com\nLogin attempts: 2\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "callout",
-          "text": "`console.log` can print several things separated by commas — it adds a space between them.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "note",
-            "title": null
-          },
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "### Declaring now, assigning later",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "let testResult: string;       // declared with a type, no value yet\ntestResult = 'passed';        // assigned later",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "A `const` must get its value immediately: `const x;` is an error.\n\n### Naming rules\n\n| ✅ Allowed | ❌ Not allowed |\n|---|---|\n| `userName`, `user_name`, `$price`, `_temp`, `test2` | `2test` (can't start with a digit) |\n| Letters, digits, `_`, `$` | `user-name` (no hyphens), `user name` (no spaces) |\n| | `let`, `const`, `class`, `return` … (reserved words) |\n\n**Convention:** use **camelCase** — first word lowercase, each next word capitalised: `loginButton`, `maxRetryCount`, `isLoggedIn`. Choose names that explain the value: `expectedTitle` beats `t`.",
+          "text": "**Rule of thumb:** start with `const`. Change it to `let` only when you find you need to replace the value. Code full of `const` is easier to trust — you know those values never change halfway through a test.\n\n### Why not `var`?\n\n`var` was JavaScript's only keyword until 2015, when `let` and `const` arrived. It has surprising behaviours:\n\n| `var` problem | What happens | `let` / `const` |\n|---|---|---|\n| **Redeclaring is allowed** | `var browser = 'chromium';` … later `var browser = 'firefox';` silently replaces the first — even if someone else wrote it far away | ❌ error: *Cannot redeclare…* |\n| **Ignores blocks** | A `var` created inside `{ … }` leaks out and is visible outside it | Stays inside its block (F3) |\n| **Usable before its line** | It exists — as `undefined` — even before the line that declares it, so typos in order go unnoticed | ❌ error: *used before its declaration* |\n\nYou'll still see `var` in old tutorials and old test code. Read it as \"an old `let`\", and write `let` or `const` yourself.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -497,16 +320,16 @@
           "variation": null,
           "checkpoint": {
             "options": [
+              "`let name: string; name = 'Asha';`",
               "`let count = 1; count = 2;`",
               "`const url = 'https://a.com'; url = 'https://b.com';`",
-              "`let name: string; name = 'Asha';`",
               "`const maxRetries = 3;`"
             ],
             "answers": [
-              1
+              2
             ],
             "kind": "single",
-            "explanation": "A `const` cannot be reassigned. Use `let` if the value must change."
+            "explanation": "A `const` can't be given a new value. Use `let` if the value must change."
           },
           "code": null,
           "callout": null,
@@ -514,22 +337,21 @@
         },
         {
           "type": "checkpoint",
-          "text": "Which are valid AND follow the camelCase convention? (Select all that apply)",
+          "text": "You store the expected page title for a test. It never changes during the test. Which keyword?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "`loginButton`",
-              "`login-button`",
-              "`expectedPageTitle`",
-              "`2ndUser`"
+              "`var`",
+              "`let`, in case the title changes one day",
+              "`let`",
+              "`const`"
             ],
             "answers": [
-              0,
-              2
+              3
             ],
-            "kind": "multiple",
-            "explanation": "Hyphens aren't allowed in names, and names can't start with a digit. `loginButton` and `expectedPageTitle` are valid camelCase."
+            "kind": "single",
+            "explanation": "A value that never changes is a `const`. Storing it once also means you change it in one place if the title changes."
           },
           "code": null,
           "callout": null,
@@ -537,7 +359,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F3 · Primitive data types\n\nA **data type** says what kind of value something is. TypeScript's everyday **primitive** (simple) types:\n\n| Type | Examples | Used in testing for… |\n|---|---|---|\n| `string` | `'Asha'`, `\"Log in\"`, `` `Hello ${name}` `` | URLs, usernames, expected text |\n| `number` | `42`, `3.14`, `-7`, `30000` | Counts, prices, timeouts (ms) |\n| `boolean` | `true`, `false` | Is the checkbox ticked? Did the test pass? |\n| `undefined` | `undefined` | \"No value has been given yet\" |\n| `null` | `null` | \"Intentionally empty\" |\n\n(There are also `bigint` for huge whole numbers and `symbol` for unique ids — you won't need them for testing.)\n\n### Type annotations vs type inference\n\nYou can **annotate** a type with `: type` after the name — or let TypeScript **infer** (work out) the type from the value:",
+          "text": "## F3 · Scope and naming\n\n### Scope: where a variable exists\n\nCurly braces `{ }` make a **block** — a group of statements. A `let` or `const` declared **inside** a block exists **only inside** that block. That area is the variable's **scope**.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -547,7 +369,7 @@
         },
         {
           "type": "code",
-          "text": "let username: string = 'asha';   // annotation: explicitly says \"string\"\nlet password = 'Secret@123';     // inference: TypeScript sees a string, so password is a string\n\npassword = 12345;                // ❌ error — TypeScript inferred string",
+          "text": "const suite = 'Checkout';            // outside any block: visible to everything below\n\n{\n  const step = 'Enter card details';   // only exists inside these braces\n  console.log(suite, step);            // ✅ both visible here\n}\n\nconsole.log(step);                     // ❌ error TS2304: Cannot find name 'step'.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -564,34 +386,7 @@
         },
         {
           "type": "markdown",
-          "text": "Rule of thumb: when you give a value immediately, inference is enough. Annotate when you declare without a value, and for function parameters (Day 7).\n\n### Strings in detail",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "const firstName: string = 'Asha';\nconst product = \"Wireless Mouse\";\n\n// Template literal: backticks + ${ } to insert values into text\nconst greeting = `Hello, ${firstName}! You added ${product} to the cart.`;\nconsole.log(greeting);\n\n// Useful string tools\nconsole.log(product.length);              // number of characters\nconsole.log(product.toUpperCase());       // WIRELESS MOUSE\nconsole.log(product.includes('Mouse'));   // does it contain \"Mouse\"?\nconsole.log('  padded  '.trim());         // remove spaces at both ends",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day5/strings.ts",
-            "run": "node day5/strings.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nHello, Asha! You added Wireless Mouse to the cart.\n14\nWIRELESS MOUSE\ntrue\npadded\n```",
+          "text": "You'll see blocks everywhere from Day 7 — after `if`, around loops, as the body of functions and Playwright tests. Block scope keeps each block's variables private, so two tests can both have a variable called `email` without clashing.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -601,182 +396,7 @@
         },
         {
           "type": "callout",
-          "text": "Template literals (backticks) are everywhere in Playwright tests — for building URLs (`` `${baseUrl}/login` ``) and expected messages (`` `Welcome, ${user}` ``).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "tip",
-            "title": null
-          },
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "### Numbers\n\nTypeScript has **one** number type for whole numbers and decimals. Timeouts in Playwright are numbers in **milliseconds**: `5000` = 5 seconds.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "const price = 499.99;\nconst quantity = 2;\nconst timeoutMs = 30_000;   // underscores make big numbers readable (same as 30000)",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "### null vs undefined",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "let couponCode: string | undefined;   // not set yet → undefined\nconsole.log(couponCode);              // undefined\n\nlet middleName: string | null = null; // deliberately \"no middle name\"",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "`undefined` usually means *\"not set (yet)\"*; `null` means *\"set to nothing on purpose\"*. You'll see both when a value may be missing.\n\n### Checking a type at runtime: `typeof`",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "console.log(typeof 'hello');   // \"string\"\nconsole.log(typeof 42);        // \"number\"\nconsole.log(typeof true);      // \"boolean\"",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "What does this print? `` const user = 'Ravi'; console.log(`Welcome back, ${user}!`); ``",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`Welcome back, ${user}!`",
-              "`Welcome back, Ravi!`",
-              "`Welcome back, user!`",
-              "An error"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "Inside backticks, `${ }` inserts the value of the expression — here the value of `user`."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "`let isVisible = true;` — what type does TypeScript infer for isVisible?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "string",
-              "number",
-              "boolean",
-              "any"
-            ],
-            "answers": [
-              2
-            ],
-            "kind": "single",
-            "explanation": "`true` and `false` are boolean values, so TypeScript infers `boolean`."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F4 · Operators\n\n**Operators** are symbols that do something with values: calculate, compare, combine.\n\n### Arithmetic\n\n| Operator | Meaning | Example | Result |\n|---|---|---|---|\n| `+` | add (also joins strings) | `5 + 2` | `7` |\n| `-` | subtract | `5 - 2` | `3` |\n| `*` | multiply | `5 * 2` | `10` |\n| `/` | divide | `5 / 2` | `2.5` |\n| `%` | remainder (modulo) | `5 % 2` | `1` |\n| `**` | power | `5 ** 2` | `25` |\n\n### Assignment and increment\n\n| Operator | Same as |\n|---|---|\n| `x = 5` | put 5 in x |\n| `x += 2` | `x = x + 2` |\n| `x -= 2` | `x = x - 2` |\n| `x *= 2` | `x = x * 2` |\n| `x++` | `x = x + 1` |\n| `x--` | `x = x - 1` |\n\n### Comparison — always produce `true` or `false`\n\n| Operator | Meaning |\n|---|---|\n| `===` | equal (value **and** type) — **use this** |\n| `!==` | not equal (value or type) — **use this** |\n| `==` / `!=` | \"loose\" equal / not equal — converts types first. **Avoid** |\n| `>` `<` `>=` `<=` | greater, less, greater-or-equal, less-or-equal |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "const expectedCount: number = 3;   // e.g. how many items we expect in the cart\nconst actualCount: number = 3;     // e.g. how many items the page shows\nconst fromTextBox = '3';           // text from an input box is always a string!\n\nconsole.log(actualCount === expectedCount);    // same value, same type\nconsole.log(actualCount > 5);\nconsole.log(actualCount !== 0);\n\n// Why we avoid == : it converts types behind your back\nconsole.log(fromTextBox == (actualCount as any));    // loose: '3' becomes 3 → true\nconsole.log(fromTextBox === (actualCount as any));   // strict: string vs number → false",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day5/comparison.ts",
-            "run": "node day5/comparison.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\ntrue\nfalse\ntrue\ntrue\nfalse\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "callout",
-          "text": "The `as any` above only exists to let TypeScript compile this deliberately bad comparison. In real code, TypeScript would stop you from comparing a string with a number — one more reason to love it.",
+          "text": "Indenting the code inside a block (moving it right) is a convention that makes blocks easy to see. The computer ignores it — but people don't.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -789,7 +409,75 @@
         },
         {
           "type": "markdown",
-          "text": "### Logical — combine true/false values\n\n| Operator | Name | Result is `true` when… |\n|---|---|---|\n| `&&` | AND | **both** sides are true |\n| `\\|\\|` | OR | **at least one** side is true |\n| `!` | NOT | flips true ↔ false |",
+          "text": "### Naming rules — what's allowed\n\n| ✅ Allowed | ❌ Not allowed |\n|---|---|\n| Letters, digits, `_` and `$`: `user1`, `max_retries`, `$price` | Starting with a digit: `2ndUser` |\n| Any length | Spaces or hyphens: `user name`, `user-name` |\n| | Reserved words: `let`, `const`, `class`, `return`, `if`… |\n\nNames are **case-sensitive**: `userName` and `username` are two different variables.\n\n### Naming conventions — what's good\n\n| Convention | Example |\n|---|---|\n| **camelCase**: first word lower-case, each following word capitalised | `loginButton`, `expectedPageTitle`, `maxRetryCount` |\n| Say what it holds — clarity beats brevity | `expectedTotal` rather than `t` or `x2` |\n| Yes/no values read like a question | `isLoggedIn`, `hasItems`, `shouldRetry` |\n| Include units when it helps | `timeoutMs`, `priceInRupees` |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Good names make a test readable by someone who has never seen it — like a good test-case title. `expect(cartTotal).toBe(expectedTotal)` explains itself; `expect(a).toBe(b)` doesn't.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which names are valid AND follow the camelCase convention? (Select all that apply)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`2ndUser`",
+              "`expectedPageTitle`",
+              "`loginButton`",
+              "`login-button`"
+            ],
+            "answers": [
+              1,
+              2
+            ],
+            "kind": "multiple",
+            "explanation": "Hyphens aren't allowed, and names can't start with a digit."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "A variable `token` is declared with `const` inside `{ … }`. Where can you use it?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Anywhere in the file",
+              "Anywhere, but only after the braces close",
+              "Only on the line where it's declared",
+              "Only inside those braces, after the line that declares it"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "`let` and `const` are block-scoped: they exist inside their block, from their declaration onward."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F4 · Building text with template literals\n\nOn Day 4 you joined text with `+`. It works, but gets messy:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -799,7 +487,7 @@
         },
         {
           "type": "code",
-          "text": "const isLoggedIn = true;\nconst hasItemsInCart = false;\n\nconsole.log(isLoggedIn && hasItemsInCart);   // false — both needed\nconsole.log(isLoggedIn || hasItemsInCart);   // true  — one is enough\nconsole.log(!isLoggedIn);                    // false — flipped",
+          "text": "const firstName = 'Asha';\nconst items = 3;\nconsole.log('Welcome back, ' + firstName + '! You have ' + items + ' items in your cart.');",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -816,7 +504,7 @@
         },
         {
           "type": "markdown",
-          "text": "### `+` with strings — joining text",
+          "text": "A **template literal** is text written between **backticks** `` ` `` (the key under `Esc` on most keyboards). Inside it, `${ … }` inserts any value or expression:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -826,7 +514,7 @@
         },
         {
           "type": "code",
-          "text": "console.log('Order ' + 1045);   // \"Order 1045\"  — number is turned into text\nconsole.log(5 + '5');           // \"55\"          — careful: text wins!\nconsole.log(5 + 5);             // 10",
+          "text": "console.log(`Welcome back, ${firstName}! You have ${items} items in your cart.`);\nconsole.log(`Next week you'll have ${items + 2} items.`);    // any expression works inside ${ }",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -843,7 +531,7 @@
         },
         {
           "type": "markdown",
-          "text": "### Ternary — a one-line if/else\n\n`condition ? valueIfTrue : valueIfFalse`",
+          "text": "Both print `Welcome back, Asha! You have 3 items in your cart.` — the template literal is simply easier to read and harder to get wrong (no missing spaces or `+` signs).\n\nTemplate literals appear constantly in Playwright tests:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -853,7 +541,7 @@
         },
         {
           "type": "code",
-          "text": "const failedTests = 0;\nconst status = failedTests === 0 ? 'PASS' : 'FAIL';   // \"PASS\"",
+          "text": "const baseUrl = 'https://shop.example.com';\nconst productId = 42;\nconst productUrl = `${baseUrl}/products/${productId}`;      // https://shop.example.com/products/42\nconst searchTerm = 'wireless mouse';\nconst expectedHeading = `Results for \"${searchTerm}\"`;     // Results for \"wireless mouse\"",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -870,7 +558,7 @@
         },
         {
           "type": "markdown",
-          "text": "This is exactly what you saw in `playwright.config.ts` on Day 4: `retries: process.env.CI ? 2 : 0`.\n\n### Nullish coalescing `??` and optional chaining `?.`",
+          "text": "A few handy tools that every piece of text has. You write them after a dot; the ones with brackets are called *methods*, and `.length` (no brackets) is a *property* — a stored fact about the text:\n\n| Method | Example | Result |\n|---|---|---|\n| `.length` (no brackets) | `'Asha'.length` | `4` |\n| `.toUpperCase()` / `.toLowerCase()` | `'Asha'.toUpperCase()` | `'ASHA'` |\n| `.trim()` | `'  a@b.com  '.trim()` | `'a@b.com'` — spaces removed from both ends |\n| `.includes('…')` | `'Order confirmed'.includes('confirmed')` | `true` |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -879,25 +567,30 @@
           "title": null
         },
         {
-          "type": "code",
-          "text": "// ?? gives a fallback when the left side is null or undefined\nconst envUrl: string | undefined = undefined;\nconst url = envUrl ?? 'http://localhost:3000';   // \"http://localhost:3000\"\n\n// ?. reads a property only if the object exists (otherwise gives undefined, no crash)\ntype Order = { coupon?: { code: string } };\nconst order: Order = {};\nconsole.log(order.coupon?.code);   // undefined — no error",
+          "type": "checkpoint",
+          "text": "`const user = 'Ravi';` — what does `` console.log(`Hi ${user}, you have ${2 * 3} messages`) `` print?",
           "starter": null,
           "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
+          "checkpoint": {
+            "options": [
+              "`Hi user, you have 2 * 3 messages`",
+              "`Hi Ravi, you have 6 messages`",
+              "An error",
+              "`Hi ${user}, you have ${2 * 3} messages`"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "Inside backticks, `${ }` is replaced by the value of what's inside — the variable's value, or the result of the calculation."
           },
+          "code": null,
           "callout": null,
           "title": null
         },
         {
           "type": "markdown",
-          "text": "### Order of operations\n\n`*` and `/` happen before `+` and `-`, just like in maths: `2 + 3 * 4` is `14`. When in doubt, add parentheses: `(2 + 3) * 4` is `20`.",
+          "text": "## F5 · Arithmetic and assignment operators\n\n### Arithmetic\n\n| Operator | Meaning | Example | Result |\n|---|---|---|---|\n| `+` | add | `7 + 2` | `9` |\n| `-` | subtract | `7 - 2` | `5` |\n| `*` | multiply | `7 * 2` | `14` |\n| `/` | divide | `7 / 2` | `3.5` |\n| `%` | remainder (*modulo*) | `7 % 2` | `1` |\n| `**` | power | `2 ** 10` | `1024` |\n\n`*`, `/` and `%` happen before `+` and `-`, just like in maths: `2 + 3 * 4` is `14`. **Brackets go first**: `(2 + 3) * 4` is `20`. When in doubt, add brackets — they make the order obvious to readers too.\n\nTwo surprises worth knowing:\n\n- Decimals aren't always exact: `0.1 + 0.2` gives `0.30000000000000004`. Round for display with `.toFixed(2)` → `'0.30'` (note: it gives *text*).\n- Dividing a number by zero gives `Infinity`, and converting text that isn't a number with `Number(…)` gives `NaN` (\"Not a Number\") — see F6.\n\n### Assignment shortcuts\n\n| Shortcut | Same as | Typical use |\n|---|---|---|\n| `x += 5` | `x = x + 5` | Add to a running total |\n| `x -= 5` | `x = x - 5` | Subtract from stock |\n| `x *= 2` | `x = x * 2` | Double a wait time |\n| `x /= 2` | `x = x / 2` | Halve something |\n| `x++` | `x = x + 1` | Count one more pass |\n| `x--` | `x = x - 1` | Count down attempts |\n\nThese all *change* the variable — so they only work on `let`, never on `const`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -913,60 +606,48 @@
           "checkpoint": {
             "options": [
               "3.33",
+              "30",
               "3",
-              "1",
-              "30"
+              "1"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "`%` gives the remainder: 10 ÷ 3 = 3, remainder 1."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`let total = 100; total += 50; total -= 30;` — what is total now?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "150",
+              "180",
+              "120",
+              "100"
             ],
             "answers": [
               2
             ],
             "kind": "single",
-            "explanation": "`%` gives the remainder: 10 ÷ 3 = 3 remainder 1."
+            "explanation": "100 + 50 = 150, then 150 − 30 = 120."
           },
           "code": null,
           "callout": null,
           "title": null
         },
         {
-          "type": "checkpoint",
-          "text": "What does `console.log('2' + 2);` print?",
+          "type": "markdown",
+          "text": "## F6 · Comparison operators\n\nComparisons always produce `true` or `false` — exactly what an assertion needs.\n\n| Operator | Meaning | Example | Result |\n|---|---|---|---|\n| `===` | equal (value **and** type) | `3 === 3` | `true` |\n| `!==` | not equal | `3 !== 4` | `true` |\n| `>` / `<` | greater / less than | `5 > 3` | `true` |\n| `>=` / `<=` | greater or equal / less or equal | `18 >= 18` | `true` |\n| `==` / `!=` | \"loose\" equal / not equal — converts types first | `'3' == 3` | `true` (!) |\n\n### Always use `===` and `!==`\n\nIn plain JavaScript, the loose `==` quietly converts values before comparing, so `'3' == 3` is `true` and `'' == 0` is `true`. That hides bugs: a page showing the text `\"3\"` would pass a check for the number `3` by accident. The strict `===` compares **value and type**, so `'3' === 3` is `false` — no surprises.\n\nTypeScript goes one step further: when the two sides clearly have different types, it flags the comparison — with `==` *or* `===` — before you even run the code (you'll see it in I4). But values without a known type (for example data read from a file) slip past that check, so make `===` your habit.\n\n### Text read from a page is always text\n\nWhen a test reads what's on the screen — a price, a count, a badge — it usually gets **text**, even if it looks like a number. To compare it with a number, convert it:\n\n| Conversion | Example | Result |\n|---|---|---|\n| Text → number | `Number('1499')` | `1499` |\n| Text that isn't a number | `Number('₹1,499')` | `NaN` — clean it up first (Day 6) |\n| Empty text | `Number('')` | `0` — careful! An empty badge silently becomes 0, not NaN |\n| Number → text | `String(3)` | `'3'` |\n| Which type is it? | `typeof badgeText` | `'string'` — the `typeof` operator from Day 4 gives the type's name, e.g. `'string'`, `'number'`, `'boolean'` |\n\n### Comparing text\n\nText is compared letter by letter, and **case matters**: `'Login' === 'login'` is `false`. When the case shouldn't matter, compare lower-cased versions: `a.toLowerCase() === b.toLowerCase()`.",
           "starter": null,
           "variation": null,
-          "checkpoint": {
-            "options": [
-              "4",
-              "22",
-              "An error",
-              "NaN"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "When one side of `+` is a string, `+` joins text. '2' + 2 becomes '22'."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "`const passed = 8; const total = 10;` — what is `passed === total ? 'All green' : 'Some failed'`?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "'All green'",
-              "'Some failed'",
-              "true",
-              "false"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "8 === 10 is false, so the ternary returns the value after the colon."
-          },
+          "checkpoint": null,
           "code": null,
           "callout": null,
           "title": null
@@ -978,16 +659,146 @@
           "variation": null,
           "checkpoint": {
             "options": [
-              "`===` is faster to type",
-              "`===` compares value AND type without converting, so `'5' === 5` is false — no surprises",
               "`==` doesn't work in TypeScript",
-              "They are exactly the same"
+              "`===` runs faster",
+              "`===` doesn't convert types, so `'5' === 5` is false",
+              "`===` ignores upper/lower case"
             ],
             "answers": [
-              1
+              2
             ],
             "kind": "single",
-            "explanation": "`==` converts types before comparing (`'5' == 5` is true), which hides bugs. `===` is strict and predictable."
+            "explanation": "`==` converts types before comparing, which hides bugs. `===` is strict and predictable."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "A test reads the cart count from the page as `countText = '3'`. How do you check it equals the number 3?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`countText == 3`",
+              "`countText === 3`",
+              "`Number(countText) === 3`",
+              "`countText + 0 === 3`"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "Convert the text to a number first, then compare strictly. (`countText + 0` would give `'30'` — text joined with 0.)"
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F7 · Logical operators and the ternary operator\n\n### Combining true/false values\n\n| Operator | Name | `true` when… | Example |\n|---|---|---|---|\n| `&&` | AND | **both** sides are true | `isLoggedIn && hasItems` |\n| `\\|\\|` | OR | **at least one** side is true | `isAdmin \\|\\| isManager` |\n| `!` | NOT | flips true ↔ false | `!isLoggedIn` |\n\nTheir full \"truth tables\":\n\n| A | B | `A && B` | `A \\|\\| B` | `!A` |\n|---|---|---|---|---|\n| true | true | true | true | false |\n| true | false | false | true | false |\n| false | true | false | true | true |\n| false | false | false | false | true |\n\nBusiness rules are full of these: *\"Show the Checkout button if the user is logged in **and** the cart isn't empty.\"*",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const isLoggedIn = true;\nconst itemsInCart = 0;\nconst showCheckout = isLoggedIn && itemsInCart > 0;   // true && false → false",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### The ternary operator — a one-line either/or\n\n`condition ? valueIfTrue : valueIfFalse`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const failedTests: number = 0;\nconst status = failedTests === 0 ? 'PASS' : 'FAIL';   // 'PASS'",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Read it as: *\"Is `failedTests === 0`? If yes, `'PASS'`; otherwise `'FAIL'`.\"* (The `: number` tells TypeScript that `failedTests` could be any number — without it, TypeScript sees it's always 0 and would call the comparison pointless. I3 explains this.)\n\nOn Day 10 you'll meet this line in Playwright's settings file: `retries: process.env.CI ? 2 : 0` — \"on a CI server, 2 retries; otherwise 0\".",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const age = 16; const hasConsent = true;` — what is `age >= 18 || hasConsent`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "16",
+              "false",
+              "An error",
+              "true"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "`age >= 18` is false, but `hasConsent` is true. With OR, one true side is enough."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const passed: number = 8; const total: number = 10;` — what is `passed === total ? 'All green' : 'Some failed'`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "'All green'",
+              "false",
+              "true",
+              "'Some failed'"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "8 === 10 is false, so the ternary gives the value after the colon."
           },
           "code": null,
           "callout": null,
@@ -1005,7 +816,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 5 · Implementation\n\n\n\n## I1 · Build expected messages with strings\n\nTests constantly build **expected text**: welcome messages, error messages, URLs. Let's practise with strings, template literals and a few string methods.",
+          "text": "# Day 5 · Implementation\n\nAll files today go in `ts-basics/day5`. Run each with `node day5/<file>.ts` and check it with `npm run check -- day5/<file>.ts`, from inside `pw-course/ts-basics`.\n\n## I1 · Test data and values built from it\n\nA registration test needs test data, plus values worked out from it. Everything here is a `const` — none of it changes during the test.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1015,14 +826,14 @@
         },
         {
           "type": "code",
-          "text": "// Test data\nconst firstName: string = 'Meera';\nconst lastName: string = 'Iyer';\nconst email: string = '  Meera.Iyer@Example.com  ';   // typed with extra spaces and capitals\nconst itemsInCart: number = 3;\n\n// Build the values a test would check\nconst fullName = `${firstName} ${lastName}`;\nconst cleanEmail = email.trim().toLowerCase();         // what a good app should store\nconst welcome = `Welcome back, ${firstName}!`;\nconst cartLabel = `Cart (${itemsInCart})`;\nconst profileUrl = `https://shop.example.com/users/${cleanEmail}`;\n\nconsole.log(welcome);\nconsole.log(cartLabel);\nconsole.log(`Full name has ${fullName.length} characters`);\nconsole.log(`Clean email: ${cleanEmail}`);\nconsole.log(`Profile URL: ${profileUrl}`);\nconsole.log(`Email looks valid: ${cleanEmail.includes('@')}`);",
+          "text": "// Test data for a registration test\nconst firstName = 'Meera';\nconst lastName = 'Iyer';\nconst email = '  Meera.Iyer@Example.com  ';   // typed by a user, with extra spaces and capitals\nconst age: number = 27;\nconst acceptsTerms = true;\n\n// Values built from the test data\nconst fullName = `${firstName} ${lastName}`;\nconst cleanEmail = email.trim().toLowerCase();          // what a good app should store\nconst expectedWelcome = `Welcome, ${firstName}!`;\nconst profileUrl = `https://shop.example.com/users/${cleanEmail}`;\n\n// Print a summary\nconsole.log(`Full name: ${fullName} (${fullName.length} characters)`);\nconsole.log(`Clean email: ${cleanEmail}`);\nconsole.log(`Adult: ${age >= 18}`);\nconsole.log(`Terms accepted: ${acceptsTerms}`);\nconsole.log(`Expected message: ${expectedWelcome}`);\nconsole.log(`Profile page: ${profileUrl}`);",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "ts-basics/day5/messages.ts",
-            "run": "node day5/messages.ts",
+            "file": "ts-basics/day5/test-data.ts",
+            "run": "node day5/test-data.ts",
             "mode": "editor",
             "expect_error": false,
             "network": false
@@ -1032,7 +843,7 @@
         },
         {
           "type": "terminal",
-          "text": "node day5/messages.ts\nnpm run check -- day5/messages.ts",
+          "text": "node day5/test-data.ts\nnpm run check -- day5/test-data.ts",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1042,7 +853,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nWelcome back, Meera!\nCart (3)\nFull name has 10 characters\nClean email: meera.iyer@example.com\nProfile URL: https://shop.example.com/users/meera.iyer@example.com\nEmail looks valid: true\n```\n\n**Try it:** change `itemsInCart` to `0` and make the cart label print `Cart (empty)` when there are no items. (Hint: you'll need the ternary operator from lesson F4: `` itemsInCart === 0 ? 'Cart (empty)' : `Cart (${itemsInCart})` ``.)\n\n## I2 · Calculate test-run metrics\n\nUse arithmetic, comparison, logical and ternary operators to summarise a test run — the kind of numbers you'd put in a test-summary report.",
+          "text": "```output\nFull name: Meera Iyer (10 characters)\nClean email: meera.iyer@example.com\nAdult: true\nTerms accepted: true\nExpected message: Welcome, Meera!\nProfile page: https://shop.example.com/users/meera.iyer@example.com\n```\n\nNotice `email.trim().toLowerCase()`: methods can be **chained** — `trim()` runs first, then `toLowerCase()` runs on its result.\n\n**Try it:** change `firstName` to `'Priya'` and run again. Three lines change, because three values were built from it — that's the \"change the cell once\" benefit from P2.\n\n## I2 · Counting results with `let`\n\nThis program tracks a test run as it happens, so its counters must be `let`:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1052,7 +863,34 @@
         },
         {
           "type": "code",
-          "text": "// Results from a test run (typed as number: in real life they come from a report)\nconst total: number = 48;\nconst passed: number = 42;\nconst failed: number = 4;\nconst skipped = total - passed - failed;       // whatever is left over\n\n// Percentages\nconst passRate = (passed / total) * 100;       // brackets first, then × 100\nconst passRateText = passRate.toFixed(1);      // round to 1 decimal place → a string\n\n// Decisions\nconst allPassed = failed === 0;\nconst releaseReady = passRate >= 90 && failed <= 5;   // both rules must be true\nconst status = allPassed ? '✅ GREEN' : '❌ RED';\n\nconsole.log(`Total: ${total} | Passed: ${passed} | Failed: ${failed} | Skipped: ${skipped}`);\nconsole.log(`Pass rate: ${passRateText}%`);\nconsole.log(`Status: ${status}`);\nconsole.log(`Ready for release? ${releaseReady}`);",
+          "text": "// Counting results as a test run progresses\nlet passed = 0;\nlet failed = 0;\nlet totalTimeMs = 0;\n\n// Test 1: login — passed in 1200 ms\npassed++;\ntotalTimeMs += 1200;\n\n// Test 2: search — failed in 5300 ms\nfailed++;\ntotalTimeMs += 5300;\n\n// Test 3: checkout — passed in 2500 ms\npassed += 1;\ntotalTimeMs = totalTimeMs + 2500;\n\n// Summary\nconst total = passed + failed;\nconsole.log(`Ran ${total} tests: ${passed} passed, ${failed} failed`);\nconsole.log(`Total time: ${totalTimeMs} ms (${totalTimeMs / 1000} seconds)`);\nconsole.log(`Average per test: ${totalTimeMs / total} ms`);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day5/counters.ts",
+            "run": "node day5/counters.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nRan 3 tests: 2 passed, 1 failed\nTotal time: 9000 ms (9 seconds)\nAverage per test: 3000 ms\n```\n\n`passed++`, `passed += 1` and `passed = passed + 1` all do the same thing — use whichever reads best.\n\n**Try it:** change `let passed = 0;` to `const passed = 0;` and check the file. Read the errors (one for each line that changes `passed`), then change it back.\n\n## I3 · Test-run metrics and a release decision\n\nArithmetic, comparison, logical and ternary operators together — the kind of numbers you'd put in a test-summary report:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Results from a test run (typed as number: in real life they come from a report)\nconst total: number = 48;\nconst passed: number = 42;\nconst failed: number = 4;\nconst skipped = total - passed - failed;          // whatever is left over\n\n// Percentages\nconst passRate = (passed / total) * 100;          // brackets first, then × 100\nconst passRateText = passRate.toFixed(1);         // round to 1 decimal place (gives text)\n\n// Decisions\nconst allPassed = failed === 0;\nconst releaseReady = passRate >= 90 && failed <= 5;   // both rules must be true\nconst status = allPassed ? 'GREEN' : 'RED';\n\nconsole.log(`Total: ${total} | Passed: ${passed} | Failed: ${failed} | Skipped: ${skipped}`);\nconsole.log(`Pass rate: ${passRateText}%`);\nconsole.log(`Status: ${status}`);\nconsole.log(`Ready for release? ${releaseReady}`);",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1069,7 +907,30 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nTotal: 48 | Passed: 42 | Failed: 4 | Skipped: 2\nPass rate: 87.5%\nStatus: ❌ RED\nReady for release? false\n```\n\n**Try it:** change `passed` to `44` and `failed` to `2`. Predict the four lines *before* you run it.",
+          "text": "```output\nTotal: 48 | Passed: 42 | Failed: 4 | Skipped: 2\nPass rate: 87.5%\nStatus: RED\nReady for release? false\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Without it, TypeScript would notice that `failed` is *always* exactly 4, and flag `failed === 0` as a comparison that can never be true. Real results come from a report and can be any number, so we tell TypeScript \"this is some number\".",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": "Why `: number` on the first three lines?"
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "**Try it:** change `passed` to `44` and `failed` to `2`. Predict all four lines *before* running.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1079,22 +940,183 @@
         },
         {
           "type": "checkpoint",
-          "text": "With passed = 44, failed = 2, total = 48, what is `releaseReady`? (Pass rate ≈ 91.7%)",
+          "text": "With passed = 44, failed = 2 and total = 48 (a pass rate of about 91.7%), what is `releaseReady`?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "true — the pass rate is at least 90 AND failures are at most 5",
-              "false — some tests failed",
-              "true — because failed is not 0",
+              "false — because the pass rate is below 95",
+              "false — because some tests failed",
+              "true",
               "An error"
             ],
             "answers": [
-              0
+              2
             ],
             "kind": "single",
-            "explanation": "91.7 >= 90 is true and 2 <= 5 is true; true && true is true."
+            "explanation": "91.7 >= 90 is true and 2 <= 5 is true; true && true is true. Failures don't matter as long as there are at most 5."
           },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I4 · The text-versus-number trap\n\nA test reads the cart badge from the page. The badge shows **3** — but text read from a page is always a string. Check this file before running it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// The cart badge on the page shows \"3\". Text read from a page is always a string.\nconst badgeText = '3';\nconst expectedItems = 3;\n\nconsole.log(badgeText === expectedItems);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day5/compare-trap.ts",
+            "run": "npm run check -- day5/compare-trap.ts",
+            "mode": "editor",
+            "expect_error": true,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm run check -- day5/compare-trap.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nday5/compare-trap.ts(5,13): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.\n```\n\nTypeScript spotted that a string can **never** be strictly equal to a number — the check would always be `false`, and the test would fail for the wrong reason. The fix is to convert first:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Convert text from the page to a number before comparing\nconst badgeText = '3';\nconst expectedItems = 3;\nconst badgeNumber = Number(badgeText);            // '3' → 3\n\nconsole.log(badgeNumber === expectedItems);       // now both are numbers\nconsole.log(typeof badgeText, typeof badgeNumber);\n\n// Conversions you'll need when reading prices and counts\nconsole.log(Number('1499') + 1);                  // a real number: adds\nconsole.log(Number('₹1,499'));                    // not a plain number: NaN\nconsole.log(String(expectedItems) + ' items');    // number → text",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day5/compare-fixed.ts",
+            "run": "node day5/compare-fixed.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\ntrue\nstring number\n1500\nNaN\n3 items\n```",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "`NaN` is a classic source of confusing test failures. If a price on the page includes a currency symbol or a comma, remove them before converting — you'll learn how to clean text on Day 6.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I5 · Fix three variable mistakes\n\nThis file has three classic variable mistakes. Check it and read each error:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Three variable mistakes. Check this file and read each error.\nconst baseUrl = 'https://shop.example.com';\nbaseUrl = 'https://staging.shop.example.com';\n\nconsole.log(attempts);\nlet attempts = 0;\n\n{\n  const secretToken = 'abc123';\n}\nconsole.log(secretToken);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day5/scope-errors.ts",
+            "run": "npm run check -- day5/scope-errors.ts",
+            "mode": "editor",
+            "expect_error": true,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "terminal",
+          "text": "npm run check -- day5/scope-errors.ts",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nday5/scope-errors.ts(3,1): error TS2588: Cannot assign to 'baseUrl' because it is a constant.\nday5/scope-errors.ts(5,13): error TS2448: Block-scoped variable 'attempts' used before its declaration.\nday5/scope-errors.ts(5,13): error TS2454: Variable 'attempts' is used before being assigned.\nday5/scope-errors.ts(11,13): error TS2304: Cannot find name 'secretToken'.\n```\n\n| Line | Mistake | Fix |\n|---|---|---|\n| 3 | Reassigning a `const` | Use `let` if it must change — or, better, make a second `const` with a different name |\n| 5 | Using `attempts` before the line that creates it (two errors for the same mistake) | Move the `console.log` below the declaration |\n| 11 | `secretToken` only exists inside its block | Use it inside the block, or declare it outside |\n\nThe fixed version:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// The same program, fixed\nconst baseUrl = 'https://shop.example.com';\nconst stagingUrl = 'https://staging.shop.example.com';   // a second const instead of reassigning\n\nlet attempts = 0;\nconsole.log(attempts);                                    // used after it's declared\n\nconst secretToken = 'abc123';                             // declared outside the block\n{\n  console.log(`Inside the block: ${secretToken}`);\n}\nconsole.log(`Outside the block: ${secretToken}`);\nconsole.log(baseUrl, stagingUrl);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day5/scope-fixed.ts",
+            "run": "node day5/scope-fixed.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\n0\nInside the block: abc123\nOutside the block: abc123\nhttps://shop.example.com https://staging.shop.example.com\n```\n\nNotice that a block can see variables from **outside** it — scope only stops variables leaking *out*.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
           "code": null,
           "callout": null,
           "title": null
@@ -1111,7 +1133,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 5 · Practice\n\n\n\n## Quiz · Day 5 check",
+          "text": "# Day 5 · Practice\n\n## Quiz · Day 5 check",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1121,18 +1143,18 @@
         },
         {
           "type": "checkpoint",
-          "text": "Which keyword should you use by default for a variable whose value never changes?",
+          "text": "Which keyword should you use by default for a new variable?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "var",
-              "let",
-              "const",
-              "static"
+              "`let` for text, `const` for numbers",
+              "`const`",
+              "`var`",
+              "`let`"
             ],
             "answers": [
-              2
+              1
             ],
             "kind": "single",
             "explanation": "Use `const` by default and switch to `let` only when the value must change. Avoid `var`."
@@ -1143,21 +1165,21 @@
         },
         {
           "type": "checkpoint",
-          "text": "What is the type of `30000` in `const timeout = 30000;`?",
+          "text": "`let x = 5; let x = 6;` in the same block — what happens?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "string",
-              "number",
-              "boolean",
-              "time"
+              "x becomes 11",
+              "An error — `let` doesn't allow declaring the same name twice",
+              "Both values are kept",
+              "x becomes 6"
             ],
             "answers": [
               1
             ],
             "kind": "single",
-            "explanation": "It's a number (30,000 milliseconds = 30 seconds)."
+            "explanation": "Redeclaring is an error with `let` and `const`. To change the value, just write `x = 6;`. (Old `var` would have allowed it silently.)"
           },
           "code": null,
           "callout": null,
@@ -1165,21 +1187,21 @@
         },
         {
           "type": "checkpoint",
-          "text": "What does `console.log(typeof 'false');` print?",
+          "text": "What does `console.log(2 + 3 * 4);` print?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "boolean",
-              "string",
-              "false",
-              "undefined"
+              "24",
+              "9",
+              "14",
+              "20"
             ],
             "answers": [
-              1
+              2
             ],
             "kind": "single",
-            "explanation": "'false' is in quotes, so it's a string that happens to contain the word false."
+            "explanation": "Multiplication happens before addition — 3 × 4 = 12, then 2 + 12 = 14. Use brackets `(2 + 3) * 4` for 20."
           },
           "code": null,
           "callout": null,
@@ -1187,17 +1209,40 @@
         },
         {
           "type": "checkpoint",
-          "text": "What does `true && !false` evaluate to?",
+          "text": "`const product = 'Mouse'; const price = 799;` — which line prints `Mouse costs ₹799`?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "true",
-              "false",
-              "An error"
+              "`` console.log(`product costs ₹price`); ``",
+              "`` console.log(${product} + ' costs ₹' + ${price}); ``",
+              "`` console.log(`${product} costs ₹${price}`); ``",
+              "`` console.log('${product} costs ₹${price}'); ``"
             ],
             "answers": [
-              0
+              2
+            ],
+            "kind": "single",
+            "explanation": "`${ }` only works inside backticks. Inside single quotes it's printed literally."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What is `true && !false`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "undefined",
+              "An error",
+              "false",
+              "true"
+            ],
+            "answers": [
+              3
             ],
             "kind": "single",
             "explanation": "`!false` is true, and true && true is true."
@@ -1208,21 +1253,66 @@
         },
         {
           "type": "checkpoint",
-          "text": "`const port = process.env.PORT ?? '3000';` — if PORT is not set (undefined), what is port?",
+          "text": "`Number('12 items')` gives…",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "undefined",
-              "'3000'",
-              "null",
-              "An empty string"
+              "NaN",
+              "0",
+              "12",
+              "'12 items'"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "The whole text must be a number. Anything extra — words, currency symbols, commas — gives NaN."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which error do you get for `const limit = 5; limit++;`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "limit is used before being assigned",
+              "Cannot assign to 'limit' because it is a constant",
+              "No error — ++ is allowed on constants",
+              "Cannot find name 'limit'"
             ],
             "answers": [
               1
             ],
             "kind": "single",
-            "explanation": "`??` returns the right-hand fallback when the left side is null or undefined."
+            "explanation": "`limit++` means `limit = limit + 1`, which changes the variable. A const can't change."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const isLoggedIn = true; const cartCount: number = 2;` — which of these are true? (Select all that apply)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`!isLoggedIn || cartCount === 0`",
+              "`isLoggedIn && cartCount > 0`",
+              "`cartCount !== 2`",
+              "`cartCount >= 2`"
+            ],
+            "answers": [
+              1,
+              3
+            ],
+            "kind": "multiple",
+            "explanation": "`isLoggedIn && cartCount > 0` is true && true. `!isLoggedIn || cartCount === 0` is false || false. `cartCount >= 2` is true. `cartCount !== 2` is false."
           },
           "code": null,
           "callout": null,
@@ -1259,8 +1349,8 @@
           "title": null
         },
         {
-          "type": "markdown",
-          "text": "## Exercises",
+          "type": "problem-ref",
+          "text": "3",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1269,8 +1359,8 @@
           "title": null
         },
         {
-          "type": "problem-ref",
-          "text": "3",
+          "type": "markdown",
+          "text": "## Exercises",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1289,8 +1379,48 @@
           "title": null
         },
         {
+          "type": "problem-ref",
+          "text": "5",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "6",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "7",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "8",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
           "type": "markdown",
-          "text": "## Reflection\n\n1. Explain in one sentence the difference between *running* a `.ts` file with Node and *checking* it with `tsc`.\n2. When do you choose `let` instead of `const`?\n3. Why is `'5' === 5` false, and why is that a good thing?",
+          "text": "## Reflection\n\n1. When do you choose `let` instead of `const` — and why never `var`?\n2. What is block scope? Give an example of a variable you can't use outside its block.\n3. Rewrite `'Hello ' + name + ', you have ' + n + ' items'` as a template literal.\n4. Why is `'5' === 5` false, and why is that a good thing?\n5. A test reads the price \"₹1,499\" from a page. What will `Number()` give, and why?",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1300,7 +1430,7 @@
         },
         {
           "type": "callout",
-          "text": "Lists and records: arrays, tuples and objects — the way you'll store test data — plus union and literal types and why `any` is a trap.",
+          "text": "Data types in depth: the rest of the simple types (`null`, `undefined`), and the ones you'll store test data in — arrays for lists, objects for records, tuples, union and literal types — plus why `any` is a trap.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1316,35 +1446,67 @@
         {
           "number": 1,
           "difficulty": "Easy",
-          "title": "Predict — strings and numbers",
+          "title": "Predict — text and numbers",
           "kind": "predict",
-          "statement": "Without running it, write down the four lines this program prints. Then run it to check.\n\n```ts\nconst a = 10;\nconst b = '10';\nconsole.log(a + 5);\nconsole.log(b + 5);\nconsole.log(a === Number(b));\nconsole.log(`${a} items`);\n```",
+          "statement": "Write down the four lines this program prints, then run it to check.\n\n```ts\nconst a = 10;\nconst b = '10';\nconsole.log(a + 5);\nconsole.log(b + 5);\nconsole.log(a === Number(b));\nconsole.log(`${a} items`);\n```",
           "stub": null,
           "hints": [],
           "file": null,
           "run": null,
           "check": null,
-          "solution": "15\n105\ntrue\n10 items\n\n`b + 5` joins text ('10' + 5 → '105'). `Number(b)` converts the string '10' to the number 10, so the strict comparison is true."
+          "solution": "15\n105\ntrue\n10 items\n\n`b + 5` joins text ('10' + 5 → '105'). `Number(b)` turns '10' into 10, so the strict comparison is true."
         },
         {
           "number": 2,
           "difficulty": "Easy",
-          "title": "Predict — let and const",
+          "title": "Predict — let and shortcuts",
           "kind": "predict",
-          "statement": "What is printed? Is there any line the type checker would reject?\n\n```ts\nlet count = 1;\ncount += 4;\ncount--;\nconst label = count > 3 ? 'many' : 'few';\nconsole.log(count, label);\n```",
+          "statement": "What is printed?\n\n```ts\nlet count = 1;\ncount += 4;\ncount--;\ncount *= 2;\nconst label = count > 6 ? 'many' : 'few';\nconsole.log(count, label);\n```",
           "stub": null,
           "hints": [],
           "file": null,
           "run": null,
           "check": null,
-          "solution": "`4 many`\n\ncount: 1 → 5 (after `+= 4`) → 4 (after `--`). 4 > 3 is true, so label is 'many'. No errors — `count` uses `let`, so it may change."
+          "solution": "`8 many`\n\ncount: 1 → 5 (`+= 4`) → 4 (`--`) → 8 (`*= 2`). 8 > 6 is true, so label is 'many'."
         },
         {
           "number": 3,
           "difficulty": "Medium",
+          "title": "Predict — the order of operations",
+          "kind": "predict",
+          "statement": "What is printed?\n\n```ts\nconst price = 200;\nconst qty = 3;\nconsole.log('Total: ' + price * qty);\nconsole.log('Total: ' + price + qty);\nconsole.log('Total: ' + (price + qty));\n```",
+          "stub": null,
+          "hints": [],
+          "file": null,
+          "run": null,
+          "check": null,
+          "solution": "Total: 600\nTotal: 2003\nTotal: 203\n\nLine 1: `*` happens before `+`, so 200 × 3 = 600, then it's joined to the text. Line 2: `+` works left to right — the text joins 200, then joins 3. Line 3: the brackets add 200 + 3 first."
+        },
+        {
+          "number": 4,
+          "difficulty": "Easy",
+          "title": "Tester profile card",
+          "kind": "code",
+          "statement": "Create `day5/profile.ts`. Declare **constants** for your name (string), years of testing experience (number), favourite browser (string) and whether you've used automation before (boolean).\n\nPrint exactly this format, using **one template literal per line** (with your own values):\n```\nTester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false\n```",
+          "stub": "// 1. Declare your four constants here\n\n// 2. Print the four lines with template literals",
+          "hints": [
+            "A template literal uses backticks: `` console.log(`Tester: ${testerName}`); ``"
+          ],
+          "file": "ts-basics/day5/profile.ts",
+          "run": "node day5/profile.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day5/profile.ts",
+            "expected": "Tester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false"
+          },
+          "solution": "```ts\n// 1. Four constants\nconst testerName = 'Priya Sharma';\nconst yearsOfExperience = 3;\nconst favouriteBrowser = 'firefox';\nconst usedAutomation = false;\n\n// 2. Print with template literals\nconsole.log(`Tester: ${testerName}`);\nconsole.log(`Experience: ${yearsOfExperience} years`);\nconsole.log(`Favourite browser: ${favouriteBrowser}`);\nconsole.log(`Automation before: ${usedAutomation}`);\n```\n\n**Output**\n\n```output\nTester: Priya Sharma\nExperience: 3 years\nFavourite browser: firefox\nAutomation before: false\n```"
+        },
+        {
+          "number": 5,
+          "difficulty": "Medium",
           "title": "Shopping-cart calculator",
           "kind": "code",
-          "statement": "Create `day5/cart.ts`. A cart has: unit price **1299**, quantity **3**, discount **10%**, and shipping **99** that is **free when the discounted subtotal is 3000 or more**.\n\nCalculate and print:\n```\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```\nUse `const` for the inputs, arithmetic operators for the maths, a **ternary** for shipping and `toFixed(2)` for the final line.",
+          "statement": "Create `day5/cart.ts`. A cart has: unit price **1299**, quantity **3**, a **10%** discount, and shipping of **99**, which is **free when the discounted amount is 3000 or more**.\n\nPrint:\n```\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```\nUse `const` for everything, arithmetic operators for the maths, a **ternary** for shipping, and `.toFixed(2)` for the last line.",
           "stub": "// Shopping-cart calculator\n// Save this as ts-basics/day5/cart.ts\n",
           "hints": [
             "discount = subtotal × discountPercent / 100",
@@ -1357,19 +1519,40 @@
             "run": "node day5/cart.ts",
             "expected": "Subtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30"
           },
-          "solution": "```ts\n// Inputs\nconst unitPrice = 1299;\nconst quantity = 3;\nconst discountPercent = 10;\n\n// Calculations\nconst subtotal = unitPrice * quantity;                      // 3897\nconst discount = (subtotal * discountPercent) / 100;        // 389.7\nconst afterDiscount = subtotal - discount;                  // 3507.3\nconst shipping = afterDiscount >= 3000 ? 0 : 99;            // free above 3000\nconst totalToPay = afterDiscount + shipping;\n\n// Output\nconsole.log(`Subtotal: ${subtotal}`);\nconsole.log(`Discount: ${discount}`);\nconsole.log(`After discount: ${afterDiscount}`);\nconsole.log(`Shipping: ${shipping}`);\nconsole.log(`Total to pay: ${totalToPay.toFixed(2)}`);\n```\n\n**Output**\n\n```output\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```"
+          "solution": "```ts\n// Inputs\nconst unitPrice = 1299;\nconst quantity = 3;\nconst discountPercent = 10;\n\n// Calculations\nconst subtotal = unitPrice * quantity;                   // 3897\nconst discount = (subtotal * discountPercent) / 100;     // 389.7\nconst afterDiscount = subtotal - discount;               // 3507.3\nconst shipping = afterDiscount >= 3000 ? 0 : 99;         // free above 3000\nconst totalToPay = afterDiscount + shipping;\n\n// Output\nconsole.log(`Subtotal: ${subtotal}`);\nconsole.log(`Discount: ${discount}`);\nconsole.log(`After discount: ${afterDiscount}`);\nconsole.log(`Shipping: ${shipping}`);\nconsole.log(`Total to pay: ${totalToPay.toFixed(2)}`);\n```\n\n**Output**\n\n```output\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```"
         },
         {
-          "number": 4,
+          "number": 6,
           "difficulty": "Medium",
-          "title": "Fix the config-style code",
+          "title": "Check the page's numbers",
           "kind": "code",
-          "statement": "The file below mimics settings from `playwright.config.ts`, but has **four** type errors. Save it as `day5/settings.ts`, run `npm run check -- day5/settings.ts`, and fix every error so that it checks cleanly and prints:\n```\nRetries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000\n```\n(Assume the `isCI` variable is `false`.)",
-          "stub": "const isCI: boolean = 'false';\nconst retries: number = isCI ? 2 : '0';\nconst workers: number = isCI ? 1 : 4;\nconst headless: boolean = 'true';\nlet baseURL: string | undefined;\nconst finalUrl: number = baseURL ?? 'http://localhost:3000';\nconsole.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${finalUrl}`);",
+          "statement": "A test read three values from an order page — all as **text**:\n```ts\nconst itemCountText = '4';\nconst unitPriceText = '250';\nconst totalText = '1000';\n```\nCreate `day5/order-check.ts` that converts them to numbers, calculates the expected total (item count × unit price), and prints:\n```\nExpected total: 1000\nPage total: 1000\nTotals match: true\n```\nUse `Number(…)` and `===`. The type check must pass.",
+          "stub": "const itemCountText = '4';\nconst unitPriceText = '250';\nconst totalText = '1000';\n",
           "hints": [
+            "Convert each text value with `Number(itemCountText)` and so on, into new constants.",
+            "Compare the page total (as a number) with your calculated total using `===`."
+          ],
+          "file": "ts-basics/day5/order-check.ts",
+          "run": "node day5/order-check.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day5/order-check.ts",
+            "expected": "Expected total: 1000\nPage total: 1000\nTotals match: true"
+          },
+          "solution": "```ts\n// Values read from the page — always text\nconst itemCountText = '4';\nconst unitPriceText = '250';\nconst totalText = '1000';\n\n// Convert to numbers\nconst itemCount = Number(itemCountText);\nconst unitPrice = Number(unitPriceText);\nconst pageTotal = Number(totalText);\n\n// Calculate and compare\nconst expectedTotal = itemCount * unitPrice;\nconsole.log(`Expected total: ${expectedTotal}`);\nconsole.log(`Page total: ${pageTotal}`);\nconsole.log(`Totals match: ${pageTotal === expectedTotal}`);\n```\n\n**Output**\n\n```output\nExpected total: 1000\nPage total: 1000\nTotals match: true\n```"
+        },
+        {
+          "number": 7,
+          "difficulty": "Medium",
+          "title": "Fix the settings file",
+          "kind": "code",
+          "statement": "This file mimics settings from `playwright.config.ts` but has **four** mistakes. Save it as `day5/settings.ts`, check it, and fix it until the check is silent and it prints:\n```\nRetries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000\n```",
+          "stub": "const isCI: boolean = 'false';\nconst retries = isCI ? 2 : 0;\nconst workers = isCI ? 1 : 4;\nconst headless: boolean = true;\nheadless = !isCI;\nconst baseUrl = http://localhost:3000;\nconsole.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${baseURL}`);",
+          "hints": [
+            "The checker reports *syntax* mistakes (like missing quotes) first. Fix those, check again, and the *type* mistakes appear — errors can come in waves.",
             "Booleans are written without quotes.",
-            "Both sides of the ternary should be numbers for `retries`.",
-            "What type does `baseURL ?? 'http://…'` produce?"
+            "A const can't be reassigned — do you need that line at all? (What is `!isCI` when isCI is false?)",
+            "Text needs quotes, and names are case-sensitive."
           ],
           "file": "ts-basics/day5/settings.ts",
           "run": "node day5/settings.ts",
@@ -1378,7 +1561,27 @@
             "run": "node day5/settings.ts",
             "expected": "Retries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000"
           },
-          "solution": "```ts\nconst isCI: boolean = false;                              // fix 1: boolean, not text\nconst retries: number = isCI ? 2 : 0;                     // fix 2: number on both sides\nconst workers: number = isCI ? 1 : 4;\nconst headless: boolean = true;                           // fix 3: boolean, not text\nlet baseURL: string | undefined;\nconst finalUrl: string = baseURL ?? 'http://localhost:3000';   // fix 4: the result is a string\nconsole.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${finalUrl}`);\n```\n\n**Output**\n\n```output\nRetries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000\n```"
+          "solution": "```ts\nconst isCI: boolean = false;                 // fix 1: a boolean, not text\nconst retries = isCI ? 2 : 0;\nconst workers = isCI ? 1 : 4;\nconst headless: boolean = !isCI;             // fix 2: set it once instead of reassigning a const\nconst baseUrl = 'http://localhost:3000';     // fix 3: text needs quotes\nconsole.log(`Retries: ${retries} | Workers: ${workers} | Headless: ${headless} | Base URL: ${baseUrl}`);   // fix 4: baseUrl, not baseURL\n```\n\n**Output**\n\n```output\nRetries: 0 | Workers: 4 | Headless: true | Base URL: http://localhost:3000\n```"
+        },
+        {
+          "number": 8,
+          "difficulty": "Challenge",
+          "title": "Challenge: build a URL and a test title",
+          "kind": "code",
+          "statement": "Create `day5/url-builder.ts`. Given:\n```ts\nconst baseUrl = 'https://shop.example.com';\nconst category = 'Laptops';\nconst brand = 'Acme Tech';\nconst page = 2;\nconst sortBy = 'price';\n```\n1. Make a URL-friendly **brand slug**: lower-case, and the space replaced by `-` → `acme-tech`. (Text has a method `.replace(' ', '-')` that replaces the first space.)\n2. Build: `https://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price` (note the category is lower-cased too).\n3. Build a test title: `[P2] Laptops by Acme Tech, sorted by price`.\n4. Print the URL, then the title.",
+          "stub": "const baseUrl = 'https://shop.example.com';\nconst category = 'Laptops';\nconst brand = 'Acme Tech';\nconst page = 2;\nconst sortBy = 'price';\n",
+          "hints": [
+            "`brand.toLowerCase().replace(' ', '-')` chains two methods.",
+            "Build both lines with template literals: `${baseUrl}/c/${…}?brand=${…}&page=${page}&sort=${sortBy}`"
+          ],
+          "file": "ts-basics/day5/url-builder.ts",
+          "run": "node day5/url-builder.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day5/url-builder.ts",
+            "expected": "https://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price\n[P2] Laptops by Acme Tech, sorted by price"
+          },
+          "solution": "```ts\nconst baseUrl = 'https://shop.example.com';\nconst category = 'Laptops';\nconst brand = 'Acme Tech';\nconst page = 2;\nconst sortBy = 'price';\n\n// 1. URL-friendly pieces\nconst brandSlug = brand.toLowerCase().replace(' ', '-');   // 'acme-tech'\nconst categorySlug = category.toLowerCase();                // 'laptops'\n\n// 2 + 3. Build the URL and the title with template literals\nconst url = `${baseUrl}/c/${categorySlug}?brand=${brandSlug}&page=${page}&sort=${sortBy}`;\nconst title = `[P${page}] ${category} by ${brand}, sorted by ${sortBy}`;\n\n// 4. Print\nconsole.log(url);\nconsole.log(title);\n```\n\n**Output**\n\n```output\nhttps://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price\n[P2] Laptops by Acme Tech, sorted by price\n```"
         }
       ]
     }

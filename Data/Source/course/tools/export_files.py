@@ -9,8 +9,8 @@ Creates:
   files/starters/<path>    starter code for exercises that have one
   files/solutions/<path>   model solutions for code exercises
 
-Use files/lessons/tests/day1/ to pre-load the Day 1 demo workspace, and
-files/lessons/tests/day5/practice-pages.ts for the Day 5 practice pages.
+Use files/lessons/tests/day1/ and tests/day2/ to pre-load the Days 1–2 demo workspace;
+files/lessons/tests/day9/practice-pages.ts holds the practice pages used on Days 9–10.
 """
 import json
 import shutil

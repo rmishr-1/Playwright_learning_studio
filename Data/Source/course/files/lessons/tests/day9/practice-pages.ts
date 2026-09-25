@@ -1,19 +1,21 @@
-// Practice web pages for Days 9–10.
-// Each constant holds the HTML of one page. Tests load it with: await page.setContent(loginPage);
+// Practice web pages for Days 9 and 10.
+// Each constant holds the HTML of one page. Tests load it with: await page.setContent(signInPage);
 
 // ---------------------------------------------------------------------------
 // Page 1: QA Academy sign-in
-//   Valid user:   student@qa.academy / Learn@123  → "Signing in…" then (0.8 s later) the Dashboard
+//   Valid user:   student@qa.academy / Learn@123 → "Signing in…", then (0.8 s later) the Dashboard
 //   Empty fields: "Please enter your email and password"
 //   Wrong login:  "Invalid email or password"
+//   Dashboard:    "Log out" button → "Signed out" page
 // ---------------------------------------------------------------------------
-export const loginPage = `
+export const signInPage = `
 <!DOCTYPE html>
 <html lang="en">
-<head><title>QA Academy - Sign in</title></head>
+<head><meta charset="utf-8"><title>QA Academy - Sign in</title></head>
 <body>
+  <img alt="QA Academy logo" width="40" height="40" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">
   <h1>Sign in to QA Academy</h1>
-  <form id="login-form">
+  <form id="signin-form">
     <label for="email">Email</label>
     <input id="email" type="email" placeholder="you@example.com">
 
@@ -24,10 +26,11 @@ export const loginPage = `
 
     <button type="submit">Sign in</button>
   </form>
-  <p id="message" role="alert" data-testid="login-message"></p>
+  <a href="#" title="Reset your password">Forgot password?</a>
+  <p id="message" role="alert"></p>
 
   <script>
-    const form = document.getElementById('login-form');
+    const form = document.getElementById('signin-form');
     const message = document.getElementById('message');
 
     form.addEventListener('submit', (event) => {
@@ -50,9 +53,10 @@ export const loginPage = `
       document.body.innerHTML =
         '<h1>Dashboard</h1>' +
         '<p>Welcome back, Student!</p>' +
-        '<ul><li>Weeks 1-2 - Fundamentals</li><li>Week 3 - Locators</li><li>Week 4 - Page Objects</li></ul>' +
-        '<button id="logout">Log out</button>';
-      document.getElementById('logout').addEventListener('click', () => {
+        '<h2>Your courses</h2>' +
+        '<ul><li>Playwright Basics</li><li>API Testing</li><li>Performance Testing</li></ul>' +
+        '<button>Log out</button>';
+      document.querySelector('button').addEventListener('click', () => {
         document.title = 'QA Academy - Signed out';
         document.body.innerHTML = '<h1>Signed out</h1><p>See you soon!</p>';
       });
@@ -63,12 +67,15 @@ export const loginPage = `
 `;
 
 // ---------------------------------------------------------------------------
-// Page 2: QA Academy course enrolment (used in the Day 10 mini-project)
+// Page 2: QA Academy course enrolment
+//   The "Enrol now" button is enabled only while "I accept the terms" is ticked
+//   Checks, in order: name required → email must contain @ → a course must be chosen
+//   Success: "Thanks, <first name>! You are enrolled in <course>." and one seat fewer
 // ---------------------------------------------------------------------------
 export const enrolPage = `
 <!DOCTYPE html>
 <html lang="en">
-<head><title>QA Academy - Enrol</title></head>
+<head><meta charset="utf-8"><title>QA Academy - Enrol</title></head>
 <body>
   <h1>Enrol in a course</h1>
   <form id="enrol-form">

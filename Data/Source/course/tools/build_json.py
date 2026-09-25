@@ -9,7 +9,9 @@ The Markdown format is described in FORMAT.md. The script also validates the con
 (section order, quiz answers, unique ids, required exercise fields) and stops with a
 clear error message if something is wrong.
 """
+import hashlib
 import json
+import random
 import re
 import shlex
 import sys
@@ -22,7 +24,7 @@ MD_DIR = ROOT / "markdown"
 JSON_DIR = ROOT / "json"
 
 SECTION_IDS = ["prerequisites", "fundamentals", "implementation", "practice"]
-WEEK_TITLES = {1: "Week 1 — Playwright Foundations & Setup", 2: "Week 2 — TypeScript & the Test Runner"}
+WEEK_TITLES = {1: "Week 1 — Playwright Foundations & TypeScript Basics", 2: "Week 2 — TypeScript Essentials & the Test Runner"}
 CALLOUT_VARIANTS = {"TIP", "NOTE", "WARNING", "TESTER", "DEEPDIVE", "PLATFORM"}
 QUIZ_TYPES = {"single", "multiple", "truefalse"}
 EXERCISE_TYPES = {"code", "terminal", "written", "predict"}
@@ -83,13 +85,19 @@ def build_quiz(raw, where):
         opts = q.get("options") or []
         if len(opts) < 2:
             raise ContentError(f"{where}: needs at least 2 options")
-        options = [{"id": chr(ord("a") + i), "text": str(t)} for i, t in enumerate(opts)]
         answers = q["answer"] if isinstance(q["answer"], list) else [q["answer"]]
         if q["type"] == "single" and len(answers) != 1:
             raise ContentError(f"{where}: single-choice quiz needs exactly one answer")
         if q["type"] == "multiple" and len(answers) < 2:
             raise ContentError(f"{where}: multiple-choice quiz needs 2+ answers")
-        correct = [options[letters_to_index(a, len(options), where)]["id"] for a in answers]
+        correct_idx = {letters_to_index(a, len(opts), where) for a in answers}
+        # Shuffle the options deterministically (seeded by the quiz id), so the correct answer
+        # isn't always in the same position. Authors can opt out with `shuffle: false`.
+        order = list(range(len(opts)))
+        if q.get("shuffle", True):
+            random.Random(hashlib.sha256(str(q["id"]).encode()).hexdigest()).shuffle(order)
+        options = [{"id": chr(ord("a") + new_pos), "text": str(opts[old_pos])} for new_pos, old_pos in enumerate(order)]
+        correct = [chr(ord("a") + new_pos) for new_pos, old_pos in enumerate(order) if old_pos in correct_idx]
     block = {
         "type": "quiz",
         "id": q["id"],
@@ -184,6 +192,7 @@ def parse_day(path):
     lesson = None
     md_buffer = []
     last_block = None
+    last_code = None
     ids_seen = set()
 
     def target_blocks():
@@ -192,7 +201,7 @@ def parse_day(path):
         return lesson["blocks"] if lesson else section["intro"]
 
     def flush_md():
-        nonlocal md_buffer, last_block
+        nonlocal md_buffer, last_block, last_code
         content = "\n".join(md_buffer).strip("\n")
         md_buffer = []
         if content.strip():
@@ -241,11 +250,11 @@ def parse_day(path):
             elif lang == "output":
                 target = flags[0] if flags else "console"
                 blk = {"type": "output", "target": target, "content": raw}
-                # attach to the preceding code block as its expected output
-                prev = last_block if not md_buffer or not "\n".join(md_buffer).strip() else None
-                if prev and prev.get("type") == "code" and "expectedOutput" not in prev:
-                    prev["expectedOutput"] = raw
-                    prev["expectedOutputTarget"] = target
+                # attach to the most recent file-backed code block (same lesson, no other code block
+                # in between) as its expected output — the first output after the code wins
+                if last_code is not None and "expectedOutput" not in last_code:
+                    last_code["expectedOutput"] = raw
+                    last_code["expectedOutputTarget"] = target
                 add_block(blk)
             elif "terminal" in flags:
                 cmds = [c for c in content if c.strip()]
@@ -264,6 +273,7 @@ def parse_day(path):
                 if blk["mode"] not in ("read", "editor"):
                     raise ContentError(f"{where}: mode must be read or editor")
                 add_block(blk)
+                last_code = blk if blk.get("file") else None
             i = j + 1
             continue
 
@@ -297,6 +307,7 @@ def parse_day(path):
             day["sections"].append(section)
             lesson = None
             last_block = None
+            last_code = None
             i += 1
             continue
         if line.startswith("## "):
@@ -311,6 +322,7 @@ def parse_day(path):
             }
             section["lessons"].append(lesson)
             last_block = None
+            last_code = None
             i += 1
             continue
 
