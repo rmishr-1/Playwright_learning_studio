@@ -170,7 +170,8 @@ Block types:
     "demo":    { "files": { "tests/day1/auto-wait.spec.ts": "file contents...", "ts-basics/package.json": "..." } },
     "project": { "files": { "tests/day9/practice-pages.ts": "...", "ts-basics/day8/helpers.ts": "..." } }
   }
-  // paths are relative to the workspace, and must sit under tests/ or ts-basics/
+  // paths are relative to the workspace, and must sit under tests/, pages/, fixtures/,
+  // test-data/, utils/ or ts-basics/
   // a day's files use its course-wide number in the path (tests/day9/...)
 }
 ```

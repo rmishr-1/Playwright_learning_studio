@@ -12,6 +12,7 @@
  *   tsconfig.json            points `@playwright/test` at .studio/ (below)
  *   .studio/test.ts          adds the live browser view to every test
  *   tests/                   the spec files
+ *   pages/, fixtures/, test-data/, utils/   page objects, fixtures, data and helpers (Day 10)
  *   ts-basics/               the TypeScript playground, where `node day3/hello.ts` runs
  *   test-results/, playwright-report/   written by the test runner
  *
@@ -27,7 +28,7 @@ import * as path from 'node:path';
 import { WORKSPACE_ROOT, onDisk } from '../config';
 import { readContent } from '../content';
 import { lockedDayNumbers } from '../store';
-import { WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
+import { PROJECT_FILE, WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
 
 const ROOT = WORKSPACE_ROOT;
 export const workspaceDir = (name: Workspace): string => path.join(ROOT, name);
@@ -47,8 +48,14 @@ export default defineConfig({
   retries: 0,
   // The same report as a new project. It is opened with \`npx playwright show-report\`.
   reporter: [['list'], ['html', { open: 'never' }]],
+  // The course's own time limits (Day 10): each test 30 s, each web-first assertion 5 s.
+  timeout: 30_000,
+  expect: { timeout: 5_000 },
   use: {
+    // The course's practice site, which its tests serve themselves: page.goto('/signin').
+    baseURL: 'https://qa-academy.test',
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
   },
   // The three browsers a new project tests in. The live view shows Chromium.
   projects: [
@@ -189,12 +196,13 @@ function readSeeds(): WorkspaceSeeds['workspaces'] {
 }
 
 /**
- * A path inside a workspace, from a path the learner or a lesson gave. Only files under tests/ and
- * ts-basics/ may be written or named, and never a path that climbs out of the workspace.
+ * A path inside a workspace, from a path the learner or a lesson gave. Only files in the project's
+ * own folders (PROJECT_FILE) may be written or named, and never a path that climbs out of the
+ * workspace.
  */
 export function resolveInside(name: Workspace, rel: string): string | null {
   const clean = rel.replace(/\\/g, '/').replace(/^\.\//, '');
-  if (!/^(tests|ts-basics)\/[\w./-]+$/.test(clean) || clean.split('/').includes('..')) return null;
+  if (!PROJECT_FILE.test(clean) || clean.split('/').includes('..')) return null;
   return path.join(workspaceDir(name), ...clean.split('/'));
 }
 
@@ -251,7 +259,7 @@ export function prepareWorkspace(name: Workspace): void {
   }
   const seeds = readSeeds()[name]?.files ?? {};
   // Every path, from the course or from .studio/seeded.json (which the learner's code can write),
-  // must stay inside tests/ or ts-basics/ of this workspace; anything else is skipped.
+  // must stay inside the project's own folders of this workspace; anything else is skipped.
   const fileOf = (rel: string): string | null => resolveInside(name, rel);
   const current = (rel: string): string | null => {
     const file = fileOf(rel);

@@ -4,6 +4,8 @@
     "timeout_ms": 30000,
     "max_concurrent": 3,
     "allowed_origins": [
+      "https://shop.test",
+      "https://qa-academy.test",
       "https://playwright.dev",
       "http://localhost",
       "http://127.0.0.1"

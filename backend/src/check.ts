@@ -22,6 +22,15 @@ const programOutput = (out: string): string =>
     .join('\n')
     .trim();
 
+/** Output as a stdoutEquals check compares it: each line without its trailing spaces (the course's rule). */
+const trimLines = (s: string): string =>
+  s
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((l) => l.trimEnd())
+    .join('\n')
+    .trim();
+
 /** What a check keeps of a command's output: its end, where the summary and the verdict are. */
 const MAX_CHECK_OUTPUT = 2_000_000;
 
@@ -68,8 +77,8 @@ export async function checkAnswer(problem: PracticeProblem, req: CheckRequest): 
   }
 
   if (check.kind === 'stdoutEquals') {
-    const expected = check.expected.trim();
-    const passed = exit === 0 && printed === expected;
+    const expected = trimLines(check.expected);
+    const passed = exit === 0 && trimLines(printed) === expected;
     return {
       status: passed ? 'passed' : 'failed',
       message: passed

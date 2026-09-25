@@ -75,9 +75,13 @@ const DEFAULTS: StudioConfig = {
     timeout_ms: 30_000,
     max_concurrent: 3,
     terminal_timeout_ms: 300_000,
-    // The course's practice pages load with page.setContent(), so they need no site at all. Two
-    // lessons open playwright.dev.
+    // Most practice pages load with page.setContent(), so they need no site at all. Some lessons
+    // serve a pretend site from their own page.route() (shop.test, qa-academy.test): .test is
+    // reserved and never resolves, so only the test's own route can answer it. Two lessons open
+    // playwright.dev.
     allowed_origins: [
+      'https://shop.test',
+      'https://qa-academy.test',
       'https://playwright.dev',
       'http://localhost',
       'http://127.0.0.1',
