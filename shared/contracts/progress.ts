@@ -47,6 +47,11 @@ export const ProgressUpdate = z.object({
    * means true, which is how every update behaved before this field existed.
    */
   viewed: z.boolean().optional(),
+  /**
+   * `true` takes the part back out of those read - the learner cleared its done mark - and the day
+   * is no longer complete. It leaves the resume point where it was.
+   */
+  unread: z.boolean().optional(),
 });
 
 export type ResumePoint = z.infer<typeof ResumePoint>;

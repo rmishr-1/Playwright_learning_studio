@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Navigate, Route, Routes, useLocation, type Location } from 'react-router-dom';
 import { Day } from './screens/Day';
 import { RunView } from './screens/RunView';
 import { Dashboard } from './screens/Dashboard';
@@ -56,13 +56,28 @@ export function App() {
     getCourse().then(setIndex).catch(() => undefined);
   }, []);
   const location = useLocation();
-  // Where the header's Lessons tab goes from the index: the resume point, refreshed on every
-  // navigation so it follows the learner.
-  const [lessonsTo, setLessonsTo] = useState('/learn/w1/d1/p1');
+  /**
+   * Both screens stay alive once opened, and only the one you are on shows: going to the course
+   * index and back finds the lesson as you left it - where you were on the page, the code in the
+   * editor, the Terminal and what it printed - and the index keeps its scroll and folded weeks. The
+   * lesson reads its week, day and part from the last lesson address, even while the index shows.
+   */
+  const onLesson = location.pathname.startsWith('/learn/');
+  const onIndex = location.pathname === '/';
+  const lastLesson = useRef<Location | null>(null);
+  if (onLesson) lastLesson.current = location;
+  const [indexSeen, setIndexSeen] = useState(onIndex);
+  useEffect(() => {
+    if (onIndex) setIndexSeen(true);
+  }, [onIndex]);
+  // Where the header's Lessons tab goes from the index: the lesson you left, else the resume
+  // point, refreshed on every navigation so it follows the learner.
+  const [resumeTo, setResumeTo] = useState('/learn/w1/d1/p1');
+  const lessonsTo = lastLesson.current ? lastLesson.current.pathname : resumeTo;
   useEffect(() => {
     getMyProgress()
       .then((p) => {
-        if (p.resume) setLessonsTo('/learn/w' + p.resume.week + '/d' + p.resume.day + '/p' + p.resume.part);
+        if (p.resume) setResumeTo('/learn/w' + p.resume.week + '/d' + p.resume.day + '/p' + p.resume.part);
       })
       .catch(() => undefined);
   }, [location.pathname]);
@@ -105,21 +120,34 @@ export function App() {
         theme={theme}
         onToggleTheme={() => setTheme(nextTheme(theme))}
       />
+      {/* Addresses only: the screens themselves are drawn below, and kept. */}
       <Routes>
-        {/* "/" is the course index - Option B’s dashboard; each day tile links to /learn/wN/dN/p1. */}
-        <Route path="/" element={<Dashboard />} />
-        {/* React Router v6 params must be a WHOLE segment, so the w/d/p prefixes travel
-            inside the param and Day parses them off. */}
-        <Route
-          path="/learn/:week/:day/:part"
-          element={
-            <Day appTheme={editorThemeFor(theme)} weeksOpen={weeksOpen} onSetWeeksOpen={setWeeksOpen} />
-          }
-        />
+        <Route path="/" element={null} />
+        <Route path="/learn/:week/:day/:part" element={null} />
         <Route path="/learn/:week/:day" element={<Navigate to="p1" replace />} />
         {/* Unknown paths go back to the index. */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      {/* "/" is the course index - Option B’s dashboard; each day tile links to /learn/wN/dN/p1. */}
+      {indexSeen && (
+        <div className="screen" hidden={!onIndex}>
+          <Dashboard active={onIndex} />
+        </div>
+      )}
+      {lastLesson.current && (
+        <div className="screen" hidden={!onLesson}>
+          {/* React Router v6 params must be a WHOLE segment, so the w/d/p prefixes travel
+              inside the param and Day parses them off. */}
+          <Routes location={lastLesson.current}>
+            <Route
+              path="/learn/:week/:day/:part"
+              element={
+                <Day appTheme={editorThemeFor(theme)} weeksOpen={weeksOpen} onSetWeeksOpen={setWeeksOpen} />
+              }
+            />
+          </Routes>
+        </div>
+      )}
     </div>
   );
 }

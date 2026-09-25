@@ -202,8 +202,8 @@ async function main(): Promise<void> {
   await page.waitForLoadState('load');
   const origin = new URL(page.url()).origin;
   expect(/^http:\/\/127\.0\.0\.1:\d+$/.test(origin), 'the studio opens from its own local server', origin);
-  const title = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map((w) => w.getTitle()).join(' | '));
-  expect(title.includes('Licensed to Smoke Test Ltd'), 'the window names the licensee', title);
+  const title = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map((w) => w.getTitle()));
+  expect(title.includes(''), 'the window\'s title bar is blank', JSON.stringify(title));
   await page.waitForSelector('text=Week 1', { timeout: 30_000 });
   await page.waitForTimeout(1500);
   await page.screenshot({ path: path.join(OUT, '6-course.png') });

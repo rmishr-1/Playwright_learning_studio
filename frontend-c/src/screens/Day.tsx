@@ -122,7 +122,8 @@ function Sidebar({
                       if (!d.locked) navigate(url);
                     }}
                   >
-                    <span className="sb-num" aria-hidden="true">{dayDone ? '✓' : d.day}</span>
+                    {/* A day that is done keeps its label, in the done colour. */}
+                    <span className="sb-num" aria-hidden="true">Day {d.day}</span>
                     <span className="sb-title">{d.title}</span>
                   </a>
                 );
@@ -206,7 +207,8 @@ export function Day({
     getCourse()
       .then((i) => {
         setIndex(i);
-        document.title = i.title;
+        // The tab says only the product's name, on the course index and on a lesson alike.
+        document.title = PRODUCT_NAME;
       })
       .catch((e: unknown) => {
         // With no course at all, say so, rather than the "day does not exist" the day request
@@ -291,6 +293,19 @@ export function Day({
         reportedRef.current = null;
       });
   }, [week, day, part]);
+
+  // The tick beside a tab clears that part's done mark. The part you are on is not marked read
+  // again on this visit, even with its end in view: it counts again once you come back and reach
+  // its end.
+  const unread = useCallback(
+    (p: number) => {
+      if (p === part) reportedRef.current = week + '/' + day + '/' + part;
+      recordProgress({ week, day, part: p as PartNumber, unread: true })
+        .then(setProgress)
+        .catch(() => undefined);
+    },
+    [week, day, part],
+  );
 
   const loadIntoEditor = useCallback((snippet: string, meta?: EditorFile) => {
     problemRef.current = null;
@@ -491,6 +506,7 @@ export function Day({
             prevDay={prevDay}
             nextDay={nextDay}
             onReachedEnd={reachedEnd}
+            onUnread={unread}
           />
         </div>
         <div className="gutter" onMouseDown={() => (draggingRef.current = true)} />

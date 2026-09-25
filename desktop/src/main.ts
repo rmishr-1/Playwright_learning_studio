@@ -393,7 +393,9 @@ async function openStudio(licence: Licence): Promise<void> {
     sameSite: 'strict',
   });
 
-  const title = BUILD.product + ' — Licensed to ' + licence.licensee;
+  // The window's title bar is left blank, in every build: the build's own name stays its program,
+  // installer, shortcuts and setup window, and the licensee is in the About box (F1).
+  const title = '';
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -404,7 +406,7 @@ async function openStudio(licence: Licence): Promise<void> {
     show: false,
     webPreferences: SAFE,
   });
-  // The page's own title would replace the licensee's name.
+  // The window keeps its own title, whatever the page sets.
   win.on('page-title-updated', (e) => e.preventDefault());
   studioOrigin = origin;
   win.webContents.on('before-input-event', (_e, input) => {

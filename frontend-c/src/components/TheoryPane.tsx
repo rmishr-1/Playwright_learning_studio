@@ -282,6 +282,7 @@ export function TheoryPane({
   prevDay,
   nextDay,
   onReachedEnd,
+  onUnread,
 }: {
   parts: CoursePart[];
   active: number;
@@ -305,6 +306,8 @@ export function TheoryPane({
   nextDay?: DayLink;
   /** Called once the end of this part's content comes into view: the part has been read. */
   onReachedEnd?: () => void;
+  /** Clears a part's done mark: it no longer counts as read. */
+  onUnread?: (part: number) => void;
 }) {
   const part = parts.find((p) => p.part === active) ?? parts[0];
   const endRef = useRef<HTMLDivElement>(null);
@@ -352,17 +355,31 @@ export function TheoryPane({
             ☰
           </button>
         )}
-        {parts.map((p) => (
-          <button
-            key={p.part}
-            className={(p.part === part.part ? 'on' : '') + (viewed.includes(p.part) ? ' seen' : '')}
-            onClick={() => onSelect(p.part)}
-          >
-            {/* Step number, which becomes a tick once the part has been viewed. */}
-            <span className="step" aria-hidden="true">{viewed.includes(p.part) ? '✓' : p.part}</span>
-            {p.tab_label}
-          </button>
-        ))}
+        {parts.map((p) => {
+          const seen = viewed.includes(p.part);
+          return (
+            <span className={'tab-slot' + (seen ? ' seen' : '') + (p.part === part.part ? ' on' : '')} key={p.part}>
+              <button className={(p.part === part.part ? 'on' : '') + (seen ? ' seen' : '')} onClick={() => onSelect(p.part)}>
+                {/* Step number, which becomes a tick once the part has been viewed. */}
+                <span className="step" aria-hidden="true">{seen ? '✓' : p.part}</span>
+                {p.tab_label}
+              </button>
+              {/* A part you have read carries a tick of its own, beside the tab (a button cannot sit
+                  inside another): selecting it clears the part's done mark. */}
+              {seen && onUnread && (
+                <button
+                  type="button"
+                  className="tab-done"
+                  onClick={() => onUnread(p.part)}
+                  aria-label={'Mark ' + p.tab_label + ' as not read'}
+                  title="Read. Select to mark it as not read."
+                >
+                  ✓
+                </button>
+              )}
+            </span>
+          );
+        })}
       </div>
 
       <div className="lesson">

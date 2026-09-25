@@ -158,7 +158,8 @@ async function withLock<T>(fn: () => T): Promise<T> {
 }
 
 /**
- * Records where the learner is and, unless `viewed: false`, that a part was read. A part
+ * Records where the learner is and, unless `viewed: false`, that a part was read (or, with
+ * `unread`, that it no longer counts as read). A part
  * completes when it is recorded as read; a day completes when every part the day actually HAS
  * has been read - not a hardcoded four, because a day may have fewer parts, with gaps in the
  * part numbers.
@@ -179,9 +180,11 @@ export async function recordProgress(update: ProgressUpdate): Promise<Progress> 
       completed_at: null,
     };
 
-    // `viewed: false` moves the resume point without counting the part as read.
-    const viewed =
-      update.viewed === false || prior.parts_viewed.includes(update.part)
+    // `viewed: false` moves the resume point without counting the part as read; `unread` takes the
+    // part back out of those read.
+    const viewed = update.unread
+      ? prior.parts_viewed.filter((p) => p !== update.part)
+      : update.viewed === false || prior.parts_viewed.includes(update.part)
         ? prior.parts_viewed
         : [...prior.parts_viewed, update.part].sort((a, b) => a - b);
 
@@ -196,7 +199,8 @@ export async function recordProgress(update: ProgressUpdate): Promise<Progress> 
 
     const next: Progress = {
       ...current,
-      resume: { week: update.week, day: update.day, part: update.part },
+      // Clearing a done mark is not going anywhere: the resume point stays.
+      resume: update.unread ? current.resume : { week: update.week, day: update.day, part: update.part },
       progress: {
         ...current.progress,
         [key]: {

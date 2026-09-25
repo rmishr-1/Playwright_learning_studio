@@ -36,7 +36,7 @@ const LockIcon = () => (
  * timeline - one card per week of the plan, each open week showing its days as tiles that open that
  * day. The days are the week's key topics; a week not built yet says it opens soon.
  */
-export function Dashboard() {
+export function Dashboard({ active = true }: { active?: boolean }) {
   const [index, setIndex] = useState<CourseIndex | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [error, setError] = useState('');
@@ -47,13 +47,21 @@ export function Dashboard() {
     getCourse()
       .then((i) => {
         setIndex(i);
-        document.title = PRODUCT_NAME + ' · Option C';
+        // The tab says only the product's name, on the course index and on a lesson alike.
+        document.title = PRODUCT_NAME;
       })
       .catch((e: unknown) =>
         setError(e instanceof ApiError && e.code === 'CONTENT_MISSING' ? 'The course has no lessons yet.' : (e as Error).message),
       );
-    getMyProgress().then(setProgress).catch(() => undefined);
   }, []);
+
+  // The index stays alive while a lesson shows (App.tsx), so progress is read again each time it
+  // comes back into view: days finished in the lesson count here at once.
+  useEffect(() => {
+    if (!active) return;
+    getMyProgress().then(setProgress).catch(() => undefined);
+    document.title = PRODUCT_NAME;
+  }, [active]);
 
   if (error) return <div className="centered"><div className="notice">{error}</div></div>;
   if (!index) return <div className="centered muted">Loading…</div>;
