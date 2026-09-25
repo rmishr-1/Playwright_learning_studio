@@ -3,6 +3,7 @@
  * Every variant has its own name, program, install folder, data folder and uninstall entry, so all
  * of them install and run side by side on one computer.
  *
+ *   build-app.bat, or npm run build-variant  lists the variants and asks which to build
  *   npm run build-variant -- internal       "Evoke Training Studio": Evoke's own, opens with any valid
  *                                           Evoke licence. Never send it to a customer.
  *   npm run build-variant -- BU             "Evoke Training Studio BU": the customer's, opens only with
@@ -34,7 +35,7 @@ import type { LicenceFile } from '../src/licence';
 import { systemExe } from '../../backend/src/system-exe';
 import { DESKTOP, VERSION } from './build';
 import { hasCertificate, packageApp } from './package';
-import { INTERNAL_CODE, licencePath, variantByCode, type Variant } from './variants';
+import { INTERNAL_CODE, licencePath, readVariants, variantByCode, type Variant } from './variants';
 
 export type BuildVariantOptions = {
   /** A zip that runs where it is unzipped, instead of an installer. */
@@ -198,13 +199,37 @@ export async function buildVariant(code: string, opts: BuildVariantOptions = {})
   return out;
 }
 
+/** With no variant named (build-app.bat): lists them and asks which, and whether as a zip. */
+async function choose(): Promise<{ code: string; zip: boolean }> {
+  if (!process.stdin.isTTY) throw new Error('Name the variant to build, e.g. `npm run build-variant -- internal` (see variants.json).');
+  const variants = readVariants();
+  console.log('');
+  console.log('  Build an app');
+  console.log('');
+  variants.forEach((v, i) => {
+    console.log('  ' + String(i + 1).padStart(2) + '. ' + v.name + (v.licensee ? '  (for ' + v.licensee + ')' : '  (Evoke internal, any Evoke licence)'));
+  });
+  console.log('');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const ask = (text: string): Promise<string> => new Promise((resolve) => rl.question(text, (a) => resolve(a.trim())));
+  let picked: Variant | undefined;
+  while (!picked) {
+    const a = await ask('  Which one (1-' + variants.length + ', Enter = 1): ');
+    picked = variants[a === '' ? 0 : Number(a) - 1];
+    if (!picked) console.log('  Type a number from the list.');
+  }
+  const zip = /^z/i.test(await ask('  An installer, or a zip that runs where it is unzipped? (Enter = installer, z = zip): '));
+  rl.close();
+  return { code: picked.code, zip };
+}
+
 if (require.main === module) {
-  const code = process.argv.slice(2).find((a) => !a.startsWith('--'));
+  const named = process.argv.slice(2).find((a) => !a.startsWith('--'));
   Promise.resolve()
-    .then(() => {
-      if (!code) throw new Error('Name the variant to build, e.g. `npm run build-variant -- internal` (see variants.json).');
+    .then(async () => {
+      const { code, zip } = named ? { code: named, zip: process.argv.includes('--zip') } : await choose();
       return buildVariant(code, {
-        zip: process.argv.includes('--zip'),
+        zip,
         unsigned: process.argv.includes('--unsigned'),
         carry: process.argv.includes('--carry'),
         noOpen: process.argv.includes('--no-open'),

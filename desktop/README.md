@@ -10,6 +10,17 @@ traceable**. No packaging can make copying impossible: everything the app needs 
 learner's computer. The aim is that taking the course out in bulk needs real skill and time, and
 that a copy that does get out points to the licence it came from.
 
+## Double-click jobs
+
+In this folder, each asks for what it needs and waits for a key at the end:
+
+| File | What it does |
+|---|---|
+| `build-app.bat` | Lists the apps (`variants.json`), asks which to build and whether as an installer or a zip, and puts it in `deliveries/<code>/`. Choose "Evoke Training Studio" for the internal app. |
+| `new-customer.bat` | A new customer: their short code, licence and app, built (below). |
+| `issue-licence.bat` | A new licence for a person or team at Evoke (it opens the internal app), or a reissue of one already issued: a new end date or computer, keeping its ID and, unless changed, its logo. |
+| `revoke-licence.bat` | Lists the licences, asks which to revoke and why, and adds it to `revoked.json`. Then commit `revoked.json` and rebuild the app it opened. |
+
 ## The apps: one per audience
 
 Every build is a **variant**, listed in `variants.json` (committed), and each has its own name:
@@ -17,12 +28,13 @@ Every build is a **variant**, listed in `variants.json` (committed), and each ha
 | Code | App | Opens with |
 |---|---|---|
 | `internal` | Evoke Training Studio | any valid Evoke licence. **Never leaves Evoke**: it is not sealed. |
-| `BU` | Evoke Training Studio BU | only Boston University's licence |
+| a customer's code, e.g. `BOSTONU` | Evoke Training Studio BOSTONU | only that customer's licence |
 
-A variant's name is its program (`Evoke Training Studio BU.exe`), its install folder
-(`%LOCALAPPDATA%ProgramsEvoke Training Studio BU`), its Start-menu and desktop shortcuts, its
-entry in Windows' Apps list, its windows and its page, and its data folder
-(`%APPDATA%Evoke Training Studio BU`: progress, work, licence). Its `appId` names its installer's
+new-customer.bat adds a customer's variant (below). A variant's name is its program
+(`Evoke Training Studio BOSTONU.exe`), its install folder
+(`%LOCALAPPDATA%\Programs\Evoke Training Studio BOSTONU`), its Start-menu and desktop shortcuts,
+its entry in Windows' Apps list, its windows and its page, and its data folder
+(`%APPDATA%\Evoke Training Studio BOSTONU`: progress, work, licence). Its `appId` names its installer's
 registry entries and its taskbar button. So **every variant installs and runs beside the others**
 on one computer, each with its own progress. A variant's name and appId are stored, not worked out
 at build time: once one has been installed anywhere, changing either would make a different app
@@ -30,7 +42,7 @@ with none of the learner's progress.
 
 ```bash
 npm run build-variant -- internal
-npm run build-variant -- BU
+npm run build-variant -- BOSTONU
 ```
 
 Each builds the variant's installer and puts what to send in `deliveries/<code>/`, replacing that
@@ -54,7 +66,7 @@ and builds their app, in about 10 minutes. Keep the window open until it says **
 to send them is in `deliveries/<code>/`:
 
 - `Evoke-Training-Studio-<code>-Setup-<version>.exe`: the installer. It installs for the user
-  only, with no administrator rights, into `%LOCALAPPDATA%ProgramsEvoke Training Studio <code>`
+  only, with no administrator rights, into `%LOCALAPPDATA%\Programs\Evoke Training Studio <code>`
   (a folder other accounts cannot change: a release refuses to start from one they can), with
   Start-menu and desktop shortcuts. It is removed from Settings > Apps, which keeps the learner's
   progress, work and licence.
@@ -63,7 +75,7 @@ to send them is in `deliveries/<code>/`:
 - `SHA256SUMS.txt`: the fingerprints of the installer and the licence, so they can check what arrived.
 
 With `--zip`, the app comes as `Evoke-Training-Studio-<code>-<version>.zip` instead, to extract to
-`%LOCALAPPDATA%ProgramsEvoke Training Studio <code>`. Its folder carries **`Uninstall.bat`**
+`%LOCALAPPDATA%\Programs\Evoke Training Studio <code>`. Its folder carries **`Uninstall.bat`**
 (a zip has no uninstaller of its own). It removes exactly the files and folders the zip put there,
 named one by one when the app was packed, then the folder only if nothing else is left in it, so a
 copy unzipped straight into Downloads takes nothing else with it. It refuses while the studio is

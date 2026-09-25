@@ -21,7 +21,7 @@
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { LOGO_MAX_BYTES, PRODUCT, sign, verify, type Licence, type LicenceFile } from '../src/licence';
+import { LOGO, LOGO_MAX_BYTES, PRODUCT, sign, verify, type Licence, type LicenceFile } from '../src/licence';
 import { DESKTOP, ISSUED_CSV, SEALS_FILE, checkedPublicKey, loadPrivateKey } from './signing-key';
 import { readRevoked, revoke } from './revoke-licence';
 
@@ -34,6 +34,8 @@ export type IssueOptions = {
   machine?: string | null;
   /** A PNG or JPEG file. */
   logoFile?: string | null;
+  /** A logo already in a licence (data:image/...), kept when a licence is reissued without a new file. */
+  logoData?: string | null;
   id?: string | null;
   /** A reissue with a new seal, for a licence that leaked. */
   newSeal?: boolean;
@@ -53,6 +55,9 @@ export function problemWith(o: IssueOptions): string | null {
     if (!fs.existsSync(o.logoFile)) return 'There is no file at ' + o.logoFile + '.';
     if (!/\.(png|jpe?g)$/i.test(o.logoFile)) return 'The logo must be a PNG or JPEG file.';
     if (fs.statSync(o.logoFile).size > LOGO_MAX_BYTES) return 'The logo is over 300 KB. Use a smaller image (about 400 pixels wide is plenty).';
+  }
+  if (o.logoData && (!LOGO.test(o.logoData) || Buffer.from(o.logoData.split(',')[1] ?? '', 'base64').length > LOGO_MAX_BYTES)) {
+    return 'The logo kept from the earlier licence is not a PNG or JPEG image of 300 KB or less.';
   }
   if (o.id && !/^EVK-[0-9A-F]{8}$/.test(o.id)) return 'A licence ID looks like EVK-1A2B3C4D.';
   return null;
@@ -141,7 +146,7 @@ export async function issueLicence(o: IssueOptions): Promise<{ licence: Licence;
 
   const logo = o.logoFile
     ? 'data:image/' + (/\.png$/i.test(o.logoFile) ? 'png' : 'jpeg') + ';base64,' + fs.readFileSync(o.logoFile).toString('base64')
-    : null;
+    : (o.logoData ?? null);
   const licence: Licence = {
     id,
     licensee: o.licensee.trim(),

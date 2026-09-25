@@ -189,6 +189,9 @@ export async function packageApp(opts: {
   }
   const cache = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-electron-'));
   process.env.ELECTRON_BUILDER_CACHE = cache;
+  // 7-Zip level 5, not electron-builder's 9: still one solid stream, so the browsers' shared files
+  // are stored once, in a fraction of level 9's time on 1.7 GB for a few percent more size.
+  process.env.ELECTRON_BUILDER_COMPRESSION_LEVEL = '5';
   const electronDist = path.join(cache, electronZip);
   console.log('\n> Electron ' + electronVersion + ', from its own releases');
   await download(ELECTRON_RELEASES + 'v' + electronVersion + '/' + electronZip, electronDist);
@@ -268,6 +271,12 @@ export async function packageApp(opts: {
       shortcutName: product,
       artifactName: base + '-Setup-' + VERSION + '.${ext}',
       deleteAppDataOnUninstall: false,
+      // No update download on top of an installed copy: the app has no auto-update, and each
+      // version is sent as a new installer. electron-builder's default prepares for one anyway, with
+      // a block map of the installer (about two-thirds of a build's time) and compression in small
+      // independent pieces (a 1 MB dictionary, not solid), which cannot share what the browsers have
+      // in common. Turn it back on only with auto-update.
+      differentialPackage: false,
       // assets/installer.nsh: tells a running copy of this variant from one of another.
       include: 'installer.nsh',
     },
@@ -279,6 +288,7 @@ export async function packageApp(opts: {
     out = await electronBuild({ targets: Platform.WINDOWS.createTarget(), config, projectDir: DESKTOP });
   } finally {
     delete process.env.ELECTRON_BUILDER_CACHE;
+    delete process.env.ELECTRON_BUILDER_COMPRESSION_LEVEL;
     fs.rmSync(cache, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
   for (const f of out) console.log('  ' + f);
