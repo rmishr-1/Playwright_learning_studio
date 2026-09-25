@@ -113,6 +113,8 @@ export function App() {
 
   return (
     <div className="app">
+      {/* The desktop app's title bar, in the header's navy (styles.css): no height in a browser. */}
+      <div className="titlebar" aria-hidden="true" />
       {/* Navy header on every screen: logo, where you are on a lesson, the tab to the other screen, theme switch. */}
       <AppHeader
         index={index}
@@ -142,7 +144,7 @@ export function App() {
             <Route
               path="/learn/:week/:day/:part"
               element={
-                <Day appTheme={editorThemeFor(theme)} weeksOpen={weeksOpen} onSetWeeksOpen={setWeeksOpen} />
+                <Day active={onLesson} appTheme={editorThemeFor(theme)} weeksOpen={weeksOpen} onSetWeeksOpen={setWeeksOpen} />
               }
             />
           </Routes>

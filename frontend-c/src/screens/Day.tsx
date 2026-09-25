@@ -139,6 +139,7 @@ function Sidebar({
 }
 
 export function Day({
+  active = true,
   appTheme,
   weeksOpen,
   onSetWeeksOpen,
@@ -151,13 +152,20 @@ export function Day({
    */
   weeksOpen: boolean;
   onSetWeeksOpen: (open: boolean) => void;
+  /**
+   * Whether this screen is the one showing. The lesson stays alive while the course index shows
+   * (App.tsx), and progress can change there - a day's done mark cleared - so it is read again each
+   * time the lesson comes back into view.
+   */
+  active?: boolean;
 }) {
   // Drives the sidebar ticks and the gating. There is only the one record - see api/client.ts.
   const [progress, setProgress] = useState<Progress | null>(null);
 
   useEffect(() => {
+    if (!active) return;
     getMyProgress().then(setProgress).catch(() => undefined);
-  }, []);
+  }, [active]);
   const params = useParams();
   const navigate = useNavigate();
   // URLs read /learn/w2/d1/p3. The prefixes are part of the segment (see App.tsx), so strip
@@ -293,19 +301,6 @@ export function Day({
         reportedRef.current = null;
       });
   }, [week, day, part]);
-
-  // The tick beside a tab clears that part's done mark. The part you are on is not marked read
-  // again on this visit, even with its end in view: it counts again once you come back and reach
-  // its end.
-  const unread = useCallback(
-    (p: number) => {
-      if (p === part) reportedRef.current = week + '/' + day + '/' + part;
-      recordProgress({ week, day, part: p as PartNumber, unread: true })
-        .then(setProgress)
-        .catch(() => undefined);
-    },
-    [week, day, part],
-  );
 
   const loadIntoEditor = useCallback((snippet: string, meta?: EditorFile) => {
     problemRef.current = null;
@@ -506,7 +501,6 @@ export function Day({
             prevDay={prevDay}
             nextDay={nextDay}
             onReachedEnd={reachedEnd}
-            onUnread={unread}
           />
         </div>
         <div className="gutter" onMouseDown={() => (draggingRef.current = true)} />

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ApiError, getCourse, getMyProgress } from '../api/client';
+import { ApiError, getCourse, getMyProgress, recordProgress } from '../api/client';
 import { planWeeks } from '../lib/coursePlan';
 import { PRODUCT_NAME } from '../components/AppHeader';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
@@ -42,6 +42,23 @@ export function Dashboard({ active = true }: { active?: boolean }) {
   const [error, setError] = useState('');
   /** The weeks whose days are folded away in Your path. Every week starts open. */
   const [collapsed, setCollapsed] = useState<Set<number>>(() => new Set());
+  /** The day ("week/day") whose done mark was selected once, and now asks "Clear progress?". */
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const confirmTimer = useRef<number | undefined>(undefined);
+  const askReset = (key: string): void => {
+    setConfirming(key);
+    window.clearTimeout(confirmTimer.current);
+    // Unanswered, the question goes away on its own.
+    confirmTimer.current = window.setTimeout(() => setConfirming(null), 5000);
+  };
+  const resetDay = (week: number, day: number): void => {
+    window.clearTimeout(confirmTimer.current);
+    setConfirming(null);
+    recordProgress({ week, day, part: 1, reset_day: true })
+      .then(setProgress)
+      .catch(() => undefined);
+  };
+  useEffect(() => () => window.clearTimeout(confirmTimer.current), []);
 
   useEffect(() => {
     getCourse()
@@ -106,7 +123,7 @@ export function Dashboard({ active = true }: { active?: boolean }) {
             <div className="ring" style={{ ['--pct' as string]: pct + '%' }}>
               <span>{pct}%</span>
             </div>
-            <div className="muted small">{doneCount} of {openDays.length} days complete</div>
+            <div className="muted small">{doneCount} of {openDays.length} days completed</div>
             {next && (
               <Link className="btn" to={dayUrl(next.week, next.day.day, resumed ? resumed.part : 1)}>
                 {resumed ? 'Continue: Week ' + resumed.week + ', Day ' + resumed.day : 'Start Day ' + next.day.day} →
@@ -143,7 +160,9 @@ export function Dashboard({ active = true }: { active?: boolean }) {
                 <li
                   key={w.week}
                   className={'path-week' + (w.open ? ' open' : ' soon') + (w.open && done === w.days.length ? ' complete' : '')}
-                  style={{ ['--mod' as string]: w.module.color }}
+                  // One colour for the whole path - the first week's module colour - on every
+                  // week's number and module chip, whatever its module.
+                  style={{ ['--mod' as string]: weeks[0].module.color }}
                 >
                   <div className="path-rail" aria-hidden="true">
                     <span className="path-num">{w.week}</span>
@@ -180,11 +199,13 @@ export function Dashboard({ active = true }: { active?: boolean }) {
                         {w.days.map((d) => {
                           const tileDone = isDone(w.week, d.day);
                           const here = next?.week === w.week && next.day.day === d.day;
+                          const key = w.week + '/' + d.day;
                           const body = (
                             <>
                               <span className="tile-top">
                                 <span className="tile-badge">DAY {d.day}</span>
-                                {tileDone && <span className="tile-done">✓ Done</span>}
+                                {/* Keeps the marker's place; the marker itself is the button beside the link. */}
+                                {tileDone && <span className="tile-done" aria-hidden="true">✓ Done</span>}
                               </span>
                               <span className="tile-title">{d.title}</span>
                               {here && <span className="here">You are here</span>}
@@ -193,14 +214,35 @@ export function Dashboard({ active = true }: { active?: boolean }) {
                           return d.locked ? (
                             <span key={d.day} className="day-tile locked">{body}</span>
                           ) : (
-                            <Link
-                              key={d.day}
-                              to={dayUrl(w.week, d.day)}
-                              className={'day-tile' + (tileDone ? ' done' : '')}
-                              aria-label={'Open Week ' + w.week + ' Day ' + d.day + ': ' + d.title}
-                            >
-                              {body}
-                            </Link>
+                            <div key={d.day} className={'tile-wrap' + (tileDone ? ' done' : '')}>
+                              <Link
+                                to={dayUrl(w.week, d.day)}
+                                className={'day-tile' + (tileDone ? ' done' : '')}
+                                aria-label={'Open Week ' + w.week + ' Day ' + d.day + ': ' + d.title}
+                              >
+                                {body}
+                              </Link>
+                              {/* A day's done mark clears its progress: every part unread, every exercise
+                                  unattempted. The whole tile is a link, so the mark is a button of its
+                                  own over the tile; it asks once before clearing. */}
+                              {tileDone && (
+                                <button
+                                  type="button"
+                                  className={'tile-reset' + (confirming === key ? ' confirm' : '')}
+                                  onClick={() => (confirming === key ? resetDay(w.week, d.day) : askReset(key))}
+                                  onBlur={() => setConfirming(null)}
+                                  onMouseLeave={() => setConfirming(null)}
+                                  aria-label={
+                                    confirming === key
+                                      ? 'Select again to clear Week ' + w.week + ' Day ' + d.day + "'s progress"
+                                      : 'Week ' + w.week + ' Day ' + d.day + ' is done. Clear its progress'
+                                  }
+                                  title={confirming === key ? 'Select again to clear this day’s progress' : 'Done. Select to clear this day’s progress'}
+                                >
+                                  {confirming === key ? 'Clear progress?' : '✓ Done'}
+                                </button>
+                              )}
+                            </div>
                           );
                         })}
                       </div>

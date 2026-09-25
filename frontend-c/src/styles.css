@@ -1544,41 +1544,79 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   transform-origin: 50% 100%;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-.day-tiles a.day-tile:hover {
-  transform: translateY(-4px) rotateX(6deg);
+/* A tile and its done mark (a button of its own, over the tile) sit in one wrapper, and it is the
+   wrapper that rises and tips back, so the two move as one. */
+.tile-wrap { position: relative; display: flex; transform-origin: 50% 100%; transition: transform .18s ease; }
+.tile-wrap > .day-tile { flex: 1; min-width: 0; }
+.day-tiles a.day-tile:hover { transform: none; }
+.day-tiles .tile-wrap:hover { transform: translateY(-4px) rotateX(6deg); }
+.day-tiles .tile-wrap:hover > .day-tile {
+  border-color: #e8a57a;
   box-shadow:
     inset 0 1px 0 var(--tile-shine),
     0 5px 0 var(--tile-edge),
     0 16px 28px var(--tile-shade);
 }
-.day-tiles a.day-tile:active {
-  transform: translateY(2px);
+.day-tiles .tile-wrap:has(> a.day-tile:active) { transform: translateY(2px); }
+.day-tiles .tile-wrap:has(> a.day-tile:active) > .day-tile {
   box-shadow:
     inset 0 1px 0 var(--tile-shine),
     0 1px 0 var(--tile-edge),
     0 2px 6px var(--tile-shade);
 }
+:root[data-theme='paper'] .day-tiles .tile-wrap:hover > .day-tile { border-color: #d9a57e; }
+
+/* The done mark: exactly where the tile's own "✓ Done" sits (kept there, hidden, to hold its
+   place). Selected once it asks "Clear progress?" in red; again, it clears the day. */
+.tile-wrap.done .tile-done { visibility: hidden; }
+.tile-reset {
+  position: absolute; top: 15px; right: 9px; height: 22px; display: inline-flex; align-items: center;
+  padding: 0 6px; border: 0; border-radius: 6px; background: transparent;
+  font: inherit; font-size: 12px; font-weight: 600; color: var(--good); cursor: pointer;
+}
+.tile-reset:hover { background: var(--good-wash); }
+.tile-reset.confirm, .tile-reset.confirm:hover { background: var(--bad); color: #fff; }
+.tile-reset:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* The day you are on: its edge in the "You are here" orange. */
 .day-tiles .day-tile:has(.here) { --tile-edge: #f0a878; }
 :root[data-theme='dark'] .day-tiles .day-tile:has(.here) { --tile-edge: #b4501c; }
 .day-tiles .day-tile.locked { background: var(--paper); box-shadow: none; transform: none; }
 @media (prefers-reduced-motion: reduce) {
-  .day-tiles .day-tile { transition: none; }
-  .day-tiles a.day-tile:hover { transform: none; }
+  .day-tiles .day-tile, .tile-wrap { transition: none; }
+  .day-tiles .tile-wrap:hover { transform: none; }
 }
-
-/* ---- lesson tabs: the tick beside a part you have read. It sits right after the tab's name, on
-   the same underline, and clears the part's done mark when selected. */
-.tab-slot { display: inline-flex; align-items: stretch; }
-.tabbar .tab-slot.seen > button:first-child { padding-right: 3px; }
-.tabbar button.tab-done {
-  padding: 14px 8px 12px 3px; border-bottom: 2px solid color-mix(in srgb, var(--good) 70%, transparent);
-  font-size: 13px; font-weight: 700; line-height: 1; color: var(--good); cursor: pointer;
-}
-.tabbar .tab-slot.on button.tab-done { border-bottom: 3px solid var(--action); padding-bottom: 11px; }
-:root[data-theme='dark'] .tabbar .tab-slot.on button.tab-done { border-bottom-color: var(--brand-orange); }
-.tabbar button.tab-done:hover { color: var(--bad); }
 
 /* ---- the two screens (App.tsx): both stay alive once opened, and only the one you are on shows. */
 .screen { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .screen[hidden] { display: none; }
+
+/* ---- the desktop app's title bar, in the header's navy: Windows' own is hidden (desktop/src/main.ts)
+   and this strip above the header takes its place - the window is dragged by it, double-clicking it
+   maximises, and Windows draws its minimise, maximise and close buttons on its right, in the same
+   navy. Its height comes from the desktop app itself (--desktop-titlebar-height, which main.ts sets):
+   anywhere else - a browser, or an app that embeds the page - the strip has none. */
+.titlebar {
+  flex: 0 0 auto; height: var(--desktop-titlebar-height, 0px); background: var(--ink);
+  -webkit-app-region: drag; app-region: drag;
+}
+
+/* ---- the editor's scrollbar follows the editor, not the page: a slim bar on the editor's own
+   background, there only when the code is longer than the editor - no light lane beside dark code. */
+.editor-body .cm-scroller { overflow-y: auto !important; }
+.editor-body .cm-scroller::-webkit-scrollbar { width: 8px; height: 8px; }
+.editor-body .cm-scroller::-webkit-scrollbar-track,
+.editor-body .cm-scroller::-webkit-scrollbar-corner { background: transparent; }
+.editor-body .cm-scroller::-webkit-scrollbar-thumb { background: var(--ed-rule); border: none; border-radius: 8px; }
+.editor-body .cm-scroller::-webkit-scrollbar-thumb:hover,
+:root[data-theme='dark'] .editor-body .cm-scroller::-webkit-scrollbar-thumb:hover { background: var(--ed-dim); }
+@supports not selector(::-webkit-scrollbar) {
+  .editor-body .cm-scroller { scrollbar-color: var(--ed-rule) transparent; }
+}
+
+/* ---- the course title stands alone: no short orange line under it. */
+.dash-intro h1::after { content: none; }
+
+/* ---- Your path: every week's number is a filled circle in the course's one colour (Dashboard.tsx
+   gives every week the first week's), opened yet or not. */
+.path-week .path-num,
+:root[data-theme='dark'] .path-week.soon .path-num { background: var(--mod); border-color: var(--mod); color: #fff; }

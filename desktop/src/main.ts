@@ -57,6 +57,8 @@ declare const __STUDIO_BUILD__: {
 const RELEASE = __STUDIO_RELEASE__;
 const BUILD = __STUDIO_BUILD__;
 const COPYRIGHT = 'Copyright © 2026 Evoke Technologies. All rights reserved.';
+/** The navy title bar's height, in pixels: Windows' buttons on it and the page's strip under them. */
+const TITLE_BAR_HEIGHT = 28;
 
 // ---------------------------------------------------------------- start-up guards
 
@@ -403,6 +405,13 @@ async function openStudio(licence: Licence): Promise<void> {
     minHeight: 600,
     title,
     backgroundColor: '#f4f6fa',
+    // The title bar in the header's navy (the same in every theme). Windows cannot recolour its own
+    // title bar, so it is hidden and the page draws one in its place: a slim strip (TITLE_BAR_HEIGHT)
+    // above the header, with Windows' minimise, maximise and close buttons on it in the same navy.
+    // The strip is what moves the window (frontend-c: App.tsx and styles.css, "the desktop app's
+    // title bar").
+    titleBarStyle: 'hidden',
+    titleBarOverlay: { color: '#0e1f45', symbolColor: '#ffffff', height: TITLE_BAR_HEIGHT },
     show: false,
     webPreferences: SAFE,
   });
@@ -411,6 +420,11 @@ async function openStudio(licence: Licence): Promise<void> {
   studioOrigin = origin;
   win.webContents.on('before-input-event', (_e, input) => {
     if (input.type === 'keyDown' && input.key === 'F1') about(win, licence);
+  });
+  // The page draws the navy title bar strip (its .titlebar), at the height of the buttons above;
+  // only this app sets it, so the strip has no height anywhere else.
+  win.webContents.on('dom-ready', () => {
+    void win.webContents.insertCSS(':root { --desktop-titlebar-height: ' + TITLE_BAR_HEIGHT + 'px; }');
   });
   win.once('ready-to-show', () => {
     win.maximize();
