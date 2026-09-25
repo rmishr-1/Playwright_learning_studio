@@ -7,4 +7,4 @@
  * and its licence agreement. Vite still passes that name in as __STUDIO_PRODUCT__ (vite.config.ts,
  * desktop/vite.web.config.mts); the page does not show it.
  */
-export const PRODUCT_NAME = 'QA Practice Training Studio';
+export const PRODUCT_NAME = 'Training Studio';
