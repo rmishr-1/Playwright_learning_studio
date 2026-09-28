@@ -744,8 +744,9 @@
               "type": "code",
               "language": "ts",
               "content": "import { test, expect } from '@playwright/test';\n\ntest('has title', async ({ page }) => {\n  await page.goto('https://playwright.dev/');\n\n  // Expect a title \"to contain\" a substring.\n  await expect(page).toHaveTitle(/Playwright/);\n});\n\ntest('get started link', async ({ page }) => {\n  await page.goto('https://playwright.dev/');\n\n  // Click the get started link.\n  await page.getByRole('link', { name: 'Get started' }).click();\n\n  // Expects page to have a heading with the name of Installation.\n  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();\n});",
-              "mode": "read",
+              "mode": "editor",
               "file": "tests/example.spec.ts",
+              "run": "npx playwright test tests/example.spec.ts --project=chromium",
               "network": true
             },
             {
