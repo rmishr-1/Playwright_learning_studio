@@ -8,6 +8,7 @@ import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { CheckRequest } from '../../shared/contracts/check';
 import { checkAnswer } from './check';
+import { savePreview } from './preview';
 import { getBranding } from './branding';
 import { serveMark } from './content';
 import { markDay } from '../../shared/watermark';
@@ -243,6 +244,19 @@ router.post('/terminal', (req, res) => {
     return fail(res, 500, 'INTERNAL_ERROR', 'The command could not start.');
   }
   res.json({ ok: true });
+});
+
+const PreviewRequest = z.object({ html: z.string().min(1).max(500_000) });
+
+/** View page: keeps a practice page's HTML and answers with the address that shows it (preview.ts). */
+router.post('/preview', (req, res) => {
+  let parsed;
+  try {
+    parsed = PreviewRequest.parse(req.body);
+  } catch (e) {
+    return badRequest(res, 'BAD_REQUEST', e);
+  }
+  res.json({ url: savePreview(parsed.html) });
 });
 
 /** Ctrl+C in the Terminal. */

@@ -565,6 +565,18 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   color: var(--ed-dim); text-align: center; font-size: 13.5px; line-height: 1.65;
 }
 
+/* View page's list, when the code holds more than one page (lib/htmlPages.ts). */
+.page-menu {
+  position: fixed; z-index: 50; min-width: 190px; padding: 5px; display: flex; flex-direction: column;
+  background: #1e232d; border: 1px solid #3d4757; border-radius: 9px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+.page-menu-title { color: #8e99ad; font-size: 11px; padding: 4px 9px 6px; }
+.page-menu button {
+  background: none; border: none; border-radius: 6px; color: #dbe2ee; text-align: left;
+  font-family: var(--mono); font-size: 12px; padding: 7px 9px; cursor: pointer;
+}
+.page-menu button:hover, .page-menu button:focus-visible { background: #333b4a; color: #fff; outline: none; }
+
 /* ---------------------------------------------------------------- run overlay */
 .overlay {
   position: absolute; left: 10px; right: 10px; bottom: 10px; height: 58%;

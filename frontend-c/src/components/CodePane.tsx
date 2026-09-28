@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { RunOverlay, type OverlayRequest, type RunState } from './RunOverlay';
 import { isSpecFile } from './Markdown';
 import { conceptHighlight } from '../lib/conceptHighlight';
+import { findPages, viewPages } from '../lib/htmlPages';
 import type { EditorFile } from './LessonBlocks';
 import type { Workspace } from '../../../shared/contracts/course_day';
 
@@ -80,6 +81,9 @@ export function CodePane({
     else if (isSpecFile(code)) openTerminal('npx playwright test');
     else onRun();
   };
+
+  // The practice pages in the editor's code, as the learner has edited them.
+  const pages = useMemo(() => findPages(code), [code]);
 
   useEffect(() => {
     if (hidePanels) setPanelsHidden(true);
@@ -164,6 +168,15 @@ export function CodePane({
         )}
         <span className="spacer" />
         {toggle}
+        {pages.length > 0 && (
+          <button
+            className="term-btn"
+            onClick={(e) => viewPages(e.currentTarget, pages)}
+            title="Open the page this code tests in your browser, as the editor has it"
+          >
+            View page
+          </button>
+        )}
         <button className="term-btn" onClick={() => openTerminal()} title="Open the Terminal, to run npx playwright test on this code">
           &gt;_ Terminal
         </button>
