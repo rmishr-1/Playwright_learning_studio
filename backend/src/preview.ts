@@ -1,5 +1,5 @@
 /**
- * View page: shows a practice page from a lesson's code, the HTML a test passes to
+ * Run on a practice page: shows a practice page from a lesson's code, the HTML a test passes to
  * page.setContent(), in the learner's own browser.
  *
  * The page is served by the report's server (server.ts), not the studio's: its scripts run, so the

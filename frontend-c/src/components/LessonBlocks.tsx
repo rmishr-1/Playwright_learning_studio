@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Markdown, highlightInto } from './Markdown';
 import { fence } from '../lib/fence';
-import { pagesIn, viewPages } from '../lib/htmlPages';
+import { pagesOnlyIn, viewPages } from '../lib/htmlPages';
 import type { ContentBlock } from '../../../shared/contracts/course_day';
 
 /** A file the editor holds: where it is saved, and the command that runs it. */
@@ -11,7 +11,7 @@ export type EditorFile = { file: string | null; run: string | null };
  * A code sample. A sample that belongs to a file can be opened in the editor as that file, and one
  * with a command can be run: Run opens it in the editor and runs the command in the Terminal, so
  * the file the Terminal runs is exactly the one on the page. A sample with a practice page in it
- * can show that page in the browser (View page).
+ * that is only a practice page has no program to run, so its Run opens the page in the browser.
  */
 export function CodeBlock({
   block,
@@ -29,7 +29,7 @@ export function CodeBlock({
   useEffect(() => {
     if (ref.current) highlightInto(ref.current, block.text, lang);
   }, [block.text, lang]);
-  const pages = useMemo(() => pagesIn(block.text, lang), [block.text, lang]);
+  const pages = useMemo(() => pagesOnlyIn(block.text, lang), [block.text, lang]);
 
   if (!meta) return null;
   const file: EditorFile = { file: meta.file, run: meta.run };
@@ -44,24 +44,26 @@ export function CodeBlock({
           {meta.network && <span className="tag">Needs the internet</span>}
         </span>
         <span className="spacer" />
-        {pages.length > 0 && (
-          <button
-            type="button"
-            onClick={(e) => viewPages(e.currentTarget, pages)}
-            title="Open the page this code tests in your browser, to see how it looks"
-          >
-            View page
-          </button>
-        )}
         {editable && (
           <button type="button" onClick={() => onOpen(block.text, file)}>
             Open in editor
           </button>
         )}
-        {editable && meta.run && (
+        {editable && meta.run ? (
           <button type="button" className="run" onClick={() => onRun(meta.run!, block.text, file)}>
             ▶ Run
           </button>
+        ) : (
+          pages.length > 0 && (
+            <button
+              type="button"
+              className="run"
+              onClick={(e) => viewPages(e.currentTarget, pages)}
+              title="This is a practice page, not a program. Run opens it in your browser."
+            >
+              ▶ Run
+            </button>
+          )
         )}
       </div>
       <pre>

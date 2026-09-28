@@ -376,8 +376,8 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .code-block .head .tag.warn { background: #4a3514; color: #f0c27a; }
 .code-block .head .spacer { flex: 1; }
-.code-block .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
-.code-block .head button.run:hover { background: #1d4fd8; }
+.code-block .head button.run, .example .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
+.code-block .head button.run:hover, .example .head button.run:hover { background: #1d4fd8; }
 
 /* Commands to type in a terminal, each with its own Run. */
 .terminal-block { margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2b3240; background: #14181f; }
@@ -565,7 +565,7 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   color: var(--ed-dim); text-align: center; font-size: 13.5px; line-height: 1.65;
 }
 
-/* View page's list, when the code holds more than one page (lib/htmlPages.ts). */
+/* Run's list of pages, when a practice file holds more than one (lib/htmlPages.ts). */
 .page-menu {
   position: fixed; z-index: 50; min-width: 190px; padding: 5px; display: flex; flex-direction: column;
   background: #1e232d; border: 1px solid #3d4757; border-radius: 9px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
