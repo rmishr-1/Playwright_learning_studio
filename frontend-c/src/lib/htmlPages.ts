@@ -33,8 +33,8 @@ function unescape(body: string): string {
 }
 
 /** Every string literal in the code, in order, with where it starts. Comments are skipped. */
-function literals(code: string): { start: number; value: string; computed: boolean }[] {
-  const out: { start: number; value: string; computed: boolean }[] = [];
+function literals(code: string): { start: number; end: number; value: string; computed: boolean }[] {
+  const out: { start: number; end: number; value: string; computed: boolean }[] = [];
   let i = 0;
   while (i < code.length) {
     const ch = code[i];
@@ -70,7 +70,7 @@ function literals(code: string): { start: number; value: string; computed: boole
         }
       }
       i++;
-      out.push({ start, value: unescape(body), computed });
+      out.push({ start, end: i, value: unescape(body), computed });
     } else {
       i++;
     }
@@ -98,6 +98,30 @@ export function findPages(code: string): HtmlPage[] {
     pages.push({ name: named ?? 'Page on line ' + line, html: value.trim() });
   }
   return pages;
+}
+
+/**
+ * True when the code does nothing but define practice pages, such as practice-shop.ts with its
+ * `export const loginPage = \`...\``: a file the tests load, with no program of its own to run.
+ */
+export function onlyPages(code: string): boolean {
+  if (findPages(code).length === 0) return false;
+  // Every string becomes "", and every comment goes; what is left must be declarations of them.
+  let rest = '';
+  let at = 0;
+  for (const { start, end } of literals(code)) {
+    rest += code.slice(at, start) + '""';
+    at = end;
+  }
+  rest = (rest + code.slice(at)).replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '');
+  const declaration = /\s*(?:export\s+)?(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*(?::\s*string\s*)?=\s*""\s*;?/y;
+  let i = 0;
+  while (i < rest.length) {
+    declaration.lastIndex = i;
+    if (!declaration.exec(rest)) break;
+    i = declaration.lastIndex;
+  }
+  return rest.slice(i).trim() === '';
 }
 
 /** Opens a page in a new browser tab. In the desktop app, that is the computer's own browser. */

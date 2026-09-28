@@ -128,6 +128,68 @@ export function retireStream(runId: string, afterMs = 60_000): void {
   setTimeout(() => streams.delete(runId), afterMs);
 }
 
+const DECLARATION = /^(?:default\s+)?(?=(?:async\s+)?(?:const|let|var|function|class|interface|type|enum|abstract|declare)\b)/;
+
+/**
+ * The code a Run runs, without its `export`s. A Run runs the code inside a function, where an
+ * export is a syntax error, so a lesson file that exports a page or a helper stopped before its
+ * first line ran. `export const x = ...` becomes `const x = ...`, and `export { a, b }` goes.
+ * Strings, templates and comments are skipped, so a word "export" inside one is left alone.
+ */
+export function dropExports(code: string): string {
+  let out = '';
+  let i = 0;
+  // At the start of a statement: the start of the code, or after a line break, ; or }.
+  let statementStart = true;
+  while (i < code.length) {
+    const ch = code[i];
+    if (ch === '/' && (code[i + 1] === '/' || code[i + 1] === '*')) {
+      const end = code[i + 1] === '/' ? code.indexOf('\n', i) : code.indexOf('*/', i + 2) + 2;
+      const stop = end <= 0 || end === 1 ? code.length : end;
+      out += code.slice(i, stop);
+      i = stop;
+      continue;
+    }
+    if (ch === "'" || ch === '"' || ch === '`') {
+      let j = i + 1;
+      let depth = 0;
+      while (j < code.length) {
+        if (code[j] === '\\') j += 2;
+        else if (ch === '`' && code[j] === '$' && code[j + 1] === '{') {
+          depth++;
+          j += 2;
+        } else if (depth > 0 && code[j] === '}') {
+          depth--;
+          j++;
+        } else if (depth === 0 && code[j] === ch) break;
+        else j++;
+      }
+      out += code.slice(i, j + 1);
+      i = j + 1;
+      statementStart = false;
+      continue;
+    }
+    if (statementStart && code.startsWith('export', i) && !/[\w$]/.test(code[i + 6] ?? '')) {
+      const rest = code.slice(i + 6);
+      const list = /^\s*\{[^}]*\}\s*(?:from\s*(['"])[^'"]*\1)?\s*;?/.exec(rest);
+      const gap = /^\s+/.exec(rest)?.[0] ?? '';
+      if (list) {
+        i += 6 + list[0].length;
+        continue;
+      }
+      if (gap && DECLARATION.test(rest.slice(gap.length))) {
+        i += 6 + gap.length + (/^default\s+/.exec(rest.slice(gap.length))?.[0].length ?? 0);
+        continue;
+      }
+    }
+    if (ch === '\n' || ch === ';' || ch === '}' || ch === '{') statementStart = true;
+    else if (!/\s/.test(ch)) statementStart = false;
+    out += ch;
+    i++;
+  }
+  return out;
+}
+
 /** Written into the scratch dir and executed by node. */
 function buildProgram(code: string): string {
   const allowed = JSON.stringify(config.run.allowed_origins);
@@ -218,7 +280,7 @@ async function show(page) {
 (async () => {
   try {
     await (async () => {
-${code}
+${dropExports(code)}
     })();
     if (_page && !_lastShot) { try { _lastShot = (await _page.screenshot()).toString('base64'); } catch {} }
     send({ event: 'result', status: 'ok', screenshot: _lastShot });

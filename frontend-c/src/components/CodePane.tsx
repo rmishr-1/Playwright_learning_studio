@@ -5,7 +5,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { RunOverlay, type OverlayRequest, type RunState } from './RunOverlay';
 import { isSpecFile } from './Markdown';
 import { conceptHighlight } from '../lib/conceptHighlight';
-import { findPages, viewPages } from '../lib/htmlPages';
+import { findPages, onlyPages, viewPages } from '../lib/htmlPages';
 import type { EditorFile } from './LessonBlocks';
 import type { Workspace } from '../../../shared/contracts/course_day';
 
@@ -75,7 +75,9 @@ export function CodePane({
   // A lesson file runs with its own command, in the Terminal, exactly as the lesson says. A spec
   // file with no file of its own cannot run in the Run button's harness either, so Run hands it to
   // the Terminal instead of failing on the import line. Anything else is the harness's.
-  const run_ = (): void => {
+  const run_ = (button: HTMLElement): void => {
+    // A file that only holds practice pages has no program to run: Run shows the page instead.
+    if (pagesOnly) return viewPages(button, pages);
     setPanelsHidden(false);
     if (editorFile.run) openTerminal(editorFile.run);
     else if (isSpecFile(code)) openTerminal('npx playwright test');
@@ -84,6 +86,7 @@ export function CodePane({
 
   // The practice pages in the editor's code, as the learner has edited them.
   const pages = useMemo(() => findPages(code), [code]);
+  const pagesOnly = useMemo(() => onlyPages(code), [code]);
 
   useEffect(() => {
     if (hidePanels) setPanelsHidden(true);
@@ -182,9 +185,15 @@ export function CodePane({
         </button>
         <button
           className="run-btn"
-          onClick={run_}
+          onClick={(e) => run_(e.currentTarget)}
           disabled={running}
-          title={editorFile.run ? 'Runs ' + editorFile.run + ' in the Terminal' : undefined}
+          title={
+            pagesOnly
+              ? 'This file holds a practice page, not a program. Run opens the page in your browser.'
+              : editorFile.run
+                ? 'Runs ' + editorFile.run + ' in the Terminal'
+                : undefined
+          }
         >
           {running ? 'Running…' : '▶ Run'}
         </button>

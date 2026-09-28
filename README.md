@@ -182,6 +182,9 @@ command. **Run** beside a command in a lesson types that command into the Termin
   app); with several pages in the code it asks which one. The page is served by the report's
   server, not the studio's, under a Content Security Policy sandbox, so its scripts run as they do
   in the test but cannot reach the studio (`backend/src/preview.ts`, `frontend-c/src/lib/htmlPages.ts`).
+  **Run** on a file that only defines pages, such as `practice-shop.ts`, does the same, since the
+  file has no program of its own. A Run ignores `export`, which is not allowed inside the function
+  the Run's code is placed in (`dropExports` in `backend/src/runner.ts`).
 
 ### Check my answer
 
