@@ -90,7 +90,7 @@ export const OpenWeeks = createContext<ReadonlySet<number> | null>(null);
 
 /**
  * Lesson markdown. Two behaviours beyond plain rendering:
- *  - fenced code blocks get a "Load into editor" button; a practice page gets Run, which opens it
+ *  - fenced code blocks get a "Load into editor" button; a practice page gets View in Page, which opens it
  *  - the importer's /learn/... links are routed in-app rather than reloading the page
  *  - a /learn/... link into a week that is not open renders as plain text (see OpenWeeks)
  */
@@ -165,8 +165,8 @@ export function Markdown({
         const view = document.createElement('button');
         view.type = 'button';
         view.className = 'run';
-        view.textContent = '▶ Run';
-        view.title = 'This is a practice page, not a program. Run opens it in your browser.';
+        view.textContent = 'View in Page';
+        view.title = 'This is a practice page, not a program. View in Page opens it in your browser.';
         view.onclick = () => viewPages(view, pages);
         head.append(view);
       }

@@ -76,7 +76,7 @@ export function CodePane({
   // file with no file of its own cannot run in the Run button's harness either, so Run hands it to
   // the Terminal instead of failing on the import line. Anything else is the harness's.
   const run_ = (button: HTMLElement): void => {
-    // A file that only holds practice pages has no program to run: Run shows the page instead.
+    // A file that only holds practice pages has no program to run: the button is View in Page.
     if (pagesOnly) return viewPages(button, pages);
     setPanelsHidden(false);
     if (editorFile.run) openTerminal(editorFile.run);
@@ -84,7 +84,7 @@ export function CodePane({
     else onRun();
   };
 
-  // Code that is only practice pages, as the learner has edited it: Run opens the page.
+  // Code that is only practice pages, as the learner has edited it: View in Page opens the page.
   const pages = useMemo(() => pagesOnlyIn(code, 'ts'), [code]);
   const pagesOnly = pages.length > 0;
 
@@ -177,16 +177,16 @@ export function CodePane({
         <button
           className="run-btn"
           onClick={(e) => run_(e.currentTarget)}
-          disabled={running}
+          disabled={running && !pagesOnly}
           title={
             pagesOnly
-              ? 'This file holds a practice page, not a program. Run opens the page in your browser.'
+              ? 'This is a practice page, not a program. View in Page opens it in your browser.'
               : editorFile.run
                 ? 'Runs ' + editorFile.run + ' in the Terminal'
                 : undefined
           }
         >
-          {running ? 'Running…' : '▶ Run'}
+          {pagesOnly ? 'View in Page' : running ? 'Running…' : '▶ Run'}
         </button>
       </div>
 

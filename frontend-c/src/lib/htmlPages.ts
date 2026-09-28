@@ -1,7 +1,7 @@
 import { previewPage } from '../api/client';
 
 /**
- * Run on a practice page: finds the practice pages in a piece of code, the HTML its tests hand to
+ * View in Page: finds the practice pages in a piece of code, the HTML its tests hand to
  * page.setContent(), and opens one in the learner's browser.
  *
  * A page is a string in the code that holds HTML: a `const checkoutPage = \`...\`` a test opens
@@ -80,7 +80,7 @@ function literals(code: string): { start: number; end: number; value: string; co
 
 /**
  * The pages a code sample is made of, when it is nothing but pages: an HTML sample, or a file such
- * as practice-shop.ts that only defines them. Its Run opens the page. Any other code gives none.
+ * as practice-shop.ts that only defines them. It gets View in Page instead of Run. Any other code gives none.
  */
 export function pagesOnlyIn(code: string, language: string): HtmlPage[] {
   if (/^(html|xml)$/i.test(language)) return code.trim() ? [{ name: 'This page', html: code.trim() }] : [];
@@ -135,14 +135,14 @@ export async function openPage(page: HtmlPage): Promise<void> {
     const { url } = await previewPage(html);
     window.open(url, '_blank', 'noopener');
   } catch {
-    window.alert('The page could not be opened. Check that the studio is still running, and select Run again.');
+    window.alert('The page could not be opened. Check that the studio is still running, and select View in Page again.');
   }
 }
 
 let openMenu: (() => void) | null = null;
 
 /**
- * Run on a page. With one page in the code it opens it; with several it shows a list of their
+ * View in Page. With one page in the code it opens it; with several it shows a list of their
  * names under the button to choose from.
  */
 export function viewPages(button: HTMLElement, pages: HtmlPage[]): void {

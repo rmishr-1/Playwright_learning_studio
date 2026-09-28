@@ -176,11 +176,11 @@ command. **Run** beside a command in a lesson types that command into the Termin
 - **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
   block in a lesson offers **Load into editor** for this.
 - The Browser panel shows Chromium. `setup.bat` installs Chromium, Firefox and WebKit.
-- **Run on a practice page.** A file that only defines practice pages, such as
-  `practice-shop.ts` (HTML in named strings), or an HTML sample, has no program to run, so its
-  **Run** opens the page in a new browser tab (the computer's own browser in the desktop app); with
-  several pages in the file it asks which one. This works in the editor and on the lesson's code
-  samples. The page is served by the report's server, not the studio's, under a Content Security
+- **View in Page.** A file that only defines practice pages, such as `practice-shop.ts` (HTML in
+  named strings), or an HTML sample, has no program to run, so in place of **Run** it gets **View in
+  Page**, which opens the page in a new browser tab (the computer's own browser in the desktop app);
+  with several pages in the file it asks which one. This works in the editor, where the Run button
+  is relabelled while it holds such a file, and on the lesson's code samples. The page is served by the report's server, not the studio's, under a Content Security
   Policy sandbox, so its scripts run as they do in the test but cannot reach the studio
   (`backend/src/preview.ts`, `frontend-c/src/lib/htmlPages.ts`). A Run ignores `export`, which is
   not allowed inside the function the Run's code is placed in (`dropExports` in

@@ -11,7 +11,8 @@ export type EditorFile = { file: string | null; run: string | null };
  * A code sample. A sample that belongs to a file can be opened in the editor as that file, and one
  * with a command can be run: Run opens it in the editor and runs the command in the Terminal, so
  * the file the Terminal runs is exactly the one on the page. A sample with a practice page in it
- * that is only a practice page has no program to run, so its Run opens the page in the browser.
+ * that is only a practice page has no program to run, so it gets View in Page, which opens the page
+ * in the browser, instead.
  */
 export function CodeBlock({
   block,
@@ -59,9 +60,9 @@ export function CodeBlock({
               type="button"
               className="run"
               onClick={(e) => viewPages(e.currentTarget, pages)}
-              title="This is a practice page, not a program. Run opens it in your browser."
+              title="This is a practice page, not a program. View in Page opens it in your browser."
             >
-              ▶ Run
+              View in Page
             </button>
           )
         )}
