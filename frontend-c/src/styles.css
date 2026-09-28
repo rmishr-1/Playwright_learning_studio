@@ -636,6 +636,11 @@ body.dragging-divider { cursor: col-resize; user-select: none; }
 /* A panel in its own window fills it. */
 body.popout-body { margin: 0; background: #12161e; }
 .popout { position: fixed; inset: 0; display: flex; }
+/* So does the whole bar, detached with Detach all. */
+.overlay.detached {
+  position: static; flex: 1; min-width: 0; min-height: 0; height: auto;
+  border: none; border-radius: 0; box-shadow: none;
+}
 
 /* ---------------------------------------------------------------- detached run view
    The whole page, in its own popped-out window - see RunOverlay's Detach button. */

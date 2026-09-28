@@ -19,7 +19,7 @@ import { NODE_BIN, config, listening, onDisk } from '../config';
 import { emit, retireStream } from '../runner';
 import { learnerEnv, systemExe } from '../child-env';
 import { DEFAULT_SPEC, HELP, parse, type Parsed } from './commands';
-import { PLAYWRIGHT_CLI, fileExists, hasReport, prepareWorkspace, reportDir, saveFile, workspaceDir } from './workspace';
+import { PLAYWRIGHT_CLI, fileExists, hasReport, playwrightStarter, prepareWorkspace, reportDir, saveFile, workspaceDir } from './workspace';
 import type { Workspace } from '../../../shared/contracts/course_day';
 
 /**
@@ -54,8 +54,23 @@ const CHECK_FLAGS = [
   'false',
 ];
 
-/** frameKey: what the command's test processes send with each live-view frame (receiveFrame). */
-type Running = { runId: string; child: ChildProcess; stopping: boolean; timedOut: boolean; frameKey: string };
+/**
+ * frameKey: what the command's test processes send with each live-view frame (receiveFrame).
+ * gentle: the command is the test runner, which Ctrl+C asks to stop through its input (see
+ * playwrightStarter()), so that it can print its own summary.
+ */
+type Running = {
+  runId: string;
+  child: ChildProcess;
+  stopping: boolean;
+  timedOut: boolean;
+  frameKey: string;
+  gentle: boolean;
+  startedAt: number;
+};
+
+/** How long the test runner may take to stop after Ctrl+C before it is stopped by force. */
+const GENTLE_STOP_MS = 8_000;
 let running: Running | null = null;
 
 const say = (runId: string, text: string): void => emit(runId, { event: 'term', data: text.replace(/\n/g, '\r\n') + '\r\n' });
@@ -207,7 +222,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
     env.STUDIO_FRAME_URL = 'http://127.0.0.1:' + listening.port + '/api/terminal/' + runId + '/frame';
     env.STUDIO_FRAME_KEY = frameKey;
     env.STUDIO_ALLOWED_ORIGINS = JSON.stringify(config.run.allowed_origins);
-    args = [PLAYWRIGHT_CLI, 'test', ...parsed.args];
+    args = [playwrightStarter(ws), PLAYWRIGHT_CLI, 'test', ...parsed.args];
     cwd = workspaceDir(ws);
   } else {
     // `node` and `npm run check` run in ts-basics, as the TypeScript lessons do.
@@ -218,15 +233,19 @@ export function startCommand(runId: string, line: string, code: string, file: st
         : [TSC, ...CHECK_FLAGS, parsed.file];
   }
 
+  const gentle = parsed.kind === 'test';
   const child = spawn(NODE_BIN, args, {
     cwd,
     env,
-    stdio: ['ignore', 'pipe', 'pipe'],
+    // The test runner's input stays open, for the stop request that Ctrl+C sends it.
+    stdio: [gentle ? 'pipe' : 'ignore', 'pipe', 'pipe'],
     // Its own process group on macOS and Linux, so Ctrl+C reaches the workers and browsers too.
     detached: process.platform !== 'win32',
     windowsHide: true,
   });
-  const current: Running = { runId, child, stopping: false, timedOut: false, frameKey };
+  const current: Running = { runId, child, stopping: false, timedOut: false, frameKey, gentle, startedAt: Date.now() };
+  // A stop request that arrives as the runner exits must not crash the studio.
+  child.stdin?.on('error', () => undefined);
   running = current;
 
   // A command's output is shown up to a limit (an endless console.log loop would otherwise fill
@@ -258,7 +277,8 @@ export function startCommand(runId: string, line: string, code: string, file: st
     if (current.timedOut) {
       say(runId, YELLOW('\nThe command was stopped at the time limit of ' + Math.round(config.run.terminal_timeout_ms / 1000) + ' seconds.'));
     } else if (current.stopping) {
-      say(runId, DIM('^C'));
+      const seconds = ((Date.now() - current.startedAt) / 1000).toFixed(1);
+      say(runId, YELLOW('\nStopped with Ctrl+C after ' + seconds + ' s.'));
     }
     done(runId, current.stopping ? 130 : exitCode);
   };
@@ -281,10 +301,14 @@ export function stopAll(): void {
   if (running) kill(running, true);
 }
 
-/** Ctrl+C. Returns false when there was nothing to stop. */
+/**
+ * Ctrl+C. Returns false when there was nothing to stop. As in a real terminal, it is echoed at
+ * once, and a second Ctrl+C while the command is still stopping stops it by force.
+ */
 export function stopCommand(runId: string): boolean {
   if (!running || running.runId !== runId) return false;
-  kill(running, false);
+  say(runId, DIM('^C'));
+  kill(running, running.stopping);
   return true;
 }
 
@@ -297,6 +321,15 @@ function kill(r: Running, hard: boolean): void {
   r.stopping = true;
   const pid = r.child.pid;
   if (!pid) return;
+  // The test runner is asked through its input, which works on Windows too. It then prints its
+  // summary; if it has not exited in time, it is stopped by force.
+  if (!hard && r.gentle && r.child.stdin?.writable) {
+    r.child.stdin.write('stop\n');
+    setTimeout(() => {
+      if (r.child.exitCode === null && r.child.signalCode === null) kill(r, true);
+    }, GENTLE_STOP_MS).unref();
+    return;
+  }
   if (process.platform === 'win32') {
     spawn(systemExe('taskkill.exe'), ['/pid', String(pid), '/T', '/F'], { windowsHide: true }).on('error', () => r.child.kill());
     return;

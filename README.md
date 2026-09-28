@@ -162,8 +162,16 @@ command. **Run** beside a command in a lesson types that command into the Termin
   the Browser panel shows the test as it runs. The same wrapper applies the Run button's navigation
   allowlist.
 - **Output** streams with its colors over the same WebSocket a Run uses. **Ctrl+C** stops the
-  command, with its workers and browsers. The Terminal's state lives in a session object
-  (`frontend-c/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command. A command is stopped at `terminal_timeout_ms` (5 minutes
+  command, with its workers and browsers. `npx playwright test` is started through
+  `.studio/run-playwright.cjs`, which turns a stop request on its input into the interrupt a real
+  terminal sends, so the runner prints its usual summary on Windows too; the studio then adds
+  "Stopped with Ctrl+C after N s". A second Ctrl+C, or a runner that has not stopped after 8
+  seconds, stops it by force. The Terminal's state lives in a session object
+  (`frontend-c/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command.
+- **The run panels.** Each panel can pop out into its own window, and **Detach all** moves the
+  whole bar, with its toggles, into one window. Loading code into the editor (**Open in editor**,
+  **Load into editor**, **Try it**, **Start this in the editor**) hides the bar in the studio
+  without closing it, so a running command keeps running; **Run** or **Terminal** shows it again. A command is stopped at `terminal_timeout_ms` (5 minutes
   by default), and one command runs at a time.
 - **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
   block in a lesson offers **Load into editor** for this.

@@ -38,6 +38,7 @@ export function CodePane({
   editorFile,
   workspace,
   command,
+  hidePanels,
 }: {
   code: string;
   onChange: (v: string) => void;
@@ -55,21 +56,39 @@ export function CodePane({
   workspace: Workspace;
   /** A command a lesson asked the Terminal to run. */
   command: { text: string; nonce: number } | null;
+  /** Changes when new code is loaded into the editor, which hides the run panels until the next Run. */
+  hidePanels: number;
 }) {
   const [theme, setTheme] = useState<'dark' | 'light'>(readTheme);
   // The Terminal keeps the overlay open without a Run. The nonce re-selects its tab when the
   // overlay is already open on another one.
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [request, setRequest] = useState<OverlayRequest | null>(null);
+  // Hidden, not closed: the Terminal keeps its history, and a command it is running keeps running.
+  const [panelsHidden, setPanelsHidden] = useState(false);
   const openTerminal = (command?: string): void => {
+    setPanelsHidden(false);
     setTerminalOpen(true);
     setRequest({ tab: 'terminal', nonce: Date.now(), command });
   };
   // A lesson file runs with its own command, in the Terminal, exactly as the lesson says. A spec
   // file with no file of its own cannot run in the Run button's harness either, so Run hands it to
   // the Terminal instead of failing on the import line. Anything else is the harness's.
-  const run_ = (): void =>
-    editorFile.run ? openTerminal(editorFile.run) : isSpecFile(code) ? openTerminal('npx playwright test') : onRun();
+  const run_ = (): void => {
+    setPanelsHidden(false);
+    if (editorFile.run) openTerminal(editorFile.run);
+    else if (isSpecFile(code)) openTerminal('npx playwright test');
+    else onRun();
+  };
+
+  useEffect(() => {
+    if (hidePanels) setPanelsHidden(true);
+  }, [hidePanels]);
+
+  // A Run started any other way shows the panels too.
+  useEffect(() => {
+    if (run?.status === 'running') setPanelsHidden(false);
+  }, [run?.status, run?.run_id]);
 
   useEffect(() => {
     if (command) openTerminal(command.text);
@@ -178,7 +197,7 @@ export function CodePane({
 
       {/* Fills what was otherwise a large dead area below a few lines of code, and tells the
           learner what Run will actually do before they press it. */}
-      {!run && !terminalOpen && (
+      {((!run && !terminalOpen) || panelsHidden) && (
         <div className="editor-idle">
           <b>Select ▶ Run</b> to run this code. If it opens a browser, you see a screenshot of the
           page. Anything it prints with <span className="k">console.log</span> appears in the Console tab.
@@ -198,6 +217,7 @@ export function CodePane({
           file={editorFile.file}
           workspace={workspace}
           request={request}
+          hidden={panelsHidden}
           onClose={() => {
             setTerminalOpen(false);
             onCloseRun();
