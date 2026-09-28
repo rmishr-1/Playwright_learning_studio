@@ -248,7 +248,7 @@ router.post('/terminal', (req, res) => {
 
 const PreviewRequest = z.object({ html: z.string().min(1).max(500_000) });
 
-/** View page: keeps a practice page's HTML and answers with the address that shows it (preview.ts). */
+/** Run on a practice page: keeps its HTML and answers with the address that shows it (preview.ts). */
 router.post('/preview', (req, res) => {
   let parsed;
   try {

@@ -9,7 +9,7 @@ import xml from 'highlight.js/lib/languages/xml';
 import bash from 'highlight.js/lib/languages/bash';
 import json from 'highlight.js/lib/languages/json';
 import { classify } from '../lib/conceptColors';
-import { pagesIn, viewPages } from '../lib/htmlPages';
+import { pagesOnlyIn, viewPages } from '../lib/htmlPages';
 
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('typescript', typescript);
@@ -90,7 +90,7 @@ export const OpenWeeks = createContext<ReadonlySet<number> | null>(null);
 
 /**
  * Lesson markdown. Two behaviours beyond plain rendering:
- *  - fenced code blocks get a "Load into editor" button, and "View page" when they hold a page
+ *  - fenced code blocks get a "Load into editor" button; a practice page gets Run, which opens it
  *  - the importer's /learn/... links are routed in-app rather than reloading the page
  *  - a /learn/... link into a week that is not open renders as plain text (see OpenWeeks)
  */
@@ -160,12 +160,13 @@ export function Markdown({
           );
         }
       }
-      const pages = pagesIn(code, lang);
+      const pages = pagesOnlyIn(code, lang);
       if (pages.length > 0) {
         const view = document.createElement('button');
         view.type = 'button';
-        view.textContent = 'View page';
-        view.title = 'Open the page this code tests in your browser, to see how it looks';
+        view.className = 'run';
+        view.textContent = '▶ Run';
+        view.title = 'This is a practice page, not a program. Run opens it in your browser.';
         view.onclick = () => viewPages(view, pages);
         head.append(view);
       }

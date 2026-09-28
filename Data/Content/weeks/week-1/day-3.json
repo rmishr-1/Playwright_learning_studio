@@ -863,8 +863,8 @@
           "code": {
             "language": "ts",
             "file": "tests/example.spec.ts",
-            "run": null,
-            "mode": "read",
+            "run": "npx playwright test tests/example.spec.ts --project=chromium",
+            "mode": "editor",
             "expect_error": false,
             "network": true
           },
