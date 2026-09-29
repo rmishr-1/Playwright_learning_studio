@@ -23,7 +23,7 @@ import { secret } from './prompt';
 import * as crypto from 'node:crypto';
 
 /** The git repository a path is inside, if any: its real path is checked, however it was spelled. */
-function repositoryOf(target: string): string | null {
+export function repositoryOf(target: string): string | null {
   let dir: string;
   try {
     dir = fs.realpathSync.native(path.dirname(target));
@@ -38,7 +38,7 @@ function repositoryOf(target: string): string | null {
   }
 }
 
-async function newPassphrase(what: string): Promise<string> {
+export async function newPassphrase(what: string): Promise<string> {
   const pass = await secret('New passphrase for ' + what + ' (at least 14 characters): ');
   if (pass.length < 14 || new Set(pass).size < 8) {
     throw new Error('Use a passphrase of at least 14 characters, with at least 8 different ones: several unrelated words work well.');
@@ -80,7 +80,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((e) => {
-  console.error(e instanceof Error ? e.message : String(e));
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((e) => {
+    console.error(e instanceof Error ? e.message : String(e));
+    process.exit(1);
+  });
+}

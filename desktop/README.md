@@ -20,6 +20,24 @@ In this folder, each asks for what it needs and waits for a key at the end:
 | `new-customer.bat` | A new customer: their short code, licence and app, built (below). |
 | `issue-licence.bat` | A new licence for a person or team at Evoke (it opens the internal app), or a reissue of one already issued: a new end date or computer, keeping its ID and, unless changed, its logo. |
 | `revoke-licence.bat` | Lists the licences, asks which to revoke and why, and adds it to `revoked.json`. Then commit `revoked.json` and rebuild the app it opened. |
+| `make-setup-kit.bat` | Makes `Evoke-Studio-Setup-Kit.exe` on your desktop, to set up another computer (below). |
+
+### Another computer
+
+git carries none of what builds and licences need: the signing key, the record of issued licences
+(`issued.csv`, `seals.json`) and `desktop/licences/`. On the computer that holds them, run
+**`make-setup-kit.bat`**: it puts all of them, encrypted with a passphrase you choose, into
+`Evoke-Studio-Setup-Kit.exe` on your desktop. On the other computer, pull the latest studio and run
+`setup.bat`, then run the kit: it asks for the studio folder and the passphrase, and sets everything
+down there. Nothing already there is overwritten: a key already there is left alone, the records are
+merged, and a licence file that differs is set down beside the one there as `.from-kit`. The
+restored key asks for the kit's passphrase whenever a licence is issued there.
+
+Send the passphrase another way than the kit (by phone, say), keep the kit off email and git, and
+delete it once used: with its passphrase, it issues licences. Licences issued on one computer are
+recorded on that computer only, so issue them on one, or bring the records together with a new kit.
+A licence locked to one computer opens the app only there: the other computer needs a licence of
+its own to open the internal app.
 
 ## The apps: one per audience
 
