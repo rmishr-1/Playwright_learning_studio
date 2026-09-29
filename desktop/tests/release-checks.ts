@@ -18,7 +18,6 @@
  * It moves the app's data folder aside while it runs, and puts it back.
  */
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
-import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as http from 'node:http';
 import * as net from 'node:net';
@@ -102,22 +101,14 @@ function builtInLicence(): LicenceFile | null {
   }
 }
 
-function reset(licenceText: string | null, accepted: boolean): void {
+function reset(licenceText: string | null): void {
   fs.rmSync(USER, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   fs.mkdirSync(USER, { recursive: true });
   if (licenceText === null) return;
-  const licence = (JSON.parse(licenceText) as LicenceFile).licence;
   if (!builtInLicence()) fs.writeFileSync(path.join(USER, 'licence.lic'), licenceText);
-  if (accepted) {
-    const eula = asar.extractFile(ASAR, 'EULA.txt');
-    fs.writeFileSync(
-      path.join(USER, 'eula-accepted.json'),
-      JSON.stringify({ eula: crypto.createHash('sha256').update(eula).digest('hex'), licence: licence.id }),
-    );
-  }
 }
 
-/** Starts the app with its licence and agreement in place, and waits for its server. */
+/** Starts the app with its licence in place, and waits for its server. */
 async function startStudio(exe: string, opts: { cwd?: string } = {}): Promise<{ child: ChildProcess; port: number }> {
   const child = spawn(exe, [], { stdio: 'ignore', cwd: opts.cwd });
   let port = 0;
@@ -160,7 +151,7 @@ async function main(): Promise<void> {
   expect(files.includes('/content.pack'), 'the course is there as content.pack');
   const main = asar.extractFile(ASAR, 'main.js').toString('utf-8');
   expect(main.startsWith('/*! ' + PRODUCT + ' '), 'main.js starts with the copyright notice');
-  const readable = ['studio_token', 'aes-256-gcm', 'SPK1', 'licence.lic', 'eula-accepted', 'courseIndex', 'recordProgress', 'setup:accept', 'last-seen'];
+  const readable = ['studio_token', 'aes-256-gcm', 'SPK1', 'licence.lic', 'courseIndex', 'recordProgress', 'setup:choose', 'last-seen'];
   const found = readable.filter((s) => main.includes(s));
   expect(found.length === 0, 'main.js is obfuscated: none of the studio\'s names are readable', found.join(', '));
   if (licence.seal) expect(!main.includes(licence.seal), 'the licence\'s seal is not in the app');
@@ -175,13 +166,13 @@ async function main(): Promise<void> {
   expect(!fs.existsSync(path.join(UNPACKED, 'resources', 'node', 'node_modules')), 'Node ships without npm');
 
   console.log('\nStarting the app');
-  reset(null, false);
+  reset(null);
   let r = await runFor(EXE, [], 8000);
-  expect(r.alive && !fs.existsSync(path.join(USER, 'port.json')), 'until there is a licence and the agreement is accepted, the backend never starts');
+  expect(r.alive && !fs.existsSync(path.join(USER, 'port.json')), 'until there is a licence, the backend never starts');
 
-  reset(given, true);
+  reset(given);
   const { child, port } = await startStudio(EXE);
-  expect(port > 0, 'with a licence and the agreement accepted, the studio starts', 'port ' + port);
+  expect(port > 0, 'with a licence, the studio starts', 'port ' + port);
   for (const p of ['/', '/api/course', '/api/course/1/1', '/api/progress']) {
     const s = port ? await status(port, p) : 0;
     expect(s === 401, 'from outside the window, ' + p + ' is refused', String(s));
@@ -205,15 +196,15 @@ async function main(): Promise<void> {
     ['studio://app/setup.html', 'an address'],
   ];
   for (const [arg, what] of switches) {
-    reset(given, true);
+    reset(given);
     r = await runFor(EXE, [arg], 7000);
     expect(!r.alive && !fs.existsSync(path.join(USER, 'port.json')), 'refuses to start with ' + what, r.alive ? 'still running' : 'exited');
   }
   expect(!fs.existsSync(netlog) && !(await listening(9339)) && !(await listening(9340)), 'no debugger port and no network log appeared');
-  reset(given, true);
+  reset(given);
   r = await runFor(EXE, ['-e', 'console.log("RAN AS NODE")'], 6000, { env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' } });
   expect(!r.out.includes('RAN AS NODE'), 'ELECTRON_RUN_AS_NODE does not turn it into Node');
-  reset(given, true);
+  reset(given);
   r = await runFor(EXE, [], 6000, { env: { ...process.env, NODE_OPTIONS: '--require ./nothing.js' } });
   expect(!/nothing\.js/.test(r.out), 'NODE_OPTIONS is ignored');
 
@@ -233,7 +224,7 @@ async function main(): Promise<void> {
   fs.writeFileSync(copyTs, plant + '\n' + fs.readFileSync(copyTs, 'utf-8'));
   // A reg.exe that is not Windows' own, in the folder the app starts from.
   fs.copyFileSync(process.execPath, path.join(copy, 'reg.exe'));
-  reset(given, true);
+  reset(given);
   const planted = await startStudio(copyExe, { cwd: copy });
   expect(planted.port > 0, 'with files planted beside it, the app still starts', 'port ' + planted.port);
   expect(!fs.existsSync(marker), 'no planted module, and not the compiler file, ran inside the app');
@@ -250,7 +241,7 @@ async function main(): Promise<void> {
   // the app must refuse to start there.
   const shared = path.join(path.parse(os.homedir()).root, 'studio-shared-test-' + Date.now());
   fs.cpSync(copy, shared, { recursive: true });
-  reset(given, true);
+  reset(given);
   // It says why in a message box, which waits for a click: what counts is that the studio never
   // opened (with the licence in place, it would have written port.json within seconds).
   r = await runFor(path.join(shared, EXE_NAME), [], 15000, { cwd: shared });
@@ -264,7 +255,7 @@ async function main(): Promise<void> {
   const at = 8 + raw.headerSize + Number(raw.header.files['main.js'].offset) + 5;
   bytes[at] = bytes[at] ^ 0x20;
   fs.writeFileSync(copyAsar, bytes);
-  reset(given, true);
+  reset(given);
   r = await runFor(copyExe, [], 8000, { cwd: copy });
   expect(!r.alive && !fs.existsSync(path.join(USER, 'port.json')), 'a changed app.asar is refused', r.alive ? 'still running' : 'exited');
   fs.rmSync(copy, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 });

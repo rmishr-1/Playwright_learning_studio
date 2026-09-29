@@ -4,7 +4,7 @@
  * end to end with Playwright's Electron support:
  *
  *   - the licence screen: no licence, a changed licence, an expired one, one for another computer
- *   - the licence agreement, then the studio itself
+ *   - no licence agreement anywhere: a valid licence opens the studio itself
  *   - the API refuses anyone without the window's token, keeps nothing in any cache, and the page
  *     has its Content Security Policy; nothing the page asks for leaves the computer
  *   - the course is watermarked with the licence in use, the fonts are the app's own
@@ -69,7 +69,7 @@ async function setupScreen(name: string, text: string | null): Promise<{ step: s
   const app = await launch();
   const page = await app.firstWindow();
   await page.waitForSelector('#product:not(:empty)');
-  const step = (await page.isVisible('#licence')) ? 'licence' : 'eula';
+  const step = (await page.isVisible('#licence')) ? 'licence' : 'none';
   const reason = (await page.isVisible('#reason')) ? ((await page.textContent('#reason')) ?? '') : '';
   await page.screenshot({ path: path.join(OUT, name + '.png') });
   await app.close();
@@ -182,23 +182,16 @@ async function main(): Promise<void> {
   await first.waitForSelector('#product:not(:empty)');
   const rolled = (await first.isVisible('#reason')) ? await first.textContent('#reason') : '';
   expect(/clock says .* already been used on 2099-06-01/.test(rolled ?? ''), 'turning the clock back does not revive an expired licence, and says it is the clock', rolled ?? '');
+  expect(first.url() === 'studio://app/setup.html', 'the setup page is served by the app itself', first.url());
+  const agreement = (await first.locator('#eula, #accept, #agree').count()) + (/EULA|agreement/i.test((await first.textContent('body')) ?? '') ? 1 : 0);
+  expect(agreement === 0, 'the setup page shows no licence agreement and does not mention one');
   await app.close();
 
-  console.log('\nAgreement and studio');
+  console.log('\nStudio');
   reset(JSON.stringify(sign(licence({ machine }), PRIVATE_KEY)));
   app = await launch();
-  const setup = await app.firstWindow();
-  await setup.waitForSelector('#eula:not([hidden])');
-  expect((await setup.textContent('#licensee')) === 'Smoke Test Ltd', 'a licence for this computer is accepted, and the agreement shown');
-  expect(await setup.isDisabled('#accept'), 'Accept waits for the tick box');
-  expect(setup.url() === 'studio://app/setup.html', 'the setup page is served by the app itself', setup.url());
-  const ipc = await app.evaluate(async ({ ipcMain }) => ipcMain.listenerCount('setup:accept') >= 0);
-  expect(ipc, 'the setup window has its handlers');
-  await setup.screenshot({ path: path.join(OUT, '5-agreement.png') });
-  await setup.check('#agree');
-  const studioOpened = app.waitForEvent('window');
-  await setup.click('#accept');
-  const page = await studioOpened;
+  // With a valid licence there is nothing to accept: the studio is the first window.
+  const page = await app.firstWindow();
   await page.waitForLoadState('load');
   const origin = new URL(page.url()).origin;
   expect(/^http:\/\/127\.0\.0\.1:\d+$/.test(origin), 'the studio opens from its own local server', origin);

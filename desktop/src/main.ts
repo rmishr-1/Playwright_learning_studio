@@ -2,8 +2,8 @@
  * The desktop app's main process.
  *
  *   1. Refuses to run under a debugger in a release build.
- *   2. Asks for a licence until it has a valid one (licence.ts), then for acceptance of the licence
- *      agreement (EULA.txt), in the setup window (setup.html).
+ *   2. Asks for a licence until it has a valid one (licence.ts), in the setup window (setup.html).
+ *      The licence agreement is installed beside the app (legal/EULA.txt) and is not shown.
  *   3. Starts the backend inside this process, on 127.0.0.1, with a new random token, and opens the
  *      studio in a window that holds the token as a cookie. Nothing else on the computer can use
  *      the API.
@@ -123,8 +123,6 @@ function serveSetupFiles(): void {
 
 const LICENCE_FILE = path.join(USER_DIR, 'licence.lic');
 const BUILT_IN_LICENCE = path.join(APP_DIR, 'licence.lic');
-const EULA_FILE = path.join(APP_DIR, 'EULA.txt');
-const ACCEPTED_FILE = path.join(USER_DIR, 'eula-accepted.json');
 const MACHINE = machineCode();
 
 /**
@@ -149,6 +147,7 @@ function licenceToday(): { today: string; now: string } {
   // The files the app itself writes: the ones it always has first, then others two folders deep,
   // at most a few hundred. Never the workspaces: the learner's own code writes there, and a date it
   // set would lock them out.
+  // eula-accepted.json: written by earlier versions, which asked for the agreement to be accepted.
   for (const known of ['Progress/progress.json', 'Local State', 'Preferences', 'eula-accepted.json', 'licence.lic']) {
     try {
       marks.push(fs.statSync(path.join(USER_DIR, known)).mtime.toISOString().slice(0, 10));
@@ -214,42 +213,24 @@ function currentLicence(): Verdict {
   return verdict;
 }
 
-const eulaText = (): string => fs.readFileSync(EULA_FILE, 'utf-8');
-const eulaHash = (): string => crypto.createHash('sha256').update(eulaText()).digest('hex');
-
-function eulaAccepted(licence: Licence): boolean {
-  try {
-    const saved = JSON.parse(fs.readFileSync(ACCEPTED_FILE, 'utf-8')) as { eula: string; licence: string };
-    return saved.eula === eulaHash() && saved.licence === licence.id;
-  } catch {
-    return false;
-  }
-}
-
 type SetupState = {
-  step: 'licence' | 'eula';
+  step: 'licence';
   product: string;
   version: string;
   copyright: string;
   machine: string;
   reason: string;
-  licensee: string | null;
-  licenceId: string | null;
-  eula: string;
 };
 
 function setupState(reason?: string): SetupState {
   const verdict = currentLicence();
   return {
-    step: verdict.ok ? 'eula' : 'licence',
+    step: 'licence',
     product: BUILD.product,
     version: BUILD.version,
     copyright: COPYRIGHT,
     machine: MACHINE,
     reason: reason ?? (verdict.ok ? '' : verdict.reason),
-    licensee: verdict.ok ? verdict.licence.licensee : null,
-    licenceId: verdict.ok ? verdict.licence.id : null,
-    eula: verdict.ok ? eulaText() : '',
   };
 }
 
@@ -263,7 +244,7 @@ const SAFE: WebPreferences = {
 };
 
 /**
- * Shows the setup window until there is a valid licence and the agreement is accepted. The window
+ * Shows the setup window until there is a valid licence. The window
  * stays open until `close` is called, once the studio's own window is there: with no window at
  * all for a moment, the app would quit.
  */
@@ -281,6 +262,14 @@ function runSetup(): Promise<{ licence: Licence; close: () => void }> {
     });
     let done = false;
     setupContents.add(win.webContents.id);
+    const finish = (licence: Licence): void => {
+      done = true;
+      for (const channel of ['setup:state', 'setup:choose', 'setup:copy-machine', 'setup:quit']) {
+        ipcMain.removeHandler(channel);
+      }
+      win.hide();
+      resolve({ licence, close: () => win.close() });
+    };
     // Only the setup page, in the setup window, may call these.
     const fromSetup = (e: Electron.IpcMainInvokeEvent): boolean =>
       e.sender.id === win.webContents.id && (e.senderFrame?.url ?? '') === SETUP_ORIGIN + '/setup.html';
@@ -302,24 +291,13 @@ function runSetup(): Promise<{ licence: Licence; close: () => void }> {
       if (!verdict.ok) return setupState(verdict.reason);
       fs.mkdirSync(USER_DIR, { recursive: true });
       fs.writeFileSync(LICENCE_FILE, text);
-      return setupState();
-    });
-    handle('setup:copy-machine', () => clipboard.writeText(MACHINE));
-    handle('setup:accept', () => {
-      const verdict = currentLicence();
-      if (!verdict.ok) return setupState();
-      fs.writeFileSync(
-        ACCEPTED_FILE,
-        JSON.stringify({ eula: eulaHash(), licence: verdict.licence.id, accepted_at: new Date().toISOString() }, null, 2),
-      );
-      done = true;
-      for (const channel of ['setup:state', 'setup:choose', 'setup:copy-machine', 'setup:accept', 'setup:quit']) {
-        ipcMain.removeHandler(channel);
-      }
-      win.hide();
-      resolve({ licence: verdict.licence, close: () => win.close() });
+      // A valid licence is all the studio needs: it opens at once.
+      const saved = currentLicence();
+      if (!saved.ok) return setupState(saved.reason);
+      finish(saved.licence);
       return null;
     });
+    handle('setup:copy-machine', () => clipboard.writeText(MACHINE));
     handle('setup:quit', () => app.quit());
     win.on('closed', () => {
       if (!done) app.quit();
@@ -603,7 +581,7 @@ void app.whenReady().then(async () => {
   serveSetupFiles();
   await lockSession();
   const verdict = currentLicence();
-  const setup = verdict.ok && eulaAccepted(verdict.licence) ? { licence: verdict.licence, close: () => {} } : await runSetup();
+  const setup = verdict.ok ? { licence: verdict.licence, close: () => {} } : await runSetup();
   try {
     await openStudio(setup.licence);
     setup.close();
