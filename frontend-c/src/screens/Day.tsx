@@ -138,6 +138,11 @@ function Sidebar({
   );
 }
 
+/** The narrowest the lesson and the editor can be dragged: below this the lesson's text and the
+ * editor's toolbar no longer fit. */
+const LESSON_MIN_PX = 420;
+const EDITOR_MIN_PX = 360;
+
 export function Day({
   active = true,
   appTheme,
@@ -275,7 +280,10 @@ export function Day({
       if (!host) return;
       const box = host.getBoundingClientRect();
       const pct = ((e.clientX - box.left) / box.width) * 100;
-      setSplit(Math.min(78, Math.max(24, pct)));
+      // The lesson keeps room to be read and the editor room to be used, whatever the window.
+      const least = Math.min(50, (LESSON_MIN_PX / box.width) * 100);
+      const most = Math.max(least, Math.min(78, 100 - (EDITOR_MIN_PX / box.width) * 100));
+      setSplit(Math.min(most, Math.max(least, pct)));
     };
     const up = (): void => {
       draggingRef.current = false;
@@ -490,7 +498,7 @@ export function Day({
       {/* Where you are and the day's title live in the header, so the split starts right here. */}
       <div className="day-main">
       <div className="split">
-        <div style={{ flex: '0 0 ' + split + '%', minWidth: 0, display: 'flex' }}>
+        <div style={{ flex: '0 0 ' + split + '%', minWidth: 'min(' + LESSON_MIN_PX + 'px, 50%)', display: 'flex' }}>
           <TheoryPane
             parts={content.parts}
             active={activePart.part}

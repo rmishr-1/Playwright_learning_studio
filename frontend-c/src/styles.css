@@ -1637,3 +1637,17 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
    gives every week the first week's), opened yet or not. */
 .path-week .path-num,
 :root[data-theme='dark'] .path-week.soon .path-num { background: var(--mod); border-color: var(--mod); color: #fff; }
+
+/* ---- a narrow run bar: Detach all becomes its icon, so the toggles and × stay on one line. */
+.overlay .tabs { flex-wrap: nowrap; min-width: 0; }
+.overlay .tabs button { white-space: nowrap; flex-shrink: 0; }
+@container (max-width: 520px) {
+  .overlay .tabs .detach .label { display: none; }
+  .overlay .tabs button { padding-left: 9px; padding-right: 9px; }
+}
+
+/* ---- a narrow lesson pane: everything wraps to the pane, and wide code scrolls inside its own
+   block, so the pane itself never scrolls sideways and hides the start of the text. */
+.pane-theory { overflow-x: hidden; }
+.lesson { min-width: 0; overflow-wrap: break-word; }
+.example pre, .terminal-block .lines { overflow-x: auto; }
