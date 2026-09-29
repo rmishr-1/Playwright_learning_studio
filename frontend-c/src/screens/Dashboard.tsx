@@ -58,7 +58,7 @@ export function Dashboard() {
       next: next?.week === w.week && next.day.day === d.day,
       locked: d.locked,
     }));
-    return { week: w.week, module: w.module.name, color: w.module.color, focus: w.focus, open: w.open, days, done: days.filter((d) => d.done).length };
+    return { week: w.week, module: w.module.name, focus: w.focus, open: w.open, days, done: days.filter((d) => d.done).length };
   });
 
   return (

@@ -18,8 +18,6 @@ export type PathDay = {
 export type PathWeek = {
   week: number;
   module: string;
-  /** The module's colour from the plan, tinting the week's heading line in the Rows view. */
-  color: string;
   focus: string;
   open: boolean;
   days: PathDay[];
@@ -78,15 +76,12 @@ const soonPhrase = (weeks: PathWeek[]): string | null => {
   return soon.length ? weeksPhrase(soon) + ' · coming soon' : null;
 };
 
-/**
- * Rows: one line per week - name, module and focus, progress - on a band tinted with the module's
- * colour, with an open week's days beneath.
- */
+/** Rows: one line per week - name, module and focus, progress - with an open week's days beneath. */
 function RowsView({ weeks }: { weeks: PathWeek[] }) {
   return (
     <ol className="yp">
       {weeks.map((w) => (
-        <li key={w.week} className={'yp-week' + (w.open ? '' : ' soon')} style={{ ['--mod' as string]: w.color }}>
+        <li key={w.week} className={'yp-week' + (w.open ? '' : ' soon')}>
           <div className="yp-head">
             <h3>Week {w.week}</h3>
             <span className="yp-meta">{w.module} · {w.focus}</span>

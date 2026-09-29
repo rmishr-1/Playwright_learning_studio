@@ -1446,21 +1446,6 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   .ypk { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* ---- Rows: more room between weeks, and a firmer divider between them. The divider is the heading
-   colour at 28%, so it stays visible in the light, warm paper and dark themes alike. */
-.yp { border-bottom: 1px solid color-mix(in srgb, var(--heading) 28%, transparent); }
-.yp-week { padding: 28px 0; border-top: 1px solid color-mix(in srgb, var(--heading) 28%, transparent); }
-.yp-days { margin-top: 18px; }
-
-/* ---- Rows: each week's heading line sits on a band tinted with its module's colour (from the plan),
-   and the space between weeks does the separating - no divider lines. */
-.yp, .yp-week { border: 0; }
-.yp-week { padding: 0; margin-bottom: 28px; }
-.yp-week:last-child { margin-bottom: 0; }
-.yp-head { padding: 12px 16px; border-radius: 0; background: color-mix(in srgb, var(--mod, var(--heading)) 10%, var(--paper)); }
-:root[data-theme='dark'] .yp-head { background: color-mix(in srgb, var(--mod, var(--heading)) 30%, var(--paper)); }
-.yp-days { margin-top: 12px; }
-
 /* ---- course index hero: a quiet grey band under the navy strip, rather than more navy. The course
    name in navy with a short orange rule beneath it, the description as a lead paragraph, and the
    Up next card lifted off the grey by a hairline and a soft shadow. One grey per theme. */

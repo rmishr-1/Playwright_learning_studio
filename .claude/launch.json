@@ -42,6 +42,21 @@
         "dev:frontend-c"
       ],
       "port": 5185
+    },
+    {
+      "name": "learning-studio-c-alt",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "frontend-c",
+        "--",
+        "--port",
+        "5186",
+        "--strictPort"
+      ],
+      "port": 5186
     }
   ]
 }
