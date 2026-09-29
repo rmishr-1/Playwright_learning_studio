@@ -9,12 +9,7 @@
     ],
     "scripts": {
         "dev:backend": "npm run dev --workspace backend",
-<<<<<<< HEAD
-        "dev:frontend": "npm run dev --workspace frontend",
-        "dev:frontend-c": "npm run dev --prefix frontend-c",
-=======
         "dev:frontend": "npm run dev --workspace frontend-c",
->>>>>>> origin/main
         "build:content": "tsx scripts/build-content.ts",
         "verify:content": "tsx scripts/verify-content.ts",
         "typecheck": "npm run typecheck --workspaces --if-present"

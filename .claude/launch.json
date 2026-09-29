@@ -4,67 +4,14 @@
     {
       "name": "learning-studio",
       "runtimeExecutable": "npm",
-<<<<<<< HEAD
-      "runtimeArgs": [
-        "run",
-        "dev:frontend"
-      ],
-      "port": 5180
-=======
       "runtimeArgs": ["run", "dev:frontend"],
       "port": 5185
->>>>>>> origin/main
     },
     {
       "name": "learning-studio-backend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev:backend"
-      ],
+      "runtimeArgs": ["run", "dev:backend"],
       "port": 3010
-<<<<<<< HEAD
-    },
-    {
-      "name": "learning-studio-v2",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev",
-        "--prefix",
-        "frontend-v2",
-        "--",
-        "--port",
-        "5182",
-        "--strictPort"
-      ],
-      "port": 5182
-    },
-    {
-      "name": "learning-studio-c",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev:frontend-c"
-      ],
-      "port": 5185
-    },
-    {
-      "name": "learning-studio-c-alt",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev",
-        "--prefix",
-        "frontend-c",
-        "--",
-        "--port",
-        "5186",
-        "--strictPort"
-      ],
-      "port": 5186
-=======
->>>>>>> origin/main
     }
   ]
 }

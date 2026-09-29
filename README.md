@@ -16,21 +16,10 @@ setup.bat
 launcher.bat
 ```
 
-<<<<<<< HEAD
-`launcher-ab.bat` starts QA Practice Training Studio (Option C, `frontend-c/`, port 5185) the same
-way. Both need Node 22.18 or later.
-
-- `setup.bat` checks Node and npm before installing anything, stops with a message and waits for a
-  key when something is wrong, and never closes before you can read why. `setup.bat /check` runs
-  only the checks.
-- The launchers reuse a backend or studio that is already running instead of starting a second
-  copy, wait until the servers answer before opening the browser, and keep each server's window
-=======
 - `setup.bat` stops with a message and waits for a key when something is wrong, so a
   double-clicked window never closes before you can read why. `/nopause` skips the wait.
 - `launcher.bat` reuses a backend or studio that is already running instead of starting a second
   copy, waits until the servers answer before opening the browser, and keeps each server's window
->>>>>>> origin/main
   open if it crashes, so the error stays readable. `/noopen` starts without opening the browser.
 
 ### Git

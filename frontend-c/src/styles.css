@@ -1417,6 +1417,21 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   .ypk { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* ---- Rows: more room between weeks, and a firmer divider between them. The divider is the heading
+   colour at 28%, so it stays visible in the light, warm paper and dark themes alike. */
+.yp { border-bottom: 1px solid color-mix(in srgb, var(--heading) 28%, transparent); }
+.yp-week { padding: 28px 0; border-top: 1px solid color-mix(in srgb, var(--heading) 28%, transparent); }
+.yp-days { margin-top: 18px; }
+
+/* ---- Rows: each week's heading line sits on a band tinted with its module's colour (from the plan),
+   and the space between weeks does the separating - no divider lines. */
+.yp, .yp-week { border: 0; }
+.yp-week { padding: 0; margin-bottom: 28px; }
+.yp-week:last-child { margin-bottom: 0; }
+.yp-head { padding: 12px 16px; border-radius: 0; background: color-mix(in srgb, var(--mod, var(--heading)) 10%, var(--paper)); }
+:root[data-theme='dark'] .yp-head { background: color-mix(in srgb, var(--mod, var(--heading)) 30%, var(--paper)); }
+.yp-days { margin-top: 12px; }
+
 /* ---- course index hero: a quiet grey band under the navy strip, rather than more navy. The course
    name in navy with a short orange rule beneath it, the description as a lead paragraph, and the
    Up next card lifted off the grey by a hairline and a soft shadow. One grey per theme. */
@@ -1451,25 +1466,6 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   font-size: clamp(18px, 8.4cqi, 26px); line-height: 1.25;
 }
 
-<<<<<<< HEAD
-/* ---- top strip controls, icons with a dot: Course index and Lessons are bare icons - the page you
-   are on is white with a small orange dot beneath it, the other soft blue-grey - and the theme
-   switch is the same bare icon after a thin divider. Names show on hover and are read out by screen
-   readers (aria-label). */
-.hdr-nav { gap: 6px; }
-.hdr-tab-label { display: none; }
-.hdr-tab, .hdr-tab.on, .hdr-btn.icon {
-  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-  width: 40px; height: 44px; padding: 0; border: 0; border-radius: 8px; background: none; color: #8c9bbd;
-}
-.hdr-tab:hover, .hdr-btn.icon:hover { background: none; color: #fff; }
-.hdr-tab.on { color: #fff; }
-.hdr-tab::after, .hdr-btn.icon::after { content: ''; width: 4px; height: 4px; border-radius: 2px; background: transparent; }
-.hdr-tab.on::after { background: #f2a36b; }
-.hdr-tab svg, .hdr-btn.icon svg { width: 19px; height: 19px; }
-.hdr-tab:focus-visible, .hdr-btn.icon:focus-visible { outline: 2px solid #f2a36b; outline-offset: 0; }
-.hdr-nav-sep { height: 26px; margin: 0 2px; }
-=======
 /* The customer's logo, right of the theme switch, in the desktop app (from their licence). On a
    white card, so any logo reads on the navy bar whatever its own colours. */
 .hdr-customer {
@@ -1522,14 +1518,11 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
   width: 620px; height: 460px; background: radial-gradient(closest-side, var(--hero-glow), transparent);
 }
 
->>>>>>> origin/main
 
 /* ---- diagrams: mermaid sizes each label's box for its own 14px text, so the lesson's paragraph
    style (15.5px, tall line height) must not reach the paragraphs inside a label - it made the text
    bigger than its box and clipped it. */
 .lesson .diagram p, .lesson .diagram li { margin: 0; font-size: inherit; line-height: inherit; }
-<<<<<<< HEAD
-=======
 
 /* ---- Your path: day tiles as raised, physical tiles.
    Each tile is lit from above (a faint top-to-bottom gradient and a bright top edge) and stands on
