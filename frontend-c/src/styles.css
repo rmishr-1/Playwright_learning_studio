@@ -376,8 +376,8 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .code-block .head .tag.warn { background: #4a3514; color: #f0c27a; }
 .code-block .head .spacer { flex: 1; }
-.code-block .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
-.code-block .head button.run:hover { background: #1d4fd8; }
+.code-block .head button.run, .example .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
+.code-block .head button.run:hover, .example .head button.run:hover { background: #1d4fd8; }
 
 /* Commands to type in a terminal, each with its own Run. */
 .terminal-block { margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2b3240; background: #14181f; }
@@ -565,6 +565,18 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   color: var(--ed-dim); text-align: center; font-size: 13.5px; line-height: 1.65;
 }
 
+/* View in Page's list of pages, when a practice file holds more than one (lib/htmlPages.ts). */
+.page-menu {
+  position: fixed; z-index: 50; min-width: 190px; padding: 5px; display: flex; flex-direction: column;
+  background: #1e232d; border: 1px solid #3d4757; border-radius: 9px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+.page-menu-title { color: #8e99ad; font-size: 11px; padding: 4px 9px 6px; }
+.page-menu button {
+  background: none; border: none; border-radius: 6px; color: #dbe2ee; text-align: left;
+  font-family: var(--mono); font-size: 12px; padding: 7px 9px; cursor: pointer;
+}
+.page-menu button:hover, .page-menu button:focus-visible { background: #333b4a; color: #fff; outline: none; }
+
 /* ---------------------------------------------------------------- run overlay */
 .overlay {
   position: absolute; left: 10px; right: 10px; bottom: 10px; height: 58%;
@@ -636,6 +648,11 @@ body.dragging-divider { cursor: col-resize; user-select: none; }
 /* A panel in its own window fills it. */
 body.popout-body { margin: 0; background: #12161e; }
 .popout { position: fixed; inset: 0; display: flex; }
+/* So does the whole bar, detached with Detach all. */
+.overlay.detached {
+  position: static; flex: 1; min-width: 0; min-height: 0; height: auto;
+  border: none; border-radius: 0; box-shadow: none;
+}
 
 /* ---------------------------------------------------------------- detached run view
    The whole page, in its own popped-out window - see RunOverlay's Detach button. */

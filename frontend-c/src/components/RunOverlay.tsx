@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import type { RunResult, RunStatus } from '../../../shared/contracts/run';
 import type { Workspace } from '../../../shared/contracts/course_day';
 import { TerminalSession } from '../lib/terminalSession';
@@ -88,6 +88,10 @@ function saveLayout(layout: Layout): void {
  * height are remembered in this browser. Popped-out windows are not reopened on the next visit,
  * because a browser opens a window only when the learner clicks something.
  *
+ * The whole bar, its toggles and the panels in it, can also be detached into one window, and put
+ * back with Back to the studio. While new code is loaded into the editor the bar is hidden (see
+ * `hidden`), but stays mounted, so nothing in it is lost.
+ *
  * The Browser panel shows whichever started last, a Run or a Terminal command.
  */
 export function RunOverlay({
@@ -96,6 +100,7 @@ export function RunOverlay({
   file,
   workspace,
   request,
+  hidden,
   onClose,
 }: {
   run: RunState | null;
@@ -107,6 +112,8 @@ export function RunOverlay({
   workspace: Workspace;
   /** Asks the overlay to show a panel, such as the Terminal button in the editor's toolbar. */
   request: OverlayRequest | null;
+  /** Hides the bar in the studio, keeping its state. Windows opened from it stay open. */
+  hidden: boolean;
   onClose: () => void;
 }) {
   const [layout, setLayout] = useState<Layout>(() => {
@@ -116,6 +123,8 @@ export function RunOverlay({
     return { ...saved, visible: { ...saved.visible, [first]: true } };
   });
   const [poppedOut, setPoppedOut] = useState<Record<PanelId, boolean>>({ browser: false, console: false, terminal: false });
+  /** The whole bar is in a window of its own. */
+  const [allOut, setAllOut] = useState(false);
   const [source, setSource] = useState<'run' | 'terminal'>(run ? 'run' : 'terminal');
   const [termFrame, setTermFrame] = useState<string | null>(null);
   const [termStatus, setTermStatus] = useState<TermStatus>(null);
@@ -172,6 +181,24 @@ export function RunOverlay({
   // Dragging the grip resizes the overlay; dragging a divider resizes the panels either side.
   const dragging = useRef<null | { kind: 'height' } | { kind: 'divider'; left: PanelId; right: PanelId; x: number; width: number }>(null);
   const row = useRef<HTMLDivElement>(null);
+  const handlers = useRef<{ move: (e: MouseEvent) => void; up: () => void } | null>(null);
+  // In the detached window the mouse moves over that window, not this one, so the drag listens
+  // there too until the button is released.
+  const followDrag = (e: ReactMouseEvent): void => {
+    const doc = e.currentTarget.ownerDocument;
+    const win = doc.defaultView;
+    doc.body.classList.add('dragging-divider');
+    if (!win || win === window || !handlers.current) return;
+    const { move, up } = handlers.current;
+    const stop = (): void => {
+      win.removeEventListener('mousemove', move);
+      win.removeEventListener('mouseup', stop);
+      doc.body.classList.remove('dragging-divider');
+      up();
+    };
+    win.addEventListener('mousemove', move);
+    win.addEventListener('mouseup', stop);
+  };
   useEffect(() => {
     const move = (e: MouseEvent): void => {
       const d = dragging.current;
@@ -201,6 +228,7 @@ export function RunOverlay({
       dragging.current = null;
       document.body.classList.remove('dragging-divider');
     };
+    handlers.current = { move, up };
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', up);
     return () => {
@@ -253,6 +281,9 @@ export function RunOverlay({
     },
   };
 
+  // A panel is on screen unless the bar it sits in is hidden. The Terminal uses this to take focus
+  // and fit itself when it is shown again.
+  const barShown = allOut || !hidden;
   const docked = PANELS.filter((p) => layout.visible[p.id] && !poppedOut[p.id]);
 
   const panel = (id: PanelId, label: string, inWindow: boolean): ReactNode => (
@@ -276,14 +307,16 @@ export function RunOverlay({
           </>
         )}
       </header>
-      {content[id].body(true)}
+      {content[id].body(inWindow || barShown)}
     </section>
   );
 
-  return (
-    <>
-      <div className="overlay" style={{ height: layout.height + '%' }}>
-        <div className="grip" onMouseDown={() => (dragging.current = { kind: 'height' })} />
+  const bar = (
+      <div
+        className={'overlay' + (allOut ? ' detached' : '')}
+        style={allOut ? undefined : { height: layout.height + '%', display: hidden ? 'none' : undefined }}
+      >
+        {!allOut && <div className="grip" onMouseDown={() => (dragging.current = { kind: 'height' })} />}
         <div className="tabs">
           {PANELS.map((p) => (
             <button
@@ -298,6 +331,20 @@ export function RunOverlay({
             </button>
           ))}
           <span className="spacer" />
+          {allOut ? (
+            <button className="panel-btn" onClick={() => setAllOut(false)} title="Put the panels back in the studio">
+              ⇲ Back to the studio
+            </button>
+          ) : (
+            <button
+              className="panel-btn"
+              onClick={() => setAllOut(true)}
+              title="Open this whole bar, with its panels, in a window of its own"
+              aria-label="Detach the whole bar"
+            >
+              ⇱ Detach all
+            </button>
+          )}
           <button className="close" onClick={onClose} aria-label="Close results">
             ×
           </button>
@@ -326,7 +373,7 @@ export function RunOverlay({
                       x: e.clientX,
                       width: row.current?.getBoundingClientRect().width ?? 1,
                     };
-                    document.body.classList.add('dragging-divider');
+                    followDrag(e);
                     e.preventDefault();
                   }}
                 />
@@ -336,6 +383,17 @@ export function RunOverlay({
           ))}
         </div>
       </div>
+  );
+
+  return (
+    <>
+      {allOut ? (
+        <PopOut name="panels" title="Run panels" onClosed={() => setAllOut(false)}>
+          {bar}
+        </PopOut>
+      ) : (
+        bar
+      )}
 
       {PANELS.filter((p) => poppedOut[p.id]).map((p) => (
         <PopOut key={p.id} name={p.id} title={p.label} onClosed={() => dockBack(p.id)}>

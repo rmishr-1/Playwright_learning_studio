@@ -18,7 +18,8 @@
  *
  * The HTML report of the Terminal's last test run is served by a second server of its own
  * (reportServer below), which knows nothing of the API or the token: the report holds whatever the
- * learner's tests put in it, and it must not run with the studio's rights.
+ * learner's tests put in it, and it must not run with the studio's rights. The practice pages that
+ * View in Page opens (preview.ts) are served there too, for the same reason.
  */
 import * as crypto from 'node:crypto';
 import express, { type NextFunction, type Request, type Response } from 'express';
@@ -30,6 +31,7 @@ import { listening } from './config';
 import { router } from './routes';
 import { attachStream } from './runner';
 import { currentReportDir, frameExpected } from './terminal';
+import { PREVIEW_CSP, previewPage, previewPath } from './preview';
 
 export type ServerOptions = { port: number; token?: string | null; webDir?: string | null };
 export type RunningServer = { port: number; close: () => Promise<void> };
@@ -141,6 +143,12 @@ function reportServer(): Promise<http.Server> {
     }
     if (real !== root && !real.startsWith(root + path.sep)) return void res.status(403).end();
     express.static(root, { cacheControl: false, dotfiles: 'deny' })(req, res, next);
+  });
+  app.get(previewPath() + '/:id', (req, res) => {
+    const html = previewPage(req.params.id);
+    if (html === undefined) return void res.status(404).type('text/plain').send('This page is no longer available. Select View in Page again.');
+    res.set({ 'Content-Security-Policy': PREVIEW_CSP, 'X-Content-Type-Options': 'nosniff' });
+    res.type('html').send(html);
   });
   app.use((_req, res) => void res.status(404).end());
   const server = http.createServer(app);

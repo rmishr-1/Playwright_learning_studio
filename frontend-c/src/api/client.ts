@@ -113,6 +113,10 @@ export const runTerminal = (
 export const stopTerminal = (runId: string): Promise<{ stopped: boolean }> =>
   call('/terminal/' + runId + '/stop', { method: 'POST' });
 
+/** View in Page: the address at which the learner's browser shows this HTML. */
+export const previewPage = (html: string): Promise<{ url: string }> =>
+  call('/preview', { method: 'POST', body: JSON.stringify({ html }) });
+
 // ---------------------------------------------------------------- check my answer
 
 /** Grades a code exercise with the check the course gives it. */

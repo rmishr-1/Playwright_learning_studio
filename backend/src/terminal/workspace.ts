@@ -11,6 +11,7 @@
  *   playwright.config.ts     the settings the test runner reads
  *   tsconfig.json            points `@playwright/test` at .studio/ (below)
  *   .studio/test.ts          adds the live browser view to every test
+ *   .studio/run-playwright.cjs  starts the test runner so that Ctrl+C can stop it gently
  *   tests/                   the spec files
  *   pages/, fixtures/, test-data/, utils/   page objects, fixtures, data and helpers (Day 10)
  *   ts-basics/               the TypeScript playground, where `node day3/hello.ts` runs
@@ -225,6 +226,28 @@ const LEGACY_SEEDS: Record<string, readonly string[]> = {
 };
 
 /**
+ * Starts the Playwright CLI named by its first argument, and turns a line "stop" on its input into
+ * the interrupt Ctrl+C sends in a real terminal. Windows cannot send that interrupt from one
+ * process to another, so without this a stopped run was ended by force and Playwright never
+ * printed its summary. With it, the runner stops its workers, closes its browsers, and reports
+ * what passed, failed, was interrupted, and did not run.
+ */
+const RUN_PLAYWRIGHT = `// Written by the Learning Studio for its Terminal. Changes to this file are replaced.
+const cli = process.argv[2];
+process.argv.splice(1, 2, cli);
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', (text) => {
+  if (text.includes('stop')) process.emit('SIGINT');
+});
+// Waiting for input must not keep the runner alive once the tests are done.
+process.stdin.unref();
+require(cli);
+`;
+
+/** The script that starts the test runner in this workspace (RUN_PLAYWRIGHT). */
+export const playwrightStarter = (name: Workspace): string => path.join(workspaceDir(name), '.studio', 'run-playwright.cjs');
+
+/**
  * Writes the studio's own files, and brings the course's starting files up to date.
  *
  * .studio/seeded.json records each starting file the studio wrote, with its fingerprint. A file
@@ -239,6 +262,7 @@ export function prepareWorkspace(name: Workspace): void {
   fs.writeFileSync(path.join(dir, 'playwright.config.ts'), CONFIG);
   fs.writeFileSync(path.join(dir, 'tsconfig.json'), TSCONFIG);
   fs.writeFileSync(path.join(dir, '.studio', 'test.ts'), wrapper());
+  fs.writeFileSync(path.join(dir, '.studio', 'run-playwright.cjs'), RUN_PLAYWRIGHT);
   fs.mkdirSync(path.join(dir, 'tests'), { recursive: true });
 
   const recordFile = path.join(dir, '.studio', 'seeded.json');

@@ -190,6 +190,9 @@ export function Day({
   const [editorFile, setEditorFile] = useState<EditorFile>({ file: null, run: null });
   // A command a lesson asked the Terminal to run. The nonce makes the same command run again.
   const [command, setCommand] = useState<{ text: string; nonce: number } | null>(null);
+  // Loading new code into the editor hides the run panels so the code can be read in full. They
+  // keep their state, and come back on Run or the Terminal button.
+  const [hidePanels, setHidePanels] = useState(0);
   const [run, setRun] = useState<RunState | null>(null);
   const [running, setRunning] = useState(false);
   const [split, setSplit] = useState(52);
@@ -306,12 +309,14 @@ export function Day({
     problemRef.current = null;
     setCode(snippet);
     setEditorFile(meta ?? { file: null, run: null });
+    setHidePanels(Date.now());
   }, []);
 
   const startProblem = useCallback((snippet: string, problemNumber: number, meta: EditorFile) => {
     problemRef.current = problemNumber;
     setCode(snippet.trim() + '\n');
     setEditorFile(meta);
+    setHidePanels(Date.now());
   }, []);
 
   // "Check my answer" grades the code in the editor, so the editor must hold this exercise's file:
@@ -517,6 +522,7 @@ export function Day({
             editorFile={editorFile}
             workspace={content.workspace}
             command={command}
+            hidePanels={hidePanels}
           />
         </div>
       </div>

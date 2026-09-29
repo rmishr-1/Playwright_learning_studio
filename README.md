@@ -162,12 +162,29 @@ command. **Run** beside a command in a lesson types that command into the Termin
   the Browser panel shows the test as it runs. The same wrapper applies the Run button's navigation
   allowlist.
 - **Output** streams with its colors over the same WebSocket a Run uses. **Ctrl+C** stops the
-  command, with its workers and browsers. The Terminal's state lives in a session object
-  (`frontend-c/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command. A command is stopped at `terminal_timeout_ms` (5 minutes
+  command, with its workers and browsers. `npx playwright test` is started through
+  `.studio/run-playwright.cjs`, which turns a stop request on its input into the interrupt a real
+  terminal sends, so the runner prints its usual summary on Windows too; the studio then adds
+  "Stopped with Ctrl+C after N s". A second Ctrl+C, or a runner that has not stopped after 8
+  seconds, stops it by force. The Terminal's state lives in a session object
+  (`frontend-c/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command.
+- **The run panels.** Each panel can pop out into its own window, and **Detach all** moves the
+  whole bar, with its toggles, into one window. Loading code into the editor (**Open in editor**,
+  **Load into editor**, **Try it**, **Start this in the editor**) hides the bar in the studio
+  without closing it, so a running command keeps running; **Run** or **Terminal** shows it again. A command is stopped at `terminal_timeout_ms` (5 minutes
   by default), and one command runs at a time.
 - **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
   block in a lesson offers **Load into editor** for this.
 - The Browser panel shows Chromium. `setup.bat` installs Chromium, Firefox and WebKit.
+- **View in Page.** A file that only defines practice pages, such as `practice-shop.ts` (HTML in
+  named strings), or an HTML sample, has no program to run, so in place of **Run** it gets **View in
+  Page**, which opens the page in a new browser tab (the computer's own browser in the desktop app);
+  with several pages in the file it asks which one. This works in the editor, where the Run button
+  is relabelled while it holds such a file, and on the lesson's code samples. The page is served by the report's server, not the studio's, under a Content Security
+  Policy sandbox, so its scripts run as they do in the test but cannot reach the studio
+  (`backend/src/preview.ts`, `frontend-c/src/lib/htmlPages.ts`). A Run ignores `export`, which is
+  not allowed inside the function the Run's code is placed in (`dropExports` in
+  `backend/src/runner.ts`).
 
 ### Check my answer
 
