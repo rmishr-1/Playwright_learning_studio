@@ -1,20 +1,27 @@
+// Five type mistakes in test data. Check this file and read each error.
 type Product = {
   name: string;
   price: number;
   inStock: boolean;
+  discount?: number;
 };
+type BrowserName = 'chromium' | 'firefox' | 'webkit';
 
 const keyboard: Product = {
   name: 'Mechanical Keyboard',
-  price: '2499',            // bug 1
-  inStock: 'yes',           // bug 2
+  price: '2499',
+  inStock: true,
 };
 
-const quantity: number = 2;
-const maxQuantity = 5;
-maxQuantity = 10;           // bug 3
+const mouse: Product = {
+  name: 'Wireless Mouse',
+  price: 799,
+};
 
-let browser: 'chromium' | 'firefox' | 'webkit' = 'chrome';   // bug 4
+const browsers: BrowserName[] = ['chromium', 'firefox'];
+browsers.push('safari');
 
-const total: string = keyboard.price * quantity;             // bug 5
-console.log(`Total for ${quantity}: ${total}`);
+const login: [string, string] = ['asha@example.com', 12345];
+
+const sizes: number[] = [38, 40, 42];
+sizes.push('44');

@@ -122,7 +122,8 @@ function Sidebar({
                       if (!d.locked) navigate(url);
                     }}
                   >
-                    <span className="sb-num" aria-hidden="true">{dayDone ? '✓' : d.day}</span>
+                    {/* A day that is done keeps its label, in the done colour. */}
+                    <span className="sb-num" aria-hidden="true">Day {d.day}</span>
                     <span className="sb-title">{d.title}</span>
                   </a>
                 );
@@ -181,6 +182,9 @@ export function Day({
   const [editorFile, setEditorFile] = useState<EditorFile>({ file: null, run: null });
   // A command a lesson asked the Terminal to run. The nonce makes the same command run again.
   const [command, setCommand] = useState<{ text: string; nonce: number } | null>(null);
+  // Loading new code into the editor hides the run panels so the code can be read in full. They
+  // keep their state, and come back on Run or the Terminal button.
+  const [hidePanels, setHidePanels] = useState(0);
   const [run, setRun] = useState<RunState | null>(null);
   const [running, setRunning] = useState(false);
   const [split, setSplit] = useState(52);
@@ -206,7 +210,8 @@ export function Day({
     getCourse()
       .then((i) => {
         setIndex(i);
-        document.title = i.title;
+        // The tab says only the product's name, on the course index and on a lesson alike.
+        document.title = PRODUCT_NAME;
       })
       .catch((e: unknown) => {
         // With no course at all, say so, rather than the "day does not exist" the day request
@@ -292,16 +297,31 @@ export function Day({
       });
   }, [week, day, part]);
 
+  // The tick beside a tab clears that part's done mark. The part you are on is not marked read
+  // again on this visit, even with its end in view: it counts again once you come back and reach
+  // its end.
+  const unread = useCallback(
+    (p: number) => {
+      if (p === part) reportedRef.current = week + '/' + day + '/' + part;
+      recordProgress({ week, day, part: p as PartNumber, unread: true })
+        .then(setProgress)
+        .catch(() => undefined);
+    },
+    [week, day, part],
+  );
+
   const loadIntoEditor = useCallback((snippet: string, meta?: EditorFile) => {
     problemRef.current = null;
     setCode(snippet);
     setEditorFile(meta ?? { file: null, run: null });
+    setHidePanels(Date.now());
   }, []);
 
   const startProblem = useCallback((snippet: string, problemNumber: number, meta: EditorFile) => {
     problemRef.current = problemNumber;
     setCode(snippet.trim() + '\n');
     setEditorFile(meta);
+    setHidePanels(Date.now());
   }, []);
 
   // "Check my answer" grades the code in the editor, so the editor must hold this exercise's file:
@@ -491,6 +511,7 @@ export function Day({
             prevDay={prevDay}
             nextDay={nextDay}
             onReachedEnd={reachedEnd}
+            onUnread={unread}
           />
         </div>
         <div className="gutter" onMouseDown={() => (draggingRef.current = true)} />
@@ -507,6 +528,7 @@ export function Day({
             editorFile={editorFile}
             workspace={content.workspace}
             command={command}
+            hidePanels={hidePanels}
           />
         </div>
       </div>

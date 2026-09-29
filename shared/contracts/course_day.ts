@@ -100,6 +100,13 @@ export const ContentBlock = z.object({
 export const Workspace = z.enum(['demo', 'project']);
 
 /**
+ * A file the learner's project may hold, as a path inside it: the spec files (tests/), the page
+ * objects, fixtures, test data and helpers the course adds on Day 10, and the TypeScript playground
+ * (ts-basics/). The studio saves, seeds and names only these.
+ */
+export const PROJECT_FILE = /^(tests|pages|fixtures|test-data|utils|ts-basics)\/[\w./-]+$/;
+
+/**
  * Data/Content/workspaces.json: the files each Terminal workspace starts with, keyed by path
  * relative to the workspace folder. Written by `npm run build:content`.
  */

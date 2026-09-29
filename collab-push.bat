@@ -1,22 +1,23 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
+set "NoDefaultCurrentDirectoryInExePath=1"
+rem Windows' own programs, by their full path: a folder early in PATH cannot stand in for them.
+set "SYS=%SystemRoot%\System32"
 :: ===========================================================================
 ::  collab-push.bat - for COLLABORATORS, not the repo owner.
 ::  ---------------------------------------------------------------------
-::  Commits your work, pushes it to YOUR OWN BRANCH, and then AUTO-LANDS it
-::  on main when it merges cleanly - no pull request, no waiting.
+::  Commits your work, pushes it to YOUR OWN BRANCH, and gives you the link
+::  to open a pull request: the owner reviews it before it reaches main.
 ::
 ::    collab-push.bat                          commit with an automatic message
 ::    collab-push.bat "what you changed"       commit with your own message
 ::    collab-push.bat "message" /branch fix-week3-typo
 ::
-::  Two people pushing at almost the same time is fine: whoever lands second
-::  is merged on top automatically and retried. Only a real CONFLICT - the
-::  same lines changed by two people - falls back to a pull request, because
-::  that genuinely needs a human decision.
+::  Nothing reaches main without review: customer builds are made from main,
+::  so every change there goes through a pull request.
 ::
 ::  No repo on this machine yet? Run collab-pull.bat first - it clones it.
-::  Owner pushing to main directly? Use git-push.bat or git-sync.bat.
+::  Owner pushing to main directly? Use git-sync.bat.
 :: ===========================================================================
 
 set "REMOTE_URL=https://github.com/rmishr-1/Playwright_learning_studio.git"
@@ -26,7 +27,7 @@ set "REPO_DIR=Playwright_learning_studio"
 set "GITCMD=%ProgramFiles%\Git\cmd"
 set "GITCMD2=%LocalAppData%\Programs\Git\cmd"
 
-cd /d "%~dp0"
+cd /d "%~dp0" || (echo [ERROR] Could not open the folder this file is in. & pause & exit /b 1)
 
 set "MSG="
 set "WANTBRANCH="
@@ -57,7 +58,7 @@ call :ensure_credentials
 if exist ".git" goto :have_repo
 if exist "%REPO_DIR%\.git" (
   echo   Using the clone in "%REPO_DIR%".
-  cd /d "%REPO_DIR%"
+  cd /d "%REPO_DIR%" || goto :die
   goto :have_repo
 )
 echo   [FAIL] There is no repository here yet.
@@ -67,6 +68,11 @@ echo          into a "%REPO_DIR%" folder. Then run this again.
 echo.
 goto :die
 :have_repo
+
+REM Files that must never be committed, as git pathspecs (any folder, any case), and the text of
+REM tokens and private keys that must never be committed inside any file.
+set SECRET_FILES=":(glob,icase)**/*.pem" ":(glob,icase)**/*.pfx" ":(glob,icase)**/*.p12" ":(glob,icase)**/*.key" ":(glob,icase)**/*.dpapi" ":(glob,icase)**/*.lic" ":(glob,icase)**/*.lic.old" ":(glob,icase)**/issued.csv" ":(glob,icase)**/seals.json" ":(glob,icase)**/.env" ":(glob,icase)**/.env.*" ":(glob,icase)**/*.bak" ":(glob,icase)**/*.backup" ":(glob,icase)**/id_rsa*" ":(glob,icase)**/id_ed25519*" ":(glob,icase)**/credentials*.json" ":(glob,icase)**/secrets*.json" ":(glob,icase)**/deliveries/**" ":(glob,icase)**/licences/**" ":(glob,icase)**/keys/**" ":(glob,icase)**/*.ppk" ":(glob,icase)**/*.jks" ":(glob,icase)**/*.keystore" ":(glob,icase)**/*.asc" ":(exclude)desktop/src/licence-public.pem"
+set "SECRET_TEXT=(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY( BLOCK)?-----|PuTTY-User-Key-File-[0-9]|AccountKey=[A-Za-z0-9+/]{20,}|AKIA[0-9A-Z]{16}|sk-ant-[A-Za-z0-9_-]{20,}|npm_[A-Za-z0-9]{36}|_auth[T]oken=)"
 
 :: Identity ------------------------------------------------------------------
 call :ensure_identity || goto :die
@@ -104,11 +110,10 @@ goto :have_target
 :derive
 :: Turn "Ada Lovelace" into "ada-lovelace/work". Done in PowerShell because
 :: batch string munging on arbitrary names is a bug factory.
-:: NOTE the doubled caret. In a batch for/f command, ^ is the escape character,
-:: so a single [^a-z0-9] reaches PowerShell as [a-z0-9] -- which replaces every
-:: alphanumeric instead of every non-alphanumeric and yields an empty slug.
+:: The caret is inside double quotes, where cmd passes it as it is, so PowerShell
+:: gets [^a-z0-9]: every character that is not a letter or a digit becomes a dash.
 set "SLUG="
-for /f "usebackq delims=" %%S in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$n=[regex]::Replace('!GIT_NAME!'.ToLower(),'[^^a-z0-9]+','-').Trim('-'); if($n -eq ''){'collab'}else{$n}" 2^>nul`) do set "SLUG=%%S"
+for /f "usebackq delims=" %%S in (`%SYS%\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -Command "$n=[regex]::Replace($env:GIT_NAME.ToLower(),'[^a-z0-9]+','-').Trim('-'); if($n -eq ''){'collab'}else{$n}" 2^>nul`) do set "SLUG=%%S"
 set "SLUG=!SLUG: =!"
 if not defined SLUG set "SLUG=collab"
 set "TARGET=!SLUG!/work"
@@ -157,9 +162,25 @@ if errorlevel 1 (
   echo   [FAIL] git add failed.
   goto :die
 )
+git diff --cached --quiet -- %SECRET_FILES% || (
+    echo.
+    echo [STOP] These staged files look like keys, certificates, licences, backups or secrets:
+    git diff --cached --name-only -- %SECRET_FILES%
+    echo        Nothing was committed. Move them out of the project, or add them to .gitignore.
+    git reset -q
+    goto :die
+)
+git diff --cached --quiet --text -G "%SECRET_TEXT%" || (
+    echo.
+    echo [STOP] These staged files contain what looks like an access token or a private key:
+    git diff --cached --name-only --text -G "%SECRET_TEXT%"
+    echo        Nothing was committed. Take the secret out of the file ^(and revoke it if it was real^).
+    git reset -q
+    goto :die
+)
 
 set /a NCHANGES=0
-for /f %%n in ('git diff --cached --name-only 2^>nul ^| find /c /v ""') do set /a NCHANGES=%%n
+for /f %%n in ('git diff --cached --name-only 2^>nul ^| %SYS%\find.exe /c /v ""') do set /a NCHANGES=%%n
 if !NCHANGES! EQU 0 (
   echo   Nothing to commit - the working tree matches the last commit.
   goto :do_push
@@ -171,9 +192,16 @@ for /f "tokens=*" %%L in ('git diff --cached --name-status 2^>nul') do (
   if !SHOWN! LEQ 25 echo     %%L
 )
 if !NCHANGES! GTR 25 echo     ... and the rest, !NCHANGES! files in total
+echo.
+%SYS%\choice.exe /c YN /n /m "  Commit these and push them to !TARGET!? [Y/N] "
+if not "!errorlevel!"=="1" (
+  git reset -q
+  echo   Nothing was committed or pushed.
+  goto :die
+)
 
 if not defined MSG (
-  for /f "usebackq delims=" %%d in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-Date -Format \"yyyy-MM-dd HH:mm\"" 2^>nul`) do set "STAMP=%%d"
+  for /f "usebackq delims=" %%d in (`%SYS%\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -Command "Get-Date -Format \"yyyy-MM-dd HH:mm\"" 2^>nul`) do set "STAMP=%%d"
   set "MSG=Work in progress: !STAMP!"
 )
 echo.
@@ -190,6 +218,7 @@ echo.
 echo   ---------------------------------------------------------------------
 echo   Pushing !TARGET! to origin
 echo   ---------------------------------------------------------------------
+call :scan_outgoing "!TARGET!" || goto :die
 
 :: collab-pull.bat rebases your branch onto main, and rebasing REWRITES your
 :: commits. After it runs, your branch no longer descends from its own copy on
@@ -239,70 +268,9 @@ if errorlevel 1 goto :push_failed
 
 echo.
 echo   [ OK ] Pushed branch !TARGET!
-
-:: --------------------------------------------------------------------------
-:: Auto-land: merge the latest main into this branch. If that is conflict-
-:: free, push the result straight to main - done, no pull request. If main
-:: moves while we do it (someone else landed first), fetch and retry: git
-:: rejects the late push, so concurrent pushers serialise safely on their own.
-:: --------------------------------------------------------------------------
 echo.
-echo   ---------------------------------------------------------------------
-echo   Landing on %MAINBRANCH% ^(automatic when there are no conflicts^)
-echo   ---------------------------------------------------------------------
-set /a LTRIES=0
-:land
-set /a LTRIES+=1
-if !LTRIES! GTR 3 goto :land_giveup
-
-git fetch origin "%MAINBRANCH%" >nul 2>&1
-
-:: If everything on main is already in this branch, main can just fast-forward.
-git merge-base --is-ancestor "origin/%MAINBRANCH%" HEAD >nul 2>&1
-if not errorlevel 1 goto :push_main
-
-:: Bring main's commits into this branch first.
-git merge "origin/%MAINBRANCH%" --no-edit
-if errorlevel 1 (
-  git merge --abort >nul 2>&1
-  goto :land_conflict
-)
-git push origin "!TARGET!" >nul 2>&1
-
-:push_main
-git push origin "HEAD:%MAINBRANCH%" >nul 2>&1
-if errorlevel 1 (
-  echo   %MAINBRANCH% moved while landing - attempt !LTRIES! of 3, retrying...
-  goto :land
-)
-
-echo   [ OK ] No conflicts - your work is now on %MAINBRANCH%.
-echo          Everyone gets it on their next collab-pull. No pull request needed.
-echo.
-pause
-endlocal & exit /b 0
-
-:land_conflict
-echo.
-echo   [INFO] Your changes CONFLICT with something already on %MAINBRANCH%:
-echo          someone else changed the same lines. Auto-landing is not safe,
-echo          so this one needs human eyes.
-echo.
-echo          Your branch IS safely pushed - nothing is lost. Open a pull
-echo          request here and resolve it with the owner:
-echo            %REPO_WEB%/compare/%MAINBRANCH%...!TARGET!?expand=1
-echo.
-pause
-endlocal & exit /b 0
-
-:land_giveup
-echo.
-echo   [WARN] Could not land on %MAINBRANCH% after 3 attempts. Either others
-echo          are pushing right now - run this again in a minute - or your
-echo          account does not have write access to %MAINBRANCH%.
-echo.
-echo          Your branch IS safely pushed. Fallback - open a pull request:
-echo            %REPO_WEB%/compare/%MAINBRANCH%...!TARGET!?expand=1
+echo   Open a pull request so the owner can review it and bring it into %MAINBRANCH%:
+echo     %REPO_WEB%/compare/%MAINBRANCH%...!TARGET!?expand=1
 echo.
 pause
 endlocal & exit /b 0
@@ -330,8 +298,8 @@ echo.
 echo     3. Authentication. GitHub does not accept passwords. Use a Personal
 echo        Access Token as the password: https://github.com/settings/tokens
 echo.
-echo   This script never force-pushes. Forcing would discard someone else's
-echo   commits, and that is not recoverable.
+echo   This script never plain-force-pushes, and never to %MAINBRANCH%: it replaces only
+echo   your own branch, and only when the remote holds nothing that is not already here.
 echo.
 goto :die
 
@@ -341,29 +309,90 @@ echo   collab-push.bat                          commit with an automatic message
 echo   collab-push.bat "what you changed"       commit with your own message
 echo   collab-push.bat "message" /branch NAME   push to a specific branch
 echo.
-echo   Pushes to your own branch, then auto-lands it on %MAINBRANCH% when the
-echo   merge is conflict-free. Conflicts fall back to a pull-request link.
+echo   Pushes to your own branch, and gives you the link for a pull request into %MAINBRANCH%,
+echo   where the owner reviews it. Nothing is ever pushed to %MAINBRANCH% itself.
 echo.
 endlocal & exit /b 0
 
+
+:: ================= everything about to be pushed =================
+:: Not only what this script staged: commits made in an editor or a terminal are checked too,
+:: against the same file list and the same token pattern. %1 is the branch being pushed.
+:scan_outgoing
+set "RANGE=HEAD"
+git rev-parse --verify --quiet "refs/remotes/origin/%MAINBRANCH%" >nul 2>&1 && set "RANGE=origin/%MAINBRANCH%..HEAD"
+if not "%~1"=="" git rev-parse --verify --quiet "refs/remotes/origin/%~1" >nul 2>&1 && set "RANGE=origin/%~1..HEAD"
+:: A range git cannot read stops the push: the scan never passes by failing.
+git rev-list "%RANGE%" >nul 2>&1 || (
+    echo.
+    echo [STOP] Could not list the commits about to be pushed ^(%RANGE%^). Nothing was pushed.
+    exit /b 1
+)
+:: Merge commits are scanned too (against their first parent: a secret added while resolving a
+:: conflict lives only in the merge), and so is every commit of a merged side branch (--full-history:
+:: git would otherwise skip one whose files end up as they started).
+:: The scan file lives in this repository's own .git folder (a relative path, so no "!" in a folder
+:: name can upset it), with a name no other run shares.
+set "SCAN=.git\studio-scan-%RANDOM%-%RANDOM%-%TIME::=%.txt"
+set "SCAN=%SCAN:,=%"
+set "SCAN=%SCAN: =0%"
+git log --full-history --diff-merges=first-parent --no-patch --format=%%h --diff-filter=AMR "%RANGE%" -- %SECRET_FILES% >"%SCAN%" 2>nul || goto :scan_failed
+if not exist "%SCAN%" goto :scan_failed
+%SYS%\findstr.exe . "%SCAN%" >nul && (
+    del "%SCAN%" >nul 2>&1
+    echo.
+    echo [STOP] Commits about to be pushed add files that look like keys, certificates, licences or secrets:
+    git log --full-history --diff-merges=first-parent --format= --name-only --diff-filter=AMR "%RANGE%" -- %SECRET_FILES%
+    echo        Nothing was pushed. Take them out of those commits first.
+    exit /b 1
+)
+git log --full-history --diff-merges=first-parent --no-patch --text --format=%%h -G "%SECRET_TEXT%" "%RANGE%" >"%SCAN%" 2>nul || goto :scan_failed
+if not exist "%SCAN%" goto :scan_failed
+%SYS%\findstr.exe . "%SCAN%" >nul && (
+    del "%SCAN%" >nul 2>&1
+    echo.
+    echo [STOP] Commits about to be pushed contain what looks like an access token or a private key:
+    git log --full-history --diff-merges=first-parent --no-patch --text --format="        %%h %%s" -G "%SECRET_TEXT%" "%RANGE%"
+    echo        Nothing was pushed. Take the secret out of those commits ^(and revoke it if it was real^).
+    exit /b 1
+)
+del "%SCAN%" >nul 2>&1
+exit /b 0
+:: git could not search the commits (too old a git, or a range it cannot read): nothing is pushed.
+:scan_failed
+del "%SCAN%" >nul 2>&1
+echo.
+echo [STOP] git could not check the commits about to be pushed for secrets. Nothing was pushed.
+echo        Update Git for Windows ^(2.31 or later^) and run this again.
+exit /b 1
+
 :: ================= helpers =================
 :ensure_git
-where git >nul 2>&1 && exit /b 0
+%SYS%\where.exe git >nul 2>&1 && exit /b 0
 if exist "%GITCMD%\git.exe"  ( set "PATH=%GITCMD%;%PATH%" & exit /b 0 )
 if exist "%GITCMD2%\git.exe" ( set "PATH=%GITCMD2%;%PATH%" & exit /b 0 )
 
-echo   [setup] Git is not installed. Installing now...
-where winget >nul 2>&1 && (
+echo   [setup] Git is not installed.
+echo   [setup] Installing it accepts the Git for Windows licence ^(GPL v2^) and, through winget,
+echo           the winget source agreements.
+%SYS%\choice.exe /c YN /n /m "  [setup] Install Git for Windows now? [Y/N] "
+if not "%errorlevel%"=="1" (
+    echo   [setup] Git was not installed. Install it from https://git-scm.com/download/win and run this again.
+    exit /b 1
+)
+%SYS%\where.exe winget >nul 2>&1 && (
     echo   [setup] Installing via winget...
     winget install --id Git.Git -e --source winget --silent --accept-package-agreements --accept-source-agreements
 ) || (
-    echo   [setup] winget not available - downloading the Git installer...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '64-bit\.exe$'} | Select-Object -First 1; $f=Join-Path $env:TEMP 'git-setup.exe'; Invoke-WebRequest $a.browser_download_url -OutFile $f; Start-Process $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait"
+    echo   [setup] winget not available - downloading the Git installer, and checking its signature...
+    REM The download goes to a folder of its own, and runs only when Windows confirms it is
+    REM signed by the Git for Windows project.
+    %SYS%\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -Command ^
+      "$a=(Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest').assets | Where-Object {$_.name -match '^Git-[\d.]+-64-bit\.exe$'} | Select-Object -First 1; $d=Join-Path $env:TEMP ([guid]::NewGuid().ToString()); New-Item -ItemType Directory $d | Out-Null; $f=Join-Path $d $a.name; Invoke-WebRequest $a.browser_download_url -OutFile $f; $s=Get-AuthenticodeSignature -LiteralPath $f; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch '^CN=Johannes Schindelin,') { Remove-Item -Recurse -Force $d; throw ('The Git installer is not signed by the Git for Windows project (' + $s.Status + '). Nothing was installed.') }; Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/NORESTART' -Wait; Remove-Item -Recurse -Force $d"
 )
 
 set "PATH=%GITCMD%;%GITCMD2%;%PATH%"
-where git >nul 2>&1 && ( echo   [setup] Git installed successfully. & exit /b 0 )
+%SYS%\where.exe git >nul 2>&1 && ( echo   [setup] Git installed successfully. & exit /b 0 )
 echo   [FAIL] Git could not be installed automatically.
 echo          Install it from https://git-scm.com/download/win and run this again.
 exit /b 1

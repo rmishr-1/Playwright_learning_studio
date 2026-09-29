@@ -2,26 +2,34 @@
   "schemaVersion": "1.0",
   "day": 10,
   "week": 2,
-  "title": "Playwright Test Runner II: Control, Debug & Ship",
-  "subtitle": "Annotations and tags, how the runner works under the hood, filtering, debugging, the HTML report — and the Week 2 mini-project",
-  "estimatedTime": "3–3.5 hours",
+  "title": "Framework Structure Overview",
+  "subtitle": "Grow from single test files into a maintainable framework — configuration, grouping and hooks, tags, test data, page objects and fixtures",
+  "estimatedTime": "3 hours",
   "topics": [
-    "Annotations & tags",
-    "Runner internals: workers, timeouts, retries",
-    "Debugging & reports",
-    "Mini-project"
+    "Framework layers — tests, pages, fixtures, test data and utilities",
+    "playwright.config.ts in depth",
+    "test.describe, hooks, tags and steps",
+    "Test data and helper modules",
+    "Page objects and custom fixtures (introduction)"
   ],
   "objectives": [
-    "Control tests with `test.only`, `test.skip`, `test.fixme` and tags, and filter them from the CLI",
-    "Explain how the runner discovers, parallelises, times out, retries and reports tests",
-    "See hooks run in order across workers",
-    "Debug a failing test from its error output, the Inspector and the HTML report",
-    "Turn written requirements into a complete, tagged, passing test suite"
+    "Explain what each folder in a Playwright framework is for, and where a new file belongs",
+    "Read every setting in playwright.config.ts, and change timeouts, baseURL, screenshots and traces",
+    "Group tests with test.describe and share set-up with beforeEach and the other hooks",
+    "Tag tests and run a chosen subset with --grep; structure reports with test.step",
+    "Keep test data and helpers in their own modules",
+    "Read and write a simple page object, and use it through a custom fixture",
+    "Organise a small suite for the enrol page using all of the above"
   ],
   "prerequisitesFromEarlierDays": [
-    "Day 9: test anatomy, fixtures, locators, assertions, describe, beforeEach, the practice pages"
+    "Day 3: the generated project, npm scripts",
+    "Day 6: type aliases and objects",
+    "Day 8: functions, async/await, export and import",
+    "Day 9: test anatomy, fixtures, locators, actions, assertions, annotations, and the practice pages in tests/day9/practice-pages.ts",
+    "Day 2: projects (one per browser) and network mocking with page.route",
+    "Day 5: the ternary operator"
   ],
-  "workspace": "pw-course/tests/day10/",
+  "workspace": "pw-course/",
   "sections": [
     {
       "id": "prerequisites",
@@ -30,79 +38,77 @@
       "lessons": [
         {
           "id": "d10-prerequisites-1",
-          "title": "P1 · Quick recap from Day 9",
+          "title": "P1 · Checklist before you start",
           "blocks": [
             {
               "type": "markdown",
-              "content": "Quick checks on Day 9 before we take control of the runner:"
+              "content": "- [ ] Your Day 9 tests pass: `npx playwright test tests/day9 --project=chromium` (Day 9)\n- [ ] `tests/day9/practice-pages.ts` exists and exports `signInPage` and `enrolPage` (Day 9 · P3)\n- [ ] Explain what a fixture is, and what `{ page }` does (Day 9 · F2)\n- [ ] Export something from one file and import it into another (Day 8 · F7)"
             },
             {
               "type": "quiz",
               "id": "d10-p1-q1",
               "quizType": "single",
-              "question": "Which locator finds `<button>Sign in</button>`?",
+              "question": "`test-data/users.ts` exports `student`. What's the import line in `tests/day10/login.spec.ts`?",
               "options": [
                 {
                   "id": "a",
-                  "text": "`page.getByRole('button', { name: 'Sign in' })`"
+                  "text": "`import { student } from '../test-data/users';`"
                 },
                 {
                   "id": "b",
-                  "text": "`page.getByLabel('Sign in')`"
+                  "text": "`import { student } from '../../test-data/users';`"
                 },
                 {
                   "id": "c",
-                  "text": "`page.getByRole('link', { name: 'Sign in' })`"
-                }
-              ],
-              "correct": [
-                "a"
-              ],
-              "explanation": "A button element has the role button; its text is its accessible name."
-            },
-            {
-              "type": "quiz",
-              "id": "d10-p1-q2",
-              "quizType": "single",
-              "question": "Where does `await page.setContent(loginPage)` belong when every test in a file needs it?",
-              "options": [
-                {
-                  "id": "a",
-                  "text": "`test.beforeAll`"
+                  "text": "`import { student } from './test-data/users';`"
                 },
                 {
-                  "id": "b",
-                  "text": "`test.beforeEach`"
-                },
-                {
-                  "id": "c",
-                  "text": "Copied into every test"
+                  "id": "d",
+                  "text": "`import student from 'test-data';`"
                 }
               ],
               "correct": [
                 "b"
               ],
-              "explanation": "`beforeEach` runs before every test and has access to `page`; `beforeAll` runs once and cannot use `page`."
+              "explanation": "From tests/day10, go up two folders (../../) to reach the project folder, then into test-data."
+            }
+          ]
+        },
+        {
+          "id": "d10-prerequisites-2",
+          "title": "P2 · Why test code needs structure",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Picture your suite six months from now: 300 tests. The *Sign in* button's text changes to *Log in*. If every test finds that button itself, you edit 300 files. If one file knows how to use the sign-in page, you edit one line.\n\nYou already organise manual testing this way:\n\n| Manual testing | Automation framework |\n|---|---|\n| Test cases, grouped into suites | `tests/` — spec files, grouped with `test.describe` |\n| Shared steps (\"Log in as a student\") | `pages/` — page objects that know how to use each page |\n| Preconditions (\"user is on the sign-in page\") | Hooks and **fixtures** — set-up that runs before each test |\n| Test-data sheets | `test-data/` — modules of users, products, messages |\n| Test plan: which suites run where, how often | `playwright.config.ts` — browsers, retries, timeouts, reports |\n| Tags on test cases: *smoke*, *regression* | Tags: `{ tag: '@smoke' }` |\n\nA **framework** is simply this: an agreed structure, so that everyone knows where things live and each fact is written down **once**."
             },
             {
               "type": "quiz",
-              "id": "d10-p1-q3",
+              "id": "d10-p2-q1",
               "quizType": "single",
-              "question": "Which assertion keeps retrying until the text matches?",
+              "question": "The Sign in button is renamed to Log in. In a well-structured framework, how many places need changing?",
               "options": [
                 {
                   "id": "a",
-                  "text": "`expect(await locator.textContent()).toBe('Dashboard')`"
+                  "text": "None — Playwright finds the new name automatically"
                 },
                 {
                   "id": "b",
-                  "text": "`await expect(locator).toHaveText('Dashboard')`"
+                  "text": "One — the page object for the sign-in page"
+                },
+                {
+                  "id": "c",
+                  "text": "Every test that signs in"
+                },
+                {
+                  "id": "d",
+                  "text": "Only the config file"
                 }
               ],
               "correct": [
                 "b"
               ],
-              "explanation": "Web-first assertions retry (5 s by default); reading the text once and comparing does not."
+              "explanation": "Keeping each page's locators in one page object means a UI change is fixed in one place."
             }
           ]
         }
@@ -115,101 +121,528 @@
       "lessons": [
         {
           "id": "d10-fundamentals-1",
-          "title": "F1 · Controlling which tests run: annotations and tags",
+          "title": "F1 · The layers of a framework",
           "blocks": [
             {
               "type": "markdown",
-              "content": "| Annotation | Effect |\n|---|---|\n| `test.only('…', …)` | Run **only** this test (and other `.only` tests). Handy while writing — never commit it! |\n| `test.skip('…', …)` | Don't run this test; report it as skipped |\n| `test.skip(condition, 'reason')` *(inside a test)* | Skip only when the condition is true, e.g. `test.skip(browserName === 'webkit', 'Feature not supported in Safari yet')` |\n| `test.fixme('…', …)` | Skip because the **test** needs fixing (marks it as \"fixme\" in the report) |\n| `test.fail()` *(inside a test)* | \"This test is expected to fail\" (known bug) — it passes when it fails, and alerts you when it starts passing |\n| `test.slow()` *(inside a test)* | Triple the timeout for this test |\n\nThe config line `forbidOnly: !!process.env.CI` (Day 4) makes CI **fail** if someone left a `test.only` in the code — otherwise CI would silently run only one test.\n\n### Tags\n\nTags label tests so you can run subsets such as smoke or regression packs:"
+              "content": "Here's the structure you'll build today, inside `pw-course`:"
             },
             {
               "type": "code",
-              "language": "ts",
-              "content": "test('valid user reaches the dashboard', { tag: '@smoke' }, async ({ page }) => { /* … */ });\n\ntest('remember-me box can be ticked', { tag: ['@regression', '@login'] }, async ({ page }) => { /* … */ });\n\ntest.describe('Enrolment', { tag: '@enrol' }, () => { /* every test inside gets @enrol */ });",
+              "language": "text",
+              "content": "pw-course/\n├── playwright.config.ts   ← how tests run: browsers, timeouts, reports\n├── package.json           ← npm scripts: test, test:smoke, report…\n├── tests/                 ← the tests themselves (*.spec.ts)\n│   ├── day9/\n│   └── day10/\n├── pages/                 ← page objects: how to use each page\n│   ├── SignInPage.ts\n│   └── EnrolPage.ts\n├── fixtures/              ← custom fixtures: ready-made set-up for tests\n│   └── index.ts\n├── test-data/             ← users, products, expected messages\n│   ├── users.ts\n│   └── messages.ts\n└── utils/                 ← small helpers used by several layers\n    └── practice-site.ts",
               "mode": "read"
             },
             {
-              "type": "markdown",
-              "content": "(Tags written inside the title, like `'login works @smoke'`, also work.)"
+              "type": "diagram",
+              "format": "mermaid",
+              "content": "flowchart TD\n  T[\"tests/*.spec.ts<br/>WHAT to check\"] --> F[\"fixtures/<br/>set-up, ready-made objects\"]\n  T --> P[\"pages/<br/>HOW to use each page\"]\n  T --> D[\"test-data/<br/>WITH which data\"]\n  F --> P\n  P --> U[\"utils/<br/>shared helpers\"]\n  F --> U\n  C[\"playwright.config.ts<br/>WHERE and HOW tests run\"] -.-> T"
             },
             {
-              "type": "terminal",
-              "shell": "bash",
-              "commands": [
-                "npx playwright test --grep @smoke            # only tests tagged @smoke",
-                "npx playwright test --grep-invert @slow      # everything EXCEPT @slow",
-                "npx playwright test --grep \"@smoke|@login\"   # @smoke OR @login"
-              ]
+              "type": "markdown",
+              "content": "| Layer | Holds | Rule of thumb |\n|---|---|---|\n| `tests/` | Test files — titles, steps, assertions | Reads like a test case: *what* is checked, not *how* to find each element |\n| `pages/` | One page object per page or component | The only place that knows a page's locators |\n| `fixtures/` | Custom fixtures (F7) | Set-up that many tests need, handed to them by name |\n| `test-data/` | Plain data: users, products, messages | No browser code at all — just values |\n| `utils/` | Small general helpers — dates, random emails, API calls | Used by several layers |\n| `playwright.config.ts` | Browsers, timeouts, retries, reports, base URL | One place for decisions that apply to every test |\n\nFolder names vary between teams — some say `page-objects/` or `data/` — but the idea is always the same: **each kind of thing has its own place**. Only `tests/` is special to Playwright, because the config's `testDir` points at it; the other folders are plain modules that tests import."
+            },
+            {
+              "type": "callout",
+              "variant": "note",
+              "content": "Test files: `feature.spec.ts` (`signin.spec.ts`). Page objects: the page name in PascalCase — every word capitalised — ending in `Page` (`SignInPage.ts`). Everything else: short, lower-case names with hyphens (`practice-site.ts`).",
+              "title": "Naming conventions"
             },
             {
               "type": "quiz",
-              "id": "d10-f6-q1",
+              "id": "d10-f1-q1",
               "quizType": "single",
-              "question": "A teammate pushed code with `test.only` still in it. What happens on CI with the generated config?",
+              "question": "Where does a list of 20 product names and prices, used by several search tests, belong?",
               "options": [
                 {
                   "id": "a",
-                  "text": "CI runs only that one test and reports success"
+                  "text": "`tests/`"
                 },
                 {
                   "id": "b",
-                  "text": "CI fails the run, because `forbidOnly` is true when the CI variable is set"
+                  "text": "`test-data/`"
                 },
                 {
                   "id": "c",
-                  "text": "CI ignores `.only`"
+                  "text": "`playwright.config.ts`"
                 },
                 {
                   "id": "d",
-                  "text": "CI deletes the test"
+                  "text": "`pages/`"
                 }
               ],
               "correct": [
                 "b"
               ],
-              "explanation": "`forbidOnly: !!process.env.CI` turns a leftover `.only` into a failure on CI, protecting the full suite from being silently skipped."
+              "explanation": "It's plain data with no browser code, used by several tests: test-data."
             }
           ]
         },
         {
           "id": "d10-fundamentals-2",
-          "title": "F2 · What the runner does when you press Run",
+          "title": "F2 · `playwright.config.ts` in depth",
           "blocks": [
             {
-              "type": "diagram",
-              "format": "mermaid",
-              "content": "flowchart LR\n  A[\"1. Load config<br/>playwright.config.ts\"] --> B[\"2. Discover tests<br/>*.spec.ts in testDir\"]\n  B --> C[\"3. Multiply by projects<br/>(chromium, firefox, webkit)\"]\n  C --> D[\"4. Distribute to workers<br/>(parallel processes)\"]\n  D --> E[\"5. For each test:<br/>fixtures → hooks → body → teardown\"]\n  E --> F[\"6. Retry failures<br/>(if retries > 0)\"]\n  F --> G[\"7. Report<br/>list, html…\"]"
+              "type": "markdown",
+              "content": "On Day 3 you changed one line of this file. Now you can read all of it. Here's the generated config, without its comment lines, plus a few settings you'll add today:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',\n  fullyParallel: true,\n  forbidOnly: !!process.env.CI,\n  retries: process.env.CI ? 2 : 0,\n  workers: process.env.CI ? 1 : undefined,\n  timeout: 30_000,\n  expect: { timeout: 5_000 },\n  reporter: [['list'], ['html', { open: 'never' }]],\n  use: {\n    baseURL: 'https://qa-academy.test',\n    trace: 'on-first-retry',\n    screenshot: 'only-on-failure',\n  },\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n    { name: 'webkit', use: { ...devices['Desktop Safari'] } },\n  ],\n});",
+              "mode": "read"
             },
             {
               "type": "markdown",
-              "content": "### Timeouts to remember\n\n| Timeout | Default | Change it with |\n|---|---|---|\n| Whole test — the body plus `beforeEach` hooks and fixture setup | **30 s** | `timeout` in the config, `--timeout=60000`, or `test.setTimeout(60000)` |\n| Each web-first assertion (`expect`) | **5 s** | `expect: { timeout: 10000 }` in the config, or `{ timeout: 10000 }` on one assertion |\n| Each action (`click`, `fill`…) | no separate limit — bounded by the test timeout | `use: { actionTimeout: 10000 }` |\n\n### Results you can get\n\n| Status | Meaning |\n|---|---|\n| ✓ **passed** | Everything worked |\n| ✘ **failed** | An action/assertion failed or timed out |\n| **flaky** | Failed first, then **passed on retry** — investigate! |\n| **skipped** | Skipped by `test.skip` / `test.fixme` |\n\nWhen any test fails, the command ends with a non-zero **exit code** — that's how CI knows the build is red."
+              "content": "The file **default-exports** (Day 8 · F7) one big settings object, wrapped in `defineConfig(…)` so that VS Code can check and autocomplete every setting.\n\n### The top-level settings\n\n| Setting | Meaning |\n|---|---|\n| `testDir: './tests'` | Where Playwright looks for `*.spec.ts` files |\n| `fullyParallel: true` | Run tests **inside** each file in parallel too, not just different files |\n| `forbidOnly: !!process.env.CI` | On a CI server, fail the run if a `test.only` was left in (Day 9 · F6) |\n| `retries: process.env.CI ? 2 : 0` | Re-run a failed test up to 2 times on CI; never on your computer (Day 5 · F7) |\n| `workers: process.env.CI ? 1 : undefined` | How many tests run at once. `undefined` lets Playwright choose based on your computer |\n| `timeout: 30_000` | Maximum time for **each test**, including its `beforeEach` hooks and fixture set-up: 30 seconds (the default). `afterEach`, `beforeAll` and `afterAll` hooks each get their own limit of the same length |\n| `expect: { timeout: 5_000 }` | How long each web-first assertion keeps retrying: 5 seconds (the default) |\n| `reporter` | Which reports to produce: here, a list in the terminal plus the HTML report |\n\n`30_000` is just `30000` written with an underscore to make it easier to read — the underscore is ignored.\n\n### `process.env.CI` — one config, two environments\n\n`process.env` holds the computer's **environment variables**: named settings the system passes to every program. CI servers such as GitHub Actions set a variable called `CI`. So `process.env.CI ? 2 : 0` (a ternary, Day 5 · F7) means *\"on a CI server, 2 retries; on my computer, 0\"*. In `forbidOnly`, `!` (Day 5 · F7) turns a value into its opposite true/false, and `!!` does that twice — so a variable that is set (truthy, Day 7 · F1) becomes `true`, and a missing one becomes `false`.\n\n### `use` — settings for every test\n\n`use` holds settings that affect the browser and page each test gets:\n\n| Option | Example | Effect |\n|---|---|---|\n| `baseURL` | `'https://qa-academy.test'` | `page.goto('/signin')` opens `https://qa-academy.test/signin`. Change one line to test another environment |\n| `trace` | `'on-first-retry'` | Record a trace when a test is retried. Also: `'on'`, `'off'`, `'retain-on-failure'`. Locally, where `retries` is 0, nothing is recorded — use `--trace on` (Day 2) when you need one |\n| `screenshot` | `'only-on-failure'` | Attach a screenshot to each failed test in the report. Also: `'on'`, `'off'` |\n| `video` | `'retain-on-failure'` | Keep a video of failed tests. Also: `'on'`, `'off'`, `'on-first-retry'` |\n| `actionTimeout` | `10_000` | Maximum time for each action, such as `click()`. The default is no limit of its own — only the test's 30 s |\n\n### `projects` — the same tests, several ways\n\nEach **project** runs the whole suite once with its own settings — usually one per browser (Day 2 · F4). `devices['Desktop Chrome']` is a ready-made bundle of settings (browser, screen size and more). Here `...` is the **spread** operator: it copies every property of one object into another — so all of those settings land in the project's `use`. It looks like the rest parameter from Day 8 · F2, but does a different job. You can also add mobile projects, such as `devices['Pixel 7']`.\n\n### Settings at three levels\n\nSettings apply from the most general to the most specific, and the more specific one wins:\n\n| Level | Where | Example |\n|---|---|---|\n| Whole suite | `use` at the top of the config | `screenshot: 'only-on-failure'` |\n| One project | `use` inside a project | `...devices['Desktop Safari']` |\n| One file or group | `test.use({ … })` in a spec file | `test.use({ viewport: { width: 375, height: 667 } });` |"
             },
             {
               "type": "quiz",
-              "id": "d10-f7-q1",
+              "id": "d10-f2-q1",
               "quizType": "single",
-              "question": "With `retries: 1`, a test fails on the first attempt and passes on the retry. How is it reported?",
+              "question": "Tests pass on your computer but you want 2 retries on the CI server only. Which setting does that?",
               "options": [
                 {
                   "id": "a",
-                  "text": "passed"
+                  "text": "`forbidOnly: 2`"
                 },
                 {
                   "id": "b",
-                  "text": "failed"
+                  "text": "`retries: process.env.CI ? 2 : 0`"
                 },
                 {
                   "id": "c",
-                  "text": "flaky"
+                  "text": "`workers: process.env.CI ? 2 : 0`"
                 },
                 {
                   "id": "d",
-                  "text": "skipped"
+                  "text": "`retries: 2`"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "The ternary picks 2 when the CI environment variable is set, and 0 otherwise."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-f2-q2",
+              "quizType": "single",
+              "question": "With `baseURL: 'https://staging.shop.test'` in the config, what does `await page.goto('/cart')` open?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`/cart` on the last page visited"
+                },
+                {
+                  "id": "b",
+                  "text": "`https://playwright.dev/cart`"
+                },
+                {
+                  "id": "c",
+                  "text": "An error: goto needs a full URL"
+                },
+                {
+                  "id": "d",
+                  "text": "`https://staging.shop.test/cart`"
+                }
+              ],
+              "correct": [
+                "d"
+              ],
+              "explanation": "A path starting with / is added to the baseURL. Switching environments then means changing one line."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-f2-q3",
+              "quizType": "single",
+              "question": "A web-first assertion gives up after 5 seconds, and a whole test after 30 seconds. Which two settings control these?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`actionTimeout` and `retries`"
+                },
+                {
+                  "id": "b",
+                  "text": "`workers` and `timeout`"
+                },
+                {
+                  "id": "c",
+                  "text": "`expect.timeout` and `timeout`"
+                },
+                {
+                  "id": "d",
+                  "text": "`timeout` and `globalTimeout`"
                 }
               ],
               "correct": [
                 "c"
               ],
-              "explanation": "Passing only on retry means the result isn't consistent. Playwright marks it flaky so you can investigate the root cause."
+              "explanation": "expect: { timeout } is per assertion; the top-level timeout is per test."
+            }
+          ]
+        },
+        {
+          "id": "d10-fundamentals-3",
+          "title": "F3 · Grouping and shared set-up: `describe` and hooks",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "### `test.describe` — a test suite\n\n`test.describe('title', () => { … })` groups related tests, like a suite in a test-management tool. The group title appears before each test's title in reports: `Sign-in › wrong password is rejected`."
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "test.describe('Sign-in', () => {\n  test('valid student reaches the dashboard', async ({ page }) => { /* … */ });\n  test('wrong password is rejected', async ({ page }) => { /* … */ });\n});",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "### Hooks — code that runs around tests\n\nIf every test in a group starts with the same steps, move them into a **hook**:\n\n| Hook | Runs… | Typical use |\n|---|---|---|\n| `test.beforeEach(async ({ page }) => { … })` | Before **every** test in its file or group | Open the page; sign in |\n| `test.afterEach(async ({ page }) => { … })` | After every test — passed or failed | Clean-up; extra logging |\n| `test.beforeAll(async () => { … })` | Once, before the first test in its file or group — **once per worker** | Expensive one-time set-up, such as creating test data through an API |\n| `test.afterAll(async () => { … })` | Once, after the last test — once per worker | Removing that test data |"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "test.describe('Sign-in', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.goto('/signin');            // every test in this group starts here\n  });\n\n  test('empty form shows a message', async ({ page }) => {\n    await page.getByRole('button', { name: 'Sign in' }).click();\n    await expect(page.getByRole('alert')).toHaveText('Please enter your email and password');\n  });\n});",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "`beforeEach` and `afterEach` can use fixtures like `page`; they get the **same** page as the test. `beforeAll` and `afterAll` can't use `page`, because they don't belong to any single test."
+            },
+            {
+              "type": "callout",
+              "variant": "warning",
+              "content": "\"Sign in once in `beforeAll`, then let all tests use that session\" sounds efficient, but tests run in parallel and in separate contexts (Day 9 · F1). Each test should set up what it needs, in `beforeEach` or a fixture. (For fast sign-in, Playwright can save and reuse a signed-in state — a topic for later.)",
+              "title": "Don't share state between tests through `beforeAll`"
+            },
+            {
+              "type": "quiz",
+              "id": "d10-f3-q1",
+              "quizType": "single",
+              "question": "A describe block has a beforeEach and 4 tests. How many times does the beforeEach run?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "1"
+                },
+                {
+                  "id": "b",
+                  "text": "5"
+                },
+                {
+                  "id": "c",
+                  "text": "4"
+                },
+                {
+                  "id": "d",
+                  "text": "It depends on the number of workers"
+                }
+              ],
+              "correct": [
+                "c"
+              ],
+              "explanation": "beforeEach runs before every test in its group: 4 tests, 4 runs. (beforeAll is the one that depends on workers.)"
+            },
+            {
+              "type": "quiz",
+              "id": "d10-f3-q2",
+              "quizType": "single",
+              "question": "A test fails halfway through. Which hook still runs for that test?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "None — hooks stop after a failure"
+                },
+                {
+                  "id": "b",
+                  "text": "Only beforeAll"
+                },
+                {
+                  "id": "c",
+                  "text": "afterEach"
+                },
+                {
+                  "id": "d",
+                  "text": "Only beforeEach"
+                }
+              ],
+              "correct": [
+                "c"
+              ],
+              "explanation": "afterEach runs after every test, passed or failed — that's what makes it suitable for clean-up."
+            }
+          ]
+        },
+        {
+          "id": "d10-fundamentals-4",
+          "title": "F4 · Tags, steps and better assertion messages",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "### Tags — choosing which tests run\n\nGive tests **tags** in the details object — the optional argument between the title and the callback:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "test('valid student reaches the dashboard', { tag: '@smoke' }, async ({ page }) => { /* … */ });\ntest('wrong password is rejected', { tag: ['@validation', '@auth'] }, async ({ page }) => { /* … */ });\n\ntest.describe('Enrolment', { tag: '@enrol' }, () => {\n  // every test in here gets @enrol\n});",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "Tags start with `@`. (Some teams write them in the title instead: `test('checkout works @smoke', …)` — that works too.) Then choose tests from the command line:\n\n| Command | Runs |\n|---|---|\n| `npx playwright test --grep @smoke` | Only tests tagged `@smoke` |\n| `npx playwright test --grep-invert @slow` | Everything **except** `@slow` tests |\n\nTo run tests with **either** of two tags, separate them with a vertical bar, which means \"or\":"
+            },
+            {
+              "type": "terminal",
+              "shell": "bash",
+              "commands": [
+                "npx playwright test --grep \"@smoke|@auth\""
+              ]
+            },
+            {
+              "type": "callout",
+              "variant": "tester",
+              "content": "Typical tags: `@smoke` (a quick check that the build is usable), `@regression` (the full suite), `@slow`, and a feature name such as `@checkout`. They're the same labels you'd put on manual test cases."
+            },
+            {
+              "type": "markdown",
+              "content": "### `test.step` — readable reports\n\nLong tests read better in the report when they're split into named steps:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "await test.step('Enter credentials and submit', async () => {\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n});",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "In the HTML report and the trace, the actions appear nested under *Enter credentials and submit*. When a test fails, you see immediately which step broke."
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "A second argument to `expect` adds a custom message to the report when the assertion fails: `` await expect(page.getByTestId('seats'), 'seat count should drop after enrolling').toHaveText('Seats left: 11'); ``. And `expect.soft(…)` records a failure but lets the test continue, so you see **all** the problems on a page at once; the test is still marked failed at the end.",
+              "title": "Two extras for assertions"
+            },
+            {
+              "type": "quiz",
+              "id": "d10-f4-q1",
+              "quizType": "single",
+              "question": "Which command runs every test EXCEPT the ones tagged @slow?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "`npx playwright test --skip @slow`"
+                },
+                {
+                  "id": "b",
+                  "text": "`npx playwright test --grep @slow`"
+                },
+                {
+                  "id": "c",
+                  "text": "`npx playwright test -g !@slow`"
+                },
+                {
+                  "id": "d",
+                  "text": "`npx playwright test --grep-invert @slow`"
+                }
+              ],
+              "correct": [
+                "d"
+              ],
+              "explanation": "--grep-invert runs the tests that do NOT match."
+            }
+          ]
+        },
+        {
+          "id": "d10-fundamentals-5",
+          "title": "F5 · Test data and helpers as modules",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Hard-coded values scattered through tests cause two problems: the same value is written in many places, and it's hard to see which data a test uses. Move them into **modules** (Day 8 · F7):"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// test-data/users.ts\nexport type User = { email: string; password: string; name: string };\n\nexport const student: User = { email: 'student@qa.academy', password: 'Learn@123', name: 'Student' };",
+              "mode": "read"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// tests/day10/signin.spec.ts\nimport { student } from '../../test-data/users';\n\nawait page.getByLabel('Email').fill(student.email);",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "Now the student's email is written once. The `User` type means TypeScript checks every user you add (Day 6).\n\n| Put in `test-data/` | Put in `utils/` |\n|---|---|\n| Users, products, addresses | A function that builds a unique email: `uniqueEmail('asha')` |\n| Expected messages and texts | A function that formats a date the way the app shows it |\n| Lists for data-driven tests (Day 9 · ex5) | Anything that *does* something rather than *is* something |"
+            },
+            {
+              "type": "callout",
+              "variant": "warning",
+              "content": "Test data files end up in version control, where everyone can read them. Real passwords, API keys and tokens belong in **environment variables** — `process.env.STUDENT_PASSWORD` — set on the CI server or in a local `.env` file that is never committed. The generated config has commented-out lines for reading a `.env` file with a package called `dotenv`. Our practice password is fine to keep in the code: it's for a pretend site.",
+              "title": "Passwords and secrets"
+            },
+            {
+              "type": "quiz",
+              "id": "d10-f5-q1",
+              "quizType": "single",
+              "question": "Where should the password for your company's real staging admin account be stored?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "In `test-data/users.ts`, so every test can import it"
+                },
+                {
+                  "id": "b",
+                  "text": "In `playwright.config.ts`, under use"
+                },
+                {
+                  "id": "c",
+                  "text": "In the test's title"
+                },
+                {
+                  "id": "d",
+                  "text": "In an environment variable, read with `process.env`"
+                }
+              ],
+              "correct": [
+                "d"
+              ],
+              "explanation": "Secrets stay out of code and version control. Environment variables are set on the CI server or in an uncommitted .env file."
+            }
+          ]
+        },
+        {
+          "id": "d10-fundamentals-6",
+          "title": "F6 · Page objects",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "A **page object** gathers everything tests need to know about one page — its locators and the actions a user can take there — into one module. Tests then say *what* they do (`signInPage.signIn(email, password)`) instead of *how* (three locators and three actions).\n\nPage objects are usually written as a **class**. You haven't met classes yet, so here's the minimum you need:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import type { Page, Locator } from '@playwright/test';\n\nexport class SignInPage {                         // ① a class: a blueprint for objects\n  readonly page: Page;                            // ② properties, each with a type\n  readonly emailField: Locator;\n\n  constructor(page: Page) {                       // ③ runs once, when a test writes: new SignInPage(page)\n    this.page = page;                             //    \"this\" = the object being built\n    this.emailField = page.getByLabel('Email');\n  }\n\n  async goto(): Promise<void> {                   // ④ a method: a function that belongs to the object\n    await this.page.goto('/signin');\n  }\n}",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "| # | Part | Meaning |\n|---|---|---|\n| ① | `class SignInPage { … }` | A **blueprint**. It describes what every sign-in page object has and can do |\n| ② | Properties | Values each object holds, like an object's properties (Day 6). `readonly` means they're set once, in the constructor, and never replaced |\n| ③ | `constructor` | Set-up code that runs when an object is created with `new SignInPage(page)`. Inside a class, `this` means \"the object itself\" |\n| ④ | Methods | Functions that belong to the object. They use `this.` to reach its properties |\n\nA class name also works as a **type**: `let signInPage: SignInPage;` means \"an object built from the SignInPage class\".\n\nUsing it in a test:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "const signInPage = new SignInPage(page);    // build an object from the blueprint\nawait signInPage.goto();\nawait signInPage.emailField.fill('student@qa.academy');",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "`Page` and `Locator` are types from Playwright — the types of `page` and of what `getByRole` & co. return — so they're imported with `import type` (Day 8 · F7)."
+            },
+            {
+              "type": "callout",
+              "variant": "tip",
+              "content": "Locators and user actions: `signIn(email, password)`, `enrol(details)`. Assertions usually stay in the **tests**, because *what* to check differs from test to test.",
+              "title": "What goes in a page object?"
+            },
+            {
+              "type": "quiz",
+              "id": "d10-f6-q1",
+              "quizType": "single",
+              "question": "What does `new SignInPage(page)` do?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "Opens a new browser tab"
+                },
+                {
+                  "id": "b",
+                  "text": "Creates an object from the SignInPage class, running its constructor with this page"
+                },
+                {
+                  "id": "c",
+                  "text": "Navigates to the sign-in page"
+                },
+                {
+                  "id": "d",
+                  "text": "Imports the SignInPage file"
+                }
+              ],
+              "correct": [
+                "b"
+              ],
+              "explanation": "new builds an object from the class, and the constructor sets up its properties. Navigating happens only when you call goto()."
+            }
+          ]
+        },
+        {
+          "id": "d10-fundamentals-7",
+          "title": "F7 · Custom fixtures",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "On Day 9 you used Playwright's built-in fixtures, like `page`. You can add **your own**, so that tests can simply ask for a ready-to-use page object:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "test('wrong password is rejected', async ({ signInPage }) => {    // ← our own fixture\n  await signInPage.signIn('student@qa.academy', 'wrong');\n  await expect(signInPage.message).toHaveText('Invalid email or password');\n});",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "You define custom fixtures once, by **extending** Playwright's `test`:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test as base } from '@playwright/test';            // import test, but call it \"base\" here\nimport { SignInPage } from '../pages/SignInPage';\n\ntype QaAcademyFixtures = { signInPage: SignInPage };\n\nexport const test = base.extend<QaAcademyFixtures>({\n  signInPage: async ({ page }, use) => {\n    const signInPage = new SignInPage(page);      // set-up…\n    await signInPage.goto();\n    await use(signInPage);                        // …hand it to the test, and wait while the test runs…\n    // …anything here is clean-up, after the test\n  },\n});\n\nexport { expect } from '@playwright/test';        // pass expect through, so tests import both from here",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "| Piece | Meaning |\n|---|---|\n| `test as base` | Import `test`, but name it `base` in this file — because we're about to create our own `test` |\n| `base.extend<QaAcademyFixtures>({ … })` | A new `test` with everything the original has, plus the fixtures described by the type in angle brackets |\n| `async ({ page }, use) => { … }` | How to build the fixture. It can ask for other fixtures, like `page` |\n| `await use(value)` | Hands `value` to the test and waits until the test finishes. Code before it is set-up; code after it is clean-up |\n| `export { expect } from …` | Re-exports Playwright's `expect` unchanged |\n\nTests then import from **your** fixtures file instead of from `@playwright/test`:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '../../fixtures';",
+              "mode": "read"
+            },
+            {
+              "type": "markdown",
+              "content": "Fixtures versus `beforeEach`: both do set-up, but a fixture is **reusable across files**, runs **only for tests that ask for it**, and keeps its set-up and clean-up together. Hooks are fine for set-up that belongs to one file."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-f7-q1",
+              "quizType": "single",
+              "question": "In a fixture, what does `await use(signInPage)` do?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "Imports the SignInPage class"
+                },
+                {
+                  "id": "b",
+                  "text": "Calls signInPage's goto() method"
+                },
+                {
+                  "id": "c",
+                  "text": "Registers a new test"
+                },
+                {
+                  "id": "d",
+                  "text": "Hands signInPage to the test and waits until the test finishes, before any clean-up runs"
+                }
+              ],
+              "correct": [
+                "d"
+              ],
+              "explanation": "Everything before use() is set-up, everything after is clean-up, and the test runs in between."
             }
           ]
         }
@@ -218,151 +651,234 @@
     {
       "id": "implementation",
       "title": "Implementation",
-      "intro": [],
+      "intro": [
+        {
+          "type": "markdown",
+          "content": "Today's files go into several folders of `pw-course`. Run commands from the `pw-course` folder."
+        }
+      ],
       "lessons": [
         {
           "id": "d10-implementation-1",
-          "title": "I1 · Filter, list, tag and skip",
+          "title": "I1 · Update your config",
           "blocks": [
             {
               "type": "markdown",
-              "content": "Run subsets of your suite:"
-            },
-            {
-              "type": "terminal",
-              "shell": "bash",
-              "commands": [
-                "# only smoke tests",
-                "npx playwright test tests/day9 --grep @smoke --project=chromium",
-                "# everything except smoke tests",
-                "npx playwright test tests/day9 --grep-invert @smoke --project=chromium",
-                "# titles containing \"error\"",
-                "npx playwright test tests/day9 -g \"error\" --project=chromium",
-                "# what would run in ALL browsers, without running it",
-                "npx playwright test tests/day9/login.spec.ts --list"
-              ]
-            },
-            {
-              "type": "output",
-              "target": "terminal",
-              "content": "Listing tests:\n  [chromium] › day9/login.spec.ts:10:7 › Sign in page › shows the sign-in form @smoke\n  [chromium] › day9/login.spec.ts:17:7 › Sign in page › valid user reaches the dashboard @smoke\n  …\n  [webkit] › day9/login.spec.ts:48:7 › Sign in page › remember-me can be ticked and unticked @regression\nTotal: 18 tests in 1 file"
-            },
-            {
-              "type": "markdown",
-              "content": "6 tests × 3 projects = 18.\n\nNow try the annotations. Create `tests/day10/annotations.spec.ts` (it imports the practice pages from the Day 9 folder):"
+              "content": "Open `playwright.config.ts` and make it look like this. Your file also contains commented-out lines from the generator; keep them or delete them, as you prefer. The new settings are `timeout`, `expect`, `baseURL` and `screenshot`:"
             },
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\ntest('runs everywhere', async ({ page }) => {\n  await page.setContent(loginPage);\n  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();\n});\n\ntest('skipped on WebKit only', async ({ page, browserName }) => {\n  // Conditional skip: imagine a known Safari-only issue\n  test.skip(browserName === 'webkit', 'Known Safari issue BUG-123');\n  await page.setContent(loginPage);\n  await expect(page.getByLabel('Remember me')).not.toBeChecked();\n});\n\ntest.skip('password reset link', async ({ page }) => {\n  // Not built yet — skipped for everyone\n});\n\ntest.fixme('sign in with Google', async ({ page }) => {\n  // The test itself needs work — shows as \"fixme\" in the report\n});",
+              "content": "import { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  // Where the tests are\n  testDir: './tests',\n\n  // Run the tests inside each file in parallel, too\n  fullyParallel: true,\n\n  // On a CI server, fail the run if a test.only was left in the code\n  forbidOnly: !!process.env.CI,\n\n  // Retry failed tests twice on CI, never on your own computer\n  retries: process.env.CI ? 2 : 0,\n\n  // On CI, one worker at a time; locally, let Playwright decide\n  workers: process.env.CI ? 1 : undefined,\n\n  // Time limits\n  timeout: 30_000,                 // each test, with its beforeEach hooks: 30 s\n  expect: { timeout: 5_000 },      // each web-first assertion: 5 s\n\n  // Reports: a list in the terminal, and an HTML report that doesn't open by itself\n  reporter: [['list'], ['html', { open: 'never' }]],\n\n  // Settings shared by every test in every project\n  use: {\n    baseURL: 'https://qa-academy.test',   // page.goto('/signin') opens https://qa-academy.test/signin\n    trace: 'on-first-retry',              // record a trace when a test is retried\n    screenshot: 'only-on-failure',        // attach a screenshot to every failed test\n  },\n\n  // One project per browser: every test runs once in each\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n    { name: 'webkit', use: { ...devices['Desktop Safari'] } },\n  ],\n});",
               "mode": "editor",
-              "file": "tests/day10/annotations.spec.ts",
-              "run": "npx playwright test tests/day10/annotations.spec.ts"
+              "file": "playwright.config.ts"
+            },
+            {
+              "type": "markdown",
+              "content": "`timeout` and `expect.timeout` are set to their default values, so nothing changes yet — but now the limits are visible, and easy to change. Run your Day 9 tests to check that nothing broke:"
             },
             {
               "type": "terminal",
               "shell": "bash",
               "commands": [
-                "npx playwright test tests/day10/annotations.spec.ts"
+                "npx playwright test tests/day9 --project=chromium"
               ]
-            },
-            {
-              "type": "output",
-              "target": "terminal",
-              "content": "Running 12 tests using 4 workers\n\n  ✓   1 [chromium] › tests/day10/annotations.spec.ts:4:5 › runs everywhere (210ms)\n  ✓   2 [chromium] › tests/day10/annotations.spec.ts:9:5 › skipped on WebKit only (190ms)\n  -   3 [chromium] › tests/day10/annotations.spec.ts:16:6 › password reset link\n  -   4 [chromium] › tests/day10/annotations.spec.ts:20:6 › sign in with Google\n  ✓   5 [firefox] › tests/day10/annotations.spec.ts:4:5 › runs everywhere (520ms)\n  …\n  -  11 [webkit] › tests/day10/annotations.spec.ts:9:5 › skipped on WebKit only\n  …\n\n  7 skipped\n  5 passed (3.1s)"
-            },
-            {
-              "type": "callout",
-              "variant": "tip",
-              "content": "Change one `test(` to `test.only(` and run the file — only that test runs. Remove `.only` before you commit: on CI it fails the whole run (`forbidOnly`).",
-              "title": "`test.only` while you work"
             }
           ]
         },
         {
           "id": "d10-implementation-2",
-          "title": "I2 · See the hooks run in order",
+          "title": "I2 · Create the framework folders",
           "blocks": [
             {
-              "type": "code",
-              "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\n\ntest.beforeAll(async () => {\n  console.log('beforeAll  → once, before the tests');\n});\n\ntest.beforeEach(async ({ page }) => {\n  console.log('beforeEach → before each test');\n  await page.setContent('<h1>Hooks demo</h1>');\n});\n\ntest.afterEach(async () => {\n  console.log('afterEach  → after each test');\n});\n\ntest.afterAll(async () => {\n  console.log('afterAll   → once, after the tests');\n});\n\ntest('first test', async ({ page }) => {\n  console.log('test body  → first test');\n  await expect(page.getByRole('heading')).toHaveText('Hooks demo');\n});\n\ntest('second test', async ({ page }) => {\n  console.log('test body  → second test');\n  await expect(page.getByRole('heading')).toBeVisible();\n});",
-              "mode": "editor",
-              "file": "tests/day10/hooks.spec.ts",
-              "run": "npx playwright test tests/day10/hooks.spec.ts --project=chromium --workers=1"
-            },
-            {
               "type": "markdown",
-              "content": "`--workers=1` makes the tests run one after another so the order is easy to read:"
+              "content": "Create three folders next to `tests`:"
             },
             {
               "type": "terminal",
               "shell": "bash",
               "commands": [
-                "npx playwright test tests/day10/hooks.spec.ts --project=chromium --workers=1"
+                "mkdir pages fixtures test-data utils"
               ]
             },
             {
-              "type": "output",
-              "target": "terminal",
-              "content": "Running 2 tests using 1 worker\n\nbeforeAll  → once, before the tests\nbeforeEach → before each test\ntest body  → first test\nafterEach  → after each test\n  ✓  1 [chromium] › tests/day10/hooks.spec.ts:20:5 › first test (160ms)\nbeforeEach → before each test\ntest body  → second test\nafterEach  → after each test\nafterAll   → once, after the tests\n  ✓  2 [chromium] › tests/day10/hooks.spec.ts:25:5 › second test (40ms)\n\n  2 passed (900ms)"
+              "type": "markdown",
+              "content": "**A stand-in for the real website.** Our practice pages aren't on the internet. This helper answers the browser's requests to `https://qa-academy.test` with them, using `page.route` — the network mocking you saw on Day 2 · I6. Tests can then use `page.goto('/signin')`, just as they would with a real site:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import type { Page } from '@playwright/test';\nimport { signInPage, enrolPage } from '../tests/day9/practice-pages';\n\n// Stands in for a real web server: answers the browser's requests to\n// https://qa-academy.test with our practice pages. A real project doesn't need this —\n// its tests open the real application.\nexport async function serveQaAcademy(page: Page): Promise<void> {\n  await page.route('https://qa-academy.test/signin', (route) =>\n    route.fulfill({ contentType: 'text/html', body: signInPage }));\n  await page.route('https://qa-academy.test/enrol', (route) =>\n    route.fulfill({ contentType: 'text/html', body: enrolPage }));\n}",
+              "mode": "editor",
+              "file": "utils/practice-site.ts"
             },
             {
               "type": "markdown",
-              "content": "**Try it:** run the same command **without** `--workers=1`. If Playwright starts two or more workers (the default is half your CPU cores), each worker runs its own `beforeAll` and `afterAll` — you'll see them printed more than once."
+              "content": "**Test data**: the users and the messages, each written once:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// Test users, in one place. Tests import what they need.\nexport type User = { email: string; password: string; name: string };\n\nexport const student: User = {\n  email: 'student@qa.academy',\n  password: 'Learn@123',\n  name: 'Student',\n};\n\nexport const wrongPassword: User = {\n  email: 'student@qa.academy',\n  password: 'not-my-password',\n  name: 'Student',\n};",
+              "mode": "editor",
+              "file": "test-data/users.ts"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "// Every message the sign-in page can show, spelled exactly once\nexport const signInMessages = {\n  empty: 'Please enter your email and password',\n  invalid: 'Invalid email or password',\n  signingIn: 'Signing in…',\n};",
+              "mode": "editor",
+              "file": "test-data/messages.ts"
             }
           ]
         },
         {
           "id": "d10-implementation-3",
-          "title": "I3 · Debug a failing test",
+          "title": "I3 · A suite with `describe`, hooks, tags and steps",
           "blocks": [
             {
               "type": "markdown",
-              "content": "Create a test with two deliberate mistakes:"
+              "content": "The Day 9 sign-in tests, reorganised. Compare them with `tests/day9/signin.spec.ts`: the set-up is written once, the data comes from `test-data`, and the tests are grouped and tagged."
             },
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\ntest('wrong expected text', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  // Mistake 1: the real message is \"Please enter your email and password\"\n  await expect(page.getByRole('alert')).toHaveText('Email is required');\n});\n\ntest('element that does not exist', async ({ page }) => {\n  test.setTimeout(5000);   // fail faster than the default 30 s while we practise\n  await page.setContent(loginPage);\n  // Mistake 2: there is no \"Log in\" button — it's called \"Sign in\"\n  await page.getByRole('button', { name: 'Log in' }).click();\n});",
+              "content": "import { test, expect } from '@playwright/test';\nimport { serveQaAcademy } from '../../utils/practice-site';\nimport { student, wrongPassword } from '../../test-data/users';\nimport { signInMessages } from '../../test-data/messages';\n\ntest.describe('Sign-in', () => {\n  // Runs before EACH test in this group: every test starts on the sign-in page\n  test.beforeEach(async ({ page }) => {\n    await serveQaAcademy(page);\n    await page.goto('/signin');                      // baseURL + '/signin'\n  });\n\n  test('valid student reaches the dashboard', { tag: ['@smoke', '@auth'] }, async ({ page }) => {\n    await test.step('Enter credentials and submit', async () => {\n      await page.getByLabel('Email').fill(student.email);\n      await page.getByLabel('Password').fill(student.password);\n      await page.getByRole('button', { name: 'Sign in' }).click();\n    });\n\n    await test.step('See the dashboard', async () => {\n      await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n      await expect(page.getByText(`Welcome back, ${student.name}!`)).toBeVisible();\n    });\n  });\n\n  test('empty form shows a message', { tag: '@validation' }, async ({ page }) => {\n    await page.getByRole('button', { name: 'Sign in' }).click();\n    await expect(page.getByRole('alert')).toHaveText(signInMessages.empty);\n  });\n\n  test('wrong password is rejected', { tag: ['@validation', '@auth'] }, async ({ page }) => {\n    await page.getByLabel('Email').fill(wrongPassword.email);\n    await page.getByLabel('Password').fill(wrongPassword.password);\n    await page.getByRole('button', { name: 'Sign in' }).click();\n    await expect(page.getByRole('alert')).toHaveText(signInMessages.invalid);\n  });\n});",
               "mode": "editor",
-              "file": "tests/day10/broken.spec.ts",
-              "run": "npx playwright test tests/day10/broken.spec.ts --project=chromium",
-              "expectError": true
+              "file": "tests/day10/signin.spec.ts",
+              "run": "npx playwright test tests/day10/signin.spec.ts --project=chromium",
+              "expectedOutput": "Running 3 tests using 2 workers\n\n  ✓  1 [chromium] › tests/day10/signin.spec.ts:13:7 › Sign-in › valid student reaches the dashboard @smoke @auth (1.2s)\n  ✓  2 [chromium] › tests/day10/signin.spec.ts:26:7 › Sign-in › empty form shows a message @validation (250ms)\n  ✓  3 [chromium] › tests/day10/signin.spec.ts:31:7 › Sign-in › wrong password is rejected @validation @auth (258ms)\n\n  3 passed (2.5s)",
+              "expectedOutputTarget": "terminal"
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "Running 3 tests using 2 workers\n\n  ✓  1 [chromium] › tests/day10/signin.spec.ts:13:7 › Sign-in › valid student reaches the dashboard @smoke @auth (1.2s)\n  ✓  2 [chromium] › tests/day10/signin.spec.ts:26:7 › Sign-in › empty form shows a message @validation (250ms)\n  ✓  3 [chromium] › tests/day10/signin.spec.ts:31:7 › Sign-in › wrong password is rejected @validation @auth (258ms)\n\n  3 passed (2.5s)"
+            },
+            {
+              "type": "markdown",
+              "content": "The group title *Sign-in ›* and the tags appear in every line. Now pick tests by tag:"
             },
             {
               "type": "terminal",
               "shell": "bash",
               "commands": [
-                "npx playwright test tests/day10/broken.spec.ts --project=chromium"
+                "npx playwright test tests/day10/signin.spec.ts --project=chromium --grep @smoke",
+                "npx playwright test tests/day10/signin.spec.ts --project=chromium --grep-invert @validation"
               ]
             },
             {
-              "type": "output",
-              "target": "terminal",
-              "content": "  1) [chromium] › tests/day10/broken.spec.ts:4:5 › wrong expected text ─────────────\n\n    Error: expect(locator).toHaveText(expected) failed\n\n    Locator:  getByRole('alert')\n    Expected: \"Email is required\"\n    Received: \"Please enter your email and password\"\n    Timeout:  5000ms\n\n       6 |   await page.getByRole('button', { name: 'Sign in' }).click();\n       7 |   // Mistake 1: the real message is \"Please enter your email and password\"\n    >  8 |   await expect(page.getByRole('alert')).toHaveText('Email is required');\n         |                                         ^\n\n  2) [chromium] › tests/day10/broken.spec.ts:11:5 › element that does not exist ──────\n\n    Test timeout of 5000ms exceeded.\n\n    Error: locator.click: Test timeout of 5000ms exceeded.\n    Call log:\n      - waiting for getByRole('button', { name: 'Log in' })\n\n      14 |   // Mistake 2: there is no \"Log in\" button — it's called \"Sign in\"\n    > 15 |   await page.getByRole('button', { name: 'Log in' }).click();\n         |                                                      ^\n\n  2 failed"
-            },
-            {
               "type": "markdown",
-              "content": "Two very different failures:\n\n| Failure | Clue in the output | Typical cause |\n|---|---|---|\n| **Assertion failed** | `Expected: …` vs `Received: …` | Wrong expectation — or a real bug in the app |\n| **Timeout waiting for an element** | `waiting for getByRole('button', { name: 'Log in' })` | Wrong locator, element never appears, or appears too late |\n\n### Your debugging toolbox\n\n| Tool | Command | Best for |\n|---|---|---|\n| Error output | *(always shown)* | First look: which line, expected vs received |\n| HTML report | `npx playwright show-report` | Browsing failures, steps and timings; screenshots/traces when enabled |\n| Headed mode | `--headed` | Watching what really happens |\n| Inspector | `npx playwright test tests/day10/broken.spec.ts --debug` | Stepping through one action at a time |\n| UI Mode | `npx playwright test --ui` | Watch mode, time-travel through each step |\n\nFix both mistakes (`'Please enter your email and password'` and `'Sign in'`), remove the `test.setTimeout` line, and run again until it's green."
+              "content": "Open the report (`npx playwright show-report`) and click the first test: its actions are grouped under the two step names."
             }
           ]
         },
         {
           "id": "d10-implementation-4",
-          "title": "I4 · Read the HTML report",
+          "title": "I4 · Watch the hooks run in order",
           "blocks": [
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test } from '@playwright/test';\n\ntest.beforeAll(async () => {\n  console.log('beforeAll  - once, before the first test in this file');\n});\n\ntest.beforeEach(async () => {\n  console.log('  beforeEach - before every test');\n});\n\ntest.afterEach(async () => {\n  console.log('  afterEach  - after every test, passed or failed');\n});\n\ntest.afterAll(async () => {\n  console.log('afterAll   - once, after the last test in this file');\n});\n\ntest('first test', async () => {\n  console.log('    first test');\n});\n\ntest.describe('a group', () => {\n  test.beforeEach(async () => {\n    console.log('    group beforeEach - only for tests in this group, after the outer one');\n  });\n\n  test('second test', async () => {\n    console.log('      second test');\n  });\n});",
+              "mode": "editor",
+              "file": "tests/day10/hooks.spec.ts",
+              "run": "npx playwright test tests/day10/hooks.spec.ts --project=chromium --workers=1",
+              "expectedOutput": "Running 2 tests using 1 worker\n\nbeforeAll  - once, before the first test in this file\n  beforeEach - before every test\n    first test\n  afterEach  - after every test, passed or failed\n  ✓  1 [chromium] › tests/day10/hooks.spec.ts:19:5 › first test (1ms)\n  beforeEach - before every test\n    group beforeEach - only for tests in this group, after the outer one\n      second test\n  afterEach  - after every test, passed or failed\nafterAll   - once, after the last test in this file\n  ✓  2 [chromium] › tests/day10/hooks.spec.ts:28:7 › a group › second test (0ms)\n\n  2 passed (623ms)",
+              "expectedOutputTarget": "terminal"
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "Running 2 tests using 1 worker\n\nbeforeAll  - once, before the first test in this file\n  beforeEach - before every test\n    first test\n  afterEach  - after every test, passed or failed\n  ✓  1 [chromium] › tests/day10/hooks.spec.ts:19:5 › first test (1ms)\n  beforeEach - before every test\n    group beforeEach - only for tests in this group, after the outer one\n      second test\n  afterEach  - after every test, passed or failed\nafterAll   - once, after the last test in this file\n  ✓  2 [chromium] › tests/day10/hooks.spec.ts:28:7 › a group › second test (0ms)\n\n  2 passed (623ms)"
+            },
+            {
+              "type": "markdown",
+              "content": "The outer `beforeEach` runs for **both** tests; the group's `beforeEach` only for the test inside the group, after the outer one. `--workers=1` makes the order easy to read. With several workers, each worker runs its own `beforeAll` and `afterAll`.\n\n**Try it:** run it again without `--workers=1`. With `fullyParallel`, the two tests may land on different workers — count how many times `beforeAll` is printed. (Usually twice: once per worker.)"
+            }
+          ]
+        },
+        {
+          "id": "d10-implementation-5",
+          "title": "I5 · Your first page object and custom fixture",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "**1. The page object** — everything about the sign-in page, in one place:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import type { Page, Locator } from '@playwright/test';\n\n// A page object: everything tests need to know about the sign-in page, in one place\nexport class SignInPage {\n  // Properties: the page, and the locators for its elements\n  readonly page: Page;\n  readonly emailField: Locator;\n  readonly passwordField: Locator;\n  readonly signInButton: Locator;\n  readonly message: Locator;\n\n  // The constructor runs once, when a test writes: new SignInPage(page)\n  constructor(page: Page) {\n    this.page = page;\n    this.emailField = page.getByLabel('Email');\n    this.passwordField = page.getByLabel('Password');\n    this.signInButton = page.getByRole('button', { name: 'Sign in' });\n    this.message = page.getByRole('alert');\n  }\n\n  // Methods: the actions a user can take here\n  async goto(): Promise<void> {\n    await this.page.goto('/signin');\n  }\n\n  async signIn(email: string, password: string): Promise<void> {\n    await this.emailField.fill(email);\n    await this.passwordField.fill(password);\n    await this.signInButton.click();\n  }\n}",
+              "mode": "editor",
+              "file": "pages/SignInPage.ts"
+            },
+            {
+              "type": "markdown",
+              "content": "**2. The fixture** — hands every test that asks for it a signed-out sign-in page, ready to use:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test as base } from '@playwright/test';\nimport { SignInPage } from '../pages/SignInPage';\nimport { serveQaAcademy } from '../utils/practice-site';\n\n// The extra fixtures our tests can ask for\ntype QaAcademyFixtures = {\n  signInPage: SignInPage;\n};\n\n// A new test() that has everything the normal one has, plus our fixtures\nexport const test = base.extend<QaAcademyFixtures>({\n  signInPage: async ({ page }, use) => {\n    await serveQaAcademy(page);               // set-up: make the practice site available\n    const signInPage = new SignInPage(page);\n    await signInPage.goto();\n    await use(signInPage);                    // hand it to the test, and wait until the test ends\n    // anything after use() is clean-up, and runs after the test\n  },\n});\n\n// Re-export expect, so tests import both from one place\nexport { expect } from '@playwright/test';",
+              "mode": "editor",
+              "file": "fixtures/index.ts"
+            },
+            {
+              "type": "markdown",
+              "content": "**3. The tests** — short, and readable by anyone on the team:"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '../../fixtures';\nimport { student, wrongPassword } from '../../test-data/users';\nimport { signInMessages } from '../../test-data/messages';\n\ntest('valid student reaches the dashboard', { tag: '@smoke' }, async ({ signInPage, page }) => {\n  await signInPage.signIn(student.email, student.password);\n  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n});\n\ntest('wrong password is rejected', async ({ signInPage }) => {\n  await signInPage.signIn(wrongPassword.email, wrongPassword.password);\n  await expect(signInPage.message).toHaveText(signInMessages.invalid);\n});\n\ntest('empty form shows a message', async ({ signInPage }) => {\n  await signInPage.signIn('', '');\n  await expect(signInPage.message).toHaveText(signInMessages.empty);\n});",
+              "mode": "editor",
+              "file": "tests/day10/signin-pom.spec.ts",
+              "run": "npx playwright test tests/day10/signin-pom.spec.ts --project=chromium",
+              "expectedOutput": "Running 3 tests using 2 workers\n\n  ✓  1 [chromium] › tests/day10/signin-pom.spec.ts:5:5 › valid student reaches the dashboard @smoke (1.1s)\n  ✓  2 [chromium] › tests/day10/signin-pom.spec.ts:10:5 › wrong password is rejected (249ms)\n  ✓  3 [chromium] › tests/day10/signin-pom.spec.ts:15:5 › empty form shows a message (247ms)\n\n  3 passed (2.5s)",
+              "expectedOutputTarget": "terminal"
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "Running 3 tests using 2 workers\n\n  ✓  1 [chromium] › tests/day10/signin-pom.spec.ts:5:5 › valid student reaches the dashboard @smoke (1.1s)\n  ✓  2 [chromium] › tests/day10/signin-pom.spec.ts:10:5 › wrong password is rejected (249ms)\n  ✓  3 [chromium] › tests/day10/signin-pom.spec.ts:15:5 › empty form shows a message (247ms)\n\n  3 passed (2.5s)"
+            },
+            {
+              "type": "markdown",
+              "content": "The first test asks for **two** fixtures, `signInPage` and `page`: they share the same browser page, because the `signInPage` fixture was built from `page`.\n\nCompare the three versions of \"wrong password is rejected\": Day 9 (everything inline), I3 (hooks and test data) and this one. Each step moved a kind of knowledge to its own layer, and the test itself got shorter and closer to the test case.\n\n**Try it:** the product owner renames the button to *Log in*. Which single line would you change? (Answer: `signInButton` in `SignInPage.ts`.)"
+            }
+          ]
+        },
+        {
+          "id": "d10-implementation-6",
+          "title": "I6 · npm scripts for the framework",
+          "blocks": [
+            {
+              "type": "markdown",
+              "content": "Give your smoke run a short name (Day 3 · I8):"
+            },
             {
               "type": "terminal",
               "shell": "bash",
               "commands": [
-                "npx playwright test tests/day9 tests/day10 --project=chromium",
-                "npx playwright show-report"
+                "npm pkg set scripts.test:smoke=\"playwright test --grep @smoke\""
               ]
             },
             {
+              "type": "terminal",
+              "shell": "bash",
+              "commands": [
+                "npm run test:smoke -- --list"
+              ]
+            },
+            {
+              "type": "output",
+              "target": "terminal",
+              "content": "Listing tests:\n  [chromium] › day10/signin-pom.spec.ts:5:5 › valid student reaches the dashboard\n  [chromium] › day10/signin.spec.ts:13:7 › Sign-in › valid student reaches the dashboard\n  [firefox] › day10/signin-pom.spec.ts:5:5 › valid student reaches the dashboard\n  [firefox] › day10/signin.spec.ts:13:7 › Sign-in › valid student reaches the dashboard\n  [webkit] › day10/signin-pom.spec.ts:5:5 › valid student reaches the dashboard\n  [webkit] › day10/signin.spec.ts:13:7 › Sign-in › valid student reaches the dashboard\nTotal: 6 tests in 2 files"
+            },
+            {
               "type": "markdown",
-              "content": "In the report:\n\n1. Use the filters at the top (**Passed / Failed / Flaky / Skipped**) and the search box — try typing `@smoke`.\n2. Click a test to see every step (`setContent`, `fill`, `click`, `expect …`) with its duration.\n3. Failed tests show the same error as the terminal, plus attachments when screenshots or traces are enabled in the config.\n\nPress `Ctrl + C` in the terminal to stop the report server when you're done."
+              "content": "`--list` shows what **would** run, without running it: a quick way to check that your tags pick the right tests. Two smoke tests × three browsers = six runs."
             }
           ]
         }
@@ -379,168 +895,318 @@
           "blocks": [
             {
               "type": "quiz",
-              "id": "d10-pr-q3",
+              "id": "d10-pr-q1",
               "quizType": "single",
-              "question": "What is the default timeout for a whole test, and for one web-first assertion?",
+              "question": "What does `fullyParallel: true` add, compared with the default?",
               "options": [
                 {
                   "id": "a",
-                  "text": "5 s and 30 s"
+                  "text": "Tests inside the same file can also run in parallel, not only different files"
                 },
                 {
                   "id": "b",
-                  "text": "30 s and 5 s"
+                  "text": "Tests retry in parallel"
                 },
                 {
                   "id": "c",
-                  "text": "60 s and 10 s"
+                  "text": "Hooks run in parallel with tests"
                 },
                 {
                   "id": "d",
-                  "text": "No limit for both"
-                }
-              ],
-              "correct": [
-                "b"
-              ],
-              "explanation": "A test may take up to 30 s (its body plus beforeEach hooks and fixture setup; afterEach and beforeAll/afterAll get their own limit of the same length). Each expect retries for up to 5 s."
-            },
-            {
-              "type": "quiz",
-              "id": "d10-pr-q4",
-              "quizType": "multiple",
-              "question": "Which of these are valid ways to tag a test as @smoke? (Select all that apply)",
-              "options": [
-                {
-                  "id": "a",
-                  "text": "`test('login works', { tag: '@smoke' }, async ({ page }) => {…})`"
-                },
-                {
-                  "id": "b",
-                  "text": "`test('login works @smoke', async ({ page }) => {…})`"
-                },
-                {
-                  "id": "c",
-                  "text": "`test.smoke('login works', async ({ page }) => {…})`"
-                },
-                {
-                  "id": "d",
-                  "text": "`test.describe('Login', { tag: '@smoke' }, () => {…})` around the test"
-                }
-              ],
-              "correct": [
-                "a",
-                "b",
-                "d"
-              ],
-              "explanation": "Tags go in the details object, in the title, or on a describe (applies to every test inside). There is no `test.smoke`."
-            },
-            {
-              "type": "quiz",
-              "id": "d10-pr-q5",
-              "quizType": "single",
-              "question": "`test.skip(browserName === 'firefox', 'Upload not supported')` is written inside a test. When is the test skipped?",
-              "options": [
-                {
-                  "id": "a",
-                  "text": "Always"
-                },
-                {
-                  "id": "b",
-                  "text": "Only when it runs in the firefox project"
-                },
-                {
-                  "id": "c",
-                  "text": "Never — skip must be outside the test"
-                },
-                {
-                  "id": "d",
-                  "text": "Only on CI"
-                }
-              ],
-              "correct": [
-                "b"
-              ],
-              "explanation": "The conditional form of `test.skip` skips only when the condition is true."
-            },
-            {
-              "type": "quiz",
-              "id": "d10-pr-q7",
-              "quizType": "single",
-              "question": "You run `npx playwright test --grep @smoke --project=firefox`. Two files contain 3 and 4 tests; 2 tests in total are tagged @smoke. How many test runs?",
-              "options": [
-                {
-                  "id": "a",
-                  "text": "2"
-                },
-                {
-                  "id": "b",
-                  "text": "6"
-                },
-                {
-                  "id": "c",
-                  "text": "7"
-                },
-                {
-                  "id": "d",
-                  "text": "21"
+                  "text": "Tests run in all browsers at once"
                 }
               ],
               "correct": [
                 "a"
               ],
-              "explanation": "Only the 2 @smoke tests are selected, and only one project runs: 2 × 1 = 2."
+              "explanation": "By default, files run in parallel but the tests inside one file run in order. fullyParallel lets them spread across workers too."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-pr-q2",
+              "quizType": "single",
+              "question": "Where should the locator for the 'Enrol now' button live in a framework?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "In test-data/messages.ts"
+                },
+                {
+                  "id": "b",
+                  "text": "In playwright.config.ts"
+                },
+                {
+                  "id": "c",
+                  "text": "In the EnrolPage page object"
+                },
+                {
+                  "id": "d",
+                  "text": "In every test that clicks it"
+                }
+              ],
+              "correct": [
+                "c"
+              ],
+              "explanation": "Page objects are the one place that knows a page's locators."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-pr-q3",
+              "quizType": "single",
+              "question": "`test.describe('Cart', { tag: '@cart' }, () => { … })` contains 5 tests. Which tests does `--grep @cart` run?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "All 5 — the group's tag applies to every test inside it"
+                },
+                {
+                  "id": "b",
+                  "text": "Only tests that also have @cart in their own title"
+                },
+                {
+                  "id": "c",
+                  "text": "Only the first test"
+                },
+                {
+                  "id": "d",
+                  "text": "None — tags only work on single tests"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "explanation": "A tag on a describe block is given to every test in it."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-pr-q4",
+              "quizType": "single",
+              "question": "Why can't `test.beforeAll` use the page fixture?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "Because it doesn't belong to any single test, and every test gets its own page"
+                },
+                {
+                  "id": "b",
+                  "text": "Because beforeAll can't be async"
+                },
+                {
+                  "id": "c",
+                  "text": "Because beforeAll runs after the tests"
+                },
+                {
+                  "id": "d",
+                  "text": "It can — page works everywhere"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "explanation": "page is created fresh for each test. beforeAll runs once for a group of tests, so there's no single page to hand it."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-pr-q5",
+              "quizType": "single",
+              "question": "A test imports `{ test, expect } from '../../fixtures'` instead of `'@playwright/test'`. Why?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "The fixtures file's test has the team's custom fixtures, such as signInPage"
+                },
+                {
+                  "id": "b",
+                  "text": "It makes the tests run faster"
+                },
+                {
+                  "id": "c",
+                  "text": "It's required for tags to work"
+                },
+                {
+                  "id": "d",
+                  "text": "@playwright/test can only be imported once per project"
+                }
+              ],
+              "correct": [
+                "a"
+              ],
+              "explanation": "The extended test has all the built-in fixtures plus the custom ones; expect is re-exported for convenience."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-pr-q6",
+              "quizType": "multiple",
+              "question": "Which belong in a page object? (Select all that apply)",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "The locator for the Email field"
+                },
+                {
+                  "id": "b",
+                  "text": "A method `signIn(email, password)`"
+                },
+                {
+                  "id": "c",
+                  "text": "The number of retries on CI"
+                },
+                {
+                  "id": "d",
+                  "text": "The list of 50 test users"
+                }
+              ],
+              "correct": [
+                "a",
+                "b"
+              ],
+              "explanation": "Page objects hold a page's locators and actions. Users go in test-data; retries go in the config."
+            },
+            {
+              "type": "quiz",
+              "id": "d10-pr-q8",
+              "quizType": "single",
+              "question": "In a fixture, where does clean-up code go?",
+              "options": [
+                {
+                  "id": "a",
+                  "text": "In playwright.config.ts"
+                },
+                {
+                  "id": "b",
+                  "text": "In the test itself"
+                },
+                {
+                  "id": "c",
+                  "text": "Before `await use(…)`"
+                },
+                {
+                  "id": "d",
+                  "text": "After `await use(…)`"
+                }
+              ],
+              "correct": [
+                "d"
+              ],
+              "explanation": "Code after use() runs after the test has finished — the natural place for clean-up."
             }
           ]
         },
         {
           "id": "d10-practice-2",
-          "title": "Spot the bug",
+          "title": "Where does it belong?",
           "blocks": [
             {
               "type": "exercise",
-              "exerciseType": "code",
-              "id": "d10-bug1",
-              "title": "Four bugs, one test file",
-              "level": "medium",
-              "prompt": "This file has **four** bugs. Some make tests fail, some make them unreliable, one breaks CI. Find and fix them all, then save the fixed version as `tests/day10/bugs.spec.ts` and run it.\n\n```ts\nimport { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\ntest.beforeAll(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\ntest.only('wrong password shows an error', async ({ page }) => {\n  await page.setContent(loginPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  page.getByRole('button', { name: 'Sign in' }).click();\n  expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});\n```",
-              "file": "tests/day10/bugs.spec.ts",
-              "run": "npx playwright test tests/day10/bugs.spec.ts --project=chromium",
-              "hints": [
-                "Which fixtures are available in beforeAll?",
-                "Which lines talk to the browser but have no `await`?",
-                "What does `forbidOnly` do on CI?"
-              ],
-              "solution": "import { test, expect } from '@playwright/test';\nimport { loginPage } from '../day9/practice-pages';\n\n// Bug 1: beforeAll can't use `page` → use beforeEach (and remove the duplicate setContent in the test)\ntest.beforeEach(async ({ page }) => {\n  await page.setContent(loginPage);\n});\n\n// Bug 2: test.only would fail CI (forbidOnly) and hide all other tests → plain test()\ntest('wrong password shows an error', async ({ page }) => {\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('nope');\n  // Bug 3: missing await on the click\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  // Bug 4: missing await on the web-first assertion\n  await expect(page.getByRole('alert')).toHaveText('Invalid email or password');\n});",
+              "exerciseType": "written",
+              "id": "d10-pr-sort",
+              "title": "Sort the framework pieces",
+              "level": "easy",
+              "prompt": "For each item, name the place it belongs: `tests/`, `pages/`, `fixtures/`, `test-data/`, `utils/`, `playwright.config.ts`, or an environment variable.\n\n1. A function that returns today's date in the format the app shows, e.g. `25 Sep 2026`\n2. The locators and actions for the checkout page\n3. \"Run every test in Chromium and on a Pixel 7 phone\"\n4. The expected error texts of the registration form\n5. `test('TC-512 guest can check out', …)`\n6. Set-up that gives tests a signed-in dashboard page, used by 40 tests in 12 files\n7. The API key for the payment provider's test account\n8. A 1-minute time limit for every test",
+              "modelAnswer": "1. `utils/` — a helper that *does* something, used in several places.\n2. `pages/` — a `CheckoutPage` page object.\n3. `playwright.config.ts` — two projects, one with `devices['Pixel 7']`.\n4. `test-data/` — plain values, written once.\n5. `tests/` — a spec file, such as `tests/checkout.spec.ts`.\n6. `fixtures/` — a custom fixture, reusable across files (a `beforeEach` would have to be repeated in each of the 12 files).\n7. An environment variable — secrets never go in the code.\n8. `playwright.config.ts` — `timeout: 60_000`.",
               "check": {
-                "kind": "testsPass",
-                "cwd": "pw-course",
-                "run": "npx playwright test tests/day10/bugs.spec.ts --project=chromium"
+                "kind": "self"
               }
             }
           ]
         },
         {
           "id": "d10-practice-3",
-          "title": "Exercises",
+          "title": "Mini-project · Organise the enrolment suite",
           "blocks": [
+            {
+              "type": "markdown",
+              "content": "Build the same structure for the **enrol page**, in five steps (Step 4 is an optional challenge)."
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d10-ex1",
+              "title": "Step 1: enrolment test data",
+              "level": "easy",
+              "prompt": "Create `test-data/enrolments.ts` that exports:\n\n1. A type `Enrolment` with `fullName`, `email` and `course` (all strings).\n2. Two enrolments:\n   - `asha`: `Asha Verma`, `asha@example.com`, `API Testing`\n   - `noAtSign`: `Ravi Kumar`, `ravi.example.com`, `Playwright Basics`\n3. An object `enrolMessages` with three properties: `nameRequired` (`Name is required`), `invalidEmail` (`Enter a valid email`) and `chooseCourse` (`Please choose a course`).\n\nIt has no tests of its own — Steps 2 and 3 use it, and VS Code underlines any type mistakes as you type.",
+              "file": "test-data/enrolments.ts",
+              "hints": [
+                "Copy the shape of test-data/users.ts.",
+                "`export const enrolMessages = { nameRequired: 'Name is required', … };`"
+              ],
+              "solution": "// Test data for the enrolment page\nexport type Enrolment = { fullName: string; email: string; course: string };\n\nexport const asha: Enrolment = {\n  fullName: 'Asha Verma',\n  email: 'asha@example.com',\n  course: 'API Testing',\n};\n\nexport const noAtSign: Enrolment = {\n  fullName: 'Ravi Kumar',\n  email: 'ravi.example.com',\n  course: 'Playwright Basics',\n};\n\nexport const enrolMessages = {\n  nameRequired: 'Name is required',\n  invalidEmail: 'Enter a valid email',\n  chooseCourse: 'Please choose a course',\n};",
+              "check": {
+                "kind": "typecheckPasses",
+                "file": "test-data/enrolments.ts"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d10-ex2",
+              "title": "Step 2: the EnrolPage page object",
+              "level": "medium",
+              "prompt": "Create `pages/EnrolPage.ts` with a class `EnrolPage`, modelled on `SignInPage`:\n\n1. Properties (all `readonly`): `page`, and locators `nameField`, `emailField`, `courseList`, `termsCheckbox`, `enrolButton`, `status` and `seats`. Use the locators from Day 9 · I4.\n2. A method `goto()` that opens `/enrol`.\n3. A method `enrol(enrolment: Enrolment)` that fills the name and email, selects the course, ticks the terms and clicks *Enrol now*. Import the `Enrolment` type from Step 1 with `import type`.",
+              "file": "pages/EnrolPage.ts",
+              "hints": [
+                "`import type { Enrolment } from '../test-data/enrolments';`",
+                "`this.courseList = page.getByLabel('Course');` and later `await this.courseList.selectOption(enrolment.course);`",
+                "The seats text has a test id: `page.getByTestId('seats')`."
+              ],
+              "solution": "import type { Page, Locator } from '@playwright/test';\nimport type { Enrolment } from '../test-data/enrolments';\n\n// Page object for the course enrolment page\nexport class EnrolPage {\n  readonly page: Page;\n  readonly nameField: Locator;\n  readonly emailField: Locator;\n  readonly courseList: Locator;\n  readonly termsCheckbox: Locator;\n  readonly enrolButton: Locator;\n  readonly status: Locator;\n  readonly seats: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.nameField = page.getByLabel('Full name');\n    this.emailField = page.getByLabel('Email');\n    this.courseList = page.getByLabel('Course');\n    this.termsCheckbox = page.getByRole('checkbox', { name: 'I accept the terms' });\n    this.enrolButton = page.getByRole('button', { name: 'Enrol now' });\n    this.status = page.getByRole('status');\n    this.seats = page.getByTestId('seats');\n  }\n\n  async goto(): Promise<void> {\n    await this.page.goto('/enrol');\n  }\n\n  // Fill the whole form, accept the terms and submit\n  async enrol(enrolment: Enrolment): Promise<void> {\n    await this.nameField.fill(enrolment.fullName);\n    await this.emailField.fill(enrolment.email);\n    await this.courseList.selectOption(enrolment.course);\n    await this.termsCheckbox.check();\n    await this.enrolButton.click();\n  }\n}",
+              "check": {
+                "kind": "typecheckPasses",
+                "file": "pages/EnrolPage.ts"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d10-ex3",
+              "title": "Step 3: the enrolment suite",
+              "level": "medium",
+              "prompt": "Create `tests/day10/enrol.spec.ts`:\n\n1. A `test.describe('Enrolment', { tag: '@enrol' }, …)` group.\n2. Inside it, declare `let enrolPage: EnrolPage;` and a `beforeEach` that calls `serveQaAcademy(page)`, creates the page object and opens the page.\n3. Four tests:\n   - `student can enrol in a course` (tag `@smoke`): enrol `asha`; in a `test.step` named `Confirmation and seat count`, check the status says `Thanks, Asha! You are enrolled in API Testing.` and the seats say `Seats left: 11`\n   - `an email without @ is rejected`: enrol `noAtSign`; check the status shows `enrolMessages.invalidEmail` and seats stay at 12\n   - `a name is required`: enrol `{ fullName: '', email: 'asha@example.com', course: 'API Testing' }`; check for `enrolMessages.nameRequired`\n   - `enrol button needs the terms`: the button starts disabled, and is enabled after ticking the terms\n\nRun it, then run only its smoke test:\n```\nnpx playwright test tests/day10/enrol.spec.ts --project=chromium\nnpx playwright test tests/day10/enrol.spec.ts --project=chromium --grep @smoke\n```",
+              "file": "tests/day10/enrol.spec.ts",
+              "run": "npx playwright test tests/day10/enrol.spec.ts --project=chromium",
+              "hints": [
+                "A variable declared in the describe block, and assigned in beforeEach, is visible to every test in the group.",
+                "In beforeEach: `enrolPage = new EnrolPage(page); await enrolPage.goto();`",
+                "The tests don't need `{ page }` at all: `async () => { await enrolPage.enrol(asha); … }`."
+              ],
+              "solution": "import { test, expect } from '@playwright/test';\nimport { EnrolPage } from '../../pages/EnrolPage';\nimport { serveQaAcademy } from '../../utils/practice-site';\nimport { asha, noAtSign, enrolMessages } from '../../test-data/enrolments';\n\ntest.describe('Enrolment', { tag: '@enrol' }, () => {\n  let enrolPage: EnrolPage;\n\n  test.beforeEach(async ({ page }) => {\n    await serveQaAcademy(page);\n    enrolPage = new EnrolPage(page);\n    await enrolPage.goto();\n  });\n\n  test('student can enrol in a course', { tag: '@smoke' }, async () => {\n    await enrolPage.enrol(asha);\n\n    await test.step('Confirmation and seat count', async () => {\n      await expect(enrolPage.status).toHaveText('Thanks, Asha! You are enrolled in API Testing.');\n      await expect(enrolPage.seats).toHaveText('Seats left: 11');\n    });\n  });\n\n  test('an email without @ is rejected', async () => {\n    await enrolPage.enrol(noAtSign);\n    await expect(enrolPage.status).toHaveText(enrolMessages.invalidEmail);\n    await expect(enrolPage.seats).toHaveText('Seats left: 12');\n  });\n\n  test('a name is required', async () => {\n    await enrolPage.enrol({ fullName: '', email: 'asha@example.com', course: 'API Testing' });\n    await expect(enrolPage.status).toHaveText(enrolMessages.nameRequired);\n  });\n\n  test('enrol button needs the terms', async () => {\n    await expect(enrolPage.enrolButton).toBeDisabled();\n    await enrolPage.termsCheckbox.check();\n    await expect(enrolPage.enrolButton).toBeEnabled();\n  });\n});",
+              "check": {
+                "kind": "testsPass",
+                "cwd": "pw-course",
+                "run": "npx playwright test tests/day10/enrol.spec.ts --project=chromium"
+              }
+            },
+            {
+              "type": "exercise",
+              "exerciseType": "code",
+              "id": "d10-ex4",
+              "title": "Step 4 (optional challenge): an enrolPage fixture",
+              "level": "challenge",
+              "prompt": "Add an `enrolPage` fixture to `fixtures/index.ts`, next to `signInPage`, so that a test can simply write:\n```ts\ntest('enrolling through the fixture', async ({ enrolPage }) => {\n  await enrolPage.enrol(asha);\n  await expect(enrolPage.seats).toHaveText('Seats left: 11');\n});\n```\n1. Add `enrolPage: EnrolPage` to the fixtures type.\n2. Add the fixture: serve the site, create the page object, open the page, `use` it.\n3. Put the test above in `tests/day10/enrol-fixture.spec.ts` (importing `test` and `expect` from your fixtures, and `asha` from the test data), and run it.",
+              "file": "fixtures/index.ts",
+              "hints": [
+                "The type becomes `{ signInPage: SignInPage; enrolPage: EnrolPage }`.",
+                "Copy the signInPage fixture and change the class and the names."
+              ],
+              "solution": "import { test as base } from '@playwright/test';\nimport { SignInPage } from '../pages/SignInPage';\nimport { EnrolPage } from '../pages/EnrolPage';\nimport { serveQaAcademy } from '../utils/practice-site';\n\n// The extra fixtures our tests can ask for\ntype QaAcademyFixtures = {\n  signInPage: SignInPage;\n  enrolPage: EnrolPage;\n};\n\n// A new test() that has everything the normal one has, plus our fixtures\nexport const test = base.extend<QaAcademyFixtures>({\n  signInPage: async ({ page }, use) => {\n    await serveQaAcademy(page);\n    const signInPage = new SignInPage(page);\n    await signInPage.goto();\n    await use(signInPage);\n  },\n\n  enrolPage: async ({ page }, use) => {\n    await serveQaAcademy(page);\n    const enrolPage = new EnrolPage(page);\n    await enrolPage.goto();\n    await use(enrolPage);\n  },\n});\n\nexport { expect } from '@playwright/test';",
+              "check": {
+                "kind": "typecheckPasses",
+                "file": "fixtures/index.ts"
+              }
+            },
             {
               "type": "exercise",
               "exerciseType": "terminal",
-              "id": "d10-ex3",
-              "title": "Run exactly what you need",
+              "id": "d10-ex5",
+              "title": "Step 5: a script for the suite",
               "level": "easy",
-              "prompt": "Write (and run) the command for each:\n\n1. Only the `@smoke` tests in `tests/day9`, Chromium only.\n2. Every test in `tests/day9` **except** `@smoke`, one worker, Firefox only.\n3. Only tests with `dashboard` in the title, with the browser visible.\n4. List all tests in `tests/day9/login.spec.ts` for WebKit without running them.\n5. Re-run only the tests that failed last time, then open the HTML report.",
-              "solution": "npx playwright test tests/day9 --grep @smoke --project=chromium\nnpx playwright test tests/day9 --grep-invert @smoke --workers=1 --project=firefox\nnpx playwright test -g \"dashboard\" --headed\nnpx playwright test tests/day9/login.spec.ts --project=webkit --list\nnpx playwright test --last-failed\nnpx playwright show-report",
+              "prompt": "Add an npm script `test:enrol` that runs only the `@enrol` tests in Chromium, then run it.",
+              "solution": "npm pkg set scripts.test:enrol=\"playwright test --grep @enrol --project=chromium\"\nnpm run test:enrol",
               "check": {
                 "kind": "commandsRun",
                 "commands": [
-                  "npx playwright test tests/day9 --grep @smoke --project=chromium",
-                  "npx playwright test tests/day9 --grep-invert @smoke --workers=1 --project=firefox",
-                  "npx playwright test -g \"dashboard\" --headed",
-                  "npx playwright test tests/day9/login.spec.ts --project=webkit --list",
-                  "npx playwright test --last-failed",
-                  "npx playwright show-report"
+                  "npm pkg set scripts.test:enrol=\"playwright test --grep @enrol --project=chromium\"",
+                  "npm run test:enrol"
                 ]
               }
             }
@@ -548,52 +1214,17 @@
         },
         {
           "id": "d10-practice-4",
-          "title": "Week 2 mini-project · Test the enrolment page",
-          "blocks": [
-            {
-              "type": "exercise",
-              "exerciseType": "code",
-              "id": "d10-project",
-              "title": "Mini-project: automate the QA Academy enrolment page",
-              "level": "challenge",
-              "prompt": "You've received these requirements for the **enrolment page** (`enrolPage` in `tests/day9/practice-pages.ts`). Like a manual tester, first list your test cases — then automate them in `tests/day10/enrol.spec.ts`.\n\n**Requirements**\n- **R1** The page title is `QA Academy - Enrol` and the heading is `Enrol in a course`.\n- **R2** The **Enrol now** button is **disabled** until *I accept the terms* is ticked, and disabled again when it is unticked.\n- **R3** Submitting without a name shows `Name is required`.\n- **R4** An email without `@` shows `Enter a valid email`.\n- **R5** Submitting without choosing a course shows `Please choose a course`.\n- **R6** A valid enrolment (name `Asha Verma`, email `asha@example.com`, course **API Testing**) shows `Thanks, Asha! You are enrolled in API Testing.`\n- **R7** After a successful enrolment, `Seats left` goes from **12** to **11**.\n\n**Your suite must**\n- use `test.describe('Enrolment page', …)` and a `beforeEach` that loads the page,\n- have at least **7** tests (one per requirement — R6 and R7 may share one test if you prefer 6),\n- tag R1 and R6 with `@smoke`, the rest with `@regression`,\n- use user-facing locators (`getByRole`, `getByLabel`, `getByTestId`) and web-first assertions only,\n- pass on **chromium** and **firefox**.\n\nThen run:\n```\nnpx playwright test tests/day10/enrol.spec.ts --project=chromium --project=firefox\nnpx playwright test tests/day10/enrol.spec.ts --grep @smoke\nnpx playwright show-report\n```",
-              "file": "tests/day10/enrol.spec.ts",
-              "run": "npx playwright test tests/day10/enrol.spec.ts --project=chromium --project=firefox",
-              "hints": [
-                "The course dropdown has the label Course: `page.getByLabel('Course').selectOption('API Testing')` (by visible text or by value 'api').",
-                "The seats text has a test id: `page.getByTestId('seats')`.",
-                "To test R3–R5 the Enrol button must be enabled — tick the terms box first.",
-                "Write a small helper function inside the file (e.g. `fillForm(page, name, email, course)`) to avoid repeating the same fills. Its `page` parameter can be typed with `import { type Page } from '@playwright/test'`."
-              ],
-              "solution": "import { test, expect, type Page } from '@playwright/test';\nimport { enrolPage } from '../day9/practice-pages';\n\n// Helper: fill the form (empty strings leave a field blank) and accept the terms\nasync function fillForm(page: Page, name: string, email: string, course: string): Promise<void> {\n  await page.getByLabel('Full name').fill(name);\n  await page.getByLabel('Email').fill(email);\n  if (course !== '') {\n    await page.getByLabel('Course').selectOption(course);\n  }\n  await page.getByLabel('I accept the terms').check();\n}\n\ntest.describe('Enrolment page', () => {\n  test.beforeEach(async ({ page }) => {\n    await page.setContent(enrolPage);\n  });\n\n  test('R1: shows the correct title and heading', { tag: '@smoke' }, async ({ page }) => {\n    await expect(page).toHaveTitle('QA Academy - Enrol');\n    await expect(page.getByRole('heading', { name: 'Enrol in a course' })).toBeVisible();\n  });\n\n  test('R2: Enrol button follows the terms checkbox', { tag: '@regression' }, async ({ page }) => {\n    const enrol = page.getByRole('button', { name: 'Enrol now' });\n    const terms = page.getByLabel('I accept the terms');\n    await expect(enrol).toBeDisabled();\n    await terms.check();\n    await expect(enrol).toBeEnabled();\n    await terms.uncheck();\n    await expect(enrol).toBeDisabled();\n  });\n\n  test('R3: name is required', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, '', 'asha@example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Name is required');\n  });\n\n  test('R4: email must contain @', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha.example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Enter a valid email');\n  });\n\n  test('R5: a course must be chosen', { tag: '@regression' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha@example.com', '');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Please choose a course');\n  });\n\n  test('R6: valid enrolment shows a confirmation', { tag: '@smoke' }, async ({ page }) => {\n    await fillForm(page, 'Asha Verma', 'asha@example.com', 'API Testing');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByRole('status')).toHaveText('Thanks, Asha! You are enrolled in API Testing.');\n  });\n\n  test('R7: seats left goes down by one', { tag: '@regression' }, async ({ page }) => {\n    await expect(page.getByTestId('seats')).toHaveText('Seats left: 12');\n    await fillForm(page, 'Asha Verma', 'asha@example.com', 'Playwright Basics');\n    await page.getByRole('button', { name: 'Enrol now' }).click();\n    await expect(page.getByTestId('seats')).toHaveText('Seats left: 11');\n  });\n});",
-              "rubric": [
-                "All 7 requirements have at least one assertion",
-                "describe + beforeEach used; no test depends on another test",
-                "Correct tags; `--grep @smoke` runs exactly the R1 and R6 tests",
-                "Every browser action and web-first assertion is awaited",
-                "Passes on chromium and firefox"
-              ],
-              "check": {
-                "kind": "testsPass",
-                "cwd": "pw-course",
-                "run": "npx playwright test tests/day10/enrol.spec.ts --project=chromium --project=firefox"
-              }
-            }
-          ]
-        },
-        {
-          "id": "d10-practice-5",
-          "title": "Week 2 wrap-up",
+          "title": "Reflection",
           "blocks": [
             {
               "type": "markdown",
-              "content": "You can now:\n\n- ✅ Read and write TypeScript: variables, types, operators, conditions, loops, functions, async/await, modules\n- ✅ Write, organise, tag, filter, run and debug Playwright tests\n- ✅ Turn written requirements into an automated test suite"
+              "content": "1. In one sentence each: what goes in `tests/`, `pages/`, `fixtures/`, `test-data/` and `utils/`?\n2. Which config settings would you change to (a) test a different environment, (b) get a video of each failed test, (c) give slow tests 60 seconds?\n3. When would you use a `beforeEach` hook, and when a custom fixture?\n4. Why do assertions usually stay in tests rather than in page objects?\n5. Compare the three versions of \"wrong password is rejected\" (Day 9, I3 and I5). What changed, and why is each step an improvement?"
             },
             {
               "type": "callout",
               "variant": "tip",
-              "content": "**Locators in depth** (role, text, CSS, XPath, filtering, chaining, strictness), **actions** (hover, drag-and-drop, uploads, dialogs, frames), more **assertions**, and your first **Page Object Model** — moving the \"how\" out of your tests into `pages/`.",
-              "title": "Coming up in Week 3"
+              "content": "You started with *what Playwright is* and finished with an organised framework: TypeScript fundamentals, a real test runner, locators and web-first assertions, configuration, hooks, tags, test data, page objects and fixtures. Next steps: more page objects for bigger journeys, reusing a signed-in state, API testing with the `request` fixture, visual comparisons, and running your suite on a CI server.",
+              "title": "Two weeks done"
             }
           ]
         }
@@ -601,9 +1232,9 @@
     }
   ],
   "stats": {
-    "lessons": 12,
-    "quizzes": 9,
-    "exercises": 3,
-    "codeBlocks": 4
+    "lessons": 19,
+    "quizzes": 19,
+    "exercises": 6,
+    "codeBlocks": 22
   }
 }

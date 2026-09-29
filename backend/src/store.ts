@@ -1,11 +1,13 @@
 /**
- * The only reader and writer of Data/. Content is read-only here; the single progress record is
+ * The only reader and writer of Data/. Content is read-only here (content.ts says where it comes
+ * from); the single progress record is
  * read-modify-write, serialised behind a lock so two tabs updating progress at once cannot lose
  * one another's writes.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { CONTENT, PROGRESS_FILE } from './config';
+import { PROGRESS_FILE } from './config';
+import { contentStamp, readContent } from './content';
 import { CourseDay } from '../../shared/contracts/course_day';
 import { CourseIndex } from '../../shared/contracts/course_index';
 import { Progress, type DayProgress, type ProgressUpdate } from '../../shared/contracts/progress';
@@ -20,15 +22,14 @@ let indexStamp = 0;
 /** Each day is cached with the mtime it was read at - see courseDay(). */
 const dayCache = new Map<string, { day: CourseDay; stamp: number }>();
 
-const indexFile = (): string => path.join(CONTENT, 'course-index.json');
+const INDEX = 'course-index.json';
 
 /**
  * An edited course index must be visible without restarting the server, so the cache is keyed
  * on the index's mtime. Without this the server silently serves the previous content and every
  * fix looks like it did not work.
  */
-function invalidateIfChanged(): void {
-  const stamp = fs.statSync(indexFile()).mtimeMs;
+function invalidateIfChanged(stamp: number): void {
   if (stamp === indexStamp) return;
   indexStamp = stamp;
   indexCache = null;
@@ -36,13 +37,13 @@ function invalidateIfChanged(): void {
 }
 
 export function courseIndex(): CourseIndex {
-  const file = indexFile();
-  if (!fs.existsSync(file)) {
+  const stamp = contentStamp(INDEX);
+  if (stamp === null) {
     throw Object.assign(new Error('no course content'), { code: 'CONTENT_MISSING' });
   }
-  invalidateIfChanged();
+  invalidateIfChanged(stamp);
   if (indexCache) return indexCache;
-  indexCache = CourseIndex.parse(JSON.parse(fs.readFileSync(file, 'utf-8')));
+  indexCache = CourseIndex.parse(JSON.parse(readContent(INDEX) ?? ''));
   return indexCache;
 }
 
@@ -51,16 +52,56 @@ export function courseIndex(): CourseIndex {
  * without touching course-index.json, and the edit must still show on the next request.
  */
 export function courseDay(week: number, day: number): CourseDay | null {
-  if (fs.existsSync(indexFile())) invalidateIfChanged();
+  const indexStampNow = contentStamp(INDEX);
+  if (indexStampNow !== null) invalidateIfChanged(indexStampNow);
   const key = dayKey(week, day);
-  const file = path.join(CONTENT, 'weeks', 'week-' + week, 'day-' + day + '.json');
-  if (!fs.existsSync(file)) return null;
-  const stamp = fs.statSync(file).mtimeMs;
+  const rel = 'weeks/week-' + week + '/day-' + day + '.json';
+  const stamp = contentStamp(rel);
+  if (stamp === null) return null;
   const cached = dayCache.get(key);
   if (cached && cached.stamp === stamp) return cached.day;
-  const parsed = CourseDay.parse(JSON.parse(fs.readFileSync(file, 'utf-8')));
+  const parsed = CourseDay.parse(JSON.parse(readContent(rel) ?? ''));
   dayCache.set(key, { day: parsed, stamp });
   return parsed;
+}
+
+/** The title the index gives a day, for a day whose own file is not there (a locked day is not in the pack). */
+export function indexDayTitle(week: number, day: number): string | null {
+  try {
+    return courseIndex().weeks.find((w) => w.week === week)?.days.find((d) => d.day === day)?.title ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Whether a day is locked: by itself, or because its whole week is. A course that cannot be read keeps it locked. */
+export function isLocked(week: number, day: number): boolean {
+  try {
+    if (courseDay(week, day)?.locked) return true;
+    const w = courseIndex().weeks.find((x) => x.week === week);
+    return w?.locked === true || w?.days.find((d) => d.day === day)?.locked === true;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * The days that are locked, by their number through the course (IndexDay.number), which is how
+ * the workspaces' folders are named (day1 to day10), so a locked day's starting files stay out of
+ * the workspaces too. null when the course cannot be read: then nothing is seeded.
+ */
+export function lockedDayNumbers(): Set<number> | null {
+  const locked = new Set<number>();
+  try {
+    for (const w of courseIndex().weeks) {
+      for (const d of w.days) {
+        if (w.locked || d.locked || courseDay(w.week, d.day)?.locked) locked.add(d.number);
+      }
+    }
+  } catch {
+    return null;
+  }
+  return locked;
 }
 
 // ---------------------------------------------------------------- progress
@@ -73,7 +114,20 @@ const EMPTY_PROGRESS: Progress = { schema: 'progress/v1', resume: null, progress
  */
 export function readProgress(): Progress {
   if (!fs.existsSync(PROGRESS_FILE)) return EMPTY_PROGRESS;
-  return Progress.parse(JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf-8')));
+  try {
+    return Progress.parse(JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf-8')));
+  } catch (e) {
+    // A damaged record is kept aside, never overwritten, and the learner starts again rather than
+    // getting an error on every page. A file that could not be read (held by another program for a
+    // moment) is left alone, and the request fails instead.
+    if (!(e instanceof SyntaxError) && (e as Error).name !== 'ZodError') throw e;
+    try {
+      fs.renameSync(PROGRESS_FILE, PROGRESS_FILE.replace(/\.json$/, '.damaged-' + Date.now() + '.json'));
+    } catch {
+      // Left where it is; read as a fresh start all the same.
+    }
+    return EMPTY_PROGRESS;
+  }
 }
 
 function writeProgressFile(p: Progress): void {
@@ -104,7 +158,8 @@ async function withLock<T>(fn: () => T): Promise<T> {
 }
 
 /**
- * Records where the learner is and, unless `viewed: false`, that a part was read. A part
+ * Records where the learner is and, unless `viewed: false`, that a part was read (or, with
+ * `unread`, that it no longer counts as read). A part
  * completes when it is recorded as read; a day completes when every part the day actually HAS
  * has been read - not a hardcoded four, because a day may have fewer parts, with gaps in the
  * part numbers.
@@ -125,9 +180,11 @@ export async function recordProgress(update: ProgressUpdate): Promise<Progress> 
       completed_at: null,
     };
 
-    // `viewed: false` moves the resume point without counting the part as read.
-    const viewed =
-      update.viewed === false || prior.parts_viewed.includes(update.part)
+    // `viewed: false` moves the resume point without counting the part as read; `unread` takes the
+    // part back out of those read.
+    const viewed = update.unread
+      ? prior.parts_viewed.filter((p) => p !== update.part)
+      : update.viewed === false || prior.parts_viewed.includes(update.part)
         ? prior.parts_viewed
         : [...prior.parts_viewed, update.part].sort((a, b) => a - b);
 
@@ -142,7 +199,8 @@ export async function recordProgress(update: ProgressUpdate): Promise<Progress> 
 
     const next: Progress = {
       ...current,
-      resume: { week: update.week, day: update.day, part: update.part },
+      // Clearing a done mark is not going anywhere: the resume point stays.
+      resume: update.unread ? current.resume : { week: update.week, day: update.day, part: update.part },
       progress: {
         ...current.progress,
         [key]: {

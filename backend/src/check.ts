@@ -6,7 +6,7 @@
  * the check's command runs in the Terminal's workspace, through the same code a Run uses
  * (terminal/index.ts), with the same limits: one command at a time, and a time limit.
  */
-import { attachStream, prepareRun } from './runner';
+import { attachStream, prepareRun, retireStream } from './runner';
 import { startCommand } from './terminal';
 import type { CheckRequest, CheckResult } from '../../shared/contracts/check';
 import type { PracticeProblem } from '../../shared/contracts/course_day';
@@ -22,6 +22,18 @@ const programOutput = (out: string): string =>
     .join('\n')
     .trim();
 
+/** Output as a stdoutEquals check compares it: each line without its trailing spaces (the course's rule). */
+const trimLines = (s: string): string =>
+  s
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((l) => l.trimEnd())
+    .join('\n')
+    .trim();
+
+/** What a check keeps of a command's output: its end, where the summary and the verdict are. */
+const MAX_CHECK_OUTPUT = 2_000_000;
+
 /** The last lines of a long output: where a test runner puts its summary and the first failure. */
 const tail = (s: string, lines = 40): string => s.split('\n').slice(-lines).join('\n');
 
@@ -30,13 +42,22 @@ function run(command: string, code: string, file: string, req: CheckRequest): Pr
     const runId = prepareRun();
     let out = '';
     const detach = attachStream(runId, (e) => {
-      if (e.event === 'term') out += e.data;
+      if (e.event === 'term') {
+        out += e.data;
+        if (out.length > MAX_CHECK_OUTPUT) out = out.slice(-MAX_CHECK_OUTPUT / 2);
+      }
       if (e.event === 'exit') {
         detach();
         resolve({ exit: e.code, out });
       }
     });
-    startCommand(runId, command, code, file, req.workspace);
+    try {
+      startCommand(runId, command, code, file, req.workspace);
+    } catch (e) {
+      detach();
+      retireStream(runId, 0);
+      throw e;
+    }
   });
 }
 
@@ -56,8 +77,8 @@ export async function checkAnswer(problem: PracticeProblem, req: CheckRequest): 
   }
 
   if (check.kind === 'stdoutEquals') {
-    const expected = check.expected.trim();
-    const passed = exit === 0 && printed === expected;
+    const expected = trimLines(check.expected);
+    const passed = exit === 0 && trimLines(printed) === expected;
     return {
       status: passed ? 'passed' : 'failed',
       message: passed

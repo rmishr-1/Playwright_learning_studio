@@ -1,28 +1,31 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.beforeAll(async () => {
-  console.log('beforeAll  → once, before the tests');
+  console.log('beforeAll  - once, before the first test in this file');
 });
 
-test.beforeEach(async ({ page }) => {
-  console.log('beforeEach → before each test');
-  await page.setContent('<h1>Hooks demo</h1>');
+test.beforeEach(async () => {
+  console.log('  beforeEach - before every test');
 });
 
 test.afterEach(async () => {
-  console.log('afterEach  → after each test');
+  console.log('  afterEach  - after every test, passed or failed');
 });
 
 test.afterAll(async () => {
-  console.log('afterAll   → once, after the tests');
+  console.log('afterAll   - once, after the last test in this file');
 });
 
-test('first test', async ({ page }) => {
-  console.log('test body  → first test');
-  await expect(page.getByRole('heading')).toHaveText('Hooks demo');
+test('first test', async () => {
+  console.log('    first test');
 });
 
-test('second test', async ({ page }) => {
-  console.log('test body  → second test');
-  await expect(page.getByRole('heading')).toBeVisible();
+test.describe('a group', () => {
+  test.beforeEach(async () => {
+    console.log('    group beforeEach - only for tests in this group, after the outer one');
+  });
+
+  test('second test', async () => {
+    console.log('      second test');
+  });
 });

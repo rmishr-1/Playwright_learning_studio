@@ -11,7 +11,9 @@
  *   playwright.config.ts     the settings the test runner reads
  *   tsconfig.json            points `@playwright/test` at .studio/ (below)
  *   .studio/test.ts          adds the live browser view to every test
+ *   .studio/run-playwright.cjs  starts the test runner so that Ctrl+C can stop it gently
  *   tests/                   the spec files
+ *   pages/, fixtures/, test-data/, utils/   page objects, fixtures, data and helpers (Day 10)
  *   ts-basics/               the TypeScript playground, where `node day3/hello.ts` runs
  *   test-results/, playwright-report/   written by the test runner
  *
@@ -24,19 +26,19 @@
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { CONTENT, DATA } from '../config';
-import { WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
+import { WORKSPACE_ROOT, onDisk } from '../config';
+import { readContent } from '../content';
+import { lockedDayNumbers } from '../store';
+import { PROJECT_FILE, WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
 
-// STUDIO_WORKSPACE_ROOT lets `npm run verify:content` work in a folder of its own, so a check never
-// touches the files a learner has saved.
-const ROOT = process.env.STUDIO_WORKSPACE_ROOT || path.join(DATA, 'Workspace');
+const ROOT = WORKSPACE_ROOT;
 export const workspaceDir = (name: Workspace): string => path.join(ROOT, name);
 export const reportDir = (name: Workspace): string => path.join(workspaceDir(name), 'playwright-report');
 
 /** The real @playwright/test, resolved once. The Terminal's own wrapper re-exports it. */
-const PLAYWRIGHT_TEST = require.resolve('@playwright/test');
+const PLAYWRIGHT_TEST = onDisk(require.resolve('@playwright/test'));
 /** The test runner's command-line entry point: what `npx playwright` runs. */
-export const PLAYWRIGHT_CLI = require.resolve('@playwright/test/cli');
+export const PLAYWRIGHT_CLI = onDisk(require.resolve('@playwright/test/cli'));
 
 const CONFIG = `// Written by the Learning Studio for its Terminal. Changes to this file are replaced.
 import { defineConfig, devices } from '@playwright/test';
@@ -47,8 +49,14 @@ export default defineConfig({
   retries: 0,
   // The same report as a new project. It is opened with \`npx playwright show-report\`.
   reporter: [['list'], ['html', { open: 'never' }]],
+  // The course's own time limits (Day 10): each test 30 s, each web-first assertion 5 s.
+  timeout: 30_000,
+  expect: { timeout: 5_000 },
   use: {
+    // The course's practice site, which its tests serve themselves: page.goto('/signin').
+    baseURL: 'https://qa-academy.test',
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
   },
   // The three browsers a new project tests in. The live view shows Chromium.
   projects: [
@@ -88,26 +96,47 @@ import { test as base } from ${real};
 export * from ${real};
 
 const FRAME_URL = process.env.STUDIO_FRAME_URL;
+const FRAME_KEY = process.env.STUDIO_FRAME_KEY ?? '';
 // The same fail-closed allowlist a Run uses (Data/Config/studio.config.json): a page may only
-// navigate to the course's practice sites. The backend always sets it; unset, nothing is gated.
-const ALLOWED: string[] | null = process.env.STUDIO_ALLOWED_ORIGINS ? JSON.parse(process.env.STUDIO_ALLOWED_ORIGINS) : null;
+// navigate to the course's practice sites. The backend always sets it; unset, nothing is allowed.
+const ALLOWED: string[] = process.env.STUDIO_ALLOWED_ORIGINS ? JSON.parse(process.env.STUDIO_ALLOWED_ORIGINS) : [];
+
+// The same scheme and host as an allowed origin; any port, unless the entry names one.
+function allowed(url: string): boolean {
+  let u: URL;
+  try { u = new URL(url); } catch { return false; }
+  return ALLOWED.some((a) => {
+    let e: URL;
+    try { e = new URL(a); } catch { return false; }
+    return u.protocol === e.protocol && u.hostname === e.hostname && (e.port === '' || u.port === e.port);
+  });
+}
 
 export const test = base.extend({
+  // No service workers: their requests would not pass through the gate below.
+  serviceWorkers: 'block',
   context: async ({ context }, use) => {
-    if (ALLOWED) {
-      await context.route('**/*', (route) => {
-        const request = route.request();
-        const url = request.url();
-        const topLevel = request.isNavigationRequest() && request.frame().parentFrame() === null;
-        let origin = '';
-        try { origin = new URL(url).origin; } catch {}
-        if (!topLevel || url.startsWith('data:') || url.startsWith('about:') || ALLOWED.some((a) => origin === a || origin.startsWith(a))) {
-          return route.fallback();
-        }
+    await context.route('**/*', (route) => {
+      const request = route.request();
+      const url = request.url();
+      const topLevel = request.isNavigationRequest() && request.frame().parentFrame() === null;
+      if (!topLevel || url.startsWith('data:') || url.startsWith('about:') || allowed(url)) {
+        return route.fallback();
+      }
+      console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
+      return route.abort('blockedbyclient');
+    });
+    // Playwright routes only the first request of a redirect: a redirect to a site not allowed is
+    // caught where it lands, and the page is taken back to a blank one.
+    context.on('page', (page) => {
+      page.on('framenavigated', (frame) => {
+        if (frame !== page.mainFrame()) return;
+        const url = frame.url();
+        if (url === '' || url.startsWith('about:') || url.startsWith('data:') || url.startsWith('chrome-error:') || allowed(url)) return;
         console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
-        return route.abort('blockedbyclient');
+        page.goto('about:blank').catch(() => {});
       });
-    }
+    });
     await use(context);
   },
   page: async ({ page, browserName }, use) => {
@@ -123,7 +152,7 @@ export const test = base.extend({
           sending = true;
           fetch(FRAME_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Studio-Frame-Key': FRAME_KEY },
             body: JSON.stringify({ data: f.data, width: f.metadata?.deviceWidth ?? 1280, height: f.metadata?.deviceHeight ?? 720 }),
           })
             .catch(() => {})
@@ -149,18 +178,32 @@ export default test;
 const PACKAGE = JSON.stringify({ name: 'studio-workspace', private: true }, null, 2) + '\n';
 
 function readSeeds(): WorkspaceSeeds['workspaces'] {
-  const file = path.join(CONTENT, 'workspaces.json');
-  if (!fs.existsSync(file)) return { demo: { files: {} }, project: { files: {} } };
-  return WorkspaceSeeds.parse(JSON.parse(fs.readFileSync(file, 'utf-8'))).workspaces;
+  const text = readContent('workspaces.json');
+  if (text === null) return { demo: { files: {} }, project: { files: {} } };
+  const seeds = WorkspaceSeeds.parse(JSON.parse(text)).workspaces;
+  // A locked day's starting files (tests/day9/..., ts-basics/day8/...) wait until it opens.
+  const locked = lockedDayNumbers();
+  if (locked === null) return { demo: { files: {} }, project: { files: {} } };
+  if (locked.size === 0) return seeds;
+  // day9/, day09/, day_9/, day9.spec.ts, day9-login.spec.ts, day9Login.spec.ts: any name that says
+  // which day it belongs to.
+  const open = (rel: string): boolean => {
+    const days = [...rel.matchAll(/(?:^|[\/._-])day[_-]?0*(\d+)(?!\d)/gi)].map((m) => Number(m[1]));
+    return !days.some((d) => locked.has(d));
+  };
+  return Object.fromEntries(
+    Object.entries(seeds).map(([name, ws]) => [name, { files: Object.fromEntries(Object.entries(ws.files).filter(([rel]) => open(rel))) }]),
+  ) as WorkspaceSeeds['workspaces'];
 }
 
 /**
- * A path inside a workspace, from a path the learner or a lesson gave. Only files under tests/ and
- * ts-basics/ may be written or named, and never a path that climbs out of the workspace.
+ * A path inside a workspace, from a path the learner or a lesson gave. Only files in the project's
+ * own folders (PROJECT_FILE) may be written or named, and never a path that climbs out of the
+ * workspace.
  */
 export function resolveInside(name: Workspace, rel: string): string | null {
   const clean = rel.replace(/\\/g, '/').replace(/^\.\//, '');
-  if (!/^(tests|ts-basics)\/[\w./-]+$/.test(clean) || clean.split('/').includes('..')) return null;
+  if (!PROJECT_FILE.test(clean) || clean.split('/').includes('..')) return null;
   return path.join(workspaceDir(name), ...clean.split('/'));
 }
 
@@ -183,6 +226,28 @@ const LEGACY_SEEDS: Record<string, readonly string[]> = {
 };
 
 /**
+ * Starts the Playwright CLI named by its first argument, and turns a line "stop" on its input into
+ * the interrupt Ctrl+C sends in a real terminal. Windows cannot send that interrupt from one
+ * process to another, so without this a stopped run was ended by force and Playwright never
+ * printed its summary. With it, the runner stops its workers, closes its browsers, and reports
+ * what passed, failed, was interrupted, and did not run.
+ */
+const RUN_PLAYWRIGHT = `// Written by the Learning Studio for its Terminal. Changes to this file are replaced.
+const cli = process.argv[2];
+process.argv.splice(1, 2, cli);
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', (text) => {
+  if (text.includes('stop')) process.emit('SIGINT');
+});
+// Waiting for input must not keep the runner alive once the tests are done.
+process.stdin.unref();
+require(cli);
+`;
+
+/** The script that starts the test runner in this workspace (RUN_PLAYWRIGHT). */
+export const playwrightStarter = (name: Workspace): string => path.join(workspaceDir(name), '.studio', 'run-playwright.cjs');
+
+/**
  * Writes the studio's own files, and brings the course's starting files up to date.
  *
  * .studio/seeded.json records each starting file the studio wrote, with its fingerprint. A file
@@ -197,43 +262,60 @@ export function prepareWorkspace(name: Workspace): void {
   fs.writeFileSync(path.join(dir, 'playwright.config.ts'), CONFIG);
   fs.writeFileSync(path.join(dir, 'tsconfig.json'), TSCONFIG);
   fs.writeFileSync(path.join(dir, '.studio', 'test.ts'), wrapper());
+  fs.writeFileSync(path.join(dir, '.studio', 'run-playwright.cjs'), RUN_PLAYWRIGHT);
   fs.mkdirSync(path.join(dir, 'tests'), { recursive: true });
 
   const recordFile = path.join(dir, '.studio', 'seeded.json');
-  const hadRecord = fs.existsSync(recordFile);
-  const before: Record<string, readonly string[]> = hadRecord
-    ? Object.fromEntries(
-        Object.entries(JSON.parse(fs.readFileSync(recordFile, 'utf-8')) as Record<string, string>).map(([k, v]) => [k, [v]]),
-      )
-    : LEGACY_SEEDS;
+  // The record is the learner's to damage (their code can write here): one that cannot be read is
+  // treated as none.
+  let before: Record<string, readonly string[]> = LEGACY_SEEDS;
+  try {
+    const record = JSON.parse(fs.readFileSync(recordFile, 'utf-8')) as unknown;
+    if (record && typeof record === 'object' && !Array.isArray(record)) {
+      before = Object.fromEntries(
+        Object.entries(record as Record<string, unknown>)
+          .filter((e): e is [string, string] => typeof e[1] === 'string')
+          .map(([k, v]) => [k, [v]]),
+      );
+    }
+  } catch {
+    // No record yet, or a damaged one.
+  }
   const seeds = readSeeds()[name]?.files ?? {};
-  const fileOf = (rel: string): string => path.join(dir, ...rel.split('/'));
+  // Every path, from the course or from .studio/seeded.json (which the learner's code can write),
+  // must stay inside the project's own folders of this workspace; anything else is skipped.
+  const fileOf = (rel: string): string | null => resolveInside(name, rel);
   const current = (rel: string): string | null => {
     const file = fileOf(rel);
-    return fs.existsSync(file) ? fingerprint(fs.readFileSync(file, 'utf-8')) : null;
+    return file && fs.existsSync(file) ? fingerprint(fs.readFileSync(file, 'utf-8')) : null;
   };
 
   // The course dropped a file the studio wrote, and the learner never changed it: remove it.
   for (const [rel, prints] of Object.entries(before)) {
-    if (rel in seeds) continue;
+    const file = fileOf(rel);
+    if (rel in seeds || !file) continue;
     const now = current(rel);
-    if (now && prints.includes(now)) fs.rmSync(fileOf(rel), { force: true });
+    if (now && prints.includes(now)) fs.rmSync(file, { force: true });
   }
 
   const after: Record<string, string> = {};
   for (const [rel, text] of Object.entries(seeds)) {
+    const file = fileOf(rel);
+    if (!file) continue;
     const now = current(rel);
     const untouched = now !== null && (before[rel] ?? []).includes(now);
     if (now === null || untouched) {
-      fs.mkdirSync(path.dirname(fileOf(rel)), { recursive: true });
-      fs.writeFileSync(fileOf(rel), text);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, text);
       after[rel] = fingerprint(text);
     } else if (now === fingerprint(text)) {
       after[rel] = now;
     }
     // Otherwise the learner has changed it: it is theirs now, and it is not recorded.
   }
-  fs.writeFileSync(recordFile, JSON.stringify(after, null, 2) + '\n');
+  fs.rmSync(recordFile + '.tmp', { recursive: true, force: true });
+  fs.writeFileSync(recordFile + '.tmp', JSON.stringify(after, null, 2) + '\n');
+  fs.renameSync(recordFile + '.tmp', recordFile);
 }
 
 /** Saves the editor's code as a file in the workspace, and returns its path there. */

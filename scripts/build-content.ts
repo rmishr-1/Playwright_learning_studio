@@ -26,6 +26,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
   CourseDay,
+  PROJECT_FILE,
   WorkspaceSeeds,
   type ContentBlock,
   type CoursePart,
@@ -46,7 +47,7 @@ const DEFAULT_TITLE = 'Playwright with TypeScript';
 type SrcOption = { id: string; text: string };
 type SrcBlock = { type: string; [key: string]: unknown };
 type SrcLesson = { id: string; title: string; blocks: SrcBlock[] };
-type SrcSection = { id: string; title: string; intro?: string; lessons: SrcLesson[] };
+type SrcSection = { id: string; title: string; intro?: SrcBlock[]; lessons: SrcLesson[] };
 type SrcDay = {
   week: number;
   day: number;
@@ -121,8 +122,8 @@ function quiz(b: SrcBlock, where: string): ContentBlock {
  * What "Start this in the editor" loads for a code exercise, or null when the editor cannot help.
  *
  * - null when the exercise's file is one the studio's Terminal cannot save or run, such as
- *   playwright.config.ts, which the studio writes itself. Only files under tests/ and ts-basics/
- *   can be saved.
+ *   playwright.config.ts, which the studio writes itself. Only files in the project's own folders
+ *   (PROJECT_FILE) can be saved.
  * - The exercise's own starter code, when it has some.
  * - The code in the prompt, when the prompt gives some to fix ("This file has four bugs").
  * - The file the prompt says to start by copying ("by copying `tests/example.spec.ts`").
@@ -131,7 +132,7 @@ function quiz(b: SrcBlock, where: string): ContentBlock {
  * - Otherwise a comment naming the file, for an exercise that writes a new file from scratch.
  */
 function starterFor(b: SrcBlock, file: string | null, title: string, files: Record<string, string>): string | null {
-  if (file && !/^(tests|ts-basics)\//.test(file)) return null;
+  if (file && !PROJECT_FILE.test(file)) return null;
   const starter = str(b, 'starter');
   if (starter) return starter;
   const prompt = str(b, 'prompt') ?? '';
@@ -276,8 +277,14 @@ function convertDay(d: SrcDay, position: number, files: Record<string, string>):
   let exerciseNo = 0;
   const parts = d.sections.map((s): CoursePart => {
     const role = SECTIONS[s.id] ?? fail(at, 'unknown section ' + s.id);
-    const blocks: ContentBlock[] = [block('markdown', '# Day ' + d.day + ' · ' + s.title + (s.intro ? '\n\n' + s.intro : ''))];
+    const blocks: ContentBlock[] = [block('markdown', '# Day ' + d.day + ' · ' + s.title)];
     if (role.part === 1) blocks.push(block('at-a-glance', '**' + d.title + '**\n\n' + atAGlance(d)));
+    // The section's intro: blocks before its first lesson, such as a note on where today's files go.
+    for (const b of s.intro ?? []) {
+      if (b.type === 'exercise') fail(at + ' ' + s.id, 'an exercise in a section intro');
+      const converted = convertBlock(b, at + ' ' + s.id + ' intro');
+      if (converted) blocks.push(converted);
+    }
     const problems: PracticeProblem[] = [];
     for (const lesson of s.lessons) {
       blocks.push(block('markdown', '## ' + lesson.title));
@@ -375,14 +382,20 @@ function buildSeeds(days: CourseDay[], lessonFiles: Record<string, string>): Wor
     }
   }
 
+  // What a lesson file imports: './x', '../../utils/x' (x.ts), or a folder '../../fixtures'
+  // (fixtures/index.ts). Followed through, so a file an imported file imports comes too.
   const project: Record<string, string> = { ...base };
-  for (const [file, text] of Object.entries(lessonFiles)) {
-    for (const m of text.matchAll(/from\s+['"](\.\/[\w./-]+)['"]/g)) {
-      let target = path.posix.join(path.posix.dirname(file), m[1]);
-      if (!target.endsWith('.ts')) target += '.ts';
-      project[target] = lessonFiles[target] ?? fail(file, 'imports ' + m[1] + ', which is not a lesson file');
+  const add = (file: string): void => {
+    for (const m of lessonFiles[file].matchAll(/from\s+['"](\.\.?\/[\w./-]+)['"]/g)) {
+      const at = path.posix.join(path.posix.dirname(file), m[1]);
+      const target = [at, at + '.ts', at + '/index.ts'].find((t) => t.endsWith('.ts') && t in lessonFiles);
+      if (!target) fail(file, 'imports ' + m[1] + ', which is not a lesson file');
+      if (target in project) continue;
+      project[target] = lessonFiles[target];
+      add(target);
     }
-  }
+  };
+  for (const file of Object.keys(lessonFiles)) add(file);
 
   return WorkspaceSeeds.parse({ schema: 'workspace-seeds/v1', workspaces: { demo: { files: demo }, project: { files: project } } });
 }

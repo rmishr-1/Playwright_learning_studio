@@ -376,8 +376,8 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .code-block .head .tag.warn { background: #4a3514; color: #f0c27a; }
 .code-block .head .spacer { flex: 1; }
-.code-block .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
-.code-block .head button.run:hover { background: #1d4fd8; }
+.code-block .head button.run, .example .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
+.code-block .head button.run:hover, .example .head button.run:hover { background: #1d4fd8; }
 
 /* Commands to type in a terminal, each with its own Run. */
 .terminal-block { margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2b3240; background: #14181f; }
@@ -565,6 +565,18 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   color: var(--ed-dim); text-align: center; font-size: 13.5px; line-height: 1.65;
 }
 
+/* View in Page's list of pages, when a practice file holds more than one (lib/htmlPages.ts). */
+.page-menu {
+  position: fixed; z-index: 50; min-width: 190px; padding: 5px; display: flex; flex-direction: column;
+  background: #1e232d; border: 1px solid #3d4757; border-radius: 9px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+.page-menu-title { color: #8e99ad; font-size: 11px; padding: 4px 9px 6px; }
+.page-menu button {
+  background: none; border: none; border-radius: 6px; color: #dbe2ee; text-align: left;
+  font-family: var(--mono); font-size: 12px; padding: 7px 9px; cursor: pointer;
+}
+.page-menu button:hover, .page-menu button:focus-visible { background: #333b4a; color: #fff; outline: none; }
+
 /* ---------------------------------------------------------------- run overlay */
 .overlay {
   position: absolute; left: 10px; right: 10px; bottom: 10px; height: 58%;
@@ -636,6 +648,11 @@ body.dragging-divider { cursor: col-resize; user-select: none; }
 /* A panel in its own window fills it. */
 body.popout-body { margin: 0; background: #12161e; }
 .popout { position: fixed; inset: 0; display: flex; }
+/* So does the whole bar, detached with Detach all. */
+.overlay.detached {
+  position: static; flex: 1; min-width: 0; min-height: 0; height: auto;
+  border: none; border-radius: 0; box-shadow: none;
+}
 
 /* ---------------------------------------------------------------- detached run view
    The whole page, in its own popped-out window - see RunOverlay's Detach button. */
@@ -651,49 +668,7 @@ body.popout-body { margin: 0; background: #12161e; }
   font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
 }
 
-/* ---------------------------------------------------------------- assistant */
-.bubble {
-  position: fixed; right: 22px; bottom: 22px; height: 50px; border-radius: 25px;
-  background: var(--accent); color: #fff; border: none; z-index: 40;
-  display: flex; align-items: center; gap: 9px; padding: 0 20px;
-  font-size: 14px; font-weight: 600;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, .38), 0 1px 3px rgba(0, 0, 0, .2);
-}
-.bubble:hover { filter: brightness(1.08); box-shadow: 0 6px 20px rgba(37, 99, 235, .46); }
-.bubble .ico { font-size: 16px; }
-.chat {
-  position: fixed; right: 22px; bottom: 22px; width: 390px; max-width: calc(100vw - 32px);
-  height: 540px; max-height: calc(100vh - 92px); background: var(--paper);
-  border: 1px solid var(--rule); border-radius: var(--radius); display: flex;
-  flex-direction: column; z-index: 41; box-shadow: 0 12px 44px rgba(31, 43, 77, .22);
-  overflow: hidden;
-}
-.chat .head {
-  background: var(--ink); color: #eef1f7; padding: 12px 15px; display: flex; align-items: center;
-  font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
-}
-.chat .head .spacer { flex: 1; }
-.chat .head button { background: none; border: none; color: #a9b6cf; font-size: 18px; }
-.chat .head button:hover { color: #fff; }
-.chat .log { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-.chat .msg { font-size: 14.5px; line-height: 1.6; }
-.chat .msg.user {
-  align-self: flex-end; background: var(--accent-wash); border-radius: 12px 12px 3px 12px;
-  padding: 9px 13px; max-width: 86%;
-}
-.chat .msg.assistant { align-self: flex-start; max-width: 96%; }
-.chat .msg.assistant code {
-  font-family: var(--mono); font-size: .88em; background: var(--tint);
-  border: 1px solid var(--rule); padding: 1px 5px; border-radius: 5px;
-}
-.chat .hint { color: var(--muted); font-size: 13px; line-height: 1.6; }
-.chat .ask { display: flex; gap: 8px; padding: 11px; border-top: 1px solid var(--rule); }
-.chat .ask textarea {
-  flex: 1; resize: none; font: inherit; font-size: 14px; padding: 9px 11px; height: 44px;
-  border: 1px solid var(--rule); border-radius: 10px;
-}
-
-/* Global light/dark toggle, bottom-left - the mirror of the Ask bubble on the right. */
+/* Global light/dark toggle, bottom-left. */
 .theme-btn {
   position: fixed; left: 22px; bottom: 22px; height: 40px; border-radius: 20px;
   background: var(--paper); color: var(--muted); border: 1px solid var(--rule);
@@ -824,7 +799,9 @@ body.popout-body { margin: 0; background: #12161e; }
   font-family: var(--mono); font-size: 19px; font-weight: 600; color: var(--heading);
 }
 .index-progress .btn { text-decoration: none; background: var(--ink); }
-:root[data-theme='dark'] .index-progress .btn { background: var(--accent); }
+/* The header navy would vanish on the dark page, and the dark theme's pale link blue leaves white
+   text unreadable (about 2:1): a deeper blue keeps the button visible and its text at 6:1. */
+:root[data-theme='dark'] .index-progress .btn { background: #2f5fc4; color: #fff; }
 
 .index-table-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule); box-shadow: var(--shadow); overflow-x: auto; }
 .index-table { width: 100%; border-collapse: collapse; background: var(--paper); min-width: 720px; }
@@ -1109,18 +1086,14 @@ a.day-tile:focus-visible { outline: 3px solid var(--action); outline-offset: 2px
 
 
 /* ---- Option C header: thinner, the white Evoke logo straight on the navy, and on a lesson the
-   week, day and title that used to sit in a strip of their own above the lesson. */
+   week and day that used to sit in a strip of their own above the lesson. */
 .app-header { flex: 0 0 64px; height: 64px; gap: 16px; padding: 0 20px; }
 .hdr-logo-white { display: block; height: 38px; width: auto; }
 .hdr-sep { height: 28px; }
 .hdr-where { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-width: 0; }
-.hdr-crumbs { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #a9b6d3; white-space: nowrap; }
+.hdr-crumbs { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; }
 .hdr-crumbs b { color: #fff; font-weight: 600; }
-.hdr-crumbs .crumb-sep { color: #5f7196; }
-.hdr-title {
-  margin: 0; font-family: var(--serif); font-size: 17px; line-height: 1.25; font-weight: 700; color: #fff;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.hdr-crumbs .crumb-sep { color: #fff; }
 .hdr-tab { height: 38px; }
 .hdr-btn.icon { width: 38px; height: 38px; border-radius: 19px; }
 
@@ -1171,8 +1144,9 @@ a.day-tile:focus-visible { outline: 3px solid var(--action); outline-offset: 2px
 }
 .sb-day:hover { color: var(--heading); }
 .sb-day:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
-.sb-num { flex: 0 0 14px; font-family: var(--mono); font-size: 12px; text-align: right; color: var(--muted); }
-.sb-day.done .sb-num { color: var(--good); }
+/* "Day N": wide enough for "Day 10", so every title starts in line. Done days turn green. */
+.sb-num { flex: 0 0 auto; min-width: 46px; font-family: var(--mono); font-size: 12px; white-space: nowrap; color: var(--muted); }
+.sb-day.done .sb-num { color: var(--good); font-weight: 600; }
 .sb-title { font-size: 13.5px; line-height: 1.45; min-width: 0; }
 .sb-day.on { border-left-color: var(--action); color: var(--heading); }
 .sb-day.on .sb-title { font-weight: 600; }
@@ -1214,13 +1188,11 @@ body.resizing { cursor: col-resize; user-select: none; }
   .app-header.in-lesson .hdr-course,
   .app-header.in-lesson .hdr-course-sep { display: none; }
 }
-/* 3. The week line goes too, leaving the day's title; the logo and course name come down a size. */
+/* 3. The logo and course name come down a size. */
 @media (max-width: 640px) {
   .app-header { gap: 10px; padding: 0 12px; }
-  .hdr-crumbs { display: none; }
   .hdr-logo-white { height: 30px; }
   .hdr-course { font-size: 17px; }
-  .hdr-title { font-size: 15px; }
 }
 
 /* On a narrow window the panes stack (see the 900px rules above), so the week list goes full width
@@ -1286,7 +1258,6 @@ body.resizing { cursor: col-resize; user-select: none; }
 
 /* ---- course index hero: the course name and its description (from course-plan.json) */
 .dash-intro h1 { max-width: none; }
-.dash-desc { margin: 0; max-width: 62ch; font-size: 16.5px; line-height: 1.6; color: #c9d3e8; }
 
 /* ---- warm paper theme: the white of the page becomes a warm paper tone - panes, cards, the week
    list and the course index - with warm rules and ink to match. The header stays Evoke navy, and
@@ -1457,7 +1428,6 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 .dash-intro { gap: 0; }
 .dash-intro h1 { color: var(--heading); letter-spacing: -.01em; }
 .dash-intro h1::after { content: ''; display: block; width: 44px; height: 3px; margin: 20px 0 18px; background: var(--action); }
-.dash-desc { max-width: 58ch; font-size: 18px; line-height: 1.7; color: var(--hero-ink); }
 .upnext {
   border: 1px solid var(--rule);
   box-shadow: 0 1px 2px rgba(14, 31, 69, .05), 0 10px 28px rgba(14, 31, 69, .07);
@@ -1465,7 +1435,6 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 :root[data-theme='dark'] .upnext { background: #262b35; box-shadow: none; }
 @media (max-width: 640px) {
   .dash-hero { padding: 32px 16px 36px; }
-  .dash-desc { font-size: 16.5px; }
 }
 
 /* ---- lesson width: the text fills the lesson pane instead of sitting in a centred 74-character column
@@ -1474,14 +1443,15 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 .lesson { max-width: none; margin: 0; padding: 26px clamp(18px, 3.5%, 44px) 90px; }
 
 /* ---- the product name at the top of the week list follows the list's width: its size scales with
-   the list (15px narrow, about 18px at the standard width, up to 20px wide) and it wraps onto a
+   the list (18px narrow, about 22px at the standard width, up to 26px wide) and it wraps onto a
    second, balanced line when there is not room - instead of ending in an ellipsis. */
 .sidebar { container-type: inline-size; }
 .sb-brand {
   white-space: normal; overflow: visible; text-overflow: clip; text-wrap: balance;
-  font-size: clamp(15px, 6.8cqi, 20px); line-height: 1.25;
+  font-size: clamp(18px, 8.4cqi, 26px); line-height: 1.25;
 }
 
+<<<<<<< HEAD
 /* ---- top strip controls, icons with a dot: Course index and Lessons are bare icons - the page you
    are on is white with a small orange dot beneath it, the other soft blue-grey - and the theme
    switch is the same bare icon after a thin divider. Names show on hover and are read out by screen
@@ -1499,8 +1469,141 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 .hdr-tab svg, .hdr-btn.icon svg { width: 19px; height: 19px; }
 .hdr-tab:focus-visible, .hdr-btn.icon:focus-visible { outline: 2px solid #f2a36b; outline-offset: 0; }
 .hdr-nav-sep { height: 26px; margin: 0 2px; }
+=======
+/* The customer's logo, right of the theme switch, in the desktop app (from their licence). On a
+   white card, so any logo reads on the navy bar whatever its own colours. */
+.hdr-customer {
+  flex: 0 0 auto; display: flex; align-items: center; height: 44px; max-width: 200px;
+  padding: 5px 10px; margin-left: 4px; background: #fff; border-radius: 10px;
+}
+.hdr-customer img { display: block; max-height: 34px; max-width: 180px; width: auto; object-fit: contain; }
+@media (max-width: 700px) { .hdr-customer { height: 36px; max-width: 120px; } .hdr-customer img { max-height: 26px; max-width: 100px; } }
+
+/* ---- Your path: collapse and expand, icon-only buttons */
+.path-head { align-items: center; }
+.path-tools { margin-left: auto; display: flex; gap: 6px; }
+.path-tool {
+  width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border-radius: 8px;
+  border: 1px solid var(--rule); background: var(--paper); color: var(--heading); cursor: pointer;
+}
+.path-tool:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.path-tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.path-tool:disabled { opacity: .4; cursor: default; }
+.path-fold { width: 30px; height: 30px; }
+.path-fold svg { transition: transform .15s ease; }
+.path-fold.closed svg { transform: rotate(-90deg); }
+
+/* ---- course index hero: a colour gradient over the theme's grey, all in the stylesheet: soft light
+   behind the progress panel, and a faint shade on the title's side. Each theme has its own tints. */
+:root {
+  --hero-glow: rgba(255, 255, 255, .8);
+  --hero-shade: rgba(14, 31, 69, .045);
+}
+:root[data-theme='paper'] {
+  --hero-glow: rgba(255, 251, 240, .75);
+  --hero-shade: rgba(120, 90, 50, .06);
+}
+:root[data-theme='dark'] {
+  --hero-glow: rgba(111, 155, 255, .07);
+  --hero-shade: rgba(0, 0, 0, .22);
+}
+.dash-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(100deg, var(--hero-shade), transparent 48%), var(--hero-bg);
+}
+/* The light is drawn from the progress ring itself, centred on it wherever the layout puts it, and
+   sits behind everything in the hero (its isolation keeps it above its background). */
+.dash-hero .ring { position: relative; }
+.dash-hero .ring::before {
+  content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  border-radius: 50%; z-index: -1; pointer-events: none;
+  width: 620px; height: 460px; background: radial-gradient(closest-side, var(--hero-glow), transparent);
+}
+
+>>>>>>> origin/main
 
 /* ---- diagrams: mermaid sizes each label's box for its own 14px text, so the lesson's paragraph
    style (15.5px, tall line height) must not reach the paragraphs inside a label - it made the text
    bigger than its box and clipped it. */
 .lesson .diagram p, .lesson .diagram li { margin: 0; font-size: inherit; line-height: inherit; }
+<<<<<<< HEAD
+=======
+
+/* ---- Your path: day tiles as raised, physical tiles.
+   Each tile is lit from above (a faint top-to-bottom gradient and a bright top edge) and stands on
+   a solid "edge" drawn under it (a shadow with no blur), with a soft shadow on the page below. On
+   hover it rises and tips back slightly towards the viewer; pressed, it sinks onto its edge. The day
+   you are on stands on an orange edge. Locked days stay flat. The edge is a shadow, not a border, so
+   nothing moves around the tile. */
+:root {
+  --tile-top: #ffffff;
+  --tile-bottom: #f3f6fb;
+  --tile-edge: #d4dbe7;
+  --tile-shade: rgba(14, 31, 69, .10);
+  --tile-shine: rgba(255, 255, 255, .9);
+}
+:root[data-theme='paper'] {
+  --tile-top: #fffdf7;
+  --tile-bottom: #f6efe0;
+  --tile-edge: #dccfb3;
+  --tile-shade: rgba(90, 70, 40, .12);
+  --tile-shine: rgba(255, 255, 255, .8);
+}
+:root[data-theme='dark'] {
+  --tile-top: #232a38;
+  --tile-bottom: #1b212c;
+  --tile-edge: #0e1219;
+  --tile-shade: rgba(0, 0, 0, .45);
+  --tile-shine: rgba(255, 255, 255, .06);
+}
+.day-tiles { perspective: 900px; }
+.day-tiles .day-tile {
+  background: linear-gradient(180deg, var(--tile-top), var(--tile-bottom));
+  box-shadow:
+    inset 0 1px 0 var(--tile-shine),
+    0 3px 0 var(--tile-edge),
+    0 6px 14px var(--tile-shade);
+  transform-origin: 50% 100%;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.day-tiles a.day-tile:hover {
+  transform: translateY(-4px) rotateX(6deg);
+  box-shadow:
+    inset 0 1px 0 var(--tile-shine),
+    0 5px 0 var(--tile-edge),
+    0 16px 28px var(--tile-shade);
+}
+.day-tiles a.day-tile:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 var(--tile-shine),
+    0 1px 0 var(--tile-edge),
+    0 2px 6px var(--tile-shade);
+}
+/* The day you are on: its edge in the "You are here" orange. */
+.day-tiles .day-tile:has(.here) { --tile-edge: #f0a878; }
+:root[data-theme='dark'] .day-tiles .day-tile:has(.here) { --tile-edge: #b4501c; }
+.day-tiles .day-tile.locked { background: var(--paper); box-shadow: none; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .day-tiles .day-tile { transition: none; }
+  .day-tiles a.day-tile:hover { transform: none; }
+}
+
+/* ---- lesson tabs: the tick beside a part you have read. It sits right after the tab's name, on
+   the same underline, and clears the part's done mark when selected. */
+.tab-slot { display: inline-flex; align-items: stretch; }
+.tabbar .tab-slot.seen > button:first-child { padding-right: 3px; }
+.tabbar button.tab-done {
+  padding: 14px 8px 12px 3px; border-bottom: 2px solid color-mix(in srgb, var(--good) 70%, transparent);
+  font-size: 13px; font-weight: 700; line-height: 1; color: var(--good); cursor: pointer;
+}
+.tabbar .tab-slot.on button.tab-done { border-bottom: 3px solid var(--action); padding-bottom: 11px; }
+:root[data-theme='dark'] .tabbar .tab-slot.on button.tab-done { border-bottom-color: var(--brand-orange); }
+.tabbar button.tab-done:hover { color: var(--bad); }
+
+/* ---- the two screens (App.tsx): both stay alive once opened, and only the one you are on shows. */
+.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.screen[hidden] { display: none; }
+>>>>>>> origin/main

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -8,6 +9,7 @@ import xml from 'highlight.js/lib/languages/xml';
 import bash from 'highlight.js/lib/languages/bash';
 import json from 'highlight.js/lib/languages/json';
 import { classify } from '../lib/conceptColors';
+import { pagesOnlyIn, viewPages } from '../lib/htmlPages';
 
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('typescript', typescript);
@@ -88,7 +90,7 @@ export const OpenWeeks = createContext<ReadonlySet<number> | null>(null);
 
 /**
  * Lesson markdown. Two behaviours beyond plain rendering:
- *  - fenced code blocks get a "Load into editor" button
+ *  - fenced code blocks get a "Load into editor" button; a practice page gets View in Page, which opens it
  *  - the importer's /learn/... links are routed in-app rather than reloading the page
  *  - a /learn/... link into a week that is not open renders as plain text (see OpenWeeks)
  */
@@ -109,7 +111,12 @@ export function Markdown({
   useEffect(() => {
     const host = ref.current;
     if (!host) return;
-    host.innerHTML = marked.parse(text) as string;
+    // Lessons are Evoke's own, and still pass through DOMPurify: no script, event handler or
+    // javascript: link can reach the page, whatever a lesson contains.
+    host.innerHTML = DOMPurify.sanitize(marked.parse(text) as string, {
+      FORBID_TAGS: ['style', 'form', 'iframe', 'frame', 'object', 'embed', 'svg', 'math', 'meta', 'link', 'base'],
+      FORBID_ATTR: ['style', 'srcset', 'formaction', 'action'],
+    });
 
     for (const block of Array.from(host.querySelectorAll('pre > code'))) {
       const code = block.textContent ?? '';
@@ -153,6 +160,16 @@ export function Markdown({
           );
         }
       }
+      const pages = pagesOnlyIn(code, lang);
+      if (pages.length > 0) {
+        const view = document.createElement('button');
+        view.type = 'button';
+        view.className = 'run';
+        view.textContent = 'View in Page';
+        view.title = 'This is a practice page, not a program. View in Page opens it in your browser.';
+        view.onclick = () => viewPages(view, pages);
+        head.append(view);
+      }
       pre.replaceWith(wrap);
       wrap.append(head, pre);
     }
@@ -172,7 +189,8 @@ export function Markdown({
     const onClick = (e: MouseEvent): void => {
       const anchor = (e.target as HTMLElement).closest('a');
       const href = anchor?.getAttribute('href');
-      if (!href?.startsWith('/')) return;
+      // Only a path in the studio itself: not //host or /\host, which a browser reads as another site.
+      if (!href || !/^\/(?![/\\])/.test(href)) return;
       e.preventDefault();
       navigate(href);
     };

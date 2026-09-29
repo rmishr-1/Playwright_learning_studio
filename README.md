@@ -16,6 +16,7 @@ setup.bat
 launcher.bat
 ```
 
+<<<<<<< HEAD
 `launcher-ab.bat` starts QA Practice Training Studio (Option C, `frontend-c/`, port 5185) the same
 way. Both need Node 22.18 or later.
 
@@ -24,20 +25,24 @@ way. Both need Node 22.18 or later.
   only the checks.
 - The launchers reuse a backend or studio that is already running instead of starting a second
   copy, wait until the servers answer before opening the browser, and keep each server's window
+=======
+- `setup.bat` stops with a message and waits for a key when something is wrong, so a
+  double-clicked window never closes before you can read why. `/nopause` skips the wait.
+- `launcher.bat` reuses a backend or studio that is already running instead of starting a second
+  copy, waits until the servers answer before opening the browser, and keeps each server's window
+>>>>>>> origin/main
   open if it crashes, so the error stays readable. `/noopen` starts without opening the browser.
 
 ### Git
 
-The repository is <https://github.com/rmishr-1/Playwright_learning_studio>. Five batch scripts
+The repository is <https://github.com/rmishr-1/Playwright_learning_studio>. Three batch scripts
 wrap the usual flows, carried over from the assessment portal and retargeted here:
 
 | Script | What it does |
 |---|---|
-| `git-pull.bat` | Fetch and fast-forward `main` |
-| `git-push.bat` | Stage, commit and push to `main` |
-| `git-sync.bat` | Pull then push, in one go |
+| `git-sync.bat` | For the owner: shows what changed and asks, then commits, pulls and pushes. It refuses keys, licences and other secrets |
 | `collab-pull.bat` | Sync your own branch, then rebase it onto `main` |
-| `collab-push.bat` | Push your branch and open a PR against `main` |
+| `collab-push.bat` | Push your branch, and get the link for a pull request into `main`; it never pushes to `main` itself |
 
 They set the git identity **repo-locally** to `rmishr-1 <rmishra@evoketechnologies.com>`, taken
 from the global config on this machine. Change those lines if someone else works in this clone,
@@ -101,13 +106,16 @@ process that touches `Data/`, so a keyed mutex is enough and there is no CAS or 
 |---|---|
 | `shared/contracts/` | zod schemas mirroring `Data/Formats/`, imported by **both** sides so they cannot drift |
 | `backend/` | Express on `127.0.0.1:3010` — content, progress, the code runner, the Terminal |
-| `frontend/` | Vite + React on `5180`, proxying `/api` to the backend |
+| `frontend-c/` | The studio's page (design Option C): Vite + React on `5185`, proxying `/api` to the backend |
 | `Data/Formats/` | The wire contracts + [FORMAT-REGISTRY.md](Data/Formats/FORMAT-REGISTRY.md) |
 | `Data/Content/` | The course content, written by hand |
 | `Data/Progress/` | **Generated.** The one progress record, for whoever runs this clone |
+| `desktop/` | The Option C studio as an offline Windows app, with licences - see [desktop/README.md](desktop/README.md) |
 
 The backend binds loopback only. In dev, Vite proxies to it; a deployment puts a TLS edge in
-front. It is never directly reachable.
+front. It is never directly reachable. The desktop app starts the same backend inside itself, with
+its own folders, Node and browsers, and a token only its window holds (`backend/src/config.ts`,
+`backend/src/server.ts`).
 
 ---
 
@@ -130,7 +138,7 @@ The overlay over the editor has three panels: **Browser**, **Console**, and **Te
 has a toggle in the overlay's header, so any of them can show at the same time, side by side, with
 draggable dividers between them. The **⇱** button on a panel pops it out into a window of its own,
 which stays live and, for the Terminal, typeable; **Back to the studio**, or closing the window,
-puts it back. The panel is a React portal into that window (`frontend/src/components/PopOut.tsx`),
+puts it back. The panel is a React portal into that window (`frontend-c/src/components/PopOut.tsx`),
 so no state is copied between windows. Which panels show, their widths, and the overlay's height
 are remembered in the browser's local storage. Popped-out windows are not reopened on the next
 visit, because a browser opens a window only when the learner clicks something.
@@ -165,12 +173,29 @@ command. **Run** beside a command in a lesson types that command into the Termin
   the Browser panel shows the test as it runs. The same wrapper applies the Run button's navigation
   allowlist.
 - **Output** streams with its colors over the same WebSocket a Run uses. **Ctrl+C** stops the
-  command, with its workers and browsers. The Terminal's state lives in a session object
-  (`frontend/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command. A command is stopped at `terminal_timeout_ms` (5 minutes
+  command, with its workers and browsers. `npx playwright test` is started through
+  `.studio/run-playwright.cjs`, which turns a stop request on its input into the interrupt a real
+  terminal sends, so the runner prints its usual summary on Windows too; the studio then adds
+  "Stopped with Ctrl+C after N s". A second Ctrl+C, or a runner that has not stopped after 8
+  seconds, stops it by force. The Terminal's state lives in a session object
+  (`frontend-c/src/lib/terminalSession.ts`), so popping it out or back never interrupts a command.
+- **The run panels.** Each panel can pop out into its own window, and **Detach all** moves the
+  whole bar, with its toggles, into one window. Loading code into the editor (**Open in editor**,
+  **Load into editor**, **Try it**, **Start this in the editor**) hides the bar in the studio
+  without closing it, so a running command keeps running; **Run** or **Terminal** shows it again. A command is stopped at `terminal_timeout_ms` (5 minutes
   by default), and one command runs at a time.
 - **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
   block in a lesson offers **Load into editor** for this.
 - The Browser panel shows Chromium. `setup.bat` installs Chromium, Firefox and WebKit.
+- **View in Page.** A file that only defines practice pages, such as `practice-shop.ts` (HTML in
+  named strings), or an HTML sample, has no program to run, so in place of **Run** it gets **View in
+  Page**, which opens the page in a new browser tab (the computer's own browser in the desktop app);
+  with several pages in the file it asks which one. This works in the editor, where the Run button
+  is relabelled while it holds such a file, and on the lesson's code samples. The page is served by the report's server, not the studio's, under a Content Security
+  Policy sandbox, so its scripts run as they do in the test but cannot reach the studio
+  (`backend/src/preview.ts`, `frontend-c/src/lib/htmlPages.ts`). A Run ignores `export`, which is
+  not allowed inside the function the Run's code is placed in (`dropExports` in
+  `backend/src/runner.ts`).
 
 ### Check my answer
 
@@ -198,9 +223,10 @@ That is the feature, not an oversight. The guards are load-bearing:
   document navigation, so an allowed app's own fonts and scripts still load
 - a concurrency cap, so one learner cannot exhaust the box
 - a per-run scratch directory, removed afterwards
-- the child's environment is stripped of anything matching `ANTHROPIC|API_KEY|TOKEN|SECRET|PASSWORD`
+- the child gets an allowlisted environment only (`backend/src/child-env.ts`): the system paths
+  and the browsers' folder, nothing of the studio's own (no token, key or secret)
 - the Terminal accepts Playwright commands only, never through a shell, and applies the same
-  allowlist, timeout, and environment stripping
+  allowlist, timeout, and environment
 
 **This is sized for an internal training tool on a trusted network.** Do not put it on the public
 internet without a container per run: process isolation alone does not contain code running as
@@ -263,7 +289,7 @@ fails on purpose; a test must pass, or fail when it is meant to. Add a filter to
 
 Also worth walking by hand before a cohort uses it:
 
-- `grep -r "fetch(" frontend/src` should match only `api/client.ts`
+- `grep -r "fetch(" frontend-c/src` should match only `api/client.ts`
 - a day with an example → Load into editor → Run: the overlay should paint live frames and finish `ok`
 - a part with no code should show the editor's empty state, not a broken pane
 - a link into a locked week should land on the locked page, not a 404

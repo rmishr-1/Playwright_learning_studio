@@ -1,5 +1,7 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Markdown, highlightInto } from './Markdown';
+import { fence } from '../lib/fence';
+import { pagesOnlyIn, viewPages } from '../lib/htmlPages';
 import type { ContentBlock } from '../../../shared/contracts/course_day';
 
 /** A file the editor holds: where it is saved, and the command that runs it. */
@@ -8,7 +10,9 @@ export type EditorFile = { file: string | null; run: string | null };
 /**
  * A code sample. A sample that belongs to a file can be opened in the editor as that file, and one
  * with a command can be run: Run opens it in the editor and runs the command in the Terminal, so
- * the file the Terminal runs is exactly the one on the page.
+ * the file the Terminal runs is exactly the one on the page. A sample with a practice page in it
+ * that is only a practice page has no program to run, so it gets View in Page, which opens the page
+ * in the browser, instead.
  */
 export function CodeBlock({
   block,
@@ -26,6 +30,7 @@ export function CodeBlock({
   useEffect(() => {
     if (ref.current) highlightInto(ref.current, block.text, lang);
   }, [block.text, lang]);
+  const pages = useMemo(() => pagesOnlyIn(block.text, lang), [block.text, lang]);
 
   if (!meta) return null;
   const file: EditorFile = { file: meta.file, run: meta.run };
@@ -45,10 +50,21 @@ export function CodeBlock({
             Open in editor
           </button>
         )}
-        {editable && meta.run && (
+        {editable && meta.run ? (
           <button type="button" className="run" onClick={() => onRun(meta.run!, block.text, file)}>
             ▶ Run
           </button>
+        ) : (
+          pages.length > 0 && (
+            <button
+              type="button"
+              className="run"
+              onClick={(e) => viewPages(e.currentTarget, pages)}
+              title="This is a practice page, not a program. View in Page opens it in your browser."
+            >
+              View in Page
+            </button>
+          )
         )}
       </div>
       <pre>
@@ -160,6 +176,50 @@ const DIAGRAM_COLOURS: Record<string, Record<string, string | boolean>> = {
   },
 };
 
+<<<<<<< HEAD
+=======
+/** Every mermaid draw gets its own id: see drawDiagram. */
+let drawCount = 0;
+/** mermaid's settings are page-wide, so draws take turns: each sets the theme, then draws. */
+let drawQueue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Draws one diagram as SVG text, one draw at a time. Each draw has an id never used before:
+ * before drawing, mermaid removes whatever element on the page already has the id it is given,
+ * and reusing an id - the same diagram drawn again in the same theme, or two overlapping draws
+ * of it - deleted the diagram already on screen, or the other draw's scratch space, leaving a
+ * blank box or the source text. A failed draw is tried once more before giving up.
+ */
+function drawDiagram(base: string, source: string, theme: string): Promise<string> {
+  const run = async (): Promise<string> => {
+    const { default: mermaid } = await import('mermaid');
+    // mermaid's 'base' theme, coloured from the app's own palette for each page theme. Its stock
+    // themes clash: 'dark' draws near-black boxes that vanish into the dark panel, and 'neutral'
+    // puts cool grey boxes and pure black text on warm paper.
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: 'base',
+      themeVariables: { ...(DIAGRAM_COLOURS[theme] ?? DIAGRAM_COLOURS.light), fontFamily: DIAGRAM_FONT, fontSize: '14px' },
+    });
+    for (let attempt = 1; ; attempt++) {
+      const id = base + 'x' + ++drawCount;
+      try {
+        return (await mermaid.render(id, source)).svg;
+      } catch (e) {
+        // A failed draw can leave its scratch elements behind; clear them before trying again.
+        document.getElementById(id)?.remove();
+        document.getElementById('d' + id)?.remove();
+        if (attempt >= 2) throw e;
+      }
+    }
+  };
+  const next = drawQueue.then(run, run);
+  drawQueue = next.catch(() => undefined);
+  return next;
+}
+
+>>>>>>> origin/main
 /**
  * A mermaid diagram. mermaid is large, so it is loaded only when a page has a diagram. It draws in
  * the app's theme, and again when the theme changes. If it cannot draw the source, the source is
@@ -237,7 +297,7 @@ export function Diagram({ source }: { source: string }) {
     };
   }, [id, source, theme]);
 
-  if (failed) return <Markdown text={'```text\n' + source + '\n```'} />;
+  if (failed) return <Markdown text={fence('text', source)} />;
   return (
     <div className="diagram" role="img" aria-label="Diagram">
       {drawn ? (

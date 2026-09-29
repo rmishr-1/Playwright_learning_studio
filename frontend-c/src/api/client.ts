@@ -1,6 +1,6 @@
 /**
  * The ONLY place in the SPA that calls fetch(). Enforced by the verification checklist:
- *   grep -r "fetch(" frontend/src   must match this file and nothing else.
+ *   grep -r "fetch(" frontend-c/src   must match this file and nothing else.
  *
  * There is no session cookie and no learner id in any of this - there are no accounts, and the
  * server keeps exactly one progress record for whoever is running this clone.
@@ -52,6 +52,10 @@ export const getDay = (week: number, day: number): Promise<CourseDay> =>
 // ---------------------------------------------------------------- progress
 
 export const getMyProgress = (): Promise<Progress> => call('/progress');
+
+/** Who the studio is licensed to, and their logo. Both null outside the desktop app. */
+export type Branding = { licensee: string | null; logo: string | null };
+export const getBranding = (): Promise<Branding> => call('/branding');
 
 export const recordProgress = (update: ProgressUpdate): Promise<Progress> =>
   call('/progress', { method: 'POST', body: JSON.stringify(update) });
@@ -109,56 +113,12 @@ export const runTerminal = (
 export const stopTerminal = (runId: string): Promise<{ stopped: boolean }> =>
   call('/terminal/' + runId + '/stop', { method: 'POST' });
 
+/** View in Page: the address at which the learner's browser shows this HTML. */
+export const previewPage = (html: string): Promise<{ url: string }> =>
+  call('/preview', { method: 'POST', body: JSON.stringify({ html }) });
+
 // ---------------------------------------------------------------- check my answer
 
 /** Grades a code exercise with the check the course gives it. */
 export const checkAnswer = (req: CheckRequest): Promise<CheckResult> =>
   call('/check', { method: 'POST', body: JSON.stringify(req) });
-
-// ---------------------------------------------------------------- assistant
-
-/** SSE, so not fetch-based JSON. Returns a cancel function. */
-export function askAssistant(
-  body: unknown,
-  onDelta: (text: string) => void,
-  onDone: (error?: string) => void,
-): () => void {
-  const controller = new AbortController();
-  void (async () => {
-    try {
-      const res = await fetch('/api/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      });
-      if (!res.ok || !res.body) {
-        onDone('The assistant is not available.');
-        return;
-      }
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const frames = buffer.split('\n\n');
-        buffer = frames.pop() ?? '';
-        for (const frame of frames) {
-          const event = /^event: (.*)$/m.exec(frame)?.[1];
-          const data = /^data: (.*)$/m.exec(frame)?.[1];
-          if (!event || !data) continue;
-          const parsed = JSON.parse(data) as { text?: string };
-          if (event === 'delta' && parsed.text) onDelta(parsed.text);
-          else if (event === 'error') onDone(parsed.text ?? 'Assistant error.');
-          else if (event === 'done') onDone();
-        }
-      }
-      onDone();
-    } catch (e) {
-      if ((e as Error).name !== 'AbortError') onDone('The assistant request failed.');
-    }
-  })();
-  return () => controller.abort();
-}

@@ -24,8 +24,10 @@
             "RUN_TIMEOUT",
             "NAVIGATION_NOT_ALLOWED",
             "SOLUTION_NOT_AUTHORED",
+            "EXERCISE_NOT_FOUND",
             "TRAINER_CODE_REQUIRED",
             "TRAINER_CODE_INCORRECT",
+            "BAD_REQUEST",
             "INTERNAL_ERROR"
         ],
         "value": "INTERNAL_ERROR"

@@ -1,64 +1,40 @@
-import { test, expect, type Page } from '@playwright/test';
-import { enrolPage } from '../day9/practice-pages';
+import { test, expect } from '@playwright/test';
+import { EnrolPage } from '../../pages/EnrolPage';
+import { serveQaAcademy } from '../../utils/practice-site';
+import { asha, noAtSign, enrolMessages } from '../../test-data/enrolments';
 
-// Helper: fill the form (empty strings leave a field blank) and accept the terms
-async function fillForm(page: Page, name: string, email: string, course: string): Promise<void> {
-  await page.getByLabel('Full name').fill(name);
-  await page.getByLabel('Email').fill(email);
-  if (course !== '') {
-    await page.getByLabel('Course').selectOption(course);
-  }
-  await page.getByLabel('I accept the terms').check();
-}
+test.describe('Enrolment', { tag: '@enrol' }, () => {
+  let enrolPage: EnrolPage;
 
-test.describe('Enrolment page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.setContent(enrolPage);
+    await serveQaAcademy(page);
+    enrolPage = new EnrolPage(page);
+    await enrolPage.goto();
   });
 
-  test('R1: shows the correct title and heading', { tag: '@smoke' }, async ({ page }) => {
-    await expect(page).toHaveTitle('QA Academy - Enrol');
-    await expect(page.getByRole('heading', { name: 'Enrol in a course' })).toBeVisible();
+  test('student can enrol in a course', { tag: '@smoke' }, async () => {
+    await enrolPage.enrol(asha);
+
+    await test.step('Confirmation and seat count', async () => {
+      await expect(enrolPage.status).toHaveText('Thanks, Asha! You are enrolled in API Testing.');
+      await expect(enrolPage.seats).toHaveText('Seats left: 11');
+    });
   });
 
-  test('R2: Enrol button follows the terms checkbox', { tag: '@regression' }, async ({ page }) => {
-    const enrol = page.getByRole('button', { name: 'Enrol now' });
-    const terms = page.getByLabel('I accept the terms');
-    await expect(enrol).toBeDisabled();
-    await terms.check();
-    await expect(enrol).toBeEnabled();
-    await terms.uncheck();
-    await expect(enrol).toBeDisabled();
+  test('an email without @ is rejected', async () => {
+    await enrolPage.enrol(noAtSign);
+    await expect(enrolPage.status).toHaveText(enrolMessages.invalidEmail);
+    await expect(enrolPage.seats).toHaveText('Seats left: 12');
   });
 
-  test('R3: name is required', { tag: '@regression' }, async ({ page }) => {
-    await fillForm(page, '', 'asha@example.com', 'API Testing');
-    await page.getByRole('button', { name: 'Enrol now' }).click();
-    await expect(page.getByRole('status')).toHaveText('Name is required');
+  test('a name is required', async () => {
+    await enrolPage.enrol({ fullName: '', email: 'asha@example.com', course: 'API Testing' });
+    await expect(enrolPage.status).toHaveText(enrolMessages.nameRequired);
   });
 
-  test('R4: email must contain @', { tag: '@regression' }, async ({ page }) => {
-    await fillForm(page, 'Asha Verma', 'asha.example.com', 'API Testing');
-    await page.getByRole('button', { name: 'Enrol now' }).click();
-    await expect(page.getByRole('status')).toHaveText('Enter a valid email');
-  });
-
-  test('R5: a course must be chosen', { tag: '@regression' }, async ({ page }) => {
-    await fillForm(page, 'Asha Verma', 'asha@example.com', '');
-    await page.getByRole('button', { name: 'Enrol now' }).click();
-    await expect(page.getByRole('status')).toHaveText('Please choose a course');
-  });
-
-  test('R6: valid enrolment shows a confirmation', { tag: '@smoke' }, async ({ page }) => {
-    await fillForm(page, 'Asha Verma', 'asha@example.com', 'API Testing');
-    await page.getByRole('button', { name: 'Enrol now' }).click();
-    await expect(page.getByRole('status')).toHaveText('Thanks, Asha! You are enrolled in API Testing.');
-  });
-
-  test('R7: seats left goes down by one', { tag: '@regression' }, async ({ page }) => {
-    await expect(page.getByTestId('seats')).toHaveText('Seats left: 12');
-    await fillForm(page, 'Asha Verma', 'asha@example.com', 'Playwright Basics');
-    await page.getByRole('button', { name: 'Enrol now' }).click();
-    await expect(page.getByTestId('seats')).toHaveText('Seats left: 11');
+  test('enrol button needs the terms', async () => {
+    await expect(enrolPage.enrolButton).toBeDisabled();
+    await enrolPage.termsCheckbox.check();
+    await expect(enrolPage.enrolButton).toBeEnabled();
   });
 });

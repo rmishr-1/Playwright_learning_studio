@@ -1,10 +1,13 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { getBranding, type Branding } from '../api/client';
 import { planWeeks } from '../lib/coursePlan';
 import { nextTheme, THEME_NAMES, type Theme } from '../lib/theme';
 import type { CourseIndex } from '../../../shared/contracts/course_index';
+import { PRODUCT_NAME } from '../product';
 
-/** The product's name: in the top strip on the course index, and heading the week list. */
-export const PRODUCT_NAME = 'QA Practice Training Studio';
+/** The product's name (product.ts): in the top strip on the course index, and heading the week list. */
+export { PRODUCT_NAME };
 
 /** Sun for light, a sheet of paper for warm paper, moon for dark. */
 function ThemeIcon({ theme }: { theme: Theme }) {
@@ -27,8 +30,10 @@ function ThemeIcon({ theme }: { theme: Theme }) {
 /**
  * Option C’s navy bar across the top of every screen: the white Evoke logo straight on the navy,
  * the product name on the course index - or on a lesson the course name and where you are (week and
- * module, day, and the day’s title) - the Course index / Lessons tabs, and the theme switch (light,
- * warm paper, dark). "Where you are" is read from the URL and the index.
+ * module, and day) - a Lessons tab on the course index and a Course index tab on a
+ * lesson, the theme switch (light,
+ * warm paper, dark), and in the desktop app the logo of the customer it is licensed to, when their
+ * licence carries one. "Where you are" is read from the URL and the index.
  */
 export function AppHeader({
   index,
@@ -47,7 +52,11 @@ export function AppHeader({
   const m = /^\/learn\/w(\d+)\/d(\d+)/.exec(pathname);
   const where = m ? { week: Number(m[1]), day: Number(m[2]) } : null;
   const week = where ? planWeeks(index).find((w) => w.week === where.week) : undefined;
-  const title = where ? week?.days.find((d) => d.day === where.day)?.title : undefined;
+  // The customer's logo, when the studio is licensed to someone whose licence carries one.
+  const [branding, setBranding] = useState<Branding | null>(null);
+  useEffect(() => {
+    getBranding().then(setBranding, () => setBranding(null));
+  }, []);
 
   return (
     <header className={'app-header' + (where ? ' in-lesson' : '')}>
@@ -66,36 +75,33 @@ export function AppHeader({
             <span className="hdr-crumbs">
               Week {where.week}
               {week ? ' · ' + week.module.name : ''}
-              <span className="crumb-sep" aria-hidden="true">/</span>
+              <span className="crumb-sep" aria-hidden="true">›</span>
               <b>Day {where.day}</b>
             </span>
-            {title && <h1 className="hdr-title">{title}</h1>}
           </div>
         </>
       )}
 
       <span className="hdr-spacer" />
 
+      {/* Each screen offers the way to the other one: Lessons on the course index, Course index on a lesson. */}
       <nav className="hdr-nav" aria-label="Main">
-        <Link to="/" className={'hdr-tab' + (where ? '' : ' on')} aria-current={where ? undefined : 'page'} aria-label="Course index" title="Course index">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-          </svg>
-          <span className="hdr-tab-label">Course index</span>
-        </Link>
-        <Link
-          to={where ? pathname : lessonsTo}
-          className={'hdr-tab' + (where ? ' on' : '')}
-          aria-current={where ? 'page' : undefined}
-          aria-label="Lessons"
-          title="Lessons"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 19V5" /><path d="M8 7h7" />
-          </svg>
-          <span className="hdr-tab-label">Lessons</span>
-        </Link>
+        {where ? (
+          <Link to="/" className="hdr-tab" aria-label="Course index" title="Course index">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span className="hdr-tab-label">Course index</span>
+          </Link>
+        ) : (
+          <Link to={lessonsTo} className="hdr-tab" aria-label="Lessons" title="Lessons">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 19V5" /><path d="M8 7h7" />
+            </svg>
+            <span className="hdr-tab-label">Lessons</span>
+          </Link>
+        )}
       </nav>
 
       <span className="hdr-sep hdr-nav-sep" aria-hidden="true" />
@@ -109,6 +115,12 @@ export function AppHeader({
       >
         <ThemeIcon theme={theme} />
       </button>
+
+      {branding?.logo && (
+        <span className="hdr-customer" title={'Licensed to ' + (branding.licensee ?? '')}>
+          <img src={branding.logo} alt={branding.licensee ?? 'Customer logo'} />
+        </span>
+      )}
     </header>
   );
 }

@@ -193,7 +193,28 @@ async function online(): Promise<boolean> {
   }
 }
 
+/**
+ * The page objects, fixtures, test data and helpers that the exercises have the learner write
+ * (Day 10: pages/EnrolPage.ts, test-data/enrolments.ts, fixtures/index.ts), as their model answers,
+ * in both workspaces: a later exercise's test imports them, as it would for a learner who did the
+ * earlier ones. The studio keeps a file that differs from its own starting copy, so these stay.
+ */
+function stageSupportAnswers(): void {
+  const source = path.join(ROOT, 'Data', 'Source');
+  for (const pkg of fs.readdirSync(source)) {
+    const solutions = path.join(source, pkg, 'files', 'solutions');
+    if (!fs.existsSync(solutions)) continue;
+    for (const folder of ['pages', 'fixtures', 'test-data', 'utils']) {
+      if (!fs.existsSync(path.join(solutions, folder))) continue;
+      for (const ws of ['demo', 'project']) {
+        fs.cpSync(path.join(solutions, folder), path.join(workRoot, ws, folder), { recursive: true });
+      }
+    }
+  }
+}
+
 async function main(): Promise<void> {
+  stageSupportAnswers();
   const only = process.argv[2];
   const items = collect().filter((i) => !only || i.label.includes(only));
   const net = await online();

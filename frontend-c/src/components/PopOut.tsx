@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { PRODUCT_NAME } from '../product';
 
 /**
  * A window whose panel was unmounted a moment ago. Closing waits one tick, so a panel that is
@@ -54,7 +55,7 @@ export function PopOut({
       doc.head.replaceChildren(
         ...Array.from(document.querySelectorAll('style, link[rel="stylesheet"]')).map((n) => n.cloneNode(true)),
       );
-      doc.title = title + ' - QA Practice Training Studio';
+      doc.title = title + ' - ' + PRODUCT_NAME;
     };
     copyStyles();
     doc.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') ?? 'dark');
@@ -94,7 +95,7 @@ export function PopOut({
       doc.head.replaceChildren(
         ...Array.from(document.querySelectorAll('style, link[rel="stylesheet"]')).map((n) => n.cloneNode(true)),
       );
-      doc.title = title + ' - QA Practice Training Studio';
+      doc.title = title + ' - ' + PRODUCT_NAME;
     });
     mirror.observe(document.head, { childList: true, subtree: true, characterData: true });
     return () => mirror.disconnect();

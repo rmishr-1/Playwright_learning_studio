@@ -11,17 +11,22 @@
  * (commands.ts), nothing goes through a shell, one command runs at a time, and a command is
  * stopped at a time limit.
  */
-import { spawn, type ChildProcess } from 'node:child_process';
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { config } from '../config';
+import { NODE_BIN, config, listening, onDisk } from '../config';
 import { emit, retireStream } from '../runner';
+import { learnerEnv, systemExe } from '../child-env';
 import { DEFAULT_SPEC, HELP, parse, type Parsed } from './commands';
-import { PLAYWRIGHT_CLI, fileExists, hasReport, prepareWorkspace, reportDir, saveFile, workspaceDir } from './workspace';
+import { PLAYWRIGHT_CLI, fileExists, hasReport, playwrightStarter, prepareWorkspace, reportDir, saveFile, workspaceDir } from './workspace';
 import type { Workspace } from '../../../shared/contracts/course_day';
 
-/** Where the backend serves the last HTML report. routes.ts mounts it. */
-export const REPORT_URL = '/api/terminal/report/index.html';
+/**
+ * Where the last HTML report is served: a server of its own (server.ts), outside the studio's
+ * origin, so the report cannot use the studio's API.
+ */
+const reportUrl = (): string => 'http://127.0.0.1:' + listening.reportPort + listening.reportPath + '/index.html';
 
 /** The workspace whose report show-report opens: the one the last test run used. */
 let reportFrom: Workspace = 'project';
@@ -33,7 +38,7 @@ export const currentReportDir = (): string => reportDir(reportFrom);
  * the studio's own build keeps its version. Its bin/ is not in the package's exports, so it is
  * found from the package folder.
  */
-const TSC = path.join(path.dirname(require.resolve('typescript-learner/package.json')), 'bin', 'tsc');
+const TSC = onDisk(path.join(path.dirname(require.resolve('typescript-learner/package.json')), 'bin', 'tsc'));
 const CHECK_FLAGS = [
   '--noEmit',
   '--strict',
@@ -49,10 +54,31 @@ const CHECK_FLAGS = [
   'false',
 ];
 
-type Running = { runId: string; child: ChildProcess; stopping: boolean; timedOut: boolean };
+/**
+ * frameKey: what the command's test processes send with each live-view frame (receiveFrame).
+ * gentle: the command is the test runner, which Ctrl+C asks to stop through its input (see
+ * playwrightStarter()), so that it can print its own summary.
+ */
+type Running = {
+  runId: string;
+  child: ChildProcess;
+  stopping: boolean;
+  timedOut: boolean;
+  frameKey: string;
+  gentle: boolean;
+  startedAt: number;
+};
+
+/** How long the test runner may take to stop after Ctrl+C before it is stopped by force. */
+const GENTLE_STOP_MS = 8_000;
 let running: Running | null = null;
 
 const say = (runId: string, text: string): void => emit(runId, { event: 'term', data: text.replace(/\n/g, '\r\n') + '\r\n' });
+/** The most a command's output fills the Terminal with. */
+const MAX_TERMINAL_OUTPUT = 2_000_000;
+
+/** Text from the page, shown in the Terminal: no control characters, so no escape sequences. */
+const printable = (s: string): string => s.replace(/[\x00-\x1f\x7f]/g, '?');
 const done = (runId: string, code: number | null, openUrl?: string): void => {
   emit(runId, openUrl ? { event: 'exit', code, open_url: openUrl } : { event: 'exit', code });
   retireStream(runId);
@@ -67,9 +93,28 @@ const containsTest = (code: string): boolean => /\btest\s*(\.\w+\s*)?\(/.test(co
 function npmVersion(): string {
   const agent = /npm\/([\d.]+)/.exec(process.env.npm_config_user_agent ?? '');
   if (agent) return agent[1];
+  // A Node installation has npm beside it. The desktop app ships Node without npm, which no
+  // command runs, and records the version npm would have had in npm-version.txt instead.
+  const home = path.dirname(NODE_BIN);
   try {
-    const file = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'package.json');
+    const file = path.join(home, 'node_modules', 'npm', 'package.json');
     return (JSON.parse(fs.readFileSync(file, 'utf-8')) as { version: string }).version;
+  } catch {
+    try {
+      return fs.readFileSync(path.join(home, 'npm-version.txt'), 'utf-8').trim();
+    } catch {
+      return 'unknown';
+    }
+  }
+}
+
+/** The version of the Node that runs the learner's code, which may not be the one running this. */
+let nodeVersionText: string | null = null;
+function nodeVersion(): string {
+  if (NODE_BIN === process.execPath && !process.versions.electron) return process.version;
+  try {
+    nodeVersionText ??= execFileSync(NODE_BIN, ['--version'], { encoding: 'utf-8', windowsHide: true }).trim();
+    return nodeVersionText;
   } catch {
     return 'unknown';
   }
@@ -84,7 +129,7 @@ function saveEditor(runId: string, ws: Workspace, parsed: Parsed, code: string, 
   if (file) {
     const saved = saveFile(ws, file, code);
     if (!saved) {
-      say(runId, YELLOW('The editor holds ' + file + ', which is not a file the Terminal can save.'));
+      say(runId, YELLOW('The editor holds ' + printable(file) + ', which is not a file the Terminal can save.'));
       return false;
     }
     say(runId, DIM('Saved the editor as ' + saved));
@@ -134,13 +179,13 @@ export function startCommand(runId: string, line: string, code: string, file: st
     return done(runId, 0);
   }
   if (parsed.kind === 'refused') {
-    say(runId, YELLOW(parsed.message));
+    say(runId, YELLOW(printable(parsed.message)));
     return done(runId, 1);
   }
   if (parsed.kind === 'version') {
     const text =
       parsed.program === 'node'
-        ? process.version
+        ? nodeVersion()
         : parsed.program === 'npm'
           ? npmVersion()
           : 'Version ' + (require('@playwright/test/package.json') as { version: string }).version;
@@ -153,7 +198,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
       return done(runId, 1);
     }
     say(runId, 'Opening the report of the last run in a new browser tab.');
-    return done(runId, 0, REPORT_URL);
+    return done(runId, 0, reportUrl());
   }
 
   try {
@@ -164,22 +209,20 @@ export function startCommand(runId: string, line: string, code: string, file: st
     return done(runId, 1);
   }
 
-  // The learner's code runs with the studio's environment minus its secrets, as a Run does.
-  const env: NodeJS.ProcessEnv = { ...process.env };
-  for (const key of Object.keys(env)) {
-    if (/ANTHROPIC|API_KEY|TOKEN|SECRET|PASSWORD/i.test(key)) delete env[key];
-  }
-  delete env.CI; // A CI variable would change retries and forbidOnly, and the lessons assume a computer.
-  env.FORCE_COLOR = '1';
+  // The learner's code runs with only the environment a program needs (child-env.ts). No CI
+  // variable either: it would change retries and forbidOnly, and the lessons assume a computer.
+  const frameKey = crypto.randomBytes(16).toString('hex');
+  const env = learnerEnv({ FORCE_COLOR: '1' });
 
   let args: string[];
   let cwd: string;
   if (parsed.kind === 'test') {
     reportFrom = ws;
     env.PLAYWRIGHT_HTML_OPEN = 'never';
-    env.STUDIO_FRAME_URL = 'http://127.0.0.1:' + config.port + '/api/terminal/' + runId + '/frame';
+    env.STUDIO_FRAME_URL = 'http://127.0.0.1:' + listening.port + '/api/terminal/' + runId + '/frame';
+    env.STUDIO_FRAME_KEY = frameKey;
     env.STUDIO_ALLOWED_ORIGINS = JSON.stringify(config.run.allowed_origins);
-    args = [PLAYWRIGHT_CLI, 'test', ...parsed.args];
+    args = [playwrightStarter(ws), PLAYWRIGHT_CLI, 'test', ...parsed.args];
     cwd = workspaceDir(ws);
   } else {
     // `node` and `npm run check` run in ts-basics, as the TypeScript lessons do.
@@ -190,18 +233,31 @@ export function startCommand(runId: string, line: string, code: string, file: st
         : [TSC, ...CHECK_FLAGS, parsed.file];
   }
 
-  const child = spawn(process.execPath, args, {
+  const gentle = parsed.kind === 'test';
+  const child = spawn(NODE_BIN, args, {
     cwd,
     env,
-    stdio: ['ignore', 'pipe', 'pipe'],
+    // The test runner's input stays open, for the stop request that Ctrl+C sends it.
+    stdio: [gentle ? 'pipe' : 'ignore', 'pipe', 'pipe'],
     // Its own process group on macOS and Linux, so Ctrl+C reaches the workers and browsers too.
     detached: process.platform !== 'win32',
     windowsHide: true,
   });
-  const current: Running = { runId, child, stopping: false, timedOut: false };
+  const current: Running = { runId, child, stopping: false, timedOut: false, frameKey, gentle, startedAt: Date.now() };
+  // A stop request that arrives as the runner exits must not crash the studio.
+  child.stdin?.on('error', () => undefined);
   running = current;
 
-  const forward = (chunk: Buffer): void => emit(runId, { event: 'term', data: chunk.toString('utf-8').replace(/\r?\n/g, '\r\n') });
+  // A command's output is shown up to a limit (an endless console.log loop would otherwise fill
+  // the app's memory); past it, the rest is dropped and the command keeps running to its end.
+  let shown = 0;
+  const forward = (chunk: Buffer): void => {
+    if (shown > MAX_TERMINAL_OUTPUT) return;
+    const text = chunk.toString('utf-8').replace(/\r?\n/g, '\r\n');
+    shown += text.length;
+    emit(runId, { event: 'term', data: text });
+    if (shown > MAX_TERMINAL_OUTPUT) say(runId, YELLOW('\n[output cut short: over ' + MAX_TERMINAL_OUTPUT + ' characters. Press Ctrl+C to stop the command.]'));
+  };
   child.stdout?.on('data', forward);
   child.stderr?.on('data', forward);
 
@@ -210,25 +266,49 @@ export function startCommand(runId: string, line: string, code: string, file: st
     kill(current, true);
   }, config.run.terminal_timeout_ms);
 
-  child.on('error', (e) => {
-    say(runId, YELLOW('The command could not start: ' + e.message));
-  });
-  child.on('close', (exitCode) => {
+  // The command ends once, whichever comes first: its output closing, or (when something it
+  // started keeps its output open) two seconds after it exits, or its failing to start at all.
+  let ended = false;
+  const end = (exitCode: number | null): void => {
+    if (ended) return;
+    ended = true;
     clearTimeout(timer);
     if (running === current) running = null;
     if (current.timedOut) {
       say(runId, YELLOW('\nThe command was stopped at the time limit of ' + Math.round(config.run.terminal_timeout_ms / 1000) + ' seconds.'));
     } else if (current.stopping) {
-      say(runId, DIM('^C'));
+      const seconds = ((Date.now() - current.startedAt) / 1000).toFixed(1);
+      say(runId, YELLOW('\nStopped with Ctrl+C after ' + seconds + ' s.'));
     }
     done(runId, current.stopping ? 130 : exitCode);
+  };
+  child.on('error', (e) => {
+    say(runId, YELLOW('The command could not start: ' + e.message));
+    end(1);
   });
+  child.on('exit', (exitCode) => {
+    setTimeout(() => {
+      child.stdout?.destroy();
+      child.stderr?.destroy();
+      end(exitCode);
+    }, 2_000).unref();
+  });
+  child.on('close', (exitCode) => end(exitCode));
 }
 
-/** Ctrl+C. Returns false when there was nothing to stop. */
+/** Stops whatever is running, with its browsers: the desktop app calls this as it closes. */
+export function stopAll(): void {
+  if (running) kill(running, true);
+}
+
+/**
+ * Ctrl+C. Returns false when there was nothing to stop. As in a real terminal, it is echoed at
+ * once, and a second Ctrl+C while the command is still stopping stops it by force.
+ */
 export function stopCommand(runId: string): boolean {
   if (!running || running.runId !== runId) return false;
-  kill(running, false);
+  say(runId, DIM('^C'));
+  kill(running, running.stopping);
   return true;
 }
 
@@ -241,8 +321,17 @@ function kill(r: Running, hard: boolean): void {
   r.stopping = true;
   const pid = r.child.pid;
   if (!pid) return;
+  // The test runner is asked through its input, which works on Windows too. It then prints its
+  // summary; if it has not exited in time, it is stopped by force.
+  if (!hard && r.gentle && r.child.stdin?.writable) {
+    r.child.stdin.write('stop\n');
+    setTimeout(() => {
+      if (r.child.exitCode === null && r.child.signalCode === null) kill(r, true);
+    }, GENTLE_STOP_MS).unref();
+    return;
+  }
   if (process.platform === 'win32') {
-    spawn('taskkill', ['/pid', String(pid), '/T', '/F'], { windowsHide: true }).on('error', () => r.child.kill());
+    spawn(systemExe('taskkill.exe'), ['/pid', String(pid), '/T', '/F'], { windowsHide: true }).on('error', () => r.child.kill());
     return;
   }
   const signal = (sig: NodeJS.Signals): void => {
@@ -256,9 +345,20 @@ function kill(r: Running, hard: boolean): void {
   if (!hard) setTimeout(() => { if (r.child.exitCode === null && r.child.signalCode === null) signal('SIGKILL'); }, 4000);
 }
 
-/** One live-view frame from the workspace's test wrapper. Frames for a finished command are dropped. */
-export function receiveFrame(runId: string, body: { data?: unknown; width?: unknown; height?: unknown }): boolean {
-  if (!running || running.runId !== runId || typeof body.data !== 'string') return false;
+/**
+ * One live-view frame from the workspace's test wrapper, which sends the key only the running
+ * command was given. Frames for a finished command, or without that key, are dropped.
+ */
+/** Whether a frame for this run, with this key, would be taken: checked before its body is read. */
+export function frameExpected(runId: string, key: string | undefined): boolean {
+  if (!running || running.runId !== runId) return false;
+  const want = Buffer.from(running.frameKey);
+  const got = Buffer.from(key ?? '');
+  return got.length === want.length && crypto.timingSafeEqual(got, want);
+}
+
+export function receiveFrame(runId: string, key: string | undefined, body: { data?: unknown; width?: unknown; height?: unknown }): boolean {
+  if (!frameExpected(runId, key) || typeof body.data !== 'string') return false;
   emit(runId, {
     event: 'frame',
     data: body.data,

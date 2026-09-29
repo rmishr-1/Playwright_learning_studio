@@ -11,13 +11,13 @@
  * It is sized for an internal training tool on a trusted network. Exposing it to the public
  * internet needs a container per run - see the README.
  */
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import * as ts from 'typescript';
-import { config } from './config';
+import { NODE_BIN, config, onDisk } from './config';
+import { learnerEnv, systemExe } from './child-env';
 import type { RunRequest, RunResult, RunStreamEvent } from '../../shared/contracts/run';
 
 /**
@@ -41,7 +41,38 @@ type Stream = {
    */
   lastFrame: string | null;
   status: string | null;
+  /** The size of what is buffered, so a run with no viewer holds a bounded amount. */
+  bufferedBytes: number;
+  /** Set once the run or command has ended: such a stream is kept only for late viewers. */
+  done: boolean;
 };
+
+/** What a stream holds for a viewer that has not attached yet, at most. */
+const MAX_BUFFERED_BYTES = 16_000_000;
+/** The largest live-view frame passed on (a frame is about 100 KB). */
+const MAX_FRAME = 4_000_000;
+/** The longest line of output passed on as one event. */
+const MAX_EVENT_TEXT = 20_000;
+/** Streams held at once, used or waiting: each can hold MAX_BUFFERED_BYTES. */
+const MAX_STREAMS = 64;
+
+const sizeOf = (event: RunStreamEvent): number =>
+  event.event === 'frame' ? event.data.length : event.event === 'stdout' ? event.text.length : event.event === 'term' ? event.data.length : 100;
+
+const newStream = (): Stream => ({ listeners: new Set(), buffered: [], lastFrame: null, status: null, bufferedBytes: 0, done: false });
+
+/**
+ * Makes room for one more stream: streams whose run has ended go first, oldest first, since they
+ * are kept only for a late viewer. Throws when every stream is still in use.
+ */
+function roomForStream(): void {
+  if (streams.size < MAX_STREAMS) return;
+  for (const [id, s] of streams) {
+    if (streams.size < MAX_STREAMS) return;
+    if (s.done) streams.delete(id);
+  }
+  if (streams.size >= MAX_STREAMS) throw Object.assign(new Error('Too many runs are waiting.'), { code: 'RUN_QUEUE_FULL' });
+}
 
 /** Frames arrive before the client may have attached, so buffer until it does. */
 const streams = new Map<string, Stream>();
@@ -52,6 +83,7 @@ export function attachStream(runId: string, listener: Listener): () => void {
   if (!s) return () => {};
   for (const e of s.buffered) listener(e);
   s.buffered.length = 0;
+  s.bufferedBytes = 0;
   s.listeners.add(listener);
   return () => s.listeners.delete(listener);
 }
@@ -70,11 +102,19 @@ export function lastFrame(runId: string): { frame: string | null; status: string
 export function emit(runId: string, event: RunStreamEvent): void {
   const s = streams.get(runId);
   if (!s) return;
-  if (event.event === 'frame') s.lastFrame = event.data;
-  else if (event.event === 'ended') s.status = event.status;
+  if (event.event === 'frame') {
+    if (typeof event.data !== 'string' || event.data.length > MAX_FRAME) return;
+    s.lastFrame = event.data;
+  } else if (event.event === 'ended') s.status = event.status;
+  if (event.event === 'ended' || event.event === 'exit') s.done = true;
   if (s.listeners.size === 0) {
-    // Cap the buffer: a long run with no viewer must not grow without bound.
-    if (s.buffered.length < 200) s.buffered.push(event);
+    // Cap the buffer, in events and in bytes: a long run with no viewer must not grow without
+    // bound. The run's end is always kept.
+    const size = sizeOf(event);
+    if ((s.buffered.length < 200 && s.bufferedBytes + size <= MAX_BUFFERED_BYTES) || event.event === 'ended' || event.event === 'exit') {
+      s.buffered.push(event);
+      s.bufferedBytes += size;
+    }
     return;
   }
   for (const l of s.listeners) l(event);
@@ -88,12 +128,74 @@ export function retireStream(runId: string, afterMs = 60_000): void {
   setTimeout(() => streams.delete(runId), afterMs);
 }
 
+const DECLARATION = /^(?:default\s+)?(?=(?:async\s+)?(?:const|let|var|function|class|interface|type|enum|abstract|declare)\b)/;
+
+/**
+ * The code a Run runs, without its `export`s. A Run runs the code inside a function, where an
+ * export is a syntax error, so a lesson file that exports a page or a helper stopped before its
+ * first line ran. `export const x = ...` becomes `const x = ...`, and `export { a, b }` goes.
+ * Strings, templates and comments are skipped, so a word "export" inside one is left alone.
+ */
+export function dropExports(code: string): string {
+  let out = '';
+  let i = 0;
+  // At the start of a statement: the start of the code, or after a line break, ; or }.
+  let statementStart = true;
+  while (i < code.length) {
+    const ch = code[i];
+    if (ch === '/' && (code[i + 1] === '/' || code[i + 1] === '*')) {
+      const end = code[i + 1] === '/' ? code.indexOf('\n', i) : code.indexOf('*/', i + 2) + 2;
+      const stop = end <= 0 || end === 1 ? code.length : end;
+      out += code.slice(i, stop);
+      i = stop;
+      continue;
+    }
+    if (ch === "'" || ch === '"' || ch === '`') {
+      let j = i + 1;
+      let depth = 0;
+      while (j < code.length) {
+        if (code[j] === '\\') j += 2;
+        else if (ch === '`' && code[j] === '$' && code[j + 1] === '{') {
+          depth++;
+          j += 2;
+        } else if (depth > 0 && code[j] === '}') {
+          depth--;
+          j++;
+        } else if (depth === 0 && code[j] === ch) break;
+        else j++;
+      }
+      out += code.slice(i, j + 1);
+      i = j + 1;
+      statementStart = false;
+      continue;
+    }
+    if (statementStart && code.startsWith('export', i) && !/[\w$]/.test(code[i + 6] ?? '')) {
+      const rest = code.slice(i + 6);
+      const list = /^\s*\{[^}]*\}\s*(?:from\s*(['"])[^'"]*\1)?\s*;?/.exec(rest);
+      const gap = /^\s+/.exec(rest)?.[0] ?? '';
+      if (list) {
+        i += 6 + list[0].length;
+        continue;
+      }
+      if (gap && DECLARATION.test(rest.slice(gap.length))) {
+        i += 6 + gap.length + (/^default\s+/.exec(rest.slice(gap.length))?.[0].length ?? 0);
+        continue;
+      }
+    }
+    if (ch === '\n' || ch === ';' || ch === '}' || ch === '{') statementStart = true;
+    else if (!/\s/.test(ch)) statementStart = false;
+    out += ch;
+    i++;
+  }
+  return out;
+}
+
 /** Written into the scratch dir and executed by node. */
 function buildProgram(code: string): string {
   const allowed = JSON.stringify(config.run.allowed_origins);
   // The program runs from a temp directory, so ordinary resolution would not find playwright.
   // Resolve it here, in the parent, and bake in the absolute path.
-  const playwrightPath = JSON.stringify(require.resolve('playwright'));
+  const playwrightPath = JSON.stringify(onDisk(require.resolve('playwright')));
   return `
 const { chromium } = require(${playwrightPath});
 const SENTINEL = ${JSON.stringify(SENTINEL)};
@@ -106,21 +208,29 @@ let _browser = null;
 let _page = null;
 let _lastShot = null;
 
-function originOf(url) { try { return new URL(url).origin; } catch { return null; } }
+// The same scheme and host as an allowed origin; any port, unless the entry names one.
+// Exact, so https://playwright.dev.example.com is not https://playwright.dev.
 function allowed(url) {
-  const o = originOf(url);
-  if (!o) return false;
-  return ALLOWED.some((a) => o === a || o.startsWith(a));
+  let u;
+  try { u = new URL(url); } catch { return false; }
+  return ALLOWED.some((a) => {
+    let e;
+    try { e = new URL(a); } catch { return false; }
+    return u.protocol === e.protocol && u.hostname === e.hostname && (e.port === '' || u.port === e.port);
+  });
 }
 
 async function launch(headless = true) {
   _browser = await chromium.launch({ headless: true });
-  const context = await _browser.newContext({ viewport: { width: 1280, height: 720 } });
+  // No service workers: their requests would not pass through the gate below.
+  const context = await _browser.newContext({ viewport: { width: 1280, height: 720 }, serviceWorkers: 'block' });
 
-  // Fail-closed navigation gate, at the network layer so it catches redirects too, not just
-  // explicit goto() calls. It gates TOP-LEVEL DOCUMENT navigation only: once the main frame is
-  // on an allowed app, that app's own fonts, scripts and images are allowed to load, otherwise
-  // every demo site renders broken and every run reports itself blocked.
+  // Fail-closed navigation gate, at the network layer. It gates TOP-LEVEL DOCUMENT navigation
+  // only: once the main frame is on an allowed app, that app's own fonts, scripts and images are
+  // allowed to load, otherwise every demo site renders broken and every run reports itself
+  // blocked. Playwright routes only the first request of a redirect, so a redirect is caught
+  // where it lands instead (framenavigated, below), and the page is taken back to a blank one.
+  // It keeps lessons on the course's sites; it is a guide rail, not a sandbox.
   await context.route('**/*', (route) => {
     const request = route.request();
     const url = request.url();
@@ -131,6 +241,16 @@ async function launch(headless = true) {
     return route.abort();
   });
 
+  const watch = (page) => {
+    page.on('framenavigated', (frame) => {
+      if (frame !== page.mainFrame()) return;
+      const url = frame.url();
+      if (url === '' || url.startsWith('about:') || url.startsWith('data:') || url.startsWith('chrome-error:') || allowed(url)) return;
+      send({ event: 'blocked', url });
+      page.goto('about:blank').catch(() => {});
+    });
+  };
+  context.on('page', watch);
   _page = await context.newPage();
 
   // Live view: CDP screencast, forwarded frame by frame to the overlay.
@@ -160,7 +280,7 @@ async function show(page) {
 (async () => {
   try {
     await (async () => {
-${code}
+${dropExports(code)}
     })();
     if (_page && !_lastShot) { try { _lastShot = (await _page.screenshot()).toString('base64'); } catch {} }
     send({ event: 'result', status: 'ok', screenshot: _lastShot });
@@ -199,23 +319,70 @@ function stripAnsi(text: string): string {
 
 /**
  * The editor is a TypeScript editor - learners write type annotations, interfaces and Page
- * Object classes. The program is executed with a plain `node run.js`, and a .js file gets none
- * of Node's own TypeScript support, so real course TypeScript (`(n: number) =>`, `private
- * readonly page: Page`, `import { type Page }`) threw a SyntaxError before a single line of the
- * learner's own code ran. Transpiling through the real compiler - not relying on Node's own
- * strip-only mode, which additionally rejects parameter properties and enums outright - removes
- * that whole class of failure. This is a syntax-only pass with no project type-checking, so it
- * does not reject anything `tsc` would merely warn about.
+ * Object classes. A plain .js file gets none of Node's own TypeScript support, so real course
+ * TypeScript (`(n: number) =>`, `private readonly page: Page`, `import { type Page }`) threw a
+ * SyntaxError before a single line of the learner's own code ran. Transpiling through the real
+ * compiler - not relying on Node's own strip-only mode, which additionally rejects parameter
+ * properties and enums outright - removes that whole class of failure. This is a syntax-only pass
+ * with no project type-checking, so it does not reject anything `tsc` would merely warn about.
+ *
+ * The transpiling happens in the run's own process (run.js below), not in the studio's: in the
+ * desktop app the compiler sits outside app.asar, where the app's integrity check does not reach,
+ * and the studio must not load code from there.
  */
-function transpile(program: string): string {
-  const out = ts.transpileModule(program, {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2022,
-      esModuleInterop: true,
-    },
-  });
-  return out.outputText;
+const TYPESCRIPT = JSON.stringify(onDisk(require.resolve('typescript')));
+/**
+ * Where the program's own require() may find a package: the packages the studio ships, and nowhere
+ * else. Node's usual search would climb from the temp folder through every parent's node_modules,
+ * and then try its global folders (%USERPROFILE%\.node_modules and the like), where anything could
+ * be waiting under a package's name. The bootstrap below starts the search in the shipped packages,
+ * and refuses anything the program asks for that resolves elsewhere (Node's own modules aside).
+ */
+const PACKAGES = JSON.stringify(path.resolve(onDisk(require.resolve('playwright/package.json')), '..', '..'));
+const BOOTSTRAP = `
+const fs = require('fs');
+const path = require('path');
+const Module = require('module');
+const ts = require(${TYPESCRIPT});
+const file = path.join(__dirname, 'program.js');
+const out = ts.transpileModule(fs.readFileSync(path.join(__dirname, 'program.ts'), 'utf-8'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
+}).outputText;
+const m = new Module(file, module);
+m.filename = file;
+m.paths = [${PACKAGES}];
+const shipped = ${PACKAGES} + path.sep;
+const resolve = Module._resolveFilename;
+Module._resolveFilename = function (request, parent, ...rest) {
+  const found = resolve.call(this, request, parent, ...rest);
+  if (parent === m && !Module.isBuiltin(found) && !found.startsWith(shipped)) {
+    throw new Error("A Run can use Playwright and the modules built into Node; " + request + " is not one of them.");
+  }
+  return found;
+};
+m._compile(out, file);
+`;
+
+/** A run's output kept for its result: enough for any lesson, and never enough to exhaust memory. */
+const MAX_OUTPUT = 1_000_000;
+/** The longest line kept while waiting for its end (a live-view frame is about 100 KB). */
+const MAX_LINE = 8_000_000;
+
+/** Runs in flight, so the app can stop them, with their browsers, as it closes. */
+const children = new Set<ChildProcess>();
+
+/** Stops a run's process with everything it started. On Windows only taskkill /T reaches the browsers. */
+function killTree(child: ChildProcess): void {
+  if (process.platform === 'win32' && child.pid) {
+    spawn(systemExe('taskkill.exe'), ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true }).on('error', () => child.kill('SIGKILL'));
+  } else {
+    child.kill('SIGKILL');
+  }
+}
+
+/** Stops every run in flight: the desktop app calls this as it closes. */
+export function stopRuns(): void {
+  for (const child of children) killTree(child);
 }
 
 export type StartedRun = { run_id: string; done: Promise<RunResult> };
@@ -226,8 +393,9 @@ export type StartedRun = { run_id: string; done: Promise<RunResult> };
  * socket is open and the first frames are lost.
  */
 export function prepareRun(): string {
+  roomForStream();
   const runId = crypto.randomUUID();
-  streams.set(runId, { listeners: new Set(), buffered: [], lastFrame: null, status: null });
+  streams.set(runId, newStream());
   // An id nobody uses must not leak a stream entry.
   setTimeout(() => {
     const s = streams.get(runId);
@@ -240,12 +408,24 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   if (active >= config.run.max_concurrent) return { queue_full: true };
 
   const runId = req.run_id;
-  if (!streams.has(runId)) streams.set(runId, { listeners: new Set(), buffered: [], lastFrame: null, status: null });
-  active++;
+  if (!streams.has(runId)) {
+    roomForStream();
+    streams.set(runId, newStream());
+  }
 
+  // Nothing is counted as running until the run's files and its environment are in place.
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-run-'));
   const program = path.join(scratch, 'run.js');
-  fs.writeFileSync(program, transpile(buildProgram(req.code)));
+  let env: NodeJS.ProcessEnv;
+  try {
+    fs.writeFileSync(path.join(scratch, 'program.ts'), buildProgram(req.code));
+    fs.writeFileSync(program, BOOTSTRAP);
+    env = learnerEnv();
+  } catch (e) {
+    fs.rmSync(scratch, { recursive: true, force: true });
+    throw e;
+  }
+  active++;
 
   const started = Date.now();
   let stdout = '';
@@ -255,63 +435,74 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   let error: RunResult['error'] = null;
   let blockedUrl: string | null = null;
 
-  // Chromium needs a real Windows environment (SystemRoot, TEMP, LOCALAPPDATA) to start at
-  // all, so the child gets the parent's env minus the secrets. Env is not the security
-  // boundary here - the separate process, the timeout and the navigation allowlist are.
-  const childEnv: NodeJS.ProcessEnv = { ...process.env };
-  for (const key of Object.keys(childEnv)) {
-    if (/ANTHROPIC|API_KEY|TOKEN|SECRET|PASSWORD/i.test(key)) delete childEnv[key];
-  }
-
-  const child = spawn(process.execPath, [program], {
+  // Chromium needs a real Windows environment (SystemRoot, TEMP, LOCALAPPDATA) to start at all,
+  // and gets only that (child-env.ts), so no secret of the studio's reaches the learner's code. The
+  // learner's code runs as the learner, like code they write anywhere: the separate process and the
+  // timeout keep a run from hurting the studio, and the navigation allowlist keeps lessons on the
+  // course's sites; neither is a sandbox.
+  const child = spawn(NODE_BIN, [program], {
     cwd: scratch,
-    env: childEnv,
+    env,
     stdio: ['ignore', 'pipe', 'pipe'],
+    windowsHide: true,
   });
+  children.add(child);
+  let truncated = false;
+  let shown = 0;
+  /** A line of the learner's output: kept for the result, and shown live, each within its limit. */
+  const out = (text: string): void => {
+    if (stdout.length + text.length + 1 <= MAX_OUTPUT) stdout += text + '\n';
+    else if (!truncated) {
+      truncated = true;
+      stdout += '[output cut short: over ' + MAX_OUTPUT + ' characters]\n';
+      emit(runId, { event: 'stdout', text: '[output cut short: over ' + MAX_OUTPUT + ' characters]' });
+    }
+    if (shown > MAX_OUTPUT) return;
+    const line = text.length > MAX_EVENT_TEXT ? text.slice(0, MAX_EVENT_TEXT) + ' [line cut short]' : text;
+    shown += line.length;
+    emit(runId, { event: 'stdout', text: line });
+  };
 
   const done = new Promise<RunResult>((resolve) => {
     const timer = setTimeout(() => {
       status = 'timeout';
-      child.kill('SIGKILL');
+      killTree(child);
     }, config.run.timeout_ms);
 
     let buffer = '';
     child.stdout.on('data', (chunk: Buffer) => {
       buffer += chunk.toString('utf-8');
+      // A line that never ends is dropped rather than held without limit.
+      if (buffer.length > MAX_LINE && !buffer.includes('\n')) buffer = '';
       const lines = buffer.split('\n');
       buffer = lines.pop() ?? '';
       for (const line of lines) {
         const marker = line.indexOf(SENTINEL);
         if (marker === -1) {
-          if (line.length) {
-            stdout += line + '\n';
-            emit(runId, { event: 'stdout', text: line });
-          }
+          if (line.length) out(line);
           continue;
         }
         // Anything before the marker is genuine learner output on the same line.
         const pre = line.slice(0, marker);
-        if (pre.length) {
-          stdout += pre + '\n';
-          emit(runId, { event: 'stdout', text: pre });
-        }
+        if (pre.length) out(pre);
         try {
           const evt = JSON.parse(line.slice(marker + SENTINEL.length));
           if (evt.event === 'frame') {
-            emit(runId, { event: 'frame', data: evt.data, width: evt.width, height: evt.height });
+            if (typeof evt.data === 'string' && typeof evt.width === 'number' && typeof evt.height === 'number') {
+              emit(runId, { event: 'frame', data: evt.data, width: evt.width, height: evt.height });
+            }
           } else if (evt.event === 'stdout') {
-            stdout += evt.text + '\n';
-            emit(runId, { event: 'stdout', text: evt.text });
+            out(String(evt.text));
           } else if (evt.event === 'blocked') {
-            blockedUrl = evt.url;
+            blockedUrl = String(evt.url).slice(0, 2_000);
             status = 'blocked';
           } else if (evt.event === 'result') {
-            screenshot = evt.screenshot ?? null;
+            screenshot = typeof evt.screenshot === 'string' && evt.screenshot.length <= MAX_FRAME ? evt.screenshot : null;
             if (evt.status === 'error') {
               // A blocked navigation CAUSES the error that follows it, so keep reporting the
               // block - it is the thing the learner can act on.
               if (status !== 'blocked') status = 'error';
-              error = { message: stripAnsi(evt.message), stack: cleanStack(evt.stack ?? '') };
+              error = { message: stripAnsi(String(evt.message)).slice(0, MAX_EVENT_TEXT), stack: cleanStack(String(evt.stack ?? '')).slice(0, MAX_EVENT_TEXT) };
             } else if (status !== 'blocked') {
               status = 'ok';
             }
@@ -323,19 +514,38 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
     });
 
     child.stderr.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString('utf-8');
+      if (stderr.length < MAX_OUTPUT) stderr += chunk.toString('utf-8');
     });
 
-    child.on('close', () => {
+    // A process that cannot start reports an error, and may never close: either ends the run, once.
+    let finished = false;
+    child.on('error', (e) => {
+      if (status === 'ok') status = 'error';
+      if (!error) error = { message: 'The run could not start: ' + e.message, stack: '' };
+      finish();
+    });
+    child.on('close', () => finish());
+    // Something the run started may keep its output open after it exits: two seconds on, the run
+    // is over all the same, and its slot is free. (What the program started and left running is
+    // then out of the studio's reach: Node cannot find a process's grandchildren once it has gone.
+    // The studio's own browser is closed by the program itself; a timeout kills the whole tree.)
+    child.on('exit', () => {
+      setTimeout(() => {
+        child.stdout.destroy();
+        child.stderr.destroy();
+        finish();
+      }, 2_000).unref();
+    });
+    const finish = (): void => {
+      if (finished) return;
+      finished = true;
       clearTimeout(timer);
+      children.delete(child);
       active--;
       // On Windows the browser can still hold a file in the scratch folder for a moment after the
-      // child exits, and rmSync then throws EPERM. Retry, and never let cleanup fail the run.
-      try {
-        fs.rmSync(scratch, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-      } catch {
-        // Leave the folder to the OS temp cleanup rather than report a learner's run as broken.
-      }
+      // child exits. Retry in the background (never blocking the app's windows), and never let
+      // cleanup fail the run: a folder left behind goes with the OS temp cleanup.
+      void fs.promises.rm(scratch, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }).catch(() => {});
       if (status === 'ok' && stderr.trim() && !screenshot) status = 'error';
       emit(runId, { event: 'ended', status });
       // Long enough that pressing Detach a little while after a run finished still has a last
@@ -351,7 +561,7 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
         duration_ms: Date.now() - started,
         blocked_url: blockedUrl,
       });
-    });
+    };
   });
 
   emit(runId, { event: 'started' });

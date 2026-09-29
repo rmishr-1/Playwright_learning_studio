@@ -1,9 +1,39 @@
 node_modules/
 dist/
 Data/Progress/
+# The module guard the backend writes for learner processes (backend/src/child-env.ts).
+Data/Runtime/
 Data/Config/*.json
 !Data/Config/*.example.json
 .run-scratch/
 
 # The Terminal's Playwright project (backend/src/terminal/workspace.ts). Regenerated on every command.
 Data/Workspace/
+
+# Secrets and customer records never belong in the repository, wherever they are dropped. The one
+# key file that is committed is the licence PUBLIC key, which every copy of the app carries.
+*.pem
+!desktop/src/licence-public.pem
+*.pfx
+*.p12
+*.key
+*.dpapi
+*.lic
+*.lic.old
+issued.csv
+.env
+.env.*
+seals.json
+*.bak
+*.backup
+id_rsa*
+id_ed25519*
+credentials*.json
+secrets*.json
+*.ppk
+*.jks
+*.keystore
+*.asc
+**/keys/
+**/licences/
+**/deliveries/

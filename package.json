@@ -2,15 +2,19 @@
     "name": "playwright-learning-studio",
     "private": true,
     "version": "0.1.0",
-    "description": "Playwright Learning Studio - a web platform for a Playwright + TypeScript course. SPA + backend + shared contracts over the repo Data/ folder.",
+    "description": "Playwright Learning Studio - a web platform for a Playwright + TypeScript course. The Option C page (frontend-c) + backend + shared contracts over the repo Data/ folder, and the desktop app (desktop/).",
     "workspaces": [
         "backend",
-        "frontend"
+        "frontend-c"
     ],
     "scripts": {
         "dev:backend": "npm run dev --workspace backend",
+<<<<<<< HEAD
         "dev:frontend": "npm run dev --workspace frontend",
         "dev:frontend-c": "npm run dev --prefix frontend-c",
+=======
+        "dev:frontend": "npm run dev --workspace frontend-c",
+>>>>>>> origin/main
         "build:content": "tsx scripts/build-content.ts",
         "verify:content": "tsx scripts/verify-content.ts",
         "typecheck": "npm run typecheck --workspaces --if-present"
@@ -22,7 +26,9 @@
         "zod": "^3.24.1"
     },
     "allowScripts": {
-        "esbuild@0.28.2": true,
-        "esbuild@0.21.5": true
+        "esbuild@0.28.2": true
+    },
+    "overrides": {
+        "lodash-es": "4.18.1"
     }
 }

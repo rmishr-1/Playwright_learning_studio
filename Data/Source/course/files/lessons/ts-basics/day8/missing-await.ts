@@ -1,26 +1,37 @@
-const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function click(label: string): Promise<void> {
-  await wait(200);                     // clicking takes a moment
-  console.log(`   clicked "${label}"`);
+  await sleep(200);                               // clicking takes a moment
+  console.log(`  clicked "${label}"`);
 }
 
-async function withoutAwait(): Promise<void> {
-  console.log('WITHOUT await:');
-  click('Log in');                     // ❌ no await — we don't wait for the click
-  console.log('   checking the dashboard…   ← too early!');
-}
+// 1. Without await: the program doesn't wait for the click
+console.log('WITHOUT await:');
+click('Log in');                                  // ❌ no await
+console.log('  checking the dashboard   <- too early!');
+await sleep(300);                                 // (give the forgotten click time to finish)
 
-async function withAwait(): Promise<void> {
-  console.log('WITH await:');
-  await click('Log in');               // ✅ wait until the click is done
-  console.log('   checking the dashboard…   ← correct order');
-}
+// 2. With await: each step finishes before the next starts
+console.log('WITH await:');
+await click('Log in');                            // ✅
+console.log('  checking the dashboard   <- right order');
 
-async function main(): Promise<void> {
-  await withoutAwait();
-  await wait(300);                     // let the forgotten click finish printing
-  await withAwait();
-}
+// 3. forEach doesn't wait for async callbacks
+console.log('forEach:');
+const pages: string[] = ['home', 'cart'];
+pages.forEach(async (page) => {
+  await sleep(100);
+  console.log(`  checked ${page}`);
+});
+console.log('  all pages checked?     <- printed first!');
+await sleep(200);
 
-main();
+// 4. for...of with await does wait
+console.log('for...of:');
+for (const page of pages) {
+  await sleep(100);
+  console.log(`  checked ${page}`);
+}
+console.log('  all pages checked      <- right order');

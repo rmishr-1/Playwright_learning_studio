@@ -3,7 +3,7 @@
   "week": 2,
   "day": 2,
   "number": 7,
-  "title": "TypeScript II: Conditions, Loops & Functions",
+  "title": "Conditions & Loops",
   "locked": false,
   "workspace": "project",
   "parts": [
@@ -16,7 +16,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 7 · Prerequisites\n\n",
+          "text": "# Day 7 · Prerequisites",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -26,7 +26,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "**TypeScript II: Conditions, Loops & Functions**\n\n*Make decisions, repeat work and package steps into reusable functions — including the callback pattern behind every Playwright test*\n\n**Time:** 3 hours\n\n**Where you work:** pw-course/ts-basics/day7/\n\n**By the end of the day you can:**\n\n- Use `if / else if / else`, `switch` and the ternary operator to make decisions\n- Explain truthy and falsy values\n- Repeat work with `for`, `for...of`, `while` and array methods, using `break` and `continue`\n- Write functions with typed parameters, return types, optional and default parameters, and arrow functions\n- Pass functions to other functions (callbacks) — the pattern behind `test('title', async () => {…})`\n\n**From earlier days:**\n\n- Day 5–6: variables, types, operators, arrays, objects, type aliases",
+          "text": "**Conditions & Loops**\n\n*Teach your code to make decisions and repeat work — the logic behind every data-driven test*\n\n**Time:** 3 hours\n\n**Where you work:** pw-course/ts-basics/day7/\n\n**By the end of the day you can:**\n\n- Predict whether a value counts as true or false in a condition (truthy and falsy)\n- Write decisions with if / else if / else, and choose between if, switch and the ternary\n- Use a check with `if` to narrow a union or optional value, so TypeScript knows what you have\n- Repeat work with for, for...of, while and do...while, and control loops with break and continue\n- Filter, transform and question lists with forEach, map, filter, find, some and every\n- Run a list of test cases through a check and report pass/fail — a mini data-driven test\n\n**From earlier days:**\n\n- Day 5: comparison and logical operators, the ternary operator, blocks and scope\n- Day 6: arrays, objects, type aliases, optional properties, `??`, `?.`, union and literal types",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -36,125 +36,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P1 · Blocks, indentation and scope\n\nCurly braces `{ }` group statements into a **block**. Code inside a block is **indented** (moved right) so you can see what belongs together.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "if (isLoggedIn) {            // the block starts\n  console.log('Welcome');    // indented: belongs to the if\n  showDashboard();\n}                            // the block ends\nconsole.log('Done');         // not indented: always runs",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "**Scope** means *where a variable exists*. A `let` or `const` created **inside** a block exists only inside that block:",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "const suite = 'Checkout';           // outside any block: visible everywhere below\nif (true) {\n  const message = 'inside';         // only exists inside these braces\n  console.log(suite, message);      // ✅ both visible\n}\nconsole.log(message);               // ❌ Cannot find name 'message'",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "callout",
-          "text": "In VS Code, select code and press `Shift + Alt + F` (Windows/Linux) or `Shift + Option + F` (Mac) to auto-format indentation.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "tip",
-            "title": null
-          },
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## P2 · Truthy and falsy\n\nConditions need `true` or `false`. When you give them another value, JavaScript treats it as \"truthy\" or \"falsy\".\n\n**Falsy** — these count as `false`: `false`, `0`, `''` (empty string), `null`, `undefined`, `NaN`.\n**Truthy** — *everything else*: `'hello'`, `42`, `[]`, `{}`, `'false'` (a non-empty string!).",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "const errorMessage = '';\nif (errorMessage) {\n  console.log('Error shown:', errorMessage);   // skipped — '' is falsy\n}",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": null,
-            "run": null,
-            "mode": "read",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "Which values are FALSY? (Select all that apply)",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "`0`",
-              "`'0'`",
-              "`''`",
-              "`undefined`"
-            ],
-            "answers": [
-              0,
-              2,
-              3
-            ],
-            "kind": "multiple",
-            "explanation": "`'0'` is a non-empty string, so it's truthy. The number 0, the empty string and undefined are falsy."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## P3 · Quick recap from Days 5–6",
+          "text": "## P1 · Quick recap from Days 5 and 6\n\n- [ ] Compare with `===` and `!==`, and combine answers with `&&`, `||` and `!` (Day 5 · F6–F7)\n- [ ] Pick one of two values with the ternary: `condition ? valueIfTrue : valueIfFalse` (Day 5 · F7)\n- [ ] Curly braces `{ }` make a **block**, and `let`/`const` inside it stay inside it (Day 5 · F3)\n- [ ] Store lists in arrays and records in objects; read an optional property with `?.` or `??` (Day 6)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -164,41 +46,108 @@
         },
         {
           "type": "checkpoint",
-          "text": "`const browsers = ['chromium', 'firefox']; browsers.push('webkit');` — what is `browsers[2]`?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "'firefox'",
-              "'webkit'",
-              "undefined",
-              "An error, because browsers is const"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`const` stops you replacing the array, not changing its contents. After push, index 2 is 'webkit'."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "What is `5 > 3 && 2 > 4`?",
+          "text": "`const isLoggedIn = true; const cartCount: number = 0;` — what is `isLoggedIn && cartCount > 0`?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
               "true",
-              "false"
+              "false",
+              "0",
+              "undefined"
             ],
             "answers": [
               1
             ],
             "kind": "single",
-            "explanation": "5 > 3 is true but 2 > 4 is false. With `&&`, both must be true."
+            "explanation": "`cartCount > 0` is false, and true && false is false."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const results = ['pass', 'fail', 'pass'];` — how do you read the LAST item, however long the list is?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`results[results.length - 1]`",
+              "`results.last`",
+              "`results[results.length]`",
+              "`results[3]`"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "Indexes start at 0, so the last index is always one less than the length."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## P2 · Decisions and repetition — you already write them\n\nRead any manual test case and you'll find two kinds of instruction that a straight list of steps can't express:\n\n| In a manual test case | In code | Today's section |\n|---|---|---|\n| \"**If** a cookie banner appears, dismiss it\" | a **condition** — `if` | F2 |\n| \"**Depending on** the user's role, check the right menu\" | a choice among many — `switch` | F4 |\n| \"**Repeat** steps 2–5 for each browser\" | a **loop** — `for...of` | F6 |\n| \"Refresh **until** the order says *Shipped* (give up after 5 tries)\" | a **loop with a stop condition** — `while` | F7 |\n| \"From the results, **list only** the failed tests\" | an **array method** — `filter` | F8 |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "diagram",
+          "text": "flowchart LR\n  S[\"Step\"] --> C{\"Condition<br/>true?\"}\n  C -- yes --> A[\"Do this\"]\n  C -- no --> B[\"Do that\"]\n  A --> N[\"Next step\"]\n  B --> N\n  N --> L{\"More items<br/>in the list?\"}\n  L -- yes --> S\n  L -- no --> E[\"Done\"]",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "So far your programs ran every line once, top to bottom. Today they learn to **skip** lines (conditions) and **repeat** lines (loops). Together these are called **control flow**.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "A data-driven test is exactly this: *for each row in the test-data sheet, do the steps; if the result matches the expected value, mark it passed, otherwise failed.* By the end of today you'll write one.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "\"Repeat the checkout steps for each of the 3 payment methods.\" Which tool from today fits?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "A loop over the list of payment methods",
+              "An `if` / `else` statement",
+              "A ternary operator",
+              "A single if statement"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "Doing the same steps once for every item in a list is a loop."
           },
           "code": null,
           "callout": null,
@@ -212,11 +161,11 @@
       "kind": "concept",
       "title": "Fundamentals",
       "tab_label": "Fundamentals",
-      "has_runnable_code": true,
+      "has_runnable_code": false,
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 7 · Fundamentals\n\n\n\n## F1 · Conditions: making decisions\n\n### `if`, `else if`, `else`",
+          "text": "# Day 7 · Fundamentals\n\n## F1 · Truthy and falsy — what counts as \"true\"\n\nAn `if` needs a yes-or-no answer. Usually you give it a real boolean — `age >= 18` is `true` or `false`. But JavaScript lets you put **any** value in a condition, and quietly treats it as true or false:\n\n| Falsy — treated as **false** | Truthy — treated as **true** |\n|---|---|\n| `false` | `true` |\n| `0` (and `-0`) | Every other number: `1`, `-5`, `0.5` |\n| `''` (empty text) | Any non-empty text: `'a'`, `' '`, even `'false'` and `'0'` |\n| `null`, `undefined` | Every array and object — even empty ones: `[]`, `{}` |\n| `NaN` | |\n\nThe falsy list is short — **just these six** (`-0` counts as `0`; there's also a rare `0n` you won't meet in tests). Everything else is truthy.\n\nThis is handy for \"is there anything here?\" checks:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -226,15 +175,15 @@
         },
         {
           "type": "code",
-          "text": "const statusCode = 404;\n\n// Checked from top to bottom — the FIRST true condition wins, the rest are skipped\nif (statusCode >= 200 && statusCode < 300) {\n  console.log('Success');\n} else if (statusCode >= 400 && statusCode < 500) {\n  console.log('Client error — check the request');\n} else if (statusCode >= 500) {\n  console.log('Server error — raise a bug');\n} else {\n  console.log('Something else');\n}\n\n// A condition can use a truthy/falsy value directly\nconst couponCode = '';\nif (!couponCode) {\n  console.log('No coupon applied');\n}",
+          "text": "const couponCode: string = '';\nif (couponCode) {\n  console.log(`Apply ${couponCode}`);\n} else {\n  console.log('No coupon to apply');      // '' is falsy, so this runs\n}",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "ts-basics/day7/conditions.ts",
-            "run": "node day7/conditions.ts",
-            "mode": "editor",
+            "file": null,
+            "run": null,
+            "mode": "read",
             "expect_error": false,
             "network": false
           },
@@ -243,7 +192,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nClient error — check the request\nNo coupon applied\n```\n\n### `switch` — choose between many exact values",
+          "text": "### The trap: `0` and `''` are real values\n\n`||` (Day 5) uses the same rule: `a || b` gives `b` whenever `a` is **falsy**. That's a problem when `0` or `''` is a legitimate value:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -253,15 +202,100 @@
         },
         {
           "type": "code",
-          "text": "const browserName: string = 'webkit';\nlet realBrowser: string;\n\nswitch (browserName) {\n  case 'chromium':\n    realBrowser = 'Chrome / Edge';\n    break;                          // stop here — otherwise the next case runs too!\n  case 'firefox':\n    realBrowser = 'Firefox';\n    break;\n  case 'webkit':\n    realBrowser = 'Safari';\n    break;\n  default:                          // none of the cases matched\n    realBrowser = 'Unknown';\n}\n\nconsole.log(`${browserName} is like ${realBrowser}`);",
+          "text": "const retries: number = 0;          // the tester deliberately set 0 retries\nconsole.log(retries || 3);          // 3  ❌ the 0 was thrown away\nconsole.log(retries ?? 3);          // 0  ✅ ?? only replaces null and undefined (Day 6)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "ts-basics/day7/switch.ts",
-            "run": "node day7/switch.ts",
-            "mode": "editor",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "For a fallback, prefer `??`. Use `||` or a bare `if (value)` only when `0` and `''` really should count as \"nothing\".",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tip",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which values are falsy? (Select all that apply)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`''`",
+              "`0`",
+              "`[]`",
+              "`'0'`"
+            ],
+            "answers": [
+              0,
+              1
+            ],
+            "kind": "multiple",
+            "explanation": "The number 0 and empty text are falsy. The text '0' isn't empty, and every array — even an empty one — is truthy."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const quantity: number = 0;` — what does `quantity || 1` give?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "0",
+              "1",
+              "true",
+              "false"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "0 is falsy, so `||` falls back to 1. `quantity ?? 1` would keep the 0."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F2 · `if`, `else if`, `else`\n\n### `if` — do something only when a condition is true",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "if (condition) {\n  // runs only when condition is true (or truthy)\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
             "expect_error": false,
             "network": false
           },
@@ -270,7 +304,88 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nwebkit is like Safari\n```",
+          "text": "The condition goes in round brackets; the code to run goes in a **block** in curly braces.\n\n### `else` — otherwise",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const stockCount: number = 0;\n\nif (stockCount > 0) {\n  console.log('Add to cart is enabled');\n} else {\n  console.log('Show \"Out of stock\"');        // this runs\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### `else if` — more than two possibilities",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const loadTimeMs: number = 1850;\n\nif (loadTimeMs < 1000) {\n  console.log('fast');\n} else if (loadTimeMs < 3000) {\n  console.log('acceptable');                 // this runs\n} else {\n  console.log('too slow');\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "The conditions are checked **top to bottom**, and **only the first one that's true** runs. Once a branch runs, the rest are skipped — even if they would also be true. (If you added `else if (loadTimeMs < 5000)` at the end, 1850 would match it too — but it would never get there, because `< 3000` already won.) So put the most specific conditions first.\n\n`else if` and `else` are both optional, and you can have as many `else if` branches as you need.\n\n### Combining and nesting conditions\n\nUse `&&` and `||` to combine checks in one condition, or put an `if` inside another `if` (**nesting**):",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const isLoggedIn: boolean = true;\nconst cartCount: number = 2;\n\nif (isLoggedIn && cartCount > 0) {\n  console.log('Show the checkout button');\n}\n\nif (isLoggedIn) {\n  if (cartCount === 0) {\n    console.log('Your cart is empty');\n  }\n} else {\n  console.log('Please sign in');\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Nesting more than two levels deep gets hard to read — like a test case with sub-sub-steps. Combining with `&&` is often clearer.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -280,20 +395,244 @@
         },
         {
           "type": "callout",
-          "text": "Forgetting `break` is a classic bug: execution \"falls through\" into the next case.",
+          "text": "Always use `{ }` after `if` and `else`, even for one line, and indent the code inside. JavaScript allows leaving the braces out for a single line, but that's a well-known source of bugs when someone later adds a second line.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
           "callout": {
-            "variant": "warning",
+            "variant": "note",
+            "title": "Braces and indentation"
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const score: number = 95;` — what does this print? `if (score > 50) { console.log('pass'); } else if (score > 90) { console.log('distinction'); } else { console.log('fail'); }`",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "pass, then distinction",
+              "pass",
+              "fail",
+              "distinction"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "95 > 50 is true, so the first branch runs and the rest are skipped. To print 'distinction', the `score > 90` check must come first."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "When does the `else` block run?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Always, after the if block",
+              "Only when the first condition was true",
+              "When the condition causes an error",
+              "Only when none of the conditions above it were true"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "`else` is the \"none of the above\" branch."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F3 · Conditions that narrow types\n\nOn Day 6 you saw that TypeScript won't let you use a value that **might** be missing, or might be the wrong type. An `if` is the everyday way to check first — and inside the block, TypeScript **knows** what you have. This is called **narrowing**.\n\n### Checking that an optional value is there",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "type LoginCase = { id: string; expectedError?: string };\nconst testCase: LoginCase = { id: 'TC-02', expectedError: 'Locked out' };\n\nconsole.log(testCase.expectedError.length);        // ❌ 'testCase.expectedError' is possibly 'undefined'\n\nif (testCase.expectedError !== undefined) {\n  console.log(testCase.expectedError.length);      // ✅ in here it's definitely a string\n}\n\nif (testCase.expectedError) {                       // a truthiness check narrows too\n  console.log(testCase.expectedError.toUpperCase());\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Checking which type of a union you have",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const orderId: string | number = Math.random() > 0.5 ? 'ORD-7' : 7;\n\nif (typeof orderId === 'string') {\n  console.log(orderId.toLowerCase());     // TypeScript knows: string\n} else {\n  console.log(orderId.toFixed(0));        // and here: number\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "`typeof value` gives the type's name as text: `'string'`, `'number'`, `'boolean'`, `'undefined'`, `'object'` (Days 4 and 6).",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Narrowing is the code version of a precondition: \"**given** the error message is shown, **then** check its text\". TypeScript refuses to let you skip the \"given\".",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
             "title": null
           },
           "title": null
         },
         {
+          "type": "checkpoint",
+          "text": "`type User = { name: string; phone?: string };` — inside which block is `user.phone.length` allowed?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`if (user.phone !== undefined) { … }`",
+              "`if (user.name) { … }`",
+              "`if (typeof user === 'object') { … }`",
+              "`if (user.phone === undefined) { … }`"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "Only a check on phone itself tells TypeScript that phone is a string inside the block."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
           "type": "markdown",
-          "text": "### Choosing the right tool\n\n| Situation | Use |\n|---|---|\n| Ranges or combined conditions (`>= 200 && < 300`) | `if / else if / else` |\n| One variable compared to many exact values | `switch` |\n| Choose between two values in one line | ternary `cond ? a : b` |",
+          "text": "## F4 · `switch` — choosing among many fixed values\n\nWhen you compare **one value** against a list of possible values, `switch` reads more cleanly than a long `else if` ladder:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "type Role = 'admin' | 'editor' | 'viewer';\ntype User = { name: string; role: Role };\nconst user: User = { name: 'Ravi', role: 'editor' };\n\nswitch (user.role) {\n  case 'admin':\n    console.log('Check the Settings menu is visible');\n    break;\n  case 'editor':\n    console.log('Check the Edit button is visible');     // this runs\n    break;\n  default:\n    console.log('Check the page is read-only');\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "| Part | Meaning |\n|---|---|\n| `switch (user.role)` | The value being checked |\n| `case 'admin':` | \"If it equals `'admin'`, start running here\" (compared with `===`) |\n| `break;` | \"Stop — leave the switch\" |\n| `default:` | Runs when no `case` matched — like the final `else` (optional) |\n\n### Forgetting `break` — fall-through\n\nWithout `break`, the code **keeps running into the next case**, whether it matches or not. This is called **fall-through**:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const status: string = 'failed';\nswitch (status) {\n  case 'failed':\n    console.log('Investigate');      // runs\n  case 'passed':\n    console.log('All good');         // ALSO runs — there was no break above!\n    break;\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Fall-through is almost always a bug — with one useful exception: stacking cases on purpose so they **share** a block:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "switch (status) {\n  case 'failed':\n  case 'timedOut':                   // 'failed' or 'timedOut' both land here\n    console.log('Open the trace');\n    break;\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "### Which one to use?\n\n| Situation | Use |\n|---|---|\n| One yes/no decision, or ranges (`< 1000`, `>= 18`) | `if` / `else` |\n| One value compared with several **exact** values | `switch` |\n| Choosing between two **values** in one line | the ternary `? :` (Day 5) |\n\nWith literal types (Day 6), TypeScript even checks your `case` labels: `case 'superuser':` is an error when `user.role` can only be `'admin' | 'editor' | 'viewer'`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -303,21 +642,43 @@
         },
         {
           "type": "checkpoint",
-          "text": "`const score = 75;` — what prints? `if (score >= 90) { console.log('A'); } else if (score >= 70) { console.log('B'); } else if (score >= 50) { console.log('C'); }`",
+          "text": "What does `break` do inside a `switch`?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "A",
-              "B",
-              "B and C",
-              "C"
+              "It stops the whole program",
+              "It skips to the default case",
+              "It leaves the switch, so the following cases don't run",
+              "It restarts the switch from the top"
             ],
             "answers": [
-              1
+              2
             ],
             "kind": "single",
-            "explanation": "The chain stops at the first true condition. 75 >= 70 is true, so 'B' prints and the 'C' check is skipped."
+            "explanation": "Without break, execution falls through into the next case."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which is the best fit for: \"show 'Adult' if age is 18 or more, otherwise 'Minor'\" stored in a variable?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`const group = age >= 18 && 'Adult';`",
+              "An `if` with no `else`, setting the value only for adults",
+              "A ternary: `const group = age >= 18 ? 'Adult' : 'Minor';`",
+              "A switch with a case for every age"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "Choosing between two values based on one condition is exactly what the ternary is for. `age >= 18 && 'Adult'` gives false (not 'Minor') for a minor, and an if without else leaves minors with no value."
           },
           "code": null,
           "callout": null,
@@ -325,7 +686,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F2 · Loops: repeating work\n\nAutomation is about repetition — the same check for every user, every browser, every row. Loops do that.\n\n### `for...of` — for each item in a list (your most-used loop)",
+          "text": "## F5 · The `for` loop — counting\n\nA **loop** runs the same block again and again. The classic `for` loop counts:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -335,7 +696,7 @@
         },
         {
           "type": "code",
-          "text": "const users = ['asha', 'ravi', 'meera'];\nfor (const user of users) {\n  console.log(`Logging in as ${user}`);\n}",
+          "text": "for (let i = 0; i < 3; i++) {\n  console.log(`Run ${i + 1}`);\n}\n// Run 1\n// Run 2\n// Run 3",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -352,7 +713,7 @@
         },
         {
           "type": "markdown",
-          "text": "### Classic `for` — when you need a counter",
+          "text": "The brackets hold three parts, separated by semicolons:\n\n| Part | Here | When it runs |\n|---|---|---|\n| **Start** | `let i = 0` | Once, before the loop begins |\n| **Condition** | `i < 3` | Before every round — if it's false, the loop ends |\n| **Update** | `i++` (add 1 to i) | After every round |\n\nTracing it step by step:\n\n| Round | `i` at start | `i < 3`? | Prints | `i` after `i++` |\n|---|---|---|---|---|\n| 1 | 0 | true | Run 1 | 1 |\n| 2 | 1 | true | Run 2 | 2 |\n| 3 | 2 | true | Run 3 | 3 |\n| — | 3 | **false** → stop | | |\n\nEach round of a loop is called an **iteration**. `i` is a traditional name for a counter (short for *index*).\n\n### Looping over an array by index\n\nBecause array indexes start at 0 and the last one is `length - 1`, the standard pattern is:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -362,7 +723,7 @@
         },
         {
           "type": "code",
-          "text": "// start at 1; keep going while attempt <= 3; add 1 after each round\nfor (let attempt = 1; attempt <= 3; attempt++) {\n  console.log(`Attempt ${attempt}`);\n}",
+          "text": "const browsers: string[] = ['chromium', 'firefox', 'webkit'];\nfor (let i = 0; i < browsers.length; i++) {\n  console.log(`${i}: ${browsers[i]}`);\n}",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -379,7 +740,61 @@
         },
         {
           "type": "markdown",
-          "text": "### `while` and `do...while` — repeat until something changes",
+          "text": "Note the `<` — not `<=`. With `i <= browsers.length` the loop runs one extra time and reads `browsers[3]`, which is `undefined`. This **off-by-one** mistake is the most common loop bug of all.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "How many times does `for (let i = 1; i <= 4; i++) { … }` run its block?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "It never stops",
+              "5",
+              "3",
+              "4"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "i takes the values 1, 2, 3 and 4. When i becomes 5, `5 <= 4` is false and the loop ends."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const items = ['a', 'b', 'c'];` — which loop prints `undefined` as its last line?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`for (let i = 0; i <= items.length; i++) { console.log(items[i]); }`",
+              "`for (let i = 0; i < 2; i++) { console.log(items[i]); }`",
+              "`for (let i = 0; i < items.length; i++) { console.log(items[i]); }`",
+              "`for (let i = 1; i < items.length; i++) { console.log(items[i]); }`"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "`<=` lets i reach 3, and items[3] doesn't exist. (Starting at 1 skips 'a', and `i < 2` stops early — both wrong, but neither prints undefined.)"
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F6 · `for...of` — one round per item\n\nMost of the time you don't need the index — you just want **each item**. `for...of` gives you them one by one:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -389,7 +804,61 @@
         },
         {
           "type": "code",
-          "text": "let itemsInCart = 3;\nwhile (itemsInCart > 0) {        // checks BEFORE each round (may run 0 times)\n  itemsInCart--;\n}\n\nlet tries = 0;\ndo {                              // runs at least ONCE, checks AFTER each round\n  tries++;\n} while (tries < 3);",
+          "text": "const browsers: string[] = ['chromium', 'firefox', 'webkit'];\n\nfor (const browser of browsers) {\n  console.log(`Testing on ${browser}`);\n}\n// Testing on chromium\n// Testing on firefox\n// Testing on webkit",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "Read it as *\"for each `browser` of the list `browsers`\"*. Each round, `browser` holds the next item. It can be a `const` because every round gets a fresh variable. There's no counter to get wrong, so no off-by-one bugs.\n\n`for...of` works on anything that holds a sequence — arrays, and text too (one character per round):",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "for (const ch of 'Hi!') {\n  console.log(ch);           // H, then i, then !\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "This is the loop you'll use most in Playwright tests — for example, \"for each product card on the page, check it has a price\".\n\n### Looping over an object's properties\n\nAn object isn't a list, so `for...of` doesn't work on it directly. `Object.entries(obj)` turns it into a list of `[name, value]` pairs, which you can unpack with destructuring (Day 6):",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const settings = { retries: 2, workers: 4, timeoutMs: 30000 };\n\nfor (const [key, value] of Object.entries(settings)) {\n  console.log(`${key} = ${value}`);\n}\n// retries = 2\n// workers = 4\n// timeoutMs = 30000",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -406,7 +875,79 @@
         },
         {
           "type": "callout",
-          "text": "If the condition never becomes false (e.g. you forget `itemsInCart--`), the loop never ends. Press `Ctrl + C` in the terminal to stop it.",
+          "text": "There's a look-alike, `for...in`, which gives property **names** (keys) instead of values. On an array, that means the indexes — as **text**: `'0'`, `'1'`, `'2'`. Writing `in` when you meant `of` is an easy slip. For arrays, always use `for...of`.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "warning",
+            "title": "`for...in` is not `for...of`"
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`for (const tag of ['@smoke', '@login']) { console.log(tag); }` — what's printed?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "@smoke and @login",
+              "The whole array, once",
+              "Nothing — for...of needs a counter",
+              "'0' and '1'"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "for...of gives the items themselves. (for...in would give the indexes '0' and '1'.)"
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F7 · `while`, `do...while`, `break` and `continue`\n\n### `while` — repeat as long as a condition holds\n\nUse `while` when you **don't know in advance** how many rounds you need — \"keep checking until it's ready\":",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "let attempt = 0;\nlet pageReady = false;\n\nwhile (!pageReady && attempt < 5) {\n  attempt++;\n  pageReady = attempt === 3;       // pretend the page becomes ready on the 3rd check\n}\nconsole.log(`Ready after ${attempt} checks`);   // Ready after 3 checks",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "The condition is checked **before** every round. If it's false at the very start, the block never runs at all.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "If nothing inside the loop ever makes the condition false, it runs forever and your program freezes. Always make sure each round moves towards the end — here, `attempt++` and the `attempt < 5` limit guarantee it stops. If it does happen, press **Stop** (or **Ctrl+C** in the terminal).",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -419,7 +960,7 @@
         },
         {
           "type": "markdown",
-          "text": "### `break` and `continue`",
+          "text": "### `do...while` — run at least once\n\n`do...while` checks the condition **after** each round, so the block always runs at least once:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -429,155 +970,7 @@
         },
         {
           "type": "code",
-          "text": "const results = ['pass', 'pass', 'skip', 'fail', 'pass'];\n\n// continue: skip the rest of THIS round, go to the next item\nfor (const result of results) {\n  if (result === 'skip') {\n    continue;\n  }\n  console.log('Counted:', result);\n}\n\n// break: stop the whole loop immediately\nfor (let i = 0; i < results.length; i++) {\n  if (results[i] === 'fail') {\n    console.log(`First failure at position ${i}`);\n    break;\n  }\n}",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day7/loops.ts",
-            "run": "node day7/loops.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nCounted: pass\nCounted: pass\nCounted: fail\nCounted: pass\nFirst failure at position 3\n```\n\n### Array methods that loop for you\n\nArrays have built-in methods that take a small function (you'll write these properly in F3):\n\n| Method | Does | Example | Result |\n|---|---|---|---|\n| `forEach` | runs code for each item | `names.forEach((n) => console.log(n))` | prints each name |\n| `map` | makes a new array by transforming each item | `[1, 2, 3].map((n) => n * 2)` | `[2, 4, 6]` |\n| `filter` | keeps only items that pass a test | `['pass', 'fail'].filter((r) => r === 'fail')` | `['fail']` |\n| `find` | returns the first matching item | `users.find((u) => u.isAdmin)` | first admin or `undefined` |\n| `some` / `every` | is it true for any / all items? | `results.every((r) => r === 'pass')` | `true` or `false` |",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "callout",
-          "text": "Later, when a loop contains Playwright actions (`await page.click(…)`), use `for...of`. `forEach` does **not** wait for `await` inside it — a subtle and common bug.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": {
-            "variant": "warning",
-            "title": "`forEach` and `await` don't mix"
-          },
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "How many times does \"Hi\" print? `for (let i = 0; i < 3; i++) { console.log('Hi'); }`",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "2",
-              "3",
-              "4",
-              "Forever"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "i takes the values 0, 1, 2 (three rounds). When i becomes 3, `i < 3` is false and the loop stops."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "What does `[5, 12, 8, 20].filter((n) => n > 10)` return?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "[5, 8]",
-              "[12, 20]",
-              "12",
-              "true"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`filter` keeps the items for which the function returns true: 12 and 20."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "## F3 · Functions: reusable steps\n\nA **function** is a named, reusable block of steps — like a reusable test step \"Log in as user X\" that many test cases call.\n\n### Declaring and calling",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "// name     parameters (inputs, with types)       return type\nfunction calculatePassRate(passed: number, total: number): number {\n  return (passed / total) * 100;              // return sends a value back to the caller\n}\n\n// A function that returns nothing uses the type void\nfunction printHeader(title: string): void {\n  console.log(`===== ${title} =====`);\n}\n\n// Calling (using) the functions\nprintHeader('Nightly run');\nconst rate = calculatePassRate(45, 50);       // arguments: the actual values\nconsole.log(`Pass rate: ${rate}%`);\nconsole.log(`Smoke pass rate: ${calculatePassRate(9, 10)}%`);",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day7/functions.ts",
-            "run": "node day7/functions.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\n===== Nightly run =====\nPass rate: 90%\nSmoke pass rate: 90%\n```\n\nWords to know: **parameters** are the input names in the definition (`passed`, `total`); **arguments** are the actual values you pass (`45`, `50`); **`return`** ends the function and hands back a value.\n\n### Optional and default parameters",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "// timeout has a DEFAULT value; tag is OPTIONAL (may be undefined)\nfunction describeTest(title: string, timeout: number = 30000, tag?: string): string {\n  const tagText = tag ? ` ${tag}` : '';        // add the tag only if one was given\n  return `${title}${tagText} (timeout ${timeout / 1000}s)`;\n}\n\nconsole.log(describeTest('Login works'));\nconsole.log(describeTest('Checkout completes', 60000));\nconsole.log(describeTest('Search returns results', 30000, '@smoke'));",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day7/parameters.ts",
-            "run": "node day7/parameters.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\nLogin works (timeout 30s)\nCheckout completes (timeout 60s)\nSearch returns results @smoke (timeout 30s)\n```\n\n### Rest parameters — any number of arguments",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "function logTags(title: string, ...tags: string[]): void {\n  console.log(title, 'has', tags.length, 'tags');\n}\nlogTags('Checkout', '@smoke', '@regression', '@payments');   // Checkout has 3 tags",
+          "text": "let tries = 0;\ndo {\n  tries++;\n  console.log(`Try ${tries}`);\n} while (tries < 0);        // false straight away — but \"Try 1\" was already printed",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -594,7 +987,7 @@
         },
         {
           "type": "markdown",
-          "text": "### Arrow functions — the short form you'll see everywhere",
+          "text": "It's rarer than `while`; you'll mostly read it rather than write it.\n\n### `break` and `continue`\n\nThese work in every kind of loop:\n\n| Keyword | Effect | Tester's version |\n|---|---|---|\n| `break` | Leave the loop **now** | \"Stop testing — a blocker was found\" |\n| `continue` | Skip the **rest of this round**, go to the next one | \"Skip this row, it's marked N/A\" |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -604,7 +997,7 @@
         },
         {
           "type": "code",
-          "text": "// Regular function\nfunction double(n: number): number {\n  return n * 2;\n}\n\n// Same thing as an arrow function stored in a constant\nconst doubleArrow = (n: number): number => {\n  return n * 2;\n};\n\n// Even shorter: one expression → no braces, no return keyword\nconst doubleShort = (n: number) => n * 2;",
+          "text": "const statuses: string[] = ['passed', 'skipped', 'passed', 'failed', 'passed'];\n\nfor (const status of statuses) {\n  if (status === 'skipped') {\n    continue;                 // ignore skipped tests\n  }\n  if (status === 'failed') {\n    console.log('Failure found - stopping');\n    break;                    // no need to look further\n  }\n  console.log(status);\n}\n// passed\n// passed\n// Failure found - stopping",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -620,72 +1013,35 @@
           "title": null
         },
         {
-          "type": "markdown",
-          "text": "### Functions as values: callbacks\n\nIn TypeScript a function is a value — you can pass it **into another function**. The receiving function decides *when* to run it. A function passed like this is called a **callback**.",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "code",
-          "text": "// runStep receives a NAME and a FUNCTION, prints the name, then calls the function\nfunction runStep(name: string, action: () => void): void {\n  console.log(`▶ ${name}`);\n  action();                       // run the function we were given\n}\n\n// Pass an arrow function directly as the second argument\nrunStep('Open the home page', () => {\n  console.log('  …navigating to /home');\n});\n\nrunStep('Search for \"mouse\"', () => {\n  console.log('  …typing into the search box');\n});",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": {
-            "language": "ts",
-            "file": "ts-basics/day7/callbacks.ts",
-            "run": "node day7/callbacks.ts",
-            "mode": "editor",
-            "expect_error": false,
-            "network": false
-          },
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "markdown",
-          "text": "```output\n▶ Open the home page\n  …navigating to /home\n▶ Search for \"mouse\"\n  …typing into the search box\n```",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
           "type": "callout",
-          "text": "```ts\ntest('Open the home page', async ({ page }) => { … });\n```\n`test` is a function that receives a **title** and a **callback**. Playwright decides when to run your callback — and hands it a ready-made `page`. You just wrote the same pattern yourself!",
+          "text": "\"Keep retrying until it passes, at most N times\" is a `while` loop with a limit — and it's what Playwright's auto-waiting and web-first assertions (Day 2) do for you behind the scenes, so in real tests you'll rarely write it yourself.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": null,
           "callout": {
             "variant": "tester",
-            "title": "This is exactly how Playwright tests are written"
+            "title": null
           },
           "title": null
         },
         {
           "type": "checkpoint",
-          "text": "`` function greet(name: string, greeting = 'Hello'): string { return `${greeting}, ${name}`; } `` — what does `greet('Ravi')` return?",
+          "text": "What's the key difference between `while` and `do...while`?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "'Ravi, Hello'",
-              "'Hello, Ravi'",
-              "'undefined, Ravi'",
-              "An error — greeting is missing"
+              "`do...while` is faster",
+              "`do...while` can only count upwards",
+              "`do...while` always runs its block at least once; `while` may run it zero times",
+              "`while` can't use break"
             ],
             "answers": [
-              1
+              2
             ],
             "kind": "single",
-            "explanation": "`greeting` has a default value 'Hello', used when no second argument is passed."
+            "explanation": "`while` checks first; `do...while` runs first and checks afterwards."
           },
           "code": null,
           "callout": null,
@@ -693,21 +1049,142 @@
         },
         {
           "type": "checkpoint",
-          "text": "Which is a correct arrow function that adds two numbers?",
+          "text": "In a loop over test results, you want to ignore rows whose status is 'skipped' but carry on with the rest. Which keyword?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "`const add = (a: number, b: number) => a + b;`",
-              "`const add = function => a + b;`",
-              "`add(a, b) => { a + b }`",
-              "`const add => (a + b);`"
+              "`continue`",
+              "`return`",
+              "`break`",
+              "`default`"
             ],
             "answers": [
               0
             ],
             "kind": "single",
-            "explanation": "Parameters in brackets, then `=>`, then the result. With a single expression the value is returned automatically."
+            "explanation": "`continue` skips the rest of the current round only. `break` would end the whole loop."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## F8 · Array methods — loops with a purpose\n\nArrays come with methods that do common loop jobs in one line. Each one takes a small **function** that says what to do with one item. You'll learn functions properly on Day 8; for now, you only need to read this shape:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "(result) => result.status === 'failed'\n// \"given one result, give back: is its status 'failed'?\"",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "- `(result)` — a name for the current item (you choose the name)\n- `=>` — \"gives back\"\n- after the arrow — what to work out for that item\n- with two names, `(item, index)`, the method also hands you the item's position\n- with `{ }` after the arrow, the function can hold several statements, like an `if` block\n\nThis is called an **arrow function**. The array method runs it once for every item.\n\n| Method | Question it answers | Gives back |\n|---|---|---|\n| `.forEach(fn)` | \"Do this with every item\" | nothing (`undefined`) |\n| `.map(fn)` | \"Turn every item into something else\" | a **new array**, same length |\n| `.filter(fn)` | \"Which items match?\" | a **new array** with only the matching items |\n| `.find(fn)` | \"Which is the **first** item that matches?\" | that item, or `undefined` |\n| `.some(fn)` | \"Does **at least one** item match?\" | `true` / `false` |\n| `.every(fn)` | \"Do **all** items match?\" | `true` / `false` |",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "const prices: number[] = [499, 1299, 2599, 799];\n\nconst expensive = prices.filter((price) => price > 1000);     // [1299, 2599]\nconst labels = prices.map((price) => `₹${price}`);             // ['₹499', '₹1299', '₹2599', '₹799']\nconst firstOver2000 = prices.find((price) => price > 2000);    // 2599\nconst anyFree = prices.some((price) => price === 0);           // false\nconst allPositive = prices.every((price) => price > 0);        // true\n\nprices.forEach((price, index) => {                             // forEach also gives the index\n  console.log(`Item ${index + 1}: ₹${price}`);\n});",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": null,
+            "run": null,
+            "mode": "read",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "None of these change the original array — `filter` and `map` give you a **new** one.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Anything these methods do, a `for...of` loop can do too; the methods are just shorter and say their purpose in their name. One important exception for later: in Playwright tests, where each step must **wait** (`await`), use `for...of`, not `forEach` — `forEach` doesn't wait. Day 8 shows why.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "note",
+            "title": "Loop or method?"
+          },
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const codes = [200, 404, 200, 500];` — what is `codes.filter((c) => c >= 400)`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "true",
+              "[404, 500]",
+              "404",
+              "[false, true, false, true]"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "filter keeps the matching items in a new array. (find would give just the first, 404; map would give the true/false list.)"
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "You want to know whether ANY test in a list failed. Which method fits best?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "`.forEach()`",
+              "`.some()`",
+              "`.every()`",
+              "`.map()`"
+            ],
+            "answers": [
+              1
+            ],
+            "kind": "single",
+            "explanation": "`some` answers \"does at least one item match?\" with true or false."
           },
           "code": null,
           "callout": null,
@@ -725,7 +1202,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 7 · Implementation\n\n\n\n## I1 · A data-driven validator\n\nCombine **objects** (Day 6), **functions**, **conditions** and **loops**: a function checks a password against rules, and a loop runs it over a table of test data — exactly like a data-driven test.",
+          "text": "# Day 7 · Implementation\n\nAll files today go in `ts-basics/day7`. Run with `node day7/<file>.ts`, check with `npm run check -- day7/<file>.ts`.\n\n## I1 · Rate page-load times, and triage results\n\n`if` ladders inside a `for...of` loop, then a `switch` inside another:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -735,14 +1212,14 @@
         },
         {
           "type": "code",
-          "text": "// Business rule: 8+ characters, at least one digit, at least one uppercase letter\nfunction validatePassword(password: string): string[] {\n  const problems: string[] = [];\n\n  if (password.length < 8) {\n    problems.push('too short');\n  }\n  if (!/[0-9]/.test(password)) {          // /[0-9]/ = \"any digit\" pattern\n    problems.push('needs a digit');\n  }\n  if (!/[A-Z]/.test(password)) {          // /[A-Z]/ = \"any uppercase letter\" pattern\n    problems.push('needs an uppercase letter');\n  }\n  return problems;                        // an empty list means the password is valid\n}\n\n// Test data: each case says what we EXPECT\ntype PasswordCase = {\n  input: string;\n  shouldBeValid: boolean;\n};\n\nconst cases: PasswordCase[] = [\n  { input: 'Secret123', shouldBeValid: true },\n  { input: 'short1A', shouldBeValid: false },\n  { input: 'alllowercase1', shouldBeValid: false },\n  { input: 'NoDigitsHere', shouldBeValid: false },\n  { input: 'Valid2Password', shouldBeValid: true },\n];\n\nlet passed = 0;\nfor (const testCase of cases) {\n  const problems = validatePassword(testCase.input);\n  const isValid = problems.length === 0;\n  const ok = isValid === testCase.shouldBeValid;          // did reality match the expectation?\n  if (ok) {\n    passed++;\n  }\n  const details = isValid ? 'valid' : problems.join(', ');\n  console.log(`${ok ? '✓' : '✗'} \"${testCase.input}\" → ${details}`);\n}\n\nconsole.log(`${passed}/${cases.length} cases behaved as expected`);",
+          "text": "// Page-load times measured by a performance check (milliseconds)\nconst loadTimesMs: number[] = [420, 1850, 5200];\n\n// for...of: run the block once for each value in the list\nfor (const timeMs of loadTimesMs) {\n  // if / else if / else: the first condition that is true wins\n  let rating: string;\n  if (timeMs < 1000) {\n    rating = 'fast';\n  } else if (timeMs < 3000) {\n    rating = 'acceptable';\n  } else {\n    rating = 'too slow';\n  }\n  console.log(`${timeMs} ms: ${rating}`);\n}\n\n// switch: choose an action for each result status\ntype Status = 'passed' | 'failed' | 'skipped' | 'timedOut';\nconst statuses: Status[] = ['passed', 'failed', 'timedOut', 'skipped'];\n\nfor (const status of statuses) {\n  switch (status) {\n    case 'passed':\n      console.log('passed: nothing to do');\n      break;\n    case 'failed':\n    case 'timedOut':                          // two cases share one block\n      console.log(`${status}: open the trace and investigate`);\n      break;\n    default:                                   // anything not listed above\n      console.log(`${status}: check why it was skipped`);\n  }\n}",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "ts-basics/day7/password-rules.ts",
-            "run": "node day7/password-rules.ts",
+            "file": "ts-basics/day7/timing.ts",
+            "run": "node day7/timing.ts",
             "mode": "editor",
             "expect_error": false,
             "network": false
@@ -752,7 +1229,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\n✓ \"Secret123\" → valid\n✓ \"short1A\" → too short\n✓ \"alllowercase1\" → needs an uppercase letter\n✓ \"NoDigitsHere\" → needs a digit\n✓ \"Valid2Password\" → valid\n5/5 cases behaved as expected\n```\n\n**Try it:** add a case `{ input: 'Abcdefg1', shouldBeValid: true }` and predict the output first. Then add a new rule — \"must not contain spaces\" (`password.includes(' ')`) — and a case that checks it.\n\n## I2 · Generate a smoke-test checklist\n\nCombine a **function**, a **loop** and **conditions** to produce a smoke-test checklist from a list of pages — the kind of thing you'd run after every deployment.",
+          "text": "```output\n420 ms: fast\n1850 ms: acceptable\n5200 ms: too slow\npassed: nothing to do\nfailed: open the trace and investigate\ntimedOut: open the trace and investigate\nskipped: check why it was skipped\n```\n\nNotice `let rating: string;` is declared **without** a value: every branch of the `if` ladder assigns one, and TypeScript checks that. Delete the `else` branch and check the file — TypeScript reports `Variable 'rating' is used before being assigned.`, because 5200 would get no rating.\n\n**Try it:** add `case 'flaky':` inside the switch and check the file. Why is it rejected?\n\n## I2 · A mini data-driven test\n\nThis is Day 6's login test-data sheet, with one more row — and now actually **run**. For each test case, the code works out what the app would do, compares it with what the case expects, and reports PASS or FAIL:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -762,14 +1239,14 @@
         },
         {
           "type": "code",
-          "text": "// Each page we want to check after a deployment\ntype PageCheck = {\n  path: string;\n  expectedTitle: string;\n  critical: boolean;      // critical pages block the release if broken\n};\n\nconst pages: PageCheck[] = [\n  { path: '/', expectedTitle: 'Home', critical: true },\n  { path: '/login', expectedTitle: 'Sign in', critical: true },\n  { path: '/help', expectedTitle: 'Help centre', critical: false },\n  { path: '/about', expectedTitle: 'About us', critical: false },\n];\n\n// A function that describes one check as a line of text\nfunction describeCheck(check: PageCheck, index: number): string {\n  const marker = check.critical ? '!' : ' ';                  // mark critical pages\n  return `${index + 1}. [${marker}] open ${check.path} → expect title \"${check.expectedTitle}\"`;\n}\n\n// A function that counts how many checks are critical\nfunction countCritical(checks: PageCheck[]): number {\n  let count = 0;\n  for (const check of checks) {\n    if (check.critical) {\n      count++;\n    }\n  }\n  return count;\n}\n\nconsole.log('Smoke checklist');\nfor (let i = 0; i < pages.length; i++) {\n  console.log(describeCheck(pages[i], i));\n}\nconsole.log(`${countCritical(pages)} of ${pages.length} checks are release-blocking`);",
+          "text": "// A mini data-driven test: check every login case against the app's rules\ntype LoginCase = {\n  id: string;\n  username: string;\n  password: string;\n  shouldSucceed: boolean;\n  expectedError?: string;\n};\n\nconst loginCases: LoginCase[] = [\n  { id: 'TC-01', username: 'standard_user', password: 'secret_sauce', shouldSucceed: true },\n  { id: 'TC-02', username: 'locked_out_user', password: 'secret_sauce', shouldSucceed: false,\n    expectedError: 'Sorry, this user has been locked out.' },\n  { id: 'TC-03', username: 'standard_user', password: 'wrong', shouldSucceed: false,\n    expectedError: 'Username and password do not match.' },\n  { id: 'TC-04', username: '', password: 'secret_sauce', shouldSucceed: false,\n    expectedError: 'Username is required' },\n  { id: 'TC-05', username: 'standard_user', password: '', shouldSucceed: false,\n    expectedError: 'Password is required.' },\n];\n\nlet passed = 0;\nlet failed = 0;\n\nfor (const testCase of loginCases) {\n  // 1. Pretend to be the app: which error would it show? (undefined = logged in)\n  let actualError: string | undefined;\n  if (testCase.username === '') {\n    actualError = 'Username is required';\n  } else if (testCase.password === '') {\n    actualError = 'Password is required';\n  } else if (testCase.username === 'locked_out_user') {\n    actualError = 'Sorry, this user has been locked out.';\n  } else if (testCase.password !== 'secret_sauce') {\n    actualError = 'Username and password do not match.';\n  }\n\n  // 2. Compare what happened with what the test case expected\n  const loggedIn = actualError === undefined;\n  if (loggedIn === testCase.shouldSucceed && actualError === testCase.expectedError) {\n    passed++;\n    console.log(`PASS ${testCase.id}`);\n  } else {\n    failed++;\n    console.log(`FAIL ${testCase.id}: expected \"${testCase.expectedError ?? 'login'}\", got \"${actualError ?? 'login'}\"`);\n  }\n}\n\nconsole.log(`${passed} passed, ${failed} failed`);",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
             "language": "ts",
-            "file": "ts-basics/day7/checklist.ts",
-            "run": "node day7/checklist.ts",
+            "file": "ts-basics/day7/login-runner.ts",
+            "run": "node day7/login-runner.ts",
             "mode": "editor",
             "expect_error": false,
             "network": false
@@ -779,7 +1256,165 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nSmoke checklist\n1. [!] open / → expect title \"Home\"\n2. [!] open /login → expect title \"Sign in\"\n3. [ ] open /help → expect title \"Help centre\"\n4. [ ] open /about → expect title \"About us\"\n2 of 4 checks are release-blocking\n```\n\n**Try it:** add a page `{ path: '/cart', expectedTitle: 'Your cart', critical: true }` and predict both the new line and the last line before running.",
+          "text": "```output\nPASS TC-01\nPASS TC-02\nPASS TC-03\nPASS TC-04\nFAIL TC-05: expected \"Password is required.\", got \"Password is required\"\n4 passed, 1 failed\n```\n\nTC-05 fails because of a single full stop. Just like in real testing, the question is: is the **app** wrong, or the **test data**? Here the test data has a typo — remove the `.` and run again for 5 passes.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "callout",
+          "text": "Everything a data-driven Playwright test does is here: a typed test-data sheet, a loop over its rows, a check per row, and a pass/fail count. On Day 9 the \"pretend to be the app\" part is replaced by a real browser.",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": {
+            "variant": "tester",
+            "title": null
+          },
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "## I3 · A password-rules checker\n\nNested loops, `continue`, and collecting problems in an array:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Check candidate passwords against the sign-up rules\nconst candidates: string[] = ['Secret@123', 'short1A', 'alllowercase1', 'NoDigitsHere', ''];\n\nfor (const password of candidates) {\n  if (password === '') {\n    console.log('(empty) -> skipped: nothing to check');\n    continue;                                  // jump straight to the next password\n  }\n\n  // Look at each character once\n  let hasDigit = false;\n  let hasUpper = false;\n  for (const ch of password) {\n    if ('0123456789'.includes(ch)) {\n      hasDigit = true;\n    } else if (ch !== ch.toLowerCase()) {     // only upper-case letters change when lower-cased\n      hasUpper = true;\n    }\n  }\n\n  // Collect every rule that fails\n  const problems: string[] = [];\n  if (password.length < 8) {\n    problems.push('at least 8 characters');\n  }\n  if (!hasDigit) {\n    problems.push('a digit');\n  }\n  if (!hasUpper) {\n    problems.push('an upper-case letter');\n  }\n\n  const verdict = problems.length === 0 ? 'valid' : `needs ${problems.join(', ')}`;\n  console.log(`${password} -> ${verdict}`);\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day7/passwords.ts",
+            "run": "node day7/passwords.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nSecret@123 -> valid\nshort1A -> needs at least 8 characters\nalllowercase1 -> needs an upper-case letter\nNoDigitsHere -> needs a digit\n(empty) -> skipped: nothing to check\n```\n\nTwo things to notice:\n\n- The rules are three **separate** `if`s, not an `else if` ladder — a password can break several rules at once, and we want to report all of them.\n- The inner loop runs completely for each password: a loop inside a loop is called a **nested loop**.\n\n**Try it:** add a fourth rule — the password must not contain a space (`password.includes(' ')`) — and a candidate `'Has Space 1'` to test it.\n\n## I4 · Retry until it works — `while` with a limit",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Retry a flaky check until it succeeds, but never more than maxAttempts times\nconst maxAttempts: number = 5;\nconst serverReplies: string[] = ['timeout', 'timeout', 'ok'];   // what happens on each attempt\n\nlet attempt = 0;\nlet succeeded = false;\n\nwhile (attempt < maxAttempts) {\n  const reply = serverReplies[attempt] ?? 'ok';   // past the end of the list? assume 'ok'\n  attempt++;\n  console.log(`Attempt ${attempt}: ${reply}`);\n  if (reply === 'ok') {\n    succeeded = true;\n    break;                                        // stop looping: we're done\n  }\n}\n\nconsole.log(succeeded ? `Succeeded after ${attempt} attempts` : `Gave up after ${maxAttempts} attempts`);\n\n// do...while: the body always runs at least once\nlet pagesVisited = 0;\ndo {\n  pagesVisited++;\n  console.log(`Visited page ${pagesVisited}`);\n} while (pagesVisited < 1);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day7/retry.ts",
+            "run": "node day7/retry.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nAttempt 1: timeout\nAttempt 2: timeout\nAttempt 3: ok\nSucceeded after 3 attempts\nVisited page 1\n```\n\n**Try it:** change `serverReplies` to `['timeout', 'timeout', 'timeout', 'timeout', 'timeout', 'timeout']` and run again. The loop stops at 5 attempts — the limit is what prevents an infinite loop.\n\n## I5 · A test-run report with array methods",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Build a test-run report with array methods\ntype Status = 'passed' | 'failed' | 'skipped';\ntype TestResult = { title: string; status: Status; durationMs: number };\n\nconst results: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'add to cart', status: 'passed', durationMs: 2100 },\n  { title: 'checkout', status: 'failed', durationMs: 7400 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n\n// forEach: do something with every item (here: print a numbered list)\nresults.forEach((result, index) => {\n  console.log(`${index + 1}. ${result.title} - ${result.status}`);\n});\n\n// filter: keep only the items that match\nconst failures = results.filter((result) => result.status === 'failed');\n\n// map: turn every item into something else (here: just its title)\nconst failedTitles = failures.map((result) => result.title);\nconsole.log(`Failed (${failures.length}): ${failedTitles.join(', ')}`);\n\n// find: the FIRST item that matches, or undefined\nconst firstSlow = results.find((result) => result.durationMs > 5000);\nconsole.log(`First slow test: ${firstSlow?.title ?? 'none'}`);\n\n// some / every: yes-or-no questions about the whole list\nconst anyFailed = results.some((result) => result.status === 'failed');\nconst allUnder10s = results.every((result) => result.durationMs < 10000);\nconsole.log(`Any failed? ${anyFailed}. All under 10 s? ${allUnder10s}`);\n\n// A plain loop still works for totals\nlet totalMs = 0;\nfor (const result of results) {\n  totalMs += result.durationMs;\n}\nconsole.log(`Total time: ${totalMs / 1000} s`);",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day7/report.ts",
+            "run": "node day7/report.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\n1. login works - passed\n2. search works - failed\n3. add to cart - passed\n4. checkout - failed\n5. profile edits - skipped\nFailed (2): search works, checkout\nFirst slow test: search works\nAny failed? true. All under 10 s? true\nTotal time: 16 s\n```\n\n`find` may find nothing, so its result's type is `TestResult | undefined` — which is why the code reads it with `?.` and `??` (Day 6). Change `5000` to `9000` and run: the line becomes `First slow test: none`.\n\n## I6 · Spot the loop bugs\n\nThis file type-checks **and** runs — but the output isn't what the comments say it should be. That's the hardest kind of bug: no error message, just wrong behaviour. Run it:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// Three loop bugs. Run this file and compare the output with the comments.\nconst browsers: string[] = ['chromium', 'firefox', 'webkit'];\n\n// Intended: print each browser once, numbered 0 to 2\nfor (let i = 0; i <= browsers.length; i++) {\n  console.log(`Browser ${i}: ${browsers[i]}`);\n}\n\n// Intended: print the browser NAMES\nfor (const browser in browsers) {\n  console.log(`Testing on ${browser}`);\n}\n\n// Intended: a failed test prints only \"Investigate\"\nconst status: string = 'failed';\nswitch (status) {\n  case 'failed':\n    console.log('Investigate');\n  case 'passed':\n    console.log('All good');\n    break;\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day7/loop-bugs.ts",
+            "run": "node day7/loop-bugs.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nBrowser 0: chromium\nBrowser 1: firefox\nBrowser 2: webkit\nBrowser 3: undefined\nTesting on 0\nTesting on 1\nTesting on 2\nInvestigate\nAll good\n```\n\n| Symptom | Bug | Fix |\n|---|---|---|\n| `Browser 3: undefined` | Off-by-one: `<=` | `i < browsers.length` |\n| `Testing on 0`, `1`, `2` | `for...in` gives indexes | `for (const browser of browsers)` |\n| `All good` after `Investigate` | Missing `break` — fall-through | Add `break;` after `console.log('Investigate');` |\n\nFix all three, then compare with the corrected version:",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "code",
+          "text": "// The same three loops, fixed\nconst browsers: string[] = ['chromium', 'firefox', 'webkit'];\n\nfor (let i = 0; i < browsers.length; i++) {\n  console.log(`Browser ${i}: ${browsers[i]}`);\n}\n\nfor (const browser of browsers) {\n  console.log(`Testing on ${browser}`);\n}\n\nconst status: string = 'failed';\nswitch (status) {\n  case 'failed':\n    console.log('Investigate');\n    break;\n  case 'passed':\n    console.log('All good');\n    break;\n}",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": {
+            "language": "ts",
+            "file": "ts-basics/day7/loop-bugs-fixed.ts",
+            "run": "node day7/loop-bugs-fixed.ts",
+            "mode": "editor",
+            "expect_error": false,
+            "network": false
+          },
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "markdown",
+          "text": "```output\nBrowser 0: chromium\nBrowser 1: firefox\nBrowser 2: webkit\nTesting on chromium\nTesting on firefox\nTesting on webkit\nInvestigate\n```",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -799,7 +1434,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 7 · Practice\n\n\n\n## Quiz · Day 7 check",
+          "text": "# Day 7 · Practice\n\n## Quiz · Day 7 check",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -809,65 +1444,43 @@
         },
         {
           "type": "checkpoint",
-          "text": "Which loop always runs its body at least once?",
+          "text": "`const name: string = '';` — what does `` name ? `Hi ${name}` : 'Hi guest' `` give?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "for",
-              "while",
-              "do...while",
-              "for...of"
-            ],
-            "answers": [
-              2
-            ],
-            "kind": "single",
-            "explanation": "`do...while` checks the condition AFTER each round, so the body runs at least once."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "What does `continue` do inside a loop?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "Stops the loop completely",
-              "Skips the rest of the current round and moves to the next one",
-              "Restarts the loop from the first item",
-              "Pauses the program"
-            ],
-            "answers": [
-              1
-            ],
-            "kind": "single",
-            "explanation": "`continue` skips to the next round; `break` exits the loop."
-          },
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
-          "type": "checkpoint",
-          "text": "`function f(a: number, b?: number) { return b === undefined ? a : a + b; }` — what is `f(4)`?",
-          "starter": null,
-          "variation": null,
-          "checkpoint": {
-            "options": [
-              "4",
-              "NaN",
               "An error",
-              "undefined"
+              "'Hi '",
+              "'Hi undefined'",
+              "'Hi guest'"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "Empty text is falsy, so the ternary takes the value after the colon."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "In an `if / else if / else` chain, how many blocks run?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "At most one — the first one whose condition is true (or the else)",
+              "Always all of them",
+              "The first true one, and then the else as well",
+              "Every block whose condition is true"
             ],
             "answers": [
               0
             ],
             "kind": "single",
-            "explanation": "`b` is optional and wasn't passed, so it is undefined and the function returns `a`."
+            "explanation": "Once one branch runs, the rest of the chain is skipped."
           },
           "code": null,
           "callout": null,
@@ -875,21 +1488,133 @@
         },
         {
           "type": "checkpoint",
-          "text": "What is a callback?",
+          "text": "Which loop is the best fit for \"check each product in the `products` array\"?",
           "starter": null,
           "variation": null,
           "checkpoint": {
             "options": [
-              "A phone call from the test runner",
-              "A function passed into another function, to be called later by that function",
-              "A function that calls itself forever",
-              "A type of loop"
+              "`for (let i = 1; i < products.length; i++) { … }`",
+              "`for (const product in products) { … }`",
+              "`for (let i = 0; i <= products.length; i++) { … }`",
+              "`for (const product of products) { … }`"
             ],
             "answers": [
-              1
+              3
             ],
             "kind": "single",
-            "explanation": "In `test('title', async ({ page }) => {…})`, the arrow function is a callback that Playwright calls when it runs the test."
+            "explanation": "for...of gives each item in turn. for...in gives the indexes as text; starting at 1 skips the first product; `<=` runs one round too many."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "What does `[1200, 5300, 800].map((ms) => ms / 1000)` give?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "[1.2, 5.3, 0.8]",
+              "true",
+              "[5300]",
+              "7.3"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "map turns every item into a new value and gives back a new array of the same length."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const users = [{ name: 'Asha', admin: false }, { name: 'Ravi', admin: true }];` — what is `users.find((u) => u.admin)?.name`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "undefined",
+              "true",
+              "'Ravi'",
+              "'Asha'"
+            ],
+            "answers": [
+              2
+            ],
+            "kind": "single",
+            "explanation": "find gives the first item whose check is truthy — Ravi's object — and `?.name` reads its name."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "Which of these can stop a loop from running forever? (Select all that apply)",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "A condition that eventually becomes false",
+              "A `break` that is reached",
+              "An attempt limit, like `attempt < maxAttempts`",
+              "A `continue` in every round"
+            ],
+            "answers": [
+              0,
+              1,
+              2
+            ],
+            "kind": "multiple",
+            "explanation": "`continue` only skips to the next round — the loop keeps going."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "`const tags: string[] = [];` — what is `tags.every((t) => t.includes('@'))`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "undefined",
+              "false — there are no tags",
+              "An error",
+              "true — no item breaks the rule"
+            ],
+            "answers": [
+              3
+            ],
+            "kind": "single",
+            "explanation": "every asks \"is there any item that fails the check?\" In an empty list there isn't one, so it's true. (some on an empty list is false.) Worth remembering: an empty list makes `every` true."
+          },
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "checkpoint",
+          "text": "In a switch, what happens when no `case` matches and there's no `default`?",
+          "starter": null,
+          "variation": null,
+          "checkpoint": {
+            "options": [
+              "Nothing — the switch is skipped",
+              "An error is thrown",
+              "The first case runs",
+              "The last case runs"
+            ],
+            "answers": [
+              0
+            ],
+            "kind": "single",
+            "explanation": "Without a matching case or a default, none of the switch's code runs."
           },
           "code": null,
           "callout": null,
@@ -926,16 +1651,6 @@
           "title": null
         },
         {
-          "type": "markdown",
-          "text": "## Exercises",
-          "starter": null,
-          "variation": null,
-          "checkpoint": null,
-          "code": null,
-          "callout": null,
-          "title": null
-        },
-        {
           "type": "problem-ref",
           "text": "3",
           "starter": null,
@@ -956,6 +1671,16 @@
           "title": null
         },
         {
+          "type": "markdown",
+          "text": "## Exercises",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
           "type": "problem-ref",
           "text": "5",
           "starter": null,
@@ -966,8 +1691,48 @@
           "title": null
         },
         {
+          "type": "problem-ref",
+          "text": "6",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "7",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "8",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
+          "type": "problem-ref",
+          "text": "9",
+          "starter": null,
+          "variation": null,
+          "checkpoint": null,
+          "code": null,
+          "callout": null,
+          "title": null
+        },
+        {
           "type": "markdown",
-          "text": "## Reflection\n\n1. When would you choose `switch` over `if / else if`?\n2. Write, from memory, an arrow function that takes a `name: string` and returns `` `Hello, ${name}` ``.\n3. Read this line aloud in plain English: `runStep('Open the home page', () => { … });`",
+          "text": "## Reflection\n\n1. Name the six falsy values. Why is `??` safer than `||` for a fallback?\n2. When would you choose `switch` over an `if / else if` ladder — and what goes wrong without `break`?\n3. What's the difference between `for...of` and `for...in` on an array?\n4. How do you make sure a `while` loop can't run forever?\n5. Which array method would you use to: list only the failed tests; check that every price is positive; get the first out-of-stock product?",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -977,7 +1742,7 @@
         },
         {
           "type": "callout",
-          "text": "`async`/`await` — the one concept behind every `await page.click()` — plus interfaces, destructuring, modules, and a mini test runner you build yourself.",
+          "text": "Functions: package steps into reusable, named actions (like `login(user)`), learn `async`/`await` — the keyword on every line of a Playwright test — and split your code into modules with `import` and `export`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -992,89 +1757,160 @@
       "problems": [
         {
           "number": 1,
-          "difficulty": "Easy",
-          "title": "Predict — loop with conditions",
+          "difficulty": "Medium",
+          "title": "Predict — break and continue",
           "kind": "predict",
-          "statement": "What does this print?\n\n```ts\nconst statuses = [200, 301, 404, 500];\nfor (const code of statuses) {\n  if (code >= 500) {\n    console.log(code, 'server');\n    break;\n  } else if (code >= 400) {\n    console.log(code, 'client');\n    continue;\n  }\n  console.log(code, 'ok');\n}\n```",
+          "statement": "What is printed?\n\n```ts\nfor (let i = 1; i <= 5; i++) {\n  if (i === 2) {\n    continue;\n  }\n  if (i === 4) {\n    break;\n  }\n  console.log(i);\n}\n```",
           "stub": null,
           "hints": [],
           "file": null,
           "run": null,
           "check": null,
-          "solution": "200 ok\n301 ok\n404 client\n500 server\n\n404 hits `continue`, so 'ok' is skipped for it. 500 prints 'server' and `break` ends the loop (it was the last item anyway)."
+          "solution": "1\n3\n\ni = 1 is printed. i = 2 is skipped by `continue`. i = 3 is printed. At i = 4, `break` ends the loop, so 4 and 5 are never printed."
         },
         {
           "number": 2,
           "difficulty": "Medium",
-          "title": "Predict — scope",
+          "title": "Predict — truthy, falsy and fallbacks",
           "kind": "predict",
-          "statement": "Which line does the type checker reject, and why?\n\n```ts\nconst suite = 'Login';\nfor (let i = 0; i < 2; i++) {\n  const title = `${suite} test ${i}`;\n  console.log(title);\n}\nconsole.log(title);\n```",
+          "statement": "What is printed?\n\n```ts\nconst retries = 0;\nconst name = '';\nconsole.log(retries || 3);\nconsole.log(retries ?? 3);\nconsole.log(name ? `Hi ${name}` : 'Hi guest');\n```",
           "stub": null,
           "hints": [],
           "file": null,
           "run": null,
           "check": null,
-          "solution": "The last line: `console.log(title);` → \"Cannot find name 'title'\".\n\n`title` is declared with `const` inside the loop's block, so it only exists inside that block. `suite` is fine because it's declared outside."
+          "solution": "3\n0\nHi guest\n\n0 is falsy, so `||` falls back to 3. `??` only replaces null or undefined, so it keeps the 0. Empty text is falsy, so the ternary picks 'Hi guest'."
         },
         {
           "number": 3,
-          "difficulty": "Easy",
-          "title": "Test-run reporter",
-          "kind": "code",
-          "statement": "Create `day7/reporter.ts`. Given\n```ts\nconst results: string[] = ['pass', 'fail', 'pass', 'skip', 'pass', 'fail'];\n```\nuse **one `for...of` loop** and **`if / else if / else`** to count passes, failures and skips, then print:\n```\nPassed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL\n```\nThe verdict is `PASS` only when there are **no** failures (use a ternary).",
-          "stub": "const results: string[] = ['pass', 'fail', 'pass', 'skip', 'pass', 'fail'];\n",
-          "hints": [
-            "Create three `let` counters starting at 0 before the loop.",
-            "`const verdict = failed === 0 ? 'PASS' : 'FAIL';`"
-          ],
-          "file": "ts-basics/day7/reporter.ts",
-          "run": "node day7/reporter.ts",
-          "check": {
-            "kind": "stdoutEquals",
-            "run": "node day7/reporter.ts",
-            "expected": "Passed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL"
-          },
-          "solution": "```ts\nconst results: string[] = ['pass', 'fail', 'pass', 'skip', 'pass', 'fail'];\n\n// Counters\nlet passed = 0;\nlet failed = 0;\nlet skipped = 0;\n\n// Count each result\nfor (const result of results) {\n  if (result === 'pass') {\n    passed++;\n  } else if (result === 'fail') {\n    failed++;\n  } else {\n    skipped++;\n  }\n}\n\n// Verdict: PASS only if nothing failed\nconst verdict = failed === 0 ? 'PASS' : 'FAIL';\n\nconsole.log(`Passed: ${passed}`);\nconsole.log(`Failed: ${failed}`);\nconsole.log(`Skipped: ${skipped}`);\nconsole.log(`Verdict: ${verdict}`);\n```\n\n**Output**\n\n```output\nPassed: 3\nFailed: 2\nSkipped: 1\nVerdict: FAIL\n```"
+          "difficulty": "Medium",
+          "title": "Predict — a switch without breaks",
+          "kind": "predict",
+          "statement": "What is printed?\n\n```ts\nconst level: string = 'warning';\nswitch (level) {\n  case 'error':\n    console.log('E');\n  case 'warning':\n    console.log('W');\n  case 'info':\n    console.log('I');\n    break;\n  default:\n    console.log('D');\n}\n```",
+          "stub": null,
+          "hints": [],
+          "file": null,
+          "run": null,
+          "check": null,
+          "solution": "W\nI\n\nThe switch starts at the matching case, 'warning', and prints W. There's no break, so it falls through into 'info' and prints I. The break there stops it before default."
         },
         {
           "number": 4,
           "difficulty": "Easy",
-          "title": "Priority mapper with switch",
-          "kind": "code",
-          "statement": "Create `day7/priority.ts`. Write a function `slaHours(priority: 'P1' | 'P2' | 'P3' | 'P4'): number` that uses a **switch** to return the bug-fix deadline: P1 → 4, P2 → 24, P3 → 72, P4 → 168.\n\nThen loop over `['P1', 'P3', 'P4']` and print:\n```\nP1 must be fixed within 4 hours\nP3 must be fixed within 72 hours\nP4 must be fixed within 168 hours\n```",
-          "stub": "// Priority mapper with switch\n// Save this as ts-basics/day7/priority.ts\n",
-          "hints": [
-            "With `return` inside each case you don't need `break` — `return` leaves the function immediately.",
-            "Type the list so TypeScript accepts it: `const priorities: ('P1' | 'P2' | 'P3' | 'P4')[] = ['P1', 'P3', 'P4'];`"
-          ],
-          "file": "ts-basics/day7/priority.ts",
-          "run": "node day7/priority.ts",
-          "check": {
-            "kind": "stdoutEquals",
-            "run": "node day7/priority.ts",
-            "expected": "P1 must be fixed within 4 hours\nP3 must be fixed within 72 hours\nP4 must be fixed within 168 hours"
-          },
-          "solution": "```ts\ntype Priority = 'P1' | 'P2' | 'P3' | 'P4';\n\n// Return the SLA (in hours) for a bug priority\nfunction slaHours(priority: Priority): number {\n  switch (priority) {\n    case 'P1':\n      return 4;\n    case 'P2':\n      return 24;\n    case 'P3':\n      return 72;\n    case 'P4':\n      return 168;\n  }\n}\n\nconst priorities: Priority[] = ['P1', 'P3', 'P4'];\nfor (const p of priorities) {\n  console.log(`${p} must be fixed within ${slaHours(p)} hours`);\n}\n```\n\n**Output**\n\n```output\nP1 must be fixed within 4 hours\nP3 must be fixed within 72 hours\nP4 must be fixed within 168 hours\n```"
+          "title": "Predict — filter then map",
+          "kind": "predict",
+          "statement": "What is printed?\n\n```ts\nconst doubled = [3, 8, 12, 5].filter((n) => n > 4).map((n) => n * 2);\nconsole.log(doubled);\nconsole.log(doubled.length);\n```",
+          "stub": null,
+          "hints": [],
+          "file": null,
+          "run": null,
+          "check": null,
+          "solution": "[ 16, 24, 10 ]\n3\n\nfilter keeps 8, 12 and 5 (3 isn't greater than 4). map doubles each: 16, 24, 10. Node.js prints arrays with spaces inside the brackets."
         },
         {
           "number": 5,
-          "difficulty": "Medium",
-          "title": "Find the failed tests",
+          "difficulty": "Easy",
+          "title": "A smoke-test checklist",
           "kind": "code",
-          "statement": "Create `day7/failed.ts` with this data:\n```ts\ntype TestResult = { title: string; status: 'passed' | 'failed' | 'skipped'; durationMs: number; };\nconst run: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'cart updates', status: 'passed', durationMs: 900 },\n  { title: 'checkout completes', status: 'failed', durationMs: 30000 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n```\n1. Use `filter` to get only the failed tests.\n2. Use `map` to get their titles.\n3. Write an **arrow function** `slowest(results: TestResult[]): TestResult` that loops over the list and returns the test with the largest `durationMs`.\n4. Print:\n```\nFailed (2): search works, checkout completes\nSlowest: checkout completes (30s)\n```",
-          "stub": "type TestResult = { title: string; status: 'passed' | 'failed' | 'skipped'; durationMs: number; };\nconst run: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'cart updates', status: 'passed', durationMs: 900 },\n  { title: 'checkout completes', status: 'failed', durationMs: 30000 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n",
+          "statement": "Create `day7/smoke.ts` with:\n```ts\nconst smokePages: string[] = ['/', '/products', '/cart', '/account'];\n```\nLoop over the list and print a numbered checklist. The `/account` page needs a login, so add ` (login needed)` to that line only:\n```\nStep 1: open /\nStep 2: open /products\nStep 3: open /cart\nStep 4: open /account (login needed)\n4 pages in the smoke checklist\n```",
+          "stub": "const smokePages: string[] = ['/', '/products', '/cart', '/account'];\n",
           "hints": [
-            "`run.filter((r) => r.status === 'failed')`",
-            "In `slowest`, start with `let max = results[0];` and replace it whenever you find a longer duration."
+            "You need both the position and the page: a counting `for` loop, or `forEach((page, index) => …)`.",
+            "Step numbers start at 1, indexes at 0: print `index + 1`.",
+            "A ternary can build the note: `const note = page === '/account' ? ' (login needed)' : '';`"
           ],
-          "file": "ts-basics/day7/failed.ts",
-          "run": "node day7/failed.ts",
+          "file": "ts-basics/day7/smoke.ts",
+          "run": "node day7/smoke.ts",
           "check": {
             "kind": "stdoutEquals",
-            "run": "node day7/failed.ts",
-            "expected": "Failed (2): search works, checkout completes\nSlowest: checkout completes (30s)"
+            "run": "node day7/smoke.ts",
+            "expected": "Step 1: open /\nStep 2: open /products\nStep 3: open /cart\nStep 4: open /account (login needed)\n4 pages in the smoke checklist"
           },
-          "solution": "```ts\ntype TestResult = {\n  title: string;\n  status: 'passed' | 'failed' | 'skipped';\n  durationMs: number;\n};\n\nconst run: TestResult[] = [\n  { title: 'login works', status: 'passed', durationMs: 1200 },\n  { title: 'search works', status: 'failed', durationMs: 5300 },\n  { title: 'cart updates', status: 'passed', durationMs: 900 },\n  { title: 'checkout completes', status: 'failed', durationMs: 30000 },\n  { title: 'profile edits', status: 'skipped', durationMs: 0 },\n];\n\n// 1 + 2: failed tests → their titles\nconst failedTests = run.filter((r) => r.status === 'failed');\nconst failedTitles = failedTests.map((r) => r.title);\n\n// 3: find the test with the largest duration\nconst slowest = (results: TestResult[]): TestResult => {\n  let max = results[0];\n  for (const r of results) {\n    if (r.durationMs > max.durationMs) {\n      max = r;\n    }\n  }\n  return max;\n};\n\nconst worst = slowest(run);\nconsole.log(`Failed (${failedTests.length}): ${failedTitles.join(', ')}`);\nconsole.log(`Slowest: ${worst.title} (${worst.durationMs / 1000}s)`);\n```\n\n**Output**\n\n```output\nFailed (2): search works, checkout completes\nSlowest: checkout completes (30s)\n```"
+          "solution": "```ts\nconst smokePages: string[] = ['/', '/products', '/cart', '/account'];\n\nfor (let i = 0; i < smokePages.length; i++) {\n  const page = smokePages[i];\n  const note = page === '/account' ? ' (login needed)' : '';\n  console.log(`Step ${i + 1}: open ${page}${note}`);\n}\n\nconsole.log(`${smokePages.length} pages in the smoke checklist`);\n```\n\n**Output**\n\n```output\nStep 1: open /\nStep 2: open /products\nStep 3: open /cart\nStep 4: open /account (login needed)\n4 pages in the smoke checklist\n```"
+        },
+        {
+          "number": 6,
+          "difficulty": "Medium",
+          "title": "Classify HTTP status codes",
+          "kind": "code",
+          "statement": "API tests check **status codes**. Create `day7/status-codes.ts` with:\n```ts\nconst codes: number[] = [200, 201, 301, 404, 500, 503];\n```\nFor each code, print its category using an `if / else if / else` ladder:\n\n| Range | Category |\n|---|---|\n| 200–299 | success |\n| 300–399 | redirect |\n| 400–499 | client error |\n| 500 and above | server error |\n\nAlso count how many codes are errors (400 or above) and print:\n```\n200 -> success\n201 -> success\n301 -> redirect\n404 -> client error\n500 -> server error\n503 -> server error\nErrors: 3\n```",
+          "stub": "const codes: number[] = [200, 201, 301, 404, 500, 503];\n",
+          "hints": [
+            "A range check combines two comparisons: `code >= 200 && code < 300`.",
+            "Order your checks from lowest to highest range, so each `else if` only needs the upper limit.",
+            "Declare `let errors = 0;` before the loop and do `errors++` inside an `if`."
+          ],
+          "file": "ts-basics/day7/status-codes.ts",
+          "run": "node day7/status-codes.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day7/status-codes.ts",
+            "expected": "200 -> success\n201 -> success\n301 -> redirect\n404 -> client error\n500 -> server error\n503 -> server error\nErrors: 3"
+          },
+          "solution": "```ts\nconst codes: number[] = [200, 201, 301, 404, 500, 503];\nlet errors = 0;\n\nfor (const code of codes) {\n  let category: string;\n  if (code >= 200 && code < 300) {\n    category = 'success';\n  } else if (code >= 300 && code < 400) {\n    category = 'redirect';\n  } else if (code >= 400 && code < 500) {\n    category = 'client error';\n  } else {\n    category = 'server error';\n  }\n\n  if (code >= 400) {\n    errors++;\n  }\n  console.log(`${code} -> ${category}`);\n}\n\nconsole.log(`Errors: ${errors}`);\n```\n\n**Output**\n\n```output\n200 -> success\n201 -> success\n301 -> redirect\n404 -> client error\n500 -> server error\n503 -> server error\nErrors: 3\n```"
+        },
+        {
+          "number": 7,
+          "difficulty": "Medium",
+          "title": "Question the product list",
+          "kind": "code",
+          "statement": "Create `day7/products.ts` with:\n```ts\ntype Product = { name: string; price: number; inStock: boolean };\nconst products: Product[] = [\n  { name: 'Monitor', price: 8999, inStock: true },\n  { name: 'Webcam', price: 2499, inStock: false },\n  { name: 'Headset', price: 1799, inStock: true },\n  { name: 'Laptop Stand', price: 1299, inStock: true },\n];\n```\nUsing **array methods** (no `for` loops), print:\n```\nIn stock: Monitor, Headset, Laptop Stand\nFirst under 2000: Headset\nAny out of stock? true\nAll priced? true\n```\n\"All priced\" means every price is greater than 0.",
+          "stub": "type Product = { name: string; price: number; inStock: boolean };\nconst products: Product[] = [\n  { name: 'Monitor', price: 8999, inStock: true },\n  { name: 'Webcam', price: 2499, inStock: false },\n  { name: 'Headset', price: 1799, inStock: true },\n  { name: 'Laptop Stand', price: 1299, inStock: true },\n];\n",
+          "hints": [
+            "`filter` keeps the in-stock products; `map` turns them into names; `join(', ')` makes one line.",
+            "`find` gives a product or undefined — use `?.name ?? 'none'`.",
+            "Out of stock means `!product.inStock` — use `some`."
+          ],
+          "file": "ts-basics/day7/products.ts",
+          "run": "node day7/products.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day7/products.ts",
+            "expected": "In stock: Monitor, Headset, Laptop Stand\nFirst under 2000: Headset\nAny out of stock? true\nAll priced? true"
+          },
+          "solution": "```ts\ntype Product = { name: string; price: number; inStock: boolean };\nconst products: Product[] = [\n  { name: 'Monitor', price: 8999, inStock: true },\n  { name: 'Webcam', price: 2499, inStock: false },\n  { name: 'Headset', price: 1799, inStock: true },\n  { name: 'Laptop Stand', price: 1299, inStock: true },\n];\n\nconst inStockNames = products.filter((product) => product.inStock).map((product) => product.name);\nconst firstCheap = products.find((product) => product.price < 2000);\nconst anyOutOfStock = products.some((product) => !product.inStock);\nconst allPriced = products.every((product) => product.price > 0);\n\nconsole.log(`In stock: ${inStockNames.join(', ')}`);\nconsole.log(`First under 2000: ${firstCheap?.name ?? 'none'}`);\nconsole.log(`Any out of stock? ${anyOutOfStock}`);\nconsole.log(`All priced? ${allPriced}`);\n```\n\n**Output**\n\n```output\nIn stock: Monitor, Headset, Laptop Stand\nFirst under 2000: Headset\nAny out of stock? true\nAll priced? true\n```"
+        },
+        {
+          "number": 8,
+          "difficulty": "Medium",
+          "title": "Wait for the order to ship",
+          "kind": "code",
+          "statement": "A test refreshes an order page until its status is `Shipped`, giving up after `maxChecks` checks. Create `day7/order-status.ts` with:\n```ts\nconst maxChecks: number = 5;\nconst statusOnEachCheck: string[] = ['Pending', 'Pending', 'Processing', 'Shipped'];\n```\nUse a `while` loop to \"check\" the status one at a time (read the next item of the list each round), stopping as soon as it's `Shipped` or after `maxChecks` checks. Print:\n```\nCheck 1: Pending\nCheck 2: Pending\nCheck 3: Processing\nCheck 4: Shipped\nShipped after 4 checks\n```\nIf it never ships within the limit, the last line should instead be `Still not shipped after N checks`, where N is `maxChecks`. Test it by changing `maxChecks` to `3` (you should see `Still not shipped after 3 checks`), then set it back.",
+          "stub": "const maxChecks: number = 5;\nconst statusOnEachCheck: string[] = ['Pending', 'Pending', 'Processing', 'Shipped'];\n",
+          "hints": [
+            "Keep a counter `let checks = 0;` and a variable for the latest status.",
+            "`statusOnEachCheck[checks] ?? 'Pending'` safely reads past the end of the list.",
+            "After the loop, a ternary on `status === 'Shipped'` picks the last line."
+          ],
+          "file": "ts-basics/day7/order-status.ts",
+          "run": "node day7/order-status.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day7/order-status.ts",
+            "expected": "Check 1: Pending\nCheck 2: Pending\nCheck 3: Processing\nCheck 4: Shipped\nShipped after 4 checks"
+          },
+          "solution": "```ts\nconst maxChecks: number = 5;\nconst statusOnEachCheck: string[] = ['Pending', 'Pending', 'Processing', 'Shipped'];\n\nlet checks = 0;\nlet status = '';\n\nwhile (checks < maxChecks && status !== 'Shipped') {\n  status = statusOnEachCheck[checks] ?? 'Pending';\n  checks++;\n  console.log(`Check ${checks}: ${status}`);\n}\n\nconsole.log(status === 'Shipped' ? `Shipped after ${checks} checks` : `Still not shipped after ${checks} checks`);\n```\n\n**Output**\n\n```output\nCheck 1: Pending\nCheck 2: Pending\nCheck 3: Processing\nCheck 4: Shipped\nShipped after 4 checks\n```"
+        },
+        {
+          "number": 9,
+          "difficulty": "Challenge",
+          "title": "Challenge: the release decision",
+          "kind": "code",
+          "statement": "Create `day7/release.ts` with this test run:\n```ts\ntype Status = 'passed' | 'failed' | 'skipped';\ntype TestResult = { title: string; status: Status; durationMs: number };\nconst results: TestResult[] = [\n  { title: 'login', status: 'passed', durationMs: 1200 },\n  { title: 'search', status: 'passed', durationMs: 2300 },\n  { title: 'filters', status: 'skipped', durationMs: 0 },\n  { title: 'add to cart', status: 'passed', durationMs: 1900 },\n  { title: 'checkout', status: 'failed', durationMs: 7400 },\n  { title: 'payment', status: 'passed', durationMs: 3100 },\n  { title: 'invoice', status: 'skipped', durationMs: 0 },\n  { title: 'logout', status: 'passed', durationMs: 600 },\n];\n```\n1. In **one** `for...of` loop, count each status with a `switch`, and track the slowest test.\n2. Calculate the pass rate as passed ÷ (passed + failed) × 100 — skipped tests didn't run, so they don't count.\n3. The release is `approved` only if the pass rate is at least 90 **and** no more than 2 tests were skipped; otherwise `blocked`.\n\nPrint:\n```\npassed: 5, failed: 1, skipped: 2\nPass rate: 83.3%\nSlowest: checkout (7.4 s)\nRelease: blocked\n```",
+          "stub": "type Status = 'passed' | 'failed' | 'skipped';\ntype TestResult = { title: string; status: Status; durationMs: number };\nconst results: TestResult[] = [\n  { title: 'login', status: 'passed', durationMs: 1200 },\n  { title: 'search', status: 'passed', durationMs: 2300 },\n  { title: 'filters', status: 'skipped', durationMs: 0 },\n  { title: 'add to cart', status: 'passed', durationMs: 1900 },\n  { title: 'checkout', status: 'failed', durationMs: 7400 },\n  { title: 'payment', status: 'passed', durationMs: 3100 },\n  { title: 'invoice', status: 'skipped', durationMs: 0 },\n  { title: 'logout', status: 'passed', durationMs: 600 },\n];\n",
+          "hints": [
+            "Declare `let passed = 0; let failed = 0; let skipped = 0;` before the loop.",
+            "Track the slowest with `let slowest = results[0];` and replace it inside the loop when `result.durationMs > slowest.durationMs`.",
+            "`.toFixed(1)` rounds the pass rate to one decimal place."
+          ],
+          "file": "ts-basics/day7/release.ts",
+          "run": "node day7/release.ts",
+          "check": {
+            "kind": "stdoutEquals",
+            "run": "node day7/release.ts",
+            "expected": "passed: 5, failed: 1, skipped: 2\nPass rate: 83.3%\nSlowest: checkout (7.4 s)\nRelease: blocked"
+          },
+          "solution": "```ts\ntype Status = 'passed' | 'failed' | 'skipped';\ntype TestResult = { title: string; status: Status; durationMs: number };\nconst results: TestResult[] = [\n  { title: 'login', status: 'passed', durationMs: 1200 },\n  { title: 'search', status: 'passed', durationMs: 2300 },\n  { title: 'filters', status: 'skipped', durationMs: 0 },\n  { title: 'add to cart', status: 'passed', durationMs: 1900 },\n  { title: 'checkout', status: 'failed', durationMs: 7400 },\n  { title: 'payment', status: 'passed', durationMs: 3100 },\n  { title: 'invoice', status: 'skipped', durationMs: 0 },\n  { title: 'logout', status: 'passed', durationMs: 600 },\n];\n\nlet passed = 0;\nlet failed = 0;\nlet skipped = 0;\nlet slowest = results[0];\n\nfor (const result of results) {\n  switch (result.status) {\n    case 'passed':\n      passed++;\n      break;\n    case 'failed':\n      failed++;\n      break;\n    case 'skipped':\n      skipped++;\n      break;\n  }\n  if (result.durationMs > slowest.durationMs) {\n    slowest = result;\n  }\n}\n\nconst passRate = (passed / (passed + failed)) * 100;\nconst release = passRate >= 90 && skipped <= 2 ? 'approved' : 'blocked';\n\nconsole.log(`passed: ${passed}, failed: ${failed}, skipped: ${skipped}`);\nconsole.log(`Pass rate: ${passRate.toFixed(1)}%`);\nconsole.log(`Slowest: ${slowest.title} (${slowest.durationMs / 1000} s)`);\nconsole.log(`Release: ${release}`);\n```\n\n**Output**\n\n```output\npassed: 5, failed: 1, skipped: 2\nPass rate: 83.3%\nSlowest: checkout (7.4 s)\nRelease: blocked\n```"
         }
       ]
     }

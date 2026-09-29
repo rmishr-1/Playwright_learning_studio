@@ -1,13 +1,17 @@
-import express, { Router, type Request, type Response } from 'express';
+import { Router, type Response } from 'express';
 import { z } from 'zod';
 import { config } from './config';
 import { lastFrame, prepareRun, startRun } from './runner';
-import { currentReportDir, receiveFrame, startCommand, stopCommand } from './terminal';
-import { courseDay, courseIndex, readProgress, recordProgress } from './store';
+import { receiveFrame, startCommand, stopCommand } from './terminal';
+import { courseDay, courseIndex, indexDayTitle, isLocked, readProgress, recordProgress } from './store';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { CheckRequest } from '../../shared/contracts/check';
 import { checkAnswer } from './check';
+import { savePreview } from './preview';
+import { getBranding } from './branding';
+import { serveMark } from './content';
+import { markDay } from '../../shared/watermark';
 import { Workspace } from '../../shared/contracts/course_day';
 import type { ErrorCode } from '../../shared/contracts/problem_error';
 
@@ -26,6 +30,26 @@ const badRequest = (res: Response, code: ErrorCode, e: unknown): void =>
   fail(res, 400, code, e instanceof z.ZodError ? e.issues[0]?.message ?? 'invalid request' : String(e));
 
 export const router = Router();
+
+/**
+ * A locked day is closed on every route, not just when its lessons are read: a check would give
+ * away its expected output, and a run or progress record would count work on a day that is not open.
+ */
+/** Answers for a locked day, or for one whose course cannot be read, and says it did. Never throws. */
+function refuseLocked(res: Response, week: number, day: number): boolean {
+  try {
+    if (!isLocked(week, day)) return false;
+    fail(res, 423, 'DAY_LOCKED', courseDay(week, day)?.title ?? 'This day is not open yet.');
+  } catch {
+    fail(res, 500, 'INTERNAL_ERROR', 'The course could not be read.');
+  }
+  return true;
+}
+
+/** Progress is bookkeeping: when recording it fails, the request it came with still succeeds. */
+const recordQuietly = (update: Parameters<typeof recordProgress>[0]): void => {
+  recordProgress(update).catch((e: unknown) => console.error('[studio] progress not recorded: ' + (e as Error).message));
+};
 
 // ---------------------------------------------------------------- content
 
@@ -46,18 +70,33 @@ router.get('/course/:week/:day', (req, res) => {
   const week = Number(req.params.week);
   const day = Number(req.params.day);
   const found = courseDay(week, day);
+  // A locked day is not in the app's content pack at all: the index still knows it, and its title.
+  if (!found && isLocked(week, day) && indexDayTitle(week, day) !== null) {
+    return fail(res, 423, 'DAY_LOCKED', indexDayTitle(week, day)!);
+  }
   if (!found) return fail(res, 404, 'DAY_NOT_FOUND', 'Week ' + week + ' day ' + day + ' does not exist.');
-  if (found.locked) {
-    // A locked day still answers, with its title, so a link into it lands somewhere honest
+  if (found.locked || isLocked(week, day)) {
+    // A locked day (or a day of a locked week) still answers, with its title, so a link into it lands somewhere honest
     // rather than a 404. The SPA renders the locked state from this.
     return fail(res, 423, 'DAY_LOCKED', found.title);
   }
-  res.json(found);
+  // Every day leaves marked with the licence the app runs under (shared/watermark.ts).
+  const mark = serveMark();
+  res.json(mark ? markDay(found, mark).day : found);
 });
+
+/** Who the studio is licensed to, and their logo, for the header (branding.ts). */
+router.get('/branding', (_req, res) => res.json(getBranding()));
 
 // ---------------------------------------------------------------- progress
 
-router.get('/progress', (_req, res) => res.json(readProgress()));
+router.get('/progress', (_req, res) => {
+  try {
+    res.json(readProgress());
+  } catch {
+    fail(res, 500, 'INTERNAL_ERROR', 'The progress record could not be read.');
+  }
+});
 
 router.post('/progress', async (req, res) => {
   let parsed;
@@ -66,7 +105,12 @@ router.post('/progress', async (req, res) => {
   } catch (e) {
     return badRequest(res, 'PART_NOT_FOUND', e);
   }
-  res.json(await recordProgress(parsed));
+  if (refuseLocked(res, parsed.week, parsed.day)) return;
+  try {
+    res.json(await recordProgress(parsed));
+  } catch {
+    fail(res, 500, 'INTERNAL_ERROR', 'The progress record could not be saved.');
+  }
 });
 
 // ---------------------------------------------------------------- run
@@ -78,7 +122,14 @@ router.post('/run', async (req, res) => {
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
-  const started = startRun(parsed);
+  if (refuseLocked(res, parsed.week, parsed.day)) return;
+  let started;
+  try {
+    started = startRun(parsed);
+  } catch (e) {
+    if ((e as { code?: string }).code === 'RUN_QUEUE_FULL') return fail(res, 429, 'RUN_QUEUE_FULL', 'Too many runs are waiting. Try again in a moment.');
+    return fail(res, 500, 'INTERNAL_ERROR', 'The run could not start.');
+  }
   if ('queue_full' in started) {
     return fail(
       res,
@@ -91,7 +142,7 @@ router.post('/run', async (req, res) => {
   // Attempting an exercise is not reading the part, so it does not count the part as read -
   // every frontend records that separately.
   if (parsed.problem_number) {
-    void recordProgress({
+    recordQuietly({
       week: parsed.week,
       day: parsed.day,
       part: parsed.part,
@@ -106,7 +157,13 @@ router.post('/run', async (req, res) => {
  * Mints the run id BEFORE the run so the client can attach the WebSocket first. Without this
  * the first second of frames is missed on every run.
  */
-router.post('/run/prepare', (_req, res) => res.json({ run_id: prepareRun() }));
+router.post('/run/prepare', (_req, res) => {
+  try {
+    res.json({ run_id: prepareRun() });
+  } catch {
+    fail(res, 429, 'RUN_QUEUE_FULL', 'Too many runs are waiting. Try again in a moment.');
+  }
+});
 
 /**
  * What the Detach window shows the instant it opens, before (or instead of) anything arrives
@@ -124,27 +181,39 @@ router.get('/run/:run_id/last-frame', (req, res) => {
  * code and which exercise it is; the check itself is read from the course here.
  */
 router.post('/check', async (req, res) => {
-  let parsed;
+  let parsed: CheckRequest;
   try {
     parsed = CheckRequest.parse(req.body);
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
-  const problem = courseDay(parsed.week, parsed.day)
-    ?.parts.find((p) => p.part === parsed.part)
-    ?.problems.find((q) => q.number === parsed.problem);
-  if (!problem?.check || !problem.file) {
+  if (refuseLocked(res, parsed.week, parsed.day)) return;
+  let found;
+  try {
+    found = courseDay(parsed.week, parsed.day);
+  } catch {
+    return fail(res, 500, 'INTERNAL_ERROR', 'The course could not be read.');
+  }
+  const problem = found?.parts.find((p) => p.part === parsed.part)?.problems.find((q) => q.number === parsed.problem);
+  if (!found || !problem?.check || !problem.file) {
     return fail(res, 404, 'EXERCISE_NOT_FOUND', 'This exercise has no automatic check.');
   }
+  // The check runs in the day's own workspace, whatever the page says.
+  parsed = { ...parsed, workspace: found.workspace };
   // Checking an answer is an attempt at the exercise, not reading the part.
-  void recordProgress({
+  recordQuietly({
     week: parsed.week,
     day: parsed.day,
     part: parsed.part,
     attempted_problem: parsed.problem,
     viewed: false,
   });
-  res.json(await checkAnswer(problem, parsed));
+  try {
+    res.json(await checkAnswer(problem, parsed));
+  } catch (e) {
+    if ((e as { code?: string }).code === 'RUN_QUEUE_FULL') return fail(res, 429, 'RUN_QUEUE_FULL', 'Too many runs are waiting. Try again in a moment.');
+    fail(res, 500, 'INTERNAL_ERROR', 'The check could not run.');
+  }
 });
 
 // ---------------------------------------------------------------- terminal
@@ -169,8 +238,25 @@ router.post('/terminal', (req, res) => {
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
-  startCommand(parsed.run_id, parsed.command, parsed.code, parsed.file, parsed.workspace);
+  try {
+    startCommand(parsed.run_id, parsed.command, parsed.code, parsed.file, parsed.workspace);
+  } catch {
+    return fail(res, 500, 'INTERNAL_ERROR', 'The command could not start.');
+  }
   res.json({ ok: true });
+});
+
+const PreviewRequest = z.object({ html: z.string().min(1).max(500_000) });
+
+/** View in Page: keeps a practice page's HTML and answers with the address that shows it (preview.ts). */
+router.post('/preview', (req, res) => {
+  let parsed;
+  try {
+    parsed = PreviewRequest.parse(req.body);
+  } catch (e) {
+    return badRequest(res, 'BAD_REQUEST', e);
+  }
+  res.json({ url: savePreview(parsed.html) });
 });
 
 /** Ctrl+C in the Terminal. */
@@ -178,13 +264,11 @@ router.post('/terminal/:run_id/stop', (req, res) => res.json({ stopped: stopComm
 
 /**
  * Live-view frames from the Workspace's test wrapper, which runs inside the test runner on this
- * same computer. Only a loopback caller is accepted, and only for the command that is running.
+ * same computer. Only a loopback caller is accepted, only for the command that is running, and only
+ * with the key that command was given (terminal/index.ts).
  */
 router.post('/terminal/:run_id/frame', (req, res) => {
   const from = req.socket.remoteAddress ?? '';
   if (!/^(::1|127\.|::ffff:127\.)/.test(from)) return res.status(403).end();
-  res.status(receiveFrame(req.params.run_id, req.body ?? {}) ? 204 : 410).end();
+  res.status(receiveFrame(req.params.run_id, req.get('x-studio-frame-key'), req.body ?? {}) ? 204 : 410).end();
 });
-
-/** The HTML report of the last Terminal command, opened by `npx playwright show-report`. */
-router.use('/terminal/report', (req, res, next) => express.static(currentReportDir())(req, res, next));
