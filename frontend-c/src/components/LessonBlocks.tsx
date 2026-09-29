@@ -176,6 +176,8 @@ const DIAGRAM_COLOURS: Record<string, Record<string, string | boolean>> = {
   },
 };
 
+<<<<<<< HEAD
+=======
 /** Every mermaid draw gets its own id: see drawDiagram. */
 let drawCount = 0;
 /** mermaid's settings are page-wide, so draws take turns: each sets the theme, then draws. */
@@ -217,11 +219,53 @@ function drawDiagram(base: string, source: string, theme: string): Promise<strin
   return next;
 }
 
+>>>>>>> origin/main
 /**
  * A mermaid diagram. mermaid is large, so it is loaded only when a page has a diagram. It draws in
  * the app's theme, and again when the theme changes. If it cannot draw the source, the source is
  * shown instead, so the lesson never loses the content.
  */
+/** Every mermaid draw gets its own id: see drawDiagram. */
+let drawCount = 0;
+/** mermaid's settings are page-wide, so draws take turns: each sets the theme, then draws. */
+let drawQueue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Draws one diagram as SVG text, one draw at a time. Each draw has an id never used before:
+ * before drawing, mermaid removes whatever element on the page already has the id it is given,
+ * and reusing an id - the same diagram drawn again in the same theme, or two overlapping draws
+ * of it - deleted the diagram already on screen, or the other draw's scratch space, leaving a
+ * blank box or the source text. A failed draw is tried once more before giving up.
+ */
+function drawDiagram(base: string, source: string, theme: string): Promise<string> {
+  const run = async (): Promise<string> => {
+    const { default: mermaid } = await import('mermaid');
+    // mermaid's 'base' theme, coloured from the app's own palette for each page theme. Its stock
+    // themes clash: 'dark' draws near-black boxes that vanish into the dark panel, and 'neutral'
+    // puts cool grey boxes and pure black text on warm paper.
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: 'base',
+      themeVariables: { ...(DIAGRAM_COLOURS[theme] ?? DIAGRAM_COLOURS.light), fontFamily: DIAGRAM_FONT, fontSize: '14px' },
+    });
+    for (let attempt = 1; ; attempt++) {
+      const id = base + 'x' + ++drawCount;
+      try {
+        return (await mermaid.render(id, source)).svg;
+      } catch (e) {
+        // A failed draw can leave its scratch elements behind; clear them before trying again.
+        document.getElementById(id)?.remove();
+        document.getElementById('d' + id)?.remove();
+        if (attempt >= 2) throw e;
+      }
+    }
+  };
+  const next = drawQueue.then(run, run);
+  drawQueue = next.catch(() => undefined);
+  return next;
+}
+
 export function Diagram({ source }: { source: string }) {
   const id = 'dgm' + useId().replace(/[^\w]/g, '');
   // The SVG and a number that changes with every draw, so React always puts the new drawing in.

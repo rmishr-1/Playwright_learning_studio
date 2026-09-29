@@ -17,6 +17,9 @@ export default defineConfig({
   server: {
     host: '127.0.0.1',
     port: 5185,
+<<<<<<< HEAD
+    // Fail rather than drift to another port: the port is how v1, v2 and C are told apart.
+=======
     // No other site may read from the dev server, and it serves only the page's own files.
     cors: false,
     fs: {
@@ -25,6 +28,7 @@ export default defineConfig({
       deny: ['.env', '.env.*', '*.{pem,key,pfx,p12,dpapi,lic,crt}', '**/.git/**'],
     },
     // Fail rather than drift to another port: the backend accepts only this page's origin in development.
+>>>>>>> origin/main
     strictPort: true,
     proxy: {
       '/api': {

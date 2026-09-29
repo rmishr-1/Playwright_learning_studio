@@ -300,9 +300,15 @@ echo         Install it manually from https://git-scm.com/download/win and run t
 exit /b 1
 
 :ensure_credentials
+<<<<<<< HEAD
+rem  Without a credential helper git asks for the GitHub sign-in on every network command - several
+rem  times in a single run, and again on every run. Git Credential Manager, part of Git for Windows,
+rem  keeps the sign-in in Windows Credential Manager after the first time. Any helper already set is kept.
+=======
 REM Without a credential helper git asks for the GitHub sign-in on every network command - several
 REM times in a single run, and again on every run. Git Credential Manager, part of Git for Windows,
 REM keeps the sign-in in Windows Credential Manager after the first time. Any helper already set is kept.
+>>>>>>> origin/main
 set "CRED_HELPER="
 for /f "delims=" %%h in ('git config --get credential.helper 2^>nul') do set "CRED_HELPER=%%h"
 if defined CRED_HELPER exit /b 0

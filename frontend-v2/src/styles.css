@@ -376,8 +376,8 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 }
 .code-block .head .tag.warn { background: #4a3514; color: #f0c27a; }
 .code-block .head .spacer { flex: 1; }
-.code-block .head button.run, .example .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
-.code-block .head button.run:hover, .example .head button.run:hover { background: #1d4fd8; }
+.code-block .head button.run { background: #2563eb; border-color: #2563eb; color: #fff; }
+.code-block .head button.run:hover { background: #1d4fd8; }
 
 /* Commands to type in a terminal, each with its own Run. */
 .terminal-block { margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2b3240; background: #14181f; }
@@ -565,18 +565,6 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
   color: var(--ed-dim); text-align: center; font-size: 13.5px; line-height: 1.65;
 }
 
-/* View in Page's list of pages, when a practice file holds more than one (lib/htmlPages.ts). */
-.page-menu {
-  position: fixed; z-index: 50; min-width: 190px; padding: 5px; display: flex; flex-direction: column;
-  background: #1e232d; border: 1px solid #3d4757; border-radius: 9px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
-}
-.page-menu-title { color: #8e99ad; font-size: 11px; padding: 4px 9px 6px; }
-.page-menu button {
-  background: none; border: none; border-radius: 6px; color: #dbe2ee; text-align: left;
-  font-family: var(--mono); font-size: 12px; padding: 7px 9px; cursor: pointer;
-}
-.page-menu button:hover, .page-menu button:focus-visible { background: #333b4a; color: #fff; outline: none; }
-
 /* ---------------------------------------------------------------- run overlay */
 .overlay {
   position: absolute; left: 10px; right: 10px; bottom: 10px; height: 58%;
@@ -648,11 +636,6 @@ body.dragging-divider { cursor: col-resize; user-select: none; }
 /* A panel in its own window fills it. */
 body.popout-body { margin: 0; background: #12161e; }
 .popout { position: fixed; inset: 0; display: flex; }
-/* So does the whole bar, detached with Detach all. */
-.overlay.detached {
-  position: static; flex: 1; min-width: 0; min-height: 0; height: auto;
-  border: none; border-radius: 0; box-shadow: none;
-}
 
 /* ---------------------------------------------------------------- detached run view
    The whole page, in its own popped-out window - see RunOverlay's Detach button. */
@@ -668,7 +651,49 @@ body.popout-body { margin: 0; background: #12161e; }
   font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
 }
 
-/* Global light/dark toggle, bottom-left. */
+/* ---------------------------------------------------------------- assistant */
+.bubble {
+  position: fixed; right: 22px; bottom: 22px; height: 50px; border-radius: 25px;
+  background: var(--accent); color: #fff; border: none; z-index: 40;
+  display: flex; align-items: center; gap: 9px; padding: 0 20px;
+  font-size: 14px; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, .38), 0 1px 3px rgba(0, 0, 0, .2);
+}
+.bubble:hover { filter: brightness(1.08); box-shadow: 0 6px 20px rgba(37, 99, 235, .46); }
+.bubble .ico { font-size: 16px; }
+.chat {
+  position: fixed; right: 22px; bottom: 22px; width: 390px; max-width: calc(100vw - 32px);
+  height: 540px; max-height: calc(100vh - 92px); background: var(--paper);
+  border: 1px solid var(--rule); border-radius: var(--radius); display: flex;
+  flex-direction: column; z-index: 41; box-shadow: 0 12px 44px rgba(31, 43, 77, .22);
+  overflow: hidden;
+}
+.chat .head {
+  background: var(--ink); color: #eef1f7; padding: 12px 15px; display: flex; align-items: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
+}
+.chat .head .spacer { flex: 1; }
+.chat .head button { background: none; border: none; color: #a9b6cf; font-size: 18px; }
+.chat .head button:hover { color: #fff; }
+.chat .log { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+.chat .msg { font-size: 14.5px; line-height: 1.6; }
+.chat .msg.user {
+  align-self: flex-end; background: var(--accent-wash); border-radius: 12px 12px 3px 12px;
+  padding: 9px 13px; max-width: 86%;
+}
+.chat .msg.assistant { align-self: flex-start; max-width: 96%; }
+.chat .msg.assistant code {
+  font-family: var(--mono); font-size: .88em; background: var(--tint);
+  border: 1px solid var(--rule); padding: 1px 5px; border-radius: 5px;
+}
+.chat .hint { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.chat .ask { display: flex; gap: 8px; padding: 11px; border-top: 1px solid var(--rule); }
+.chat .ask textarea {
+  flex: 1; resize: none; font: inherit; font-size: 14px; padding: 9px 11px; height: 44px;
+  border: 1px solid var(--rule); border-radius: 10px;
+}
+
+/* Global light/dark toggle, bottom-left - the mirror of the Ask bubble on the right. */
 .theme-btn {
   position: fixed; left: 22px; bottom: 22px; height: 40px; border-radius: 20px;
   background: var(--paper); color: var(--muted); border: 1px solid var(--rule);
@@ -799,9 +824,7 @@ body.popout-body { margin: 0; background: #12161e; }
   font-family: var(--mono); font-size: 19px; font-weight: 600; color: var(--heading);
 }
 .index-progress .btn { text-decoration: none; background: var(--ink); }
-/* The header navy would vanish on the dark page, and the dark theme's pale link blue leaves white
-   text unreadable (about 2:1): a deeper blue keeps the button visible and its text at 6:1. */
-:root[data-theme='dark'] .index-progress .btn { background: #2f5fc4; color: #fff; }
+:root[data-theme='dark'] .index-progress .btn { background: var(--accent); }
 
 .index-table-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule); box-shadow: var(--shadow); overflow-x: auto; }
 .index-table { width: 100%; border-collapse: collapse; background: var(--paper); min-width: 720px; }
@@ -886,761 +909,49 @@ a.day-link:hover .go { opacity: 1; transform: translateX(2px); color: var(--acce
 :root[data-theme='dark'] .pane-theory::-webkit-scrollbar-thumb:hover,
 :root[data-theme='dark'] .editor-body .cm-scroller::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-/* ================================================================ Option A
-   The canvas design's look on top of v2: Evoke navy and orange, IBM Plex, a taller header with
-   the product name and Course index / Lessons tabs, a breadcrumb over the lesson, and a week
-   list with day badges. Everything above stays as v2 had it; these rules only override. */
-:root {
-  --ink: #0e1f45;
-  --ink-2: #1b3268;
-  --heading: #0e1f45;
-  --brand-orange: #c2410c;   /* darkened from the logo's orange so white text on it passes contrast */
-  --action: #c2410c;         /* filled buttons: Run, Continue. Fixed in both themes for the same reason. */
-  --accent: #1a4fa0;         /* the logo's blue: links and interactive states */
-  --accent-wash: #eef2fa;
-  --sans: 'IBM Plex Sans', system-ui, 'Segoe UI', sans-serif;
+/* ================================================================ dashboard slider + next day */
+/* The sidebar width now comes from the slider (inline style), so drop the fixed 250px. */
+.sidebar { flex-grow: 0; flex-shrink: 0; min-width: 200px; max-width: 520px; }
+/* The slider on the Learners Dashboard's right edge. */
+.side-gutter {
+  flex: 0 0 6px; cursor: col-resize; background: var(--rule-soft);
+  border-right: 1px solid var(--rule); position: relative;
 }
-:root[data-theme='dark'] { --accent: #8fb0f2; --accent-wash: #1c2740; }
+/* Three grip dots so it reads as something to drag. */
+.side-gutter::after {
+  content: '⋮'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  color: var(--muted); font-size: 14px; line-height: 1;
+}
+.side-gutter:hover, body.dragging-side .side-gutter { background: var(--brand-orange); }
+.side-gutter:hover::after, body.dragging-side .side-gutter::after { color: #fff; }
+body.dragging-side { cursor: col-resize; user-select: none; }
+/* Wider dashboard = more of each day title visible. */
+.sidebar .daytitle { white-space: nowrap; }
 
-/* ---- header */
-.app-header { flex: 0 0 72px; height: 72px; gap: 20px; padding: 0 28px 0 20px; box-shadow: none; }
-.hdr-logo { width: 164px; height: 48px; padding: 6px 10px; border-radius: 10px; justify-content: center; box-shadow: none; }
-.hdr-logo img { height: 36px; }
-.hdr-sep { height: 32px; background: #2e4274; }
-.hdr-product { display: flex; flex-direction: column; gap: 2px; font-family: var(--sans); min-width: 0; }
-.hdr-product b { font-size: 16px; font-weight: 600; color: #fff; }
-.hdr-product small { font-size: 12px; color: #a9b6d3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hdr-nav { display: flex; gap: 4px; }
-.hdr-tab {
-  display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 8px;
-  color: #d4dcee; font-size: 14px; font-weight: 500; text-decoration: none; white-space: nowrap;
-}
-.hdr-tab:hover { background: #152b5c; color: #fff; }
-.hdr-tab.on { background: #1b3268; color: #fff; font-weight: 600; }
-.hdr-btn.icon { width: 44px; height: 44px; border-radius: 22px; background: transparent; border-color: #2e4274; color: #d4dcee; }
-
-/* ---- lesson screen: breadcrumb and title over the split */
-.day-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.day-main .split { flex: 1; min-height: 0; }
-.day-head { padding: 14px 28px 14px; border-bottom: 1px solid var(--rule); background: var(--page); }
-.day-crumbs { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-.day-crumbs a { color: var(--accent); text-decoration: none; font-weight: 500; }
-.day-crumbs a:hover { text-decoration: underline; }
-.day-crumbs b { color: var(--heading); }
-.day-head h1 { margin: 6px 0 0; font-size: 26px; line-height: 1.25; }
-
-/* ---- week list */
-.sidebar { width: 280px; flex: 0 0 280px; padding: 16px 12px 40px; }
-.sidebar .wk-all {
-  height: 44px; margin-bottom: 10px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 8px;
-  background: var(--tint); color: var(--heading); font-family: var(--sans); font-size: 14px;
-  letter-spacing: 0; text-transform: none; font-weight: 600;
-}
-.sidebar .wk-all:hover { border-color: var(--accent); }
-.sidebar .wk-all .count { font-family: var(--mono); font-size: 12px; }
-.sidebar .wk-title {
-  padding: 10px 6px; border-radius: 6px; font-family: var(--sans); font-size: 12px;
-  letter-spacing: .08em; font-weight: 700; color: var(--muted);
-}
-.sidebar .wk-title .dot { width: 8px; height: 8px; border-radius: 4px; flex: 0 0 8px; }
-.sidebar ul { display: grid; gap: 2px; }
-.sidebar li a { min-height: 44px; padding: 0 10px; gap: 10px; border-radius: 8px; border-left: none; }
-.sidebar li a:hover { background: var(--accent-wash); }
-.sidebar li a .badge {
-  flex: 0 0 30px; height: 24px; border-radius: 6px; display: grid; place-items: center;
-  font-family: var(--mono); font-size: 11px; font-weight: 600; background: #eef0fb; color: #4338ca;
-}
-.sidebar li a.done .badge { background: var(--good-wash); color: var(--good); }
-.sidebar li a.on { background: var(--ink); color: #fff; border-left: none; font-weight: 600; }
-.sidebar li a.on .badge { background: var(--action); color: #fff; }
-:root[data-theme='dark'] .sidebar li a.on { background: #22386b; }
-.sidebar .wk-locked {
-  display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px;
-  color: var(--muted); font-size: 13px;
-}
-.sidebar .wk-locked .pill { margin-left: auto; }
-
-/* ---- lesson tabs: orange underline on the one you are on */
-.tabbar button.on { border-bottom-color: var(--action); }
-:root[data-theme='dark'] .tabbar button.on { border-bottom-color: var(--brand-orange); }
-
-/* ---- editor: Run is the orange primary action */
-.run-btn, .run-btn:disabled { background: var(--action); }
-
-/* ---- course index */
-.index-hero { border-left-color: var(--ink); }
-.index-progress .btn { background: var(--ink); min-height: 44px; display: inline-flex; align-items: center; }
-.index-table thead th { background: var(--ink); }
-.index-table td.module { font-size: 14.5px; }
-/* Not-yet-built weeks stay at full strength: faded grey text is too hard to read, and the
-   "soon" pill and the lock line already say the week is not open. */
-.index-table tr.soon td { opacity: 1; }
-.index-table .lock-line { display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: var(--muted); font-size: 14px; }
-a.day-link { min-height: 44px; }
-a.day-link:hover { background: #fff4ec; border-color: #e8a57a; }
-a.day-link:hover .day-title, a.day-link:hover .go { color: var(--action); }
-:root[data-theme='dark'] a.day-link:hover { background: var(--accent-wash); border-color: var(--accent); }
-:root[data-theme='dark'] a.day-link:hover .day-title, :root[data-theme='dark'] a.day-link:hover .go { color: var(--accent); }
-.day-link .here { color: var(--brand-orange); border-color: var(--brand-orange); }
-
-/* Controls keep their size; only the product line gives up width on a narrow window. */
-.hdr-brand, .hdr-nav, .hdr-btn.icon { flex: 0 0 auto; }
-
-/* ================================================================ Option C
-   Option A throughout, except the home page: Option B’s learner dashboard is the course index.
-   The dashboard rules below are Option B’s, unchanged. */
-/* The dashboard hero continues the navy header, so a hairline marks where the header ends. */
-.app-header { border-bottom: 1px solid #22386b; }
-
-/* ---- dashboard */
-.dash { flex: 1; min-height: 0; overflow-y: auto; background: var(--page); }
-.dash-in { max-width: 1328px; margin: 0 auto; }
-.dash-hero { background: var(--ink); color: #fff; padding: 36px 56px 40px; }
-.dash-hero-in { display: flex; gap: 40px; align-items: stretch; flex-wrap: wrap; }
-.dash-intro { flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 14px; justify-content: center; }
-.dash-intro .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: #f2a36b; }
-.dash-intro h1 { margin: 0; font-size: 44px; line-height: 1.14; font-weight: 700; color: #fff; max-width: 20ch; }
-.dash-stats { display: flex; flex-wrap: wrap; margin-top: 8px; }
-.dash-stat { display: flex; flex-direction: column; gap: 2px; padding: 0 28px; border-left: 1px solid #2e4274; }
-.dash-stat:first-child { padding-left: 0; border-left: none; }
-.dash-stat b { font-family: var(--mono); font-size: 26px; font-weight: 600; }
-.dash-stat span { font-size: 13px; color: #a9b6d3; }
-.upnext {
-  flex: 0 1 420px; min-width: 300px; background: var(--paper); color: var(--graphite);
-  border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px;
-}
-.upnext-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.upnext-top .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--brand-orange); }
-:root[data-theme='dark'] .upnext-top .eyebrow { color: #ff7a3d; }
-.upnext-top .mono { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.upnext-title { font-family: var(--serif); font-size: 22px; line-height: 1.3; font-weight: 700; color: var(--heading); }
-.upnext-progress { display: flex; flex-direction: column; gap: 6px; }
-.upnext-bar { display: flex; gap: 4px; }
-.upnext-bar span { flex: 1; height: 6px; border-radius: 3px; background: var(--rule); }
-.upnext-bar span.on { background: var(--good); }
-.small { font-size: 12.5px; }
-.btn.action {
-  background: var(--action); min-height: 48px; display: inline-flex; align-items: center; justify-content: center;
-  text-decoration: none; font-size: 15px; border-radius: 10px;
-}
-
-.dash-path { padding: 32px 56px 60px; }
-.path-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
-.path-head h2 { margin: 0; font-size: 26px; }
-.path { list-style: none; margin: 0; padding: 0; }
-.path-week { display: flex; gap: 22px; }
-.path-rail { width: 44px; flex: 0 0 44px; display: flex; flex-direction: column; align-items: center; }
-.path-num {
-  width: 44px; height: 44px; flex: 0 0 44px; border-radius: 22px; display: grid; place-items: center;
-  font-family: var(--mono); font-size: 15px; font-weight: 600;
-  border: 2px solid var(--mod); color: var(--mod); background: var(--paper);
-}
-.path-week.open .path-num { background: var(--mod); color: #fff; }
-.path-line { flex: 1; width: 2px; margin: 4px 0; background: var(--rule); }
-.path-card {
-  flex: 1; min-width: 0; margin-bottom: 16px; background: var(--paper); border: 1px solid var(--rule);
-  border-radius: 14px; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px;
-}
-.path-card-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.path-card-head h3 { margin: 0; font-family: var(--sans); font-size: 19px; }
-.path-card-head .spacer { flex: 1; }
-.mod-chip {
-  font-size: 12px; font-weight: 700; border-radius: 12px; padding: 5px 11px;
-  color: var(--mod); background: color-mix(in srgb, var(--mod) 10%, var(--paper));
-}
-:root[data-theme='dark'] .mod-chip { color: color-mix(in srgb, var(--mod) 40%, #fff); background: color-mix(in srgb, var(--mod) 30%, var(--paper)); }
-:root[data-theme='dark'] .path-week.soon .path-num { color: color-mix(in srgb, var(--mod) 40%, #fff); }
-.path-card-head .focus { font-size: 14px; font-style: italic; color: var(--muted); }
-.done-pill {
-  font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--tint);
-  border: 1px solid var(--rule); border-radius: 20px; padding: 3px 10px;
-}
-.soon-chip {
-  display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
-  color: var(--muted); background: var(--tint); border-radius: 12px; padding: 5px 10px;
-}
-.day-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.day-tile {
-  min-height: 112px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper);
-  padding: 14px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: var(--heading);
-  transition: transform .15s, box-shadow .15s, border-color .15s;
-}
-a.day-tile:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(14, 31, 69, .12); border-color: #e8a57a; }
-a.day-tile:focus-visible { outline: 3px solid var(--action); outline-offset: 2px; }
-.day-tile.locked { color: var(--muted); cursor: not-allowed; }
-.tile-top { display: flex; align-items: center; gap: 8px; }
-.tile-badge { font-family: var(--mono); font-size: 12px; font-weight: 600; color: #fff; background: var(--ink); border-radius: 6px; padding: 3px 7px; }
-:root[data-theme='dark'] .tile-badge { background: #22386b; }
-.tile-done { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--good); }
-.tile-title { font-size: 14px; line-height: 1.35; font-weight: 600; }
-.day-tile .here {
-  align-self: flex-start; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--brand-orange); border: 1px solid var(--brand-orange); border-radius: 20px; padding: 1px 8px;
-}
-:root[data-theme='dark'] .day-tile .here { color: #ff7a3d; border-color: #ff7a3d; }
+/* "Next day" stands out from the in-day Next: navy fill. */
+.part-nav-btn.next.day { background: var(--ink); border-color: var(--ink); }
+.part-nav-btn.next.day .dir { color: #aebbd6; }
+.part-nav-btn.next.day .name { color: #fff; }
+.part-nav-btn.next.day:hover { background: var(--ink-2); }
+.part-nav-btn.next.day:hover .name { color: #fff; }
+:root[data-theme='dark'] .part-nav-btn.next.day { background: var(--accent); border-color: var(--accent); }
+.part-nav-end { margin-left: auto; align-self: center; color: var(--muted); font-size: 14px; }
 @media (max-width: 900px) {
-  .dash-hero, .dash-path { padding-left: 16px; padding-right: 16px; }
-  .dash-intro h1 { font-size: 32px; }
-  .path-week { gap: 12px; }
+  .side-gutter { display: none; }
+  .sidebar { width: auto !important; flex-basis: auto !important; max-width: none; }
 }
 
-
-/* ---- Option C header: thinner, the white Evoke logo straight on the navy, and on a lesson the
-   week and day that used to sit in a strip of their own above the lesson. */
-.app-header { flex: 0 0 64px; height: 64px; gap: 16px; padding: 0 20px; }
-.hdr-logo-white { display: block; height: 38px; width: auto; }
-.hdr-sep { height: 28px; }
-.hdr-where { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-width: 0; }
-.hdr-crumbs { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; }
-.hdr-crumbs b { color: #fff; font-weight: 600; }
-.hdr-crumbs .crumb-sep { color: #fff; }
-.hdr-tab { height: 38px; }
-.hdr-btn.icon { width: 38px; height: 38px; border-radius: 19px; }
-
-/* The product name heads the week list, where the "All weeks" button was. */
-.sb-brand {
-  padding: 4px 6px 14px; margin-bottom: 8px; border-bottom: 1px solid var(--rule);
-  font-family: var(--serif); font-size: 17px; line-height: 1.3; font-weight: 700; color: var(--heading);
+/* ================================================================ dashboard title -> index */
+/* The row is now a container: a small hide button + the title button that opens the index. */
+.sidebar .wk-all { padding: 0; gap: 0; }
+.sidebar .wk-all:hover { background: none; }
+.sidebar .wk-all button {
+  background: none; border: none; color: inherit; font: inherit; letter-spacing: inherit;
+  text-transform: inherit; display: flex; align-items: center; padding: 12px 10px;
 }
-/* The course name, between the logo and where you are. It keeps its width; the day title gives way first. */
-.hdr-course { flex: 0 0 auto; font-family: var(--serif); font-size: 21px; font-weight: 700; letter-spacing: -.005em; color: #fff; white-space: nowrap; }
-
-/* The line between the top strip and the page: Evoke orange, the colour of the logo's swooshes.
-   It sits inside the strip's 64px, so nothing below moves. */
-.app-header { border-bottom: 3px solid var(--brand-orange); }
-
-/* ---- Option C week list: minimal - text and whitespace, no icons, pills or dividers.
-   Titles wrap rather than running under the lesson. (The old v2 list laid its days out as a grid
-   whose column grew to the longest title, so titles slid under the lesson pane.) */
-.sidebar {
-  width: 290px; flex: 0 0 290px; padding: 24px 12px 32px;
-  overflow-x: hidden; overflow-y: auto !important; scrollbar-width: thin;
-}
-.sidebar::-webkit-scrollbar { width: 6px; }
-.sidebar::-webkit-scrollbar-thumb { border: none; background: #d3dae6; }
-/* The product name: the one prominent thing in the list, with a rule between it and the weeks. */
-.sb-brand {
-  padding: 0 0 18px 12px; margin: 0 0 16px; border: 0; border-bottom: 1px solid var(--rule);
-  font-family: var(--serif); font-size: 18px; line-height: 1.3; font-weight: 700; letter-spacing: -.005em; color: var(--heading);
-  /* Always one line; if a fallback font is ever wider, it ends in an ellipsis rather than wrapping. */
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-.sb-week + .sb-week { margin-top: 12px; }
-.sb-week-head {
-  display: flex; align-items: baseline; justify-content: space-between; width: 100%; min-height: 36px;
-  padding: 8px 12px; border: 0; border-radius: 6px; background: none; text-align: left;
-  font-size: 14px; font-weight: 600; color: var(--heading);
-}
-.sb-week-head:hover { background: var(--rule-soft); }
-.sb-week-head[aria-expanded='false'] { color: var(--muted); }
-.sb-week-count { font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--muted); }
-
-.sb-days { display: flex; flex-direction: column; margin-top: 2px; }
-.sb-days[hidden] { display: none; }
-.sb-day {
-  display: flex; align-items: baseline; gap: 12px; min-height: 40px; padding: 9px 12px 9px 10px;
-  border-left: 2px solid transparent; color: #3a4666; text-decoration: none;
-}
-.sb-day:hover { color: var(--heading); }
-.sb-day:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
-/* "Day N": wide enough for "Day 10", so every title starts in line. Done days turn green. */
-.sb-num { flex: 0 0 auto; min-width: 46px; font-family: var(--mono); font-size: 12px; white-space: nowrap; color: var(--muted); }
-.sb-day.done .sb-num { color: var(--good); font-weight: 600; }
-.sb-title { font-size: 13.5px; line-height: 1.45; min-width: 0; }
-.sb-day.on { border-left-color: var(--action); color: var(--heading); }
-.sb-day.on .sb-title { font-weight: 600; }
-.sb-day.on .sb-num { color: var(--action); }
-.sb-day.locked { cursor: not-allowed; opacity: .7; }
-:root[data-theme='dark'] .sb-day.on .sb-num { color: #ff7a3d; }
-
-.sb-soon { margin-top: 20px; padding: 0 12px; font-size: 12.5px; color: var(--muted); }
-
-:root[data-theme='dark'] .sb-day { color: var(--graphite); }
-
-/* ---- lesson tabs: when the lesson pane is too narrow for all four, they wrap onto a second row
-   rather than sliding under the editor behind a scrollbar. */
-.tabbar { flex-wrap: wrap; overflow-x: visible; row-gap: 0; }
-.tabbar button { padding: 11px 10px; }
-
-/* ---- resizable week list: its width comes from --sb-w (set by the Day screen), and the bar on
-   its right edge is a .gutter like the lesson/editor one, so it looks and behaves the same. */
-.sidebar { width: var(--sb-w, 290px); flex: 0 0 var(--sb-w, 290px); border-right: none; }
-.sb-gutter:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-/* While dragging, keep the resize cursor everywhere and stop the drag selecting lesson text. */
-body.resizing { cursor: col-resize; user-select: none; }
-
-/* ---- header on narrower windows: nothing may overlap, so the least important parts give way first */
-.app-header { overflow: hidden; }
-.hdr-where { flex: 0 1 auto; min-width: 0; overflow: hidden; }
-.hdr-crumbs { display: block; overflow: hidden; text-overflow: ellipsis; }
-.hdr-crumbs .crumb-sep { margin: 0 6px; }
-.hdr-spacer { min-width: 12px; }
-.hdr-tab svg { flex: 0 0 auto; }
-
-/* 1. The Course index and Lessons tabs become icon buttons (their names stay as labels and tips). */
-@media (max-width: 1180px) {
-  .hdr-tab-label { display: none; }
-  .hdr-tab { width: 42px; padding: 0; justify-content: center; }
-}
-/* 2. On a lesson, the course name gives way to where you are. The index page keeps it. */
-@media (max-width: 1000px) {
-  .app-header.in-lesson .hdr-course,
-  .app-header.in-lesson .hdr-course-sep { display: none; }
-}
-/* 3. The logo and course name come down a size. */
-@media (max-width: 640px) {
-  .app-header { gap: 10px; padding: 0 12px; }
-  .hdr-logo-white { height: 30px; }
-  .hdr-course { font-size: 17px; }
-}
-
-/* On a narrow window the panes stack (see the 900px rules above), so the week list goes full width
-   and its drag bar goes with the other one. */
-@media (max-width: 900px) {
-  .sidebar { width: auto; flex: 0 0 auto; }
-}
-
-/* ---- sleek dividers: both drag bars (week list | lesson, and lesson | editor) are a 1px hairline.
-   An invisible 9px strip over it keeps them easy to grab; they turn blue on hover, focus or drag. */
-.gutter {
-  flex: 0 0 1px; position: relative; z-index: 3; border: 0; background: var(--rule); cursor: col-resize;
-  transition: background .12s;
-}
-.gutter::after { content: ''; position: absolute; top: 0; bottom: 0; left: -4px; right: -4px; }
-.gutter:hover, .gutter:focus-visible, body.resizing .sb-gutter { background: var(--accent); }
-.sb-gutter:focus-visible { outline: none; }
-
-/* ---- sleek lesson scrollbar: 6px, a pale thumb on no track, only when the lesson is taller than the
-   pane; it darkens under the pointer. (v2 had a 10px bar that was always there.) The week list gets the
-   same clear track so the two match. Chrome/Edge use the ::-webkit rules; Firefox the standard ones. */
-.pane-theory { overflow-y: auto !important; }
-.pane-theory::-webkit-scrollbar { width: 6px; height: 6px; }
-.pane-theory::-webkit-scrollbar-track, .sidebar::-webkit-scrollbar-track { background: transparent; }
-.pane-theory::-webkit-scrollbar-thumb { background: #cfd6e2; border: none; border-radius: 6px; }
-.pane-theory::-webkit-scrollbar-thumb:hover { background: #9aa6ba; }
-:root[data-theme='dark'] .pane-theory::-webkit-scrollbar-thumb { background: #3a4254; }
-:root[data-theme='dark'] .pane-theory::-webkit-scrollbar-thumb:hover { background: #56607a; }
-@supports not selector(::-webkit-scrollbar) {
-  .pane-theory { scrollbar-width: thin; scrollbar-color: #cfd6e2 transparent; }
-}
-
-/* ---- lesson tabs, minimal: the part names alone. The part you are on is dark with a thin orange
-   underline; a part you have read has a green one. No step circles, and the
-   week-list button is a plain icon with no box behind it. */
-.tabbar { padding: 0 8px; gap: 2px; border-bottom: 1px solid var(--rule); }
-.tabbar .step { display: none; }
-.tabbar button {
-  gap: 0; padding: 14px 12px 12px; border-bottom: 2px solid transparent;
-  font-size: 13.5px; font-weight: 500; color: var(--muted);
-}
-.tabbar button:hover { color: var(--heading); }
-.tabbar button.on { color: var(--heading); font-weight: 600; border-bottom-color: var(--action); }
-:root[data-theme='dark'] .tabbar button.on { border-bottom-color: var(--brand-orange); }
-/* A part you have read is underlined in green - the same mark as the part you are on, in the
-   "done" colour - so the row reads as a progress track: green done, orange here, none ahead. */
-.tabbar button.seen:not(.on) { border-bottom-color: color-mix(in srgb, var(--good) 70%, transparent); }
-.tabbar button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
-.tabbar .show-weeks, .tabbar .show-weeks[aria-expanded='true'] {
-  padding: 12px 10px; background: none; color: var(--muted); font-size: 16px; border-bottom: 2px solid transparent;
-}
-.tabbar .show-weeks:hover { color: var(--heading); }
-
-/* The current tab's orange underline is 3px against the 2px green of a finished one; 1px less padding
-   keeps its label level with the others. */
-.tabbar button.on { border-bottom-width: 3px; padding-bottom: 11px; }
-
-/* Previous / Next can now name a whole day ("Day 5: TypeScript I: ..."), so each keeps to its half. */
-.part-nav-btn { max-width: 48%; }
-
-/* The marker at the end of a part's content (see TheoryPane): 1px so it can register as in view. */
-.lesson-end { height: 1px; }
-
-/* ---- course index hero: the course name and its description (from course-plan.json) */
-.dash-intro h1 { max-width: none; }
-
-/* ---- warm paper theme: the white of the page becomes a warm paper tone - panes, cards, the week
-   list and the course index - with warm rules and ink to match. The header stays Evoke navy, and
-   the code editor goes dark (see editorThemeFor in lib/theme.ts). */
-:root[data-theme='paper'] {
-  --page: #f4eddd;
-  --paper: #fbf6ea;
-  --tint: #efe5d0;
-  --rule: #e0d3b8;
-  --rule-soft: #f1e8d6;
-  --muted: #675d48;          /* 5.6:1 on --paper */
-  --graphite: #2f2a21;
-  --heading: #0e1f45;
-  --accent: #1a4fa0;
-  --accent-wash: #ece5d6;
-  --good-wash: #e4ebd3;
-  --warn-wash: #f5e4c4;
-  --bad-wash: #f5dcd2;
-  --shadow: 0 1px 2px rgba(80, 60, 20, .08), 0 4px 16px rgba(80, 60, 20, .06);
-  color-scheme: light;
-}
-/* The few light colours that were written as fixed values rather than theme colours. */
-:root[data-theme='paper'] .sb-day-text span, :root[data-theme='paper'] .sb-day { color: #3b3428; }
-:root[data-theme='paper'] .sb-day.on { color: var(--heading); }
-:root[data-theme='paper'] a.day-tile:hover { border-color: #d9a57e; }
-:root[data-theme='paper'] .pane-theory::-webkit-scrollbar-thumb,
-:root[data-theme='paper'] .sidebar::-webkit-scrollbar-thumb { background: #d8ccb3; }
-:root[data-theme='paper'] .pane-theory::-webkit-scrollbar-thumb:hover { background: #b3a585; }
-@supports not selector(::-webkit-scrollbar) {
-  :root[data-theme='paper'] .pane-theory, :root[data-theme='paper'] .sidebar { scrollbar-color: #d8ccb3 transparent; }
-}
-
-/* ---- Your path, minimal: across the full width of the page, one line per week - its name, then
-   module and focus in grey, then progress at the right - with hairlines between the weeks. An open
-   week's days sit in a row beneath it, each a small label over its title with a thin rule on its
-   left; the day up next gets an orange rule. No cards, chips, badges or icons. */
-.dash-path { padding: 36px 56px 64px; }
-.yp-title { margin: 0 0 12px; font-size: 22px; }
-.yp { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--rule); }
-.yp-week { padding: 18px 0; border-top: 1px solid var(--rule); }
-.yp-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
-.yp-head h3 { margin: 0; min-width: 76px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--heading); }
-.yp-meta { font-size: 14px; color: var(--muted); }
-.yp-status { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.yp-week.soon h3 { font-weight: 500; color: var(--muted); }
-
-.yp-days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px 20px; margin-top: 14px; }
-.yp-day {
-  display: flex; flex-direction: column; gap: 4px; min-height: 44px; padding: 8px 12px 10px;
-  border-left: 1px solid var(--rule); border-radius: 0 6px 6px 0; color: var(--graphite); text-decoration: none;
-}
-a.yp-day:hover { background: var(--rule-soft); }
-a.yp-day:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.yp-day-no { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.yp-day.done .yp-day-no { color: var(--good); }
-.yp-day-title { font-size: 14px; line-height: 1.4; }
-.yp-day.next { border-left: 2px solid var(--action); padding-left: 11px; }
-.yp-day.next .yp-day-no { color: var(--action); }
-.yp-day.next .yp-day-title { font-weight: 600; color: var(--heading); }
-:root[data-theme='dark'] .yp-day.next .yp-day-no { color: #ff7a3d; }
-.yp-day.locked { color: var(--muted); cursor: not-allowed; }
-
-@media (max-width: 1100px) { .yp-days { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 640px) {
-  .dash-path { padding: 28px 16px 48px; }
-  .yp-days { grid-template-columns: minmax(0, 1fr); }
-  .yp-status { margin-left: 0; }
-}
-
-/* ---- Your path: the heading with the layout toggle on the right */
-.yp-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 0 0 14px; }
-.yp-top .yp-title { margin: 0; }
-.yp-views { margin-left: auto; display: flex; gap: 2px; padding: 3px; border-radius: 8px; background: var(--tint); }
-.yp-view {
-  min-height: 32px; padding: 0 12px; border: 0; border-radius: 6px; background: none;
-  font-size: 13px; font-weight: 500; color: var(--muted);
-}
-.yp-view:hover { color: var(--heading); }
-.yp-view.on { background: var(--paper); color: var(--heading); box-shadow: 0 1px 2px rgba(14, 31, 69, .12); }
-.yp-view:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.yp-soon { margin: 16px 0 0; font-size: 13.5px; color: var(--muted); }
-/* Shared day states: a finished day fades, the day up next is orange. */
-.ypc-day.done, .ypf-day.done, .yps-day.done, .ypk-day.done { color: var(--muted); }
-.ypc-day.next, .ypf-day.next, .yps-day.next, .ypk-day.next { color: var(--action); font-weight: 600; }
-:root[data-theme='dark'] :is(.ypc-day, .ypf-day, .yps-day, .ypk-day).next { color: #ff7a3d; }
-:is(.ypc-day, .ypf-day, .yps-day, .ypk-day).locked { color: var(--muted); cursor: not-allowed; }
-:is(.ypc-day, .ypf-day, .yps-day, .ypk-day) { color: var(--graphite); text-decoration: none; }
-a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):hover { text-decoration: underline; text-underline-offset: 3px; }
-a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
-
-/* ---- Contents: a book's table of contents. The week on the left, its numbered days in two columns. */
-.ypc-week { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 0 24px; padding: 14px 0; }
-.ypc-head { display: flex; flex-direction: column; gap: 2px; }
-.ypc-head h3 { margin: 0; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--heading); }
-.ypc-head span { font-size: 13px; color: var(--muted); }
-.ypc-days { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 48px; }
-.ypc-days li { break-inside: avoid; }
-.ypc-day { display: flex; align-items: baseline; gap: 14px; min-height: 36px; padding: 6px 0; font-size: 14.5px; line-height: 1.4; }
-.ypc-no { flex: 0 0 14px; text-align: right; font-family: var(--mono); font-size: 12.5px; color: var(--muted); font-weight: 400; }
-.ypc-day.next .ypc-no { color: inherit; }
-
-/* ---- This week: only the current week open, with a thin progress line; other weeks one line each. */
-.ypf-week { border-top: 1px solid var(--rule); }
-.ypf-week:first-child { border-top: 0; }
-.ypf-row {
-  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0;
-  border: 0; background: none; text-align: left; color: var(--muted); font-size: 15px;
-}
-.ypf-row:hover, .ypf-week.open .ypf-row { color: var(--heading); }
-.ypf-week.open .ypf-name { font-weight: 600; }
-.ypf-count { margin-left: auto; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
-.ypf-chev { color: var(--muted); transition: transform .15s ease; }
-.ypf-row[aria-expanded='true'] .ypf-chev { transform: rotate(180deg); }
-.ypf-bar { height: 3px; background: var(--rule); }
-.ypf-bar span { display: block; height: 3px; background: var(--good); }
-.ypf-days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px 24px; padding: 16px 0 20px; }
-.ypf-day { font-size: 14.5px; line-height: 1.45; }
-.ypf-soon { padding-top: 14px; border-top: 1px solid var(--rule); margin-top: 0; }
-
-/* ---- Strip: the weeks as one progress bar across the page; the chosen week's days beneath. */
-.yps-bar { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
-.yps-week { display: flex; flex-direction: column; gap: 8px; min-height: 44px; padding: 6px 0; border: 0; background: none; text-align: left; }
-.yps-track { display: block; height: 5px; border-radius: 3px; background: var(--rule); overflow: hidden; }
-.yps-fill { display: block; height: 100%; background: var(--good); }
-.yps-week.on .yps-track { outline: 2px solid var(--action); outline-offset: 2px; }
-.yps-label { font-size: 13.5px; color: var(--muted); }
-.yps-week.on .yps-label { color: var(--heading); font-weight: 600; }
-.yps-week.soon .yps-track { opacity: .5; }
-.yps-week:hover .yps-label { color: var(--heading); }
-.yps-week:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-.yps-sel { margin-top: 18px; }
-.yps-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.yps-head b { font-size: 15px; font-weight: 600; color: var(--heading); }
-.yps-head span { font-size: 13.5px; color: var(--muted); }
-.yps-days { display: flex; flex-wrap: wrap; align-items: baseline; margin-top: 10px; font-size: 14.5px; line-height: 2; }
-.yps-day + .yps-day::before { content: '·'; margin: 0 12px; color: var(--muted); font-weight: 400; display: inline-block; }
-
-/* ---- Columns: a timetable - every week of the plan side by side, its days listed down the column. */
-.ypk { display: grid; grid-template-columns: repeat(var(--cols, 7), minmax(0, 1fr)); gap: 24px; }
-.ypk-head { display: flex; flex-direction: column; gap: 2px; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--rule); }
-.ypk-head h3 { margin: 0; font-family: var(--sans); font-size: 14.5px; font-weight: 600; color: var(--heading); }
-.ypk-head span { font-size: 12.5px; color: var(--muted); }
-.ypk-col.soon .ypk-head h3 { color: var(--muted); font-weight: 500; }
-.ypk-days { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.ypk-day { display: block; font-size: 13.5px; line-height: 1.4; }
-.ypk-soon { margin: 0; font-size: 13px; color: var(--muted); }
-
-@media (max-width: 1100px) {
-  .ypf-days { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .ypk { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-@media (max-width: 640px) {
-  .yp-views { margin-left: 0; overflow-x: auto; }
-  .ypc-week { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .ypc-days { columns: 1; }
-  .ypf-days { grid-template-columns: minmax(0, 1fr); }
-  .ypk { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-/* ---- course index hero: a quiet grey band under the navy strip, rather than more navy. The course
-   name in navy with a short orange rule beneath it, the description as a lead paragraph, and the
-   Up next card lifted off the grey by a hairline and a soft shadow. One grey per theme. */
-:root { --hero-bg: #eef0f4; --hero-ink: #3d4863; }
-:root[data-theme='paper'] { --hero-bg: #e9e3d7; --hero-ink: #4a4233; }
-:root[data-theme='dark'] { --hero-bg: #20242c; --hero-ink: #c3cad6; }
-.dash-hero { background: var(--hero-bg); color: var(--graphite); padding: 48px 56px 52px; border-bottom: 1px solid var(--rule); }
-.dash-hero-in { align-items: center; }
-.dash-intro { gap: 0; }
-.dash-intro h1 { color: var(--heading); letter-spacing: -.01em; }
-.dash-intro h1::after { content: ''; display: block; width: 44px; height: 3px; margin: 20px 0 18px; background: var(--action); }
-.upnext {
-  border: 1px solid var(--rule);
-  box-shadow: 0 1px 2px rgba(14, 31, 69, .05), 0 10px 28px rgba(14, 31, 69, .07);
-}
-:root[data-theme='dark'] .upnext { background: #262b35; box-shadow: none; }
-@media (max-width: 640px) {
-  .dash-hero { padding: 32px 16px 36px; }
-}
-
-/* ---- lesson width: the text fills the lesson pane instead of sitting in a centred 74-character column
-   with empty margins either side. The side padding is a share of the pane's width, so the text
-   widens and narrows as either divider is dragged. */
-.lesson { max-width: none; margin: 0; padding: 26px clamp(18px, 3.5%, 44px) 90px; }
-
-/* ---- the product name at the top of the week list follows the list's width: its size scales with
-   the list (18px narrow, about 22px at the standard width, up to 26px wide) and it wraps onto a
-   second, balanced line when there is not room - instead of ending in an ellipsis. */
-.sidebar { container-type: inline-size; }
-.sb-brand {
-  white-space: normal; overflow: visible; text-overflow: clip; text-wrap: balance;
-  font-size: clamp(18px, 8.4cqi, 26px); line-height: 1.25;
-}
-
-<<<<<<< HEAD
-/* ---- top strip controls, icons with a dot: Course index and Lessons are bare icons - the page you
-   are on is white with a small orange dot beneath it, the other soft blue-grey - and the theme
-   switch is the same bare icon after a thin divider. Names show on hover and are read out by screen
-   readers (aria-label). */
-.hdr-nav { gap: 6px; }
-.hdr-tab-label { display: none; }
-.hdr-tab, .hdr-tab.on, .hdr-btn.icon {
-  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-  width: 40px; height: 44px; padding: 0; border: 0; border-radius: 8px; background: none; color: #8c9bbd;
-}
-.hdr-tab:hover, .hdr-btn.icon:hover { background: none; color: #fff; }
-.hdr-tab.on { color: #fff; }
-.hdr-tab::after, .hdr-btn.icon::after { content: ''; width: 4px; height: 4px; border-radius: 2px; background: transparent; }
-.hdr-tab.on::after { background: #f2a36b; }
-.hdr-tab svg, .hdr-btn.icon svg { width: 19px; height: 19px; }
-.hdr-tab:focus-visible, .hdr-btn.icon:focus-visible { outline: 2px solid #f2a36b; outline-offset: 0; }
-.hdr-nav-sep { height: 26px; margin: 0 2px; }
-=======
-/* The customer's logo, right of the theme switch, in the desktop app (from their licence). On a
-   white card, so any logo reads on the navy bar whatever its own colours. */
-.hdr-customer {
-  flex: 0 0 auto; display: flex; align-items: center; height: 44px; max-width: 200px;
-  padding: 5px 10px; margin-left: 4px; background: #fff; border-radius: 10px;
-}
-.hdr-customer img { display: block; max-height: 34px; max-width: 180px; width: auto; object-fit: contain; }
-@media (max-width: 700px) { .hdr-customer { height: 36px; max-width: 120px; } .hdr-customer img { max-height: 26px; max-width: 100px; } }
-
-/* ---- Your path: collapse and expand, icon-only buttons */
-.path-head { align-items: center; }
-.path-tools { margin-left: auto; display: flex; gap: 6px; }
-.path-tool {
-  width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border-radius: 8px;
-  border: 1px solid var(--rule); background: var(--paper); color: var(--heading); cursor: pointer;
-}
-.path-tool:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-.path-tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.path-tool:disabled { opacity: .4; cursor: default; }
-.path-fold { width: 30px; height: 30px; }
-.path-fold svg { transition: transform .15s ease; }
-.path-fold.closed svg { transform: rotate(-90deg); }
-
-/* ---- course index hero: a colour gradient over the theme's grey, all in the stylesheet: soft light
-   behind the progress panel, and a faint shade on the title's side. Each theme has its own tints. */
-:root {
-  --hero-glow: rgba(255, 255, 255, .8);
-  --hero-shade: rgba(14, 31, 69, .045);
-}
-:root[data-theme='paper'] {
-  --hero-glow: rgba(255, 251, 240, .75);
-  --hero-shade: rgba(120, 90, 50, .06);
-}
-:root[data-theme='dark'] {
-  --hero-glow: rgba(111, 155, 255, .07);
-  --hero-shade: rgba(0, 0, 0, .22);
-}
-.dash-hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background: linear-gradient(100deg, var(--hero-shade), transparent 48%), var(--hero-bg);
-}
-/* The light is drawn from the progress ring itself, centred on it wherever the layout puts it, and
-   sits behind everything in the hero (its isolation keeps it above its background). */
-.dash-hero .ring { position: relative; }
-.dash-hero .ring::before {
-  content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  border-radius: 50%; z-index: -1; pointer-events: none;
-  width: 620px; height: 460px; background: radial-gradient(closest-side, var(--hero-glow), transparent);
-}
-
->>>>>>> origin/main
-
-/* ---- diagrams: mermaid sizes each label's box for its own 14px text, so the lesson's paragraph
-   style (15.5px, tall line height) must not reach the paragraphs inside a label - it made the text
-   bigger than its box and clipped it. */
-.lesson .diagram p, .lesson .diagram li { margin: 0; font-size: inherit; line-height: inherit; }
-<<<<<<< HEAD
-=======
-
-/* ---- Your path: day tiles as raised, physical tiles.
-   Each tile is lit from above (a faint top-to-bottom gradient and a bright top edge) and stands on
-   a solid "edge" drawn under it (a shadow with no blur), with a soft shadow on the page below. On
-   hover it rises and tips back slightly towards the viewer; pressed, it sinks onto its edge. The day
-   you are on stands on an orange edge. Locked days stay flat. The edge is a shadow, not a border, so
-   nothing moves around the tile. */
-:root {
-  --tile-top: #ffffff;
-  --tile-bottom: #f3f6fb;
-  --tile-edge: #d4dbe7;
-  --tile-shade: rgba(14, 31, 69, .10);
-  --tile-shine: rgba(255, 255, 255, .9);
-}
-:root[data-theme='paper'] {
-  --tile-top: #fffdf7;
-  --tile-bottom: #f6efe0;
-  --tile-edge: #dccfb3;
-  --tile-shade: rgba(90, 70, 40, .12);
-  --tile-shine: rgba(255, 255, 255, .8);
-}
-:root[data-theme='dark'] {
-  --tile-top: #232a38;
-  --tile-bottom: #1b212c;
-  --tile-edge: #0e1219;
-  --tile-shade: rgba(0, 0, 0, .45);
-  --tile-shine: rgba(255, 255, 255, .06);
-}
-.day-tiles { perspective: 900px; }
-.day-tiles .day-tile {
-  background: linear-gradient(180deg, var(--tile-top), var(--tile-bottom));
-  box-shadow:
-    inset 0 1px 0 var(--tile-shine),
-    0 3px 0 var(--tile-edge),
-    0 6px 14px var(--tile-shade);
-  transform-origin: 50% 100%;
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-/* A tile and its done mark (a button of its own, over the tile) sit in one wrapper, and it is the
-   wrapper that rises and tips back, so the two move as one. */
-.tile-wrap { position: relative; display: flex; transform-origin: 50% 100%; transition: transform .18s ease; }
-.tile-wrap > .day-tile { flex: 1; min-width: 0; }
-.day-tiles a.day-tile:hover { transform: none; }
-.day-tiles .tile-wrap:hover { transform: translateY(-4px) rotateX(6deg); }
-.day-tiles .tile-wrap:hover > .day-tile {
-  border-color: #e8a57a;
-  box-shadow:
-    inset 0 1px 0 var(--tile-shine),
-    0 5px 0 var(--tile-edge),
-    0 16px 28px var(--tile-shade);
-}
-.day-tiles .tile-wrap:has(> a.day-tile:active) { transform: translateY(2px); }
-.day-tiles .tile-wrap:has(> a.day-tile:active) > .day-tile {
-  box-shadow:
-    inset 0 1px 0 var(--tile-shine),
-    0 1px 0 var(--tile-edge),
-    0 2px 6px var(--tile-shade);
-}
-:root[data-theme='paper'] .day-tiles .tile-wrap:hover > .day-tile { border-color: #d9a57e; }
-
-/* The done mark: exactly where the tile's own "✓ Done" sits (kept there, hidden, to hold its
-   place). Selected once it asks "Clear progress?" in red; again, it clears the day. */
-.tile-wrap.done .tile-done { visibility: hidden; }
-.tile-reset {
-  position: absolute; top: 15px; right: 9px; height: 22px; display: inline-flex; align-items: center;
-  padding: 0 6px; border: 0; border-radius: 6px; background: transparent;
-  font: inherit; font-size: 12px; font-weight: 600; color: var(--good); cursor: pointer;
-}
-.tile-reset:hover { background: var(--good-wash); }
-.tile-reset.confirm, .tile-reset.confirm:hover { background: var(--bad); color: #fff; }
-.tile-reset:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-/* The day you are on: its edge in the "You are here" orange. */
-.day-tiles .day-tile:has(.here) { --tile-edge: #f0a878; }
-:root[data-theme='dark'] .day-tiles .day-tile:has(.here) { --tile-edge: #b4501c; }
-.day-tiles .day-tile.locked { background: var(--paper); box-shadow: none; transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  .day-tiles .day-tile, .tile-wrap { transition: none; }
-  .day-tiles .tile-wrap:hover { transform: none; }
-}
-
-/* ---- the two screens (App.tsx): both stay alive once opened, and only the one you are on shows. */
-.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.screen[hidden] { display: none; }
-
-/* ---- the desktop app's title bar, in the header's navy: Windows' own is hidden (desktop/src/main.ts)
-   and this strip above the header takes its place - the window is dragged by it, double-clicking it
-   maximises, and Windows draws its minimise, maximise and close buttons on its right, in the same
-   navy. Its height comes from the desktop app itself (--desktop-titlebar-height, which main.ts sets):
-   anywhere else - a browser, or an app that embeds the page - the strip has none. */
-.titlebar {
-  flex: 0 0 auto; height: var(--desktop-titlebar-height, 0px); background: var(--ink);
-  -webkit-app-region: drag; app-region: drag;
-}
-
-/* ---- the editor's scrollbar follows the editor, not the page: a slim bar on the editor's own
-   background, there only when the code is longer than the editor - no light lane beside dark code. */
-.editor-body .cm-scroller { overflow-y: auto !important; }
-.editor-body .cm-scroller::-webkit-scrollbar { width: 8px; height: 8px; }
-.editor-body .cm-scroller::-webkit-scrollbar-track,
-.editor-body .cm-scroller::-webkit-scrollbar-corner { background: transparent; }
-.editor-body .cm-scroller::-webkit-scrollbar-thumb { background: var(--ed-rule); border: none; border-radius: 8px; }
-.editor-body .cm-scroller::-webkit-scrollbar-thumb:hover,
-:root[data-theme='dark'] .editor-body .cm-scroller::-webkit-scrollbar-thumb:hover { background: var(--ed-dim); }
-@supports not selector(::-webkit-scrollbar) {
-  .editor-body .cm-scroller { scrollbar-color: var(--ed-rule) transparent; }
-}
-
-/* ---- the course title stands alone: no short orange line under it. */
-.dash-intro h1::after { content: none; }
-
-/* ---- Your path: every week's number is a filled circle in the course's one colour (Dashboard.tsx
-   gives every week the first week's), opened yet or not. */
-.path-week .path-num,
-:root[data-theme='dark'] .path-week.soon .path-num { background: var(--mod); border-color: var(--mod); color: #fff; }
+.sidebar .wk-hide { flex: 0 0 auto; padding-left: 14px !important; font-size: 11px !important; }
+.sidebar .wk-hide:hover { color: var(--heading); background: var(--rule-soft) !important; }
+.sidebar .wk-home { flex: 1; gap: 8px; min-width: 0; text-align: left; }
+.sidebar .wk-home:hover { color: var(--accent); background: var(--accent-wash) !important; }
+.sidebar .wk-home:hover > span:first-child { text-decoration: underline; }
+.sidebar .wk-home .spacer { flex: 1; }

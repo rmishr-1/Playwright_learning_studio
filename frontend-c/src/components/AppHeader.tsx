@@ -104,6 +104,8 @@ export function AppHeader({
         )}
       </nav>
 
+      <span className="hdr-sep hdr-nav-sep" aria-hidden="true" />
+
       {/* One button steps through the themes; its icon shows the theme you are on now. */}
       <button
         className="hdr-btn icon"

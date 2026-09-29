@@ -92,6 +92,21 @@ export function Dashboard({ active = true }: { active?: boolean }) {
   const doneCount = openDays.filter((x) => isDone(x.week, x.day.day)).length;
   const pct = openDays.length ? Math.round((doneCount / openDays.length) * 100) : 0;
 
+<<<<<<< HEAD
+  // Every week of the plan for Your path, each day resolved against progress and "Up next".
+  const pathWeeks: PathWeek[] = weeks.map((w) => {
+    const days = w.days.map((d) => ({
+      week: w.week,
+      day: d.day,
+      title: d.title,
+      url: dayUrl(w.week, d.day),
+      done: isDone(w.week, d.day),
+      next: next?.week === w.week && next.day.day === d.day,
+      locked: d.locked,
+    }));
+    return { week: w.week, module: w.module.name, focus: w.focus, open: w.open, days, done: days.filter((d) => d.done).length };
+  });
+=======
   // Where the button goes: the saved resume point when it is an open day, else the first open day.
   const r = progress?.resume;
   const resumedDay = r ? openDays.find((x) => x.week === r.week && x.day.day === r.day) : undefined;
@@ -108,6 +123,7 @@ export function Dashboard({ active = true }: { active?: boolean }) {
       else n.add(week);
       return n;
     });
+>>>>>>> origin/main
 
   return (
     <div className="dash">
