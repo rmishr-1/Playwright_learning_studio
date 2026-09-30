@@ -79,8 +79,8 @@ function readMe(v: Variant, artifact: string, licenceName: string | null, licenc
     ? [name + ' ' + VERSION, 'Licensed to ' + licence.licensee + ' (licence ' + licence.id + (licence.expires ? ', valid until ' + licence.expires : '') + ')']
     : [name + ' ' + VERSION, 'Evoke internal: opens with any valid Evoke licence. Never send it outside Evoke.'];
   const licenceStep = licenceName
-    ? '3. Choose "Choose licence file..." and pick "' + licenceName + '".'
-    : '3. Choose "Choose licence file..." and pick your Evoke licence (a .lic file).';
+    ? '3. Choose "Choose licence file..." and pick "' + licenceName + '". The studio opens.'
+    : '3. Choose "Choose licence file..." and pick your Evoke licence (a .lic file). The studio opens.';
   const start = zip
     ? [
         '1. Right-click ' + artifact + ' and choose "Extract All". As the folder, type',
@@ -91,7 +91,7 @@ function readMe(v: Variant, artifact: string, licenceName: string | null, licenc
         ...signedLines(unsigned),
       ]
     : [
-        '1. Double-click ' + artifact + ', read the licence agreement and choose "I Agree", then "Install".',
+        '1. Double-click ' + artifact + ', then choose "Install".',
         ...signedLines(unsigned),
         '   It installs for you only, with no administrator rights, into',
         '      %LOCALAPPDATA%\\Programs\\' + name,
@@ -117,7 +117,6 @@ function readMe(v: Variant, artifact: string, licenceName: string | null, licenc
     'To start:',
     ...start,
     licenceStep,
-    '4. Read the licence agreement, tick the box, and choose "Accept and open".',
     '',
     ...(licence
       ? ['This copy works only with this licence. Keep the licence file safe, and do not share it', 'or the application.', '']

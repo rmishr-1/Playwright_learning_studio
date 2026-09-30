@@ -26,7 +26,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "**Conditions & Loops**\n\n*Teach your code to make decisions and repeat work — the logic behind every data-driven test*\n\n**Time:** 3 hours\n\n**Where you work:** pw-course/ts-basics/day7/\n\n**By the end of the day you can:**\n\n- Predict whether a value counts as true or false in a condition (truthy and falsy)\n- Write decisions with if / else if / else, and choose between if, switch and the ternary\n- Use a check with `if` to narrow a union or optional value, so TypeScript knows what you have\n- Repeat work with for, for...of, while and do...while, and control loops with break and continue\n- Filter, transform and question lists with forEach, map, filter, find, some and every\n- Run a list of test cases through a check and report pass/fail — a mini data-driven test\n\n**From earlier days:**\n\n- Day 5: comparison and logical operators, the ternary operator, blocks and scope\n- Day 6: arrays, objects, type aliases, optional properties, `??`, `?.`, union and literal types",
+          "text": "**Conditions & Loops**\n\n*Teach your code to make decisions and repeat work — the logic behind every data-driven test*\n\n**Time:** 3 hours\n\n**Where you work:** pw-course/ts-basics/day7/\n\n**By the end of the day you can:**\n\n- Predict whether a value counts as true or false in a condition (truthy and falsy)\n- Write decisions with if / else if / else, and choose among if, switch, and the ternary operator\n- Use a check with `if` to narrow a union or optional value, so TypeScript knows what you have\n- Repeat work with for, for...of, while, and do...while, and control loops with break and continue\n- Filter, transform, and query lists with forEach, map, filter, find, some, and every\n- Run a list of test cases through a check and report pass/fail — a mini data-driven test\n\n**From earlier days:**\n\n- Day 5: comparison and logical operators, the ternary operator, blocks, and scope\n- Day 6: arrays, objects, type aliases, optional properties, `??`, `?.`, and union and literal types",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -36,7 +36,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P1 · Quick recap from Days 5 and 6\n\n- [ ] Compare with `===` and `!==`, and combine answers with `&&`, `||` and `!` (Day 5 · F6–F7)\n- [ ] Pick one of two values with the ternary: `condition ? valueIfTrue : valueIfFalse` (Day 5 · F7)\n- [ ] Curly braces `{ }` make a **block**, and `let`/`const` inside it stay inside it (Day 5 · F3)\n- [ ] Store lists in arrays and records in objects; read an optional property with `?.` or `??` (Day 6)",
+          "text": "## P1 · Quick recap from Days 5 and 6\n\n- [ ] Compare with `===` and `!==`, and combine answers with `&&`, `||`, and `!` (Day 5 · F6–F7)\n- [ ] Pick one of two values with the ternary operator: `condition ? valueIfTrue : valueIfFalse` (Day 5 · F7)\n- [ ] Curly braces `{ }` make a **block**, and `let`/`const` inside it stay inside it (Day 5 · F3)\n- [ ] Store lists in arrays and records in objects; read an optional property with `?.` or `??` (Day 6)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -90,7 +90,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P2 · Decisions and repetition — you already write them\n\nRead any manual test case and you'll find two kinds of instruction that a straight list of steps can't express:\n\n| In a manual test case | In code | Today's section |\n|---|---|---|\n| \"**If** a cookie banner appears, dismiss it\" | a **condition** — `if` | F2 |\n| \"**Depending on** the user's role, check the right menu\" | a choice among many — `switch` | F4 |\n| \"**Repeat** steps 2–5 for each browser\" | a **loop** — `for...of` | F6 |\n| \"Refresh **until** the order says *Shipped* (give up after 5 tries)\" | a **loop with a stop condition** — `while` | F7 |\n| \"From the results, **list only** the failed tests\" | an **array method** — `filter` | F8 |",
+          "text": "## P2 · Decisions and repetition — you already write them\n\nRead any manual test case and you'll find two kinds of instructions that a straight list of steps can't express:\n\n| In a manual test case | In code | Today's section |\n|---|---|---|\n| \"**If** a cookie banner appears, dismiss it\" | a **condition** — `if` | F2 |\n| \"**Depending on** the user's role, check the right menu\" | a choice among many — `switch` | F4 |\n| \"**Repeat** steps 2–5 for each browser\" | a **loop** — `for...of` | F6 |\n| \"Refresh **until** the order says *Shipped* (give up after 5 tries)\" | a **loop with a stop condition** — `while` | F7 |\n| \"From the results, **list only** the failed tests\" | an **array method** — `filter` | F8 |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -110,7 +110,7 @@
         },
         {
           "type": "markdown",
-          "text": "So far your programs ran every line once, top to bottom. Today they learn to **skip** lines (conditions) and **repeat** lines (loops). Together these are called **control flow**.",
+          "text": "So far, your programs have run every line once, top to bottom. Today they learn to **skip** lines (conditions) and **repeat** lines (loops). Together these are called **control flow**.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -202,7 +202,7 @@
         },
         {
           "type": "code",
-          "text": "const retries: number = 0;          // the tester deliberately set 0 retries\nconsole.log(retries || 3);          // 3  ❌ the 0 was thrown away\nconsole.log(retries ?? 3);          // 0  ✅ ?? only replaces null and undefined (Day 6)",
+          "text": "const retries: number = 0;          // the tester deliberately set 0 retries\nconsole.log(retries || 3);          // 3  ❌ the 0 was thrown away\nconsole.log(retries ?? 3);          // 0  ✅ ?? replaces only null and undefined (Day 6)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -304,7 +304,7 @@
         },
         {
           "type": "markdown",
-          "text": "The condition goes in round brackets; the code to run goes in a **block** in curly braces.\n\n### `else` — otherwise",
+          "text": "The condition goes in parentheses; the code to run goes in a **block** in curly braces.\n\n### `else` — otherwise",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -358,7 +358,7 @@
         },
         {
           "type": "markdown",
-          "text": "The conditions are checked **top to bottom**, and **only the first one that's true** runs. Once a branch runs, the rest are skipped — even if they would also be true. (If you added `else if (loadTimeMs < 5000)` at the end, 1850 would match it too — but it would never get there, because `< 3000` already won.) So put the most specific conditions first.\n\n`else if` and `else` are both optional, and you can have as many `else if` branches as you need.\n\n### Combining and nesting conditions\n\nUse `&&` and `||` to combine checks in one condition, or put an `if` inside another `if` (**nesting**):",
+          "text": "The conditions are checked **top to bottom**, and **only the first one that's true** runs. Once a branch runs, the rest are skipped — even if they would also be true. (If you added `else if (loadTimeMs < 5000)` at the end, 1850 would match it too — but the program would never reach it, because `< 3000` already won.) So put the most specific conditions first.\n\n`else if` and `else` are both optional, and you can have as many `else if` branches as you need.\n\n### Combining and nesting conditions\n\nUse `&&` and `||` to combine checks in one condition, or put an `if` inside another `if` (**nesting**):",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -543,7 +543,7 @@
               0
             ],
             "kind": "single",
-            "explanation": "Only a check on phone itself tells TypeScript that phone is a string inside the block."
+            "explanation": "Only a check on `phone` itself tells TypeScript that `phone` is a string inside the block."
           },
           "code": null,
           "callout": null,
@@ -615,7 +615,7 @@
         },
         {
           "type": "code",
-          "text": "switch (status) {\n  case 'failed':\n  case 'timedOut':                   // 'failed' or 'timedOut' both land here\n    console.log('Open the trace');\n    break;\n}",
+          "text": "switch (status) {\n  case 'failed':\n  case 'timedOut':                   // 'failed' and 'timedOut' both land here\n    console.log('Open the trace');\n    break;\n}",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -632,7 +632,7 @@
         },
         {
           "type": "markdown",
-          "text": "### Which one to use?\n\n| Situation | Use |\n|---|---|\n| One yes/no decision, or ranges (`< 1000`, `>= 18`) | `if` / `else` |\n| One value compared with several **exact** values | `switch` |\n| Choosing between two **values** in one line | the ternary `? :` (Day 5) |\n\nWith literal types (Day 6), TypeScript even checks your `case` labels: `case 'superuser':` is an error when `user.role` can only be `'admin' | 'editor' | 'viewer'`.",
+          "text": "### Which one to use?\n\n| Situation | Use |\n|---|---|\n| One yes/no decision, or ranges (`< 1000`, `>= 18`) | `if` / `else` |\n| One value compared with several **exact** values | `switch` |\n| Choosing between two **values** in one line | the ternary operator `? :` (Day 5) |\n\nWith literal types (Day 6), TypeScript even checks your `case` labels: `case 'superuser':` is an error when `user.role` can only be `'admin' | 'editor' | 'viewer'`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -664,7 +664,7 @@
         },
         {
           "type": "checkpoint",
-          "text": "Which is the best fit for: \"show 'Adult' if age is 18 or more, otherwise 'Minor'\" stored in a variable?",
+          "text": "Which is the best way to store \"'Adult' if age is 18 or more, otherwise 'Minor'\" in a variable?",
           "starter": null,
           "variation": null,
           "checkpoint": {
@@ -678,7 +678,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "Choosing between two values based on one condition is exactly what the ternary is for. `age >= 18 && 'Adult'` gives false (not 'Minor') for a minor, and an if without else leaves minors with no value."
+            "explanation": "Choosing between two values based on one condition is exactly what the ternary operator is for. `age >= 18 && 'Adult'` gives false (not 'Minor') for a minor, and an if without else leaves minors with no value."
           },
           "code": null,
           "callout": null,
@@ -713,7 +713,7 @@
         },
         {
           "type": "markdown",
-          "text": "The brackets hold three parts, separated by semicolons:\n\n| Part | Here | When it runs |\n|---|---|---|\n| **Start** | `let i = 0` | Once, before the loop begins |\n| **Condition** | `i < 3` | Before every round — if it's false, the loop ends |\n| **Update** | `i++` (add 1 to i) | After every round |\n\nTracing it step by step:\n\n| Round | `i` at start | `i < 3`? | Prints | `i` after `i++` |\n|---|---|---|---|---|\n| 1 | 0 | true | Run 1 | 1 |\n| 2 | 1 | true | Run 2 | 2 |\n| 3 | 2 | true | Run 3 | 3 |\n| — | 3 | **false** → stop | | |\n\nEach round of a loop is called an **iteration**. `i` is a traditional name for a counter (short for *index*).\n\n### Looping over an array by index\n\nBecause array indexes start at 0 and the last one is `length - 1`, the standard pattern is:",
+          "text": "The parentheses hold three parts, separated by semicolons:\n\n| Part | Here | When it runs |\n|---|---|---|\n| **Start** | `let i = 0` | Once, before the loop begins |\n| **Condition** | `i < 3` | Before every round — if it's false, the loop ends |\n| **Update** | `i++` (add 1 to i) | After every round |\n\nTracing it step by step:\n\n| Round | `i` at start | `i < 3`? | Prints | `i` after `i++` |\n|---|---|---|---|---|\n| 1 | 0 | true | Run 1 | 1 |\n| 2 | 1 | true | Run 2 | 2 |\n| 3 | 2 | true | Run 3 | 3 |\n| — | 3 | **false** → stop | | |\n\nEach round of a loop is called an **iteration**. `i` is a traditional name for a counter (short for *index*).\n\n### Looping over an array by index\n\nBecause array indexes start at 0 and the last one is `length - 1`, the standard pattern is:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -764,7 +764,7 @@
               3
             ],
             "kind": "single",
-            "explanation": "i takes the values 1, 2, 3 and 4. When i becomes 5, `5 <= 4` is false and the loop ends."
+            "explanation": "`i` takes the values 1, 2, 3, and 4. When `i` becomes 5, `5 <= 4` is false and the loop ends."
           },
           "code": null,
           "callout": null,
@@ -794,7 +794,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F6 · `for...of` — one round per item\n\nMost of the time you don't need the index — you just want **each item**. `for...of` gives you them one by one:",
+          "text": "## F6 · `for...of` — one round per item\n\nMost of the time you don't need the index — you just want **each item**. `for...of` gives them to you one by one:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -821,7 +821,7 @@
         },
         {
           "type": "markdown",
-          "text": "Read it as *\"for each `browser` of the list `browsers`\"*. Each round, `browser` holds the next item. It can be a `const` because every round gets a fresh variable. There's no counter to get wrong, so no off-by-one bugs.\n\n`for...of` works on anything that holds a sequence — arrays, and text too (one character per round):",
+          "text": "Read it as *\"for each `browser` of the list `browsers`\"*. In each round, `browser` holds the next item. It can be a `const` because every round gets a fresh variable. There's no counter to get wrong, so there are no off-by-one bugs.\n\n`for...of` works on anything that holds a sequence — arrays, and text too (one character per round):",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -848,7 +848,7 @@
         },
         {
           "type": "markdown",
-          "text": "This is the loop you'll use most in Playwright tests — for example, \"for each product card on the page, check it has a price\".\n\n### Looping over an object's properties\n\nAn object isn't a list, so `for...of` doesn't work on it directly. `Object.entries(obj)` turns it into a list of `[name, value]` pairs, which you can unpack with destructuring (Day 6):",
+          "text": "This is the loop you'll use most in Playwright tests — for example, \"for each product card on the page, check that it has a price\".\n\n### Looping over an object's properties\n\nAn object isn't a list, so `for...of` doesn't work on it directly. `Object.entries(obj)` turns it into a list of `[name, value]` pairs, which you can unpack with destructuring (Day 6):",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -902,7 +902,7 @@
               0
             ],
             "kind": "single",
-            "explanation": "for...of gives the items themselves. (for...in would give the indexes '0' and '1'.)"
+            "explanation": "`for...of` gives the items themselves. (`for...in` would give the indexes '0' and '1'.)"
           },
           "code": null,
           "callout": null,
@@ -910,7 +910,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F7 · `while`, `do...while`, `break` and `continue`\n\n### `while` — repeat as long as a condition holds\n\nUse `while` when you **don't know in advance** how many rounds you need — \"keep checking until it's ready\":",
+          "text": "## F7 · `while`, `do...while`, `break`, and `continue`\n\n### `while` — repeat as long as a condition holds\n\nUse `while` when you **don't know in advance** how many rounds you need — \"keep checking until it's ready\":",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -947,7 +947,7 @@
         },
         {
           "type": "callout",
-          "text": "If nothing inside the loop ever makes the condition false, it runs forever and your program freezes. Always make sure each round moves towards the end — here, `attempt++` and the `attempt < 5` limit guarantee it stops. If it does happen, press **Stop** (or **Ctrl+C** in the terminal).",
+          "text": "If nothing inside the loop ever makes the condition false, it runs forever and your program freezes. Always make sure each round moves towards the end — here, `attempt++` and the `attempt < 5` limit guarantee it stops. If a loop does run forever, press **Stop** (or **Ctrl+C** in the terminal).",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -987,7 +987,7 @@
         },
         {
           "type": "markdown",
-          "text": "It's rarer than `while`; you'll mostly read it rather than write it.\n\n### `break` and `continue`\n\nThese work in every kind of loop:\n\n| Keyword | Effect | Tester's version |\n|---|---|---|\n| `break` | Leave the loop **now** | \"Stop testing — a blocker was found\" |\n| `continue` | Skip the **rest of this round**, go to the next one | \"Skip this row, it's marked N/A\" |",
+          "text": "It's rarer than `while`; you'll mostly read it rather than write it.\n\n### `break` and `continue`\n\nThese work in every kind of loop:\n\n| Keyword | Effect | Tester's version |\n|---|---|---|\n| `break` | Leave the loop **now** | \"Stop testing — a blocker was found\" |\n| `continue` | Skip the **rest of this round**, go to the next one | \"Skip this row; it's marked N/A\" |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -997,7 +997,7 @@
         },
         {
           "type": "code",
-          "text": "const statuses: string[] = ['passed', 'skipped', 'passed', 'failed', 'passed'];\n\nfor (const status of statuses) {\n  if (status === 'skipped') {\n    continue;                 // ignore skipped tests\n  }\n  if (status === 'failed') {\n    console.log('Failure found - stopping');\n    break;                    // no need to look further\n  }\n  console.log(status);\n}\n// passed\n// passed\n// Failure found - stopping",
+          "text": "const statuses: string[] = ['passed', 'skipped', 'passed', 'failed', 'passed'];\n\nfor (const status of statuses) {\n  if (status === 'skipped') {\n    continue;                 // ignore skipped tests\n  }\n  if (status === 'failed') {\n    console.log('Failure found: stopping');\n    break;                    // no need to look further\n  }\n  console.log(status);\n}\n// passed\n// passed\n// Failure found: stopping",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1098,7 +1098,7 @@
         },
         {
           "type": "markdown",
-          "text": "- `(result)` — a name for the current item (you choose the name)\n- `=>` — \"gives back\"\n- after the arrow — what to work out for that item\n- with two names, `(item, index)`, the method also hands you the item's position\n- with `{ }` after the arrow, the function can hold several statements, like an `if` block\n\nThis is called an **arrow function**. The array method runs it once for every item.\n\n| Method | Question it answers | Gives back |\n|---|---|---|\n| `.forEach(fn)` | \"Do this with every item\" | nothing (`undefined`) |\n| `.map(fn)` | \"Turn every item into something else\" | a **new array**, same length |\n| `.filter(fn)` | \"Which items match?\" | a **new array** with only the matching items |\n| `.find(fn)` | \"Which is the **first** item that matches?\" | that item, or `undefined` |\n| `.some(fn)` | \"Does **at least one** item match?\" | `true` / `false` |\n| `.every(fn)` | \"Do **all** items match?\" | `true` / `false` |",
+          "text": "- `(result)` — a name for the current item (you choose the name)\n- `=>` — \"gives back\"\n- after the arrow — what to work out for that item\n- `(item, index)` — with two names, the method also hands you the item's position\n- `{ }` after the arrow — lets the function hold several statements, like an `if` block\n\nThis is called an **arrow function**. The array method runs it once for every item.\n\n| Method | Question it answers | Gives back |\n|---|---|---|\n| `.forEach(fn)` | \"Do this with every item\" | nothing (`undefined`) |\n| `.map(fn)` | \"Turn every item into something else\" | a **new array**, same length |\n| `.filter(fn)` | \"Which items match?\" | a **new array** with only the matching items |\n| `.find(fn)` | \"Which is the **first** item that matches?\" | that item, or `undefined` |\n| `.some(fn)` | \"Does **at least one** item match?\" | `true` / `false` |\n| `.every(fn)` | \"Do **all** items match?\" | `true` / `false` |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1162,7 +1162,7 @@
               1
             ],
             "kind": "single",
-            "explanation": "filter keeps the matching items in a new array. (find would give just the first, 404; map would give the true/false list.)"
+            "explanation": "`filter` keeps the matching items in a new array. (`find` would give just the first, 404; `map` would give the true/false list.)"
           },
           "code": null,
           "callout": null,
@@ -1202,7 +1202,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 7 · Implementation\n\nAll files today go in `ts-basics/day7`. Run with `node day7/<file>.ts`, check with `npm run check -- day7/<file>.ts`.\n\n## I1 · Rate page-load times, and triage results\n\n`if` ladders inside a `for...of` loop, then a `switch` inside another:",
+          "text": "# Day 7 · Implementation\n\nAll files today go in `ts-basics/day7`. Run with `node day7/<file>.ts`, check with `npm run check -- day7/<file>.ts`.\n\n## I1 · Rate page-load times, and triage results\n\nThis file uses `if` ladders inside a `for...of` loop, then a `switch` inside a second loop:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1229,7 +1229,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\n420 ms: fast\n1850 ms: acceptable\n5200 ms: too slow\npassed: nothing to do\nfailed: open the trace and investigate\ntimedOut: open the trace and investigate\nskipped: check why it was skipped\n```\n\nNotice `let rating: string;` is declared **without** a value: every branch of the `if` ladder assigns one, and TypeScript checks that. Delete the `else` branch and check the file — TypeScript reports `Variable 'rating' is used before being assigned.`, because 5200 would get no rating.\n\n**Try it:** add `case 'flaky':` inside the switch and check the file. Why is it rejected?\n\n## I2 · A mini data-driven test\n\nThis is Day 6's login test-data sheet, with one more row — and now actually **run**. For each test case, the code works out what the app would do, compares it with what the case expects, and reports PASS or FAIL:",
+          "text": "```output\n420 ms: fast\n1850 ms: acceptable\n5200 ms: too slow\npassed: nothing to do\nfailed: open the trace and investigate\ntimedOut: open the trace and investigate\nskipped: check why it was skipped\n```\n\nNotice `let rating: string;` is declared **without** a value: every branch of the `if` ladder assigns one, and TypeScript checks that. Delete the `else` branch and check the file — TypeScript reports `Variable 'rating' is used before being assigned.`, because 5200 would get no rating.\n\n**Try it:** add `case 'flaky':` inside the switch and check the file. Why is it rejected?\n\n## I2 · A mini data-driven test\n\nThis is Day 6's login test-data sheet, with one more row, and this time it actually **runs**. For each test case, the code works out what the app would do, compares it with what the case expects, and reports PASS or FAIL:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1256,7 +1256,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nPASS TC-01\nPASS TC-02\nPASS TC-03\nPASS TC-04\nFAIL TC-05: expected \"Password is required.\", got \"Password is required\"\n4 passed, 1 failed\n```\n\nTC-05 fails because of a single full stop. Just like in real testing, the question is: is the **app** wrong, or the **test data**? Here the test data has a typo — remove the `.` and run again for 5 passes.",
+          "text": "```output\nPASS TC-01\nPASS TC-02\nPASS TC-03\nPASS TC-04\nFAIL TC-05: expected \"Password is required.\", got \"Password is required\"\n4 passed, 1 failed\n```\n\nTC-05 fails because of a single period. Just like in real testing, the question is: is the **app** wrong, or the **test data**? Here the test data has a typo — remove the `.` and run again for 5 passes.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1279,7 +1279,7 @@
         },
         {
           "type": "markdown",
-          "text": "## I3 · A password-rules checker\n\nNested loops, `continue`, and collecting problems in an array:",
+          "text": "## I3 · A password-rules checker\n\nThis file uses nested loops and `continue`, and collects problems in an array:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1360,7 +1360,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\n1. login works - passed\n2. search works - failed\n3. add to cart - passed\n4. checkout - failed\n5. profile edits - skipped\nFailed (2): search works, checkout\nFirst slow test: search works\nAny failed? true. All under 10 s? true\nTotal time: 16 s\n```\n\n`find` may find nothing, so its result's type is `TestResult | undefined` — which is why the code reads it with `?.` and `??` (Day 6). Change `5000` to `9000` and run: the line becomes `First slow test: none`.\n\n## I6 · Spot the loop bugs\n\nThis file type-checks **and** runs — but the output isn't what the comments say it should be. That's the hardest kind of bug: no error message, just wrong behaviour. Run it:",
+          "text": "```output\n1. login works - passed\n2. search works - failed\n3. add to cart - passed\n4. checkout - failed\n5. profile edits - skipped\nFailed (2): search works, checkout\nFirst slow test: search works\nAny failed? true. All under 10 s? true\nTotal time: 16 s\n```\n\n`find` may return nothing, so its result's type is `TestResult | undefined` — which is why the code reads it with `?.` and `??` (Day 6). Change `5000` to `9000` and run: the line becomes `First slow test: none`.\n\n## I6 · Spot the loop bugs\n\nThis file type-checks **and** runs — but the output isn't what the comments say it should be. That's the hardest kind of bug: no error message, just wrong behaviour. Run it:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1458,7 +1458,7 @@
               3
             ],
             "kind": "single",
-            "explanation": "Empty text is falsy, so the ternary takes the value after the colon."
+            "explanation": "Empty text is falsy, so the ternary operator takes the value after the colon."
           },
           "code": null,
           "callout": null,
@@ -1502,7 +1502,7 @@
               3
             ],
             "kind": "single",
-            "explanation": "for...of gives each item in turn. for...in gives the indexes as text; starting at 1 skips the first product; `<=` runs one round too many."
+            "explanation": "`for...of` gives each item in turn. `for...in` gives the indexes as text; starting at 1 skips the first product; `<=` runs one round too many."
           },
           "code": null,
           "callout": null,
@@ -1524,7 +1524,7 @@
               0
             ],
             "kind": "single",
-            "explanation": "map turns every item into a new value and gives back a new array of the same length."
+            "explanation": "`map` turns every item into a new value and gives back a new array of the same length."
           },
           "code": null,
           "callout": null,
@@ -1546,7 +1546,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "find gives the first item whose check is truthy — Ravi's object — and `?.name` reads its name."
+            "explanation": "`find` gives the first item whose check is truthy — Ravi's object — and `?.name` reads its name."
           },
           "code": null,
           "callout": null,
@@ -1592,7 +1592,7 @@
               3
             ],
             "kind": "single",
-            "explanation": "every asks \"is there any item that fails the check?\" In an empty list there isn't one, so it's true. (some on an empty list is false.) Worth remembering: an empty list makes `every` true."
+            "explanation": "`every` asks \"is there any item that fails the check?\" In an empty list there isn't one, so it's true. (`some` on an empty list is false.) Worth remembering: an empty list makes `every` true."
           },
           "code": null,
           "callout": null,
@@ -1779,7 +1779,7 @@
           "file": null,
           "run": null,
           "check": null,
-          "solution": "3\n0\nHi guest\n\n0 is falsy, so `||` falls back to 3. `??` only replaces null or undefined, so it keeps the 0. Empty text is falsy, so the ternary picks 'Hi guest'."
+          "solution": "3\n0\nHi guest\n\n0 is falsy, so `||` falls back to 3. `??` replaces only null or undefined, so it keeps the 0. Empty text is falsy, so the ternary operator picks 'Hi guest'."
         },
         {
           "number": 3,
@@ -1805,7 +1805,7 @@
           "file": null,
           "run": null,
           "check": null,
-          "solution": "[ 16, 24, 10 ]\n3\n\nfilter keeps 8, 12 and 5 (3 isn't greater than 4). map doubles each: 16, 24, 10. Node.js prints arrays with spaces inside the brackets."
+          "solution": "[ 16, 24, 10 ]\n3\n\n`filter` keeps 8, 12, and 5 (3 isn't greater than 4). `map` doubles each: 16, 24, 10. Node.js prints arrays with spaces inside the brackets."
         },
         {
           "number": 5,

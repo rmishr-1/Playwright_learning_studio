@@ -3,18 +3,18 @@
   "day": 6,
   "week": 2,
   "title": "Data Types",
-  "subtitle": "The shapes your test data comes in — single values, empty values, lists and records — and the types that describe them precisely",
+  "subtitle": "The shapes your test data comes in — single values, empty values, lists, and records — and the types that describe them precisely",
   "estimatedTime": "3 hours",
   "topics": [
     "Data types (primitives, null and undefined)",
-    "Arrays, tuples and objects",
-    "Union, literal, any and unknown types"
+    "Arrays, tuples, and objects",
+    "Union, literal, any, and unknown types"
   ],
   "objectives": [
-    "Map the TypeScript type family — primitives, collections and special types",
-    "Explain null and undefined, and give fallbacks with `??` and safe access with `?.`",
+    "Map the TypeScript type family — primitives, collections, and special types",
+    "Explain null and undefined, and provide fallbacks with `??` and access values safely with `?.`",
     "Store and read lists with arrays, and fixed pairs with tuples",
-    "Describe records with objects, type aliases and interfaces, including optional properties",
+    "Describe records with objects, type aliases, and interfaces, including optional properties",
     "Unpack arrays and objects with destructuring — the pattern behind `{ page }`",
     "Use union and literal types, and explain why `any` is a trap",
     "Clean text read from a page and turn it into useful values"
@@ -102,7 +102,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Open any test-data spreadsheet and you'll see three shapes of data:\n\n| Shape | Spreadsheet equivalent | Example | TypeScript |\n|---|---|---|---|\n| **A single value** | One cell | `'asha@example.com'`, `3`, `true` | string, number, boolean |\n| **A list** | A column | All the browsers to test on; all the product names on a page | **array** |\n| **A record** | A row with named columns | One user: name, email, age, is admin | **object** |\n\nAnd there's a fourth situation every tester knows: **the empty cell** — a value that's missing on purpose, or hasn't been filled in yet. TypeScript has types for that too."
+              "content": "Open any test-data spreadsheet and you'll see three shapes of data:\n\n| Shape | Spreadsheet equivalent | Example | TypeScript |\n|---|---|---|---|\n| **A single value** | One cell | `'asha@example.com'`, `3`, `true` | string, number, boolean |\n| **A list** | A column | All the browsers to test on; all the product names on a page | **array** |\n| **A record** | A row with named columns | One user: name, email, age, admin status | **object** |\n\nAnd there's a fourth situation every tester knows: **the empty cell** — a value that's missing on purpose, or hasn't been filled in yet. TypeScript has types for that too."
             },
             {
               "type": "diagram",
@@ -161,7 +161,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "On Day 4 you met the three everyday simple types (**primitives**): `string`, `number` and `boolean`. There are a few more facts worth knowing:\n\n| Type | Notes |\n|---|---|\n| `string` | Text, in single quotes, double quotes or backticks |\n| `number` | Whole numbers *and* decimals — there is one number type. Includes the special values `NaN` and `Infinity` (Day 5) |\n| `boolean` | Only `true` or `false` |\n| `null` | \"Empty on purpose\" — see F2 |\n| `undefined` | \"No value (yet)\" — see F2 |\n| `bigint`, `symbol` | Very large whole numbers and unique ids. You won't need them for testing |\n\nPrimitives are **single, simple values**. You can replace a variable's primitive value, but you can't change the value itself: `'asha'.toUpperCase()` gives you a *new* text, `'ASHA'`, and leaves the original alone."
+              "content": "On Day 4 you met the three everyday simple types (**primitives**): `string`, `number`, and `boolean`. There are a few more facts worth knowing:\n\n| Type | Notes |\n|---|---|\n| `string` | Text, in single quotes, double quotes, or backticks |\n| `number` | Whole numbers *and* decimals — there is one number type. Includes the special values `NaN` and `Infinity` (Day 5) |\n| `boolean` | Only `true` or `false` |\n| `null` | \"Empty on purpose\" — see F2 |\n| `undefined` | \"No value (yet)\" — see F2 |\n| `bigint`, `symbol` | Very large whole numbers and unique IDs. You won't need them for testing |\n\nPrimitives are **single, simple values**. You can replace a variable's primitive value, but you can't change the value itself: `'asha'.toUpperCase()` gives you a *new* string, `'ASHA'`, and leaves the original alone."
             },
             {
               "type": "callout",
@@ -197,7 +197,7 @@
             },
             {
               "type": "markdown",
-              "content": "`??` only steps in for `null` and `undefined`. A real value such as `0` or empty text `''` is kept — which is usually what a test wants (a quantity of `0` is still a quantity)."
+              "content": "`??` steps in only for `null` and `undefined`. A real value such as `0` or an empty string `''` is kept — which is usually what a test wants (a quantity of `0` is still a quantity)."
             },
             {
               "type": "quiz",
@@ -273,7 +273,7 @@
             },
             {
               "type": "markdown",
-              "content": "The type `string[]` means *\"a list of strings\"*. (You may also see the long form `Array<string>` — it means exactly the same.) For a list of literal values, give the literal type a name first and add `[]`: `BrowserName[]` (F6).\n\n### Positions start at 0\n\nEach item has a numbered position — its **index** — and counting starts at **0**:\n\n| Index | 0 | 1 | 2 |\n|---|---|---|---|\n| Value | `'chromium'` | `'firefox'` | `'webkit'` |\n\n| You want… | Write | Result |\n|---|---|---|\n| The first item | `browsers[0]` | `'chromium'` |\n| The third item | `browsers[2]` | `'webkit'` |\n| How many items | `browsers.length` | `3` |\n| The last item | `browsers[browsers.length - 1]` | `'webkit'` |\n| An item that doesn't exist | `browsers[5]` | `undefined` — no error, and TypeScript doesn't warn you either (it assumes the item is there) |\n\n### Changing and searching arrays\n\n| Method | What it does | Example | Result |\n|---|---|---|---|\n| `.push(value)` | Adds to the end | `browsers.push('msedge')` | 4 items |\n| `.pop()` | Removes the last item and gives it back | `browsers.pop()` | `'msedge'` |\n| `.includes(value)` | Is it in the list? | `browsers.includes('firefox')` | `true` |\n| `.indexOf(value)` | Where is it? (`-1` if absent) | `browsers.indexOf('webkit')` | `2` |\n| `.join(separator)` | Joins the items into one text | `browsers.join(', ')` | `'chromium, firefox, webkit'` |\n\nTypeScript keeps lists consistent: `retryDelays.push('5000')` is an error — text can't go into a list of numbers."
+              "content": "The type `string[]` means *\"a list of strings\"*. (You may also see the long form `Array<string>` — it means exactly the same thing.) For a list of literal values, give the literal type a name first and add `[]`: `BrowserName[]` (F6).\n\n### Positions start at 0\n\nEach item has a numbered position — its **index** — and counting starts at **0**:\n\n| Index | 0 | 1 | 2 |\n|---|---|---|---|\n| Value | `'chromium'` | `'firefox'` | `'webkit'` |\n\n| You want… | Write | Result |\n|---|---|---|\n| The first item | `browsers[0]` | `'chromium'` |\n| The third item | `browsers[2]` | `'webkit'` |\n| How many items | `browsers.length` | `3` |\n| The last item | `browsers[browsers.length - 1]` | `'webkit'` |\n| An item that doesn't exist | `browsers[5]` | `undefined` — no error, and TypeScript doesn't warn you either (it assumes the item is there) |\n\n### Changing and searching arrays\n\n| Method | What it does | Example | Result |\n|---|---|---|---|\n| `.push(value)` | Adds to the end | `browsers.push('msedge')` | 4 items |\n| `.pop()` | Removes the last item and gives it back | `browsers.pop()` | `'msedge'` |\n| `.includes(value)` | Is it in the list? | `browsers.includes('firefox')` | `true` |\n| `.indexOf(value)` | Where is it? (`-1` if absent) | `browsers.indexOf('webkit')` | `2` |\n| `.join(separator)` | Joins the items into one string | `browsers.join(', ')` | `'chromium, firefox, webkit'` |\n\nTypeScript keeps lists consistent: `retryDelays.push('5000')` is an error — text can't go into a list of numbers."
             },
             {
               "type": "callout",
@@ -359,7 +359,7 @@
             },
             {
               "type": "markdown",
-              "content": "Use a tuple for small, fixed groups where the position has a meaning — like a pair of login details. For anything bigger, an object (F5) with named properties is clearer.\n\n### Destructuring: unpacking into variables\n\n**Destructuring** takes the items out of a list and puts them into separate variables in one line:"
+              "content": "Use a tuple for small, fixed groups where each position has a meaning — like a pair of login details. For anything bigger, an object (F5) with named properties is clearer.\n\n### Destructuring: unpacking into variables\n\n**Destructuring** takes the items out of a list and puts them into separate variables in one line:"
             },
             {
               "type": "code",
@@ -443,7 +443,7 @@
             },
             {
               "type": "markdown",
-              "content": "### Reading and changing properties\n\n| You want… | Write |\n|---|---|\n| Read a property | `user.email` (or `user['email']`) |\n| Change a property | `user.age = 30;` |\n| Read an optional property | `user.phone` → the value, or `undefined` if missing |\n\nJust like arrays, a `const` object's **properties** can change; the name just can't point to a different object.\n\n### Safe access with `?.`\n\nIf a property is optional, TypeScript won't let you use it as if it were definitely there:"
+              "content": "### Reading and changing properties\n\n| You want… | Write |\n|---|---|\n| Read a property | `user.email` (or `user['email']`) |\n| Change a property | `user.age = 30;` |\n| Read an optional property | `user.phone` → the value, or `undefined` if missing |\n\nAs with a `const` array's items, a `const` object's **properties** can change, but the name can't point to a different object.\n\n### Safe access with `?.`\n\nIf a property is optional, TypeScript won't let you use it as if it were definitely there:"
             },
             {
               "type": "code",
@@ -545,7 +545,7 @@
             },
             {
               "type": "markdown",
-              "content": "A value read from somewhere else might be either:\n\nYou've already used unions for empty values: `string | undefined`, `string | null`.\n\nWith a union, TypeScript only lets you do what's safe for **every** option. To use string-only abilities, check first — TypeScript then knows which one you have:"
+              "content": "A value read from somewhere else might be either:\n\nYou've already used unions for empty values: `string | undefined`, `string | null`.\n\nWith a union, TypeScript lets you do only what's safe for **every** option. To use string-only methods, check first — TypeScript then knows which one you have:"
             },
             {
               "type": "code",
@@ -603,7 +603,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Sometimes you don't know a value's type — for example, data read from a file. TypeScript has two \"could be anything\" types:\n\n| Type | Meaning | Advice |\n|---|---|---|\n| `any` | \"Stop checking this value\" — anything goes, anything can be done with it | **Avoid.** It silently switches TypeScript off and turns it back into plain JavaScript |\n| `unknown` | \"Could be anything — **check before using it**\" | The safe choice when you truly don't know |"
+              "content": "Sometimes you don't know a value's type — for example, data read from a file. TypeScript has two \"could be anything\" types:\n\n| Type | Meaning | Advice |\n|---|---|---|\n| `any` | \"Stop checking this value\" — anything goes, anything can be done with it | **Avoid.** It silently switches TypeScript off for that value, so the code behaves like plain JavaScript. |\n| `unknown` | \"Could be anything — **check before using it**\" | The safe choice when you truly don't know |"
             },
             {
               "type": "code",
@@ -713,7 +713,7 @@
             {
               "type": "callout",
               "variant": "tester",
-              "content": "This is your test-data spreadsheet in code: the type is the column headers, each object is a row, and TypeScript refuses rows with missing or wrongly typed cells."
+              "content": "This is your test-data spreadsheet in code: the type is the header row, each object is a row, and TypeScript refuses rows with missing or wrongly typed cells."
             }
           ]
         },
@@ -748,7 +748,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "On Day 5, `Number('₹1,499')` gave `NaN`. With text methods and arrays you can clean page text into useful values:"
+              "content": "On Day 5, `Number('₹1,499')` gave `NaN`. With text methods and arrays you can turn page text into useful values:"
             },
             {
               "type": "code",
@@ -767,7 +767,7 @@
             },
             {
               "type": "markdown",
-              "content": "| Method | What it did |\n|---|---|\n| `.trim()` | Removed the spaces at both ends (Day 5) |\n| `.replace('₹', '')` | Replaced the **first** `₹` with nothing |\n| `.replaceAll(',', '')` | Replaced **every** comma with nothing (`₹1,00,000` has two) |\n| `.split('/')` | Cut the URL at every `/` into an array (the empty `''` is between the two slashes of `//`) |\n| `parts[4].split('?')[0]` | Took piece 4, cut it at `?`, kept the first half |"
+              "content": "| Method | What it did |\n|---|---|\n| `.trim()` | Removed the spaces at both ends (Day 5) |\n| `.replace('₹', '')` | Replaced the **first** `₹` with nothing |\n| `.replaceAll(',', '')` | Replaced **every** comma with nothing (`₹1,00,000` has two) |\n| `.split('/')` | Cut the URL at every `/` into an array (the empty `''` is between the two slashes of `//`) |\n| `parts[4].split('?')[0]` | Took piece 4, cut it at `?`, kept the first part |"
             }
           ]
         },
@@ -804,7 +804,7 @@
             },
             {
               "type": "markdown",
-              "content": "Two words in these messages: an **argument** is the value you hand to a method in brackets — `'safari'` in `push('safari')` — and a **parameter** is the slot the method expects it in. Day 8 covers both.\n\n| Line | Mistake |\n|---|---|\n| 12 | A price given as text |\n| 16 | A required property (`inStock`) is missing — `discount` is optional, so it's fine to leave out |\n| 22 | `'safari'` isn't one of the allowed browser names |\n| 24 | Position 1 of the tuple must be a string (a password) |\n| 27 | Text pushed into a list of numbers |\n\nFix all five, check until silent, and run:"
+              "content": "Two terms appear in these messages: an **argument** is the value you hand to a method in parentheses — `'safari'` in `push('safari')` — and a **parameter** is the slot the method expects it in. Day 8 covers both.\n\n| Line | Mistake |\n|---|---|\n| 12 | A price given as text |\n| 16 | A required property (`inStock`) is missing — `discount` is optional, so it's fine to leave out |\n| 22 | `'safari'` isn't one of the allowed browser names |\n| 24 | Position 1 of the tuple must be a string (a password) |\n| 27 | Text pushed into a list of numbers |\n\nFix all five, check until silent, and run:"
             },
             {
               "type": "code",
@@ -888,7 +888,7 @@
               "correct": [
                 "a"
               ],
-              "explanation": "`join` combines the items into one text, with the separator between them."
+              "explanation": "`join` combines the items into one string, with the separator between them."
             },
             {
               "type": "quiz",
@@ -916,7 +916,7 @@
               "correct": [
                 "c"
               ],
-              "explanation": "phone is optional, so it may be undefined. TypeScript requires `?.` or a fallback before using it."
+              "explanation": "phone is optional, so it may be undefined. TypeScript requires `?.` or a fallback before you use it."
             },
             {
               "type": "quiz",
@@ -1087,7 +1087,7 @@
               "level": "medium",
               "prompt": "What is printed?",
               "code": "const sizes = [38, 40, 42];\ntype Person = { name: string; nickname?: string };\nconst user: Person = { name: 'Ravi' };\nconsole.log(sizes[3]);\nconsole.log(sizes[3] ?? 'no size');\nconsole.log(user.nickname ?? user.name);",
-              "answer": "undefined\nno size\nRavi\n\nThere's no index 3 (the last is 2), so it's undefined, and `??` then uses the fallback. nickname is missing, so `??` falls back to the name.",
+              "answer": "undefined\nno size\nRavi\n\nThere's no index 3 (the last is 2), so it's undefined, and `??` then uses the fallback. `nickname` is missing, so `??` falls back to the name.",
               "check": {
                 "kind": "self"
               }
@@ -1100,7 +1100,7 @@
               "level": "easy",
               "prompt": "What is printed?",
               "code": "const path = '/products/laptops/42';\nconst parts = path.split('/');\nconsole.log(parts.length);\nconsole.log(parts[2]);\nconsole.log(parts.join(' > '));",
-              "answer": "4\nlaptops\n\" > products > laptops > 42\"\n\nThe text starts with `/`, so the first piece is the empty text `''`: `['', 'products', 'laptops', '42']` — 4 pieces. Joining puts `' > '` between them — so the line starts with a space and `>` (after the empty first piece). The quotes above just show where the line begins.",
+              "answer": "4\nlaptops\n\" > products > laptops > 42\"\n\nThe text starts with `/`, so the first piece is the empty string `''`: `['', 'products', 'laptops', '42']` — 4 pieces. Joining puts `' > '` between them — so the line starts with a space and `>` (after the empty first piece). The quotes above just show where the line begins.",
               "check": {
                 "kind": "self"
               }
@@ -1206,7 +1206,7 @@
               "id": "d6-ex5",
               "title": "Challenge: model a test run",
               "level": "challenge",
-              "prompt": "Create `day6/test-run.ts` that models a finished test run with types:\n\n1. `type Status = 'passed' | 'failed' | 'skipped';`\n2. `type TestResult = { title: string; status: Status; durationMs: number; error?: string };`\n3. `type TestRun = { browser: 'chromium' | 'firefox' | 'webkit'; results: TestResult[] };`\n4. Create a `run` for `firefox` with three results: `login works` (passed, 1200), `search works` (failed, 5300, error `Timeout 5000ms exceeded`), `profile edits` (skipped, 0).\n5. Print (reading by position — no loops yet):\n```\nBrowser: firefox, 3 results\n2nd test: search works - failed after 5.3s\nIts error: Timeout 5000ms exceeded\n1st test error: none\n```\nThen try adding a result with status `'flaky'` and read the check error — then remove it.",
+              "prompt": "Create `day6/test-run.ts` that models a finished test run with types:\n\n1. `type Status = 'passed' | 'failed' | 'skipped';`\n2. `type TestResult = { title: string; status: Status; durationMs: number; error?: string };`\n3. `type TestRun = { browser: 'chromium' | 'firefox' | 'webkit'; results: TestResult[] };`\n4. Create a `run` for `firefox` with three results: `login works` (passed, 1200), `search works` (failed, 5300, error `Timeout 5000ms exceeded`), `profile edits` (skipped, 0).\n5. Print (reading by position — no loops yet):\n```\nBrowser: firefox, 3 results\n2nd test: search works - failed after 5.3s\nIts error: Timeout 5000ms exceeded\n1st test error: none\n```\nThen try adding a result with status `'flaky'` read the check error, and then remove it.",
               "file": "ts-basics/day6/test-run.ts",
               "run": "node day6/test-run.ts",
               "hints": [

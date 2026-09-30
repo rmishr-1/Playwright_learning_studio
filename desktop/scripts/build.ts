@@ -5,7 +5,7 @@
  *                               release build, obfuscated)
  *   web/                        Option C, built for the app (vite.web.config.mts)
  *   content.pack                the course, watermarked and encrypted (pack-content.ts)
- *   setup.html, logo.png, EULA.txt, licence.lic (a customer's build only)
+ *   setup.html, logo.png, licence.lic (a customer's build only)
  *   node_modules/               only what the learner's code runs on: Playwright and TypeScript
  *
  * and desktop/build/legal (EULA.txt, THIRD-PARTY-NOTICES.txt), which is installed beside the app.
@@ -253,9 +253,8 @@ export async function build(opts: {
     fs.readFileSync(path.join(DESKTOP, 'src', 'setup.html'), 'utf-8').replace(/<title>[^<]*<\/title>/, '<title>' + product + '</title>'),
   );
   fs.copyFileSync(path.join(ROOT, 'frontend-c', 'public', 'evoke-logo.png'), path.join(APP, 'logo.png'));
-  const eula = renderEula(product);
-  fs.writeFileSync(path.join(APP, 'EULA.txt'), eula);
-  fs.writeFileSync(path.join(LEGAL, 'EULA.txt'), eula);
+  // The agreement is installed beside the app, but never shown or asked for: the app does not read it.
+  fs.writeFileSync(path.join(LEGAL, 'EULA.txt'), renderEula(product));
   if (licence && opts.licenceFile && opts.carryLicence === true) fs.copyFileSync(opts.licenceFile, path.join(APP, 'licence.lic'));
   const dependencies = Object.fromEntries(
     ['@playwright/test', 'playwright', 'typescript', 'typescript-learner'].map((n) => [n, installedVersion(n)]),

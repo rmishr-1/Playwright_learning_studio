@@ -337,12 +337,12 @@ export function RunOverlay({
             </button>
           ) : (
             <button
-              className="panel-btn"
+              className="panel-btn detach"
               onClick={() => setAllOut(true)}
               title="Open this whole bar, with its panels, in a window of its own"
               aria-label="Detach the whole bar"
             >
-              ⇱ Detach all
+              ⇱<span className="label"> Detach all</span>
             </button>
           )}
           <button className="close" onClick={onClose} aria-label="Close results">

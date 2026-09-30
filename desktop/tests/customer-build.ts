@@ -43,7 +43,7 @@ function reset(licenceText: string | null): void {
 async function setupStep(app: ElectronApplication): Promise<{ page: Page; step: string; reason: string }> {
   const page = await app.firstWindow();
   await page.waitForSelector('#product:not(:empty)');
-  const step = (await page.isVisible('#eula')) ? 'eula' : 'licence';
+  const step = (await page.isVisible('#licence')) ? 'licence' : 'studio';
   const reason = (await page.isVisible('#reason')) ? ((await page.textContent('#reason')) ?? '') : '';
   return { page, step, reason };
 }
@@ -99,12 +99,8 @@ async function main(): Promise<void> {
 
   reset(licenceText);
   app = await launch();
-  s = await setupStep(app);
-  expect(s.step === 'eula' && (await s.page.textContent('#licensee')) === customer.licensee, 'with its own licence, it shows the agreement', customer.licensee);
-  await s.page.check('#agree');
-  const opened = app.waitForEvent('window');
-  await s.page.click('#accept');
-  const page = await opened;
+  // With its own licence there is no setup step and no agreement: the studio opens at once.
+  const page = await app.firstWindow();
   await page.waitForSelector('text=Week 1', { timeout: 30_000 });
   expect(true, 'with its own licence, the sealed course opens');
   const day = await page.evaluate(() => fetch('/api/course/1/3').then((r) => r.text()));

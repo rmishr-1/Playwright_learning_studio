@@ -267,7 +267,6 @@ export async function packageApp(opts: {
       // Always the user's own %LOCALAPPDATA%\Programs: a folder chosen elsewhere (under C:\, say)
       // could be changed by every account on the computer, and the app refuses to start from one.
       allowToChangeInstallationDirectory: false,
-      license: 'build/legal/EULA.txt',
       shortcutName: product,
       artifactName: base + '-Setup-' + VERSION + '.${ext}',
       deleteAppDataOnUninstall: false,

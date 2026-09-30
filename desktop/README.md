@@ -204,7 +204,7 @@ npm run build-variant -- internal
 
 | Layer | What it does |
 |---|---|
-| Licence agreement | Shown and accepted on first start, including the technical measures (section 4A). `legal/EULA.txt` is a **draft for legal review**. |
+| Licence agreement | Installed beside the app as `EULA.txt` (with THIRD-PARTY-NOTICES.txt), including the technical measures (section 4A), but not shown, referenced or accepted anywhere: the installer has no agreement page, and a valid licence opens the studio at once. `legal/EULA.txt` is a **draft for legal review**. |
 | Licence | Ed25519-signed; optional expiry and one-computer limit; revocation list (builds made after the revocation); re-checked every hour, with ten minutes' notice before the studio closes once a licence has ended; the learner is warned two weeks ahead. |
 | Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, or the latest date of the files in the app's data folder (two folders deep, not the learner's workspaces, where their own code writes). It stops the clock simply being turned back; someone who also edits or re-dates those files can get past it. |
 | Encrypted, sealed course | `content.pack`, AES-256-GCM, a new key every build, decrypted in memory only and never cached; a customer's build needs their licence to decrypt it. |
@@ -235,8 +235,8 @@ npm run test:release -- licences/<a licence the build accepts>.lic
 ```
 
 - `test:app` builds the app (obfuscated like a release) and drives it laid out as installed
-  (packed, with the release's fuses, `tests/packed.ts`): every licence case, the clock guard, the
-  agreement, the locked API, no caching, the page's Content Security Policy, offline, watermarks,
+  (packed, with the release's fuses, `tests/packed.ts`): every licence case, the clock guard, that
+  no agreement is shown, the locked API, no caching, the page's Content Security Policy, offline, watermarks,
   the Terminal on the bundled Node, the live view, the editor's Run, Check my answer in all three
   browsers, and the separate report server.
 - `test:customer` builds a sealed copy for a test customer and checks it refuses other licences,

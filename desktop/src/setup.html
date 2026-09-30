@@ -22,7 +22,6 @@
       .reason { background: var(--bad-wash); border: 1px solid #fecdca; border-left: 3px solid var(--bad); color: var(--bad); padding: 10px 14px; border-radius: 8px; font-size: 14px; }
       .machine { display: flex; align-items: center; gap: 10px; font-size: 14px; }
       .machine code { font-family: Consolas, monospace; font-size: 15px; background: var(--paper); border: 1px solid var(--rule); padding: 5px 10px; border-radius: 6px; letter-spacing: .04em; }
-      .eula { flex: 1; min-height: 200px; overflow: auto; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; white-space: pre-wrap; font-size: 13px; line-height: 1.55; font-family: 'Segoe UI', system-ui, sans-serif; }
       label { display: flex; gap: 9px; align-items: center; font-size: 14.5px; }
       footer { display: flex; gap: 10px; justify-content: flex-end; align-items: center; padding: 14px 28px; background: var(--paper); border-top: 1px solid var(--rule); }
       footer .copy { margin-right: auto; color: var(--muted); font-size: 12px; }
@@ -50,18 +49,10 @@
       <div class="machine"><code id="machine"></code><button class="small" id="copy">Copy</button><span id="copied" hidden>Copied</span></div>
     </main>
 
-    <main id="eula" hidden>
-      <h1>Licence agreement</h1>
-      <p>Licensed to <b id="licensee"></b> (<span id="licence-id"></span>). Read the agreement, and accept it to open the studio.</p>
-      <div class="eula" id="eula-text" tabindex="0"></div>
-      <label><input type="checkbox" id="agree" /> I have read the licence agreement and I accept it.</label>
-    </main>
-
     <footer>
       <span class="copy" id="copyright"></span>
       <button id="quit">Quit</button>
       <button class="primary" id="choose" hidden>Choose licence file&hellip;</button>
-      <button class="primary" id="accept" hidden disabled>Accept and open</button>
     </footer>
 
     <script>
@@ -71,28 +62,19 @@
         $('version').textContent = 'Version ' + s.version;
         $('copyright').textContent = s.copyright;
         $('machine').textContent = s.machine;
-        const licence = s.step === 'licence';
-        $('licence').hidden = !licence;
-        $('choose').hidden = !licence;
-        $('eula').hidden = licence;
-        $('accept').hidden = licence;
+        $('licence').hidden = false;
+        $('choose').hidden = false;
         $('reason').hidden = !s.reason;
         $('reason').textContent = s.reason;
-        if (!licence) {
-          $('licensee').textContent = s.licensee;
-          $('licence-id').textContent = s.licenceId;
-          $('eula-text').textContent = s.eula;
-        }
       }
-      $('choose').onclick = async () => show(await window.setup.chooseLicence());
+      // With a valid licence the studio opens and this window closes, so there is nothing to show.
+      $('choose').onclick = async () => {
+        const s = await window.setup.chooseLicence();
+        if (s) show(s);
+      };
       $('copy').onclick = async () => {
         await window.setup.copyMachineCode();
         $('copied').hidden = false;
-      };
-      $('agree').onchange = () => ($('accept').disabled = !$('agree').checked);
-      $('accept').onclick = async () => {
-        const s = await window.setup.accept();
-        if (s) show(s);
       };
       $('quit').onclick = () => window.setup.quit();
       window.setup.state().then(show);

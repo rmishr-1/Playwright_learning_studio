@@ -6,19 +6,19 @@ subtitle: Teach your code to make decisions and repeat work — the logic behind
 estimatedTime: 3 hours
 topics:
   - Truthy and falsy values
-  - if / else if / else, switch and the ternary operator
-  - for, for...of, while and do...while loops, with break and continue
-  - Array methods forEach, map, filter, find, some and every
+  - if / else if / else, switch, and the ternary operator
+  - for, for...of, while, and do...while loops, with break and continue
+  - Array methods forEach, map, filter, find, some, and every
 objectives:
   - Predict whether a value counts as true or false in a condition (truthy and falsy)
-  - Write decisions with if / else if / else, and choose between if, switch and the ternary
+  - Write decisions with if / else if / else, and choose among if, switch, and the ternary operator
   - Use a check with `if` to narrow a union or optional value, so TypeScript knows what you have
-  - Repeat work with for, for...of, while and do...while, and control loops with break and continue
-  - Filter, transform and question lists with forEach, map, filter, find, some and every
+  - Repeat work with for, for...of, while, and do...while, and control loops with break and continue
+  - Filter, transform, and query lists with forEach, map, filter, find, some, and every
   - Run a list of test cases through a check and report pass/fail — a mini data-driven test
 prerequisitesFromEarlierDays:
-  - "Day 5: comparison and logical operators, the ternary operator, blocks and scope"
-  - "Day 6: arrays, objects, type aliases, optional properties, `??`, `?.`, union and literal types"
+  - "Day 5: comparison and logical operators, the ternary operator, blocks, and scope"
+  - "Day 6: arrays, objects, type aliases, optional properties, `??`, `?.`, and union and literal types"
 workspace: pw-course/ts-basics/day7/
 ---
 
@@ -26,8 +26,8 @@ workspace: pw-course/ts-basics/day7/
 
 ## P1 · Quick recap from Days 5 and 6
 
-- [ ] Compare with `===` and `!==`, and combine answers with `&&`, `||` and `!` (Day 5 · F6–F7)
-- [ ] Pick one of two values with the ternary: `condition ? valueIfTrue : valueIfFalse` (Day 5 · F7)
+- [ ] Compare with `===` and `!==`, and combine answers with `&&`, `||`, and `!` (Day 5 · F6–F7)
+- [ ] Pick one of two values with the ternary operator: `condition ? valueIfTrue : valueIfFalse` (Day 5 · F7)
 - [ ] Curly braces `{ }` make a **block**, and `let`/`const` inside it stay inside it (Day 5 · F3)
 - [ ] Store lists in arrays and records in objects; read an optional property with `?.` or `??` (Day 6)
 
@@ -59,7 +59,7 @@ explanation: "Indexes start at 0, so the last index is always one less than the 
 
 ## P2 · Decisions and repetition — you already write them
 
-Read any manual test case and you'll find two kinds of instruction that a straight list of steps can't express:
+Read any manual test case and you'll find two kinds of instructions that a straight list of steps can't express:
 
 | In a manual test case | In code | Today's section |
 |---|---|---|
@@ -81,7 +81,7 @@ flowchart LR
   L -- no --> E["Done"]
 ```
 
-So far your programs ran every line once, top to bottom. Today they learn to **skip** lines (conditions) and **repeat** lines (loops). Together these are called **control flow**.
+So far, your programs have run every line once, top to bottom. Today they learn to **skip** lines (conditions) and **repeat** lines (loops). Together these are called **control flow**.
 
 > [!TESTER]
 > A data-driven test is exactly this: *for each row in the test-data sheet, do the steps; if the result matches the expected value, mark it passed, otherwise failed.* By the end of today you'll write one.
@@ -133,7 +133,7 @@ if (couponCode) {
 ```ts mode=read
 const retries: number = 0;          // the tester deliberately set 0 retries
 console.log(retries || 3);          // 3  ❌ the 0 was thrown away
-console.log(retries ?? 3);          // 0  ✅ ?? only replaces null and undefined (Day 6)
+console.log(retries ?? 3);          // 0  ✅ ?? replaces only null and undefined (Day 6)
 ```
 
 > [!TIP]
@@ -175,7 +175,7 @@ if (condition) {
 }
 ```
 
-The condition goes in round brackets; the code to run goes in a **block** in curly braces.
+The condition goes in parentheses; the code to run goes in a **block** in curly braces.
 
 ### `else` — otherwise
 
@@ -203,7 +203,7 @@ if (loadTimeMs < 1000) {
 }
 ```
 
-The conditions are checked **top to bottom**, and **only the first one that's true** runs. Once a branch runs, the rest are skipped — even if they would also be true. (If you added `else if (loadTimeMs < 5000)` at the end, 1850 would match it too — but it would never get there, because `< 3000` already won.) So put the most specific conditions first.
+The conditions are checked **top to bottom**, and **only the first one that's true** runs. Once a branch runs, the rest are skipped — even if they would also be true. (If you added `else if (loadTimeMs < 5000)` at the end, 1850 would match it too — but the program would never reach it, because `< 3000` already won.) So put the most specific conditions first.
 
 `else if` and `else` are both optional, and you can have as many `else if` branches as you need.
 
@@ -307,7 +307,7 @@ options:
   - "`if (user.phone === undefined) { … }`"
   - "`if (typeof user === 'object') { … }`"
 answer: b
-explanation: "Only a check on phone itself tells TypeScript that phone is a string inside the block."
+explanation: "Only a check on `phone` itself tells TypeScript that `phone` is a string inside the block."
 ```
 
 ## F4 · `switch` — choosing among many fixed values
@@ -358,7 +358,7 @@ Fall-through is almost always a bug — with one useful exception: stacking case
 ```ts mode=read
 switch (status) {
   case 'failed':
-  case 'timedOut':                   // 'failed' or 'timedOut' both land here
+  case 'timedOut':                   // 'failed' and 'timedOut' both land here
     console.log('Open the trace');
     break;
 }
@@ -370,7 +370,7 @@ switch (status) {
 |---|---|
 | One yes/no decision, or ranges (`< 1000`, `>= 18`) | `if` / `else` |
 | One value compared with several **exact** values | `switch` |
-| Choosing between two **values** in one line | the ternary `? :` (Day 5) |
+| Choosing between two **values** in one line | the ternary operator `? :` (Day 5) |
 
 With literal types (Day 6), TypeScript even checks your `case` labels: `case 'superuser':` is an error when `user.role` can only be `'admin' | 'editor' | 'viewer'`.
 
@@ -397,7 +397,7 @@ options:
   - "`const group = age >= 18 && 'Adult';`"
   - An `if` with no `else`, setting the value only for adults
 answer: b
-explanation: "Choosing between two values based on one condition is exactly what the ternary is for. `age >= 18 && 'Adult'` gives false (not 'Minor') for a minor, and an if without else leaves minors with no value."
+explanation: "Choosing between two values based on one condition is exactly what the ternary operator is for. `age >= 18 && 'Adult'` gives false (not 'Minor') for a minor, and an if without else leaves minors with no value."
 ```
 
 ## F5 · The `for` loop — counting
@@ -413,7 +413,7 @@ for (let i = 0; i < 3; i++) {
 // Run 3
 ```
 
-The brackets hold three parts, separated by semicolons:
+The parentheses hold three parts, separated by semicolons:
 
 | Part | Here | When it runs |
 |---|---|---|
@@ -455,7 +455,7 @@ options:
   - "5"
   - "It never stops"
 answer: b
-explanation: "i takes the values 1, 2, 3 and 4. When i becomes 5, `5 <= 4` is false and the loop ends."
+explanation: "`i` takes the values 1, 2, 3, and 4. When `i` becomes 5, `5 <= 4` is false and the loop ends."
 ```
 
 ```quiz
@@ -473,7 +473,7 @@ explanation: "`<=` lets i reach 3, and items[3] doesn't exist. (Starting at 1 sk
 
 ## F6 · `for...of` — one round per item
 
-Most of the time you don't need the index — you just want **each item**. `for...of` gives you them one by one:
+Most of the time you don't need the index — you just want **each item**. `for...of` gives them to you one by one:
 
 ```ts mode=read
 const browsers: string[] = ['chromium', 'firefox', 'webkit'];
@@ -486,7 +486,7 @@ for (const browser of browsers) {
 // Testing on webkit
 ```
 
-Read it as *"for each `browser` of the list `browsers`"*. Each round, `browser` holds the next item. It can be a `const` because every round gets a fresh variable. There's no counter to get wrong, so no off-by-one bugs.
+Read it as *"for each `browser` of the list `browsers`"*. In each round, `browser` holds the next item. It can be a `const` because every round gets a fresh variable. There's no counter to get wrong, so there are no off-by-one bugs.
 
 `for...of` works on anything that holds a sequence — arrays, and text too (one character per round):
 
@@ -496,7 +496,7 @@ for (const ch of 'Hi!') {
 }
 ```
 
-This is the loop you'll use most in Playwright tests — for example, "for each product card on the page, check it has a price".
+This is the loop you'll use most in Playwright tests — for example, "for each product card on the page, check that it has a price".
 
 ### Looping over an object's properties
 
@@ -526,10 +526,10 @@ options:
   - "'0' and '1'"
   - "Nothing — for...of needs a counter"
 answer: a
-explanation: "for...of gives the items themselves. (for...in would give the indexes '0' and '1'.)"
+explanation: "`for...of` gives the items themselves. (`for...in` would give the indexes '0' and '1'.)"
 ```
 
-## F7 · `while`, `do...while`, `break` and `continue`
+## F7 · `while`, `do...while`, `break`, and `continue`
 
 ### `while` — repeat as long as a condition holds
 
@@ -549,7 +549,7 @@ console.log(`Ready after ${attempt} checks`);   // Ready after 3 checks
 The condition is checked **before** every round. If it's false at the very start, the block never runs at all.
 
 > [!WARNING] Infinite loops
-> If nothing inside the loop ever makes the condition false, it runs forever and your program freezes. Always make sure each round moves towards the end — here, `attempt++` and the `attempt < 5` limit guarantee it stops. If it does happen, press **Stop** (or **Ctrl+C** in the terminal).
+> If nothing inside the loop ever makes the condition false, it runs forever and your program freezes. Always make sure each round moves towards the end — here, `attempt++` and the `attempt < 5` limit guarantee it stops. If a loop does run forever, press **Stop** (or **Ctrl+C** in the terminal).
 
 ### `do...while` — run at least once
 
@@ -572,7 +572,7 @@ These work in every kind of loop:
 | Keyword | Effect | Tester's version |
 |---|---|---|
 | `break` | Leave the loop **now** | "Stop testing — a blocker was found" |
-| `continue` | Skip the **rest of this round**, go to the next one | "Skip this row, it's marked N/A" |
+| `continue` | Skip the **rest of this round**, go to the next one | "Skip this row; it's marked N/A" |
 
 ```ts mode=read
 const statuses: string[] = ['passed', 'skipped', 'passed', 'failed', 'passed'];
@@ -582,14 +582,14 @@ for (const status of statuses) {
     continue;                 // ignore skipped tests
   }
   if (status === 'failed') {
-    console.log('Failure found - stopping');
+    console.log('Failure found: stopping');
     break;                    // no need to look further
   }
   console.log(status);
 }
 // passed
 // passed
-// Failure found - stopping
+// Failure found: stopping
 ```
 
 > [!TESTER]
@@ -633,8 +633,8 @@ Arrays come with methods that do common loop jobs in one line. Each one takes a 
 - `(result)` — a name for the current item (you choose the name)
 - `=>` — "gives back"
 - after the arrow — what to work out for that item
-- with two names, `(item, index)`, the method also hands you the item's position
-- with `{ }` after the arrow, the function can hold several statements, like an `if` block
+- `(item, index)` — with two names, the method also hands you the item's position
+- `{ }` after the arrow — lets the function hold several statements, like an `if` block
 
 This is called an **arrow function**. The array method runs it once for every item.
 
@@ -676,7 +676,7 @@ options:
   - "404"
   - "[false, true, false, true]"
 answer: a
-explanation: "filter keeps the matching items in a new array. (find would give just the first, 404; map would give the true/false list.)"
+explanation: "`filter` keeps the matching items in a new array. (`find` would give just the first, 404; `map` would give the true/false list.)"
 ```
 
 ```quiz
@@ -698,7 +698,7 @@ All files today go in `ts-basics/day7`. Run with `node day7/<file>.ts`, check wi
 
 ## I1 · Rate page-load times, and triage results
 
-`if` ladders inside a `for...of` loop, then a `switch` inside another:
+This file uses `if` ladders inside a `for...of` loop, then a `switch` inside a second loop:
 
 ```ts file=ts-basics/day7/timing.ts mode=editor run="node day7/timing.ts"
 // Page-load times measured by a performance check (milliseconds)
@@ -753,7 +753,7 @@ Notice `let rating: string;` is declared **without** a value: every branch of th
 
 ## I2 · A mini data-driven test
 
-This is Day 6's login test-data sheet, with one more row — and now actually **run**. For each test case, the code works out what the app would do, compares it with what the case expects, and reports PASS or FAIL:
+This is Day 6's login test-data sheet, with one more row, and this time it actually **runs**. For each test case, the code works out what the app would do, compares it with what the case expects, and reports PASS or FAIL:
 
 ```ts file=ts-basics/day7/login-runner.ts mode=editor run="node day7/login-runner.ts"
 // A mini data-driven test: check every login case against the app's rules
@@ -816,14 +816,14 @@ FAIL TC-05: expected "Password is required.", got "Password is required"
 4 passed, 1 failed
 ```
 
-TC-05 fails because of a single full stop. Just like in real testing, the question is: is the **app** wrong, or the **test data**? Here the test data has a typo — remove the `.` and run again for 5 passes.
+TC-05 fails because of a single period. Just like in real testing, the question is: is the **app** wrong, or the **test data**? Here the test data has a typo — remove the `.` and run again for 5 passes.
 
 > [!TESTER]
 > Everything a data-driven Playwright test does is here: a typed test-data sheet, a loop over its rows, a check per row, and a pass/fail count. On Day 9 the "pretend to be the app" part is replaced by a real browser.
 
 ## I3 · A password-rules checker
 
-Nested loops, `continue`, and collecting problems in an array:
+This file uses nested loops and `continue`, and collects problems in an array:
 
 ```ts file=ts-basics/day7/passwords.ts mode=editor run="node day7/passwords.ts"
 // Check candidate passwords against the sign-up rules
@@ -974,7 +974,7 @@ Any failed? true. All under 10 s? true
 Total time: 16 s
 ```
 
-`find` may find nothing, so its result's type is `TestResult | undefined` — which is why the code reads it with `?.` and `??` (Day 6). Change `5000` to `9000` and run: the line becomes `First slow test: none`.
+`find` may return nothing, so its result's type is `TestResult | undefined` — which is why the code reads it with `?.` and `??` (Day 6). Change `5000` to `9000` and run: the line becomes `First slow test: none`.
 
 ## I6 · Spot the loop bugs
 
@@ -1072,7 +1072,7 @@ options:
   - "An error"
   - "'Hi undefined'"
 answer: b
-explanation: Empty text is falsy, so the ternary takes the value after the colon.
+explanation: Empty text is falsy, so the ternary operator takes the value after the colon.
 ```
 
 ```quiz
@@ -1098,7 +1098,7 @@ options:
   - "`for (let i = 1; i < products.length; i++) { … }`"
   - "`for (let i = 0; i <= products.length; i++) { … }`"
 answer: a
-explanation: "for...of gives each item in turn. for...in gives the indexes as text; starting at 1 skips the first product; `<=` runs one round too many."
+explanation: "`for...of` gives each item in turn. `for...in` gives the indexes as text; starting at 1 skips the first product; `<=` runs one round too many."
 ```
 
 ```quiz
@@ -1111,7 +1111,7 @@ options:
   - "[5300]"
   - "true"
 answer: a
-explanation: "map turns every item into a new value and gives back a new array of the same length."
+explanation: "`map` turns every item into a new value and gives back a new array of the same length."
 ```
 
 ```quiz
@@ -1124,7 +1124,7 @@ options:
   - "true"
   - "undefined"
 answer: b
-explanation: "find gives the first item whose check is truthy — Ravi's object — and `?.name` reads its name."
+explanation: "`find` gives the first item whose check is truthy — Ravi's object — and `?.name` reads its name."
 ```
 
 ```quiz
@@ -1150,7 +1150,7 @@ options:
   - "undefined"
   - "An error"
 answer: b
-explanation: "every asks \"is there any item that fails the check?\" In an empty list there isn't one, so it's true. (some on an empty list is false.) Worth remembering: an empty list makes `every` true."
+explanation: "every asks \"is there any item that fails the check?\" In an empty list there isn't one, so it's true. (`some` on an empty list is false.) Worth remembering: an empty list makes `every` true."
 ```
 
 ```quiz
@@ -1208,7 +1208,7 @@ answer: |
   0
   Hi guest
 
-  0 is falsy, so `||` falls back to 3. `??` only replaces null or undefined, so it keeps the 0. Empty text is falsy, so the ternary picks 'Hi guest'.
+  0 is falsy, so `||` falls back to 3. `??` replaces only null or undefined, so it keeps the 0. Empty text is falsy, so the ternary operator picks 'Hi guest'.
 ````
 
 ````exercise
@@ -1251,7 +1251,7 @@ answer: |
   [ 16, 24, 10 ]
   3
 
-  filter keeps 8, 12 and 5 (3 isn't greater than 4). map doubles each: 16, 24, 10. Node.js prints arrays with spaces inside the brackets.
+  `filter` keeps 8, 12, and 5 (3 isn't greater than 4). `map` doubles each: 16, 24, 10. Node.js prints arrays with spaces inside the brackets.
 ````
 
 ## Exercises
