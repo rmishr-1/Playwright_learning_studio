@@ -140,10 +140,12 @@ export async function buildVariant(code: string, opts: BuildVariantOptions = {})
   const licence = licenceFile ? (JSON.parse(fs.readFileSync(licenceFile, 'utf-8')) as LicenceFile).licence : null;
   const zip = opts.zip === true;
 
-  // Node and the browsers the app ships, the first time.
+  // Node and the browsers the app ships, the first time: downloaded fresh, never copied from this
+  // computer's own Playwright folder, where running Playwright leaves files of its own (a Chromium
+  // debug.log, say) that no longer match runtime-pins.json.
   if (!fs.existsSync(path.join(DESKTOP, 'runtime', 'MANIFEST.sha256'))) {
-    console.log('\n> Gathering Node and the browsers the app ships (first time only)');
-    execFileSync(process.execPath, [path.join(DESKTOP, '..', 'node_modules', 'tsx', 'dist', 'cli.mjs'), path.join(__dirname, 'runtime.ts')], {
+    console.log('\n> Downloading Node and the browsers the app ships (first time only, a few minutes)');
+    execFileSync(process.execPath, [path.join(DESKTOP, '..', 'node_modules', 'tsx', 'dist', 'cli.mjs'), path.join(__dirname, 'runtime.ts'), '--fresh'], {
       stdio: 'inherit',
     });
   }
