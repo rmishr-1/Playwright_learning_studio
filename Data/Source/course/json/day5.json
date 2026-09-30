@@ -3,7 +3,7 @@
   "day": 5,
   "week": 1,
   "title": "Variables and Operators",
-  "subtitle": "Store test data in variables, name them well, and calculate, compare and combine values — the building blocks of every test",
+  "subtitle": "Store test data in variables, name them well, and calculate, compare, and combine values — the building blocks of every test",
   "estimatedTime": "3 hours",
   "topics": [
     "Variables (let, const, var)",
@@ -15,7 +15,7 @@
     "Describe block scope — where a variable exists and where it doesn't",
     "Name variables clearly using the rules and the camelCase convention",
     "Build text with template literals",
-    "Use arithmetic, assignment, comparison and logical operators, and the ternary operator",
+    "Use arithmetic, assignment, comparison, and logical operators, and the ternary operator",
     "Convert between text and numbers, and avoid comparison traps",
     "Read and fix the TypeScript errors caused by variable mistakes"
   ],
@@ -36,7 +36,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Before starting, make sure you can do each of these (the Day 4 lesson is in brackets):\n\n- [ ] Run a file with `node day5/file.ts` and type-check it with `npm run check -- day5/file.ts`, from inside `pw-course/ts-basics` (Day 4 · I1–I2)\n- [ ] Explain why Node.js and Playwright don't catch type mistakes, but `tsc` and VS Code do (Day 4 · F4)\n- [ ] Read an error like `day5/x.ts(3,7): error TS2322: …` — file, line, character, code, message (Day 4 · P3)"
+              "content": "Before starting, make sure you can do each of these (the Day 4 lesson is in parentheses):\n\n- [ ] Run a file with `node day5/file.ts` and type-check it with `npm run check -- day5/file.ts`, from inside `pw-course/ts-basics` (Day 4 · I1–I2)\n- [ ] Explain why Node.js and Playwright don't catch type mistakes, but `tsc` and VS Code do (Day 4 · F4)\n- [ ] Read an error like `day5/x.ts(3,7): error TS2322: …` — file, line, character, code, message (Day 4 · P3)"
             },
             {
               "type": "quiz",
@@ -161,7 +161,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Creating a variable is called **declaring** it. The full form has five parts:"
+              "content": "Creating a variable is called **declaring** it. The full form has four parts:"
             },
             {
               "type": "code",
@@ -171,7 +171,7 @@
             },
             {
               "type": "markdown",
-              "content": "- **keyword** — `let` or `const` (F2 explains which)\n- **name** — how you'll refer to it\n- **type** — optional; TypeScript infers it from the value if you leave it out (Day 4 · F5)\n- **value** — the first value you put in the box\n\nThere are four ways to write a declaration:\n\n| Form | Example | Result |\n|---|---|---|\n| Type **and** value | `let status: string = 'passed';` | A string box holding `'passed'` |\n| Value only (type inferred) | `let status = 'passed';` | Same — TypeScript infers `string` |\n| Type only, value later | `let status: string;` then `status = 'passed';` | Must be given a value before it's used |\n| Neither | `let status;` | Avoid — it's unclear what the box is for |\n\n### Assigning and reassigning\n\n`=` means **\"put this value in the box\"** — it's not \"equals\" as in maths."
+              "content": "- **keyword** — `let` or `const` (F2 explains which)\n- **name** — how you'll refer to it\n- **type** — optional; TypeScript infers it from the value if you leave it out (Day 4 · F5)\n- **value** — the first value you put in the box\n\nThere are four ways to write a declaration:\n\n| Form | Example | Result |\n|---|---|---|\n| Type **and** value | `let status: string = 'passed';` | A string box holding `'passed'` |\n| Value only (type inferred) | `let status = 'passed';` | Same — TypeScript infers `string` |\n| Type only, value later | `let status: string;` then `status = 'passed';` | Must be given a value before it's used |\n| Neither | `let status;` | Avoid — it's unclear what the box is for |\n\n### Assigning and reassigning\n\n`=` means **\"put this value in the box\"** — it's not \"equals\" as in math."
             },
             {
               "type": "code",
@@ -229,7 +229,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "| Keyword | Can the value be replaced? | Use it for |\n|---|---|---|\n| `const` | ❌ No — \"constant\" | Values that shouldn't change: test data, URLs, expected messages. **Use by default.** |\n| `let` | ✅ Yes | Values that must change: counters, running totals, results |\n| `var` | ✅ Yes | **Nothing** — the old keyword from before 2015. Avoid it |"
+              "content": "| Keyword | Can the value be replaced? | Use it for |\n|---|---|---|\n| `const` | ❌ No — \"constant\" | Values that shouldn't change: test data, URLs, expected messages. **Use by default.** |\n| `let` | ✅ Yes | Values that must change: counters, running totals, results |\n| `var` | ✅ Yes | **Nothing** — the old keyword from before 2015. Avoid it. |"
             },
             {
               "type": "code",
@@ -239,7 +239,7 @@
             },
             {
               "type": "markdown",
-              "content": "**Rule of thumb:** start with `const`. Change it to `let` only when you find you need to replace the value. Code full of `const` is easier to trust — you know those values never change halfway through a test.\n\n### Why not `var`?\n\n`var` was JavaScript's only keyword until 2015, when `let` and `const` arrived. It has surprising behaviours:\n\n| `var` problem | What happens | `let` / `const` |\n|---|---|---|\n| **Redeclaring is allowed** | `var browser = 'chromium';` … later `var browser = 'firefox';` silently replaces the first — even if someone else wrote it far away | ❌ error: *Cannot redeclare…* |\n| **Ignores blocks** | A `var` created inside `{ … }` leaks out and is visible outside it | Stays inside its block (F3) |\n| **Usable before its line** | It exists — as `undefined` — even before the line that declares it, so typos in order go unnoticed | ❌ error: *used before its declaration* |\n\nYou'll still see `var` in old tutorials and old test code. Read it as \"an old `let`\", and write `let` or `const` yourself."
+              "content": "**Rule of thumb:** start with `const`. Change it to `let` only when you find you need to replace the value. Code full of `const` is easier to trust — you know those values never change halfway through a test.\n\n### Why not `var`?\n\n`var` was JavaScript's only keyword until 2015, when `let` and `const` arrived. It behaves in surprising ways:\n\n| `var` problem | What happens | `let` / `const` |\n|---|---|---|\n| **Redeclaring is allowed** | `var browser = 'chromium';` … later `var browser = 'firefox';` silently replaces the first — even if it was written elsewhere in the file | ❌ error: *Cannot redeclare…* |\n| **Ignores blocks** | A `var` created inside `{ … }` leaks out and is visible outside it | Stays inside its block (F3) |\n| **Usable before its line** | It exists — as `undefined` — even before the line that declares it, so mistakes in the order of lines go unnoticed | ❌ error: *used before its declaration* |\n\nYou'll still see `var` in old tutorials and old test code. Read it as \"an old `let`\", and write `let` or `const` yourself."
             },
             {
               "type": "quiz",
@@ -310,12 +310,12 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "const suite = 'Checkout';            // outside any block: visible to everything below\n\n{\n  const step = 'Enter card details';   // only exists inside these braces\n  console.log(suite, step);            // ✅ both visible here\n}\n\nconsole.log(step);                     // ❌ error TS2304: Cannot find name 'step'.",
+              "content": "const suite = 'Checkout';            // outside any block: visible to everything below\n\n{\n  const step = 'Enter card details';   // exists only inside these braces\n  console.log(suite, step);            // ✅ both visible here\n}\n\nconsole.log(step);                     // ❌ error TS2304: Cannot find name 'step'.",
               "mode": "read"
             },
             {
               "type": "markdown",
-              "content": "You'll see blocks everywhere from Day 7 — after `if`, around loops, as the body of functions and Playwright tests. Block scope keeps each block's variables private, so two tests can both have a variable called `email` without clashing."
+              "content": "You'll see blocks everywhere starting on Day 7 — after `if`, around loops, as the body of functions and Playwright tests. Block scope keeps each block's variables private, so two tests can both have a variable called `email` without clashing."
             },
             {
               "type": "callout",
@@ -396,7 +396,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "On Day 4 you joined text with `+`. It works, but gets messy:"
+              "content": "On Day 4 you joined text with `+`. It works, but it gets messy:"
             },
             {
               "type": "code",
@@ -426,7 +426,7 @@
             },
             {
               "type": "markdown",
-              "content": "A few handy tools that every piece of text has. You write them after a dot; the ones with brackets are called *methods*, and `.length` (no brackets) is a *property* — a stored fact about the text:\n\n| Method | Example | Result |\n|---|---|---|\n| `.length` (no brackets) | `'Asha'.length` | `4` |\n| `.toUpperCase()` / `.toLowerCase()` | `'Asha'.toUpperCase()` | `'ASHA'` |\n| `.trim()` | `'  a@b.com  '.trim()` | `'a@b.com'` — spaces removed from both ends |\n| `.includes('…')` | `'Order confirmed'.includes('confirmed')` | `true` |"
+              "content": "Every piece of text has a few handy tools. You write them after a dot; the ones with parentheses are called *methods*, and `.length` (no parentheses) is a *property* — a stored fact about the text:\n\n| Method or property | Example | Result |\n|---|---|---|\n| `.length` (no parentheses) | `'Asha'.length` | `4` |\n| `.toUpperCase()` / `.toLowerCase()` | `'Asha'.toUpperCase()` | `'ASHA'` |\n| `.trim()` | `'  a@b.com  '.trim()` | `'a@b.com'` — spaces removed from both ends |\n| `.includes('…')` | `'Order confirmed'.includes('confirmed')` | `true` |"
             },
             {
               "type": "quiz",
@@ -464,7 +464,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "### Arithmetic\n\n| Operator | Meaning | Example | Result |\n|---|---|---|---|\n| `+` | add | `7 + 2` | `9` |\n| `-` | subtract | `7 - 2` | `5` |\n| `*` | multiply | `7 * 2` | `14` |\n| `/` | divide | `7 / 2` | `3.5` |\n| `%` | remainder (*modulo*) | `7 % 2` | `1` |\n| `**` | power | `2 ** 10` | `1024` |\n\n`*`, `/` and `%` happen before `+` and `-`, just like in maths: `2 + 3 * 4` is `14`. **Brackets go first**: `(2 + 3) * 4` is `20`. When in doubt, add brackets — they make the order obvious to readers too.\n\nTwo surprises worth knowing:\n\n- Decimals aren't always exact: `0.1 + 0.2` gives `0.30000000000000004`. Round for display with `.toFixed(2)` → `'0.30'` (note: it gives *text*).\n- Dividing a number by zero gives `Infinity`, and converting text that isn't a number with `Number(…)` gives `NaN` (\"Not a Number\") — see F6.\n\n### Assignment shortcuts\n\n| Shortcut | Same as | Typical use |\n|---|---|---|\n| `x += 5` | `x = x + 5` | Add to a running total |\n| `x -= 5` | `x = x - 5` | Subtract from stock |\n| `x *= 2` | `x = x * 2` | Double a wait time |\n| `x /= 2` | `x = x / 2` | Halve something |\n| `x++` | `x = x + 1` | Count one more pass |\n| `x--` | `x = x - 1` | Count down attempts |\n\nThese all *change* the variable — so they only work on `let`, never on `const`."
+              "content": "### Arithmetic\n\n| Operator | Meaning | Example | Result |\n|---|---|---|---|\n| `+` | add | `7 + 2` | `9` |\n| `-` | subtract | `7 - 2` | `5` |\n| `*` | multiply | `7 * 2` | `14` |\n| `/` | divide | `7 / 2` | `3.5` |\n| `%` | remainder (*modulo*) | `7 % 2` | `1` |\n| `**` | power | `2 ** 10` | `1024` |\n\n`*`, `/`, and `%` happen before `+` and `-`, just like in math: `2 + 3 * 4` is `14`. **Parentheses go first**: `(2 + 3) * 4` is `20`. When in doubt, add parentheses — they make the order obvious to readers too.\n\nTwo surprises worth knowing:\n\n- Decimals aren't always exact: `0.1 + 0.2` gives `0.30000000000000004`. Round for display with `.toFixed(2)` → `'0.30'` (note: it gives *text*).\n- Dividing a number by zero gives `Infinity`, and converting text that isn't a number with `Number(…)` gives `NaN` (\"Not a Number\") — see F6.\n\n### Assignment shortcuts\n\n| Shortcut | Same as | Typical use |\n|---|---|---|\n| `x += 5` | `x = x + 5` | Add to a running total |\n| `x -= 5` | `x = x - 5` | Subtract from stock |\n| `x *= 2` | `x = x * 2` | Double a wait time |\n| `x /= 2` | `x = x / 2` | Halve something |\n| `x++` | `x = x + 1` | Count one more pass |\n| `x--` | `x = x - 1` | Count down attempts |\n\nThese all *change* the variable — so they work only on `let`, never on `const`."
             },
             {
               "type": "quiz",
@@ -530,7 +530,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Comparisons always produce `true` or `false` — exactly what an assertion needs.\n\n| Operator | Meaning | Example | Result |\n|---|---|---|---|\n| `===` | equal (value **and** type) | `3 === 3` | `true` |\n| `!==` | not equal | `3 !== 4` | `true` |\n| `>` / `<` | greater / less than | `5 > 3` | `true` |\n| `>=` / `<=` | greater or equal / less or equal | `18 >= 18` | `true` |\n| `==` / `!=` | \"loose\" equal / not equal — converts types first | `'3' == 3` | `true` (!) |\n\n### Always use `===` and `!==`\n\nIn plain JavaScript, the loose `==` quietly converts values before comparing, so `'3' == 3` is `true` and `'' == 0` is `true`. That hides bugs: a page showing the text `\"3\"` would pass a check for the number `3` by accident. The strict `===` compares **value and type**, so `'3' === 3` is `false` — no surprises.\n\nTypeScript goes one step further: when the two sides clearly have different types, it flags the comparison — with `==` *or* `===` — before you even run the code (you'll see it in I4). But values without a known type (for example data read from a file) slip past that check, so make `===` your habit.\n\n### Text read from a page is always text\n\nWhen a test reads what's on the screen — a price, a count, a badge — it usually gets **text**, even if it looks like a number. To compare it with a number, convert it:\n\n| Conversion | Example | Result |\n|---|---|---|\n| Text → number | `Number('1499')` | `1499` |\n| Text that isn't a number | `Number('₹1,499')` | `NaN` — clean it up first (Day 6) |\n| Empty text | `Number('')` | `0` — careful! An empty badge silently becomes 0, not NaN |\n| Number → text | `String(3)` | `'3'` |\n| Which type is it? | `typeof badgeText` | `'string'` — the `typeof` operator from Day 4 gives the type's name, e.g. `'string'`, `'number'`, `'boolean'` |\n\n### Comparing text\n\nText is compared letter by letter, and **case matters**: `'Login' === 'login'` is `false`. When the case shouldn't matter, compare lower-cased versions: `a.toLowerCase() === b.toLowerCase()`."
+              "content": "Comparisons always produce `true` or `false` — exactly what an assertion needs.\n\n| Operator | Meaning | Example | Result |\n|---|---|---|---|\n| `===` | equal (value **and** type) | `3 === 3` | `true` |\n| `!==` | not equal | `3 !== 4` | `true` |\n| `>` / `<` | greater / less than | `5 > 3` | `true` |\n| `>=` / `<=` | greater than or equal / less than or equal | `18 >= 18` | `true` |\n| `==` / `!=` | \"loose\" equal / not equal — converts types first | `'3' == 3` | `true` (!) |\n\n### Always use `===` and `!==`\n\nIn plain JavaScript, the loose `==` quietly converts values before comparing, so `'3' == 3` is `true` and `'' == 0` is `true`. That hides bugs: a page showing the text `\"3\"` would pass a check for the number `3` by accident. The strict `===` compares **value and type**, so `'3' === 3` is `false` — no surprises.\n\nTypeScript goes one step further: when the two sides clearly have different types, it flags the comparison — with `==` *or* `===` — before you even run the code (you'll see it in I4). But values without a known type (for example, data read from a file) slip past that check, so make `===` your habit.\n\n### Text read from a page is always text\n\nWhen a test reads what's on the screen — a price, a count, a badge — it usually gets **text**, even if it looks like a number. To compare it with a number, convert it:\n\n| Conversion | Example | Result |\n|---|---|---|\n| Text → number | `Number('1499')` | `1499` |\n| Text that isn't a number | `Number('₹1,499')` | `NaN` — clean it up first (Day 6) |\n| Empty text | `Number('')` | `0` — careful! An empty badge silently becomes 0, not NaN |\n| Number → text | `String(3)` | `'3'` |\n| Which type is it? | `typeof badgeText` | `'string'` — the `typeof` operator from Day 4 gives the type's name, e.g., `'string'`, `'number'`, `'boolean'` |\n\n### Comparing text\n\nText is compared letter by letter, and **case matters**: `'Login' === 'login'` is `false`. When the case shouldn't matter, compare lower-cased versions: `a.toLowerCase() === b.toLowerCase()`."
             },
             {
               "type": "quiz",
@@ -616,7 +616,7 @@
             },
             {
               "type": "markdown",
-              "content": "Read it as: *\"Is `failedTests === 0`? If yes, `'PASS'`; otherwise `'FAIL'`.\"* (The `: number` tells TypeScript that `failedTests` could be any number — without it, TypeScript sees it's always 0 and would call the comparison pointless. I3 explains this.)\n\nOn Day 10 you'll meet this line in Playwright's settings file: `retries: process.env.CI ? 2 : 0` — \"on a CI server, 2 retries; otherwise 0\"."
+              "content": "Read it as: *\"Is `failedTests === 0`? If yes, `'PASS'`; otherwise `'FAIL'`.\"* (The `: number` tells TypeScript that `failedTests` could be any number — without it, TypeScript would see that it's always 0 and flag the comparison as pointless. I3 explains this.)\n\nOn Day 10 you'll meet this line in Playwright's settings file: `retries: process.env.CI ? 2 : 0` — \"on a CI server, 2 retries; otherwise 0\"."
             },
             {
               "type": "quiz",
@@ -672,7 +672,7 @@
               "correct": [
                 "d"
               ],
-              "explanation": "8 === 10 is false, so the ternary gives the value after the colon."
+              "explanation": "8 === 10 is false, so the ternary operator gives the value after the colon."
             }
           ]
         }
@@ -721,7 +721,7 @@
             },
             {
               "type": "markdown",
-              "content": "Notice `email.trim().toLowerCase()`: methods can be **chained** — `trim()` runs first, then `toLowerCase()` runs on its result.\n\n**Try it:** change `firstName` to `'Priya'` and run again. Three lines change, because three values were built from it — that's the \"change the cell once\" benefit from P2."
+              "content": "Notice `email.trim().toLowerCase()`: methods can be **chained** — `trim()` runs first, then `toLowerCase()` runs on its result.\n\n**Try it:** change `firstName` to `'Priya'` and run again. Three lines change because three values were built from it — that's the \"change the cell once\" benefit from P2."
             }
           ]
         },
@@ -750,7 +750,7 @@
             },
             {
               "type": "markdown",
-              "content": "`passed++`, `passed += 1` and `passed = passed + 1` all do the same thing — use whichever reads best.\n\n**Try it:** change `let passed = 0;` to `const passed = 0;` and check the file. Read the errors (one for each line that changes `passed`), then change it back."
+              "content": "`passed++`, `passed += 1`, and `passed = passed + 1` all do the same thing — use whichever reads best.\n\n**Try it:** change `let passed = 0;` to `const passed = 0;` and check the file. Read the errors (one for each line that changes `passed`), then change it back."
             }
           ]
         },
@@ -760,12 +760,12 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Arithmetic, comparison, logical and ternary operators together — the kind of numbers you'd put in a test-summary report:"
+              "content": "This program uses arithmetic, comparison, logical, and ternary operators together to produce the kind of numbers you'd put in a test-summary report:"
             },
             {
               "type": "code",
               "language": "ts",
-              "content": "// Results from a test run (typed as number: in real life they come from a report)\nconst total: number = 48;\nconst passed: number = 42;\nconst failed: number = 4;\nconst skipped = total - passed - failed;          // whatever is left over\n\n// Percentages\nconst passRate = (passed / total) * 100;          // brackets first, then × 100\nconst passRateText = passRate.toFixed(1);         // round to 1 decimal place (gives text)\n\n// Decisions\nconst allPassed = failed === 0;\nconst releaseReady = passRate >= 90 && failed <= 5;   // both rules must be true\nconst status = allPassed ? 'GREEN' : 'RED';\n\nconsole.log(`Total: ${total} | Passed: ${passed} | Failed: ${failed} | Skipped: ${skipped}`);\nconsole.log(`Pass rate: ${passRateText}%`);\nconsole.log(`Status: ${status}`);\nconsole.log(`Ready for release? ${releaseReady}`);",
+              "content": "// Results from a test run (typed as number: in real life they come from a report)\nconst total: number = 48;\nconst passed: number = 42;\nconst failed: number = 4;\nconst skipped = total - passed - failed;          // whatever is left over\n\n// Percentages\nconst passRate = (passed / total) * 100;          // parentheses first, then × 100\nconst passRateText = passRate.toFixed(1);         // round to 1 decimal place (gives text)\n\n// Decisions\nconst allPassed = failed === 0;\nconst releaseReady = passRate >= 90 && failed <= 5;   // both rules must be true\nconst status = allPassed ? 'GREEN' : 'RED';\n\nconsole.log(`Total: ${total} | Passed: ${passed} | Failed: ${failed} | Skipped: ${skipped}`);\nconsole.log(`Pass rate: ${passRateText}%`);\nconsole.log(`Status: ${status}`);\nconsole.log(`Ready for release? ${releaseReady}`);",
               "mode": "editor",
               "file": "ts-basics/day5/metrics.ts",
               "run": "node day5/metrics.ts",
@@ -780,7 +780,7 @@
             {
               "type": "callout",
               "variant": "note",
-              "content": "Without it, TypeScript would notice that `failed` is *always* exactly 4, and flag `failed === 0` as a comparison that can never be true. Real results come from a report and can be any number, so we tell TypeScript \"this is some number\".",
+              "content": "Without the `: number` annotation, TypeScript would notice that `failed` is *always* exactly 4, and flag `failed === 0` as a comparison that can never be true. Real results come from a report and can be any number, so we tell TypeScript \"this is some number\".",
               "title": "Why `: number` on the first three lines?"
             },
             {
@@ -870,7 +870,7 @@
             {
               "type": "callout",
               "variant": "tester",
-              "content": "`NaN` is a classic source of confusing test failures. If a price on the page includes a currency symbol or a comma, remove them before converting — you'll learn how to clean text on Day 6."
+              "content": "`NaN` is a classic source of confusing test failures. If a price on the page includes a currency symbol or a comma, remove these characters before converting — you'll learn how to clean text on Day 6."
             }
           ]
         },
@@ -907,7 +907,7 @@
             },
             {
               "type": "markdown",
-              "content": "| Line | Mistake | Fix |\n|---|---|---|\n| 3 | Reassigning a `const` | Use `let` if it must change — or, better, make a second `const` with a different name |\n| 5 | Using `attempts` before the line that creates it (two errors for the same mistake) | Move the `console.log` below the declaration |\n| 11 | `secretToken` only exists inside its block | Use it inside the block, or declare it outside |\n\nThe fixed version:"
+              "content": "| Line | Mistake | Fix |\n|---|---|---|\n| 3 | Reassigning a `const` | Use `let` if it must change — or, better, make a second `const` with a different name |\n| 5 | Using `attempts` before the line that creates it (two errors for the same mistake) | Move the `console.log` below the declaration |\n| 11 | `secretToken` exists only inside its block | Use it inside the block, or declare it outside |\n\nThe fixed version:"
             },
             {
               "type": "code",
@@ -926,7 +926,7 @@
             },
             {
               "type": "markdown",
-              "content": "Notice that a block can see variables from **outside** it — scope only stops variables leaking *out*."
+              "content": "Notice that a block can see variables from **outside** it — scope only stops variables from leaking *out*."
             }
           ]
         }
@@ -1023,7 +1023,7 @@
               "correct": [
                 "c"
               ],
-              "explanation": "Multiplication happens before addition — 3 × 4 = 12, then 2 + 12 = 14. Use brackets `(2 + 3) * 4` for 20."
+              "explanation": "Multiplication happens before addition — 3 × 4 = 12, then 2 + 12 = 14. Use parentheses `(2 + 3) * 4` for 20."
             },
             {
               "type": "quiz",
@@ -1051,7 +1051,7 @@
               "correct": [
                 "c"
               ],
-              "explanation": "`${ }` only works inside backticks. Inside single quotes it's printed literally."
+              "explanation": "`${ }` works only inside backticks. Inside single quotes it's printed literally."
             },
             {
               "type": "quiz",
@@ -1193,7 +1193,7 @@
               "level": "easy",
               "prompt": "What is printed?",
               "code": "let count = 1;\ncount += 4;\ncount--;\ncount *= 2;\nconst label = count > 6 ? 'many' : 'few';\nconsole.log(count, label);",
-              "answer": "`8 many`\n\ncount: 1 → 5 (`+= 4`) → 4 (`--`) → 8 (`*= 2`). 8 > 6 is true, so label is 'many'.",
+              "answer": "`8 many`\n\ncount: 1 → 5 (`+= 4`) → 4 (`--`) → 8 (`*= 2`). 8 > 6 is true, so `label` is 'many'.",
               "check": {
                 "kind": "self"
               }
@@ -1206,7 +1206,7 @@
               "level": "medium",
               "prompt": "What is printed?",
               "code": "const price = 200;\nconst qty = 3;\nconsole.log('Total: ' + price * qty);\nconsole.log('Total: ' + price + qty);\nconsole.log('Total: ' + (price + qty));",
-              "answer": "Total: 600\nTotal: 2003\nTotal: 203\n\nLine 1: `*` happens before `+`, so 200 × 3 = 600, then it's joined to the text. Line 2: `+` works left to right — the text joins 200, then joins 3. Line 3: the brackets add 200 + 3 first.",
+              "answer": "Total: 600\nTotal: 2003\nTotal: 203\n\nLine 1: `*` happens before `+`, so 200 × 3 = 600, then it's joined to the text. Line 2: `+` works left to right — the text joins 200, then joins 3. Line 3: the parentheses add 200 + 3 first.",
               "check": {
                 "kind": "self"
               }
@@ -1245,14 +1245,14 @@
               "id": "d5-ex2",
               "title": "Shopping-cart calculator",
               "level": "medium",
-              "prompt": "Create `day5/cart.ts`. A cart has: unit price **1299**, quantity **3**, a **10%** discount, and shipping of **99**, which is **free when the discounted amount is 3000 or more**.\n\nPrint:\n```\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```\nUse `const` for everything, arithmetic operators for the maths, a **ternary** for shipping, and `.toFixed(2)` for the last line.",
+              "prompt": "Create `day5/cart.ts`. A cart has a unit price of **1299**, a quantity of **3**, a **10%** discount, and shipping of **99**, which is **free when the discounted amount is 3000 or more**.\n\nPrint:\n```\nSubtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30\n```\nUse `const` for everything, arithmetic operators for the math, a **ternary** for shipping, and `.toFixed(2)` for the last line.",
               "file": "ts-basics/day5/cart.ts",
               "run": "node day5/cart.ts",
               "hints": [
                 "discount = subtotal × discountPercent / 100",
                 "`const shipping = afterDiscount >= 3000 ? 0 : 99;`"
               ],
-              "solution": "// Inputs\nconst unitPrice = 1299;\nconst quantity = 3;\nconst discountPercent = 10;\n\n// Calculations\nconst subtotal = unitPrice * quantity;                   // 3897\nconst discount = (subtotal * discountPercent) / 100;     // 389.7\nconst afterDiscount = subtotal - discount;               // 3507.3\nconst shipping = afterDiscount >= 3000 ? 0 : 99;         // free above 3000\nconst totalToPay = afterDiscount + shipping;\n\n// Output\nconsole.log(`Subtotal: ${subtotal}`);\nconsole.log(`Discount: ${discount}`);\nconsole.log(`After discount: ${afterDiscount}`);\nconsole.log(`Shipping: ${shipping}`);\nconsole.log(`Total to pay: ${totalToPay.toFixed(2)}`);",
+              "solution": "// Inputs\nconst unitPrice = 1299;\nconst quantity = 3;\nconst discountPercent = 10;\n\n// Calculations\nconst subtotal = unitPrice * quantity;                   // 3897\nconst discount = (subtotal * discountPercent) / 100;     // 389.7\nconst afterDiscount = subtotal - discount;               // 3507.3\nconst shipping = afterDiscount >= 3000 ? 0 : 99;         // free at 3000 or more\nconst totalToPay = afterDiscount + shipping;\n\n// Output\nconsole.log(`Subtotal: ${subtotal}`);\nconsole.log(`Discount: ${discount}`);\nconsole.log(`After discount: ${afterDiscount}`);\nconsole.log(`Shipping: ${shipping}`);\nconsole.log(`Total to pay: ${totalToPay.toFixed(2)}`);",
               "expectedOutput": "Subtotal: 3897\nDiscount: 389.7\nAfter discount: 3507.3\nShipping: 0\nTotal to pay: 3507.30",
               "check": {
                 "kind": "stdoutEquals",
@@ -1314,7 +1314,7 @@
               "id": "d5-ex5",
               "title": "Challenge: build a URL and a test title",
               "level": "challenge",
-              "prompt": "Create `day5/url-builder.ts`. Given:\n```ts\nconst baseUrl = 'https://shop.example.com';\nconst category = 'Laptops';\nconst brand = 'Acme Tech';\nconst page = 2;\nconst sortBy = 'price';\n```\n1. Make a URL-friendly **brand slug**: lower-case, and the space replaced by `-` → `acme-tech`. (Text has a method `.replace(' ', '-')` that replaces the first space.)\n2. Build: `https://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price` (note the category is lower-cased too).\n3. Build a test title: `[P2] Laptops by Acme Tech, sorted by price`.\n4. Print the URL, then the title.",
+              "prompt": "Create `day5/url-builder.ts`. Given:\n```ts\nconst baseUrl = 'https://shop.example.com';\nconst category = 'Laptops';\nconst brand = 'Acme Tech';\nconst page = 2;\nconst sortBy = 'price';\n```\n1. Make a URL-friendly **brand slug**: lower-case, and the space replaced by `-` → `acme-tech`. (Text has a method `.replace(' ', '-')` that replaces the first space.)\n2. Build: `https://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price` (note that the category is lower-cased too).\n3. Build a test title: `[P2] Laptops by Acme Tech, sorted by price`.\n4. Print the URL, then the title.",
               "file": "ts-basics/day5/url-builder.ts",
               "run": "node day5/url-builder.ts",
               "hints": [
@@ -1343,7 +1343,7 @@
             {
               "type": "callout",
               "variant": "tip",
-              "content": "Data types in depth: the rest of the simple types (`null`, `undefined`), and the ones you'll store test data in — arrays for lists, objects for records, tuples, union and literal types — plus why `any` is a trap.",
+              "content": "Data types in depth: the rest of the simple types (`null`, `undefined`), and the ones you'll store test data in — arrays for lists, objects for records, tuples, and union and literal types — plus why `any` is a trap.",
               "title": "Coming up on Day 6"
             }
           ]

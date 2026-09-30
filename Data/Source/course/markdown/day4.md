@@ -32,7 +32,7 @@ console.log('Step 2: enter the username');
 console.log('Step 3: click Log in');
 ```
 
-`console.log(…)` is the first instruction everyone learns: it **prints** whatever is inside the brackets. In our course platform, it appears in the terminal or console pane.
+`console.log(…)` is the first instruction everyone learns: it **prints** whatever is inside the parentheses. On our course platform, it appears in the terminal or console pane.
 
 The things a program works with are **values**:
 
@@ -71,12 +71,12 @@ explanation: Statements run from top to bottom, one after another, unless the co
 
 ## P2 · The rules of writing code
 
-Computers are strict readers. Five rules prevent most beginners' mistakes:
+Computers are strict readers. Five rules prevent most beginner mistakes:
 
 | Rule | Right | Wrong |
 |---|---|---|
 | **Text goes in quotes** — single `'…'` or double `"…"` (a third kind, backticks, comes on Day 5) | `'Log in'` | `Log in` |
-| **Quotes and brackets come in pairs** | `console.log('Hi')` | `console.log('Hi)` |
+| **Quotes and parentheses come in pairs** | `console.log('Hi')` | `console.log('Hi)` |
 | **Case matters** | `console.log` | `Console.Log` |
 | **Comments are notes for people** — the computer ignores them | `// open the page` | — |
 | **A semicolon ends a statement** (optional in most places, but we always write it) | `console.log('Hi');` | — |
@@ -93,7 +93,7 @@ Two kinds of comments:
 ```
 
 > [!WARNING] Straight quotes only
-> Word processors, PDFs and chat apps often turn `'` into curly quotes `‘ ’`. Code needs straight quotes. If you see an "Invalid character" error after pasting, retype the quotes.
+> Word processors, PDFs, and chat apps often turn `'` into curly quotes `‘ ’`. Code needs straight quotes. If you see an "Invalid character" error after pasting, retype the quotes.
 
 ```quiz
 id: d4-p2-q1
@@ -125,13 +125,13 @@ day4/example.ts(3,7): error TS2322: Type 'string' is not assignable to type 'num
 | `Type 'string' is not assignable…` | **What** went wrong, in (fairly) plain English |
 
 > [!TESTER]
-> Read an error the way you'd read a bug report: *where*, then *what*. You'll practise this all through today's Implementation.
+> Read an error the way you'd read a bug report: *where*, then *what*. You'll practise this throughout today's Implementation tab.
 
 # Fundamentals
 
 ## F1 · JavaScript: the language of the web
 
-**JavaScript (JS)** was created in **1995** at Netscape, to make web pages interactive. Today it's the only programming language that **every web browser** runs. Whenever a page shows an error message without reloading, opens a menu, or loads more results as you scroll, that's JavaScript at work — the "electricity and plumbing" from Day 1.
+**JavaScript (JS)** was created in **1995** at Netscape to make web pages interactive. Today it's the only programming language that **every web browser** runs. Whenever a page shows an error message without reloading, opens a menu, or loads more results as you scroll, that's JavaScript at work — the "electricity and plumbing" from Day 1.
 
 For a long time JavaScript lived only inside browsers. In 2009 **Node.js** took it outside: Node.js runs JavaScript on computers and servers. That's what you installed on Day 3, and it's what runs Playwright.
 
@@ -143,7 +143,7 @@ flowchart LR
 
 JavaScript is standardised under the name **ECMAScript**, and a new edition comes out every year (ES2023, ES2024, …). You don't need to track editions — just know that "modern JavaScript" keeps gaining features.
 
-**Why a tester cares:** the app you test runs JavaScript in the browser, and your tests run JavaScript in Node.js. Understanding the language helps on both sides — writing tests, and understanding why a page behaves the way it does.
+**Why a tester cares:** the app you test runs JavaScript in the browser, and your tests run JavaScript in Node.js. Understanding the language helps on both sides: it helps you write tests and see why a page behaves the way it does.
 
 ```quiz
 id: d4-f1-q1
@@ -160,7 +160,7 @@ explanation: Node.js runs JavaScript (and TypeScript) outside the browser. npm i
 
 ## F2 · TypeScript: JavaScript plus types
 
-**TypeScript (TS)** was released by **Microsoft in 2012**, designed by Anders Hejlsberg. It's open source and free.
+**TypeScript (TS)** was designed by Anders Hejlsberg and released by **Microsoft in 2012**. It's open source and free.
 
 TypeScript is a **superset** of JavaScript: it contains *all* of JavaScript and adds one big thing — **types**. A type says *what kind of value* something is: text, a number, true/false, a list of users, and so on. Any JavaScript code is allowed in a TypeScript file — though the type checker may point out mistakes in it that JavaScript would have let slip.
 
@@ -193,7 +193,7 @@ flowchart LR
 ```
 
 > [!NOTE]
-> "Compiling" TypeScript mostly means *checking* the types and then *removing* them. What's left is ordinary JavaScript. Note that the check doesn't *stop* the JavaScript being written — your job is to read the report and fix it.
+> "Compiling" TypeScript mostly means *checking* the types and then *removing* them. What's left is ordinary JavaScript. Note that the check doesn't *stop* the JavaScript from being written — your job is to read the report and fix it.
 
 ```quiz
 id: d4-f2-q1
@@ -223,7 +223,7 @@ explanation: The language service gives editors like VS Code their error underli
 
 ## F3 · Static vs dynamic typing — why types help
 
-JavaScript is **dynamically typed**: types are only looked at while the program runs. If a value that should be a number arrives as text, nobody complains until something goes wrong *while the program is running* — maybe in front of a customer.
+JavaScript is **dynamically typed**: types are checked only while the program runs. If a value that should be a number arrives as text, nobody complains until something goes wrong *while the program is running* — maybe in front of a customer.
 
 TypeScript is **statically typed**: types are checked **before** the program runs. If you put text where a number belongs, you're told immediately, with the file and line.
 
@@ -335,14 +335,14 @@ console.log(typeof true);      // boolean
 
 ### Giving a value a name
 
-To use a value more than once, give it a **name** with `const`:
+As you saw in P1, you give a value a **name** with `const`:
 
 ```ts mode=read
 const tester = 'Asha';       // the name "tester" now means 'Asha'
 console.log(tester);         // prints Asha
 ```
 
-(Tomorrow, Day 5, is all about these named values — *variables*. For today, `const name = value` is all you need.)
+(Tomorrow's lesson, Day 5, is all about these named values — *variables*. For today, `const name = value` is all you need.)
 
 ### Type annotations and type inference
 
@@ -357,7 +357,7 @@ const attempts = 3;              // INFERENCE: TypeScript works out "number" fro
 |---|---|---|
 | Who decides the type | You write it: `: string` | TypeScript works it out from the value |
 | Looks like | `const count: number = 3;` | `const count = 3;` |
-| When to use it | When the type isn't obvious, or to document intent (you'll use it a lot for function inputs on Day 8) | When the value makes the type obvious |
+| When to use it | When the type isn't obvious, or when you want to document intent (you'll use it a lot for function inputs on Day 8) | When the value makes the type obvious |
 
 Either way, the type is **fixed**: once TypeScript knows `attempts` is a number, it won't let you treat it as text.
 
@@ -394,7 +394,7 @@ explanation: "The annotation says number, but 'two' is text. TypeScript reports 
 
 ## I1 · Set up your TypeScript playground
 
-You'll practise TypeScript in a small folder inside your course project, called `ts-basics`. It gets its own settings, separate from your Playwright tests. From the `pw-course` folder, run:
+You'll practise TypeScript in a small folder called `ts-basics` inside your course project. It gets its own settings, separate from your Playwright tests. From the `pw-course` folder, run:
 
 ```bash terminal
 mkdir ts-basics
@@ -566,7 +566,7 @@ npm run check -- day4/runs-anyway.ts
 day4/runs-anyway.ts(2,7): error TS2322: Type 'string' is not assignable to type 'number'.
 ```
 
-The checker points straight at line 2. Fix it — change `'499'` to `499` (no quotes) — then check and run again. Now `Price + 1` prints `500`.
+The checker points straight at line 2. Fix it — change `'499'` to `499` (no quotes) — then check and run again. Now `price + 1` prints `500`.
 
 > [!TESTER]
 > This is the whole case for TypeScript in one example: a *silent* wrong result is far worse than a loud error. It's also why you should never trust "it ran without errors" — check it.
@@ -599,7 +599,7 @@ day4/three-mistakes.ts(4,36): error TS2551: Property 'toUppercase' does not exis
 |---|---|---|---|
 | `TS2322` | 3 | Text `'four'` where a number was promised | `4` |
 | `TS2552` | 4 | There's nothing called `consol` — a typo. TypeScript even suggests `console` | `console` |
-| `TS2551` | 4 | Text has no ability called `toUppercase`. Case matters: it's `toUpperCase` | `toUpperCase` |
+| `TS2551` | 4 | Text has no method called `toUppercase`. Case matters: it's `toUpperCase` | `toUpperCase` |
 
 Fix all three, then check (silence!) and run:
 
@@ -616,7 +616,7 @@ Tester: ASHA
 Experience: 4 years
 ```
 
-`toUpperCase()` turns text into capitals. You'll meet more of these abilities (called *methods*) on Days 5 and 6.
+`toUpperCase()` turns text into capitals. You'll meet more of these (called *methods*) on Days 5 and 6.
 
 ### Three kinds of errors
 
@@ -635,7 +635,7 @@ ReferenceError: consol is not defined
     at file:///…/ts-basics/day4/three-mistakes.ts:4:1
 ```
 
-A **crash while running**. Node.js didn't notice line 3's type mistake at all; it only stopped when it reached something impossible on line 4. Programmers name three kinds of errors:
+A **crash while running**. Node.js didn't notice line 3's type mistake at all; it only stopped when it reached something impossible on line 4. Programmers distinguish three kinds of errors:
 
 | Kind | When it's found | Example |
 |---|---|---|
@@ -699,11 +699,11 @@ chromium -> string
 false -> boolean
 ```
 
-**Try it:** add the line `const timeout: boolean = 5000;` at the end, and check the file. Read the error, predict it before you look, then remove the line.
+**Try it:** add the line `const timeout: boolean = 5000;` at the end, and check the file. Predict the error before you look, then read it and remove the line.
 
-## I7 · (Your own computer) Let VS Code catch mistakes as you type
+## I7 · On your own computer: let VS Code catch mistakes as you type
 
-1. In VS Code, **File → Open Folder** and open your `pw-course` folder. Open `ts-basics/day4/types.ts`.
+1. In VS Code, select **File → Open Folder** and open your `pw-course` folder. Open `ts-basics/day4/types.ts`.
 2. **Hover** over `browser` on line 7. A box shows `const browser: "chromium"` — the type TypeScript worked out. (It's even more precise than `string`: it knows the exact text. You'll see why that's useful on Day 6.)
 3. On a new line, type `console.` — a list of everything `console` can do pops up. That's the *language service* from F2.
 4. Type `const x: number = 'oops';` — a red squiggle appears at once. Hover over it to read the same TS2322 message the checker prints.
@@ -744,7 +744,7 @@ id: d4-pr-q3
 type: multiple
 question: Which of these check your types? (Select all that apply)
 options:
-  - "`tsc` (e.g. `npm run check -- file.ts`)"
+  - "`tsc` (e.g., `npm run check -- file.ts`)"
   - VS Code, as you type
   - "`node file.ts`"
   - "`npx playwright test`"
@@ -775,7 +775,7 @@ options:
   - Error number 12
   - In the file TS2322
 answer: b
-explanation: The numbers in brackets are (line, character).
+explanation: The numbers in parentheses are (line, character).
 ```
 
 ```quiz
@@ -801,7 +801,7 @@ options:
   - Node.js refuses to run the file
   - It turns the price into 0
 answer: b
-explanation: "With text, `+` glues instead of adds. The program runs, but the answer is wrong — the worst kind of bug."
+explanation: "With text, `+` glues instead of adding. The program runs, but the answer is wrong — the worst kind of bug."
 ```
 
 ```quiz
@@ -935,7 +935,7 @@ title: Annotate everything
 level: easy
 type: code
 prompt: |
-  Create `day4/annotated.ts`. Declare these named values **with type annotations**, then print each one with its type using `typeof`, like I6:
+  Create `day4/annotated.ts`. Declare these named values **with type annotations**, then print each one with its type using `typeof`, as in I6:
 
   - `siteUrl` — `'https://shop.example.com'`
   - `maxWaitMs` — `5000`
@@ -1008,12 +1008,12 @@ starter: |
   console.log('After adding one more: ' + itemsInCart + 1);
 hints:
   - "After fixing the type, the second line still prints 31. Why? `+` works from left to right: first `'After adding one more: ' + 3` makes text, then that text + 1 glues a 1 on."
-  - Brackets make part of a calculation happen first — just like in maths.
+  - Parentheses make part of a calculation happen first — just like in math.
 solution: |
   // The number of items, stored as a real number
   const itemsInCart: number = 3;
   console.log('Items in cart: ' + itemsInCart);
-  console.log('After adding one more: ' + (itemsInCart + 1));   // brackets: add first, then join
+  console.log('After adding one more: ' + (itemsInCart + 1));   // parentheses: add first, then join
 expectedOutput: |
   Items in cart: 3
   After adding one more: 4
@@ -1028,4 +1028,4 @@ expectedOutput: |
 5. In `day4/x.ts(7,12): error TS2322`, what do 7 and 12 mean?
 
 > [!TIP] Coming up on Day 5
-> Variables and operators: storing values with `let` and `const`, naming them well, and calculating, comparing and combining values — the building blocks of every test.
+> Variables and operators: storing values with `let` and `const`, naming them well, and calculating, comparing, and combining values — the building blocks of every test.

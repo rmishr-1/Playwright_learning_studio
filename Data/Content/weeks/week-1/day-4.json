@@ -63,7 +63,7 @@
         },
         {
           "type": "markdown",
-          "text": "`console.log(…)` is the first instruction everyone learns: it **prints** whatever is inside the brackets. In our course platform, it appears in the terminal or console pane.\n\nThe things a program works with are **values**:\n\n| Value | Kind of value |\n|---|---|\n| `'Log in'`, `\"asha@example.com\"` | Text |\n| `42`, `3.5`, `30000` | Numbers |\n| `true`, `false` | Yes/no answers |\n\nA program can also *calculate*: `console.log(2 + 3)` prints `5`. With text, `+` **joins** instead: `console.log('Hello, ' + 'Asha')` prints `Hello, Asha`.\n\nTo use a value more than once, you give it a **name** with `const`:",
+          "text": "`console.log(…)` is the first instruction everyone learns: it **prints** whatever is inside the parentheses. On our course platform, it appears in the terminal or console pane.\n\nThe things a program works with are **values**:\n\n| Value | Kind of value |\n|---|---|\n| `'Log in'`, `\"asha@example.com\"` | Text |\n| `42`, `3.5`, `30000` | Numbers |\n| `true`, `false` | Yes/no answers |\n\nA program can also *calculate*: `console.log(2 + 3)` prints `5`. With text, `+` **joins** instead: `console.log('Hello, ' + 'Asha')` prints `Hello, Asha`.\n\nTo use a value more than once, you give it a **name** with `const`:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -135,7 +135,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P2 · The rules of writing code\n\nComputers are strict readers. Five rules prevent most beginners' mistakes:\n\n| Rule | Right | Wrong |\n|---|---|---|\n| **Text goes in quotes** — single `'…'` or double `\"…\"` (a third kind, backticks, comes on Day 5) | `'Log in'` | `Log in` |\n| **Quotes and brackets come in pairs** | `console.log('Hi')` | `console.log('Hi)` |\n| **Case matters** | `console.log` | `Console.Log` |\n| **Comments are notes for people** — the computer ignores them | `// open the page` | — |\n| **A semicolon ends a statement** (optional in most places, but we always write it) | `console.log('Hi');` | — |\n\nTwo kinds of comments:",
+          "text": "## P2 · The rules of writing code\n\nComputers are strict readers. Five rules prevent most beginner mistakes:\n\n| Rule | Right | Wrong |\n|---|---|---|\n| **Text goes in quotes** — single `'…'` or double `\"…\"` (a third kind, backticks, comes on Day 5) | `'Log in'` | `Log in` |\n| **Quotes and parentheses come in pairs** | `console.log('Hi')` | `console.log('Hi)` |\n| **Case matters** | `console.log` | `Console.Log` |\n| **Comments are notes for people** — the computer ignores them | `// open the page` | — |\n| **A semicolon ends a statement** (optional in most places, but we always write it) | `console.log('Hi');` | — |\n\nTwo kinds of comments:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -162,7 +162,7 @@
         },
         {
           "type": "callout",
-          "text": "Word processors, PDFs and chat apps often turn `'` into curly quotes `‘ ’`. Code needs straight quotes. If you see an \"Invalid character\" error after pasting, retype the quotes.",
+          "text": "Word processors, PDFs, and chat apps often turn `'` into curly quotes `‘ ’`. Code needs straight quotes. If you see an \"Invalid character\" error after pasting, retype the quotes.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -234,7 +234,7 @@
         },
         {
           "type": "callout",
-          "text": "Read an error the way you'd read a bug report: *where*, then *what*. You'll practise this all through today's Implementation.",
+          "text": "Read an error the way you'd read a bug report: *where*, then *what*. You'll practise this throughout today's Implementation tab.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -257,7 +257,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 4 · Fundamentals\n\n## F1 · JavaScript: the language of the web\n\n**JavaScript (JS)** was created in **1995** at Netscape, to make web pages interactive. Today it's the only programming language that **every web browser** runs. Whenever a page shows an error message without reloading, opens a menu, or loads more results as you scroll, that's JavaScript at work — the \"electricity and plumbing\" from Day 1.\n\nFor a long time JavaScript lived only inside browsers. In 2009 **Node.js** took it outside: Node.js runs JavaScript on computers and servers. That's what you installed on Day 3, and it's what runs Playwright.",
+          "text": "# Day 4 · Fundamentals\n\n## F1 · JavaScript: the language of the web\n\n**JavaScript (JS)** was created in **1995** at Netscape to make web pages interactive. Today it's the only programming language that **every web browser** runs. Whenever a page shows an error message without reloading, opens a menu, or loads more results as you scroll, that's JavaScript at work — the \"electricity and plumbing\" from Day 1.\n\nFor a long time JavaScript lived only inside browsers. In 2009 **Node.js** took it outside: Node.js runs JavaScript on computers and servers. That's what you installed on Day 3, and it's what runs Playwright.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -277,7 +277,7 @@
         },
         {
           "type": "markdown",
-          "text": "JavaScript is standardised under the name **ECMAScript**, and a new edition comes out every year (ES2023, ES2024, …). You don't need to track editions — just know that \"modern JavaScript\" keeps gaining features.\n\n**Why a tester cares:** the app you test runs JavaScript in the browser, and your tests run JavaScript in Node.js. Understanding the language helps on both sides — writing tests, and understanding why a page behaves the way it does.",
+          "text": "JavaScript is standardised under the name **ECMAScript**, and a new edition comes out every year (ES2023, ES2024, …). You don't need to track editions — just know that \"modern JavaScript\" keeps gaining features.\n\n**Why a tester cares:** the app you test runs JavaScript in the browser, and your tests run JavaScript in Node.js. Understanding the language helps on both sides: it helps you write tests and see why a page behaves the way it does.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -309,7 +309,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F2 · TypeScript: JavaScript plus types\n\n**TypeScript (TS)** was released by **Microsoft in 2012**, designed by Anders Hejlsberg. It's open source and free.\n\nTypeScript is a **superset** of JavaScript: it contains *all* of JavaScript and adds one big thing — **types**. A type says *what kind of value* something is: text, a number, true/false, a list of users, and so on. Any JavaScript code is allowed in a TypeScript file — though the type checker may point out mistakes in it that JavaScript would have let slip.",
+          "text": "## F2 · TypeScript: JavaScript plus types\n\n**TypeScript (TS)** was designed by Anders Hejlsberg and released by **Microsoft in 2012**. It's open source and free.\n\nTypeScript is a **superset** of JavaScript: it contains *all* of JavaScript and adds one big thing — **types**. A type says *what kind of value* something is: text, a number, true/false, a list of users, and so on. Any JavaScript code is allowed in a TypeScript file — though the type checker may point out mistakes in it that JavaScript would have let slip.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -373,7 +373,7 @@
         },
         {
           "type": "callout",
-          "text": "\"Compiling\" TypeScript mostly means *checking* the types and then *removing* them. What's left is ordinary JavaScript. Note that the check doesn't *stop* the JavaScript being written — your job is to read the report and fix it.",
+          "text": "\"Compiling\" TypeScript mostly means *checking* the types and then *removing* them. What's left is ordinary JavaScript. Note that the check doesn't *stop* the JavaScript from being written — your job is to read the report and fix it.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -430,7 +430,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F3 · Static vs dynamic typing — why types help\n\nJavaScript is **dynamically typed**: types are only looked at while the program runs. If a value that should be a number arrives as text, nobody complains until something goes wrong *while the program is running* — maybe in front of a customer.\n\nTypeScript is **statically typed**: types are checked **before** the program runs. If you put text where a number belongs, you're told immediately, with the file and line.",
+          "text": "## F3 · Static vs dynamic typing — why types help\n\nJavaScript is **dynamically typed**: types are checked only while the program runs. If a value that should be a number arrives as text, nobody complains until something goes wrong *while the program is running* — maybe in front of a customer.\n\nTypeScript is **statically typed**: types are checked **before** the program runs. If you put text where a number belongs, you're told immediately, with the file and line.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -600,7 +600,7 @@
         },
         {
           "type": "markdown",
-          "text": "### Giving a value a name\n\nTo use a value more than once, give it a **name** with `const`:",
+          "text": "### Giving a value a name\n\nAs you saw in P1, you give a value a **name** with `const`:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -627,7 +627,7 @@
         },
         {
           "type": "markdown",
-          "text": "(Tomorrow, Day 5, is all about these named values — *variables*. For today, `const name = value` is all you need.)\n\n### Type annotations and type inference\n\nThere are two ways a name gets its type:",
+          "text": "(Tomorrow's lesson, Day 5, is all about these named values — *variables*. For today, `const name = value` is all you need.)\n\n### Type annotations and type inference\n\nThere are two ways a name gets its type:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -654,7 +654,7 @@
         },
         {
           "type": "markdown",
-          "text": "| | Type annotation | Type inference |\n|---|---|---|\n| Who decides the type | You write it: `: string` | TypeScript works it out from the value |\n| Looks like | `const count: number = 3;` | `const count = 3;` |\n| When to use it | When the type isn't obvious, or to document intent (you'll use it a lot for function inputs on Day 8) | When the value makes the type obvious |\n\nEither way, the type is **fixed**: once TypeScript knows `attempts` is a number, it won't let you treat it as text.",
+          "text": "| | Type annotation | Type inference |\n|---|---|---|\n| Who decides the type | You write it: `: string` | TypeScript works it out from the value |\n| Looks like | `const count: number = 3;` | `const count = 3;` |\n| When to use it | When the type isn't obvious, or when you want to document intent (you'll use it a lot for function inputs on Day 8) | When the value makes the type obvious |\n\nEither way, the type is **fixed**: once TypeScript knows `attempts` is a number, it won't let you treat it as text.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -731,7 +731,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 4 · Implementation\n\n## I1 · Set up your TypeScript playground\n\nYou'll practise TypeScript in a small folder inside your course project, called `ts-basics`. It gets its own settings, separate from your Playwright tests. From the `pw-course` folder, run:",
+          "text": "# Day 4 · Implementation\n\n## I1 · Set up your TypeScript playground\n\nYou'll practise TypeScript in a small folder called `ts-basics` inside your course project. It gets its own settings, separate from your Playwright tests. From the `pw-course` folder, run:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1027,7 +1027,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\n> ts-basics@1.0.0 check\n> tsc --noEmit --strict --target esnext --module nodenext --allowImportingTsExtensions --ignoreConfig --pretty false day4/runs-anyway.ts\n\nday4/runs-anyway.ts(2,7): error TS2322: Type 'string' is not assignable to type 'number'.\n```\n\nThe checker points straight at line 2. Fix it — change `'499'` to `499` (no quotes) — then check and run again. Now `Price + 1` prints `500`.",
+          "text": "```output\n> ts-basics@1.0.0 check\n> tsc --noEmit --strict --target esnext --module nodenext --allowImportingTsExtensions --ignoreConfig --pretty false day4/runs-anyway.ts\n\nday4/runs-anyway.ts(2,7): error TS2322: Type 'string' is not assignable to type 'number'.\n```\n\nThe checker points straight at line 2. Fix it — change `'499'` to `499` (no quotes) — then check and run again. Now `price + 1` prints `500`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1087,7 +1087,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nday4/three-mistakes.ts(3,7): error TS2322: Type 'string' is not assignable to type 'number'.\nday4/three-mistakes.ts(4,1): error TS2552: Cannot find name 'consol'. Did you mean 'console'?\nday4/three-mistakes.ts(4,36): error TS2551: Property 'toUppercase' does not exist on type 'string'. Did you mean 'toUpperCase'?\n```\n\n(Above the errors, npm prints its two `>` lines as before.)\n\n| Error | Line | What it means | Fix |\n|---|---|---|---|\n| `TS2322` | 3 | Text `'four'` where a number was promised | `4` |\n| `TS2552` | 4 | There's nothing called `consol` — a typo. TypeScript even suggests `console` | `console` |\n| `TS2551` | 4 | Text has no ability called `toUppercase`. Case matters: it's `toUpperCase` | `toUpperCase` |\n\nFix all three, then check (silence!) and run:",
+          "text": "```output\nday4/three-mistakes.ts(3,7): error TS2322: Type 'string' is not assignable to type 'number'.\nday4/three-mistakes.ts(4,1): error TS2552: Cannot find name 'consol'. Did you mean 'console'?\nday4/three-mistakes.ts(4,36): error TS2551: Property 'toUppercase' does not exist on type 'string'. Did you mean 'toUpperCase'?\n```\n\n(Above the errors, npm prints its two `>` lines as before.)\n\n| Error | Line | What it means | Fix |\n|---|---|---|---|\n| `TS2322` | 3 | Text `'four'` where a number was promised | `4` |\n| `TS2552` | 4 | There's nothing called `consol` — a typo. TypeScript even suggests `console` | `console` |\n| `TS2551` | 4 | Text has no method called `toUppercase`. Case matters: it's `toUpperCase` | `toUpperCase` |\n\nFix all three, then check (silence!) and run:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1114,7 +1114,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nTester: ASHA\nExperience: 4 years\n```\n\n`toUpperCase()` turns text into capitals. You'll meet more of these abilities (called *methods*) on Days 5 and 6.\n\n### Three kinds of errors\n\nWhat would have happened if you had *run* the broken file instead of checking it?",
+          "text": "```output\nTester: ASHA\nExperience: 4 years\n```\n\n`toUpperCase()` turns text into capitals. You'll meet more of these (called *methods*) on Days 5 and 6.\n\n### Three kinds of errors\n\nWhat would have happened if you had *run* the broken file instead of checking it?",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1134,7 +1134,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nfile:///…/ts-basics/day4/three-mistakes.ts:4\nconsol.log('Tester: ' + testerName.toUppercase());\n^\n\nReferenceError: consol is not defined\n    at file:///…/ts-basics/day4/three-mistakes.ts:4:1\n```\n\nA **crash while running**. Node.js didn't notice line 3's type mistake at all; it only stopped when it reached something impossible on line 4. Programmers name three kinds of errors:\n\n| Kind | When it's found | Example |\n|---|---|---|\n| **Syntax error** | Before anything else — the code can't even be read | A missing quote: `'TC-205;` → `error TS1002: Unterminated string literal.` |\n| **Type error** | By the checker (`tsc`, VS Code), before running | `'four'` where a number was promised → `TS2322` |\n| **Runtime error** | While the program runs — a crash | `ReferenceError: consol is not defined` |\n\nThe checker catches the first two kinds *before* you run anything. That's why you check first.",
+          "text": "```output\nfile:///…/ts-basics/day4/three-mistakes.ts:4\nconsol.log('Tester: ' + testerName.toUppercase());\n^\n\nReferenceError: consol is not defined\n    at file:///…/ts-basics/day4/three-mistakes.ts:4:1\n```\n\nA **crash while running**. Node.js didn't notice line 3's type mistake at all; it only stopped when it reached something impossible on line 4. Programmers distinguish three kinds of errors:\n\n| Kind | When it's found | Example |\n|---|---|---|\n| **Syntax error** | Before anything else — the code can't even be read | A missing quote: `'TC-205;` → `error TS1002: Unterminated string literal.` |\n| **Type error** | By the checker (`tsc`, VS Code), before running | `'four'` where a number was promised → `TS2322` |\n| **Runtime error** | While the program runs — a crash | `ReferenceError: consol is not defined` |\n\nThe checker catches the first two kinds *before* you run anything. That's why you check first.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1216,7 +1216,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nTC-101 -> string\n4.2 -> number\ntrue -> boolean\nchromium -> string\n0 -> number\nfalse -> boolean\n```\n\n**Try it:** add the line `const timeout: boolean = 5000;` at the end, and check the file. Read the error, predict it before you look, then remove the line.\n\n## I7 · (Your own computer) Let VS Code catch mistakes as you type\n\n1. In VS Code, **File → Open Folder** and open your `pw-course` folder. Open `ts-basics/day4/types.ts`.\n2. **Hover** over `browser` on line 7. A box shows `const browser: \"chromium\"` — the type TypeScript worked out. (It's even more precise than `string`: it knows the exact text. You'll see why that's useful on Day 6.)\n3. On a new line, type `console.` — a list of everything `console` can do pops up. That's the *language service* from F2.\n4. Type `const x: number = 'oops';` — a red squiggle appears at once. Hover over it to read the same TS2322 message the checker prints.\n5. Delete the line. The squiggle disappears.",
+          "text": "```output\nTC-101 -> string\n4.2 -> number\ntrue -> boolean\nchromium -> string\n0 -> number\nfalse -> boolean\n```\n\n**Try it:** add the line `const timeout: boolean = 5000;` at the end, and check the file. Predict the error before you look, then read it and remove the line.\n\n## I7 · On your own computer: let VS Code catch mistakes as you type\n\n1. In VS Code, select **File → Open Folder** and open your `pw-course` folder. Open `ts-basics/day4/types.ts`.\n2. **Hover** over `browser` on line 7. A box shows `const browser: \"chromium\"` — the type TypeScript worked out. (It's even more precise than `string`: it knows the exact text. You'll see why that's useful on Day 6.)\n3. On a new line, type `console.` — a list of everything `console` can do pops up. That's the *language service* from F2.\n4. Type `const x: number = 'oops';` — a red squiggle appears at once. Hover over it to read the same TS2322 message the checker prints.\n5. Delete the line. The squiggle disappears.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1296,7 +1296,7 @@
           "checkpoint": {
             "options": [
               "VS Code, as you type",
-              "`tsc` (e.g. `npm run check -- file.ts`)",
+              "`tsc` (e.g., `npm run check -- file.ts`)",
               "`npx playwright test`",
               "`node file.ts`"
             ],
@@ -1349,7 +1349,7 @@
               1
             ],
             "kind": "single",
-            "explanation": "The numbers in brackets are (line, character)."
+            "explanation": "The numbers in parentheses are (line, character)."
           },
           "code": null,
           "callout": null,
@@ -1393,7 +1393,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "With text, `+` glues instead of adds. The program runs, but the answer is wrong — the worst kind of bug."
+            "explanation": "With text, `+` glues instead of adding. The program runs, but the answer is wrong — the worst kind of bug."
           },
           "code": null,
           "callout": null,
@@ -1523,7 +1523,7 @@
         },
         {
           "type": "callout",
-          "text": "Variables and operators: storing values with `let` and `const`, naming them well, and calculating, comparing and combining values — the building blocks of every test.",
+          "text": "Variables and operators: storing values with `let` and `const`, naming them well, and calculating, comparing, and combining values — the building blocks of every test.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1607,7 +1607,7 @@
           "difficulty": "Easy",
           "title": "Annotate everything",
           "kind": "code",
-          "statement": "Create `day4/annotated.ts`. Declare these named values **with type annotations**, then print each one with its type using `typeof`, like I6:\n\n- `siteUrl` — `'https://shop.example.com'`\n- `maxWaitMs` — `5000`\n- `runHeaded` — `false`\n\nExpected output:\n```\nhttps://shop.example.com -> string\n5000 -> number\nfalse -> boolean\n```",
+          "statement": "Create `day4/annotated.ts`. Declare these named values **with type annotations**, then print each one with its type using `typeof`, as in I6:\n\n- `siteUrl` — `'https://shop.example.com'`\n- `maxWaitMs` — `5000`\n- `runHeaded` — `false`\n\nExpected output:\n```\nhttps://shop.example.com -> string\n5000 -> number\nfalse -> boolean\n```",
           "stub": "// Annotate everything\n// Save this as ts-basics/day4/annotated.ts\n",
           "hints": [
             "An annotation goes after the name: `const siteUrl: string = …`",
@@ -1644,7 +1644,7 @@
           "stub": "// The number of items was read from the page as text\nconst itemsInCart: number = '3';\nconsole.log('Items in cart: ' + itemsInCart);\nconsole.log('After adding one more: ' + itemsInCart + 1);",
           "hints": [
             "After fixing the type, the second line still prints 31. Why? `+` works from left to right: first `'After adding one more: ' + 3` makes text, then that text + 1 glues a 1 on.",
-            "Brackets make part of a calculation happen first — just like in maths."
+            "Parentheses make part of a calculation happen first — just like in math."
           ],
           "file": "ts-basics/day4/silent-bug.ts",
           "run": "node day4/silent-bug.ts",
@@ -1653,7 +1653,7 @@
             "run": "node day4/silent-bug.ts",
             "expected": "Items in cart: 3\nAfter adding one more: 4"
           },
-          "solution": "```ts\n// The number of items, stored as a real number\nconst itemsInCart: number = 3;\nconsole.log('Items in cart: ' + itemsInCart);\nconsole.log('After adding one more: ' + (itemsInCart + 1));   // brackets: add first, then join\n```\n\n**Output**\n\n```output\nItems in cart: 3\nAfter adding one more: 4\n```"
+          "solution": "```ts\n// The number of items, stored as a real number\nconst itemsInCart: number = 3;\nconsole.log('Items in cart: ' + itemsInCart);\nconsole.log('After adding one more: ' + (itemsInCart + 1));   // parentheses: add first, then join\n```\n\n**Output**\n\n```output\nItems in cart: 3\nAfter adding one more: 4\n```"
         }
       ]
     }

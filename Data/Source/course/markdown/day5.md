@@ -2,7 +2,7 @@
 day: 5
 week: 1
 title: Variables and Operators
-subtitle: Store test data in variables, name them well, and calculate, compare and combine values — the building blocks of every test
+subtitle: Store test data in variables, name them well, and calculate, compare, and combine values — the building blocks of every test
 estimatedTime: 3 hours
 topics:
   - Variables (let, const, var)
@@ -13,7 +13,7 @@ objectives:
   - Describe block scope — where a variable exists and where it doesn't
   - Name variables clearly using the rules and the camelCase convention
   - Build text with template literals
-  - Use arithmetic, assignment, comparison and logical operators, and the ternary operator
+  - Use arithmetic, assignment, comparison, and logical operators, and the ternary operator
   - Convert between text and numbers, and avoid comparison traps
   - Read and fix the TypeScript errors caused by variable mistakes
 prerequisitesFromEarlierDays:
@@ -26,7 +26,7 @@ workspace: pw-course/ts-basics/day5/
 
 ## P1 · Quick recap from Day 4
 
-Before starting, make sure you can do each of these (the Day 4 lesson is in brackets):
+Before starting, make sure you can do each of these (the Day 4 lesson is in parentheses):
 
 - [ ] Run a file with `node day5/file.ts` and type-check it with `npm run check -- day5/file.ts`, from inside `pw-course/ts-basics` (Day 4 · I1–I2)
 - [ ] Explain why Node.js and Playwright don't catch type mistakes, but `tsc` and VS Code do (Day 4 · F4)
@@ -100,7 +100,7 @@ explanation: "`price * quantity` calculates a value. `const price` and `let tota
 
 ## F1 · Declaring variables
 
-Creating a variable is called **declaring** it. The full form has five parts:
+Creating a variable is called **declaring** it. The full form has four parts:
 
 ```text mode=read
 let   passedTests :  number  =  0 ;
@@ -124,7 +124,7 @@ There are four ways to write a declaration:
 
 ### Assigning and reassigning
 
-`=` means **"put this value in the box"** — it's not "equals" as in maths.
+`=` means **"put this value in the box"** — it's not "equals" as in math.
 
 ```ts mode=read
 let itemsInCart = 0;    // declare, with a first value
@@ -162,7 +162,7 @@ explanation: "The right-hand side is worked out first, then `=` stores the resul
 |---|---|---|
 | `const` | ❌ No — "constant" | Values that shouldn't change: test data, URLs, expected messages. **Use by default.** |
 | `let` | ✅ Yes | Values that must change: counters, running totals, results |
-| `var` | ✅ Yes | **Nothing** — the old keyword from before 2015. Avoid it |
+| `var` | ✅ Yes | **Nothing** — the old keyword from before 2015. Avoid it. |
 
 ```ts mode=read
 const siteUrl = 'https://shop.example.com';
@@ -176,13 +176,13 @@ attempts = 2;                               // ✅ fine — let allows it
 
 ### Why not `var`?
 
-`var` was JavaScript's only keyword until 2015, when `let` and `const` arrived. It has surprising behaviours:
+`var` was JavaScript's only keyword until 2015, when `let` and `const` arrived. It behaves in surprising ways:
 
 | `var` problem | What happens | `let` / `const` |
 |---|---|---|
-| **Redeclaring is allowed** | `var browser = 'chromium';` … later `var browser = 'firefox';` silently replaces the first — even if someone else wrote it far away | ❌ error: *Cannot redeclare…* |
+| **Redeclaring is allowed** | `var browser = 'chromium';` … later `var browser = 'firefox';` silently replaces the first — even if it was written elsewhere in the file | ❌ error: *Cannot redeclare…* |
 | **Ignores blocks** | A `var` created inside `{ … }` leaks out and is visible outside it | Stays inside its block (F3) |
-| **Usable before its line** | It exists — as `undefined` — even before the line that declares it, so typos in order go unnoticed | ❌ error: *used before its declaration* |
+| **Usable before its line** | It exists — as `undefined` — even before the line that declares it, so mistakes in the order of lines go unnoticed | ❌ error: *used before its declaration* |
 
 You'll still see `var` in old tutorials and old test code. Read it as "an old `let`", and write `let` or `const` yourself.
 
@@ -222,14 +222,14 @@ Curly braces `{ }` make a **block** — a group of statements. A `let` or `const
 const suite = 'Checkout';            // outside any block: visible to everything below
 
 {
-  const step = 'Enter card details';   // only exists inside these braces
+  const step = 'Enter card details';   // exists only inside these braces
   console.log(suite, step);            // ✅ both visible here
 }
 
 console.log(step);                     // ❌ error TS2304: Cannot find name 'step'.
 ```
 
-You'll see blocks everywhere from Day 7 — after `if`, around loops, as the body of functions and Playwright tests. Block scope keeps each block's variables private, so two tests can both have a variable called `email` without clashing.
+You'll see blocks everywhere starting on Day 7 — after `if`, around loops, as the body of functions and Playwright tests. Block scope keeps each block's variables private, so two tests can both have a variable called `email` without clashing.
 
 > [!NOTE]
 > Indenting the code inside a block (moving it right) is a convention that makes blocks easy to see. The computer ignores it — but people don't.
@@ -284,7 +284,7 @@ explanation: "`let` and `const` are block-scoped: they exist inside their block,
 
 ## F4 · Building text with template literals
 
-On Day 4 you joined text with `+`. It works, but gets messy:
+On Day 4 you joined text with `+`. It works, but it gets messy:
 
 ```ts mode=read
 const firstName = 'Asha';
@@ -311,11 +311,11 @@ const searchTerm = 'wireless mouse';
 const expectedHeading = `Results for "${searchTerm}"`;     // Results for "wireless mouse"
 ```
 
-A few handy tools that every piece of text has. You write them after a dot; the ones with brackets are called *methods*, and `.length` (no brackets) is a *property* — a stored fact about the text:
+Every piece of text has a few handy tools. You write them after a dot; the ones with parentheses are called *methods*, and `.length` (no parentheses) is a *property* — a stored fact about the text:
 
-| Method | Example | Result |
+| Method or property | Example | Result |
 |---|---|---|
-| `.length` (no brackets) | `'Asha'.length` | `4` |
+| `.length` (no parentheses) | `'Asha'.length` | `4` |
 | `.toUpperCase()` / `.toLowerCase()` | `'Asha'.toUpperCase()` | `'ASHA'` |
 | `.trim()` | `'  a@b.com  '.trim()` | `'a@b.com'` — spaces removed from both ends |
 | `.includes('…')` | `'Order confirmed'.includes('confirmed')` | `true` |
@@ -346,7 +346,7 @@ explanation: Inside backticks, `${ }` is replaced by the value of what's inside 
 | `%` | remainder (*modulo*) | `7 % 2` | `1` |
 | `**` | power | `2 ** 10` | `1024` |
 
-`*`, `/` and `%` happen before `+` and `-`, just like in maths: `2 + 3 * 4` is `14`. **Brackets go first**: `(2 + 3) * 4` is `20`. When in doubt, add brackets — they make the order obvious to readers too.
+`*`, `/`, and `%` happen before `+` and `-`, just like in math: `2 + 3 * 4` is `14`. **Parentheses go first**: `(2 + 3) * 4` is `20`. When in doubt, add parentheses — they make the order obvious to readers too.
 
 Two surprises worth knowing:
 
@@ -364,7 +364,7 @@ Two surprises worth knowing:
 | `x++` | `x = x + 1` | Count one more pass |
 | `x--` | `x = x - 1` | Count down attempts |
 
-These all *change* the variable — so they only work on `let`, never on `const`.
+These all *change* the variable — so they work only on `let`, never on `const`.
 
 ```quiz
 id: d5-f5-q1
@@ -401,14 +401,14 @@ Comparisons always produce `true` or `false` — exactly what an assertion needs
 | `===` | equal (value **and** type) | `3 === 3` | `true` |
 | `!==` | not equal | `3 !== 4` | `true` |
 | `>` / `<` | greater / less than | `5 > 3` | `true` |
-| `>=` / `<=` | greater or equal / less or equal | `18 >= 18` | `true` |
+| `>=` / `<=` | greater than or equal / less than or equal | `18 >= 18` | `true` |
 | `==` / `!=` | "loose" equal / not equal — converts types first | `'3' == 3` | `true` (!) |
 
 ### Always use `===` and `!==`
 
 In plain JavaScript, the loose `==` quietly converts values before comparing, so `'3' == 3` is `true` and `'' == 0` is `true`. That hides bugs: a page showing the text `"3"` would pass a check for the number `3` by accident. The strict `===` compares **value and type**, so `'3' === 3` is `false` — no surprises.
 
-TypeScript goes one step further: when the two sides clearly have different types, it flags the comparison — with `==` *or* `===` — before you even run the code (you'll see it in I4). But values without a known type (for example data read from a file) slip past that check, so make `===` your habit.
+TypeScript goes one step further: when the two sides clearly have different types, it flags the comparison — with `==` *or* `===` — before you even run the code (you'll see it in I4). But values without a known type (for example, data read from a file) slip past that check, so make `===` your habit.
 
 ### Text read from a page is always text
 
@@ -420,7 +420,7 @@ When a test reads what's on the screen — a price, a count, a badge — it usua
 | Text that isn't a number | `Number('₹1,499')` | `NaN` — clean it up first (Day 6) |
 | Empty text | `Number('')` | `0` — careful! An empty badge silently becomes 0, not NaN |
 | Number → text | `String(3)` | `'3'` |
-| Which type is it? | `typeof badgeText` | `'string'` — the `typeof` operator from Day 4 gives the type's name, e.g. `'string'`, `'number'`, `'boolean'` |
+| Which type is it? | `typeof badgeText` | `'string'` — the `typeof` operator from Day 4 gives the type's name, e.g., `'string'`, `'number'`, `'boolean'` |
 
 ### Comparing text
 
@@ -488,7 +488,7 @@ const failedTests: number = 0;
 const status = failedTests === 0 ? 'PASS' : 'FAIL';   // 'PASS'
 ```
 
-Read it as: *"Is `failedTests === 0`? If yes, `'PASS'`; otherwise `'FAIL'`."* (The `: number` tells TypeScript that `failedTests` could be any number — without it, TypeScript sees it's always 0 and would call the comparison pointless. I3 explains this.)
+Read it as: *"Is `failedTests === 0`? If yes, `'PASS'`; otherwise `'FAIL'`."* (The `: number` tells TypeScript that `failedTests` could be any number — without it, TypeScript would see that it's always 0 and flag the comparison as pointless. I3 explains this.)
 
 On Day 10 you'll meet this line in Playwright's settings file: `retries: process.env.CI ? 2 : 0` — "on a CI server, 2 retries; otherwise 0".
 
@@ -515,7 +515,7 @@ options:
   - "true"
   - "false"
 answer: b
-explanation: 8 === 10 is false, so the ternary gives the value after the colon.
+explanation: 8 === 10 is false, so the ternary operator gives the value after the colon.
 ```
 
 # Implementation
@@ -565,7 +565,7 @@ Profile page: https://shop.example.com/users/meera.iyer@example.com
 
 Notice `email.trim().toLowerCase()`: methods can be **chained** — `trim()` runs first, then `toLowerCase()` runs on its result.
 
-**Try it:** change `firstName` to `'Priya'` and run again. Three lines change, because three values were built from it — that's the "change the cell once" benefit from P2.
+**Try it:** change `firstName` to `'Priya'` and run again. Three lines change because three values were built from it — that's the "change the cell once" benefit from P2.
 
 ## I2 · Counting results with `let`
 
@@ -602,13 +602,13 @@ Total time: 9000 ms (9 seconds)
 Average per test: 3000 ms
 ```
 
-`passed++`, `passed += 1` and `passed = passed + 1` all do the same thing — use whichever reads best.
+`passed++`, `passed += 1`, and `passed = passed + 1` all do the same thing — use whichever reads best.
 
 **Try it:** change `let passed = 0;` to `const passed = 0;` and check the file. Read the errors (one for each line that changes `passed`), then change it back.
 
 ## I3 · Test-run metrics and a release decision
 
-Arithmetic, comparison, logical and ternary operators together — the kind of numbers you'd put in a test-summary report:
+This program uses arithmetic, comparison, logical, and ternary operators together to produce the kind of numbers you'd put in a test-summary report:
 
 ```ts file=ts-basics/day5/metrics.ts mode=editor run="node day5/metrics.ts"
 // Results from a test run (typed as number: in real life they come from a report)
@@ -618,7 +618,7 @@ const failed: number = 4;
 const skipped = total - passed - failed;          // whatever is left over
 
 // Percentages
-const passRate = (passed / total) * 100;          // brackets first, then × 100
+const passRate = (passed / total) * 100;          // parentheses first, then × 100
 const passRateText = passRate.toFixed(1);         // round to 1 decimal place (gives text)
 
 // Decisions
@@ -640,7 +640,7 @@ Ready for release? false
 ```
 
 > [!NOTE] Why `: number` on the first three lines?
-> Without it, TypeScript would notice that `failed` is *always* exactly 4, and flag `failed === 0` as a comparison that can never be true. Real results come from a report and can be any number, so we tell TypeScript "this is some number".
+> Without the `: number` annotation, TypeScript would notice that `failed` is *always* exactly 4, and flag `failed === 0` as a comparison that can never be true. Real results come from a report and can be any number, so we tell TypeScript "this is some number".
 
 **Try it:** change `passed` to `44` and `failed` to `2`. Predict all four lines *before* running.
 
@@ -703,7 +703,7 @@ NaN
 ```
 
 > [!TESTER]
-> `NaN` is a classic source of confusing test failures. If a price on the page includes a currency symbol or a comma, remove them before converting — you'll learn how to clean text on Day 6.
+> `NaN` is a classic source of confusing test failures. If a price on the page includes a currency symbol or a comma, remove these characters before converting — you'll learn how to clean text on Day 6.
 
 ## I5 · Fix three variable mistakes
 
@@ -738,7 +738,7 @@ day5/scope-errors.ts(11,13): error TS2304: Cannot find name 'secretToken'.
 |---|---|---|
 | 3 | Reassigning a `const` | Use `let` if it must change — or, better, make a second `const` with a different name |
 | 5 | Using `attempts` before the line that creates it (two errors for the same mistake) | Move the `console.log` below the declaration |
-| 11 | `secretToken` only exists inside its block | Use it inside the block, or declare it outside |
+| 11 | `secretToken` exists only inside its block | Use it inside the block, or declare it outside |
 
 The fixed version:
 
@@ -765,7 +765,7 @@ Outside the block: abc123
 https://shop.example.com https://staging.shop.example.com
 ```
 
-Notice that a block can see variables from **outside** it — scope only stops variables leaking *out*.
+Notice that a block can see variables from **outside** it — scope only stops variables from leaking *out*.
 
 # Practice
 
@@ -807,7 +807,7 @@ options:
   - "24"
   - "9"
 answer: b
-explanation: Multiplication happens before addition — 3 × 4 = 12, then 2 + 12 = 14. Use brackets `(2 + 3) * 4` for 20.
+explanation: Multiplication happens before addition — 3 × 4 = 12, then 2 + 12 = 14. Use parentheses `(2 + 3) * 4` for 20.
 ```
 
 ```quiz
@@ -820,7 +820,7 @@ options:
   - "`` console.log(`product costs ₹price`); ``"
   - "`` console.log(${product} + ' costs ₹' + ${price}); ``"
 answer: b
-explanation: "`${ }` only works inside backticks. Inside single quotes it's printed literally."
+explanation: "`${ }` works only inside backticks. Inside single quotes it's printed literally."
 ```
 
 ```quiz
@@ -915,7 +915,7 @@ code: |
 answer: |
   `8 many`
 
-  count: 1 → 5 (`+= 4`) → 4 (`--`) → 8 (`*= 2`). 8 > 6 is true, so label is 'many'.
+  count: 1 → 5 (`+= 4`) → 4 (`--`) → 8 (`*= 2`). 8 > 6 is true, so `label` is 'many'.
 ````
 
 ````exercise
@@ -935,7 +935,7 @@ answer: |
   Total: 2003
   Total: 203
 
-  Line 1: `*` happens before `+`, so 200 × 3 = 600, then it's joined to the text. Line 2: `+` works left to right — the text joins 200, then joins 3. Line 3: the brackets add 200 + 3 first.
+  Line 1: `*` happens before `+`, so 200 × 3 = 600, then it's joined to the text. Line 2: `+` works left to right — the text joins 200, then joins 3. Line 3: the parentheses add 200 + 3 first.
 ````
 
 ## Exercises
@@ -988,7 +988,7 @@ title: Shopping-cart calculator
 level: medium
 type: code
 prompt: |
-  Create `day5/cart.ts`. A cart has: unit price **1299**, quantity **3**, a **10%** discount, and shipping of **99**, which is **free when the discounted amount is 3000 or more**.
+  Create `day5/cart.ts`. A cart has a unit price of **1299**, a quantity of **3**, a **10%** discount, and shipping of **99**, which is **free when the discounted amount is 3000 or more**.
 
   Print:
   ```
@@ -998,7 +998,7 @@ prompt: |
   Shipping: 0
   Total to pay: 3507.30
   ```
-  Use `const` for everything, arithmetic operators for the maths, a **ternary** for shipping, and `.toFixed(2)` for the last line.
+  Use `const` for everything, arithmetic operators for the math, a **ternary** for shipping, and `.toFixed(2)` for the last line.
 file: ts-basics/day5/cart.ts
 run: node day5/cart.ts
 hints:
@@ -1014,7 +1014,7 @@ solution: |
   const subtotal = unitPrice * quantity;                   // 3897
   const discount = (subtotal * discountPercent) / 100;     // 389.7
   const afterDiscount = subtotal - discount;               // 3507.3
-  const shipping = afterDiscount >= 3000 ? 0 : 99;         // free above 3000
+  const shipping = afterDiscount >= 3000 ? 0 : 99;         // free at 3000 or more
   const totalToPay = afterDiscount + shipping;
 
   // Output
@@ -1128,7 +1128,7 @@ prompt: |
   const sortBy = 'price';
   ```
   1. Make a URL-friendly **brand slug**: lower-case, and the space replaced by `-` → `acme-tech`. (Text has a method `.replace(' ', '-')` that replaces the first space.)
-  2. Build: `https://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price` (note the category is lower-cased too).
+  2. Build: `https://shop.example.com/c/laptops?brand=acme-tech&page=2&sort=price` (note that the category is lower-cased too).
   3. Build a test title: `[P2] Laptops by Acme Tech, sorted by price`.
   4. Print the URL, then the title.
 file: ts-basics/day5/url-builder.ts
@@ -1168,4 +1168,4 @@ expectedOutput: |
 5. A test reads the price "₹1,499" from a page. What will `Number()` give, and why?
 
 > [!TIP] Coming up on Day 6
-> Data types in depth: the rest of the simple types (`null`, `undefined`), and the ones you'll store test data in — arrays for lists, objects for records, tuples, union and literal types — plus why `any` is a trap.
+> Data types in depth: the rest of the simple types (`null`, `undefined`), and the ones you'll store test data in — arrays for lists, objects for records, tuples, and union and literal types — plus why `any` is a trap.

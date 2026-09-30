@@ -2,17 +2,17 @@
 day: 6
 week: 2
 title: Data Types
-subtitle: The shapes your test data comes in — single values, empty values, lists and records — and the types that describe them precisely
+subtitle: The shapes your test data comes in — single values, empty values, lists, and records — and the types that describe them precisely
 estimatedTime: 3 hours
 topics:
   - Data types (primitives, null and undefined)
-  - Arrays, tuples and objects
-  - Union, literal, any and unknown types
+  - Arrays, tuples, and objects
+  - Union, literal, any, and unknown types
 objectives:
-  - Map the TypeScript type family — primitives, collections and special types
-  - Explain null and undefined, and give fallbacks with `??` and safe access with `?.`
+  - Map the TypeScript type family — primitives, collections, and special types
+  - Explain null and undefined, and provide fallbacks with `??` and access values safely with `?.`
   - Store and read lists with arrays, and fixed pairs with tuples
-  - Describe records with objects, type aliases and interfaces, including optional properties
+  - Describe records with objects, type aliases, and interfaces, including optional properties
   - Unpack arrays and objects with destructuring — the pattern behind `{ page }`
   - Use union and literal types, and explain why `any` is a trap
   - Clean text read from a page and turn it into useful values
@@ -64,7 +64,7 @@ Open any test-data spreadsheet and you'll see three shapes of data:
 |---|---|---|---|
 | **A single value** | One cell | `'asha@example.com'`, `3`, `true` | string, number, boolean |
 | **A list** | A column | All the browsers to test on; all the product names on a page | **array** |
-| **A record** | A row with named columns | One user: name, email, age, is admin | **object** |
+| **A record** | A row with named columns | One user: name, email, age, admin status | **object** |
 
 And there's a fourth situation every tester knows: **the empty cell** — a value that's missing on purpose, or hasn't been filled in yet. TypeScript has types for that too.
 
@@ -98,18 +98,18 @@ explanation: Several values of the same kind, in order — that's a list, an arr
 
 ## F1 · The simple types, completed
 
-On Day 4 you met the three everyday simple types (**primitives**): `string`, `number` and `boolean`. There are a few more facts worth knowing:
+On Day 4 you met the three everyday simple types (**primitives**): `string`, `number`, and `boolean`. There are a few more facts worth knowing:
 
 | Type | Notes |
 |---|---|
-| `string` | Text, in single quotes, double quotes or backticks |
+| `string` | Text, in single quotes, double quotes, or backticks |
 | `number` | Whole numbers *and* decimals — there is one number type. Includes the special values `NaN` and `Infinity` (Day 5) |
 | `boolean` | Only `true` or `false` |
 | `null` | "Empty on purpose" — see F2 |
 | `undefined` | "No value (yet)" — see F2 |
-| `bigint`, `symbol` | Very large whole numbers and unique ids. You won't need them for testing |
+| `bigint`, `symbol` | Very large whole numbers and unique IDs. You won't need them for testing |
 
-Primitives are **single, simple values**. You can replace a variable's primitive value, but you can't change the value itself: `'asha'.toUpperCase()` gives you a *new* text, `'ASHA'`, and leaves the original alone.
+Primitives are **single, simple values**. You can replace a variable's primitive value, but you can't change the value itself: `'asha'.toUpperCase()` gives you a *new* string, `'ASHA'`, and leaves the original alone.
 
 > [!NOTE] What about `enum`?
 > Other tutorials use `enum` for a fixed set of named values. This course uses literal types instead (F6): they do a similar job, and they also work with Node.js's built-in TypeScript support, which rejects `enum`. (Playwright itself handles `enum` fine, so you may see it in test code.)
@@ -143,7 +143,7 @@ couponCode = 'WELCOME10';
 console.log(couponCode ?? 'no coupon');   // WELCOME10
 ```
 
-`??` only steps in for `null` and `undefined`. A real value such as `0` or empty text `''` is kept — which is usually what a test wants (a quantity of `0` is still a quantity).
+`??` steps in only for `null` and `undefined`. A real value such as `0` or an empty string `''` is kept — which is usually what a test wants (a quantity of `0` is still a quantity).
 
 ```quiz
 id: d6-f2-q1
@@ -181,7 +181,7 @@ const retryDelays: number[] = [1000, 2000, 4000];                // a list of nu
 const flags = [true, false, true];                               // type inferred: boolean[]
 ```
 
-The type `string[]` means *"a list of strings"*. (You may also see the long form `Array<string>` — it means exactly the same.) For a list of literal values, give the literal type a name first and add `[]`: `BrowserName[]` (F6).
+The type `string[]` means *"a list of strings"*. (You may also see the long form `Array<string>` — it means exactly the same thing.) For a list of literal values, give the literal type a name first and add `[]`: `BrowserName[]` (F6).
 
 ### Positions start at 0
 
@@ -207,7 +207,7 @@ Each item has a numbered position — its **index** — and counting starts at *
 | `.pop()` | Removes the last item and gives it back | `browsers.pop()` | `'msedge'` |
 | `.includes(value)` | Is it in the list? | `browsers.includes('firefox')` | `true` |
 | `.indexOf(value)` | Where is it? (`-1` if absent) | `browsers.indexOf('webkit')` | `2` |
-| `.join(separator)` | Joins the items into one text | `browsers.join(', ')` | `'chromium, firefox, webkit'` |
+| `.join(separator)` | Joins the items into one string | `browsers.join(', ')` | `'chromium, firefox, webkit'` |
 
 TypeScript keeps lists consistent: `retryDelays.push('5000')` is an error — text can't go into a list of numbers.
 
@@ -253,7 +253,7 @@ const lineItem: [string, number, boolean] = ['Keyboard', 1499, true];        // 
 lineItem[1] = 'free';     // ❌ position 1 must be a number
 ```
 
-Use a tuple for small, fixed groups where the position has a meaning — like a pair of login details. For anything bigger, an object (F5) with named properties is clearer.
+Use a tuple for small, fixed groups where each position has a meaning — like a pair of login details. For anything bigger, an object (F5) with named properties is clearer.
 
 ### Destructuring: unpacking into variables
 
@@ -339,7 +339,7 @@ const typo: User = { name: 'Asha', emial: 'asha@example.com', age: 29, isAdmin: 
 | Change a property | `user.age = 30;` |
 | Read an optional property | `user.phone` → the value, or `undefined` if missing |
 
-Just like arrays, a `const` object's **properties** can change; the name just can't point to a different object.
+As with a `const` array's items, a `const` object's **properties** can change, but the name can't point to a different object.
 
 ### Safe access with `?.`
 
@@ -414,7 +414,7 @@ A value read from somewhere else might be either:
 
 You've already used unions for empty values: `string | undefined`, `string | null`.
 
-With a union, TypeScript only lets you do what's safe for **every** option. To use string-only abilities, check first — TypeScript then knows which one you have:
+With a union, TypeScript lets you do only what's safe for **every** option. To use string-only methods, check first — TypeScript then knows which one you have:
 
 ```ts mode=read
 // Imagine this value came from a file: it could be either type
@@ -459,7 +459,7 @@ Sometimes you don't know a value's type — for example, data read from a file. 
 
 | Type | Meaning | Advice |
 |---|---|---|
-| `any` | "Stop checking this value" — anything goes, anything can be done with it | **Avoid.** It silently switches TypeScript off and turns it back into plain JavaScript |
+| `any` | "Stop checking this value" — anything goes, anything can be done with it | **Avoid.** It silently switches TypeScript off for that value, so the code behaves like plain JavaScript. |
 | `unknown` | "Could be anything — **check before using it**" | The safe choice when you truly don't know |
 
 ```ts mode=read
@@ -589,7 +589,7 @@ Now 4 cases; the newest is TC-04
 ```
 
 > [!TESTER]
-> This is your test-data spreadsheet in code: the type is the column headers, each object is a row, and TypeScript refuses rows with missing or wrongly typed cells.
+> This is your test-data spreadsheet in code: the type is the header row, each object is a row, and TypeScript refuses rows with missing or wrongly typed cells.
 
 ## I3 · A test matrix with literal types and tuples
 
@@ -628,7 +628,7 @@ Total page checks: 9
 
 ## I4 · Clean up text read from a page
 
-On Day 5, `Number('₹1,499')` gave `NaN`. With text methods and arrays you can clean page text into useful values:
+On Day 5, `Number('₹1,499')` gave `NaN`. With text methods and arrays you can turn page text into useful values:
 
 ```ts file=ts-basics/day6/clean-text.ts mode=editor run="node day6/clean-text.ts"
 // Text read from an order page (page text often has stray spaces)
@@ -669,7 +669,7 @@ Coupon: WELCOME10
 | `.replace('₹', '')` | Replaced the **first** `₹` with nothing |
 | `.replaceAll(',', '')` | Replaced **every** comma with nothing (`₹1,00,000` has two) |
 | `.split('/')` | Cut the URL at every `/` into an array (the empty `''` is between the two slashes of `//`) |
-| `parts[4].split('?')[0]` | Took piece 4, cut it at `?`, kept the first half |
+| `parts[4].split('?')[0]` | Took piece 4, cut it at `?`, kept the first part |
 
 ## I5 · Type detective — five mistakes in test data
 
@@ -717,7 +717,7 @@ day6/detective.ts(24,54): error TS2322: Type 'number' is not assignable to type 
 day6/detective.ts(27,12): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
 ```
 
-Two words in these messages: an **argument** is the value you hand to a method in brackets — `'safari'` in `push('safari')` — and a **parameter** is the slot the method expects it in. Day 8 covers both.
+Two terms appear in these messages: an **argument** is the value you hand to a method in parentheses — `'safari'` in `push('safari')` — and a **parameter** is the slot the method expects it in. Day 8 covers both.
 
 | Line | Mistake |
 |---|---|
@@ -788,7 +788,7 @@ options:
   - "['a-b-c']"
   - "'a, b, c'"
 answer: b
-explanation: "`join` combines the items into one text, with the separator between them."
+explanation: "`join` combines the items into one string, with the separator between them."
 ```
 
 ```quiz
@@ -801,7 +801,7 @@ options:
   - "`console.log(u.phone.length);`"
   - "`console.log(u.phone ?? 'none');`"
 answer: c
-explanation: "phone is optional, so it may be undefined. TypeScript requires `?.` or a fallback before using it."
+explanation: "phone is optional, so it may be undefined. TypeScript requires `?.` or a fallback before you use it."
 ```
 
 ```quiz
@@ -906,7 +906,7 @@ answer: |
   no size
   Ravi
 
-  There's no index 3 (the last is 2), so it's undefined, and `??` then uses the fallback. nickname is missing, so `??` falls back to the name.
+  There's no index 3 (the last is 2), so it's undefined, and `??` then uses the fallback. `nickname` is missing, so `??` falls back to the name.
 ````
 
 ````exercise
@@ -926,7 +926,7 @@ answer: |
   laptops
   " > products > laptops > 42"
 
-  The text starts with `/`, so the first piece is the empty text `''`: `['', 'products', 'laptops', '42']` — 4 pieces. Joining puts `' > '` between them — so the line starts with a space and `>` (after the empty first piece). The quotes above just show where the line begins.
+  The text starts with `/`, so the first piece is the empty string `''`: `['', 'products', 'laptops', '42']` — 4 pieces. Joining puts `' > '` between them — so the line starts with a space and `>` (after the empty first piece). The quotes above just show where the line begins.
 ````
 
 ## Exercises
@@ -1163,7 +1163,7 @@ prompt: |
   Its error: Timeout 5000ms exceeded
   1st test error: none
   ```
-  Then try adding a result with status `'flaky'` and read the check error — then remove it.
+  Then try adding a result with status `'flaky'` read the check error, and then remove it.
 file: ts-basics/day6/test-run.ts
 run: node day6/test-run.ts
 hints:
