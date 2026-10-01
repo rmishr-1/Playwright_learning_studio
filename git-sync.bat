@@ -17,7 +17,7 @@ set "SYS=%SystemRoot%\System32"
 ::  on GitHub ends up here. Collaborators: use collab-pull / collab-push.
 :: ===========================================================================
 
-set "REPO=https://rmishr-1@github.com/rmishr-1/Playwright_learning_studio.git"
+set "REPO=https://github.com/rmishr-1/Playwright_learning_studio.git"
 set "MAINBRANCH=main"
 set "GITCMD=%ProgramFiles%\Git\cmd"
 set "GITCMD2=%LocalAppData%\Programs\Git\cmd"
