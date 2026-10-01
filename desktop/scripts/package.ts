@@ -13,12 +13,18 @@
  *   ... --carry                                    the installer carries the licence (it then opens
  *                                                  for anyone who has it)
  *   ... --zip                                      a zip of the app instead of an installer
+ *   ... --full                                     carries Node and the browsers (about 490 MB):
+ *                                                  for a customer whose network blocks their download.
+ *                                                  Without it (standard, about 100 MB) the first
+ *                                                  start downloads them from their official servers
+ *                                                  (src/runtime-install.ts, runtime-sources.json)
  *   ... --unsigned                                 without a code-signing certificate (see below)
  *
  * Most of the time use build-variant.ts, which does this and puts what to send in
  * deliveries/<code>/; new-customer.ts adds a customer's variant and licence, then builds it.
  *
- * Needs `npm run runtime` once first (Node and the browsers the app ships).
+ * Needs `npm run runtime` once first (Node and the browsers: a full build ships them, and a
+ * standard build's pins are checked against them, which the tests run on).
  *
  * Code signing, by whichever way Evoke's certificate is held:
  *   CSC_LINK (or WIN_CSC_LINK) and CSC_KEY_PASSWORD      a .pfx file
@@ -149,22 +155,33 @@ function checkInstallerMacroVersion(): void {
 /**
  * electron-builder unpacks the app with no text on the "Installing" page. This edits its unpack
  * macro (templates/nsis/include/extractAppPackage.nsh, extractUsing7za, from the same 26.15.3) so
- * the status line names each file as it goes in, then "Finishing installation..." while the files
- * are copied into place. NSIS cannot redefine a macro and no hook runs between its definition and
- * its use, so the template itself is edited; `npm ci` undoes it and every build applies it again.
- * assets/installer.nsh moves the line under the progress bar.
+ * the status line names each file as it goes in ("Installing <file>..."), then "Completing the
+ * installation..." while the files are copied into place. NSIS cannot redefine a macro and no hook
+ * runs between its definition and its use, so the template itself is edited; `npm ci` undoes it and
+ * every build applies it again. assets/installer.nsh moves the line under the progress bar.
  */
 const STATUS_MARK = '; studio: file status';
+const FILE_STATUS = 'Installing %s...';
+const FINISH_STATUS = 'Completing the installation...';
+/** The wording earlier builds patched in, replaced by the above where a template still has it. */
+const OLD_STATUS: [string, string][] = [
+  ['"Downloading %s..."', '"' + FILE_STATUS + '"'],
+  ['DetailPrint "Finishing installation..."', 'DetailPrint "' + FINISH_STATUS + '"'],
+];
 function patchExtractStatus(): void {
   const file = path.join(DESKTOP, 'node_modules', 'app-builder-lib', 'templates', 'nsis', 'include', 'extractAppPackage.nsh');
   let text = fs.readFileSync(file, 'utf-8');
-  if (text.includes(STATUS_MARK)) return;
+  if (text.includes(STATUS_MARK)) {
+    const reworded = OLD_STATUS.reduce((t, [from, to]) => t.split(from).join(to), text);
+    if (reworded !== text) fs.writeFileSync(file, reworded);
+    return;
+  }
   const extract = (indent: string): string =>
-    indent + 'SetDetailsPrint textonly\n' + indent + 'Nsis7z::ExtractWithDetails "${FILE}" "Downloading %s..."\n';
+    indent + 'SetDetailsPrint textonly\n' + indent + 'Nsis7z::ExtractWithDetails "${FILE}" "' + FILE_STATUS + '"\n';
   const edits: [string, string][] = [
     [
       '  Nsis7z::Extract "${FILE}"\n  Pop $R0\n  SetOutPath $R0\n',
-      '  ' + STATUS_MARK + '\n' + extract('  ') + '  Pop $R0\n  SetOutPath $R0\n  DetailPrint "Finishing installation..."\n',
+      '  ' + STATUS_MARK + '\n' + extract('  ') + '  Pop $R0\n  SetOutPath $R0\n  DetailPrint "' + FINISH_STATUS + '"\n',
     ],
     ['    Nsis7z::Extract "${FILE}"\n    Goto DoneExtract7za\n', extract('    ') + '    Goto DoneExtract7za\n'],
     ['  DoneExtract7za:\n!macroend', '  DoneExtract7za:\n  SetDetailsPrint none\n!macroend'],
@@ -181,6 +198,66 @@ function patchExtractStatus(): void {
   fs.writeFileSync(file, text);
 }
 
+/**
+ * The English wording of electron-builder's own installer and uninstaller messages, in formal
+ * language throughout (its originals include "If it doesn't close, try closing it manually" and
+ * "Will reinstall/upgrade."). They are read from templates/nsis/messages.yml and
+ * assistedMessages.yml (26.15.3) as the installer is built, so each English entry is set there, the
+ * same way patchExtractStatus edits its template; `npm ci` undoes it and every build applies it
+ * again. A message that is not where 26.15.3 has it stops the build.
+ */
+const INSTALLER_MESSAGES: Record<string, Record<string, string>> = {
+  'messages.yml': {
+    win7Required: 'This application requires Windows 7 or later.',
+    x64WinRequired: 'This application requires a 64-bit edition of Windows.',
+    appRunning: '${PRODUCT_NAME} is currently running.\nClick OK to close it and continue.\nIf it does not close, please close it manually.',
+    appCannotBeClosed: '${PRODUCT_NAME} could not be closed.\nPlease close it manually, then click Retry to continue.',
+    installing: 'Installing. Please wait...',
+    areYouSureToUninstall: 'Are you sure you want to uninstall ${PRODUCT_NAME}?',
+    decompressionFailed: 'The installation files could not be extracted. Please run the installer again.',
+    uninstallFailed: 'The previous version could not be removed. Please run the installer again.',
+    appClosing: 'Closing ${PRODUCT_NAME}...',
+  },
+  'assistedMessages.yml': {
+    chooseInstallationOptions: 'Installation Options',
+    chooseUninstallationOptions: 'Uninstallation Options',
+    whichInstallationShouldBeRemoved: 'Please select the installation to remove.',
+    whoShouldThisApplicationBeInstalledFor: 'Please select the users for whom this application will be installed.',
+    selectUserMode: 'Please select whether this application will be available to all users of this computer or only to you.',
+    whichInstallationRemove: 'This application is installed both for all users and for the current user.\nPlease select the installation to remove.',
+    freshInstallForAll: 'New installation for all users (administrator credentials will be requested).',
+    freshInstallForCurrent: 'New installation for the current user only.',
+    onlyForMe: 'Only for &me',
+    forAll: 'For &all users of this computer',
+    loginWithAdminAccount: 'Please sign in with an administrator account to continue.',
+    perUserInstallExists: 'An installation for the current user already exists.',
+    perUserInstall: 'An installation exists for the current user.',
+    perMachineInstallExists: 'An installation for all users already exists.',
+    perMachineInstall: 'An installation exists for all users.',
+    reinstallUpgrade: 'The existing installation will be updated.',
+    uninstall: 'The existing installation will be removed.',
+  },
+};
+export function patchInstallerMessages(): void {
+  for (const [name, messages] of Object.entries(INSTALLER_MESSAGES)) {
+    const file = path.join(DESKTOP, 'node_modules', 'app-builder-lib', 'templates', 'nsis', name);
+    let text = fs.readFileSync(file, 'utf-8');
+    for (const [key, english] of Object.entries(messages)) {
+      // The message's first entry, its English one: "<key>:" and on the next line "  en: <text>".
+      const entry = new RegExp('^(' + key + ':\\r?\\n[ \\t]+en: ).*$', 'm');
+      if (!entry.test(text)) {
+        throw new Error(
+          'Cannot set the installer message ' + key + ': ' + file + ' is not the one from electron-builder ' + INSTALLER_MACRO_FOR +
+            '. Compare it with INSTALLER_MESSAGES in scripts/package.ts and update both.',
+        );
+      }
+      // A JSON string is a valid YAML double-quoted one: its \n is a new line there too.
+      text = text.replace(entry, (_all, head: string) => head + JSON.stringify(english));
+    }
+    fs.writeFileSync(file, text);
+  }
+}
+
 /** Whether a code-signing certificate is given, by any of the ways above. */
 export const hasCertificate = (): boolean => signing() !== null;
 
@@ -195,6 +272,8 @@ export async function packageApp(opts: {
   target?: 'nsis' | 'zip';
   /** Package without a certificate. */
   unsigned?: boolean;
+  /** Carry Node and the browsers, instead of downloading them on the first start. */
+  full?: boolean;
 }): Promise<string[]> {
   const variant = opts.variant;
   const licenceFile = licencePath(variant);
@@ -209,8 +288,12 @@ export async function packageApp(opts: {
   verifyManifest();
   const target = opts.target ?? 'nsis';
   checkInstallerMacroVersion();
-  if (target === 'nsis') patchExtractStatus();
-  await build({ release: true, licenceFile, carryLicence: opts.carryLicence, variant });
+  if (target === 'nsis') {
+    patchExtractStatus();
+    patchInstallerMessages();
+  }
+  const full = opts.full === true;
+  await build({ release: true, licenceFile, carryLicence: opts.carryLicence, variant, runtime: full ? 'bundled' : 'download' });
   const electronVersion = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'node_modules', 'electron', 'package.json'), 'utf-8')) as { version: string }).version;
   const product = variant.name;
   const base = artifactBase(variant);
@@ -247,7 +330,9 @@ export async function packageApp(opts: {
   const config: Configuration = {
     appId: variant.appId,
     productName: product,
-    copyright: 'Copyright © 2026 Evoke Technologies. All rights reserved.',
+    // No copyright line in the program's or the installer's file properties. Empty, not left out:
+    // left out, electron-builder writes "Copyright © <year> <author>" of its own.
+    copyright: '',
     electronVersion,
     // The zip downloaded and checked above: electron-builder downloads no Electron of its own.
     electronDist: electronDist,
@@ -258,7 +343,7 @@ export async function packageApp(opts: {
       // removes exactly what is in the app's folder now.
       if (target === 'zip') {
         const entries = fs.readdirSync(context.appOutDir).sort();
-        fs.writeFileSync(path.join(context.appOutDir, 'Uninstall.bat'), uninstallScript(product, entries));
+        fs.writeFileSync(path.join(context.appOutDir, 'Uninstall.bat'), uninstallScript(product, entries, { downloadsRuntime: !full }));
       }
     },
     directories: { app: 'build/app', output: 'release', buildResources: 'assets' },
@@ -270,9 +355,9 @@ export async function packageApp(opts: {
     // Node (outside the app) runs the learner's code, and it cannot read inside app.asar.
     asarUnpack: ['node_modules/**'],
     files: ['**/*'],
+    // A full build carries Node and the browsers; a standard one downloads them on its first start.
     extraResources: [
-      { from: 'runtime/node', to: 'node' },
-      { from: 'runtime/ms-playwright', to: 'ms-playwright' },
+      ...(full ? [{ from: 'runtime/node', to: 'node' }, { from: 'runtime/ms-playwright', to: 'ms-playwright' }] : []),
       { from: 'build/legal', to: 'legal' },
     ],
     electronFuses: {
@@ -291,11 +376,10 @@ export async function packageApp(opts: {
       target: [{ target, arch: ['x64'] }],
       // Windows unzips into a folder of the zip's name, and the browsers' deepest files are 149
       // characters in: variants.ts keeps names short enough to stay under Windows' 260 limit.
-      artifactName: base + '-' + VERSION + '.${ext}',
+      artifactName: base + '-' + VERSION + (full ? '-full' : '') + '.${ext}',
       icon: 'assets/icon.ico',
       // The program is named after the variant: Uninstall.bat and the installer find it by name.
       executableName: product,
-      legalTrademarks: 'Evoke Technologies',
       ...(sign ?? {}),
     },
     nsis: {
@@ -305,7 +389,7 @@ export async function packageApp(opts: {
       // could be changed by every account on the computer, and the app refuses to start from one.
       allowToChangeInstallationDirectory: false,
       shortcutName: product,
-      artifactName: base + '-Setup-' + VERSION + '.${ext}',
+      artifactName: base + '-Setup-' + VERSION + (full ? '-full' : '') + '.${ext}',
       deleteAppDataOnUninstall: false,
       // No update download on top of an installed copy: the app has no auto-update, and each
       // version is sent as a new installer. electron-builder's default prepares for one anyway, with
@@ -318,7 +402,7 @@ export async function packageApp(opts: {
     },
   };
 
-  console.log('\n> The ' + (target === 'zip' ? 'zip' : 'installer') + ': about 5 minutes, compressing the browsers');
+  console.log('\n> The ' + (target === 'zip' ? 'zip' : 'installer') + (full ? ': about 5 minutes, compressing the browsers' : ' (standard: Node and the browsers download on its first start)'));
   let out: string[];
   try {
     out = await electronBuild({ targets: Platform.WINDOWS.createTarget(), config, projectDir: DESKTOP });
@@ -371,6 +455,7 @@ if (require.main === module) {
         carryLicence: process.argv.includes('--carry'),
         target: process.argv.includes('--zip') ? 'zip' : 'nsis',
         unsigned: process.argv.includes('--unsigned'),
+        full: process.argv.includes('--full'),
       }),
     )
     .catch((e) => {

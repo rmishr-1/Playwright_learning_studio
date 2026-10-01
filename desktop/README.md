@@ -2,23 +2,41 @@
 
 Packages the studio as a Windows app in two halves:
 
-- **The installer** carries a launcher (the licence, the windows, the security), Electron, its own
-  Node, Chromium, Firefox and WebKit, and the Playwright and TypeScript packages the learner's code
-  runs on. **No course and no studio code**: the learner's computer needs no Node of its own.
+- **The installer** carries a launcher (the licence, the windows, the security), Electron, and the
+  Playwright and TypeScript packages the learner's code runs on. **No course and no studio code**.
+  It comes in two kinds:
+  - **standard** (the default, about 100 MB): its **first start downloads Node and the browsers**
+    (Chromium, Firefox, WebKit: about 530 MB, once) from their official servers, checks every one
+    against hashes built into the app, and keeps them in `%LOCALAPPDATA%\<app>\runtime`;
+  - **full** (`--full`, about 490 MB): carries Node and the browsers, for a customer whose network
+    blocks those downloads.
+
+  Either way the learner's computer needs no Node or Playwright of its own.
 - **The course and the studio's code** (its backend and page) are **published** to two public
   GitHub repositories, encrypted and signed (`distribution.json`, `publish-course.bat`,
   `publish-app.bat`). At every start the launcher downloads both, opens them in memory with the
   learner's licence, and runs the studio. Nothing of the course stays on the disk after it closes.
 
-So **the studio needs the internet at every start** (raw.githubusercontent.com only); without it,
-it says so and offers Retry. A course update or a new feature reaches every installed copy at its
-next start, with no new installer; a day that changed shows **Updated** (or **New**) on its card
-until it is opened, and the learner's progress and saved work stay with their exercises.
+So **the studio needs the internet at every start**; without it, it says so and offers Retry. A
+course update or a new feature reaches every installed copy at its next start, with no new
+installer; a day that changed shows **Updated** (or **New**) on its card until it is opened, and
+the learner's progress and saved work stay with their exercises.
 
-It is proprietary software, and it is built so that copying it is **forbidden, slow and
-traceable**. No packaging can make copying impossible: everything the app needs to run is on the
-learner's computer. The aim is that taking the course out in bulk needs real skill and time, and
-that a copy that does get out points to the licence it came from.
+What a customer's IT must allow:
+
+| Address | For | Needed by |
+|---|---|---|
+| `raw.githubusercontent.com` | the course and the studio's code, every start | every build |
+| `nodejs.org` | Node, on the first start | standard |
+| `storage.googleapis.com` (`/chrome-for-testing-public/`) | Chromium, Google's Chrome for Testing | standard |
+| `playwright.download.prss.microsoft.com` | Firefox, WebKit, ffmpeg, winldd (Microsoft's Playwright CDN) | standard |
+| `cdn.playwright.dev` | the same, Playwright's fallback address | standard |
+
+It is built so that copying the course out of it is **slow and traceable**. No packaging can make
+copying impossible: everything the app needs to run is on the learner's computer. The aim is that
+taking the course out in bulk needs real skill and time, and that a copy that does get out points
+to the licence file it came from. Nothing the learner sees makes legal claims: no copyright line,
+no trademark, no licence agreement; only the third-party notices the open-source parts require.
 
 ## Double-click jobs
 
@@ -26,7 +44,7 @@ In this folder, each asks for what it needs and waits for a key at the end:
 
 | File | What it does |
 |---|---|
-| `build-app.bat` | Lists the apps (`variants.json`), asks which to build and whether as an installer or a zip, and puts it in `deliveries/<code>/`. Choose "Evoke Training Studio" for the internal app. |
+| `build-app.bat` | Lists the apps (`variants.json`), asks which to build, whether standard or full, and whether as an installer or a zip, and puts it in `deliveries/<code>/` (a full one in `deliveries/<code>-full/`). Choose "Evoke Training Studio" for the internal app. |
 | `new-customer.bat` | A new customer: their short code, licence and app, built (below). |
 | `issue-licence.bat` | A new licence for a person or team at Evoke (it opens the internal app), or a reissue of one already issued: a new end date or computer, keeping its ID and, unless changed, its logo. |
 | `revoke-licence.bat` | Lists the licences, asks which to revoke and why, and adds it to `revoked.json`. Then commit `revoked.json` and run `publish-access.bat`, choosing new keys. |
@@ -175,9 +193,10 @@ A course update or a new feature needs **no new build**: publish it. A new build
 licence (after a reissue, add `--code <their code>` if the licence file's name changed; a licence
 with no variant yet gets one with `--code`).
 
-The installer is about 470 MB, almost all of it the three browsers the course tests in. The
-launcher itself is about 1.5 MB; the studio's code it downloads is about 10 MB, the course well
-under 1 MB.
+The standard installer is about 100 MB, almost all of it Electron; its first start downloads about
+530 MB of Node and browsers. The full one (`--full`, into `deliveries/<code>-full/`) is about
+490 MB and downloads only the course. The launcher itself is about 1.5 MB; the studio's code it
+downloads is about 10 MB, the course well under 1 MB.
 
 ## Licences and the signing key
 
@@ -226,12 +245,22 @@ npm run runtime -- --fresh
 npm run build-variant -- internal
 ```
 
-- `npm run runtime` gathers the Node the app ships (it must carry the OpenJS Foundation's valid
-  signature) and the browsers at the revisions Playwright pins, and writes a SHA-256 manifest of
-  it all. `--fresh` downloads the browsers again rather than copying this computer's cache: use
-  it for anything that leaves Evoke. Every browser must match its hash in `runtime-pins.json`
-  (committed); after upgrading Playwright, `npm run runtime -- --fresh --pin` records the new
-  ones. Packaging refuses a runtime that has changed since.
+- `npm run runtime` gathers Node (it must carry the OpenJS Foundation's valid signature) and the
+  browsers at the revisions Playwright pins into `runtime/`, from their **official archives**
+  (nodejs.org, Chrome for Testing, Playwright's CDN), with the same code a standard build's first
+  start uses (`src/runtime-install.ts`), and writes a SHA-256 manifest of it all. The archives are
+  kept in `runtime-archives/` (gitignored) and reused when they still match; `--fresh` downloads
+  them again: use it for anything that leaves Evoke. Every archive must match its SHA-256 and every
+  folder its hash in `runtime-sources.json` and `runtime-pins.json` (both committed); after
+  upgrading Playwright or Node, `npm run runtime -- --fresh --pin` records new ones (it pins the
+  Node it runs on). Packaging refuses a runtime that has changed since.
+- **Standard or full.** `npm run build-variant -- <code>` makes the standard installer: it builds in
+  the pins of `runtime-sources.json` and the addresses they may come from, and its first start
+  downloads and checks them (`src/runtime-install.ts`, shown in the launch window: "Downloading
+  required components (first start only): 210 MB of 530 MB"). Add `--full` for the installer that carries `runtime/`
+  itself. Both hold the same files: the full build ships what the standard one downloads. A
+  standard copy keeps them in `%LOCALAPPDATA%\<app>\runtime`, which an update keeps and the
+  uninstaller removes (`assets/installer.nsh`, `customUnInstall`; `Uninstall.bat` for a zip).
 - **An internal build never leaves Evoke.** It opens with every customer's licence.
 - A release build needs both repositories named in `distribution.json`, and the app secret, which
   is derived from the signing key (and cached, encrypted for this Windows user, in
@@ -250,10 +279,14 @@ npm run build-variant -- internal
   any program whose path merely starts with the install folder. It is a copy of electron-builder
   26.15.3's; packaging stops at any other version until it is compared again.
 - While installing, one line under the progress bar names each file as it goes in
-  ("Downloading <file>..."), then "Finishing installation...". Packaging edits electron-builder's
+  ("Installing <file>..."), then "Completing the installation...". Packaging edits electron-builder's
   unpack macro for this (`patchExtractStatus` in `scripts/package.ts`, in `node_modules`; `npm ci`
   undoes it and the next build applies it again), and `assets/installer.nsh` moves the line
   under the bar. If the macro is not the expected one, packaging stops.
+- Every installer and uninstaller message is in formal English: electron-builder's own wording
+  (its `messages.yml` and `assistedMessages.yml`) is replaced the same way at build time
+  (`patchInstallerMessages`, `INSTALLER_MESSAGES` in `scripts/package.ts`). Nothing the learner
+  sees makes legal claims: no copyright line, no trademark, no licence agreement.
 - The app's own packages for the learner's code (Playwright, TypeScript) are taken from their npm
   tarballs, checked against `package-lock.json`, not from `node_modules`.
 - The installer carries no course: `publish-course.bat` publishes it from `../Data/Content/`.
@@ -263,10 +296,10 @@ npm run build-variant -- internal
 
 | Layer | What it does |
 |---|---|
-| Licence agreement | Installed beside the app as `EULA.txt` (with THIRD-PARTY-NOTICES.txt), including the technical measures (section 4A), but not shown, referenced or accepted anywhere: the installer has no agreement page, and a valid licence opens the studio at once. `legal/EULA.txt` is a **draft for legal review**. |
 | Licence | Ed25519-signed; optional expiry and one-computer limit; revocation list, in the app and in every release it downloads; re-checked every hour, with ten minutes' notice before the studio closes once a licence has ended; the learner is warned two weeks ahead. |
 | Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, the day the downloaded release was published, or the latest date of the files in the app's data folder (two folders deep, not the learner's workspaces, where their own code writes). It stops the clock simply being turned back; someone who also edits or re-dates those files can get past it. |
 | Nothing installed to copy | The course and the studio's code are not in the installer. They are downloaded at every start from public repositories that hold only encrypted files: AES-256-GCM, a new key for every release, wrapped once per licence with a key that needs **both** the licence's seal and the secret built into the app. Manifests are signed (Ed25519) and name every file by hash; an older manifest is never accepted after a newer one. Decrypted in memory only, never cached; the studio's code is run from memory, after checking, and may load nothing from the disk but Node's own modules. |
+| Checked runtime | A standard build's Node and browsers come from their official servers only (an allow-list built into the app; a redirect anywhere else is refused), and each archive must match the SHA-256, and the folder it unpacks to the hash, built into the app before it is used. A piece that fails is deleted. The folder they are kept in must be the learner's own: a release refuses to start if other accounts can change it. |
 | Wiped at quit | At quit (and at the next start, after a crash) the Terminal's starting files the learner has not changed, the test report and the Run folders leave the disk. Progress, the learner's own files and the licence stay. |
 | Locked API | 127.0.0.1 only; answers only the app's window (a new random token every start), and only to its own host name, so neither another program nor a web page can read it. |
 | Locked app | No command-line switches in a release (debuggers, proxies, network logs); Electron fuses; DevTools off; nothing leaves the computer; the test report is served apart from the studio; the learner's code gets none of the app's environment. |
@@ -291,6 +324,7 @@ The tests use a throwaway key pair of their own; Evoke's signing key is never to
 
 ```bash
 npm run test:publish
+npm run test:runtime
 npm run test:distribution
 npm run test:app
 npm run test:customer
@@ -307,7 +341,14 @@ npm run test:release -- licences/<a licence the build accepts>.lic
   code with the real publisher to a stand-in for GitHub (`tests/fake-raw.ts`), and drives it as
   installed: a start opens the studio, no internet then Retry, GitHub busy, a damaged download, a
   licence with no access, a course update tagging the changed day, a licence withdrawn by a
-  release, a course needing a newer studio, and no course text left on disk after quitting.
+  release, a course needing a newer studio, and no course text left on disk after quitting. Then a
+  standard build, with no Node or browsers in it: a damaged runtime download is refused, Retry
+  downloads the official archives (served from `runtime-archives/`) with its progress shown, the
+  Terminal's Node and all three browsers run, and the next start downloads nothing.
+- `test:runtime` (plain Node, seconds): the runtime installer against small zips made with
+  Windows' `tar.exe`: install, mirrors, a wrong archive or a wrong unpacked folder refused with
+  nothing left behind, too little disk space, a damaged piece downloaded again alone, and an
+  unpinned old browser removed.
 - `test:app` builds the app (obfuscated like a release) and drives it laid out as installed
   (packed, with the release's fuses, `tests/packed.ts`): every licence case, the clock guard, that
   no agreement is shown, the locked API, no caching, the page's Content Security Policy, offline, watermarks,
@@ -328,8 +369,8 @@ it checks.
 ## Before the first external release
 
 - **Create the two public repositories** on GitHub (empty), name them in `distribution.json`,
-  then `publish-app.bat` and `publish-course.bat`. Tell customers' IT to allow
-  `raw.githubusercontent.com`.
+  then `publish-app.bat` and `publish-course.bat`. Tell customers' IT which addresses to allow
+  (the table at the top; `READ ME FIRST.txt` lists them too), or send the full installer.
 - **Back up the signing key** (above), and give it a passphrase: it now signs the studio's code.
 - **Code signing.** Buy a Windows code-signing certificate. Certificates now live on a hardware
   token or in a cloud service; set whichever applies before `npm run package` or `new-customer.bat`:
@@ -342,8 +383,8 @@ it checks.
   `--unsigned`. Unsigned, SmartScreen warns on install.
 - **GitHub branch protection** for `main` (Settings → Branches): require a reviewed pull request.
   `collab-push.bat` no longer pushes to `main`, but only GitHub can enforce it.
-- **Legal review** of `legal/EULA.txt` (placeholders in brackets) and of the `[REVIEW]` notes in
-  the generated `THIRD-PARTY-NOTICES.txt`; confirm in writing that Evoke holds the rights to the
-  course content.
+- **Legal review** of the `[REVIEW]` notes in the generated `THIRD-PARTY-NOTICES.txt`; confirm in
+  writing that Evoke holds the rights to the course content. (The draft licence agreement was
+  withdrawn: no agreement ships. It is in git history, `desktop/legal/EULA.txt`, if wanted later.)
 - **Test on a clean computer**: a Windows machine or VM with no Node, online (and once offline, to
   see the studio refuse to start and say why).

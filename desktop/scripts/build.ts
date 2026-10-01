@@ -10,7 +10,7 @@
  *   setup.html, logo.png, licence.lic (a customer's build only)
  *   node_modules/               only what the learner's code runs on: Playwright and TypeScript
  *
- * and desktop/build/legal (EULA.txt, THIRD-PARTY-NOTICES.txt), which is installed beside the app.
+ * and desktop/build/legal (THIRD-PARTY-NOTICES.txt), which is installed beside the app.
  * No course and no page: those are published (publish.ts), never installed.
  *
  * The bundle, into desktop/build/bundle/app.sbx (buildBundle): the backend (studio-app.js) and the
@@ -44,6 +44,7 @@ import { checkedPublicKey, loadAppSecret } from './signing-key';
 import { distribution, rawBase, readDistribution, type Distribution } from './distribution';
 import { appSecretFingerprint, packContainer } from '../src/release-format';
 import { LAUNCHER_API } from '../../shared/studio-host';
+import { checkedRuntimeSources } from './runtime';
 import { systemExe } from '../../backend/src/system-exe';
 import { readRevoked } from './revoke-licence';
 import { internalVariant, packageName, variantByCode, type Variant } from './variants';
@@ -58,20 +59,7 @@ export const BUNDLE_DIR = path.join(BUILD, 'bundle');
 export const BUNDLE_FILE = path.join(BUNDLE_DIR, 'app.sbx');
 
 export const VERSION = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'package.json'), 'utf-8')) as { version: string }).version;
-const banner = (product: string): string =>
-  '/*! ' + product + ' ' + VERSION + '. Copyright (c) 2026 Evoke Technologies. All rights reserved. Proprietary and ' +
-  'confidential: use is subject to the licence agreement; copying, reverse engineering and redistribution are ' +
-  'prohibited. Third-party components are under their own licences, see THIRD-PARTY-NOTICES.txt. */';
-
-/** The licence agreement, naming the variant: {{PRODUCT}} and {{PRODUCT_UPPER}} in legal/EULA.txt. */
-function renderEula(product: string): string {
-  const text = fs
-    .readFileSync(path.join(DESKTOP, 'legal', 'EULA.txt'), 'utf-8')
-    .replace(/\{\{PRODUCT_UPPER\}\}/g, product.toUpperCase())
-    .replace(/\{\{PRODUCT\}\}/g, product);
-  if (text.includes('{{')) throw new Error('legal/EULA.txt has a {{...}} this build does not fill in.');
-  return text;
-}
+const banner = (product: string): string => '/*! ' + product + ' ' + VERSION + '. Third-party software notices: THIRD-PARTY-NOTICES.txt. */';
 
 /** The packages the learner's code runs on, at the versions the studio is built and tested with. */
 export const RUNTIME_PACKAGES = ['@playwright/test', 'playwright', 'playwright-core', 'typescript', 'typescript-learner'];
@@ -299,6 +287,12 @@ export async function build(opts: {
    * Data/Content, from this computer instead of downloading them (build/app/dev-local.json).
    */
   devLocal?: boolean;
+  /**
+   * Where the packaged app finds Node and the browsers: 'bundled' in its own resources (a full
+   * build, and the tests' packed copies, which link desktop/runtime there), or 'download': fetched
+   * on the first start from the official servers runtime-sources.json pins (a standard build).
+   */
+  runtime?: 'bundled' | 'download';
 }): Promise<BuildInfo> {
   const variant = opts.variant ?? internalVariant();
   const product = variant.name;
@@ -337,11 +331,16 @@ export async function build(opts: {
   if (variant.licenceId && licence?.id !== variant.licenceId) {
     throw new Error('"' + product + '" is built for licence ' + variant.licenceId + ', not ' + (licence?.id ?? 'none') + '.');
   }
+  // A standard build carries the pins of what its first start downloads, checked against this
+  // checkout's Playwright and the pins desktop/runtime (what the tests run on) was checked with.
+  const sources = opts.runtime === 'download' ? checkedRuntimeSources() : null;
+  const runtime = sources ? { mode: 'download' as const, allow: sources.allow, pieces: sources.pieces } : { mode: 'bundled' as const };
   // Asked for last: it may need the key's passphrase, which is not worth typing for a build that stops anyway.
   const secret = opts.release ? await loadAppSecret() : opts.appSecret ?? null;
   const mark = licence?.id ?? 'EVK-INTERNAL';
   console.log(product + ' ' + VERSION + ', ' + (opts.release ? 'release' : 'development') + ' build' +
-    (licence ? ' for ' + licence.licensee + ' (' + licence.id + ')' : ', for any valid licence'));
+    (licence ? ' for ' + licence.licensee + ' (' + licence.id + ')' : ', for any valid licence') +
+    (sources ? ', downloading Node and the browsers on its first start' : ''));
 
   for (const dir of [APP, LEGAL]) fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   fs.mkdirSync(APP, { recursive: true });
@@ -371,6 +370,7 @@ export async function build(opts: {
         dist: dist ? { content: rawBase(dist.content), app: rawBase(dist.app) } : null,
         runPrefix: runPrefix(variant.appId),
         secretFingerprint: secret ? appSecretFingerprint(secret) : null,
+        runtime,
       }),
       __STUDIO_SECRET__: JSON.stringify(secret ? halves(secret) : null),
     },
@@ -393,8 +393,6 @@ export async function build(opts: {
     fs.readFileSync(path.join(DESKTOP, 'src', 'setup.html'), 'utf-8').replace(/<title>[^<]*<\/title>/, '<title>' + product + '</title>'),
   );
   fs.copyFileSync(path.join(ROOT, 'frontend-c', 'public', 'evoke-logo.png'), path.join(APP, 'logo.png'));
-  // The agreement is installed beside the app, but never shown or asked for: the app does not read it.
-  fs.writeFileSync(path.join(LEGAL, 'EULA.txt'), renderEula(product));
   if (licence && opts.licenceFile && opts.carryLicence === true) fs.copyFileSync(opts.licenceFile, path.join(APP, 'licence.lic'));
   const dependencies = Object.fromEntries(
     ['@playwright/test', 'playwright', 'typescript', 'typescript-learner'].map((n) => [n, installedVersion(n)]),
@@ -411,7 +409,6 @@ export async function build(opts: {
         // Windows shows this as the program's description (Task Manager, for one).
         description: product,
         author: 'Evoke Technologies',
-        license: 'UNLICENSED',
         private: true,
         main: 'main.js',
         dependencies,

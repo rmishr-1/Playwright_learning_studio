@@ -4,7 +4,6 @@
  *
  *   1. Refuses to run under a debugger in a release build.
  *   2. Asks for a licence until it has a valid one (licence.ts), in the launch window (setup.html).
- *      The licence agreement is installed beside the app (legal/EULA.txt) and is not shown.
  *   3. Downloads the studio's code and the course from Evoke's distribution repositories on GitHub
  *      (release.ts) and opens them with the licence's seal and the app's secret: the licence alone,
  *      or the app alone, opens nothing. Without the internet the studio does not open.
@@ -17,7 +16,7 @@
  * release build, no navigating away from the studio. Links elsewhere open in the learner's browser.
  */
 import './env';
-import { APP_DIR, USER_DIR } from './env';
+import { APP_DIR, RUNTIME_DIR, USER_DIR } from './env';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -39,7 +38,8 @@ import { systemExe } from '../../backend/src/system-exe';
 import { execFileSync } from 'node:child_process';
 import { NetworkError, openReleases, publishedDay, type Opened } from './release';
 import { ReleaseError, appSecretFingerprint, unpackContainer } from './release-format';
-import { makeGet } from './fetch-session';
+import { openFetchSession, type Fetcher } from './fetch-session';
+import { RuntimeError, ensureRuntime, isInstalled, type RuntimePiece } from './runtime-install';
 import { loadBundle } from './bundle-loader';
 import { SetupError, runSetupSteps } from './setup-steps';
 import { removeCourseLeftovers } from './cleanup';
@@ -67,13 +67,18 @@ declare const __STUDIO_BUILD__: {
   runPrefix: string;
   /** The hash of the app secret built in, to check the halves against. */
   secretFingerprint: string | null;
+  /**
+   * Node and the browsers: carried in the app's resources (a full build), or downloaded on the first
+   * start from their official servers (a standard build), checked against these pins
+   * (runtime-sources.json, runtime-install.ts).
+   */
+  runtime: { mode: 'bundled' } | { mode: 'download'; allow: string[]; pieces: RuntimePiece[] };
 };
 /** The app secret, as two halves that XOR to it (scripts/build.ts); null in a development build without one. */
 declare const __STUDIO_SECRET__: [string, string] | null;
 
 const RELEASE = __STUDIO_RELEASE__;
 const BUILD = __STUDIO_BUILD__;
-const COPYRIGHT = 'Copyright © 2026 Evoke Technologies. All rights reserved.';
 /** The navy title bar's height, in pixels: Windows' buttons on it and the page's strip under them. */
 const TITLE_BAR_HEIGHT = 28;
 /** What the launcher keeps about releases: the manifests it accepted (no course), and the setup steps done. */
@@ -250,7 +255,6 @@ type SetupState = {
   step: 'licence' | 'working' | 'problem';
   product: string;
   version: string;
-  copyright: string;
   machine: string;
   /** licence: why the licence there is refused, if one is. */
   reason: string;
@@ -298,7 +302,6 @@ function openLaunchWindow(): LaunchWindow {
     step: 'working',
     product: BUILD.product,
     version: BUILD.version,
-    copyright: COPYRIGHT,
     machine: MACHINE,
     reason: '',
     message: 'Starting',
@@ -402,6 +405,108 @@ function readFolder(dir: string, prefix = ''): Map<string, string> {
 }
 
 /**
+ * A test server on 127.0.0.1 a development build may be pointed at, in place of GitHub
+ * (STUDIO_DIST_BASE) or the runtime's official servers (STUDIO_RUNTIME_BASE). A release never is.
+ */
+const localBase = (name: string): string | null =>
+  !RELEASE && /^http:\/\/127\.0\.0\.1:\d{1,5}\/$/.test(process.env[name] ?? '') ? process.env[name]! : null;
+const DIST_OVERRIDE = localBase('STUDIO_DIST_BASE');
+const RUNTIME_OVERRIDE = localBase('STUDIO_RUNTIME_BASE');
+
+/** Where the course and the studio's code are downloaded from. */
+const distBase = (): { content: string; app: string } | null =>
+  DIST_OVERRIDE ? { content: DIST_OVERRIDE + 'content/', app: DIST_OVERRIDE + 'app/' } : BUILD.dist;
+
+/** What a standard build downloads on its first start: none for a full build. */
+function runtimePieces(): RuntimePiece[] {
+  if (BUILD.runtime.mode !== 'download') return [];
+  return BUILD.runtime.pieces.map((p) => (RUNTIME_OVERRIDE ? { ...p, urls: [RUNTIME_OVERRIDE + p.name + '.zip'] } : p));
+}
+
+/** The one session the launcher downloads with (fetch-session.ts), made once. */
+let fetcherMade: Promise<Fetcher> | null = null;
+function fetcher(): Promise<Fetcher> {
+  if (!fetcherMade) {
+    const base = distBase();
+    const runtime = BUILD.runtime.mode === 'download' ? (RUNTIME_OVERRIDE ? [RUNTIME_OVERRIDE] : BUILD.runtime.allow) : [];
+    fetcherMade = openFetchSession(base ? [base.content, base.app] : [], runtime, DIST_OVERRIDE !== null || RUNTIME_OVERRIDE !== null).catch((e: unknown) => {
+      fetcherMade = null;
+      throw e;
+    });
+  }
+  return fetcherMade;
+}
+
+const MB = 1024 * 1024;
+const PIECE_NAMES: Record<string, string> = {
+  chromium: 'Chromium',
+  chromium_headless_shell: 'Chromium (headless)',
+  firefox: 'Firefox',
+  webkit: 'WebKit',
+  ffmpeg: 'ffmpeg',
+  winldd: 'winldd',
+};
+const pieceName = (p: RuntimePiece): string => (p.kind === 'node' ? 'Node.js' : (PIECE_NAMES[p.name.replace(/-\d+$/, '')] ?? p.name));
+
+/**
+ * A standard build's first start, or the first after an update that pins other versions: Node and
+ * the browsers, downloaded from their official servers and checked (runtime-install.ts). Pieces
+ * already in place are kept, so Retry carries on where a failed start stopped.
+ */
+async function installRuntime(launch: LaunchWindow): Promise<void> {
+  const pieces = runtimePieces();
+  if (!pieces.length || pieces.every((p) => isInstalled(RUNTIME_DIR, p))) return;
+  const { download } = await fetcher();
+  let shown = 0;
+  await ensureRuntime(RUNTIME_DIR, pieces, download, {
+    onProgress: (p) => {
+      const now = Date.now();
+      if (p.phase === 'download' && now - shown < 250 && p.bytes < p.piece.size) return;
+      shown = now;
+      launch.working(
+        p.phase === 'unpack'
+          ? 'Installing ' + pieceName(p.piece) + ' (first start only)'
+          : 'Downloading required components (first start only): ' + Math.floor(p.done / MB) + ' MB of ' + Math.ceil(p.total / MB) + ' MB',
+      );
+    },
+  });
+}
+
+/** What went wrong setting up Node and the browsers, said so the learner (or their IT team) knows what to do. */
+function explainRuntime(e: unknown): { message: string; detail: string } {
+  const hosts = 'nodejs.org, storage.googleapis.com, playwright.download.prss.microsoft.com and cdn.playwright.dev';
+  const size = Math.ceil(runtimePieces().reduce((sum, p) => sum + p.size, 0) / MB);
+  if (e instanceof RuntimeError) {
+    if (e.code === 'space') return { message: 'There is not enough free disk space.', detail: e.message + ' Please free some disk space, then select Retry.' };
+    if (e.code === 'checksum') {
+      return {
+        message: 'A download could not be verified.',
+        detail:
+          e.message + ' Please select Retry to download it again. If the problem persists, please contact your IT department, as downloads on this ' +
+          'network may be altered in transit.',
+      };
+    }
+    return { message: 'The required components could not be installed.', detail: e.message + ' Please select Retry.' };
+  }
+  if (e instanceof NetworkError) {
+    if (e.code === 'certificate') {
+      return {
+        message: 'The connection could not be verified.',
+        detail: 'A device on this network is intercepting secure connections. Please ask your IT department to allow ' + hosts + '. (' + e.message + ')',
+      };
+    }
+    return {
+      message: 'The required components could not be downloaded.',
+      detail:
+        'On its first start, the application downloads Node.js and the browsers used by the course (approximately ' + size + ' MB) from their ' +
+        'official servers: ' + hosts + '. Please check the internet connection, then select Retry; completed downloads are retained. If your ' +
+        'organisation restricts internet access, please ask your IT department to allow these addresses. (' + e.message + ')',
+    };
+  }
+  return { message: 'The application could not start.', detail: (e as Error)?.message ?? String(e) };
+}
+
+/**
  * The studio's code and the course for this start. A development build made with a local bundle
  * (build.ts devLocal) opens them from this computer; every other build downloads them. A development
  * build may be pointed at a test server on 127.0.0.1 (STUDIO_DIST_BASE); a release never.
@@ -418,8 +523,7 @@ async function fetchStudio(licence: Licence, licenceFingerprint: string, progres
       } as Opened;
     }
   }
-  const override = !RELEASE && /^http:\/\/127\.0\.0\.1:\d{1,5}\/$/.test(process.env.STUDIO_DIST_BASE ?? '') ? process.env.STUDIO_DIST_BASE! : null;
-  const base = override ? { content: override + 'content/', app: override + 'app/' } : BUILD.dist;
+  const base = distBase();
   if (!base) throw new Error('This build does not say where to download the course from.');
   const secret = appSecret();
   if (!secret) throw new Error('This build cannot open the course.');
@@ -432,7 +536,7 @@ async function fetchStudio(licence: Licence, licenceFingerprint: string, progres
       secret,
       api: BUILD.api,
       stateDir: STATE_DIR,
-      get: await makeGet([base.content, base.app], override !== null),
+      get: (await fetcher()).get,
       progress,
     });
   } finally {
@@ -507,10 +611,6 @@ function about(win: BrowserWindow, licence: Licence): void {
       '\nMachine code ' +
       MACHINE +
       '\nStudio release ' + versions.app + ', course release ' + versions.content +
-      '\n\n' +
-      COPYRIGHT +
-      '\nThis software and its course content are licensed, not sold, under the licence agreement you accepted.' +
-      ' Copying, sharing or extracting them is not permitted.' +
       '\n\nThird-party software notices: ' +
       path.join(process.resourcesPath, 'legal', 'THIRD-PARTY-NOTICES.txt'),
   });
@@ -787,6 +887,19 @@ void app.whenReady().then(async () => {
     app.quit();
     return;
   }
+  // The same for the folder a standard build keeps Node and the browsers in: the learner's code runs on them.
+  if (RELEASE && BUILD.runtime.mode === 'download') {
+    fs.mkdirSync(RUNTIME_DIR, { recursive: true });
+    if (othersCanChange(RUNTIME_DIR) === true) {
+      dialog.showErrorBox(
+        BUILD.product,
+        'The folder the studio keeps Node and its browsers in (' + RUNTIME_DIR + ') can be changed by other people who use this computer, ' +
+          'so the studio will not start. Ask your IT team to give it back to your account alone, or delete it: the studio downloads it again.',
+      );
+      app.quit();
+      return;
+    }
+  }
   // Whatever a crash or a power cut left on the disk last time.
   cleanUpNow();
   serveSetupFiles();
@@ -800,6 +913,14 @@ void app.whenReady().then(async () => {
     const chosen = currentLicence();
     if (!chosen.ok || !chosen.fingerprint) continue;
     launch.working('Starting');
+    // A standard build's first start: Node and the browsers, before anything needs them.
+    try {
+      await installRuntime(launch);
+    } catch (e) {
+      const { message, detail } = explainRuntime(e);
+      await launch.problem(message, detail);
+      continue;
+    }
     let opened: Opened;
     try {
       opened = await fetchStudio(licence, chosen.fingerprint, (text) => launch.working(text));

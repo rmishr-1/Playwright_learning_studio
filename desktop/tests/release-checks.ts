@@ -36,6 +36,12 @@ const PRODUCT = (JSON.parse(asar.extractFile(ASAR, 'package.json').toString('utf
 const EXE_NAME = PRODUCT + '.exe';
 const EXE = path.join(UNPACKED, EXE_NAME);
 const USER = path.join(process.env.APPDATA!, PRODUCT);
+/**
+ * A standard build carries no Node and no browsers: its first start downloads them from their
+ * official servers into %LOCALAPPDATA%\<product>\runtime (kept between runs of this test, as on a
+ * learner's computer). A full build carries them in its resources.
+ */
+const STANDARD = !fs.existsSync(path.join(UNPACKED, 'resources', 'ms-playwright'));
 
 let failures = 0;
 function expect(ok: boolean, what: string, detail = ''): void {
@@ -112,7 +118,8 @@ function reset(licenceText: string | null): void {
 async function startStudio(exe: string, opts: { cwd?: string } = {}): Promise<{ child: ChildProcess; port: number }> {
   const child = spawn(exe, [], { stdio: 'ignore', cwd: opts.cwd });
   let port = 0;
-  for (let i = 0; i < 60 && !port; i++) {
+  // A standard build's first start may be downloading Node and the browsers: minutes, not seconds.
+  for (let i = 0; i < (STANDARD ? 2400 : 60) && !port; i++) {
     await sleep(500);
     try {
       port = (JSON.parse(fs.readFileSync(path.join(USER, 'port.json'), 'utf-8')) as { port: number }).port;
@@ -151,7 +158,7 @@ async function main(): Promise<void> {
   expect(!files.includes('/content.pack') && !files.some((f) => f.startsWith('/web/')) && !files.includes('/studio-app.js'), 'no course, no page and no studio code: they are downloaded');
   expect(!files.includes('/dev-local.json'), 'nothing tells it to open a course from this computer');
   const main = asar.extractFile(ASAR, 'main.js').toString('utf-8');
-  expect(main.startsWith('/*! ' + PRODUCT + ' '), 'main.js starts with the copyright notice');
+  expect(main.startsWith('/*! ' + PRODUCT + ' '), 'main.js starts with its notice');
   const readable = ['studio_token', 'aes-256-gcm', 'SEB1', 'licence.lic', 'evoke-studio/kek', 'STUDIO_DIST_BASE', 'dev-local', 'setup:choose', 'last-seen'];
   const found = readable.filter((s) => main.includes(s));
   expect(found.length === 0, 'main.js is obfuscated: none of the studio\'s names are readable', found.join(', '));
@@ -162,7 +169,12 @@ async function main(): Promise<void> {
   expect(unpackedOwn.length === 0, 'only third-party packages are unpacked', unpackedOwn.join(', '));
   const tsLib = path.join(unpacked, 'node_modules', 'typescript', 'lib');
   expect(fs.existsSync(tsLib) && fs.readdirSync(tsLib).join() === 'typescript.js', 'of the TypeScript package, only the one file a Run needs ships');
-  expect(!fs.existsSync(path.join(UNPACKED, 'resources', 'node', 'node_modules')), 'Node ships without npm');
+  if (STANDARD) {
+    expect(!fs.existsSync(path.join(UNPACKED, 'resources', 'node')), 'a standard build carries no Node and no browsers: its first start downloads them');
+  } else {
+    expect(fs.existsSync(path.join(UNPACKED, 'resources', 'node', 'node.exe')), 'a full build carries Node and the browsers');
+    expect(!fs.existsSync(path.join(UNPACKED, 'resources', 'node', 'node_modules')), 'Node ships without npm');
+  }
 
   console.log('\nStarting the app');
   reset(null);

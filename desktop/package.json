@@ -17,6 +17,7 @@
         "test:customer": "node ../node_modules/tsx/dist/cli.mjs tests/customer-build.ts",
         "test:publish": "node ../node_modules/tsx/dist/cli.mjs tests/release-format.ts",
         "test:distribution": "node ../node_modules/tsx/dist/cli.mjs tests/distribution.ts",
+        "test:runtime": "node ../node_modules/tsx/dist/cli.mjs tests/runtime-install.ts",
         "publish": "node ../node_modules/tsx/dist/cli.mjs scripts/publish.ts",
         "licence:unsealed": "node ../node_modules/tsx/dist/cli.mjs scripts/unsealed-licences.ts",
         "new-customer": "node ../node_modules/tsx/dist/cli.mjs scripts/new-customer.ts",

@@ -92,9 +92,8 @@ export function writeNotices(out: string, groups: { title: string; dirs: string[
   const head = `${product}
 THIRD-PARTY SOFTWARE NOTICES
 
-${product} is proprietary software of Evoke Technologies. It includes the third-party software
-below, each part under its own licence. Nothing in Evoke's licence agreement limits your rights
-under these licences.
+${product} includes the third-party software listed below. Each component is provided under its
+own licence, reproduced in this document.
 
 ${RULE}
 PARTS THAT ARE NOT NPM PACKAGES

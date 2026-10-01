@@ -7,6 +7,8 @@
  *   npm run new-customer -- --code BWP --licensee "BWP Group" --logo bwp.png [--email x]
  *                           [--expires 2027-09-30] [--machine XXXX-XXXX-XXXX-XXXX]   (no questions)
  *   ... --zip                                   a zip instead of an installer
+ *   ... --full                                  the full installer, carrying Node and the browsers,
+ *                                               for a customer whose network blocks their download
  *   npm run new-customer -- --rebuild licences/<id>-<name>.lic   a new build for a licence already
  *                                                                 issued (a new launcher, or a
  *                                                                 reissue; a course update needs
@@ -118,7 +120,7 @@ function variantLicencePath(file: string): string {
  * reissued licence moves to the variant --code names (keeping its name and identity, so it installs
  * over the customer's copy), and a licence with no variant yet gets one with --code.
  */
-async function rebuild(file: string, code: string | null, build: { zip: boolean; unsigned: boolean }): Promise<void> {
+async function rebuild(file: string, code: string | null, build: { zip: boolean; unsigned: boolean; full: boolean }): Promise<void> {
   const licence = (JSON.parse(fs.readFileSync(file, 'utf-8')) as LicenceFile).licence;
   const rel = variantLicencePath(file);
   const known = variantByLicenceId(licence.id);
@@ -149,7 +151,7 @@ async function rebuild(file: string, code: string | null, build: { zip: boolean;
 }
 
 async function main(): Promise<void> {
-  const build = { zip: process.argv.includes('--zip'), unsigned: process.argv.includes('--unsigned') };
+  const build = { zip: process.argv.includes('--zip'), unsigned: process.argv.includes('--unsigned'), full: process.argv.includes('--full') };
   const again = arg('rebuild');
   if (again) return rebuild(path.resolve(cleanPath(again)), arg('code'), build);
   if (!hasPrivateKey()) {

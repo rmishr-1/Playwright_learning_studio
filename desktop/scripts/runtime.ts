@@ -1,43 +1,73 @@
 /**
- * Gathers what the app ships so it runs with no Node and no internet on the learner's computer:
+ * Gathers Node and the browsers the learner's code runs on into desktop/runtime, and pins them:
  *
- *   desktop/runtime/node/          node.exe, from the Node this script runs on (24.x), and the
- *                                  version of its npm (npm itself is not shipped)
- *   desktop/runtime/ms-playwright/ Chromium, Firefox and WebKit at the revisions the studio's
- *                                  Playwright pins, from this computer's browser cache, or
- *                                  downloaded by `playwright install` when they are not there
- *   desktop/runtime/MANIFEST.sha256   the SHA-256 of every file above
+ *   desktop/runtime/node/            node.exe, its LICENSE, and the version of its npm (npm itself
+ *                                    is not shipped)
+ *   desktop/runtime/ms-playwright/   Chromium, its headless shell, Firefox, WebKit, ffmpeg and
+ *                                    winldd, at the revisions the studio's Playwright pins
+ *   desktop/runtime/MANIFEST.sha256  the SHA-256 of every file above
  *
- *   npm run runtime                (in desktop/)
- *   npm run runtime -- --fresh     downloads the browsers again rather than copying the cache: do
- *                                  this for a build that leaves Evoke
- *   npm run runtime -- --fresh --pin   after upgrading Playwright or Node: downloads the browsers,
- *                                  and records their hashes, and the Node version and its hash, in
- *                                  desktop/runtime-pins.json, to commit (--pin needs --fresh: a
- *                                  pin is never taken from this computer's cache)
+ * Everything comes from its official archive, through the same code a learner's first start uses
+ * (src/runtime-install.ts): Node from nodejs.org, Chromium from Chrome for Testing, the others from
+ * Playwright's CDN, as `playwright install` would. So the full installer, which carries this folder,
+ * and the standard one, whose first start downloads the same archives, end up with the same files.
  *
- * node.exe must carry the OpenJS Foundation's valid signature, be the version and file pinned in
- * runtime-pins.json, and have nothing beside it but its licence and npm's version number (Windows
- * loads a DLL from beside a program before its own). The browsers are Playwright's own
- * builds, which are not signed: each must match the hash of its whole folder that
- * runtime-pins.json records, so a browser changed in this computer's cache, or on its way from the
- * internet, is refused. Packaging checks the manifest and the pins again (verifyManifest), so
- * nothing that changes here after it was gathered goes out unnoticed.
+ *   npm run runtime                 (in desktop/) from the pins in runtime-sources.json; archives
+ *                                   already in desktop/runtime-archives/ (gitignored) are reused
+ *                                   when they match
+ *   npm run runtime -- --fresh      downloads every archive again: do this for a build that leaves Evoke
+ *   npm run runtime -- --fresh --pin   after upgrading Playwright or Node: downloads the archives for
+ *                                   this checkout's Playwright and the Node running this, and records
+ *                                   their hashes in runtime-sources.json and runtime-pins.json, to
+ *                                   commit (--pin needs --fresh: a pin is never taken from a cache)
  *
- * Both folders are ignored by Git. It is safe to run again: what is already there is kept.
+ * node.exe must carry the OpenJS Foundation's valid signature and be the version and file pinned.
+ * The browsers are Playwright's own builds, which are not signed: each archive must match its
+ * pinned SHA-256, and the folder it unpacks to its pinned hash, so a browser changed anywhere on its
+ * way is refused. Packaging checks the manifest and the pins again (verifyManifest), so nothing that
+ * changes here after it was gathered goes out unnoticed.
  */
 import { execFileSync } from 'node:child_process';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
+import { Readable, Transform } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { systemExe } from '../../backend/src/system-exe';
+import {
+  ensureRuntime,
+  fileSha256,
+  filesUnder,
+  installPiece,
+  treeHashSync,
+  type Download,
+  type Measured,
+  type RuntimePiece,
+} from '../src/runtime-install';
 
 const DESKTOP = path.resolve(__dirname, '..');
 const ROOT = path.resolve(DESKTOP, '..');
 const OUT = path.join(DESKTOP, 'runtime');
 const MANIFEST = path.join(OUT, 'MANIFEST.sha256');
 const PINS = path.join(DESKTOP, 'runtime-pins.json');
+export const SOURCES_FILE = path.join(DESKTOP, 'runtime-sources.json');
+/** The official archives, kept once downloaded: a second gather, and the tests, need no download. */
+export const ARCHIVES = path.join(DESKTOP, 'runtime-archives');
+
+/**
+ * Where the runtime may be downloaded from: the official servers, and where they send a download on
+ * to (cdn.playwright.dev forwards Chromium to Chrome for Testing and the others to Microsoft's CDN).
+ * Built into every standard launcher as its allow-list (src/fetch-session.ts).
+ */
+export const RUNTIME_HOSTS = [
+  'https://nodejs.org/dist/',
+  'https://storage.googleapis.com/chrome-for-testing-public/',
+  'https://playwright.download.prss.microsoft.com/dbazure/download/playwright/',
+  'https://cdn.playwright.dev/',
+];
+const GOOGLE = 'https://storage.googleapis.com/chrome-for-testing-public/';
+const MICROSOFT = 'https://playwright.download.prss.microsoft.com/dbazure/download/playwright/';
+const PLAYWRIGHT = 'https://cdn.playwright.dev/';
 
 /** Windows' verdict on a program's signature, and who signed it. */
 export function signature(file: string): { status: string; signer: string } {
@@ -65,72 +95,24 @@ const NODE_FILES = ['node.exe', 'npm-version.txt', 'LICENSE'];
 
 const sha256 = (file: string): string => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 
-/** Throws unless runtime/node holds only NODE_FILES, and its node.exe is the pinned one. */
+type Pins = Record<string, string>;
+const readPins = (): Pins => (fs.existsSync(PINS) ? (JSON.parse(fs.readFileSync(PINS, 'utf-8')) as Pins) : {});
+
+/** Throws unless runtime/node holds only NODE_FILES, and is the pinned Node. */
 function checkNode(): void {
   const dir = path.join(OUT, 'node');
   const extra = fs.readdirSync(dir).filter((n) => !NODE_FILES.includes(n));
   if (extra.length) throw new Error('desktop/runtime/node holds files that must not ship (' + extra.join(', ') + '). Run `npm run runtime -- --fresh`.');
-  const want = readPins()['node.exe'];
-  if (!want) throw new Error('desktop/runtime-pins.json has no pin for node.exe. Run `npm run runtime -- --fresh --pin` and commit the file.');
+  const pins = readPins();
+  const want = pins['node.exe'];
+  if (!want || !pins.node) throw new Error('desktop/runtime-pins.json has no pin for Node. Run `npm run runtime -- --fresh --pin` and commit the file.');
   const exe = path.join(dir, 'node.exe');
   requireNodeSignature(exe);
   const got = execFileSync(exe, ['--version'], { encoding: 'utf-8' }).trim() + ' ' + sha256(exe);
-  if (got !== want) throw new Error('desktop/runtime/node/node.exe is not the pinned Node (' + want.split(' ')[0] + '). Run `npm run runtime -- --fresh` with that Node, or pin a new one.');
+  if (got !== want || treeHashSync(dir) !== pins.node) {
+    throw new Error('desktop/runtime/node is not the pinned Node (' + want.split(' ')[0] + '). Run `npm run runtime -- --fresh`.');
+  }
 }
-
-function node(): void {
-  const [major, minor] = process.versions.node.split('.').map(Number);
-  if (major < 24) {
-    throw new Error('Run this with Node 24 (found ' + process.version + '): the app ships the Node that runs it.');
-  }
-  const dir = path.join(OUT, 'node');
-  const exe = path.join(dir, 'node.exe');
-  const home = path.dirname(process.execPath);
-  requireNodeSignature(process.execPath);
-  // No command runs npm itself, so only its version ships, for `npm --version`.
-  const npm = (JSON.parse(fs.readFileSync(path.join(home, 'node_modules', 'npm', 'package.json'), 'utf-8')) as { version: string }).version;
-  // A node.exe already there runs only once its signature is proven.
-  let have: string | null = null;
-  if (fs.existsSync(exe)) {
-    try {
-      requireNodeSignature(exe);
-      have = execFileSync(exe, ['--version'], { encoding: 'utf-8' }).trim();
-    } catch {
-      have = null;
-    }
-  }
-  const extra = fs.existsSync(dir) ? fs.readdirSync(dir).filter((n) => !NODE_FILES.includes(n)) : [];
-  if (have === process.version && extra.length === 0) {
-    fs.writeFileSync(path.join(dir, 'npm-version.txt'), npm + '\n');
-    console.log('node      ' + have + ', npm ' + npm + ', signed by the OpenJS Foundation (already there)');
-    return;
-  }
-  fs.rmSync(dir, { recursive: true, force: true });
-  fs.mkdirSync(dir, { recursive: true });
-  fs.copyFileSync(process.execPath, exe);
-  requireNodeSignature(exe);
-  fs.writeFileSync(path.join(dir, 'npm-version.txt'), npm + '\n');
-  for (const f of ['LICENSE']) {
-    if (fs.existsSync(path.join(home, f))) fs.copyFileSync(path.join(home, f), path.join(dir, f));
-  }
-  console.log('node      ' + process.version + ' (' + major + '.' + minor + '), npm ' + npm + ', signed by the OpenJS Foundation, copied from ' + home);
-}
-
-/** The hash of a whole folder: every file's path and SHA-256. */
-function treeHash(dir: string): string {
-  return crypto
-    .createHash('sha256')
-    .update(
-      files(dir)
-        .sort()
-        .map((f) => crypto.createHash('sha256').update(fs.readFileSync(path.join(dir, ...f.split('/')))).digest('hex') + '  ' + f)
-        .join('\n'),
-    )
-    .digest('hex');
-}
-
-type Pins = Record<string, string>;
-const readPins = (): Pins => (fs.existsSync(PINS) ? (JSON.parse(fs.readFileSync(PINS, 'utf-8')) as Pins) : {});
 
 /** Throws unless every browser folder matches its pin. */
 function checkPins(dir: string, names: string[]): void {
@@ -138,93 +120,158 @@ function checkPins(dir: string, names: string[]): void {
   for (const name of names) {
     const want = pins[name];
     if (!want) throw new Error('desktop/runtime-pins.json has no hash for ' + name + '. After upgrading Playwright, run `npm run runtime -- --fresh --pin` and commit the file.');
-    if (treeHash(path.join(dir, name)) !== want) {
+    if (treeHashSync(path.join(dir, name)) !== want) {
       fs.rmSync(path.join(dir, name), { recursive: true, force: true });
       throw new Error(name + ' does not match its hash in desktop/runtime-pins.json, and was removed. Run `npm run runtime -- --fresh`.');
     }
   }
 }
 
-/**
- * The environment `playwright install` downloads with: no other download host, and no switch that
- * would weaken the checking of its HTTPS certificate.
- */
-function downloadEnv(dir: string): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = {};
-  for (const [k, v] of Object.entries(process.env)) {
-    if (/^(PLAYWRIGHT_|NODE_TLS_|NODE_EXTRA_CA_CERTS$|NODE_OPTIONS$|SSL_CERT_|DEBUG$)/i.test(k)) continue;
-    env[k] = v;
-  }
-  env.PLAYWRIGHT_BROWSERS_PATH = dir;
-  return env;
-}
+// ---------------------------------------------------------------- what to download
 
-function browsers(fresh: boolean, pin: boolean): string[] {
-  const dir = path.join(OUT, 'ms-playwright');
+/**
+ * The pieces this checkout's Playwright and the Node running this need, at their official
+ * addresses, not yet measured: the URLs are the ones `playwright install` uses (playwright-core's
+ * DOWNLOAD_PATHS and PLAYWRIGHT_CDN_MIRRORS), final address first.
+ */
+function officialPieces(): RuntimePiece[] {
   const list = (
     JSON.parse(fs.readFileSync(path.join(ROOT, 'node_modules', 'playwright-core', 'browsers.json'), 'utf-8')) as {
-      browsers: { name: string; revision: string; installByDefault: boolean }[];
+      browsers: { name: string; revision: string; browserVersion?: string; installByDefault: boolean }[];
     }
-  ).browsers;
-  // The browsers Playwright installs by default, and winldd, the Windows helper it installs with
-  // them: each at the one revision the studio's Playwright pins.
-  const wanted = list
-    .filter((b) => b.installByDefault || b.name === 'winldd')
-    .map((b) => b.name.replace(/-/g, '_') + '-' + b.revision);
-  if (fresh) fs.rmSync(dir, { recursive: true, force: true });
-  fs.mkdirSync(dir, { recursive: true });
-  // Anything else here (an older revision) does not ship.
-  for (const name of fs.readdirSync(dir)) {
-    if (!wanted.includes(name)) fs.rmSync(path.join(dir, name), { recursive: true, force: true });
-  }
-  const cache = path.join(process.env.LOCALAPPDATA ?? path.join(os.homedir(), 'AppData', 'Local'), 'ms-playwright');
-  const missing: string[] = [];
-  for (const name of wanted) {
-    const target = path.join(dir, name);
-    if (fs.existsSync(path.join(target, 'INSTALLATION_COMPLETE'))) {
-      console.log('browser   ' + name + ' (already there)');
-      continue;
+  ).browsers.filter((b) => b.installByDefault || b.name === 'winldd');
+  const unknown = { size: 0, sha256: '', tree: '', unpacked: 0 };
+  const browsers = list.map((b): RuntimePiece => {
+    const name = b.name.replace(/-/g, '_') + '-' + b.revision;
+    if (b.name === 'chromium' || b.name === 'chromium-headless-shell') {
+      if (!b.browserVersion) throw new Error(b.name + ' has no browserVersion in browsers.json.');
+      const file = b.name === 'chromium' ? 'chrome-win64.zip' : 'chrome-headless-shell-win64.zip';
+      const sub = b.browserVersion + '/win64/' + file;
+      return {
+        name,
+        kind: 'browser',
+        urls: [GOOGLE + sub, PLAYWRIGHT + 'builds/cft/' + sub],
+        exe: b.name === 'chromium' ? 'chrome-win64/chrome.exe' : 'chrome-headless-shell-win64/chrome-headless-shell.exe',
+        ...unknown,
+      };
     }
-    const source = path.join(cache, name);
-    if (!fresh && fs.existsSync(path.join(source, 'INSTALLATION_COMPLETE'))) {
-      fs.cpSync(source, target, { recursive: true });
-      console.log('browser   ' + name + ' copied from ' + cache);
-    } else {
-      missing.push(name);
-    }
-  }
-  if (missing.length) {
-    console.log('browser   downloading ' + missing.join(', ') + ' from Playwright');
-    execFileSync(process.execPath, [path.join(ROOT, 'node_modules', 'playwright', 'cli.js'), 'install', 'chromium', 'firefox', 'webkit'], {
-      stdio: 'inherit',
-      env: downloadEnv(dir),
-    });
-    // What the installer adds beside the browsers (its .links folder) does not ship.
-    for (const name of fs.readdirSync(dir)) {
-      if (!wanted.includes(name)) fs.rmSync(path.join(dir, name), { recursive: true, force: true });
-    }
-  }
-  if (pin) {
-    const exe = path.join(OUT, 'node', 'node.exe');
-    const pins = {
-      'node.exe': execFileSync(exe, ['--version'], { encoding: 'utf-8' }).trim() + ' ' + sha256(exe),
-      ...Object.fromEntries(wanted.map((n) => [n, treeHash(path.join(dir, n))])),
-    };
-    fs.writeFileSync(PINS, JSON.stringify(pins, null, 2) + '\n');
-    console.log('pins      ' + PINS + ' (commit it)');
-  }
-  checkPins(dir, wanted);
-  return wanted;
+    const exe: Record<string, string> = { firefox: 'firefox/firefox.exe', webkit: 'Playwright.exe', ffmpeg: 'ffmpeg-win64.exe', winldd: 'PrintDeps.exe' };
+    if (!exe[b.name]) throw new Error('The studio does not know how to download ' + b.name + ' (Playwright was upgraded?). Add it to scripts/runtime.ts.');
+    const sub = 'builds/' + b.name + '/' + b.revision + '/' + b.name + '-win64.zip';
+    return { name, kind: 'browser', urls: [MICROSOFT + sub, PLAYWRIGHT + sub, PLAYWRIGHT + 'dbazure/download/playwright/' + sub], exe: exe[b.name], ...unknown };
+  });
+  const [major] = process.versions.node.split('.').map(Number);
+  if (major < 24) throw new Error('Run this with Node 24 (found ' + process.version + '): the app ships the Node that pins it.');
+  const top = 'node-' + process.version + '-win-x64';
+  const node: RuntimePiece = { name: 'node', kind: 'node', urls: ['https://nodejs.org/dist/' + process.version + '/' + top + '.zip'], exe: 'node.exe', archiveRoot: top, ...unknown };
+  return [node, ...browsers];
 }
 
-function files(dir: string, prefix = ''): string[] {
-  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory() ? files(path.join(dir, e.name), prefix + e.name + '/') : [prefix + e.name],
-  );
+export type RuntimeSources = { allow: string[]; pieces: RuntimePiece[] };
+
+/** runtime-sources.json, checked: every piece fully pinned, every URL on the allow-list. */
+export function readRuntimeSources(): RuntimeSources {
+  if (!fs.existsSync(SOURCES_FILE)) throw new Error('desktop/runtime-sources.json is missing. Run `npm run runtime -- --fresh --pin` and commit it.');
+  const raw = JSON.parse(fs.readFileSync(SOURCES_FILE, 'utf-8')) as Partial<RuntimeSources>;
+  const allow = raw.allow ?? [];
+  const pieces = raw.pieces ?? [];
+  if (!allow.length || allow.some((a) => !/^https:\/\/[a-z0-9.-]+\/([\w.-]+\/)*$/.test(a))) throw new Error('runtime-sources.json: "allow" must list https:// address prefixes.');
+  for (const p of pieces) {
+    const ok =
+      typeof p.name === 'string' && /^(node|[a-z0-9_]+-\d+)$/.test(p.name) && (p.kind === 'node' || p.kind === 'browser') &&
+      Array.isArray(p.urls) && p.urls.length > 0 && p.urls.every((u) => allow.some((a) => u.startsWith(a))) &&
+      Number.isInteger(p.size) && p.size > 0 && /^[0-9a-f]{64}$/.test(p.sha256) && /^[0-9a-f]{64}$/.test(p.tree) &&
+      Number.isInteger(p.unpacked) && p.unpacked > 0 && typeof p.exe === 'string' && !p.exe.includes('..') &&
+      (p.kind === 'browser' || /^node-v\d+\.\d+\.\d+-win-x64$/.test(p.archiveRoot ?? ''));
+    if (!ok) throw new Error('runtime-sources.json: the entry for ' + String(p.name) + ' is not complete. Run `npm run runtime -- --fresh --pin`.');
+  }
+  if (!pieces.some((p) => p.kind === 'node')) throw new Error('runtime-sources.json has no Node.');
+  return { allow, pieces };
 }
+
+/**
+ * The pinned pieces, checked against this checkout: the browsers its Playwright needs and the pins
+ * the full build is checked with. A Playwright upgrade without a new pin stops here.
+ */
+export function checkedRuntimeSources(): RuntimeSources {
+  const sources = readRuntimeSources();
+  const pins = readPins();
+  const wanted = officialPieces().map((p) => p.name).sort().join();
+  const have = sources.pieces.map((p) => p.name).sort().join();
+  if (wanted !== have) {
+    throw new Error('runtime-sources.json is for other browser versions (' + have + ') than this Playwright needs (' + wanted + '). Run `npm run runtime -- --fresh --pin`.');
+  }
+  for (const p of sources.pieces) {
+    if (pins[p.name] !== p.tree) throw new Error('runtime-sources.json and runtime-pins.json disagree about ' + p.name + '. Run `npm run runtime -- --fresh --pin`.');
+  }
+  return sources;
+}
+
+// ---------------------------------------------------------------- downloading, on the build machine
+
+/** Counts the bytes going through. */
+function counter(onBytes: (bytes: number) => void): Transform {
+  let n = 0;
+  return new Transform({
+    transform(chunk: Buffer, _enc, done) {
+      n += chunk.length;
+      onBytes(n);
+      done(null, chunk);
+    },
+  });
+}
+
+/**
+ * Downloads with Node's own fetch, from the piece's URLs in turn, only from the allow-list (a
+ * redirect elsewhere is refused), keeping each archive in `cache` for the next gather and the tests.
+ * With `fresh`, a kept archive is never used.
+ */
+export function buildMachineDownload(cache: string | null, fresh: boolean, allow = RUNTIME_HOSTS): Download {
+  return async (piece, file, onBytes) => {
+    const kept = cache ? path.join(cache, piece.name + '.zip') : null;
+    if (kept && !fresh && piece.sha256 && fs.existsSync(kept) && fs.statSync(kept).size === piece.size && (await fileSha256(kept)) === piece.sha256) {
+      fs.copyFileSync(kept, file);
+      onBytes(piece.size);
+      return;
+    }
+    let last: unknown = null;
+    for (const url of piece.urls) {
+      try {
+        if (!allow.some((a) => url.startsWith(a))) throw new Error(url + ' is not an official address for the runtime.');
+        const res = await fetch(url, { redirect: 'follow' });
+        if (res.url && !allow.some((a) => res.url.startsWith(a))) throw new Error(url + ' sent the download on to ' + res.url + ', which is not on the allow-list.');
+        if (!res.ok || !res.body) throw new Error(url + ' answered ' + res.status + '.');
+        await pipeline(Readable.fromWeb(res.body as import('node:stream/web').ReadableStream), counter(onBytes), fs.createWriteStream(file));
+        if (kept) {
+          fs.mkdirSync(path.dirname(kept), { recursive: true });
+          fs.copyFileSync(file, kept);
+        }
+        return;
+      } catch (e) {
+        last = e;
+        fs.rmSync(file, { force: true });
+      }
+    }
+    throw last instanceof Error ? last : new Error('Could not download ' + piece.name + '.');
+  };
+}
+
+/** Prints a piece's progress every tenth of the way. */
+function logger(): (piece: RuntimePiece, bytes: number) => void {
+  const shown = new Map<string, number>();
+  return (piece, bytes) => {
+    const size = piece.size || 1;
+    const tenth = piece.size ? Math.floor((bytes / size) * 10) : Math.floor(bytes / (20 * 1024 * 1024));
+    if (shown.get(piece.name) === tenth) return;
+    shown.set(piece.name, tenth);
+    console.log('          ' + piece.name + ': ' + Math.round(bytes / 1024 / 1024) + (piece.size ? ' of ' + Math.round(piece.size / 1024 / 1024) : '') + ' MB');
+  };
+}
+
+// ---------------------------------------------------------------- the manifest
 
 function hashes(): string {
-  return files(OUT)
+  return filesUnder(OUT)
     .filter((f) => f !== 'MANIFEST.sha256')
     .sort()
     .map((f) => crypto.createHash('sha256').update(fs.readFileSync(path.join(OUT, ...f.split('/')))).digest('hex') + '  ' + f)
@@ -246,16 +293,65 @@ export function verifyManifest(): void {
   checkPins(dir, fs.readdirSync(dir));
 }
 
+// ---------------------------------------------------------------- gathering
+
+async function gather(fresh: boolean, pin: boolean): Promise<void> {
+  const log = logger();
+  if (fresh) {
+    for (const name of ['node', 'ms-playwright', '.studio', 'MANIFEST.sha256']) fs.rmSync(path.join(OUT, name), { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  }
+  fs.mkdirSync(OUT, { recursive: true });
+  const download = buildMachineDownload(ARCHIVES, fresh);
+
+  if (pin) {
+    const pieces = officialPieces();
+    const measured = new Map<string, Measured>();
+    for (const piece of pieces) {
+      console.log((piece.kind === 'node' ? 'node      ' : 'browser   ') + piece.name + ' from ' + piece.urls[0]);
+      measured.set(piece.name, await installPiece(OUT, piece, download, { pin: true, onBytes: (b) => log(piece, b) }));
+    }
+    // What was pinned before and is not now goes.
+    const browsers = path.join(OUT, 'ms-playwright');
+    for (const name of fs.readdirSync(browsers)) if (!pieces.some((p) => p.name === name)) fs.rmSync(path.join(browsers, name), { recursive: true, force: true });
+    const exe = path.join(OUT, 'node', 'node.exe');
+    requireNodeSignature(exe);
+    const pinned = pieces.map((p) => ({ ...p, ...measured.get(p.name)! }));
+    const sources = {
+      _comment:
+        'Where a standard installer\'s first start downloads Node and the browsers from, and what each must be (scripts/runtime.ts, src/runtime-install.ts). Written by `npm run runtime -- --fresh --pin`; commit it with runtime-pins.json.',
+      allow: RUNTIME_HOSTS,
+      pieces: pinned,
+    };
+    fs.writeFileSync(SOURCES_FILE, JSON.stringify(sources, null, 2) + '\n');
+    const pins: Pins = {
+      'node.exe': execFileSync(exe, ['--version'], { encoding: 'utf-8' }).trim() + ' ' + sha256(exe),
+      ...Object.fromEntries(pinned.map((p) => [p.name, p.tree])),
+    };
+    fs.writeFileSync(PINS, JSON.stringify(pins, null, 2) + '\n');
+    console.log('pins      ' + PINS + ' and ' + SOURCES_FILE + ' (commit them)');
+  } else {
+    const { pieces } = checkedRuntimeSources();
+    const result = await ensureRuntime(OUT, pieces, download, { onProgress: (p) => p.phase === 'download' && log(p.piece, p.bytes) });
+    for (const p of pieces) console.log((p.kind === 'node' ? 'node      ' : 'browser   ') + p.name + (result.installed.includes(p.name) ? ' (installed, checked)' : ' (already there)'));
+  }
+
+  fs.rmSync(path.join(OUT, '.studio', 'partial'), { recursive: true, force: true });
+  checkNode();
+  const dir = path.join(OUT, 'ms-playwright');
+  checkPins(dir, fs.readdirSync(dir));
+  fs.writeFileSync(MANIFEST, hashes());
+  console.log('manifest  ' + MANIFEST);
+}
+
 if (require.main === module) {
   const fresh = process.argv.includes('--fresh');
   const pin = process.argv.includes('--pin');
   if (pin && !fresh) {
-    console.error('--pin records what it downloads, never what is in this computer\'s cache: use --fresh --pin.');
+    console.error('--pin records what it downloads, never what is in a cache: use --fresh --pin.');
     process.exit(1);
   }
-  node();
-  browsers(fresh, pin);
-  checkNode();
-  fs.writeFileSync(MANIFEST, hashes());
-  console.log('manifest  ' + MANIFEST);
+  gather(fresh, pin).catch((e) => {
+    console.error(e instanceof Error ? e.message : e);
+    process.exit(1);
+  });
 }

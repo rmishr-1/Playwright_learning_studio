@@ -2,7 +2,8 @@
  * A stand-in for raw.githubusercontent.com, on 127.0.0.1, for the tests: it serves a folder laid out
  * as the distribution repositories are (<root>/content/..., <root>/app/...), and can misbehave the
  * ways the real one can. A development build of the app reads from it when STUDIO_DIST_BASE names
- * it; a release never does.
+ * it; a release never does. Served from desktop/runtime-archives, it stands in for the runtime's
+ * official servers the same way (STUDIO_RUNTIME_BASE).
  */
 import * as fs from 'node:fs';
 import * as http from 'node:http';
@@ -24,7 +25,7 @@ export async function fakeRaw(root: string): Promise<FakeRaw> {
     const file = path.join(root, ...rel.split('/'));
     if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return void res.writeHead(404).end('404: Not Found');
     let data = fs.readFileSync(file);
-    if (state.mode === 'corrupt' && rel.includes('/blobs/')) {
+    if (state.mode === 'corrupt' && (rel.includes('/blobs/') || rel.endsWith('.zip'))) {
       data = Buffer.from(data);
       data[data.length - 1] ^= 1;
     }

@@ -40,7 +40,11 @@ export function builtProduct(): string {
   return (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'package.json'), 'utf-8')) as { productName: string }).productName;
 }
 
-export async function packedApp(): Promise<string> {
+/**
+ * runtime: false lays it out as a standard build is installed, with no Node and no browsers in its
+ * resources (its first start downloads them); by default, as a full build, with desktop/runtime there.
+ */
+export async function packedApp(opts: { runtime?: boolean } = {}): Promise<string> {
   const dir = path.join(DESKTOP, 'build', 'test-app');
   const resources = path.join(dir, 'resources');
   fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
@@ -51,7 +55,7 @@ export async function packedApp(): Promise<string> {
   await asar.createPackageWithOptions(path.join(DESKTOP, 'build', 'app'), path.join(resources, 'app.asar'), {
     unpack: '**/node_modules/**',
   });
-  for (const name of ['node', 'ms-playwright']) {
+  for (const name of opts.runtime === false ? [] : ['node', 'ms-playwright']) {
     fs.symlinkSync(path.join(DESKTOP, 'runtime', name), path.join(resources, name), 'junction');
   }
   await flipFuses(exe, {

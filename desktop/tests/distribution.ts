@@ -11,6 +11,9 @@
  *   - a licence withdrawn after the app was built: refused once the release lists it
  *   - a course that needs a newer studio: "install the new version"
  *   - after quitting, no course text is anywhere in the app's data or the temporary folder
+ *   - a standard build (no Node or browsers in it): a damaged runtime download is refused; then its
+ *     first start downloads the official archives (served locally) with progress, and the Terminal's
+ *     Node and all three browsers run; the next start downloads nothing
  *
  *   npm run test:distribution     (in desktop/; moves the app's data folder aside, and puts it back)
  */
@@ -29,11 +32,43 @@ import { testKeys } from './test-keys';
 import { keepUserData } from './user-data';
 import { internalVariant } from '../scripts/variants';
 import { fakeRaw } from './fake-raw';
+import { ARCHIVES } from '../scripts/runtime';
 
 const DESKTOP = path.resolve(__dirname, '..');
 const OUT = path.join(DESKTOP, 'test-output', 'distribution');
 const VARIANT = internalVariant();
 const USER = path.join(process.env.APPDATA!, VARIANT.name);
+/** Where a standard build keeps what its first start downloaded (src/env.ts RUNTIME_DIR). */
+const LOCAL = path.join(process.env.LOCALAPPDATA!, VARIANT.name);
+const RUNTIME = path.join(LOCAL, 'runtime');
+
+type TermResult = { code: number | null; out: string };
+
+/** Runs one Terminal command through the API, as the page does, and returns what it printed. */
+async function terminal(page: Page, command: string, workspace: string): Promise<TermResult> {
+  return page.evaluate(
+    async ({ command, workspace }) => {
+      const { run_id } = (await (await fetch('/api/run/prepare', { method: 'POST' })).json()) as { run_id: string };
+      const ws = new WebSocket('ws://' + location.host + '/api/run/' + run_id + '/stream');
+      await new Promise((r) => (ws.onopen = r));
+      let out = '';
+      const done = new Promise<TermResult>((resolve) => {
+        ws.onmessage = (m) => {
+          const e = JSON.parse(m.data as string) as { event: string; data?: string; code?: number | null };
+          if (e.event === 'term') out += e.data;
+          if (e.event === 'exit') resolve({ code: e.code ?? null, out });
+        };
+      });
+      await fetch('/api/terminal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ run_id, command, code: '', file: null, workspace }),
+      });
+      return done;
+    },
+    { command, workspace },
+  );
+}
 
 let failures = 0;
 function expect(ok: boolean, what: string, detail = ''): void {
@@ -53,6 +88,8 @@ function filesUnder(dir: string): string[] {
 
 async function main(): Promise<void> {
   keepUserData(USER, VARIANT.name + '.exe');
+  // A standard build's Node and browsers, which a real installed copy may have there too.
+  keepUserData(LOCAL, VARIANT.name + '.exe');
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
   const keys = testKeys();
@@ -248,6 +285,84 @@ async function main(): Promise<void> {
   screen = await launchScreen(app, '8-too-old');
   expect(/Install the new version/.test(screen.text), 'the learner is told to install the new version', screen.text.slice(0, 60));
   await app.close();
+
+  console.log('\nA standard build: Node and the browsers on its first start');
+  // The course for every licence again, as it was before the two cases above.
+  publishInto(path.join(dist, 'content'), 'content', ctx(), { files: updated, minApp: null });
+  await build({ release: false, obfuscate: true, licenceFile: null, publicKeyFile: keys.publicKeyFile, appSecret: secret, runtime: 'download' });
+  const standardExe = await packedApp({ runtime: false });
+  // The official archives runtime.ts downloaded and checked, served as the official servers would.
+  const runtimeServer = await fakeRaw(ARCHIVES);
+  const launchStandard = (): Promise<ElectronApplication> =>
+    electron.launch({
+      executablePath: standardExe,
+      args: [],
+      timeout: 60_000,
+      env: { ...process.env, STUDIO_DIST_BASE: raw.base, STUDIO_RUNTIME_BASE: runtimeServer.base } as Record<string, string>,
+    });
+  reset(granted.text);
+  fs.rmSync(RUNTIME, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  runtimeServer.mode = 'corrupt';
+  app = await launchStandard();
+  screen = await launchScreen(app, '9-runtime-damaged');
+  expect(screen.step === 'problem' && /could not be verified/.test(screen.text), 'a damaged download of Node or a browser is refused', screen.text.slice(0, 90));
+  expect(!fs.existsSync(path.join(RUNTIME, 'node', 'node.exe')), 'and nothing of it is installed');
+  runtimeServer.mode = 'ok';
+  await screen.page.click('#retry');
+  const seen: string[] = [];
+  let shot = false;
+  page = null;
+  for (const started = Date.now(); Date.now() - started < 15 * 60_000; ) {
+    page = app.windows().find((w) => w.url().startsWith('http://127.0.0.1:')) ?? null;
+    if (page) break;
+    try {
+      const text = (await screen.page.textContent('#progress', { timeout: 1000 })) ?? '';
+      if (text && seen[seen.length - 1] !== text) seen.push(text);
+      if (!shot && /\d+ MB of \d+ MB/.test(text)) {
+        shot = true;
+        await screen.page.screenshot({ path: path.join(OUT, '10-runtime-progress.png') });
+      }
+    } catch {
+      // The launch window closes as the studio opens.
+    }
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  expect(page !== null, 'Retry downloads Node and the browsers, and the studio opens');
+  expect(seen.some((t) => /Downloading required components .*: \d+ MB of \d+ MB/.test(t)), 'the launch window shows the download\'s progress', seen.find((t) => /MB/.test(t)) ?? seen.join(' | '));
+  expect(seen.some((t) => /Installing (Chromium|Firefox|WebKit|Node\.js)/.test(t)), 'and each piece being installed', seen.find((t) => /Installing/.test(t)) ?? '');
+  if (page) {
+    await page.waitForLoadState('load');
+    await page.waitForSelector('text=Week 1', { timeout: 30_000 });
+    const version = await terminal(page, 'node --version', 'project');
+    expect(version.out.includes('v24.21.0'), 'the Terminal runs the downloaded Node', version.out.trim());
+    const browsers = await page.evaluate(async () => {
+      const { run_id } = (await (await fetch('/api/run/prepare', { method: 'POST' })).json()) as { run_id: string };
+      const code =
+        "const { chromium, firefox, webkit } = require('playwright');\n" +
+        'for (const type of [chromium, firefox, webkit]) {\n' +
+        '  const browser = await type.launch();\n' +
+        '  const page = await browser.newPage();\n' +
+        "  await page.setContent('<h1>ready</h1>');\n" +
+        "  console.log(type.name() + ' ' + (await page.textContent('h1')));\n" +
+        '  await browser.close();\n' +
+        '}';
+      const res = await fetch('/api/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ run_id, week: 1, day: 3, part: 1, code }) });
+      return (await res.json()) as { status: string; stdout: string; error: { message?: string } | null };
+    });
+    const said = browsers.stdout.trim().split(/\r?\n/).join(', ');
+    expect(said === 'chromium ready, firefox ready, webkit ready', 'Chromium, Firefox and WebKit, as downloaded, all run', said || browsers.status + ' ' + (browsers.error?.message ?? ''));
+  }
+  await app.close();
+  expect(
+    ['node/node.exe', 'ms-playwright/chromium-1243', 'ms-playwright/firefox-1543', 'ms-playwright/webkit-2359'].every((p) => fs.existsSync(path.join(RUNTIME, ...p.split('/')))),
+    'they are kept in %LOCALAPPDATA%\\' + VARIANT.name + '\\runtime',
+  );
+  const before = runtimeServer.requests.length;
+  app = await launchStandard();
+  page = await studio(app);
+  expect(page !== null && runtimeServer.requests.length === before, 'the next start downloads nothing', runtimeServer.requests.length - before + ' requests');
+  await app.close();
+  await runtimeServer.close();
 
   await raw.close();
   fs.rmSync(work, { recursive: true, force: true });
