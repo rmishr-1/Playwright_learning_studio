@@ -105,3 +105,32 @@ Var pid
     ${endIf}
   ${endIf}
 !macroend
+
+; The "Installing" page: electron-builder puts its one status line above the progress bar. While
+; the app is unpacked that line names each file (package.ts, patchExtractStatus); this moves it
+; under the bar. electron-builder inserts this macro just before the installing page, and only in
+; the installer.
+!macro customPageAfterChangeDir
+  !define MUI_PAGE_CUSTOMFUNCTION_SHOW studioInstFilesShow
+
+  Function studioInstFilesShow
+    FindWindow $0 "#32770" "" $HWNDPARENT
+    GetDlgItem $1 $0 1006 ; status line
+    GetDlgItem $2 $0 1004 ; progress bar
+    System::Call "*(i, i, i, i) p.r3"
+    ; Each one's left, top and bottom, inside the page.
+    System::Call "user32::GetWindowRect(p r1, p r3)"
+    System::Call "user32::MapWindowPoints(p 0, p r0, p r3, i 2)"
+    System::Call "*$3(i .r4, i .r5, i, i .r6)"
+    System::Call "user32::GetWindowRect(p r2, p r3)"
+    System::Call "user32::MapWindowPoints(p 0, p r0, p r3, i 2)"
+    System::Call "*$3(i .r7, i .r8, i, i .r9)"
+    System::Free $3
+    ; The bar takes the line's top; the line goes below the bar, the same gap apart.
+    IntOp $3 $9 - $6 ; the line's top after the move: its top plus the bar's height and the gap
+    IntOp $3 $3 + $5
+    ; SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE
+    System::Call "user32::SetWindowPos(p r2, p 0, i r7, i r5, i 0, i 0, i 0x15)"
+    System::Call "user32::SetWindowPos(p r1, p 0, i r4, i r3, i 0, i 0, i 0x15)"
+  FunctionEnd
+!macroend
