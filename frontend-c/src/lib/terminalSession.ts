@@ -1,9 +1,13 @@
 import type { Terminal } from '@xterm/xterm';
 import { openRunStream, prepareRun, runTerminal, stopTerminal } from '../api/client';
 import type { Workspace } from '../../../shared/contracts/course_day';
+import type { ExerciseRef } from '../components/LessonBlocks';
 
-/** What a command needs from the editor: its code, the file it holds, and the day's workspace. */
-export type EditorState = { code: string; file: string | null; workspace: Workspace };
+/**
+ * What a command needs from the editor: its code, the file it holds, the exercise it was opened from
+ * (if any), and the day's workspace.
+ */
+export type EditorState = { code: string; file: string | null; exercise: ExerciseRef | null; workspace: Workspace };
 
 const PROMPT = '\x1b[36m$\x1b[0m ';
 const WELCOME =
@@ -240,7 +244,7 @@ export class TerminalSession {
         }
       });
       const editor = this.getEditor();
-      await runTerminal(run_id, trimmed, editor.code, editor.file, editor.workspace);
+      await runTerminal(run_id, trimmed, editor.code, editor.file, editor.workspace, editor.exercise);
     } catch (e) {
       this.write('\x1b[31m' + (e as Error).message + '\x1b[0m\r\n');
       this.finish(1);

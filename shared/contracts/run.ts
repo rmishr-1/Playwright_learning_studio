@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DayNumber, PartNumber, ProblemNumber, WeekNumber } from './common';
+import { ContentId, DayNumber, PartNumber, ProblemNumber, WeekNumber } from './common';
 
 /**
  * Mirrors Data/Formats/run_format.json.
@@ -18,6 +18,8 @@ export const RunRequest = z.object({
   part: PartNumber,
   /** Set when this run is an attempt at a practice problem, so progress can record it. */
   problem_number: ProblemNumber.nullable().optional(),
+  /** The same exercise, by its identity. */
+  problem_id: ContentId.nullable().optional(),
   code: z.string().min(1).max(64_000),
 });
 

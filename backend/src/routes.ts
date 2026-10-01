@@ -3,7 +3,21 @@ import { z } from 'zod';
 import { config } from './config';
 import { lastFrame, prepareRun, startRun } from './runner';
 import { receiveFrame, startCommand, stopCommand } from './terminal';
-import { courseDay, courseIndex, indexDayTitle, isLocked, readProgress, recordProgress } from './store';
+import { readLearnerFile } from './terminal/workspace';
+import {
+  courseDay,
+  courseIndex,
+  coursePlan,
+  ensureReconciled,
+  findProblem,
+  indexDayTitle,
+  isLocked,
+  progressForClient,
+  readProgress,
+  recordProgress,
+} from './store';
+import type { FileAt } from '../../shared/contracts/progress';
+import type { SavedCode } from '../../shared/contracts/saved_code';
 import { ProgressUpdate } from '../../shared/contracts/progress';
 import { RunRequest } from '../../shared/contracts/run';
 import { CheckRequest } from '../../shared/contracts/check';
@@ -13,6 +27,7 @@ import { getBranding } from './branding';
 import { serveMark } from './content';
 import { markDay } from '../../shared/watermark';
 import { Workspace } from '../../shared/contracts/course_day';
+import { ContentId, DayNumber, WeekNumber, exerciseIdentity } from '../../shared/contracts/common';
 import type { ErrorCode } from '../../shared/contracts/problem_error';
 
 /** Every non-2xx response is problem+json - clients branch on `code`, never on `detail`. */
@@ -59,8 +74,9 @@ router.get('/course', (_req, res) => {
     // look unfinished. The filter keys off `locked` rather than a week number, so a week appears
     // on its own the moment it is unlocked, and a direct link to a locked day still gets the
     // locked screen below instead of a 404.
+    // The course plan comes with the course (it is content, not the page's), or null without one.
     const index = courseIndex();
-    res.json({ ...index, weeks: index.weeks.filter((w) => !w.locked) });
+    res.json({ ...index, weeks: index.weeks.filter((w) => !w.locked), plan: coursePlan() });
   } catch {
     fail(res, 503, 'CONTENT_MISSING', 'The course has no content yet.');
   }
@@ -90,11 +106,12 @@ router.get('/branding', (_req, res) => res.json(getBranding()));
 
 // ---------------------------------------------------------------- progress
 
-router.get('/progress', (_req, res) => {
+router.get('/progress', async (_req, res) => {
   try {
-    res.json(readProgress());
-  } catch {
-    fail(res, 500, 'INTERNAL_ERROR', 'The progress record could not be read.');
+    // Reconciled with the course first, so the day cards' tags are those of this launch's course.
+    res.json(await progressForClient());
+  } catch (e) {
+    fail(res, 500, 'INTERNAL_ERROR', (e as { code?: string }).code === 'PROGRESS_NEWER' ? (e as Error).message : 'The progress record could not be read.');
   }
 });
 
@@ -141,12 +158,13 @@ router.post('/run', async (req, res) => {
   // Recording the attempt is progress bookkeeping; a failure there must not fail the run.
   // Attempting an exercise is not reading the part, so it does not count the part as read -
   // every frontend records that separately.
-  if (parsed.problem_number) {
+  if (parsed.problem_number || parsed.problem_id) {
     recordQuietly({
       week: parsed.week,
       day: parsed.day,
       part: parsed.part,
-      attempted_problem: parsed.problem_number,
+      attempted_problem: parsed.problem_number ?? null,
+      ...(parsed.problem_id ? { attempted_exercise: parsed.problem_id } : {}),
       viewed: false,
     });
   }
@@ -194,18 +212,21 @@ router.post('/check', async (req, res) => {
   } catch {
     return fail(res, 500, 'INTERNAL_ERROR', 'The course could not be read.');
   }
-  const problem = found?.parts.find((p) => p.part === parsed.part)?.problems.find((q) => q.number === parsed.problem);
+  // By identity first, so an exercise renumbered since the page loaded is still the one checked.
+  const located = found ? findProblem(found, { id: parsed.problem_id ?? null, number: parsed.problem }) : null;
+  const problem = located?.problem;
   if (!found || !problem?.check || !problem.file) {
     return fail(res, 404, 'EXERCISE_NOT_FOUND', 'This exercise has no automatic check.');
   }
   // The check runs in the day's own workspace, whatever the page says.
-  parsed = { ...parsed, workspace: found.workspace };
+  parsed = { ...parsed, part: located!.part.part, problem: problem.number, workspace: found.workspace };
   // Checking an answer is an attempt at the exercise, not reading the part.
   recordQuietly({
     week: parsed.week,
     day: parsed.day,
     part: parsed.part,
     attempted_problem: parsed.problem,
+    attempted_exercise: exerciseIdentity(found.number, problem),
     viewed: false,
   });
   try {
@@ -228,7 +249,35 @@ const TerminalRequest = z.object({
   file: z.string().max(200).nullable().default(null),
   /** The workspace of the day the learner is on. */
   workspace: Workspace.default('project'),
+  /**
+   * The exercise the editor holds, when it was opened from one: saving it as that exercise's own file
+   * counts as working on the exercise.
+   */
+  exercise: z
+    .object({ week: WeekNumber, day: DayNumber, id: ContentId })
+    .nullable()
+    .default(null),
 });
+
+/** Records an attempt when a command saved the editor as the exercise's own file, in the day's workspace. */
+function recordTerminalAttempt(exercise: { week: number; day: number; id: string }, saved: string, workspace: Workspace): void {
+  try {
+    if (isLocked(exercise.week, exercise.day)) return;
+    const day = courseDay(exercise.week, exercise.day);
+    const located = day ? findProblem(day, { id: exercise.id }) : null;
+    if (!day || !located || located.problem.file !== saved || day.workspace !== workspace) return;
+    recordQuietly({
+      week: exercise.week,
+      day: exercise.day,
+      part: located.part.part,
+      attempted_problem: located.problem.number,
+      attempted_exercise: exercise.id,
+      viewed: false,
+    });
+  } catch {
+    // Bookkeeping only.
+  }
+}
 
 /** Starts one Terminal command. Its output, and its outcome, arrive on the run's stream. */
 router.post('/terminal', (req, res) => {
@@ -238,12 +287,64 @@ router.post('/terminal', (req, res) => {
   } catch (e) {
     return badRequest(res, 'CODE_REQUIRED', e);
   }
+  let saved: string | null;
   try {
-    startCommand(parsed.run_id, parsed.command, parsed.code, parsed.file, parsed.workspace);
+    saved = startCommand(parsed.run_id, parsed.command, parsed.code, parsed.file, parsed.workspace);
   } catch {
     return fail(res, 500, 'INTERNAL_ERROR', 'The command could not start.');
   }
+  if (saved && parsed.exercise) recordTerminalAttempt(parsed.exercise, saved, parsed.workspace);
   res.json({ ok: true });
+});
+
+// ---------------------------------------------------------------- the learner's saved code
+
+/** The longest file loaded back into the editor: the most the editor sends (CODE_MAX). */
+const SAVED_MAX = 64_000;
+const nothingSaved: SavedCode = { code: null, file: null, moved: false, too_large: false };
+const plain = (text: string): string => text.replace(/\r\n/g, '\n').trim();
+
+/**
+ * The code the learner last saved for a code exercise, so "Start this in the editor" brings their
+ * work back. Looked for where the exercise's file is now, then where it was before a course update
+ * moved it (newest first). An untouched starting file, or the starting code itself, is not theirs.
+ */
+router.get('/exercise/:week/:day/:id/saved', async (req, res) => {
+  const week = Number(req.params.week);
+  const day = Number(req.params.day);
+  const id = req.params.id;
+  if (!Number.isInteger(week) || !Number.isInteger(day) || !ContentId.safeParse(id).success) {
+    return fail(res, 404, 'EXERCISE_NOT_FOUND', 'There is no such exercise.');
+  }
+  if (refuseLocked(res, week, day)) return;
+  let found;
+  try {
+    found = courseDay(week, day);
+  } catch {
+    return fail(res, 500, 'INTERNAL_ERROR', 'The course could not be read.');
+  }
+  const problem = found ? findProblem(found, { id })?.problem : undefined;
+  if (!found || !problem || problem.kind !== 'code' || !problem.file) {
+    return fail(res, 404, 'EXERCISE_NOT_FOUND', 'This exercise has no file of its own.');
+  }
+  let earlier: FileAt[] = [];
+  try {
+    await ensureReconciled();
+    earlier = [...(readProgress().content_seen?.files[id]?.moved_from ?? [])].reverse();
+  } catch {
+    // Without the record, only the exercise's own file is looked at.
+  }
+  const places: FileAt[] = [{ workspace: found.workspace, file: problem.file }, ...earlier];
+  for (const [i, at] of places.entries()) {
+    const text = readLearnerFile(at.workspace, at.file);
+    if (text === null || (problem.stub !== null && plain(text) === plain(problem.stub))) continue;
+    const answer: SavedCode =
+      text.length > SAVED_MAX
+        ? { code: null, file: at.file, moved: i > 0, too_large: true }
+        : { code: text, file: at.file, moved: i > 0, too_large: false };
+    return res.json(answer);
+  }
+  res.json(nothingSaved);
 });
 
 const PreviewRequest = z.object({ html: z.string().min(1).max(500_000) });

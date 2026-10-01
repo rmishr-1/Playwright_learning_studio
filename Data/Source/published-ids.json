@@ -1,0 +1,401 @@
+{
+  "schema": "published-ids/v1",
+  "exercises": {
+    "d1-ex1": {
+      "title": "Convert a manual test case",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d1-ex2": {
+      "title": "Label the architecture",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d1-ex3": {
+      "title": "Predict the isolation outcome",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d1-ex4": {
+      "title": "Write TC-102: invalid login",
+      "file": "tests/day1/tc102-invalid-login.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d1-ex5": {
+      "title": "Challenge: prove it with the debug log",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d2-ex1": {
+      "title": "Which check is failing?",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d2-ex2": {
+      "title": "Fix the flaky test",
+      "file": "tests/day2/retrying-vs-once.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d2-ex3": {
+      "title": "Mock three products",
+      "file": "tests/day2/three-products.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d2-ex4": {
+      "title": "Choose the right tool",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d2-ex5": {
+      "title": "Optional challenge: a slow server",
+      "file": "tests/day2/slow-server.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d3-ex1": {
+      "title": "Write the command",
+      "file": null,
+      "kind": "terminal",
+      "generation": 1
+    },
+    "d3-ex2": {
+      "title": "Troubleshooting desk",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d3-ex3": {
+      "title": "Your own copy of the example",
+      "file": "tests/day3/my-first.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d3-ex4": {
+      "title": "Predict the run count",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d3-ex5": {
+      "title": "Challenge: your own shortcut",
+      "file": null,
+      "kind": "terminal",
+      "generation": 1
+    },
+    "d4-pr-p1": {
+      "title": "Predict — numbers and text",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d4-pr-p2": {
+      "title": "Predict — what does the checker say?",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d4-ex1": {
+      "title": "A test-run banner",
+      "file": "ts-basics/day4/banner.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d4-ex2": {
+      "title": "Fix four mistakes",
+      "file": "ts-basics/day4/fix-me.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d4-ex3": {
+      "title": "Annotate everything",
+      "file": "ts-basics/day4/annotated.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d4-ex4": {
+      "title": "JavaScript or TypeScript?",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d4-ex5": {
+      "title": "Challenge: a silent bug",
+      "file": "ts-basics/day4/silent-bug.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d5-pr-p1": {
+      "title": "Predict — text and numbers",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d5-pr-p2": {
+      "title": "Predict — let and shortcuts",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d5-pr-p3": {
+      "title": "Predict — the order of operations",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d5-ex1": {
+      "title": "Tester profile card",
+      "file": "ts-basics/day5/profile.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d5-ex2": {
+      "title": "Shopping-cart calculator",
+      "file": "ts-basics/day5/cart.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d5-ex3": {
+      "title": "Check the page's numbers",
+      "file": "ts-basics/day5/order-check.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d5-ex4": {
+      "title": "Fix the settings file",
+      "file": "ts-basics/day5/settings.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d5-ex5": {
+      "title": "Challenge: build a URL and a test title",
+      "file": "ts-basics/day5/url-builder.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d6-pr-p1": {
+      "title": "Predict — arrays and objects",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d6-pr-p2": {
+      "title": "Predict — missing values",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d6-pr-p3": {
+      "title": "Predict — split and join",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d6-ex1": {
+      "title": "A product catalogue",
+      "file": "ts-basics/day6/catalogue.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d6-ex2": {
+      "title": "Login test data",
+      "file": "ts-basics/day6/login-data.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d6-ex3": {
+      "title": "Destructure the test settings",
+      "file": "ts-basics/day6/settings.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d6-ex4": {
+      "title": "Clean the order summary",
+      "file": "ts-basics/day6/summary.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d6-ex5": {
+      "title": "Challenge: model a test run",
+      "file": "ts-basics/day6/test-run.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d7-pr-p1": {
+      "title": "Predict — break and continue",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d7-pr-p2": {
+      "title": "Predict — truthy, falsy and fallbacks",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d7-pr-p3": {
+      "title": "Predict — a switch without breaks",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d7-pr-p4": {
+      "title": "Predict — filter then map",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d7-ex1": {
+      "title": "A smoke-test checklist",
+      "file": "ts-basics/day7/smoke.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d7-ex2": {
+      "title": "Classify HTTP status codes",
+      "file": "ts-basics/day7/status-codes.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d7-ex3": {
+      "title": "Question the product list",
+      "file": "ts-basics/day7/products.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d7-ex4": {
+      "title": "Wait for the order to ship",
+      "file": "ts-basics/day7/order-status.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d7-ex5": {
+      "title": "Challenge: the release decision",
+      "file": "ts-basics/day7/release.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d8-pr-p1": {
+      "title": "Predict — default and optional parameters",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d8-pr-p2": {
+      "title": "Predict — a forgotten await",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d8-pr-p3": {
+      "title": "Predict — try, catch and finally",
+      "file": null,
+      "kind": "predict",
+      "generation": 1
+    },
+    "d8-ex1": {
+      "title": "Cart total with an optional discount",
+      "file": "ts-basics/day8/total.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d8-ex2": {
+      "title": "Fill the cart, one item at a time",
+      "file": "ts-basics/day8/add-items.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d8-ex3": {
+      "title": "Reject bad quantities",
+      "file": "ts-basics/day8/quantities.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d8-ex4": {
+      "title": "Optional challenge: add skip to the mini runner",
+      "file": "ts-basics/day8/runner-plus.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d9-pr-bug1": {
+      "title": "Four bugs in one test",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d9-ex1": {
+      "title": "The sign-in page, at first sight",
+      "file": "tests/day9/signin-page.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d9-ex2": {
+      "title": "Enrolment validation",
+      "file": "tests/day9/enrol-validation.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d9-ex3": {
+      "title": "From test case to test — the dashboard",
+      "file": "tests/day9/dashboard.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d9-ex4": {
+      "title": "Triage with annotations",
+      "file": "tests/day9/triage.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d9-ex5": {
+      "title": "Optional challenge: data-driven sign-in tests",
+      "file": "tests/day9/signin-data.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d10-pr-sort": {
+      "title": "Sort the framework pieces",
+      "file": null,
+      "kind": "written",
+      "generation": 1
+    },
+    "d10-ex1": {
+      "title": "Step 1: enrolment test data",
+      "file": "test-data/enrolments.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d10-ex2": {
+      "title": "Step 2: the EnrolPage page object",
+      "file": "pages/EnrolPage.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d10-ex3": {
+      "title": "Step 3: the enrolment suite",
+      "file": "tests/day10/enrol.spec.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d10-ex4": {
+      "title": "Step 4 (optional challenge): an enrolPage fixture",
+      "file": "fixtures/index.ts",
+      "kind": "code",
+      "generation": 1
+    },
+    "d10-ex5": {
+      "title": "Step 5: a script for the suite",
+      "file": null,
+      "kind": "terminal",
+      "generation": 1
+    }
+  }
+}

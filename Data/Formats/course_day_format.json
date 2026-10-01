@@ -3,6 +3,10 @@
     "schema": {
         "value": "course-day/v2"
     },
+    "id": {
+        "_comment": "Optional: the day's own identity, when its front matter sets one. Otherwise its identity is 'd' + number (invariant 10).",
+        "value": null
+    },
     "week": {
         "value": 1
     },
@@ -170,6 +174,10 @@
                     "title": {
                         "_comment": "reference ONLY: the title shown while the full table or list is collapsed. null for every other block type.",
                         "value": null
+                    },
+                    "id": {
+                        "_comment": "checkpoint: the quiz's id; problem-ref: the exercise's identity. null for every other block type. Only ever a key: nothing about a checkpoint is recorded (invariant 9).",
+                        "value": null
                     }
                 },
                 "value": []
@@ -178,8 +186,16 @@
                 "_comment": "Present ONLY on a practice part: the day's exercises. The count is not fixed.",
                 "_itemTemplate": {
                     "number": {
-                        "_comment": "1-based within the part.",
+                        "_comment": "Counted across the day, in the order the exercises appear (not within the part). Changes when an exercise is added before it.",
                         "value": 1
+                    },
+                    "id": {
+                        "_comment": "The exercise's identity for good (invariant 10): the learner's attempts and saved code follow it. The author's id, checked against Data/Source/published-ids.json; a reused id is built as '<id>~<generation>'. null only in content built before ids.",
+                        "value": "d4-ex1"
+                    },
+                    "revision": {
+                        "_comment": "Changes when what the learner is asked to do changes: statement, starting code, file, command or check. Not for a renumbering, title, hints or model answer. Opaque (invariant 11).",
+                        "value": "0123456789ab"
                     },
                     "difficulty": {
                         "_comment": "The exercise's level. null for an exercise that carries none.",

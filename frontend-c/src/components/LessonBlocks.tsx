@@ -4,8 +4,14 @@ import { fence } from '../lib/fence';
 import { pagesOnlyIn, viewPages } from '../lib/htmlPages';
 import type { ContentBlock } from '../../../shared/contracts/course_day';
 
-/** A file the editor holds: where it is saved, and the command that runs it. */
-export type EditorFile = { file: string | null; run: string | null };
+/** An exercise, by its day and identity: the one the editor was opened from. */
+export type ExerciseRef = { week: number; day: number; id: string };
+
+/**
+ * A file the editor holds: where it is saved, and the command that runs it. `exercise` is set when
+ * it was opened from an exercise, so a command that saves it there counts as working on it.
+ */
+export type EditorFile = { file: string | null; run: string | null; exercise?: ExerciseRef | null };
 
 /**
  * A code sample. A sample that belongs to a file can be opened in the editor as that file, and one

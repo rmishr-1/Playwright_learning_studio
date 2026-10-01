@@ -12,6 +12,10 @@
             "_comment": "Set when the run is an attempt at a practice problem, so it can be recorded against progress. null otherwise.",
             "value": null
         },
+        "problem_id": {
+            "_comment": "Optional: the same exercise, by its identity (invariant 10). Preferred over problem_number.",
+            "value": null
+        },
         "code": {
             "_comment": "TypeScript as typed in the editor. The runner injects launch and show as ambient bindings, so the code needs no import.",
             "value": ""

@@ -18,31 +18,36 @@
           "day": 1,
           "number": 1,
           "title": "Introduction to Playwright & Architecture",
-          "locked": false
+          "locked": false,
+          "revision": "2985a06d8033"
         },
         {
           "day": 2,
           "number": 2,
           "title": "Why Playwright (Future of Automation)",
-          "locked": false
+          "locked": false,
+          "revision": "ea0bd6f1d90d"
         },
         {
           "day": 3,
           "number": 3,
           "title": "Installation & Project Setup (Node.js, VS Code)",
-          "locked": false
+          "locked": false,
+          "revision": "0521bf648843"
         },
         {
           "day": 4,
           "number": 4,
           "title": "JavaScript / TypeScript Fundamentals",
-          "locked": false
+          "locked": false,
+          "revision": "35a6e876c2d5"
         },
         {
           "day": 5,
           "number": 5,
           "title": "Variables and Operators",
-          "locked": false
+          "locked": false,
+          "revision": "613deb996cdf"
         }
       ]
     },
@@ -55,31 +60,36 @@
           "day": 1,
           "number": 6,
           "title": "Data Types",
-          "locked": false
+          "locked": false,
+          "revision": "57a491bb434c"
         },
         {
           "day": 2,
           "number": 7,
           "title": "Conditions & Loops",
-          "locked": false
+          "locked": false,
+          "revision": "e483e519d96b"
         },
         {
           "day": 3,
           "number": 8,
           "title": "Functions, Async & Modules",
-          "locked": false
+          "locked": false,
+          "revision": "dfca91d580a4"
         },
         {
           "day": 4,
           "number": 9,
           "title": "Playwright Test Runner Basics",
-          "locked": false
+          "locked": false,
+          "revision": "7ce8b791b317"
         },
         {
           "day": 5,
           "number": 10,
           "title": "Framework Structure Overview",
-          "locked": false
+          "locked": false,
+          "revision": "adfb8f19703b"
         }
       ]
     }

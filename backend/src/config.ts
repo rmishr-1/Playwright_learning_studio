@@ -19,8 +19,11 @@ import { z } from 'zod';
 
 export const ROOT = path.resolve(__dirname, '..', '..');
 export const DATA = process.env.STUDIO_DATA_DIR ? path.resolve(process.env.STUDIO_DATA_DIR) : path.join(ROOT, 'Data');
-/** The course as plain files, read when there is no content pack. */
-export const CONTENT = path.join(ROOT, 'Data', 'Content');
+/**
+ * The course as plain files, read when the course is not handed over in memory (the desktop app
+ * downloads it). STUDIO_CONTENT_DIR points elsewhere, for tests that change the course.
+ */
+export const CONTENT = process.env.STUDIO_CONTENT_DIR ? path.resolve(process.env.STUDIO_CONTENT_DIR) : path.join(ROOT, 'Data', 'Content');
 export const CONTENT_PACK = process.env.STUDIO_CONTENT_PACK || null;
 export const WEB_DIR = process.env.STUDIO_WEB_DIR || null;
 /**

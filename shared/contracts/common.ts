@@ -17,6 +17,22 @@ export const Difficulty = z.enum(['Easy', 'Medium', 'Hard', 'Challenge']);
 /** 'w2d1' — the progress key, and the id used in URLs. */
 export const dayKey = (week: number, day: number) => `w${week}d${day}`;
 
+/**
+ * An identity the course gives a day or an exercise for good (registry invariant 10): an edit,
+ * a renumbering or a move keeps it, so what the learner did stays with the same thing.
+ */
+export const ContentId = z.string().regex(/^[A-Za-z0-9][\w.~-]{0,63}$/);
+
+/**
+ * A day's identity: its own `id` when the course gives it one, otherwise its number across the
+ * course ('d4'). Unlike `dayKey`, it does not change when a day moves within or between weeks.
+ */
+export const dayIdentity = (d: { id?: string | null; number: number }): string => d.id ?? 'd' + d.number;
+
+/** An exercise's identity: its authored id, or (for content built without ids) its day and number. */
+export const exerciseIdentity = (dayNumber: number, p: { id?: string | null; number: number }): string =>
+  p.id ?? 'd' + dayNumber + '#' + p.number;
+
 export type Timestamp = z.infer<typeof Timestamp>;
 export type PartNumber = z.infer<typeof PartNumber>;
 export type ProblemNumber = z.infer<typeof ProblemNumber>;

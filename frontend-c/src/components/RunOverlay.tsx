@@ -4,6 +4,7 @@ import type { Workspace } from '../../../shared/contracts/course_day';
 import { TerminalSession } from '../lib/terminalSession';
 import { PopOut } from './PopOut';
 import { TerminalView } from './TerminalView';
+import type { ExerciseRef } from './LessonBlocks';
 
 export type RunState = {
   status: RunStatus | 'running';
@@ -98,6 +99,7 @@ export function RunOverlay({
   run,
   code,
   file,
+  exercise,
   workspace,
   request,
   hidden,
@@ -108,6 +110,8 @@ export function RunOverlay({
   code: string;
   /** The lesson file the editor holds, where the Terminal saves it. */
   file: string | null;
+  /** The exercise the editor was opened from, if any. */
+  exercise: ExerciseRef | null;
   /** The day's Terminal workspace. */
   workspace: Workspace;
   /** Asks the overlay to show a panel, such as the Terminal button in the editor's toolbar. */
@@ -140,8 +144,8 @@ export function RunOverlay({
   };
 
   // The Terminal outlives its display, which is recreated when it moves to or from a window.
-  const editorRef = useRef({ code, file, workspace });
-  editorRef.current = { code, file, workspace };
+  const editorRef = useRef({ code, file, exercise, workspace });
+  editorRef.current = { code, file, exercise, workspace };
   const [session] = useState(
     () => new TerminalSession(() => editorRef.current, { onStart: () => undefined, onFrame: () => undefined, onEnd: () => undefined }),
   );

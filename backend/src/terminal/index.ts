@@ -123,9 +123,10 @@ function nodeVersion(): string {
 /**
  * Saves the editor before a command, and says where. The editor holds either a lesson's file,
  * which it is always saved as, or code of its own, which is saved only where it cannot replace a
- * file already in the workspace. Returns false, having said why, when the command cannot go on.
+ * file already in the workspace. Returns false, having said why, when the command cannot go on;
+ * otherwise the lesson file the editor was saved as, or null when it held no lesson file.
  */
-function saveEditor(runId: string, ws: Workspace, parsed: Parsed, code: string, file: string | null): boolean {
+function saveEditor(runId: string, ws: Workspace, parsed: Parsed, code: string, file: string | null): string | null | false {
   if (file) {
     const saved = saveFile(ws, file, code);
     if (!saved) {
@@ -133,21 +134,21 @@ function saveEditor(runId: string, ws: Workspace, parsed: Parsed, code: string, 
       return false;
     }
     say(runId, DIM('Saved the editor as ' + saved));
-    return true;
+    return saved;
   }
   if (parsed.kind === 'node' || parsed.kind === 'check') {
     const rel = 'ts-basics/' + parsed.file;
-    if (fileExists(ws, rel)) return true;
+    if (fileExists(ws, rel)) return null;
     say(runId, DIM('Saved the editor as ' + saveFile(ws, rel, code)));
-    return true;
+    return null;
   }
-  if (parsed.kind !== 'test') return true;
+  if (parsed.kind !== 'test') return null;
   // A test command that names one new file saves the editor there; one that names nothing runs
   // the editor on its own, as editor.spec.ts. Either way the editor has to contain a test.
   const named = parsed.paths.filter((p) => p.endsWith('.ts'));
   const target =
     parsed.paths.length === 0 ? DEFAULT_SPEC : named.length === 1 && !fileExists(ws, named[0]) ? named[0] : null;
-  if (!target) return true;
+  if (!target) return null;
   if (!containsTest(code)) {
     say(
       runId,
@@ -160,27 +161,31 @@ function saveEditor(runId: string, ws: Workspace, parsed: Parsed, code: string, 
   }
   say(runId, DIM('Saved the editor as ' + saveFile(ws, target, code)));
   if (parsed.paths.length === 0) parsed.args.push(target);
-  return true;
+  return null;
 }
 
 /**
  * Starts one command. The run id is minted by POST /api/run/prepare, exactly as for a Run, and
- * the client attaches its socket before calling this. Returns at once; the outcome streams.
+ * the client attaches its socket before calling this. Returns at once; the outcome streams. Returns
+ * the lesson file the editor was saved as, if any, so the route can count it as an exercise attempt.
  */
-export function startCommand(runId: string, line: string, code: string, file: string | null, ws: Workspace): void {
+export function startCommand(runId: string, line: string, code: string, file: string | null, ws: Workspace): string | null {
   if (running) {
     say(runId, YELLOW('A command is already running. Press Ctrl+C to stop it first.'));
-    return done(runId, 1);
+    done(runId, 1);
+    return null;
   }
   const parsed = parse(line);
 
   if (parsed.kind === 'help') {
     say(runId, HELP);
-    return done(runId, 0);
+    done(runId, 0);
+    return null;
   }
   if (parsed.kind === 'refused') {
     say(runId, YELLOW(printable(parsed.message)));
-    return done(runId, 1);
+    done(runId, 1);
+    return null;
   }
   if (parsed.kind === 'version') {
     const text =
@@ -190,23 +195,33 @@ export function startCommand(runId: string, line: string, code: string, file: st
           ? npmVersion()
           : 'Version ' + (require('@playwright/test/package.json') as { version: string }).version;
     say(runId, text);
-    return done(runId, 0);
+    done(runId, 0);
+    return null;
   }
   if (parsed.kind === 'show-report') {
     if (!hasReport(reportFrom)) {
       say(runId, YELLOW('There is no report yet. Run npx playwright test first.'));
-      return done(runId, 1);
+      done(runId, 1);
+      return null;
     }
     say(runId, 'Opening the report of the last run in a new browser tab.');
-    return done(runId, 0, reportUrl());
+    done(runId, 0, reportUrl());
+    return null;
   }
 
+  let saved: string | null = null;
   try {
     prepareWorkspace(ws);
-    if (!saveEditor(runId, ws, parsed, code, file)) return done(runId, 1);
+    const result = saveEditor(runId, ws, parsed, code, file);
+    if (result === false) {
+      done(runId, 1);
+      return null;
+    }
+    saved = result;
   } catch (e) {
     say(runId, YELLOW('The studio could not prepare its workspace: ' + (e as Error).message));
-    return done(runId, 1);
+    done(runId, 1);
+    return null;
   }
 
   // The learner's code runs with only the environment a program needs (child-env.ts). No CI
@@ -294,6 +309,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
     }, 2_000).unref();
   });
   child.on('close', (exitCode) => end(exitCode));
+  return saved;
 }
 
 /** Stops whatever is running, with its browsers: the desktop app calls this as it closes. */

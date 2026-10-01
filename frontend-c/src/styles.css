@@ -492,6 +492,13 @@ h1, h2, h3 { font-family: var(--serif); color: var(--heading); }
 .problem .actions { display: flex; gap: 9px; margin-top: 14px; flex-wrap: wrap; }
 .solution { margin-top: 14px; border-top: 1px solid var(--rule); padding-top: 4px; }
 .no-solution { margin-top: 11px; font-size: 13.5px; color: var(--muted); font-style: italic; }
+/* The course changed the exercise since the learner last checked or ran their answer. */
+.problem .updated-note {
+  font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-wash);
+  border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+}
+/* "Start this in the editor" opened the learner's own saved code. */
+.problem .saved-note { margin: 10px 0 0; font-size: 13.5px; color: var(--muted); display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 
 /* ---------------------------------------------------------------- editor */
 .editor-head {
@@ -1078,6 +1085,12 @@ a.day-tile:focus-visible { outline: 3px solid var(--action); outline-offset: 2px
   color: var(--brand-orange); border: 1px solid var(--brand-orange); border-radius: 20px; padding: 1px 8px;
 }
 :root[data-theme='dark'] .day-tile .here { color: #ff7a3d; border-color: #ff7a3d; }
+/* New or changed since the learner's previous launch, until they open the day. Blue, not the
+   orange of "You are here" (a tile holding .here gets an orange edge). */
+.day-tile .tile-tag {
+  align-self: flex-start; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--accent); background: var(--accent-wash); border-radius: 20px; padding: 1px 8px;
+}
 @media (max-width: 900px) {
   .dash-hero, .dash-path { padding-left: 16px; padding-right: 16px; }
   .dash-intro h1 { font-size: 32px; }
@@ -1148,6 +1161,8 @@ a.day-tile:focus-visible { outline: 3px solid var(--action); outline-offset: 2px
 .sb-num { flex: 0 0 auto; min-width: 46px; font-family: var(--mono); font-size: 12px; white-space: nowrap; color: var(--muted); }
 .sb-day.done .sb-num { color: var(--good); font-weight: 600; }
 .sb-title { font-size: 13.5px; line-height: 1.45; min-width: 0; }
+/* The week list keeps to text: a changed day says so in words, in the interactive blue. */
+.sb-tag { color: var(--accent); font-size: 12px; font-weight: 600; white-space: nowrap; }
 .sb-day.on { border-left-color: var(--action); color: var(--heading); }
 .sb-day.on .sb-title { font-weight: 600; }
 .sb-day.on .sb-num { color: var(--action); }

@@ -1,0 +1,26 @@
+{
+    "_comment": "Data/Content/course-plan.json - the course's description, which module each week belongs to and its focus. Hand-written in Data/Source/course-plan.json; `npm run build:content` checks it and writes it here. Part of the course, so it travels with the content: GET /api/course returns it as `plan` (null when the course has none). It lists every week of the course, written or not; a planned week with no built days shows as 'opens soon'.",
+    "schema": {
+        "value": "course-plan/v1"
+    },
+    "description": {
+        "_comment": "Shown under the course's name on the course index. May be empty.",
+        "value": ""
+    },
+    "modules": {
+        "_comment": "Keyed by a short module key that weeks refer to.",
+        "_itemTemplate": {
+            "name": { "value": "Foundation" },
+            "color": { "_comment": "A plain hex colour, #RRGGBB: it is used as a CSS colour, so nothing else is accepted.", "value": "#4338CA" }
+        },
+        "value": {}
+    },
+    "weeks": {
+        "_itemTemplate": {
+            "week": { "value": 1 },
+            "module": { "_comment": "One of the keys in modules.", "value": "foundation" },
+            "focus": { "value": "" }
+        },
+        "value": []
+    }
+}

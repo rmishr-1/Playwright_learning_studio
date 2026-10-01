@@ -22,7 +22,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "at-a-glance",
@@ -32,7 +33,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -42,7 +44,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -64,7 +67,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-p1-q1"
         },
         {
           "type": "checkpoint",
@@ -86,7 +90,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-p1-q2"
         },
         {
           "type": "markdown",
@@ -96,7 +101,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "diagram",
@@ -106,7 +112,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -116,7 +123,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -129,7 +137,8 @@
             "variant": "tester",
             "title": null
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -151,7 +160,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-p2-q1"
         }
       ],
       "problems": []
@@ -171,7 +181,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -184,7 +195,8 @@
             "variant": "note",
             "title": "What about `enum`?"
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -194,7 +206,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -211,7 +224,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -221,7 +235,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -238,7 +253,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -248,7 +264,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -270,7 +287,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f2-q1"
         },
         {
           "type": "checkpoint",
@@ -292,7 +310,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f2-q2"
         },
         {
           "type": "markdown",
@@ -302,7 +321,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -319,7 +339,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -329,7 +350,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -342,7 +364,8 @@
             "variant": "note",
             "title": "`const` arrays can still change"
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -352,7 +375,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -374,7 +398,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f3-q1"
         },
         {
           "type": "checkpoint",
@@ -396,7 +421,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f3-q2"
         },
         {
           "type": "markdown",
@@ -406,7 +432,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -423,7 +450,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -433,7 +461,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -450,7 +479,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -472,7 +502,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f4-q1"
         },
         {
           "type": "markdown",
@@ -482,7 +513,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -499,7 +531,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -509,7 +542,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -526,7 +560,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -536,7 +571,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -553,7 +589,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -563,7 +600,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -580,7 +618,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -590,7 +629,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -607,7 +647,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -617,7 +658,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -634,7 +676,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -644,7 +687,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -661,7 +705,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -683,7 +728,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f5-q1"
         },
         {
           "type": "checkpoint",
@@ -705,7 +751,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f5-q2"
         },
         {
           "type": "markdown",
@@ -715,7 +762,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -732,7 +780,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -742,7 +791,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -759,7 +809,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -769,7 +820,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -786,7 +838,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -796,7 +849,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -818,7 +872,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f6-q1"
         },
         {
           "type": "markdown",
@@ -828,7 +883,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -845,7 +901,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -858,7 +915,8 @@
             "variant": "warning",
             "title": null
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -880,7 +938,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-f7-q1"
         }
       ],
       "problems": []
@@ -900,7 +959,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -917,7 +977,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -927,7 +988,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -944,7 +1006,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -954,7 +1017,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -967,7 +1031,8 @@
             "variant": "tester",
             "title": null
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -977,7 +1042,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -994,7 +1060,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1004,7 +1071,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -1021,7 +1089,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1031,7 +1100,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -1048,7 +1118,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "terminal",
@@ -1058,7 +1129,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1068,7 +1140,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -1085,7 +1158,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1095,7 +1169,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         }
       ],
       "problems": []
@@ -1115,7 +1190,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -1137,7 +1213,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-q1"
         },
         {
           "type": "checkpoint",
@@ -1159,7 +1236,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-q2"
         },
         {
           "type": "checkpoint",
@@ -1181,7 +1259,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-q3"
         },
         {
           "type": "checkpoint",
@@ -1205,7 +1284,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-q4"
         },
         {
           "type": "checkpoint",
@@ -1227,7 +1307,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-q5"
         },
         {
           "type": "checkpoint",
@@ -1249,7 +1330,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-q6"
         },
         {
           "type": "checkpoint",
@@ -1271,7 +1353,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-q7"
         },
         {
           "type": "checkpoint",
@@ -1293,7 +1376,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-q8"
         },
         {
           "type": "markdown",
@@ -1303,7 +1387,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "problem-ref",
@@ -1313,7 +1398,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-p1"
         },
         {
           "type": "problem-ref",
@@ -1323,7 +1409,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-p2"
         },
         {
           "type": "problem-ref",
@@ -1333,7 +1420,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-pr-p3"
         },
         {
           "type": "markdown",
@@ -1343,7 +1431,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "problem-ref",
@@ -1353,7 +1442,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-ex1"
         },
         {
           "type": "problem-ref",
@@ -1363,7 +1453,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-ex2"
         },
         {
           "type": "problem-ref",
@@ -1373,7 +1464,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-ex3"
         },
         {
           "type": "problem-ref",
@@ -1383,7 +1475,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-ex4"
         },
         {
           "type": "problem-ref",
@@ -1393,7 +1486,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d6-ex5"
         },
         {
           "type": "markdown",
@@ -1403,7 +1497,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -1416,12 +1511,15 @@
             "variant": "tip",
             "title": "Coming up on Day 7"
           },
-          "title": null
+          "title": null,
+          "id": null
         }
       ],
       "problems": [
         {
           "number": 1,
+          "id": "d6-pr-p1",
+          "revision": "361e847728dc",
           "difficulty": "Medium",
           "title": "Predict — arrays and objects",
           "kind": "predict",
@@ -1435,6 +1533,8 @@
         },
         {
           "number": 2,
+          "id": "d6-pr-p2",
+          "revision": "6099f2821538",
           "difficulty": "Medium",
           "title": "Predict — missing values",
           "kind": "predict",
@@ -1448,6 +1548,8 @@
         },
         {
           "number": 3,
+          "id": "d6-pr-p3",
+          "revision": "38293275cbef",
           "difficulty": "Easy",
           "title": "Predict — split and join",
           "kind": "predict",
@@ -1461,6 +1563,8 @@
         },
         {
           "number": 4,
+          "id": "d6-ex1",
+          "revision": "b9512d4977aa",
           "difficulty": "Easy",
           "title": "A product catalogue",
           "kind": "code",
@@ -1481,6 +1585,8 @@
         },
         {
           "number": 5,
+          "id": "d6-ex2",
+          "revision": "e9f2caf011c8",
           "difficulty": "Medium",
           "title": "Login test data",
           "kind": "code",
@@ -1501,6 +1607,8 @@
         },
         {
           "number": 6,
+          "id": "d6-ex3",
+          "revision": "e8ceac57539c",
           "difficulty": "Medium",
           "title": "Destructure the test settings",
           "kind": "code",
@@ -1521,6 +1629,8 @@
         },
         {
           "number": 7,
+          "id": "d6-ex4",
+          "revision": "21fd4a830345",
           "difficulty": "Medium",
           "title": "Clean the order summary",
           "kind": "code",
@@ -1542,6 +1652,8 @@
         },
         {
           "number": 8,
+          "id": "d6-ex5",
+          "revision": "d984847d55db",
           "difficulty": "Challenge",
           "title": "Challenge: model a test run",
           "kind": "code",

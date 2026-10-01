@@ -11,6 +11,7 @@
  *   Data/Content/course-index.json
  *   Data/Content/weeks/week-<w>/day-<d>.json
  *   Data/Content/workspaces.json
+ *   Data/Content/course-plan.json     (from Data/Source/course-plan.json, checked)
  *
  * The course counts its days across the whole course (Week 2 starts on Day 6), and that number is
  * kept as `number`, because the lessons and their file names use it. `day` is the position within
@@ -21,6 +22,17 @@
  * by its blocks. Callouts marked `platform` are notes for the people who build the app, so they
  * are left out. Every day is validated against the contract before anything is written, so a
  * source that does not fit fails here rather than in the learner's browser.
+ *
+ * Identity (registry invariants 10 and 11). Each exercise keeps the id its author gave it, checked
+ * against the record of published ids (scripts/lib/identity-ledger.ts, Data/Source/published-ids.json)
+ * so an id is never reused for a different exercise; each quiz keeps its id as a key; and each
+ * exercise and day gets a revision token, so the studio can tell a learner what changed since their
+ * last launch. When the ledger stops the build, say which it is:
+ *
+ *   npm run build:content -- --same d9-ex1            the same exercise, edited
+ *   npm run build:content -- --new-identity d9-ex1    a different exercise under a reused id
+ *
+ * Commit Data/Source/published-ids.json with the content: it is what keeps the ids honest.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -34,11 +46,16 @@ import {
   type Workspace,
 } from '../shared/contracts/course_day';
 import { CourseIndex } from '../shared/contracts/course_index';
-import type { PartNumber } from '../shared/contracts/common';
+import { CoursePlan } from '../shared/contracts/course_plan';
+import { ContentId, dayIdentity, exerciseIdentity, type PartNumber } from '../shared/contracts/common';
+import { dayRevision, problemRevision } from '../shared/revision';
+import { checkLedger, EMPTY_LEDGER, parseLedger, type LedgerExercise } from './lib/identity-ledger';
 
 const ROOT = path.resolve(__dirname, '..');
 const SOURCE = path.join(ROOT, 'Data', 'Source');
 const CONTENT = path.join(ROOT, 'Data', 'Content');
+const LEDGER = path.join(SOURCE, 'published-ids.json');
+const PLAN = path.join(SOURCE, 'course-plan.json');
 /** Used when a package has no json/course.json title. */
 const DEFAULT_TITLE = 'Playwright with TypeScript';
 
@@ -49,6 +66,8 @@ type SrcBlock = { type: string; [key: string]: unknown };
 type SrcLesson = { id: string; title: string; blocks: SrcBlock[] };
 type SrcSection = { id: string; title: string; intro?: SrcBlock[]; lessons: SrcLesson[] };
 type SrcDay = {
+  /** The day's own identity, when its front matter gives one; otherwise it is 'd' + day. */
+  id?: string;
   week: number;
   day: number;
   title: string;
@@ -84,8 +103,16 @@ function fail(where: string, message: string): never {
 
 const str = (b: SrcBlock, key: string): string | undefined => (typeof b[key] === 'string' ? (b[key] as string) : undefined);
 
+/** A quiz's or an exercise's id as its author wrote it, checked to be one the contract accepts. */
+function authoredId(b: SrcBlock, where: string): string | null {
+  if (b.id === undefined) return null;
+  const id = String(b.id);
+  if (!ContentId.safeParse(id).success) fail(where, 'the id "' + id + '" may use only letters, digits, ".", "_", "~" and "-"');
+  return id;
+}
+
 function block(type: ContentBlock['type'], text: string, extra: Partial<ContentBlock> = {}): ContentBlock {
-  return { type, text, starter: null, variation: null, checkpoint: null, code: null, callout: null, title: null, ...extra };
+  return { type, text, starter: null, variation: null, checkpoint: null, code: null, callout: null, title: null, id: null, ...extra };
 }
 
 /** A fenced code block, with a fence long enough that the code's own backticks cannot close it. */
@@ -114,6 +141,7 @@ function quiz(b: SrcBlock, where: string): ContentBlock {
   const kind = str(b, 'quizType') ?? 'single';
   if (kind !== 'single' && kind !== 'multiple' && kind !== 'truefalse') fail(where, 'unknown quiz type ' + kind);
   return block('checkpoint', str(b, 'question') ?? fail(where, 'a quiz has no question'), {
+    id: authoredId(b, where),
     checkpoint: { options: options.map((o) => o.text), answers, kind, explanation: str(b, 'explanation') ?? '' },
   });
 }
@@ -203,6 +231,9 @@ function exercise(b: SrcBlock, number: number, where: string, files: Record<stri
 
   return {
     number,
+    // The authored id for now; stampIdentities() swaps in the identity the ledger gives it.
+    id: authoredId(b, where),
+    revision: null,
     check: checkFor(b, stub, where),
     difficulty: LEVELS[str(b, 'level') ?? ''] ?? null,
     title,
@@ -292,8 +323,9 @@ function convertDay(d: SrcDay, position: number, files: Record<string, string>):
         const where = at + ' ' + lesson.id;
         if (b.type === 'exercise') {
           exerciseNo++;
-          problems.push(exercise(b, exerciseNo, where, files));
-          blocks.push(block('problem-ref', String(exerciseNo)));
+          const problem = exercise(b, exerciseNo, where, files);
+          problems.push(problem);
+          blocks.push(block('problem-ref', String(exerciseNo), { id: problem.id }));
           continue;
         }
         const converted = convertBlock(b, where);
@@ -324,8 +356,10 @@ function convertDay(d: SrcDay, position: number, files: Record<string, string>):
   parts.sort((a, b) => a.part - b.part);
   // A day that runs before the learner has installed anything works in a ready-made workspace.
   const workspace: Workspace = /^pre-loaded/i.test(d.workspace ?? '') ? 'demo' : 'project';
+  if (d.id !== undefined && !ContentId.safeParse(d.id).success) fail(at, 'the day id "' + String(d.id) + '" is not a valid id');
   return CourseDay.parse({
     schema: 'course-day/v2',
+    ...(d.id !== undefined ? { id: d.id } : {}),
     week: d.week,
     day: position,
     number: d.day,
@@ -402,6 +436,54 @@ function buildSeeds(days: CourseDay[], lessonFiles: Record<string, string>): Wor
 
 // ---------------------------------------------------------------- the course
 
+/** The ids named after --same or --new-identity: repeated, or separated by commas. */
+function argIds(name: string): Set<string> {
+  const ids = new Set<string>();
+  process.argv.forEach((a, i) => {
+    if (a === '--' + name) for (const id of (process.argv[i + 1] ?? '').split(',')) if (id.trim()) ids.add(id.trim());
+  });
+  return ids;
+}
+
+/**
+ * Gives every exercise its identity from the ledger, and every exercise its revision. Run once every
+ * day has been built, because the ledger checks the whole course at once.
+ */
+function stampIdentities(days: CourseDay[]): { ledger: unknown; added: string[]; changed: string[] } {
+  const ledger = fs.existsSync(LEDGER) ? parseLedger(JSON.parse(fs.readFileSync(LEDGER, 'utf-8'))) : EMPTY_LEDGER;
+  const exercises: LedgerExercise[] = [];
+  for (const d of days) {
+    for (const part of d.parts) {
+      for (const p of part.problems) {
+        if (p.id) exercises.push({ id: p.id, title: p.title, file: p.file, kind: p.kind, where: 'day ' + d.number + ' exercise ' + p.number });
+      }
+    }
+  }
+  const checked = checkLedger(ledger, exercises, { same: argIds('same'), newIdentity: argIds('new-identity') });
+
+  const dayIds = new Map<string, number>();
+  for (const d of days) {
+    const id = dayIdentity(d);
+    const other = dayIds.get(id);
+    if (other !== undefined) fail('day ' + d.number, 'has the same identity, ' + id + ', as day ' + other);
+    dayIds.set(id, d.number);
+    const seen = new Set<string>();
+    for (const part of d.parts) {
+      for (const p of part.problems) {
+        if (p.id) p.id = checked.ids.get(p.id) ?? p.id;
+        p.revision = problemRevision(p);
+        const identity = exerciseIdentity(d.number, p);
+        if (seen.has(identity)) fail('day ' + d.number, 'two exercises have the identity ' + identity);
+        seen.add(identity);
+      }
+      for (const b of part.blocks) {
+        if (b.type === 'problem-ref' && b.id) b.id = checked.ids.get(b.id) ?? b.id;
+      }
+    }
+  }
+  return checked;
+}
+
 function main(): void {
   const packages = fs
     .readdirSync(SOURCE, { withFileTypes: true })
@@ -461,6 +543,18 @@ function main(): void {
   }
   weeks.sort((a, b) => a.week - b.week);
 
+  const identities = stampIdentities(out.map((o) => o.day));
+  for (const o of out) o.day = CourseDay.parse(o.day);
+  for (const w of weeks) {
+    for (const d of w.days) {
+      const built = out.find((o) => o.day.week === w.week && o.day.day === d.day)!.day;
+      if (built.id) d.id = built.id;
+      d.revision = dayRevision(built);
+    }
+  }
+  // The plan is hand-written; checked here, so a broken plan fails the build rather than the page.
+  const plan = fs.existsSync(PLAN) ? CoursePlan.parse(JSON.parse(fs.readFileSync(PLAN, 'utf-8'))) : null;
+
   const days = out.map((o) => o.day);
   const index = CourseIndex.parse({
     schema: 'course-index/v1',
@@ -479,6 +573,9 @@ function main(): void {
 
   // Written only once everything has validated, so a bad source never leaves a half-built course.
   fs.writeFileSync(path.join(CONTENT, 'workspaces.json'), JSON.stringify(seeds, null, 2) + '\n');
+  if (plan) fs.writeFileSync(path.join(CONTENT, 'course-plan.json'), JSON.stringify(plan, null, 2) + '\n');
+  else fs.rmSync(path.join(CONTENT, 'course-plan.json'), { force: true });
+  fs.writeFileSync(LEDGER, JSON.stringify(identities.ledger, null, 2) + '\n');
   fs.rmSync(path.join(CONTENT, 'weeks'), { recursive: true, force: true });
   for (const o of out) {
     fs.mkdirSync(path.dirname(o.file), { recursive: true });
@@ -489,6 +586,9 @@ function main(): void {
     'Built ' + index.totals.days + ' day(s) in ' + index.totals.weeks + ' week(s): ' + index.totals.parts + ' tabs, ' +
       index.totals.practice_problems + ' exercises.',
   );
+  if (identities.added.length) console.log('New exercise ids recorded in Data/Source/published-ids.json: ' + identities.added.length + '.');
+  if (identities.changed.length) console.log('Exercise ids whose record changed: ' + identities.changed.join(', ') + '.');
+  if (identities.added.length || identities.changed.length) console.log('Commit Data/Source/published-ids.json with the content.');
 }
 
 main();
