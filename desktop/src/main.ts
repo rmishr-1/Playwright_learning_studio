@@ -474,7 +474,6 @@ async function installRuntime(launch: LaunchWindow): Promise<void> {
 
 /** What went wrong setting up Node and the browsers, said so the learner (or their IT team) knows what to do. */
 function explainRuntime(e: unknown): { message: string; detail: string } {
-  const hosts = 'nodejs.org, storage.googleapis.com, playwright.download.prss.microsoft.com and cdn.playwright.dev';
   const size = Math.ceil(runtimePieces().reduce((sum, p) => sum + p.size, 0) / MB);
   if (e instanceof RuntimeError) {
     if (e.code === 'space') return { message: 'There is not enough free disk space.', detail: e.message + ' Please free some disk space, then select Retry.' };
@@ -492,15 +491,15 @@ function explainRuntime(e: unknown): { message: string; detail: string } {
     if (e.code === 'certificate') {
       return {
         message: 'The connection could not be verified.',
-        detail: 'A device on this network is intercepting secure connections. Please ask your IT department to allow ' + hosts + '. (' + e.message + ')',
+        detail: 'A device on this network is intercepting secure connections. Please contact your IT department. (' + e.message + ')',
       };
     }
     return {
       message: 'The required components could not be downloaded.',
       detail:
-        'On its first start, the application downloads Node.js and the browsers used by the course (approximately ' + size + ' MB) from their ' +
-        'official servers: ' + hosts + '. Please check the internet connection, then select Retry; completed downloads are retained. If your ' +
-        'organisation restricts internet access, please ask your IT department to allow these addresses. (' + e.message + ')',
+        'On its first start, the application downloads the components it needs to run the course (approximately ' + size + ' MB). The internet could ' +
+        'not be reached. Please check the connection, then select Retry; completed downloads are retained. On a corporate network, your IT department ' +
+        'may need to allow the websites listed in the installation guide provided by Evoke. (' + e.message + ')',
     };
   }
   return { message: 'The application could not start.', detail: (e as Error)?.message ?? String(e) };
@@ -550,25 +549,20 @@ function explain(e: unknown, licence: Licence): { message: string; detail: strin
     switch (e.code) {
       case 'rate-limited':
         return {
-          message: 'GitHub is busy at the moment.',
-          detail: 'The application downloads the course from GitHub each time it starts, and GitHub is currently declining requests. Please wait a few minutes, then select Retry.',
+          message: 'The service is temporarily busy.',
+          detail: 'The latest course could not be downloaded because the service is busy. Please wait a few minutes, then select Retry.',
         };
       case 'certificate':
         return {
-          message: 'The connection to GitHub could not be verified.',
-          detail: 'A device on this network is intercepting secure connections. Please ask your IT department to allow raw.githubusercontent.com. (' + e.message + ')',
+          message: 'The connection could not be verified.',
+          detail: 'A device on this network is intercepting secure connections. Please contact your IT department. (' + e.message + ')',
         };
       case 'not-found':
         return { message: 'The course could not be located.', detail: 'Please try again in a few minutes. If the problem persists, please contact Evoke.' };
       case 'timeout':
         return { message: 'The download took too long.', detail: 'The connection may be slow. Please select Retry to try again.' };
       default:
-        return {
-          message: 'The application requires an internet connection to start.',
-          detail:
-            'It downloads the course from GitHub (raw.githubusercontent.com) each time it starts, and could not reach it. Please check the internet ' +
-            'connection, then select Retry. On a corporate network, your IT department may need to allow raw.githubusercontent.com.',
-        };
+        return { message: 'The application requires an internet connection to start.', detail: '' };
     }
   }
   if (e instanceof ReleaseError) {

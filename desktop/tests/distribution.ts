@@ -231,7 +231,7 @@ async function main(): Promise<void> {
   raw.mode = 'busy';
   app = await launch();
   screen = await launchScreen(app, '3-busy');
-  expect(/GitHub is busy/.test(screen.text), 'GitHub turning requests away is said plainly', screen.text.slice(0, 60));
+  expect(/temporarily busy/.test(screen.text), 'the service being busy is said plainly, without naming it', screen.text.slice(0, 60));
   await app.close();
   raw.mode = 'corrupt';
   app = await launch();
