@@ -7,7 +7,8 @@
  *   npm run build-variant -- internal       "Evoke Training Studio": Evoke's own, opens with any valid
  *                                           Evoke licence. Never send it to a customer.
  *   npm run build-variant -- BU             "Evoke Training Studio BU": the customer's, opens only with
- *                                           their licence (after a course update, say)
+ *                                           their licence. A course update or a new feature needs no
+ *                                           new build: publish it (publish-course.bat, publish-app.bat)
  *   ... --zip                               a zip that runs where it is unzipped (with Uninstall.bat),
  *                                           instead of an installer
  *   ... --unsigned                          build without a code-signing certificate, without asking
@@ -114,6 +115,11 @@ function readMe(v: Variant, artifact: string, licenceName: string | null, licenc
     'It installs beside any other Evoke Training Studio on the same computer, each with its own',
     'progress.',
     '',
+    'The studio needs the internet each time it starts: it downloads the latest course, encrypted,',
+    'from GitHub (raw.githubusercontent.com). It sends nothing about you or your work. On a company',
+    'network, ask IT to allow raw.githubusercontent.com. Course updates arrive by themselves; a day',
+    'that changed is marked "Updated" on its card, and your progress and your work stay.',
+    '',
     'To start:',
     ...start,
     licenceStep,
@@ -196,6 +202,7 @@ export async function buildVariant(code: string, opts: BuildVariantOptions = {})
     console.log('  download link, the licence by email to the named contact), and the fingerprints in SHA256SUMS.txt');
     console.log('  by a third route, or read them out: the seal only protects the course while the two travel apart.');
   }
+  console.log('  It opens only once the course and the studio are published for its licence (publish-access.bat).');
   if (!opts.noOpen) spawn(systemExe(path.join('..', 'explorer.exe')), [out], { detached: true, stdio: 'ignore' }).unref();
   return out;
 }

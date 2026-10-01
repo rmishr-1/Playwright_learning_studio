@@ -1,15 +1,17 @@
 /**
- * Withdraws a licence file: builds made from now on refuse it.
+ * Withdraws a licence file: installed copies refuse it once the change is published.
  *
  *   npm run licence:revoke -- licences/<id>-<customer>.lic [--reason "reissued with a new expiry"]
  *
  * Adds the file's fingerprint (the hash of its signature, so only that file, not every licence with
- * its ID) to desktop/revoked.json, which is committed and built into every copy. It records the
- * licence ID, never the customer's name: issued.csv, kept beside the signing key, says whose it is.
+ * its ID) to desktop/revoked.json, which is committed, built into every new copy, and listed in every
+ * release published from then on (publish.ts). It records the licence ID, never the customer's name:
+ * issued.csv, kept beside the signing key, says whose it is.
  *
- * Copies already given out do not change: they keep the list they were built with. A customer must
- * get a new build (npm run new-customer -- --rebuild <their new licence>) before their copy refuses
- * the old file. Revoke the old file whenever a licence is reissued under the same ID.
+ * Installed copies read the list in each release they download, so they refuse the file at their
+ * first start after the next publish (`npm run publish -- grants --rekey` for a withdrawal, so the
+ * course from then on is under keys the file never had). Revoke the old file whenever a licence is
+ * reissued under the same ID.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -91,7 +93,7 @@ if (require.main === module) {
   }
   console.log(
     done
-      ? 'Revoked. Builds made from now on refuse this licence file. Copies already sent still accept it until the customer gets a new build.'
+      ? 'Revoked. Commit desktop/revoked.json, then publish with new keys (npm run publish -- grants --rekey): installed copies refuse this licence file at their next start.'
       : 'That licence file was already revoked.',
   );
 }

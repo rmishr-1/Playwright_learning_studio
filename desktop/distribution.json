@@ -1,0 +1,5 @@
+{
+    "_comment": "The two public GitHub repositories the studio downloads from at every start (desktop/scripts/distribution.ts). They hold only encrypted, signed files. null until the repositories exist: a release cannot be built or published without them.",
+    "content": null,
+    "app": null
+}

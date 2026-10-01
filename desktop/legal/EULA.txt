@@ -47,13 +47,20 @@ To enforce this licence, the Software:
  (b) records the latest date on which it ran, and reads the dates its own files were last
      written, and treats that date as the earliest the current date can be, to make it harder to
      extend a licence period by changing the computer's clock;
- (c) keeps the course content encrypted and its program code obfuscated, and refuses to start
+ (c) downloads the course content and parts of its program code, encrypted, each time it starts,
+     opens them only in memory with your licence, and removes from your computer when it closes
+     the course files it set down there that you have not changed; keeps its program code
+     obfuscated, and refuses to start
      with debugging, logging or proxy options, or when its main program files have been changed;
  (d) checks the licence while it runs: it tells you two weeks before a licence period ends, and
      when a licence period ends during a session, it tells you and closes ten minutes later.
      Your progress is kept, and is there again when a valid licence is added.
-The Software works offline. It does not send the machine code, your progress, your code or any
-other information about you or your computer to Evoke or to anyone else.
+The Software needs an internet connection each time it starts, to download the course content
+and its program code from GitHub (raw.githubusercontent.com), operated by GitHub, Inc. Those
+downloads carry nothing about you: the Software does not send the machine code, your licence,
+your progress, your code or any other information about you or your computer to Evoke or to
+anyone else. As with any connection, GitHub receives your computer's network address.
+[REVIEW: legal to confirm this wording and whether GitHub needs naming as a service provider.]
 
 5. THIRD-PARTY SOFTWARE
 The Software includes third-party components (among them Electron, Node.js, Playwright and the

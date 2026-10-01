@@ -7,13 +7,13 @@
  *
  *   - the fuses are set: no running as Node, no NODE_OPTIONS, no debugger, app.asar only, and
  *     app.asar is checked against the hash built into the program
- *   - app.asar holds no source, no source maps, no plain course, and nothing readable in main.js
- *   - content.pack is not readable
+ *   - app.asar holds no source, no source maps, no course and no studio page (both are downloaded
+ *     at every start, publish.ts), and nothing readable in main.js
  *   - the app refuses every command-line switch (debuggers, proxies, network logs) and a changed
- *     app.asar; a reg.exe or a module planted beside it is never used; the one compiler file
- *     outside app.asar is never loaded by the app itself
- *   - without a licence the backend never starts; with one, the API still refuses anyone but the
- *     window, and to every other host name
+ *     app.asar; a reg.exe, a module or a studio-app.js planted beside it is never used; the one
+ *     compiler file outside app.asar is never loaded by the app itself
+ *   - without a licence the backend never starts; with one (and the releases published for it,
+ *     reachable on GitHub), the API still refuses anyone but the window, and to every other host name
  *
  * It moves the app's data folder aside while it runs, and puts it back.
  */
@@ -148,15 +148,14 @@ async function main(): Promise<void> {
   const own = files.filter((f) => !f.startsWith('/node_modules/'));
   expect(!own.some((f) => /\.(ts|tsx|map|md)$/.test(f)), 'no source, source maps or Markdown', own.filter((f) => /\.(ts|tsx|map|md)$/.test(f)).join(', '));
   expect(!files.some((f) => /Data\/(Source|Content)|course-index\.json|day-\d+\.json|workspaces\.json/.test(f)), 'no course files in plain form');
-  expect(files.includes('/content.pack'), 'the course is there as content.pack');
+  expect(!files.includes('/content.pack') && !files.some((f) => f.startsWith('/web/')) && !files.includes('/studio-app.js'), 'no course, no page and no studio code: they are downloaded');
+  expect(!files.includes('/dev-local.json'), 'nothing tells it to open a course from this computer');
   const main = asar.extractFile(ASAR, 'main.js').toString('utf-8');
   expect(main.startsWith('/*! ' + PRODUCT + ' '), 'main.js starts with the copyright notice');
-  const readable = ['studio_token', 'aes-256-gcm', 'SPK1', 'licence.lic', 'courseIndex', 'recordProgress', 'setup:choose', 'last-seen'];
+  const readable = ['studio_token', 'aes-256-gcm', 'SEB1', 'licence.lic', 'evoke-studio/kek', 'STUDIO_DIST_BASE', 'dev-local', 'setup:choose', 'last-seen'];
   const found = readable.filter((s) => main.includes(s));
   expect(found.length === 0, 'main.js is obfuscated: none of the studio\'s names are readable', found.join(', '));
   if (licence.seal) expect(!main.includes(licence.seal), 'the licence\'s seal is not in the app');
-  const pack = asar.extractFile(ASAR, 'content.pack');
-  expect(!/Playwright|"parts"|course-index|TypeScript/.test(pack.toString('latin1')), 'content.pack is not readable', pack.length + ' bytes');
   expect(!fs.existsSync(path.join(UNPACKED, 'resources', 'app')), 'there is no unpacked app folder to load instead');
   const unpacked = path.join(UNPACKED, 'resources', 'app.asar.unpacked');
   const unpackedOwn = fs.existsSync(unpacked) ? fs.readdirSync(unpacked).filter((n) => n !== 'node_modules') : [];
@@ -222,6 +221,11 @@ async function main(): Promise<void> {
   // The one compiler file outside app.asar, turned into a trap the app itself must never spring.
   const copyTs = path.join(copy, 'resources', 'app.asar.unpacked', 'node_modules', 'typescript', 'lib', 'typescript.js');
   fs.writeFileSync(copyTs, plant + '\n' + fs.readFileSync(copyTs, 'utf-8'));
+  // The studio's code where a launcher that loaded it from disk would look: it is only ever run from
+  // the verified download, in memory.
+  for (const dir of [copy, path.join(copy, 'resources'), path.join(copy, 'resources', 'app.asar.unpacked')]) {
+    fs.writeFileSync(path.join(dir, 'studio-app.js'), plant);
+  }
   // A reg.exe that is not Windows' own, in the folder the app starts from.
   fs.copyFileSync(process.execPath, path.join(copy, 'reg.exe'));
   reset(given);

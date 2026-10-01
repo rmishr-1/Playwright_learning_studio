@@ -8,9 +8,10 @@
  *                           [--expires 2027-09-30] [--machine XXXX-XXXX-XXXX-XXXX]   (no questions)
  *   ... --zip                                   a zip instead of an installer
  *   npm run new-customer -- --rebuild licences/<id>-<name>.lic   a new build for a licence already
- *                                                                 issued (after a course update, or
- *                                                                 a reissue); --code X names the
- *                                                                 variant when it has none yet
+ *                                                                 issued (a new launcher, or a
+ *                                                                 reissue; a course update needs
+ *                                                                 none, only publishing); --code X
+ *                                                                 names the variant when it has none yet
  *
  * Their app is its own: named "Evoke Training Studio <code>", it installs beside Evoke's own and
  * every other customer's. It opens only with their licence and refuses every other one, even a
@@ -193,6 +194,8 @@ async function main(): Promise<void> {
   });
   console.log('> Added "' + variantByCode(customer.code).name + '" to variants.json. Commit it, so their app keeps its name in every later build.');
   await buildVariant(customer.code, build);
+  console.log('\n  Their app opens nothing until the course is published for their licence: run publish-access.bat');
+  console.log('  (npm run publish -- grants) before sending it.');
 }
 
 main().catch((e) => {

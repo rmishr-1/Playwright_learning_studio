@@ -51,6 +51,8 @@ function licence(over: Partial<Licence> = {}): Licence {
     expires: null,
     machine: null,
     product: 'learning-studio',
+    // The seal is half of what opens the course: a licence without one is refused.
+    seal: '5ea1'.repeat(16),
     ...over,
   };
 }
@@ -68,12 +70,22 @@ async function setupScreen(name: string, text: string | null): Promise<{ step: s
   reset(text);
   const app = await launch();
   const page = await app.firstWindow();
-  await page.waitForSelector('#product:not(:empty)');
+  await page.waitForSelector('#licence:not([hidden]), #problem:not([hidden])', { timeout: 60_000 });
   const step = (await page.isVisible('#licence')) ? 'licence' : 'none';
   const reason = (await page.isVisible('#reason')) ? ((await page.textContent('#reason')) ?? '') : '';
   await page.screenshot({ path: path.join(OUT, name + '.png') });
   await app.close();
   return { step, reason };
+}
+
+/** The studio's window, once the launch window has opened it. */
+async function studioWindow(app: ElectronApplication): Promise<Page> {
+  for (let i = 0; i < 240; i++) {
+    const page = app.windows().find((w) => w.url().startsWith('http://127.0.0.1:'));
+    if (page) return page;
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error('The studio window did not open.');
 }
 
 type TermResult = { code: number | null; out: string; frames: number; openUrl: string | null };
@@ -106,31 +118,33 @@ async function terminal(page: Page, command: string, workspace: string): Promise
   );
 }
 
-/** The model answer of exercise N of a course day, from the course source. */
-function solution(dayNumber: number, exercise: number): string {
+/** The model answer of an exercise, by its ID, from the course source. */
+function solution(dayNumber: number, id: string): string {
   const day = JSON.parse(fs.readFileSync(path.join(ROOT, 'Data', 'Source', 'course', 'json', 'day' + dayNumber + '.json'), 'utf-8')) as {
-    sections: { lessons: { blocks: { type: string; solution?: string }[] }[] }[];
+    sections: { lessons: { blocks: { type: string; id?: string; solution?: string }[] }[] }[];
   };
-  const exercises = day.sections.flatMap((s) => s.lessons.flatMap((l) => l.blocks.filter((b) => b.type === 'exercise')));
-  return exercises[exercise - 1].solution ?? '';
+  const exercise = day.sections.flatMap((s) => s.lessons.flatMap((l) => l.blocks)).find((b) => b.type === 'exercise' && b.id === id);
+  if (!exercise) throw new Error('The course has no exercise ' + id + ' on day ' + dayNumber + '.');
+  return exercise.solution ?? '';
 }
 
-async function checkAnswer(page: Page, week: number, day: number, dayNumber: number, problemNumber: number) {
+async function checkAnswer(page: Page, week: number, day: number, dayNumber: number, id: string) {
   return page.evaluate(
-    async ({ week, day, problemNumber, code }) => {
+    async ({ week, day, id, code }) => {
       const d = (await (await fetch('/api/course/' + week + '/' + day)).json()) as {
         workspace: string;
-        parts: { part: number; problems: { number: number }[] }[];
+        parts: { part: number; problems: { number: number; id?: string }[] }[];
       };
-      const part = d.parts.find((p) => p.problems.some((q) => q.number === problemNumber))!;
+      const part = d.parts.find((p) => p.problems.some((q) => q.id === id))!;
+      const problem = part.problems.find((q) => q.id === id)!;
       const res = await fetch('/api/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ week, day, part: part.part, problem: problemNumber, code, workspace: d.workspace }),
+        body: JSON.stringify({ week, day, part: part.part, problem: problem.number, problem_id: id, code, workspace: d.workspace }),
       });
       return (await res.json()) as { status: string; message: string; output: string | null };
     },
-    { week, day, problemNumber, code: solution(dayNumber, problemNumber) },
+    { week, day, id, code: solution(dayNumber, id) },
   );
 }
 
@@ -150,12 +164,15 @@ function get(url: string, host?: string): Promise<{ status: number; body: string
 
 async function main(): Promise<void> {
   keepUserData(USER, PRODUCT + '.exe');
-  fs.rmSync(OUT, { recursive: true, force: true });
+  // Its own screenshots only: the other tests keep theirs here too.
+  if (fs.existsSync(OUT)) for (const f of fs.readdirSync(OUT)) if (f.endsWith('.png')) fs.rmSync(path.join(OUT, f), { force: true });
   fs.mkdirSync(OUT, { recursive: true });
   const keys = testKeys();
   PRIVATE_KEY = keys.privateKey;
   console.log('Building the app with the tests\' key, obfuscated like a release...');
-  await build({ release: false, obfuscate: true, licenceFile: null, publicKeyFile: keys.publicKeyFile });
+  // The studio's code and the course come from this computer (build.ts devLocal), not GitHub:
+  // tests/distribution.ts drives the download itself.
+  await build({ release: false, obfuscate: true, licenceFile: null, publicKeyFile: keys.publicKeyFile, devLocal: true });
   EXE = await packedApp();
   const machine = machineCode();
 
@@ -179,7 +196,7 @@ async function main(): Promise<void> {
   fs.writeFileSync(path.join(USER, 'last-seen.json'), JSON.stringify({ day: '2099-06-01' }));
   let app = await launch();
   let first = await app.firstWindow();
-  await first.waitForSelector('#product:not(:empty)');
+  await first.waitForSelector('#licence:not([hidden]), #problem:not([hidden])', { timeout: 60_000 });
   const rolled = (await first.isVisible('#reason')) ? await first.textContent('#reason') : '';
   expect(/clock says .* already been used on 2099-06-01/.test(rolled ?? ''), 'turning the clock back does not revive an expired licence, and says it is the clock', rolled ?? '');
   expect(first.url() === 'studio://app/setup.html', 'the setup page is served by the app itself', first.url());
@@ -190,8 +207,8 @@ async function main(): Promise<void> {
   console.log('\nStudio');
   reset(JSON.stringify(sign(licence({ machine }), PRIVATE_KEY)));
   app = await launch();
-  // With a valid licence there is nothing to accept: the studio is the first window.
-  const page = await app.firstWindow();
+  // With a valid licence there is nothing to accept: the launch window opens the studio's own.
+  const page = await studioWindow(app);
   await page.waitForLoadState('load');
   const origin = new URL(page.url()).origin;
   expect(/^http:\/\/127\.0\.0\.1:\d+$/.test(origin), 'the studio opens from its own local server', origin);
@@ -263,11 +280,11 @@ async function main(): Promise<void> {
     return (await res.json()) as { status: string; stdout: string };
   });
   expect(typed.stdout.includes('42'), 'a Run transpiles TypeScript in its own process', typed.status + ', ' + typed.stdout);
-  const cart = await checkAnswer(page, 1, 5, 5, 3);
-  expect(cart.status === 'passed', 'Check my answer passes Day 5 exercise 3 (node)', cart.message);
-  const logout = await checkAnswer(page, 2, 4, 9, 1);
-  expect(logout.status === 'passed', 'Check my answer passes Day 9 exercise 1 (tests in 3 browsers)', logout.message);
-  const tests = await terminal(page, 'npx playwright test tests/day9/logout.spec.ts', 'project');
+  const order = await checkAnswer(page, 1, 5, 5, 'd5-ex3');
+  expect(order.status === 'passed', 'Check my answer passes Day 5 exercise d5-ex3 (node)', order.message);
+  const signin = await checkAnswer(page, 2, 4, 9, 'd9-ex1');
+  expect(signin.status === 'passed', 'Check my answer passes Day 9 exercise d9-ex1 (a Playwright test)', signin.message);
+  const tests = await terminal(page, 'npx playwright test tests/day9/signin-page.spec.ts', 'project');
   const passedLine = /(\d+) passed/.exec(tests.out.replace(/\x1b\[[0-9;]*m/g, ''))?.[0] ?? '';
   expect(tests.code === 0 && passedLine === '3 passed', 'the test runs in Chromium, Firefox and WebKit', passedLine);
   expect(tests.frames > 0, 'the live view arrives, with the command\'s own frame key', tests.frames + ' frames');
@@ -302,7 +319,7 @@ async function main(): Promise<void> {
   expect(opened.includes('https://playwright.dev/docs/intro'), 'a link to another site opens in the learner\'s browser, not the app');
 
   await app.close();
-  const workspace = path.join(USER, 'Workspace', 'project', 'tests', 'day9', 'logout.spec.ts');
+  const workspace = path.join(USER, 'Workspace', 'project', 'tests', 'day9', 'signin-page.spec.ts');
   expect(fs.existsSync(workspace), 'the learner\'s files are kept in the app data folder');
   const cacheDir = path.join(USER, 'Cache', 'Cache_Data');
   const cached = fs.existsSync(cacheDir)

@@ -80,6 +80,15 @@ npm run build:content
 The first needs Python with PyYAML (`pip install pyyaml`). The backend picks up the new files on the
 next page load, without a restart.
 
+Every exercise keeps a permanent ID (`Data/Source/published-ids.json`, checked by the build): an ID
+is never reused for a different exercise, so a learner's progress, attempts and saved code stay with
+the right exercise however the course is edited, renumbered or moved. Each day and exercise also
+gets a revision; when a day's revision changes, the learner's next visit shows **Updated** on its
+card (or **New** for a new day) until they open it.
+
+The desktop app does not install the course: `desktop/publish-course.bat` publishes it, encrypted,
+and every installed copy downloads it at its next start (see [desktop/README.md](desktop/README.md)).
+
 A day or a week marked `locked` appears greyed with a "soon" marker, and a link into it lands on a
 locked page rather than a 404.
 
@@ -99,12 +108,14 @@ process that touches `Data/`, so a keyed mutex is enough and there is no CAS or 
 | `Data/Formats/` | The wire contracts + [FORMAT-REGISTRY.md](Data/Formats/FORMAT-REGISTRY.md) |
 | `Data/Content/` | The course content, written by hand |
 | `Data/Progress/` | **Generated.** The one progress record, for whoever runs this clone |
-| `desktop/` | The Option C studio as an offline Windows app, with licences - see [desktop/README.md](desktop/README.md) |
+| `desktop/` | The Option C studio as a Windows app, with licences: an installed launcher that downloads the course and the studio's code at every start - see [desktop/README.md](desktop/README.md) |
 
 The backend binds loopback only. In dev, Vite proxies to it; a deployment puts a TLS edge in
-front. It is never directly reachable. The desktop app starts the same backend inside itself, with
-its own folders, Node and browsers, and a token only its window holds (`backend/src/config.ts`,
-`backend/src/server.ts`).
+front. It is never directly reachable. The desktop app installs only a launcher, with its own Node
+and browsers: at every start it downloads the backend and the page (`backend/src/studio-app.ts`,
+built into one bundle) and the course, encrypted, runs them in memory with its own folders and a
+token only its window holds (`backend/src/config.ts`, `backend/src/server.ts`,
+`shared/studio-host.ts`), and takes the course's traces off the disk when it closes.
 
 ---
 

@@ -1,0 +1,4 @@
+{
+    "_comment": "One-time setup the next app release asks installed studios to run (desktop/src/setup-steps.ts), read by `npm run publish -- app`. A step runs once per computer, by its id: give a changed step a new id. 'bundle' runs a setup function of the studio's own (backend/src/studio-app.ts); 'package' downloads an npm package here, ships its tarball inside the release, and unpacks it into the learner's workspaces, e.g. { \"id\": \"faker-9.9.0\", \"kind\": \"package\", \"name\": \"@faker-js/faker\", \"version\": \"9.9.0\" }.",
+    "steps": []
+}

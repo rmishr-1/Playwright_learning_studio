@@ -33,7 +33,34 @@ import { attachStream } from './runner';
 import { currentReportDir, frameExpected } from './terminal';
 import { PREVIEW_CSP, previewPage, previewPath } from './preview';
 
-export type ServerOptions = { port: number; token?: string | null; webDir?: string | null };
+export type ServerOptions = {
+  port: number;
+  token?: string | null;
+  webDir?: string | null;
+  /** The built page's files by path (index.html, assets/...), served in place of webDir. */
+  web?: ReadonlyMap<string, Uint8Array> | null;
+};
+
+/** The types of the files the built page has. */
+const WEB_TYPES: Record<string, string> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.ico': 'image/x-icon',
+  '.webp': 'image/webp',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.txt': 'text/plain; charset=utf-8',
+  '.wasm': 'application/wasm',
+};
 export type RunningServer = { port: number; close: () => Promise<void> };
 
 const FRAME_POST = /^\/api\/terminal\/[0-9a-f-]{36}\/frame$/;
@@ -201,7 +228,31 @@ export async function startServer(opts: ServerOptions): Promise<RunningServer> {
   app.get('/health', (_req, res) => res.json({ ok: true }));
 
   const webDir = opts.webDir ?? null;
-  if (webDir) {
+  if (opts.web) {
+    // The page handed over in memory (the desktop app downloads it with the rest of the studio).
+    const web = opts.web;
+    const indexHtml = web.get('index.html');
+    if (!indexHtml) throw new Error('The page has no index.html.');
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      if ((req.method !== 'GET' && req.method !== 'HEAD') || req.path.startsWith('/api/')) return next();
+      let rel: string;
+      try {
+        rel = decodeURIComponent(req.path).replace(/^\/+/, '');
+      } catch {
+        return void res.status(400).end();
+      }
+      if (rel.includes('\\') || rel.split('/').some((s) => s === '..' || s === '.')) return void res.status(400).end();
+      const file = rel ? web.get(rel) : undefined;
+      res.set({ 'Content-Security-Policy': CSP, 'X-Frame-Options': 'DENY' });
+      if (file) {
+        res.type(WEB_TYPES[path.extname(rel).toLowerCase()] ?? 'application/octet-stream');
+        return void res.send(Buffer.from(file.buffer, file.byteOffset, file.byteLength));
+      }
+      // A file that should have been there is missing; any other address is a page route (/learn/w1/d1).
+      if (/\.[a-z0-9]{1,8}$/i.test(rel)) return void res.status(404).end();
+      res.type('html').send(Buffer.from(indexHtml.buffer, indexHtml.byteOffset, indexHtml.byteLength));
+    });
+  } else if (webDir) {
     const indexHtml = path.join(webDir, 'index.html');
     const page = (res: Response): void => {
       res.set({ 'Content-Security-Policy': CSP, 'X-Frame-Options': 'DENY' });

@@ -1,9 +1,19 @@
 # Desktop app
 
-Packages the studio (the Option C page, the backend and the course) as a Windows app that runs
-**fully offline**: it ships its own Node and its own Chromium, Firefox and WebKit, so the learner's
-computer needs neither Node nor the internet. (Two lessons open playwright.dev, and need the
-internet for that page only.)
+Packages the studio as a Windows app in two halves:
+
+- **The installer** carries a launcher (the licence, the windows, the security), Electron, its own
+  Node, Chromium, Firefox and WebKit, and the Playwright and TypeScript packages the learner's code
+  runs on. **No course and no studio code**: the learner's computer needs no Node of its own.
+- **The course and the studio's code** (its backend and page) are **published** to two public
+  GitHub repositories, encrypted and signed (`distribution.json`, `publish-course.bat`,
+  `publish-app.bat`). At every start the launcher downloads both, opens them in memory with the
+  learner's licence, and runs the studio. Nothing of the course stays on the disk after it closes.
+
+So **the studio needs the internet at every start** (raw.githubusercontent.com only); without it,
+it says so and offers Retry. A course update or a new feature reaches every installed copy at its
+next start, with no new installer; a day that changed shows **Updated** (or **New**) on its card
+until it is opened, and the learner's progress and saved work stay with their exercises.
 
 It is proprietary software, and it is built so that copying it is **forbidden, slow and
 traceable**. No packaging can make copying impossible: everything the app needs to run is on the
@@ -19,7 +29,10 @@ In this folder, each asks for what it needs and waits for a key at the end:
 | `build-app.bat` | Lists the apps (`variants.json`), asks which to build and whether as an installer or a zip, and puts it in `deliveries/<code>/`. Choose "Evoke Training Studio" for the internal app. |
 | `new-customer.bat` | A new customer: their short code, licence and app, built (below). |
 | `issue-licence.bat` | A new licence for a person or team at Evoke (it opens the internal app), or a reissue of one already issued: a new end date or computer, keeping its ID and, unless changed, its logo. |
-| `revoke-licence.bat` | Lists the licences, asks which to revoke and why, and adds it to `revoked.json`. Then commit `revoked.json` and rebuild the app it opened. |
+| `revoke-licence.bat` | Lists the licences, asks which to revoke and why, and adds it to `revoked.json`. Then commit `revoked.json` and run `publish-access.bat`, choosing new keys. |
+| `publish-course.bat` | Builds the course from `Data/Source` and publishes it: every installed studio gets it at its next start. |
+| `publish-app.bat` | Builds the studio's code (backend and page) and publishes it: a new feature or fix, with no new installer. Needs the key's passphrase. |
+| `publish-access.bat` | Publishes who has access: after a licence is issued or reissued, or (new keys) withdrawn. |
 | `make-setup-kit.bat` | Makes `Evoke-Studio-Setup-Kit.exe` on your desktop, to set up another computer (below). |
 
 ### Another computer
@@ -38,6 +51,40 @@ delete it once used: with its passphrase, it issues licences. Licences issued on
 recorded on that computer only, so issue them on one, or bring the records together with a new kit.
 A licence locked to one computer opens the app only there: the other computer needs a licence of
 its own to open the internal app.
+
+## Publishing the course and the studio
+
+`distribution.json` (committed) names two **public** GitHub repositories, one for the course and
+one for the studio's code. They hold only encrypted, signed files, so the app needs no GitHub
+account or token; a release cannot be built until both are named. Only the publishing computer
+clones them (into `%USERPROFILE%\.evoke-studio\dist\`); learners' computers only read
+`https://raw.githubusercontent.com/<owner>/<repo>/main/...`.
+
+```bash
+npm run publish -- content          # the course in Data/Content (npm run build:content first)
+npm run publish -- app              # the backend and page, built (build.ts buildBundle)
+npm run publish -- grants           # access only, for licences issued since
+npm run publish -- grants --rekey   # after a withdrawal: new keys
+```
+
+Each publish writes `latest.json` (a manifest signed with Evoke's key, naming the release by hash)
+and `blobs/<sha256>.bin` (the release, AES-256-GCM), opens what it wrote with the launcher's own
+code for every licence it grants, then commits, tags and pushes. `--dry-run` says what it would do;
+`--to <folder>` writes to a plain folder; `--no-push` leaves the push to you.
+
+**Who gets access**: every licence in `licences/` with a seal that matches `seals.json`, not
+revoked and not expired. Each skipped licence is listed with the reason (`npm run licence:unsealed`
+lists them without publishing). A licence's grant opens a release only together with the secret
+built into every launcher, so neither the licence file nor the app alone opens anything. A publish
+stops if the last release has grants this computer has no seal for (a licence issued on another
+computer), unless `--drop-unknown`.
+
+**A new feature** that needs an npm package for the learner's code: add it to `app-setup.json`
+(`{ "id", "kind": "package", "name", "version" }`). `publish app` ships its tarball inside the
+release; at the next start every launcher checks it and unpacks it into the learner's workspaces,
+once. Changes to the launcher itself, Electron, Node, the browsers or the shipped Playwright still
+need a new installer: bump `LAUNCHER_API` in `shared/studio-host.ts`, and older launchers keep
+their own channel.
 
 ## The apps: one per audience
 
@@ -110,8 +157,9 @@ computers, for good. For a customer with several learners, consider one licence 
 at least an end date.
 
 That app opens **only** with that licence: it refuses every other one, even a valid licence
-issued to someone else. Its course is **sealed** to the licence: without the licence file the app
-cannot even decrypt it (a customer build is refused for a licence without a seal). Their logo
+issued to someone else. It opens nothing until the course is published for the licence: run
+`publish-access.bat` after new-customer.bat. Without the licence file nothing it downloads can be
+decrypted (a licence without a seal is refused everywhere). Their logo
 shows in the header right of the theme switch; it is part of the signed licence, so it cannot be
 swapped. The lessons carry the licence ID as an invisible watermark.
 
@@ -121,13 +169,15 @@ If no code-signing certificate is set, the build asks before making an unsigned 
 The same without questions:
 `npm run new-customer -- --code BWP --licensee "BWP Group" --logo bwp.png --expires 2027-09-30`
 
-A new build for a customer who already has a licence (after a course update):
-`npm run build-variant -- <code>`, or `npm run new-customer -- --rebuild licences/<id>-<customer>.lic`,
-which finds the variant by the licence (after a reissue, add `--code <their code>` if the licence
-file's name changed; a licence with no variant yet gets one with `--code`).
+A course update or a new feature needs **no new build**: publish it. A new build for a customer
+(a new launcher, Electron or browsers): `npm run build-variant -- <code>`, or
+`npm run new-customer -- --rebuild licences/<id>-<customer>.lic`, which finds the variant by the
+licence (after a reissue, add `--code <their code>` if the licence file's name changed; a licence
+with no variant yet gets one with `--code`).
 
-The installer is about 700 MB, almost all of it the three browsers the course tests in, which the
-app ships so it works offline. The app itself is 3.5 MB.
+The installer is about 470 MB, almost all of it the three browsers the course tests in. The
+launcher itself is about 1.5 MB; the studio's code it downloads is about 10 MB, the course well
+under 1 MB.
 
 ## Licences and the signing key
 
@@ -152,18 +202,19 @@ licence will ever work with the copies already given out.
 | Command | What it does |
 |---|---|
 | `npm run licence:issue -- --licensee "Acme Ltd" [--email x] [--expires 2027-09-30] [--machine CODE] [--logo x.png]` | Issues a licence into `licences/` |
-| `... --id EVK-1A2B3C4D` | Reissues a licence (a new expiry, or bound to one computer). Same licensee only; it keeps the seal, so the customer's build still opens, and every earlier file is revoked (all of them must still be in `licences/`). Add `--new-seal` when the licence leaked: the customer then needs a new build too. A withdrawn licence can come back only with `--new-seal`. |
-| `npm run licence:revoke -- licences/<file>.lic [--reason withdrawn]` | Withdraws a licence file: builds made from now on refuse it (`revoked.json`, committed). The reason is a few plain words; a customer's name is refused. |
+| `... --id EVK-1A2B3C4D` | Reissues a licence (a new expiry, or bound to one computer). Same licensee only; it keeps the seal, and every earlier file is revoked (all of them must still be in `licences/`). Add `--new-seal` when the licence leaked. A withdrawn licence can come back only with `--new-seal`. Then publish access. |
+| `npm run licence:revoke -- licences/<file>.lic [--reason withdrawn]` | Withdraws a licence file (`revoked.json`, committed); installed copies refuse it once published with new keys. The reason is a few plain words; a customer's name is refused. |
+| `npm run licence:unsealed` | Lists the licences that cannot open the published course, and why. |
 | `npm run licence:keygen` | Makes the key pair. Once, ever; it refuses to replace a key. |
 | `npm run watermark:find -- copied-text.txt` | Prints the licence ID hidden in copied course text; `issued.csv` names the customer. |
 
-**Revoking reaches only builds made afterwards.** A copy already sent keeps its own key, seal and
-revocation list, so it opens with the old licence file for good, or until that file's end date:
-nothing Evoke does later can reach it. A reissue that narrows a licence (a computer limit, a new
-computer, an earlier end date) therefore needs a new build for the customer
-(`npm run new-customer -- --rebuild <new licence>`); `licence:issue` says so when it happens.
-`--new-seal` stops the old file opening any build made from now on; it does nothing to the copy
-already sent. An end date is the only limit that holds for a copy once it has left Evoke.
+**Revoking reaches installed copies.** Every release lists the licence files Evoke has withdrawn,
+and every start downloads the latest release, so a copy refuses a withdrawn or replaced licence
+file at its first start after the next publish (`publish-access.bat`). Publishing with new keys
+(`--rekey`) also puts everything published from then on under keys the withdrawn file never had.
+A reissue that narrows a licence (a computer limit, an earlier end date) reaches every copy the
+same way. The same key that signs licences now signs code that runs on every learner's computer:
+`publish app` refuses unless the key has a passphrase.
 
 ## Build
 
@@ -181,8 +232,12 @@ npm run build-variant -- internal
   it for anything that leaves Evoke. Every browser must match its hash in `runtime-pins.json`
   (committed); after upgrading Playwright, `npm run runtime -- --fresh --pin` records the new
   ones. Packaging refuses a runtime that has changed since.
-- **An internal build never leaves Evoke.** It is not sealed, so its course can be decrypted
-  without any licence, and it opens with every customer's licence.
+- **An internal build never leaves Evoke.** It opens with every customer's licence.
+- A release build needs both repositories named in `distribution.json`, and the app secret, which
+  is derived from the signing key (and cached, encrypted for this Windows user, in
+  `%USERPROFILE%\.evoke-studio\app-secret.dpapi`): build releases where the key is.
+- `npm start` (`build -- --dev`) builds the bundle too and opens it, with the course in
+  `../Data/Content`, from this computer: no download, no repositories needed.
 - Run `npm ci` (here and at the root) before `npm run package`: the app's own code is bundled from
   `node_modules` as it is. `new-customer.bat` always does.
 - `npm run build-variant -- <code>` builds that variant's installer into `deliveries/<code>/`
@@ -196,18 +251,18 @@ npm run build-variant -- internal
   26.15.3's; packaging stops at any other version until it is compared again.
 - The app's own packages for the learner's code (Playwright, TypeScript) are taken from their npm
   tarballs, checked against `package-lock.json`, not from `node_modules`.
-- It takes the course from `../Data/Content/`: run `npm run build:content` at the root first
-  when the course has changed. The build refuses a `src/licence-public.pem` that does not match
-  the signing key's fingerprint.
+- The installer carries no course: `publish-course.bat` publishes it from `../Data/Content/`.
+  The build refuses a `src/licence-public.pem` that does not match the signing key's fingerprint.
 
 ## What protects it
 
 | Layer | What it does |
 |---|---|
 | Licence agreement | Installed beside the app as `EULA.txt` (with THIRD-PARTY-NOTICES.txt), including the technical measures (section 4A), but not shown, referenced or accepted anywhere: the installer has no agreement page, and a valid licence opens the studio at once. `legal/EULA.txt` is a **draft for legal review**. |
-| Licence | Ed25519-signed; optional expiry and one-computer limit; revocation list (builds made after the revocation); re-checked every hour, with ten minutes' notice before the studio closes once a licence has ended; the learner is warned two weeks ahead. |
-| Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, or the latest date of the files in the app's data folder (two folders deep, not the learner's workspaces, where their own code writes). It stops the clock simply being turned back; someone who also edits or re-dates those files can get past it. |
-| Encrypted, sealed course | `content.pack`, AES-256-GCM, a new key every build, decrypted in memory only and never cached; a customer's build needs their licence to decrypt it. |
+| Licence | Ed25519-signed; optional expiry and one-computer limit; revocation list, in the app and in every release it downloads; re-checked every hour, with ten minutes' notice before the studio closes once a licence has ended; the learner is warned two weeks ahead. |
+| Clock guard | The day used for expiry is never earlier than the day the licence was issued, the day the app was built, the day the downloaded release was published, or the latest date of the files in the app's data folder (two folders deep, not the learner's workspaces, where their own code writes). It stops the clock simply being turned back; someone who also edits or re-dates those files can get past it. |
+| Nothing installed to copy | The course and the studio's code are not in the installer. They are downloaded at every start from public repositories that hold only encrypted files: AES-256-GCM, a new key for every release, wrapped once per licence with a key that needs **both** the licence's seal and the secret built into the app. Manifests are signed (Ed25519) and name every file by hash; an older manifest is never accepted after a newer one. Decrypted in memory only, never cached; the studio's code is run from memory, after checking, and may load nothing from the disk but Node's own modules. |
+| Wiped at quit | At quit (and at the next start, after a crash) the Terminal's starting files the learner has not changed, the test report and the Run folders leave the disk. Progress, the learner's own files and the licence stay. |
 | Locked API | 127.0.0.1 only; answers only the app's window (a new random token every start), and only to its own host name, so neither another program nor a web page can read it. |
 | Locked app | No command-line switches in a release (debuggers, proxies, network logs); Electron fuses; DevTools off; nothing leaves the computer; the test report is served apart from the studio; the learner's code gets none of the app's environment. |
 | Obfuscated code | The main process, backend and page code are obfuscated; no source maps. |
@@ -219,21 +274,35 @@ computer. The watermark traces text copied and pasted out of the app; for screen
 title shows the licensee. Neither survives a deliberate effort to remove it, and a mark only says
 which licence ID it names: someone who knows the scheme could write another customer's ID in.
 
-Two things are on the learner's disk by design: each open day's starting files (the example and
-lesson tests the Terminal starts with) are written to their workspace as plain files, since they
-edit and run them; and whatever the page shows is, while it shows it, in the app's memory.
+While the studio is open, two things are on the learner's disk by design: each open day's starting
+files (the example and lesson tests the Terminal starts with) are written to their workspace as
+plain files, since they edit and run them (those they have not changed leave at quit); and whatever
+the page shows is, while it shows it, in the app's memory. Files the learner changed are theirs and
+stay. Windows' page file and crash dumps are beyond the app's reach.
 
 ## Tests
 
 The tests use a throwaway key pair of their own; Evoke's signing key is never touched by one.
 
 ```bash
+npm run test:publish
+npm run test:distribution
 npm run test:app
 npm run test:customer
 npm run package -- --internal --unsigned
 npm run test:release -- licences/<a licence the build accepts>.lic
 ```
 
+- `test:publish` (plain Node, seconds): the release format and the publisher. Who gets a grant,
+  that neither the licence nor the app alone opens a release, tampering, wrong kinds and keys,
+  grants-only publishes, `--rekey`, the launcher's download order (offline, withdrawn, a stale
+  manifest, a course needing a newer app), the clean-up, the bundle's module guard and the
+  package unpacker.
+- `test:distribution` builds the app with no course in it, publishes the course and the studio's
+  code with the real publisher to a stand-in for GitHub (`tests/fake-raw.ts`), and drives it as
+  installed: a start opens the studio, no internet then Retry, GitHub busy, a damaged download, a
+  licence with no access, a course update tagging the changed day, a licence withdrawn by a
+  release, a course needing a newer studio, and no course text left on disk after quitting.
 - `test:app` builds the app (obfuscated like a release) and drives it laid out as installed
   (packed, with the release's fuses, `tests/packed.ts`): every licence case, the clock guard, that
   no agreement is shown, the locked API, no caching, the page's Content Security Policy, offline, watermarks,
@@ -253,7 +322,10 @@ it checks.
 
 ## Before the first external release
 
-- **Back up the signing key** (above).
+- **Create the two public repositories** on GitHub (empty), name them in `distribution.json`,
+  then `publish-app.bat` and `publish-course.bat`. Tell customers' IT to allow
+  `raw.githubusercontent.com`.
+- **Back up the signing key** (above), and give it a passphrase: it now signs the studio's code.
 - **Code signing.** Buy a Windows code-signing certificate. Certificates now live on a hardware
   token or in a cloud service; set whichever applies before `npm run package` or `new-customer.bat`:
   `STUDIO_SIGN_SUBJECT` (the certificate's subject name, for one in Windows' store or on a token),
@@ -268,4 +340,5 @@ it checks.
 - **Legal review** of `legal/EULA.txt` (placeholders in brackets) and of the `[REVIEW]` notes in
   the generated `THIRD-PARTY-NOTICES.txt`; confirm in writing that Evoke holds the rights to the
   course content.
-- **Test on a clean computer**: a Windows machine or VM with no Node and no internet.
+- **Test on a clean computer**: a Windows machine or VM with no Node, online (and once offline, to
+  see the studio refuse to start and say why).

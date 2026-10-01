@@ -214,8 +214,19 @@ export function wrapGrant(kek: Buffer, key: Buffer, m: Pick<Manifest, 'kind' | '
   return Buffer.concat([iv, cipher.getAuthTag(), body]).toString('base64');
 }
 
-/** A grant that is random bytes of the right length: padding, so the number of licences does not show. */
-export const decoyGrant = (): [string, string] => [crypto.randomBytes(17).toString('base64url').slice(0, 22), crypto.randomBytes(60).toString('base64')];
+/**
+ * A grant that opens nothing: padding, so the number of licences does not show. Its ID comes from
+ * Evoke's key, so the publisher can tell its own padding from a grant it does not know (a licence
+ * issued on another computer); to anyone else it looks like any grant.
+ */
+export function decoyGrant(seed: Buffer, m: Pick<Manifest, 'kind' | 'channel' | 'release'>, n: number): [string, string] {
+  const id = crypto
+    .createHmac('sha256', hkdf(seed, Buffer.alloc(0), 'evoke-studio/decoy/v1'))
+    .update(m.kind + '\0' + m.channel + '\0' + m.release.id + '\0' + n)
+    .digest('base64url')
+    .slice(0, 22);
+  return [id, crypto.randomBytes(60).toString('base64')];
+}
 
 /** The release key, from this licence's grant. Throws 'no-access' when there is none, or it does not open. */
 export function unwrapGrant(kek: Buffer, m: Manifest): Buffer {
@@ -313,3 +324,29 @@ export function unpackContainer(data: Buffer): Map<string, Buffer> {
 /** Text files of a container, as text (the course). */
 export const asText = (files: ReadonlyMap<string, Buffer>): Map<string, string> =>
   new Map([...files.entries()].map(([p, b]) => [p, b.toString('utf-8')]));
+
+// ---------------------------------------------------------------- opening a release
+
+/**
+ * A release's files, opened with a licence's seal and the app's secret: the blob checked against
+ * the manifest (size and hash) before anything is decrypted, then the grant, the blob and the
+ * container. The launcher opens every release this way, and the publisher opens what it is about
+ * to publish this way before it publishes it.
+ */
+export function openRelease(m: Manifest, blob: Buffer, seal: string, secret: Buffer): Map<string, Buffer> {
+  if (blob.length !== m.blob.size || sha256(blob) !== m.blob.sha256) throw new ReleaseError('hash', 'The download is damaged or incomplete.');
+  const kek = kekFor(seal, secret);
+  let key: Buffer | null = null;
+  try {
+    key = unwrapGrant(kek, m);
+    return unpackContainer(decryptBlob(key, blob, m.kind, m.release.id));
+  } finally {
+    kek.fill(0);
+    key?.fill(0);
+  }
+}
+
+/** Where a kind's latest.json is in its repository. */
+export const latestPath = (kind: Kind, api: number): string => (kind === 'content' ? 'latest.json' : 'channels/api-' + api + '/latest.json');
+/** A kind's channel, as its manifests name it. */
+export const channelOf = (kind: Kind, api: number): string => (kind === 'content' ? 'content' : 'api-' + api);

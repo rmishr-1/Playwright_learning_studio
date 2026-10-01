@@ -5,9 +5,9 @@
  *
  *   START  bits of the ID (U+200B = 0, U+200C = 1)  END
  *
- * The desktop build marks the course with the licence it is made for (desktop/scripts/
- * pack-content.ts), and the app marks every day again, as it serves it, with the licence in use
- * (backend/src/routes.ts), so even a build made for any licence traces to the one that opened it.
+ * The studio marks every day with the licence that opened it, as it serves it
+ * (backend/src/routes.ts): the course is published once for every licence (desktop/scripts/
+ * content-files.ts), and each copy of it traces to the licence that opened it.
  */
 const ZERO = '​';
 const ONE = '‌';

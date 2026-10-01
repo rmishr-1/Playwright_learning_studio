@@ -16,7 +16,7 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { NODE_BIN, config, onDisk } from './config';
+import { NODE_BIN, RUN_PREFIX, WORKSPACE_ROOT, config, onDisk } from './config';
 import { learnerEnv, systemExe } from './child-env';
 import type { RunRequest, RunResult, RunStreamEvent } from '../../shared/contracts/run';
 
@@ -339,6 +339,8 @@ const TYPESCRIPT = JSON.stringify(onDisk(require.resolve('typescript')));
  * and refuses anything the program asks for that resolves elsewhere (Node's own modules aside).
  */
 const PACKAGES = JSON.stringify(path.resolve(onDisk(require.resolve('playwright/package.json')), '..', '..'));
+/** Packages an app release installed for the learner's code (desktop/src/setup-steps.ts): the workspaces' own node_modules. */
+const INSTALLED = JSON.stringify(path.join(WORKSPACE_ROOT, 'node_modules'));
 const BOOTSTRAP = `
 const fs = require('fs');
 const path = require('path');
@@ -350,12 +352,13 @@ const out = ts.transpileModule(fs.readFileSync(path.join(__dirname, 'program.ts'
 }).outputText;
 const m = new Module(file, module);
 m.filename = file;
-m.paths = [${PACKAGES}];
+m.paths = [${PACKAGES}, ${INSTALLED}];
 const shipped = ${PACKAGES} + path.sep;
+const installed = ${INSTALLED} + path.sep;
 const resolve = Module._resolveFilename;
 Module._resolveFilename = function (request, parent, ...rest) {
   const found = resolve.call(this, request, parent, ...rest);
-  if (parent === m && !Module.isBuiltin(found) && !found.startsWith(shipped)) {
+  if (parent === m && !Module.isBuiltin(found) && !found.startsWith(shipped) && !found.startsWith(installed)) {
     throw new Error("A Run can use Playwright and the modules built into Node; " + request + " is not one of them.");
   }
   return found;
@@ -414,7 +417,7 @@ export function startRun(req: RunRequest): StartedRun | { queue_full: true } {
   }
 
   // Nothing is counted as running until the run's files and its environment are in place.
-  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-run-'));
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), RUN_PREFIX));
   const program = path.join(scratch, 'run.js');
   let env: NodeJS.ProcessEnv;
   try {
