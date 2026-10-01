@@ -220,7 +220,7 @@ async function main(): Promise<void> {
   raw.mode = 'offline';
   app = await launch();
   let screen = await launchScreen(app, '2-offline');
-  expect(screen.step === 'problem' && /needs the internet/.test(screen.text), 'the launch window says the studio needs the internet', screen.text.slice(0, 90));
+  expect(screen.step === 'problem' && /requires an internet connection/.test(screen.text), 'the launch window says the application requires the internet', screen.text.slice(0, 90));
   raw.mode = 'ok';
   await screen.page.click('#retry');
   page = await studio(app);
@@ -236,7 +236,7 @@ async function main(): Promise<void> {
   raw.mode = 'corrupt';
   app = await launch();
   screen = await launchScreen(app, '4-corrupt');
-  expect(/could not be checked/.test(screen.text), 'a damaged download is refused', screen.text.slice(0, 60));
+  expect(/could not be verified/.test(screen.text), 'a damaged download is refused', screen.text.slice(0, 60));
   await app.close();
   raw.mode = 'ok';
   reset(stranger.text);

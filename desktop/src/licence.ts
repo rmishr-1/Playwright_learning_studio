@@ -103,16 +103,16 @@ export function verify(
   try {
     file = JSON.parse(text) as LicenceFile;
   } catch {
-    return { ok: false, reason: 'The file is not a licence.' };
+    return { ok: false, reason: 'The selected file is not a valid licence.' };
   }
   const l = file?.licence;
   if (!l || typeof l.id !== 'string' || typeof l.licensee !== 'string' || typeof file.signature !== 'string') {
-    return { ok: false, reason: 'The file is not a licence.' };
+    return { ok: false, reason: 'The selected file is not a valid licence.' };
   }
   // One spelling only: base64 decoding would otherwise ignore spaces, missing padding and the URL
   // alphabet, and a revoked licence could be written anew with the same signature.
   if (!SIGNATURE.test(file.signature) || Buffer.from(file.signature, 'base64').length !== 64) {
-    return { ok: false, reason: 'The licence is not valid: it was not issued by Evoke, or it has been changed.' };
+    return { ok: false, reason: 'This licence is not valid. It was not issued by Evoke, or it has been modified.' };
   }
   let valid = false;
   try {
@@ -120,25 +120,25 @@ export function verify(
   } catch {
     valid = false;
   }
-  if (!valid) return { ok: false, reason: 'The licence is not valid: it was not issued by Evoke, or it has been changed.' };
-  if (l.product !== PRODUCT) return { ok: false, reason: 'The licence is for a different product.', licence: l };
-  if (l.logo && !LOGO.test(l.logo)) return { ok: false, reason: "The licence's logo is not a PNG or JPEG image.", licence: l };
-  if (l.seal && !SEAL.test(l.seal)) return { ok: false, reason: 'The licence is damaged.', licence: l };
-  if (l.serial && !SERIAL.test(l.serial)) return { ok: false, reason: 'The licence is damaged.', licence: l };
-  if (opts.revoked?.includes(fingerprint(file))) return { ok: false, reason: 'The licence (' + l.id + ') has been withdrawn.', licence: l };
+  if (!valid) return { ok: false, reason: 'This licence is not valid. It was not issued by Evoke, or it has been modified.' };
+  if (l.product !== PRODUCT) return { ok: false, reason: 'This licence is for a different product.', licence: l };
+  if (l.logo && !LOGO.test(l.logo)) return { ok: false, reason: 'The licence logo is not a valid PNG or JPEG image.', licence: l };
+  if (l.seal && !SEAL.test(l.seal)) return { ok: false, reason: 'This licence file is damaged.', licence: l };
+  if (l.serial && !SERIAL.test(l.serial)) return { ok: false, reason: 'This licence file is damaged.', licence: l };
+  if (opts.revoked?.includes(fingerprint(file))) return { ok: false, reason: 'This licence (' + l.id + ') has been withdrawn by Evoke.', licence: l };
   if (opts.onlyId && l.id !== opts.onlyId) {
-    return { ok: false, reason: 'The licence (' + l.id + ') is not the one this copy was made for.', licence: l };
+    return { ok: false, reason: 'This licence (' + l.id + ') was not issued for this installation.', licence: l };
   }
   if (l.expires) {
-    if (!DATE.test(l.expires)) return { ok: false, reason: 'The licence is damaged.', licence: l };
+    if (!DATE.test(l.expires)) return { ok: false, reason: 'This licence file is damaged.', licence: l };
     // Never earlier than the day the licence was issued: a clock set back before that is wrong.
     const given = opts.today ?? new Date().toISOString().slice(0, 10);
     const today = DATE.test(l.issued) && l.issued > given ? l.issued : given;
-    if (today > l.expires) return { ok: false, reason: 'The licence expired on ' + l.expires + ' (UTC).', licence: l, expired: true };
+    if (today > l.expires) return { ok: false, reason: 'This licence expired on ' + l.expires + ' (UTC).', licence: l, expired: true };
   }
   if (l.machine) {
-    if (opts.machine === 'UNKNOWN') return { ok: false, reason: "This computer's machine code cannot be read, and the licence is for one computer.", licence: l };
-    if (l.machine !== opts.machine) return { ok: false, reason: 'The licence is for a different computer.', licence: l };
+    if (opts.machine === 'UNKNOWN') return { ok: false, reason: "This computer's machine code could not be read, and this licence is issued for a single computer.", licence: l };
+    if (l.machine !== opts.machine) return { ok: false, reason: 'This licence is issued for a different computer.', licence: l };
   }
   return { ok: true, licence: l };
 }

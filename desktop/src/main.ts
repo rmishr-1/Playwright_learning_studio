@@ -220,16 +220,16 @@ function check(text: string): Verdict {
   const verdict = verify(text, BUILD.publicKey, { onlyId: BUILD.onlyId, machine: MACHINE, today, revoked: [...BUILD.revoked, ...releaseRevoked] });
   // The seal is half of what opens the course: a licence without one (issued before seals) opens nothing.
   if (verdict.ok && !verdict.licence.seal) {
-    return { ok: false, reason: 'This licence was issued before the studio downloaded its course, and cannot open it. Ask Evoke for a new licence file.', licence: verdict.licence };
+    return { ok: false, reason: 'This licence was issued before the current course system and cannot open it. Please request a new licence file from Evoke.', licence: verdict.licence };
   }
   // Said plainly when it is the clock, not the licence, that is wrong.
   if (!verdict.ok && verdict.expired && verdict.licence?.expires && now <= verdict.licence.expires) {
     return {
       ...verdict,
       reason:
-        "This computer's clock says " + now + ', but the studio has already been used on ' + today + ', after the licence ' +
-        'ended (' + verdict.licence.expires + '). Set the clock to the right date. If it was ever set ahead by mistake, ' +
-        'ask Evoke for a renewed licence: the studio keeps the latest date it has seen.',
+        "This computer's clock says " + now + ', but the application has already been used on ' + today + ', which is after this licence ' +
+        'expired (' + verdict.licence.expires + '). Please set the clock to the correct date. If it was previously set ahead in error, please ' +
+        'request a renewed licence from Evoke; the application retains the latest date it has observed.',
     };
   }
   return verdict;
@@ -549,33 +549,47 @@ function explain(e: unknown, licence: Licence): { message: string; detail: strin
   if (e instanceof NetworkError) {
     switch (e.code) {
       case 'rate-limited':
-        return { message: 'GitHub is busy right now.', detail: 'The studio downloads its course from GitHub every time it starts, and GitHub is turning requests away for a few minutes. Wait a few minutes, then press Retry.' };
+        return {
+          message: 'GitHub is busy at the moment.',
+          detail: 'The application downloads the course from GitHub each time it starts, and GitHub is currently declining requests. Please wait a few minutes, then select Retry.',
+        };
       case 'certificate':
-        return { message: 'The connection to GitHub could not be trusted.', detail: 'Something on this network is intercepting secure connections. Ask your IT team to allow raw.githubusercontent.com. (' + e.message + ')' };
+        return {
+          message: 'The connection to GitHub could not be verified.',
+          detail: 'A device on this network is intercepting secure connections. Please ask your IT department to allow raw.githubusercontent.com. (' + e.message + ')',
+        };
       case 'not-found':
-        return { message: 'The course is not where the studio expects it.', detail: 'Try again in a few minutes. If it keeps happening, tell Evoke.' };
+        return { message: 'The course could not be located.', detail: 'Please try again in a few minutes. If the problem persists, please contact Evoke.' };
       case 'timeout':
-        return { message: 'The download took too long.', detail: 'The connection may be slow. Press Retry to try again.' };
+        return { message: 'The download took too long.', detail: 'The connection may be slow. Please select Retry to try again.' };
       default:
         return {
-          message: 'The studio needs the internet to start.',
-          detail: 'It downloads the course from GitHub (raw.githubusercontent.com) every time it starts, and could not reach it. Check the connection, then press Retry. On a company network, your IT team may need to allow raw.githubusercontent.com.',
+          message: 'The application requires an internet connection to start.',
+          detail:
+            'It downloads the course from GitHub (raw.githubusercontent.com) each time it starts, and could not reach it. Please check the internet ' +
+            'connection, then select Retry. On a corporate network, your IT department may need to allow raw.githubusercontent.com.',
         };
     }
   }
   if (e instanceof ReleaseError) {
     switch (e.code) {
       case 'no-access':
-        return { message: 'Your licence does not have access to the course yet.', detail: 'Ask Evoke to give licence ' + licence.id + ' access, then press Retry.' };
+        return { message: 'This licence does not have access to the course yet.', detail: 'Please ask Evoke to grant licence ' + licence.id + ' access, then select Retry.' };
       case 'retired':
       case 'too-old':
-        return { message: 'Install the new version of the studio.', detail: (e.code === 'retired' ? e.message + ' ' : '') + 'This version can no longer open the course. Your progress is kept when you install the new version.' };
+        return {
+          message: 'Install the new version of the application.',
+          detail: (e.code === 'retired' ? e.message + ' ' : '') + 'This version can no longer open the course. Your progress is retained when you install the new version.',
+        };
       default:
-        return { message: 'The download could not be checked.', detail: 'What arrived was not exactly what Evoke published (' + e.message + '). Press Retry. If it keeps happening, tell Evoke.' };
+        return {
+          message: 'The download could not be verified.',
+          detail: 'The downloaded files do not match what Evoke published (' + e.message + '). Please select Retry. If the problem persists, please contact Evoke.',
+        };
     }
   }
-  if (e instanceof SetupError) return { message: 'The studio could not finish setting up.', detail: e.message + ' Press Retry.' };
-  return { message: 'The studio could not start.', detail: (e as Error)?.message ?? String(e) };
+  if (e instanceof SetupError) return { message: 'The application could not complete its setup.', detail: e.message + ' Please select Retry.' };
+  return { message: 'The application could not start.', detail: (e as Error)?.message ?? String(e) };
 }
 
 // ---------------------------------------------------------------- the studio
@@ -610,7 +624,7 @@ function about(win: BrowserWindow, licence: Licence): void {
       (licence.expires ? ', valid until ' + licence.expires : '') +
       '\nMachine code ' +
       MACHINE +
-      '\nStudio release ' + versions.app + ', course release ' + versions.content +
+      '\nApplication release ' + versions.app + ', course release ' + versions.content +
       '\n\nThird-party software notices: ' +
       path.join(process.resourcesPath, 'legal', 'THIRD-PARTY-NOTICES.txt'),
   });
@@ -697,8 +711,8 @@ function warnOfExpiry(licence: Licence): void {
   const message = {
     type: 'info' as const,
     title: BUILD.product,
-    message: days <= 0 ? 'Your licence ends today.' : 'Your licence ends in ' + days + (days === 1 ? ' day' : ' days') + ', on ' + licence.expires + '.',
-    detail: 'Ask your training contact, or Evoke, for a renewed licence to keep using the studio after that.',
+    message: days <= 0 ? 'Your licence expires today.' : 'Your licence expires in ' + days + (days === 1 ? ' day' : ' days') + ', on ' + licence.expires + '.',
+    detail: 'Please request a renewed licence from your training contact or from Evoke to continue using the application after this date.',
   };
   void (win ? dialog.showMessageBox(win, message) : dialog.showMessageBox(message));
 }
@@ -880,8 +894,8 @@ void app.whenReady().then(async () => {
   if (RELEASE && othersCanChange(path.dirname(process.execPath)) === true) {
     dialog.showErrorBox(
       BUILD.product,
-      'The studio is in a folder that other people who use this computer can change (' + path.dirname(process.execPath) + '), ' +
-        'so it will not start there. Move the whole folder into your own Programs folder, for example ' +
+      'The application is located in a folder that other users of this computer can modify (' + path.dirname(process.execPath) + '), ' +
+        'and will not start there. Please move the entire folder into your own Programs folder, for example ' +
         '%LOCALAPPDATA%\\Programs\\' + BUILD.product + ', and start it from there.',
     );
     app.quit();
@@ -893,8 +907,8 @@ void app.whenReady().then(async () => {
     if (othersCanChange(RUNTIME_DIR) === true) {
       dialog.showErrorBox(
         BUILD.product,
-        'The folder the studio keeps Node and its browsers in (' + RUNTIME_DIR + ') can be changed by other people who use this computer, ' +
-          'so the studio will not start. Ask your IT team to give it back to your account alone, or delete it: the studio downloads it again.',
+        'The folder in which the application stores Node and its browsers (' + RUNTIME_DIR + ') can be modified by other users of this computer, ' +
+          'so the application will not start. Please ask your IT department to restrict it to your account, or delete it; the application will download it again.',
       );
       app.quit();
       return;
@@ -964,7 +978,7 @@ void app.whenReady().then(async () => {
     if (now.ok || closing) return;
     closing = true;
     const win = BrowserWindow.getAllWindows()[0];
-    const message = { type: 'warning' as const, title: BUILD.product, message: now.reason, detail: 'The studio will close in 10 minutes. Your progress is saved.' };
+    const message = { type: 'warning' as const, title: BUILD.product, message: now.reason, detail: 'The application will close in 10 minutes. Your progress has been saved.' };
     void (win ? dialog.showMessageBox(win, message) : dialog.showMessageBox(message));
     setTimeout(() => app.quit(), 10 * 60 * 1000);
   }, 60 * 60 * 1000);

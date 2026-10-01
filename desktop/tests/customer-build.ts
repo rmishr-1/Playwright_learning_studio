@@ -79,7 +79,7 @@ async function main(): Promise<void> {
   const otherLicence: Licence = { ...customer, id: 'EVK-0DDC0FFE', licensee: 'Another Customer', logo: null, seal: crypto.randomBytes(32).toString('hex'), machine: machineCode() };
   const other = JSON.stringify(sign(otherLicence, keys.privateKey));
   const verdict = verify(other, keys.publicKey, { onlyId: customer.id, machine: machineCode() });
-  expect(!verdict.ok && /not the one this copy was made for/.test(verdict.reason), 'the check refuses other licences', verdict.ok ? '' : verdict.reason);
+  expect(!verdict.ok && /not issued for this installation/.test(verdict.reason), 'the check refuses other licences', verdict.ok ? '' : verdict.reason);
 
   reset(null);
   let app = await launch();
@@ -90,7 +90,7 @@ async function main(): Promise<void> {
   reset(other);
   app = await launch();
   s = await setupStep(app);
-  expect(s.step === 'licence' && /not the one this copy was made for/.test(s.reason), 'another customer\'s valid licence is refused', s.reason);
+  expect(s.step === 'licence' && /not issued for this installation/.test(s.reason), 'another customer\'s valid licence is refused', s.reason);
   await s.page.screenshot({ path: path.join(OUT, 'customer-1-other-licence.png') });
   await app.close();
 
