@@ -194,6 +194,11 @@ npm run build-variant -- internal
   variant's installer never closes another variant that is open: electron-builder's own matches
   any program whose path merely starts with the install folder. It is a copy of electron-builder
   26.15.3's; packaging stops at any other version until it is compared again.
+- While installing, one line under the progress bar names each file as it goes in
+  ("Downloading <file>..."), then "Finishing installation...". Packaging edits electron-builder's
+  unpack macro for this (`patchExtractStatus` in `scripts/package.ts`, in `node_modules`; `npm ci`
+  undoes it and the next build applies it again), and `assets/installer.nsh` moves the line
+  under the bar. If the macro is not the expected one, packaging stops.
 - The app's own packages for the learner's code (Playwright, TypeScript) are taken from their npm
   tarballs, checked against `package-lock.json`, not from `node_modules`.
 - It takes the course from `../Data/Content/`: run `npm run build:content` at the root first

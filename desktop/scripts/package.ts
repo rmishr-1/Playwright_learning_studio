@@ -131,8 +131,9 @@ function signing(): Signing | null {
 
 /**
  * assets/installer.nsh replaces electron-builder's check for a running copy of the app with one that
- * tells the variants apart, copied from electron-builder 26.15.3. Another version may have changed
- * the original: compare the two, update the copy, then this version.
+ * tells the variants apart, copied from electron-builder 26.15.3, and patchExtractStatus edits its
+ * unpack macro from the same version. Another version may have changed the originals: compare
+ * them, update the copy and the edit, then this version.
  */
 const INSTALLER_MACRO_FOR = '26.15.3';
 function checkInstallerMacroVersion(): void {
@@ -143,6 +144,41 @@ function checkInstallerMacroVersion(): void {
         'node_modules/app-builder-lib/templates/nsis/include/allowOnlyOneInstallerInstance.nsh, update it, then INSTALLER_MACRO_FOR.',
     );
   }
+}
+
+/**
+ * electron-builder unpacks the app with no text on the "Installing" page. This edits its unpack
+ * macro (templates/nsis/include/extractAppPackage.nsh, extractUsing7za, from the same 26.15.3) so
+ * the status line names each file as it goes in, then "Finishing installation..." while the files
+ * are copied into place. NSIS cannot redefine a macro and no hook runs between its definition and
+ * its use, so the template itself is edited; `npm ci` undoes it and every build applies it again.
+ * assets/installer.nsh moves the line under the progress bar.
+ */
+const STATUS_MARK = '; studio: file status';
+function patchExtractStatus(): void {
+  const file = path.join(DESKTOP, 'node_modules', 'app-builder-lib', 'templates', 'nsis', 'include', 'extractAppPackage.nsh');
+  let text = fs.readFileSync(file, 'utf-8');
+  if (text.includes(STATUS_MARK)) return;
+  const extract = (indent: string): string =>
+    indent + 'SetDetailsPrint textonly\n' + indent + 'Nsis7z::ExtractWithDetails "${FILE}" "Downloading %s..."\n';
+  const edits: [string, string][] = [
+    [
+      '  Nsis7z::Extract "${FILE}"\n  Pop $R0\n  SetOutPath $R0\n',
+      '  ' + STATUS_MARK + '\n' + extract('  ') + '  Pop $R0\n  SetOutPath $R0\n  DetailPrint "Finishing installation..."\n',
+    ],
+    ['    Nsis7z::Extract "${FILE}"\n    Goto DoneExtract7za\n', extract('    ') + '    Goto DoneExtract7za\n'],
+    ['  DoneExtract7za:\n!macroend', '  DoneExtract7za:\n  SetDetailsPrint none\n!macroend'],
+  ];
+  for (const [from, to] of edits) {
+    if (text.split(from).length !== 2) {
+      throw new Error(
+        'Cannot add the file status line: ' + file + ' is not the one from electron-builder ' + INSTALLER_MACRO_FOR +
+          '. Compare its extractUsing7za with patchExtractStatus in scripts/package.ts and update both.',
+      );
+    }
+    text = text.replace(from, () => to);
+  }
+  fs.writeFileSync(file, text);
 }
 
 /** Whether a code-signing certificate is given, by any of the ways above. */
@@ -173,6 +209,7 @@ export async function packageApp(opts: {
   verifyManifest();
   const target = opts.target ?? 'nsis';
   checkInstallerMacroVersion();
+  if (target === 'nsis') patchExtractStatus();
   await build({ release: true, licenceFile, carryLicence: opts.carryLicence, variant });
   const electronVersion = (JSON.parse(fs.readFileSync(path.join(DESKTOP, 'node_modules', 'electron', 'package.json'), 'utf-8')) as { version: string }).version;
   const product = variant.name;
