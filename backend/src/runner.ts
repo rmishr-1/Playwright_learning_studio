@@ -207,6 +207,8 @@ const send = (o) => { try { process.stdout.write(SENTINEL + JSON.stringify(o) + 
 let _browser = null;
 let _page = null;
 let _lastShot = null;
+// Every browser the run started, closed when it ends, whoever launched it.
+const _browsers = [];
 
 // The same scheme and host as an allowed origin; any port, unless the entry names one.
 // Exact, so https://playwright.dev.example.com is not https://playwright.dev.
@@ -220,17 +222,34 @@ function allowed(url) {
   });
 }
 
-async function launch(headless = true) {
-  _browser = await chromium.launch({ headless: true });
-  // No service workers: their requests would not pass through the gate below.
-  const context = await _browser.newContext({ viewport: { width: 1280, height: 720 }, serviceWorkers: 'block' });
+// Every browser stays inside the studio: headless: false, or the learner's own chromium.launch(),
+// still runs headless, and its pages stream to the Browser tab. The learner detaches the tab into
+// a window of their own when they want one. Chromium, Firefox and WebKit share this prototype.
+const _browserType = Object.getPrototypeOf(chromium);
+const _launch = _browserType.launch;
+_browserType.launch = async function (options) {
+  const browser = await _launch.call(this, { ...(options || {}), headless: true });
+  _browsers.push(browser);
+  const newContext = browser.newContext.bind(browser);
+  browser.newContext = async (o) => prepare(await newContext({ ...(o || {}), serviceWorkers: 'block' }));
+  // browser.newPage makes its own context, which the wrap above does not see.
+  browser.newPage = async (o) => (await browser.newContext(o)).newPage();
+  return browser;
+};
+_browserType.launchPersistentContext = async function () {
+  throw new Error('A Run uses chromium.launch(); launchPersistentContext is not available in the studio.');
+};
 
-  // Fail-closed navigation gate, at the network layer. It gates TOP-LEVEL DOCUMENT navigation
-  // only: once the main frame is on an allowed app, that app's own fonts, scripts and images are
-  // allowed to load, otherwise every demo site renders broken and every run reports itself
-  // blocked. Playwright routes only the first request of a redirect, so a redirect is caught
-  // where it lands instead (framenavigated, below), and the page is taken back to a blank one.
-  // It keeps lessons on the course's sites; it is a guide rail, not a sandbox.
+let _streaming = false;
+
+// Fail-closed navigation gate, at the network layer. It gates TOP-LEVEL DOCUMENT navigation
+// only: once the main frame is on an allowed app, that app's own fonts, scripts and images are
+// allowed to load, otherwise every demo site renders broken and every run reports itself
+// blocked. Playwright routes only the first request of a redirect, so a redirect is caught
+// where it lands instead (framenavigated, below), and the page is taken back to a blank one.
+// It keeps lessons on the course's sites; it is a guide rail, not a sandbox.
+// The first page any context opens streams to the Browser tab.
+async function prepare(context) {
   await context.route('**/*', (route) => {
     const request = route.request();
     const url = request.url();
@@ -241,7 +260,7 @@ async function launch(headless = true) {
     return route.abort();
   });
 
-  const watch = (page) => {
+  context.on('page', (page) => {
     page.on('framenavigated', (frame) => {
       if (frame !== page.mainFrame()) return;
       const url = frame.url();
@@ -249,13 +268,19 @@ async function launch(headless = true) {
       send({ event: 'blocked', url });
       page.goto('about:blank').catch(() => {});
     });
-  };
-  context.on('page', watch);
-  _page = await context.newPage();
+    if (!_page) _page = page;
+    if (!_streaming) {
+      _streaming = true;
+      stream(context, page);
+    }
+  });
+  return context;
+}
 
-  // Live view: CDP screencast, forwarded frame by frame to the overlay.
+// Live view: CDP screencast, forwarded frame by frame to the overlay. Chromium only.
+async function stream(context, page) {
   try {
-    const cdp = await context.newCDPSession(_page);
+    const cdp = await context.newCDPSession(page);
     await cdp.send('Page.enable');
     cdp.on('Page.screencastFrame', async (f) => {
       send({ event: 'frame', data: f.data, width: 1280, height: 720 });
@@ -266,7 +291,12 @@ async function launch(headless = true) {
     // Screencast is a nicety. If it will not attach, the run still produces a screenshot.
     send({ event: 'stdout', text: '[live view unavailable: ' + String(e && e.message) + ']' });
   }
+}
 
+async function launch() {
+  _browser = await chromium.launch();
+  const context = await _browser.newContext({ viewport: { width: 1280, height: 720 } });
+  _page = await context.newPage();
   return { browser: _browser, page: _page };
 }
 
@@ -294,7 +324,7 @@ ${dropExports(code)}
       stack: String((err && err.stack) || ''),
     });
   } finally {
-    try { if (_browser) await _browser.close(); } catch {}
+    for (const b of _browsers) { try { await b.close(); } catch {} }
   }
 })();
 `;

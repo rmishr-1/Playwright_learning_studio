@@ -92,8 +92,24 @@ const TSCONFIG = JSON.stringify(
 function wrapper(): string {
   const real = JSON.stringify(PLAYWRIGHT_TEST);
   return `// Written by the Learning Studio for its Terminal. Changes to this file are replaced.
-import { test as base } from ${real};
+import { test as base, chromium } from ${real};
 export * from ${real};
+
+// Every browser stays inside the studio: --headed, headless: false or a test's own launch() still
+// runs headless, and the live view below shows it in the Browser tab. The learner detaches the
+// tab into a window of its own when they want one. Chromium, Firefox and WebKit share this.
+const browserType: any = Object.getPrototypeOf(chromium);
+if (!browserType.__studioHeadless) {
+  browserType.__studioHeadless = true;
+  for (const name of ['launch', 'launchPersistentContext']) {
+    const original = browserType[name];
+    browserType[name] = function (this: any, ...args: any[]) {
+      const at = name === 'launch' ? 0 : 1;
+      args[at] = { ...(args[at] ?? {}), headless: true };
+      return original.apply(this, args);
+    };
+  }
+}
 
 const FRAME_URL = process.env.STUDIO_FRAME_URL;
 const FRAME_KEY = process.env.STUDIO_FRAME_KEY ?? '';

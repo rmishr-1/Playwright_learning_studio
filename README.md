@@ -187,6 +187,10 @@ command. **Run** beside a command in a lesson types that command into the Termin
 - **Run on a spec file** hands it to the Terminal as `npx playwright test`, and a spec-file code
   block in a lesson offers **Load into editor** for this.
 - The Browser panel shows Chromium. `setup.bat` installs Chromium, Firefox and WebKit.
+- A browser never opens a window of its own: `--headed`, `headless: false`, or a script's own
+  `chromium.launch()` still runs headless, and the run shows in the Browser panel (Chromium) or
+  only in the output (Firefox, WebKit). Its **⇱** button detaches it when the learner wants a
+  window. The Terminal's wrapper (`.studio/test.ts`) and the Run program both force this.
 - **View in Page.** A file that only defines practice pages, such as `practice-shop.ts` (HTML in
   named strings), or an HTML sample, has no program to run, so in place of **Run** it gets **View in
   Page**, which opens the page in a new browser tab (the computer's own browser in the desktop app);

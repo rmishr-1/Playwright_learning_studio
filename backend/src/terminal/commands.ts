@@ -87,7 +87,7 @@ export const HELP = [
   '  npx playwright test                         Run every test',
   '  npx playwright test tests/day1/auto-wait.spec.ts  Run one file',
   '  npx playwright test --project=chromium      Run in one browser',
-  '  npx playwright test --headed                Run with a visible browser window',
+  '  npx playwright test --headed                Run with the browser shown in the Browser tab',
   '  npx playwright test --list                  List the tests without running them',
   '  npx playwright test -g "sign in"            Run only the tests whose names match',
   '  npx playwright show-report                  Open the report of the last run',
