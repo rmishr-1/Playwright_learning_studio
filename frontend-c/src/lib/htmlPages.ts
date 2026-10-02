@@ -15,6 +15,8 @@ export type HtmlPage = {
   /** The variable's name, such as checkoutPage, or "Page on line 12" for one written in place. */
   name: string;
   html: string;
+  /** What the page gets when it fetches these paths (the lesson's sample data). */
+  responses?: Record<string, unknown>;
 };
 
 /** An element with its closing tag, or a whole document. */
@@ -132,7 +134,7 @@ export async function openPage(page: HtmlPage): Promise<void> {
   // A page with no title of its own gets one, so its tab says which page it is.
   const html = /<title[\s>]/i.test(page.html) ? page.html : '<title>' + page.name + ' - Practice page</title>\n' + page.html;
   try {
-    const { url } = await previewPage(html);
+    const { url } = await previewPage(html, page.responses);
     window.open(url, '_blank', 'noopener');
   } catch {
     window.alert('The page could not be opened. Check that the studio is still running, and select View in Page again.');
@@ -164,9 +166,18 @@ export function viewPages(button: HTMLElement, pages: HtmlPage[]): void {
     };
     menu.append(item);
   }
-  const box = button.getBoundingClientRect();
-  menu.style.top = box.bottom + 4 + 'px';
-  menu.style.right = Math.max(8, doc.documentElement.clientWidth - box.right) + 'px';
+  // Under the button; it follows the button as the lesson scrolls, and closes once the button is
+  // out of sight. (Closing on any scroll lost the menu to the tail of a scroll just before the click.)
+  const place = (): boolean => {
+    const box = button.getBoundingClientRect();
+    menu.style.top = box.bottom + 4 + 'px';
+    menu.style.right = Math.max(8, doc.documentElement.clientWidth - box.right) + 'px';
+    return box.bottom > 0 && box.top < doc.documentElement.clientHeight;
+  };
+  const scrolled = (): void => {
+    if (!place()) close();
+  };
+  place();
   doc.body.append(menu);
   (menu.querySelector('button[role=menuitem]') as HTMLButtonElement | null)?.focus();
 
@@ -183,11 +194,11 @@ export function viewPages(button: HTMLElement, pages: HtmlPage[]): void {
     menu.remove();
     doc.removeEventListener('mousedown', outside);
     doc.removeEventListener('keydown', key);
-    doc.removeEventListener('scroll', close, true);
+    doc.removeEventListener('scroll', scrolled, true);
     openMenu = null;
   }
   doc.addEventListener('mousedown', outside);
   doc.addEventListener('keydown', key);
-  doc.addEventListener('scroll', close, true);
+  doc.addEventListener('scroll', scrolled, true);
   openMenu = close;
 }

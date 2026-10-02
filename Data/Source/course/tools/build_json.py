@@ -270,6 +270,8 @@ def parse_day(path):
                     blk["expectError"] = True
                 if attrs.get("network") == "true":
                     blk["network"] = True
+                if "preview" in attrs:
+                    blk["previewResponses"] = json.loads(attrs["preview"])
                 if blk["mode"] not in ("read", "editor"):
                     raise ContentError(f"{where}: mode must be read or editor")
                 add_block(blk)

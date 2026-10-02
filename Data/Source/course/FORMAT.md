@@ -69,6 +69,7 @@ Everything that is not one of the blocks below is emitted as a `markdown` block.
 | `run="…"` | Command the UI should run in the terminal for this file. The working directory is `pw-course/`, or `pw-course/ts-basics/` for files under `ts-basics/`. |
 | `expect=error` | The sample is *supposed* to fail (type error or failing test) — used for teaching. |
 | `network=true` | Needs internet (e.g. opens playwright.dev). |
+| `preview='{…}'` | For a practice page: what **View in Page** answers when the page fetches a path, as JSON keyed by path (`'{"/api/products": [ … ]}'`), the way the lesson's test answers with `page.route()`. Tests ignore it. |
 
 ### Other code fences
 

@@ -85,7 +85,8 @@ export function CodePane({
   };
 
   // Code that is only practice pages, as the learner has edited it: View in Page opens the page.
-  const pages = useMemo(() => pagesOnlyIn(code, 'ts'), [code]);
+  const responses = editorFile.previewResponses ?? undefined;
+  const pages = useMemo(() => pagesOnlyIn(code, 'ts').map((p) => ({ ...p, responses })), [code, responses]);
   const pagesOnly = pages.length > 0;
 
   useEffect(() => {

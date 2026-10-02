@@ -832,7 +832,7 @@ The exact times depend on your computer — the more CPU cores, the bigger the g
 
 This pretend shop page asks the server for its product list at `/api/products` and shows each product. The test plays the **server**: it answers that request itself. The second test pretends the server is **down**.
 
-```ts file=tests/day2/products-page.ts mode=editor
+```ts file=tests/day2/products-page.ts mode=editor preview='{"/api/products": [{"name": "Wireless Mouse", "price": 799}, {"name": "Keyboard", "price": 1499}]}'
 // A pretend shop page at https://shop.test. When it loads, its JavaScript asks
 // the server for the product list at /api/products and shows each product.
 export const productsPage = `

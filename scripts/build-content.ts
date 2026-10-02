@@ -274,6 +274,7 @@ function convertBlock(b: SrcBlock, where: string): ContentBlock | null {
           mode: str(b, 'mode') === 'editor' ? 'editor' : 'read',
           expect_error: b.expectError === true,
           network: b.network === true,
+          ...(b.previewResponses && typeof b.previewResponses === 'object' ? { preview_responses: b.previewResponses as Record<string, unknown> } : {}),
         },
       });
     case 'terminal':

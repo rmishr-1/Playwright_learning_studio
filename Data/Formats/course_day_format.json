@@ -152,6 +152,10 @@
                             "_comment": "The sample needs the internet.",
                             "value": false
                         },
+                        "preview_responses": {
+                            "_comment": "Optional. For a practice page: what View in Page answers when the page fetches one of these paths (path -> JSON), as the lesson's test does with page.route(). Tests ignore it.",
+                            "value": { "/api/products": [{ "name": "Wireless Mouse", "price": 799 }] }
+                        },
                         "value": null
                     },
                     "callout": {

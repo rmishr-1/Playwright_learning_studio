@@ -999,7 +999,19 @@
               "language": "ts",
               "content": "// A pretend shop page at https://shop.test. When it loads, its JavaScript asks\n// the server for the product list at /api/products and shows each product.\nexport const productsPage = `\n  <meta charset=\"utf-8\">\n  <h1>Products</h1>\n  <ul id=\"list\"><li>Loading…</li></ul>\n  <script>\n    fetch('/api/products')\n      .then((response) => response.json())\n      .then((products) => {\n        document.getElementById('list').innerHTML =\n          products.map((p) => '<li>' + p.name + ' - ₹' + p.price + '</li>').join('');\n      })\n      .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));\n  </script>\n`;\n",
               "mode": "editor",
-              "file": "tests/day2/products-page.ts"
+              "file": "tests/day2/products-page.ts",
+              "previewResponses": {
+                "/api/products": [
+                  {
+                    "name": "Wireless Mouse",
+                    "price": 799
+                  },
+                  {
+                    "name": "Keyboard",
+                    "price": 1499
+                  }
+                ]
+              }
             },
             {
               "type": "code",

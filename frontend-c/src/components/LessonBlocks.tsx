@@ -11,7 +11,13 @@ export type ExerciseRef = { week: number; day: number; id: string };
  * A file the editor holds: where it is saved, and the command that runs it. `exercise` is set when
  * it was opened from an exercise, so a command that saves it there counts as working on it.
  */
-export type EditorFile = { file: string | null; run: string | null; exercise?: ExerciseRef | null };
+export type EditorFile = {
+  file: string | null;
+  run: string | null;
+  exercise?: ExerciseRef | null;
+  /** A practice page's sample answers for View in Page (CodeMeta.preview_responses). */
+  previewResponses?: Record<string, unknown> | null;
+};
 
 /**
  * A code sample. A sample that belongs to a file can be opened in the editor as that file, and one
@@ -36,10 +42,14 @@ export function CodeBlock({
   useEffect(() => {
     if (ref.current) highlightInto(ref.current, block.text, lang);
   }, [block.text, lang]);
-  const pages = useMemo(() => pagesOnlyIn(block.text, lang), [block.text, lang]);
+  const responses = meta?.preview_responses ?? undefined;
+  const pages = useMemo(
+    () => pagesOnlyIn(block.text, lang).map((p) => ({ ...p, responses })),
+    [block.text, lang, responses],
+  );
 
   if (!meta) return null;
-  const file: EditorFile = { file: meta.file, run: meta.run };
+  const file: EditorFile = { file: meta.file, run: meta.run, previewResponses: meta.preview_responses ?? null };
   const editable = meta.mode === 'editor';
 
   return (

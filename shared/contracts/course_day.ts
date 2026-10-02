@@ -68,6 +68,11 @@ export const CodeMeta = z.object({
   expect_error: z.boolean(),
   /** The sample needs the internet. */
   network: z.boolean(),
+  /**
+   * For a practice page: what View in Page answers when the page asks for one of these paths, as a
+   * test would with page.route(). Only View in Page uses it; tests answer for themselves.
+   */
+  preview_responses: z.record(z.unknown()).nullable().optional(),
 });
 
 export const CalloutMeta = z.object({

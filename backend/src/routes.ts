@@ -347,7 +347,9 @@ router.get('/exercise/:week/:day/:id/saved', async (req, res) => {
   res.json(nothingSaved);
 });
 
-const PreviewRequest = z.object({ html: z.string().min(1).max(500_000) });
+const PreviewRequest = z
+  .object({ html: z.string().min(1).max(500_000), responses: z.record(z.unknown()).optional() })
+  .refine((r) => JSON.stringify(r.responses ?? {}).length <= 200_000, { message: 'responses are too large' });
 
 /** View in Page: keeps a practice page's HTML and answers with the address that shows it (preview.ts). */
 router.post('/preview', (req, res) => {
@@ -357,7 +359,7 @@ router.post('/preview', (req, res) => {
   } catch (e) {
     return badRequest(res, 'BAD_REQUEST', e);
   }
-  res.json({ url: savePreview(parsed.html) });
+  res.json({ url: savePreview(parsed.html, parsed.responses) });
 });
 
 /** Ctrl+C in the Terminal. */

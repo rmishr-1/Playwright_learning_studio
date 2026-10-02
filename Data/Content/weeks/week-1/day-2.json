@@ -1269,7 +1269,19 @@
             "run": null,
             "mode": "editor",
             "expect_error": false,
-            "network": false
+            "network": false,
+            "preview_responses": {
+              "/api/products": [
+                {
+                  "name": "Wireless Mouse",
+                  "price": 799
+                },
+                {
+                  "name": "Keyboard",
+                  "price": 1499
+                }
+              ]
+            }
           },
           "callout": null,
           "title": null,
