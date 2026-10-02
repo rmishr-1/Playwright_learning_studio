@@ -2,7 +2,7 @@
 day: 10
 week: 2
 title: Framework Structure Overview
-subtitle: Grow from single test files into a maintainable framework — configuration, grouping and hooks, tags, test data, page objects and fixtures
+subtitle: Grow from single test files into a maintainable framework — configuration, grouping and hooks, tags, test data, page objects, and fixtures
 estimatedTime: 3 hours
 topics:
   - Framework layers — tests, pages, fixtures, test data and utilities
@@ -12,7 +12,7 @@ topics:
   - Page objects and custom fixtures (introduction)
 objectives:
   - Explain what each folder in a Playwright framework is for, and where a new file belongs
-  - Read every setting in playwright.config.ts, and change timeouts, baseURL, screenshots and traces
+  - Read every setting in playwright.config.ts, and change timeouts, baseURL, screenshots, and traces
   - Group tests with test.describe and share set-up with beforeEach and the other hooks
   - Tag tests and run a chosen subset with --grep; structure reports with test.step
   - Keep test data and helpers in their own modules
@@ -183,7 +183,7 @@ The file **default-exports** (Day 8 · F7) one big settings object, wrapped in `
 | `forbidOnly: !!process.env.CI` | On a CI server, fail the run if a `test.only` was left in (Day 9 · F6) |
 | `retries: process.env.CI ? 2 : 0` | Re-run a failed test up to 2 times on CI; never on your computer (Day 5 · F7) |
 | `workers: process.env.CI ? 1 : undefined` | How many tests run at once. `undefined` lets Playwright choose based on your computer |
-| `timeout: 30_000` | Maximum time for **each test**, including its `beforeEach` hooks and fixture set-up: 30 seconds (the default). `afterEach`, `beforeAll` and `afterAll` hooks each get their own limit of the same length |
+| `timeout: 30_000` | Maximum time for **each test**, including its `beforeEach` hooks and fixture set-up: 30 seconds (the default). `afterEach`, `beforeAll`, and `afterAll` hooks each get their own limit of the same length |
 | `expect: { timeout: 5_000 }` | How long each web-first assertion keeps retrying: 5 seconds (the default) |
 | `reporter` | Which reports to produce: here, a list in the terminal plus the HTML report |
 
@@ -191,7 +191,7 @@ The file **default-exports** (Day 8 · F7) one big settings object, wrapped in `
 
 ### `process.env.CI` — one config, two environments
 
-`process.env` holds the computer's **environment variables**: named settings the system passes to every program. CI servers such as GitHub Actions set a variable called `CI`. So `process.env.CI ? 2 : 0` (a ternary, Day 5 · F7) means *"on a CI server, 2 retries; on my computer, 0"*. In `forbidOnly`, `!` (Day 5 · F7) turns a value into its opposite true/false, and `!!` does that twice — so a variable that is set (truthy, Day 7 · F1) becomes `true`, and a missing one becomes `false`.
+`process.env` holds the computer's **environment variables**: named settings the system passes to every program. CI servers such as GitHub Actions set a variable called `CI`. So `process.env.CI ? 2 : 0` (the ternary operator, Day 5 · F7) means *"on a CI server, 2 retries; on my computer, 0"*. In `forbidOnly`, `!` (Day 5 · F7) turns a value into its opposite true/false, and `!!` does that twice — so a variable that is set (truthy, Day 7 · F1) becomes `true`, and a missing one becomes `false`.
 
 ### `use` — settings for every test
 
@@ -222,14 +222,14 @@ Settings apply from the most general to the most specific, and the more specific
 ```quiz
 id: d10-f2-q1
 type: single
-question: "Tests pass on your computer but you want 2 retries on the CI server only. Which setting does that?"
+question: "Tests pass on your computer, but you want 2 retries on the CI server only. Which setting does that?"
 options:
   - "`retries: 2`"
   - "`retries: process.env.CI ? 2 : 0`"
   - "`workers: process.env.CI ? 2 : 0`"
   - "`forbidOnly: 2`"
 answer: b
-explanation: "The ternary picks 2 when the CI environment variable is set, and 0 otherwise."
+explanation: "The ternary operator picks 2 when the CI environment variable is set, and 0 otherwise."
 ```
 
 ```quiz
@@ -255,7 +255,7 @@ options:
   - "`workers` and `timeout`"
   - "`timeout` and `globalTimeout`"
 answer: a
-explanation: "expect: { timeout } is per assertion; the top-level timeout is per test."
+explanation: "`expect: { timeout }` is per assertion; the top-level `timeout` is per test."
 ```
 
 ## F3 · Grouping and shared set-up: `describe` and hooks
@@ -310,7 +310,7 @@ options:
   - "5"
   - "It depends on the number of workers"
 answer: b
-explanation: "beforeEach runs before every test in its group: 4 tests, 4 runs. (beforeAll is the one that depends on workers.)"
+explanation: "`beforeEach` runs before every test in its group: 4 tests, 4 runs. (`beforeAll` is the one that depends on workers.)"
 ```
 
 ```quiz
@@ -323,10 +323,10 @@ options:
   - None — hooks stop after a failure
   - Only beforeEach
 answer: b
-explanation: "afterEach runs after every test, passed or failed — that's what makes it suitable for clean-up."
+explanation: "`afterEach` runs after every test, passed or failed — that's what makes it suitable for clean-up."
 ```
 
-## F4 · Tags, steps and better assertion messages
+## F4 · Tags, steps, and better assertion messages
 
 ### Tags — choosing which tests run
 
@@ -384,7 +384,7 @@ options:
   - "`npx playwright test --skip @slow`"
   - "`npx playwright test -g !@slow`"
 answer: b
-explanation: "--grep-invert runs the tests that do NOT match."
+explanation: "`--grep-invert` runs the tests that do NOT match."
 ```
 
 ## F5 · Test data and helpers as modules
@@ -414,7 +414,7 @@ Now the student's email is written once. The `User` type means TypeScript checks
 | Lists for data-driven tests (Day 9 · ex5) | Anything that *does* something rather than *is* something |
 
 > [!WARNING] Passwords and secrets
-> Test data files end up in version control, where everyone can read them. Real passwords, API keys and tokens belong in **environment variables** — `process.env.STUDENT_PASSWORD` — set on the CI server or in a local `.env` file that is never committed. The generated config has commented-out lines for reading a `.env` file with a package called `dotenv`. Our practice password is fine to keep in the code: it's for a pretend site.
+> Test data files end up in version control, where everyone can read them. Real passwords, API keys, and tokens belong in **environment variables** — `process.env.STUDENT_PASSWORD` — set on the CI server or in a local `.env` file that is never committed. The generated config has commented-out lines for reading a `.env` file with a package called `dotenv`. Our practice password is fine to keep in the code: it's for a pretend site.
 
 ```quiz
 id: d10-f5-q1
@@ -485,7 +485,7 @@ options:
   - Navigates to the sign-in page
   - Imports the SignInPage file
 answer: b
-explanation: "new builds an object from the class, and the constructor sets up its properties. Navigating happens only when you call goto()."
+explanation: "`new` builds an object from the class, and the constructor sets up its properties. Navigating happens only when you call goto()."
 ```
 
 ## F7 · Custom fixtures
@@ -554,7 +554,7 @@ Today's files go into several folders of `pw-course`. Run commands from the `pw-
 
 ## I1 · Update your config
 
-Open `playwright.config.ts` and make it look like this. Your file also contains commented-out lines from the generator; keep them or delete them, as you prefer. The new settings are `timeout`, `expect`, `baseURL` and `screenshot`:
+Open `playwright.config.ts` and make it look like this. Your file also contains commented-out lines from the generator; keep them or delete them, as you prefer. The new settings are `timeout`, `expect`, `baseURL`, and `screenshot`:
 
 ```ts file=playwright.config.ts mode=editor
 import { defineConfig, devices } from '@playwright/test';
@@ -657,7 +657,7 @@ export const signInMessages = {
 };
 ```
 
-## I3 · A suite with `describe`, hooks, tags and steps
+## I3 · A suite with `describe`, hooks, tags, and steps
 
 The Day 9 sign-in tests, reorganised. Compare them with `tests/day9/signin.spec.ts`: the set-up is written once, the data comes from `test-data`, and the tests are grouped and tagged.
 
@@ -774,7 +774,7 @@ afterAll   - once, after the last test in this file
   2 passed (623ms)
 ```
 
-The outer `beforeEach` runs for **both** tests; the group's `beforeEach` only for the test inside the group, after the outer one. `--workers=1` makes the order easy to read. With several workers, each worker runs its own `beforeAll` and `afterAll`.
+The outer `beforeEach` runs for **both** tests; the group's `beforeEach` runs only for the test inside the group, after the outer one. `--workers=1` makes the order easy to read. With several workers, each worker runs its own `beforeAll` and `afterAll`.
 
 **Try it:** run it again without `--workers=1`. With `fullyParallel`, the two tests may land on different workers — count how many times `beforeAll` is printed. (Usually twice: once per worker.)
 
@@ -878,7 +878,7 @@ Running 3 tests using 2 workers
 
 The first test asks for **two** fixtures, `signInPage` and `page`: they share the same browser page, because the `signInPage` fixture was built from `page`.
 
-Compare the three versions of "wrong password is rejected": Day 9 (everything inline), I3 (hooks and test data) and this one. Each step moved a kind of knowledge to its own layer, and the test itself got shorter and closer to the test case.
+Compare the three versions of "wrong password is rejected": Day 9 (everything inline), I3 (hooks and test data), and this one. Each step moved a kind of knowledge to its own layer, and the test itself got shorter and closer to the test case.
 
 **Try it:** the product owner renames the button to *Log in*. Which single line would you change? (Answer: `signInButton` in `SignInPage.ts`.)
 
@@ -921,7 +921,7 @@ options:
   - Tests retry in parallel
   - Hooks run in parallel with tests
 answer: b
-explanation: "By default, files run in parallel but the tests inside one file run in order. fullyParallel lets them spread across workers too."
+explanation: "By default, files run in parallel, but the tests inside one file run in order. `fullyParallel` lets them spread across workers too."
 ```
 
 ```quiz
@@ -942,7 +942,7 @@ id: d10-pr-q3
 type: single
 question: "`test.describe('Cart', { tag: '@cart' }, () => { … })` contains 5 tests. Which tests does `--grep @cart` run?"
 options:
-  - None — tags only work on single tests
+  - None — tags work only on single tests
   - All 5 — the group's tag applies to every test inside it
   - Only the first test
   - Only tests that also have @cart in their own title
@@ -960,7 +960,7 @@ options:
   - Because beforeAll can't be async
   - It can — page works everywhere
 answer: b
-explanation: "page is created fresh for each test. beforeAll runs once for a group of tests, so there's no single page to hand it."
+explanation: "`page` is created fresh for each test. `beforeAll` runs once for a group of tests, so there's no single page to hand it."
 ```
 
 ```quiz
@@ -970,7 +970,7 @@ question: "A test imports `{ test, expect } from '../../fixtures'` instead of `'
 options:
   - "The fixtures file's test has the team's custom fixtures, such as signInPage"
   - It makes the tests run faster
-  - "@playwright/test can only be imported once per project"
+  - "`@playwright/test` can be imported only once per project"
   - It's required for tags to work
 answer: a
 explanation: "The extended test has all the built-in fixtures plus the custom ones; expect is re-exported for convenience."
@@ -1012,10 +1012,10 @@ type: written
 prompt: |
   For each item, name the place it belongs: `tests/`, `pages/`, `fixtures/`, `test-data/`, `utils/`, `playwright.config.ts`, or an environment variable.
 
-  1. A function that returns today's date in the format the app shows, e.g. `25 Sep 2026`
+  1. A function that returns today's date in the format the app shows, e.g., `25 Sep 2026`
   2. The locators and actions for the checkout page
   3. "Run every test in Chromium and on a Pixel 7 phone"
-  4. The expected error texts of the registration form
+  4. The expected error messages for the registration form
   5. `test('TC-512 guest can check out', …)`
   6. Set-up that gives tests a signed-in dashboard page, used by 40 tests in 12 files
   7. The API key for the payment provider's test account
@@ -1043,11 +1043,11 @@ type: code
 prompt: |
   Create `test-data/enrolments.ts` that exports:
 
-  1. A type `Enrolment` with `fullName`, `email` and `course` (all strings).
+  1. A type `Enrolment` with `fullName`, `email`, and `course` (all strings).
   2. Two enrolments:
      - `asha`: `Asha Verma`, `asha@example.com`, `API Testing`
      - `noAtSign`: `Ravi Kumar`, `ravi.example.com`, `Playwright Basics`
-  3. An object `enrolMessages` with three properties: `nameRequired` (`Name is required`), `invalidEmail` (`Enter a valid email`) and `chooseCourse` (`Please choose a course`).
+  3. An object `enrolMessages` with three properties: `nameRequired` (`Name is required`), `invalidEmail` (`Enter a valid email`), and `chooseCourse` (`Please choose a course`).
 
   It has no tests of its own — Steps 2 and 3 use it, and VS Code underlines any type mistakes as you type.
 file: test-data/enrolments.ts
@@ -1085,14 +1085,14 @@ type: code
 prompt: |
   Create `pages/EnrolPage.ts` with a class `EnrolPage`, modelled on `SignInPage`:
 
-  1. Properties (all `readonly`): `page`, and locators `nameField`, `emailField`, `courseList`, `termsCheckbox`, `enrolButton`, `status` and `seats`. Use the locators from Day 9 · I4.
+  1. Properties (all `readonly`): `page`, and locators `nameField`, `emailField`, `courseList`, `termsCheckbox`, `enrolButton`, `status`, and `seats`. Use the locators from Day 9 · I4.
   2. A method `goto()` that opens `/enrol`.
-  3. A method `enrol(enrolment: Enrolment)` that fills the name and email, selects the course, ticks the terms and clicks *Enrol now*. Import the `Enrolment` type from Step 1 with `import type`.
+  3. A method `enrol(enrolment: Enrolment)` that fills the name and email, selects the course, ticks the terms, and clicks *Enrol now*. Import the `Enrolment` type from Step 1 with `import type`.
 file: pages/EnrolPage.ts
 hints:
   - "`import type { Enrolment } from '../test-data/enrolments';`"
   - "`this.courseList = page.getByLabel('Course');` and later `await this.courseList.selectOption(enrolment.course);`"
-  - "The seats text has a test id: `page.getByTestId('seats')`."
+  - "The seats text has a test ID: `page.getByTestId('seats')`."
 solution: |
   import type { Page, Locator } from '@playwright/test';
   import type { Enrolment } from '../test-data/enrolments';
@@ -1123,7 +1123,7 @@ solution: |
       await this.page.goto('/enrol');
     }
 
-    // Fill the whole form, accept the terms and submit
+    // Fill the whole form, accept the terms, and submit
     async enrol(enrolment: Enrolment): Promise<void> {
       await this.nameField.fill(enrolment.fullName);
       await this.emailField.fill(enrolment.email);
@@ -1143,7 +1143,7 @@ prompt: |
   Create `tests/day10/enrol.spec.ts`:
 
   1. A `test.describe('Enrolment', { tag: '@enrol' }, …)` group.
-  2. Inside it, declare `let enrolPage: EnrolPage;` and a `beforeEach` that calls `serveQaAcademy(page)`, creates the page object and opens the page.
+  2. Inside it, declare `let enrolPage: EnrolPage;` and a `beforeEach` that calls `serveQaAcademy(page)`, creates the page object, and opens the page.
   3. Four tests:
      - `student can enrol in a course` (tag `@smoke`): enrol `asha`; in a `test.step` named `Confirmation and seat count`, check the status says `Thanks, Asha! You are enrolled in API Testing.` and the seats say `Seats left: 11`
      - `an email without @ is rejected`: enrol `noAtSign`; check the status shows `enrolMessages.invalidEmail` and seats stay at 12
@@ -1218,7 +1218,7 @@ prompt: |
   });
   ```
   1. Add `enrolPage: EnrolPage` to the fixtures type.
-  2. Add the fixture: serve the site, create the page object, open the page, `use` it.
+  2. Add the fixture: serve the site, create the page object, open the page, and `use` it.
   3. Put the test above in `tests/day10/enrol-fixture.spec.ts` (importing `test` and `expect` from your fixtures, and `asha` from the test data), and run it.
 file: fixtures/index.ts
 hints:
@@ -1270,11 +1270,11 @@ solution: |
 
 ## Reflection
 
-1. In one sentence each: what goes in `tests/`, `pages/`, `fixtures/`, `test-data/` and `utils/`?
+1. In one sentence each: what goes in `tests/`, `pages/`, `fixtures/`, `test-data/`, and `utils/`?
 2. Which config settings would you change to (a) test a different environment, (b) get a video of each failed test, (c) give slow tests 60 seconds?
 3. When would you use a `beforeEach` hook, and when a custom fixture?
 4. Why do assertions usually stay in tests rather than in page objects?
-5. Compare the three versions of "wrong password is rejected" (Day 9, I3 and I5). What changed, and why is each step an improvement?
+5. Compare the three versions of "wrong password is rejected" (Day 9, I3, and I5). What changed, and why is each step an improvement?
 
 > [!TIP] Two weeks done
-> You started with *what Playwright is* and finished with an organised framework: TypeScript fundamentals, a real test runner, locators and web-first assertions, configuration, hooks, tags, test data, page objects and fixtures. Next steps: more page objects for bigger journeys, reusing a signed-in state, API testing with the `request` fixture, visual comparisons, and running your suite on a CI server.
+> You started with *what Playwright is* and finished with an organised framework: TypeScript fundamentals, a real test runner, locators and web-first assertions, configuration, hooks, tags, test data, page objects, and fixtures. Next steps: more page objects for bigger journeys, reusing a signed-in state, API testing with the `request` fixture, visual comparisons, and running your suite on a CI server.

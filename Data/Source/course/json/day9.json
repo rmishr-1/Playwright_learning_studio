@@ -18,11 +18,11 @@
     "Find elements with the recommended locators, and explain strictness",
     "Perform user actions — fill, click, check, selectOption, press",
     "Check results with web-first assertions, and know when to use generic ones",
-    "Mark tests with skip, fixme, fail and slow",
-    "Debug a failing test using the error message, headed mode, the Inspector and traces"
+    "Mark tests with skip, fixme, fail, and slow",
+    "Debug a failing test using the error message, headed mode, the Inspector, and traces"
   ],
   "prerequisitesFromEarlierDays": [
-    "Day 1: Browser, Context and Page; a test case turned into Playwright steps",
+    "Day 1: Browser, Context, and Page; a test case turned into Playwright steps",
     "Day 2: auto-waiting and web-first assertions",
     "Day 3: running tests from the terminal, the HTML report",
     "Day 6: object destructuring — `{ page }`",
@@ -107,7 +107,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Playwright's recommended way to find elements is the way **users and assistive technologies** (screen readers) see them: by **role** and **accessible name**.\n\nMost HTML elements have a built-in role:\n\n| HTML | Role | Accessible name comes from… |\n|---|---|---|\n| `<button>Sign in</button>` | `button` | its text → \"Sign in\" |\n| `<a href=\"/help\">Help</a>` | `link` | its text → \"Help\" |\n| `<h1>Dashboard</h1>` (also `h2`–`h6`) | `heading` | its text → \"Dashboard\" |\n| `<input type=\"text\">` or `type=\"email\"`, with a `<label>` | `textbox` | its label → e.g. \"Email\" |\n| `<input type=\"checkbox\">` | `checkbox` | its label → e.g. \"Remember me\" |\n| `<select>` | `combobox` | its label → e.g. \"Course\" |\n| `<option>` inside a `<select>` | `option` | its text |\n| `<ul>` / `<li>` | `list` / `listitem` | — |\n| `<p role=\"alert\">` | `alert` | an urgent message — role set on purpose by the developer |\n| `<p role=\"status\">` | `status` | a status message, such as \"Saved\" — role set by the developer |\n\nSo `page.getByRole('button', { name: 'Sign in' })` means *\"the button whose accessible name is Sign in\"* — the way you'd describe it in a manual test case."
+              "content": "Playwright's recommended way to find elements is the way **users and assistive technologies** (screen readers) see them: by **role** and **accessible name**.\n\nMost HTML elements have a built-in role:\n\n| HTML | Role | Accessible name comes from… |\n|---|---|---|\n| `<button>Sign in</button>` | `button` | its text → \"Sign in\" |\n| `<a href=\"/help\">Help</a>` | `link` | its text → \"Help\" |\n| `<h1>Dashboard</h1>` (also `h2`–`h6`) | `heading` | its text → \"Dashboard\" |\n| `<input type=\"text\">` or `type=\"email\"`, with a `<label>` | `textbox` | its label → e.g., \"Email\" |\n| `<input type=\"checkbox\">` | `checkbox` | its label → e.g., \"Remember me\" |\n| `<select>` | `combobox` | its label → e.g., \"Course\" |\n| `<option>` inside a `<select>` | `option` | its text |\n| `<ul>` / `<li>` | `list` / `listitem` | — |\n| `<p role=\"alert\">` | `alert` | an urgent message — role set on purpose by the developer |\n| `<p role=\"status\">` | `status` | a status message, such as \"Saved\" — role set by the developer |\n\nSo `page.getByRole('button', { name: 'Sign in' })` means *\"the button whose accessible name is Sign in\"* — the way you'd describe it in a manual test case."
             },
             {
               "type": "callout",
@@ -150,7 +150,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Real websites change, go down or need a VPN — not ideal for learning. Today you'll test two small **practice pages** that live inside your project as HTML text. Tests load them with `page.setContent(html)` instead of `page.goto(url)`, just like on Day 1. Everything you learn works the same on real sites.\n\nCreate `tests/day9/practice-pages.ts`. It's a normal module (Day 8) that **exports** two HTML strings. Its name doesn't end in `.spec.ts`, so Playwright won't treat it as a test file."
+              "content": "Real websites change, go down, or need a VPN — not ideal for learning. Today you'll test two small **practice pages** that live inside your project as HTML strings. Tests load them with `page.setContent(html)` instead of `page.goto(url)`, just like on Day 1. Everything you learn works the same on real sites.\n\nCreate `tests/day9/practice-pages.ts`. It's a normal module (Day 8) that **exports** two HTML strings. Its name doesn't end in `.spec.ts`, so Playwright won't treat it as a test file."
             },
             {
               "type": "code",
@@ -231,7 +231,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "The object that Playwright passes to your test callback contains **fixtures**: ready-made tools, set up before the test and cleaned up after it. You ask for the ones you need by name, with destructuring:\n\n| Fixture | What it is |\n|---|---|\n| `page` | A fresh, isolated browser tab for this test. The one you'll use in almost every test |\n| `context` | The isolated browser context that `page` belongs to (Day 1) — for cookies, or opening a second tab |\n| `browser` | The browser itself — shared across tests to save time |\n| `browserName` | The name of the browser running the test: `'chromium'`, `'firefox'` or `'webkit'` |\n| `request` | A tool for calling APIs directly, without a page |"
+              "content": "The object that Playwright passes to your test callback contains **fixtures**: ready-made tools, set up before the test and cleaned up after it. You ask for the ones you need by name, with destructuring:\n\n| Fixture | What it is |\n|---|---|\n| `page` | A fresh, isolated browser tab for this test. The one you'll use in almost every test |\n| `context` | The isolated browser context that `page` belongs to (Day 1) — for cookies, or opening a second tab |\n| `browser` | The browser itself — shared across tests to save time |\n| `browserName` | The name of the browser running the test: `'chromium'`, `'firefox'`, or `'webkit'` |\n| `request` | A tool for calling APIs directly, without a page |"
             },
             {
               "type": "code",
@@ -241,7 +241,7 @@
             },
             {
               "type": "markdown",
-              "content": "Playwright only prepares the fixtures you ask for. On Day 10 you'll see how to create your **own** fixtures."
+              "content": "Playwright prepares only the fixtures you ask for. On Day 10 you'll see how to create your **own** fixtures."
             },
             {
               "type": "quiz",
@@ -269,7 +269,7 @@
               "correct": [
                 "d"
               ],
-              "explanation": "browserName is 'chromium', 'firefox' or 'webkit'."
+              "explanation": "`browserName` is 'chromium', 'firefox', or 'webkit'."
             }
           ]
         },
@@ -279,7 +279,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "A **locator** describes **how to find** an element: *\"the button named Sign in\"*. Creating one doesn't touch the page. Playwright only searches when you **act** or **assert** on it, and it searches **again** every time — so a locator never goes stale when the page changes."
+              "content": "A **locator** describes **how to find** an element: *\"the button named Sign in\"*. Creating one doesn't touch the page. Playwright searches only when you **act** or **assert** on it, and it searches **again** every time — so a locator never goes stale when the page changes."
             },
             {
               "type": "code",
@@ -337,7 +337,7 @@
               "correct": [
                 "d"
               ],
-              "explanation": "Role locators reflect how users and assistive technology see the page. Test ids are a good fallback; CSS and XPath are the last resort."
+              "explanation": "Role locators reflect how users and assistive technology see the page. Test IDs are a good fallback; CSS and XPath are the last resort."
             },
             {
               "type": "quiz",
@@ -387,7 +387,7 @@
                 },
                 {
                   "id": "d",
-                  "text": "Yes — matching ignores case and a part of the text is enough"
+                  "text": "Yes — matching ignores case, and a part of the text is enough"
                 }
               ],
               "correct": [
@@ -403,7 +403,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Once you have a locator, you act on it. Every action is `await`ed, and before acting, Playwright **auto-waits** until the element is ready — found (exactly one), visible, stable, enabled and not covered by something else, depending on the action (Day 2). `fill`, for example, also waits until the field is editable.\n\n| Action | What it does | Example |\n|---|---|---|\n| `page.goto(url)` | Opens a URL | `await page.goto('https://example.com');` |\n| `page.setContent(html)` | Loads HTML directly (our practice pages) | `await page.setContent(signInPage);` |\n| `click()` | Clicks | `await page.getByRole('button', { name: 'Sign in' }).click();` |\n| `fill(text)` | Clears a field and enters the text (all at once) | `await page.getByLabel('Email').fill('a@b.com');` |\n| `press(key)` | Presses a key, like Enter or Tab | `await page.getByLabel('Password').press('Enter');` |\n| `check()` / `uncheck()` | Ticks / unticks a checkbox or radio button | `await page.getByLabel('Remember me').check();` |\n| `selectOption(…)` | Chooses from a `<select>` list, by visible text or value | `await page.getByLabel('Course').selectOption('API Testing');` |"
+              "content": "Once you have a locator, you act on it. Every action is `await`ed, and before acting, Playwright **auto-waits** until the element is ready — found (exactly one), visible, stable, enabled, and not covered by something else, depending on the action (Day 2). `fill`, for example, also waits until the field is editable.\n\n| Action | What it does | Example |\n|---|---|---|\n| `page.goto(url)` | Opens a URL | `await page.goto('https://example.com');` |\n| `page.setContent(html)` | Loads HTML directly (our practice pages) | `await page.setContent(signInPage);` |\n| `click()` | Clicks | `await page.getByRole('button', { name: 'Sign in' }).click();` |\n| `fill(text)` | Clears a field and enters the text (all at once) | `await page.getByLabel('Email').fill('a@b.com');` |\n| `press(key)` | Presses a key, like Enter or Tab | `await page.getByLabel('Password').press('Enter');` |\n| `check()` / `uncheck()` | Ticks / unticks a checkbox or radio button | `await page.getByLabel('Remember me').check();` |\n| `selectOption(…)` | Chooses from a `<select>` list, by visible text or value | `await page.getByLabel('Course').selectOption('API Testing');` |"
             },
             {
               "type": "quiz",
@@ -431,7 +431,7 @@
               "correct": [
                 "d"
               ],
-              "explanation": "selectOption chooses from a `<select>` list, by the option's visible text or its value."
+              "explanation": "`selectOption` chooses from a `<select>` list, by the option's visible text or its value."
             }
           ]
         },
@@ -441,7 +441,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "`expect(…)` checks that something is as expected. There are two kinds, and the difference matters.\n\n### Web-first assertions: `await expect(locator or page)…`\n\nThese check the **page**, and they **keep retrying** until the condition is true, or until the timeout (5 seconds by default) runs out. That's why they're reliable on pages that change (Day 2). They must be `await`ed.\n\n| Assertion | Passes when… |\n|---|---|\n| `toBeVisible()` / `toBeHidden()` | The element is shown / not shown **or not on the page at all** |\n| `toHaveText(text)` | The element's **whole** text equals this. Case matters; extra spaces are ignored. Unlike locators, a part is **not** enough — use `toContainText` or a regular expression like `/Welcome/` for that |\n| `toContainText(text)` | The element's text **contains** this part |\n| `toHaveValue(value)` | An input or select has this value |\n| `toBeEmpty()` | An input has no value |\n| `toBeChecked()` | A checkbox is ticked |\n| `toBeEnabled()` / `toBeDisabled()` | The element can / can't be used |\n| `toBeEditable()` | A field can be typed into |\n| `toHaveCount(n)` | The locator matches exactly `n` elements |\n| `toHaveAttribute(name, value)` | An attribute has this value |\n| `toHaveTitle(title)` | The **page**'s title matches — `expect(page)` |\n| `toHaveURL(url)` | The **page**'s URL matches — `expect(page)` |\n\nPut `.not` in front to check the opposite: `await expect(rememberMe).not.toBeChecked();`\n\n`toHaveText` also accepts an array for a list of elements: `await expect(page.getByRole('listitem')).toHaveText(['Playwright Basics', 'API Testing', 'Performance Testing']);` checks every item, in order.\n\n### Generic assertions: `expect(value)…`\n\nThese check an ordinary **value** you already have — a number, text, an array. They check **once**, immediately, and don't need `await`:\n\n| Assertion | Passes when… |\n|---|---|\n| `toBe(value)` | The same value (like `===`) |\n| `toEqual(value)` | Equal in content — for comparing objects and arrays |\n| `toContain(item)` | A text contains a part, or an array contains an item |\n| `toBeGreaterThan(n)` / `toBeLessThan(n)` | Number comparisons |\n| `toBeTruthy()` | The value is truthy (Day 7) |"
+              "content": "`expect(…)` checks that something is as expected. There are two kinds, and the difference matters.\n\n### Web-first assertions: `await expect(locator or page)…`\n\nThese check the **page**, and they **keep retrying** until the condition is true, or until the timeout (5 seconds by default) runs out. That's why they're reliable on pages that change (Day 2). They must be `await`ed.\n\n| Assertion | Passes when… |\n|---|---|\n| `toBeVisible()` / `toBeHidden()` | The element is shown / not shown **or not on the page at all** |\n| `toHaveText(text)` | The element's **whole** text equals this. Case matters; extra spaces are ignored. Unlike locators, a part is **not** enough — use `toContainText` or a regular expression like `/Welcome/` for that |\n| `toContainText(text)` | The element's text **contains** this part |\n| `toHaveValue(value)` | An input or select has this value |\n| `toBeEmpty()` | An input has no value |\n| `toBeChecked()` | A checkbox is ticked |\n| `toBeEnabled()` / `toBeDisabled()` | The element can / can't be used |\n| `toBeEditable()` | A field can be typed into |\n| `toHaveCount(n)` | The locator matches exactly `n` elements |\n| `toHaveAttribute(name, value)` | An attribute has this value |\n| `toHaveTitle(title)` | The **page**'s title matches — `expect(page)` |\n| `toHaveURL(url)` | The **page**'s URL matches — `expect(page)` |\n\nPut `.not` in front to check the opposite: `await expect(rememberMe).not.toBeChecked();`\n\n`toHaveText` also accepts an array for a list of elements: `await expect(page.getByRole('listitem')).toHaveText(['Playwright Basics', 'API Testing', 'Performance Testing']);` checks every item, in order.\n\n### Generic assertions: `expect(value)…`\n\nThese check an ordinary **value** you already have — a number, a string, an array. They check **once**, immediately, and don't need `await`:\n\n| Assertion | Passes when… |\n|---|---|\n| `toBe(value)` | The same value (like `===`) |\n| `toEqual(value)` | Equal in content — for comparing objects and arrays |\n| `toContain(item)` | A string contains a part, or an array contains an item |\n| `toBeGreaterThan(n)` / `toBeLessThan(n)` | Number comparisons |\n| `toBeTruthy()` | The value is truthy (Day 7) |"
             },
             {
               "type": "code",
@@ -481,7 +481,7 @@
               "correct": [
                 "c"
               ],
-              "explanation": "toHaveText with text needs the whole text, with matching case. toContainText accepts a part — but case still matters. (Locators are the lenient ones: getByText('thanks, asha') would find it.)"
+              "explanation": "`toHaveText` with a string needs the whole text, with matching case. `toContainText` accepts a part — but case still matters. (Locators are the lenient ones: getByText('thanks, asha') would find it.)"
             },
             {
               "type": "quiz",
@@ -588,7 +588,7 @@
               "correct": [
                 "a"
               ],
-              "explanation": "test.fail runs the test and expects it to fail. When BUG-88 is fixed, the test passes unexpectedly and Playwright flags it. skip and fixme don't run the test at all."
+              "explanation": "`test.fail` runs the test and expects it to fail. When BUG-88 is fixed, the test passes unexpectedly and Playwright flags it. `skip` and `fixme` don't run the test at all."
             }
           ]
         },
@@ -598,7 +598,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "You met the run commands on Day 3. The ones you'll use most today:\n\n| Goal | Command |\n|---|---|\n| Run one file in Chromium | `npx playwright test tests/day9/signin.spec.ts --project=chromium` |\n| Watch the browser | add `--headed` |\n| Only tests whose title contains a phrase | add `-g \"TC-203\"` |\n| Open the HTML report | `npx playwright show-report` |\n\nWhen a test fails, work through these steps in order:\n\n| Step | How | What you get |\n|---|---|---|\n| 1. **Read the error** | In the terminal | What was expected, what was received, which line (Day 3 · I7) |\n| 2. **Watch it** | `--headed` | See the page as the test runs |\n| 3. **Travel back in time** | `--trace on`, then open the trace from the HTML report | A recording of every action, with page snapshots, network and console (Day 2) |\n\nOn your own computer, two more tools are worth trying: `--debug` opens the **Playwright Inspector**, where you run one line at a time and see which element each locator finds; `--ui` opens **UI Mode**, with a timeline, watch mode and a locator picker."
+              "content": "You met the run commands on Day 3. The ones you'll use most today:\n\n| Goal | Command |\n|---|---|\n| Run one file in Chromium | `npx playwright test tests/day9/signin.spec.ts --project=chromium` |\n| Watch the browser | add `--headed` |\n| Only tests whose title contains a phrase | add `-g \"TC-203\"` |\n| Open the HTML report | `npx playwright show-report` |\n\nWhen a test fails, work through these steps in order:\n\n| Step | How | What you get |\n|---|---|---|\n| 1. **Read the error** | In the terminal | What was expected, what was received, which line (Day 3 · I7) |\n| 2. **Watch it** | `--headed` | See the page as the test runs |\n| 3. **Travel back in time** | `--trace on`, then open the trace from the HTML report | A recording of every action, with page snapshots, network, and console (Day 2) |\n\nOn your own computer, two more tools are worth trying: `--debug` opens the **Playwright Inspector**, where you run one line at a time and see which element each locator finds; `--ui` opens **UI Mode**, with a timeline, watch mode, and a locator picker."
             },
             {
               "type": "quiz",
@@ -703,7 +703,7 @@
             },
             {
               "type": "markdown",
-              "content": "The number of workers, the order of the lines and the times will differ on your machine: the tests run in parallel.\n\nFour things to notice:\n\n- **TC-201** checks the in-between state *\"Signing in…\"* and then the dashboard. Web-first assertions handle both without a single wait.\n- **TC-204** stores a locator in a `const` and reuses it. Remember: a locator is only a description, so it's searched afresh each time.\n- **TC-205** clicks *Log out* straight after pressing Enter. `click()` auto-waits until that button exists — about 0.8 seconds later.\n- Every test starts with `setContent`: tests are isolated, so none of them can rely on another having signed in.\n\n**Try it:** run only TC-203 with `-g \"TC-203\"`."
+              "content": "The number of workers, the order of the lines, and the times will differ on your machine: the tests run in parallel.\n\nFour things to notice:\n\n- **TC-201** checks the in-between state *\"Signing in…\"* and then the dashboard. Web-first assertions handle both without a single wait.\n- **TC-204** stores a locator in a `const` and reuses it. Remember: a locator is only a description, so it's searched afresh each time.\n- **TC-205** clicks *Log out* straight after pressing Enter. `click()` auto-waits until that button exists — about 0.8 seconds later.\n- Every test starts with `setContent`: tests are isolated, so none of them can rely on another having signed in.\n\n**Try it:** run only TC-203 with `-g \"TC-203\"`."
             }
           ]
         },
@@ -718,7 +718,7 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\nimport { signInPage, enrolPage } from './practice-pages';\n\ntest('recommended locators on the sign-in page', async ({ page }) => {\n  await page.setContent(signInPage);\n\n  // By role (and accessible name): the first choice\n  await expect(page.getByRole('heading', { name: 'Sign in to QA Academy' })).toBeVisible();\n  await expect(page.getByRole('link', { name: 'Forgot password?' })).toBeVisible();\n\n  // By label: form fields\n  await expect(page.getByLabel('Password')).toBeEmpty();\n\n  // By placeholder: fields with hint text\n  await expect(page.getByPlaceholder('you@example.com')).toBeEditable();\n\n  // By text: non-interactive text\n  await expect(page.getByText('Sign in to QA')).toBeVisible();                 // part of the text is enough\n\n  // By alt text (images) and by title attribute\n  await expect(page.getByAltText('QA Academy logo')).toBeVisible();\n  await expect(page.getByTitle('Reset your password')).toHaveText('Forgot password?');\n});\n\ntest('matching rules, strictness and lists on the enrol page', async ({ page }) => {\n  await page.setContent(enrolPage);\n\n  // By test id: data-testid=\"seats\"\n  await expect(page.getByTestId('seats')).toHaveText('Seats left: 12');\n\n  // Names match case-insensitively and by substring… unless exact: true\n  await expect(page.getByRole('button', { name: 'enrol' })).toBeVisible();\n  await expect(page.getByRole('button', { name: 'enrol', exact: true })).toHaveCount(0);\n\n  // Two text boxes match: count them, or narrow down to one\n  const textboxes = page.getByRole('textbox');\n  await expect(textboxes).toHaveCount(2);\n  await expect(textboxes.first()).toHaveAttribute('id', 'name');\n  await expect(textboxes.nth(1)).toHaveAttribute('placeholder', 'you@example.com');\n\n  // Options inside the course list; filter by text\n  const options = page.getByRole('option');\n  await expect(options).toHaveCount(4);\n  await expect(options.filter({ hasText: 'API' })).toHaveText('API Testing');\n});",
+              "content": "import { test, expect } from '@playwright/test';\nimport { signInPage, enrolPage } from './practice-pages';\n\ntest('recommended locators on the sign-in page', async ({ page }) => {\n  await page.setContent(signInPage);\n\n  // By role (and accessible name): the first choice\n  await expect(page.getByRole('heading', { name: 'Sign in to QA Academy' })).toBeVisible();\n  await expect(page.getByRole('link', { name: 'Forgot password?' })).toBeVisible();\n\n  // By label: form fields\n  await expect(page.getByLabel('Password')).toBeEmpty();\n\n  // By placeholder: fields with hint text\n  await expect(page.getByPlaceholder('you@example.com')).toBeEditable();\n\n  // By text: non-interactive text\n  await expect(page.getByText('Sign in to QA')).toBeVisible();                 // part of the text is enough\n\n  // By alt text (images) and by title attribute\n  await expect(page.getByAltText('QA Academy logo')).toBeVisible();\n  await expect(page.getByTitle('Reset your password')).toHaveText('Forgot password?');\n});\n\ntest('matching rules, strictness and lists on the enrol page', async ({ page }) => {\n  await page.setContent(enrolPage);\n\n  // By test ID: data-testid=\"seats\"\n  await expect(page.getByTestId('seats')).toHaveText('Seats left: 12');\n\n  // Names match case-insensitively and by substring… unless exact: true\n  await expect(page.getByRole('button', { name: 'enrol' })).toBeVisible();\n  await expect(page.getByRole('button', { name: 'enrol', exact: true })).toHaveCount(0);\n\n  // Two text boxes match: count them, or narrow down to one\n  const textboxes = page.getByRole('textbox');\n  await expect(textboxes).toHaveCount(2);\n  await expect(textboxes.first()).toHaveAttribute('id', 'name');\n  await expect(textboxes.nth(1)).toHaveAttribute('placeholder', 'you@example.com');\n\n  // Options inside the course list; filter by text\n  const options = page.getByRole('option');\n  await expect(options).toHaveCount(4);\n  await expect(options.filter({ hasText: 'API' })).toHaveText('API Testing');\n});",
               "mode": "editor",
               "file": "tests/day9/locators.spec.ts",
               "run": "npx playwright test tests/day9/locators.spec.ts --project=chromium"
@@ -836,7 +836,7 @@
             },
             {
               "type": "markdown",
-              "content": "| In the report | Use it to… |\n|---|---|\n| Filters: **Passed**, **Failed**, **Flaky**, **Skipped** | Jump straight to what needs attention |\n| Search box | Find tests by title — e.g. `TC-20` |\n| A test's page: steps | See every action and assertion with its duration; failed steps are red |\n| Errors | The same message as the terminal, with the code line |\n| Attachments: screenshots, videos, traces | Evidence — when the config records them |\n\nPress **Ctrl+C** in the terminal to stop the report server when you're done."
+              "content": "| In the report | Use it to… |\n|---|---|\n| Filters: **Passed**, **Failed**, **Flaky**, **Skipped** | Jump straight to what needs attention |\n| Search box | Find tests by title — e.g., `TC-20` |\n| A test's page: steps | See every action and assertion with its duration; failed steps are red |\n| Errors | The same message as the terminal, with the code line |\n| Attachments: screenshots, videos, traces | Evidence — when the config records them |\n\nPress **Ctrl+C** in the terminal to stop the report server when you're done."
             }
           ]
         }
@@ -905,7 +905,7 @@
               "correct": [
                 "b"
               ],
-              "explanation": "Form fields are best found by their label. getByText would find the label itself, not the input."
+              "explanation": "Form fields are best found by their label. `getByText` would find the label itself, not the input."
             },
             {
               "type": "quiz",
@@ -961,7 +961,7 @@
               "correct": [
                 "b"
               ],
-              "explanation": "toBeHidden passes when the element is missing or invisible, and it retries. The isVisible version checks only once. (toHaveCount(0) also works when the element disappears completely — but our sign-in page always contains an empty alert paragraph, so there only toBeHidden works.)"
+              "explanation": "`toBeHidden` passes when the element is missing or invisible, and it retries. The isVisible version checks only once. (`toHaveCount(0)` also works when the element disappears completely — but our sign-in page always contains an empty alert paragraph, so only `toBeHidden` works there.)"
             },
             {
               "type": "quiz",
@@ -989,7 +989,7 @@
               "correct": [
                 "a"
               ],
-              "explanation": "toHaveValue checks an input's or select's current value."
+              "explanation": "`toHaveValue` checks an input's or select's current value."
             },
             {
               "type": "quiz",
@@ -1017,7 +1017,7 @@
               "correct": [
                 "c"
               ],
-              "explanation": "fixme (like skip) doesn't run the test. test.fail is the one that runs and expects a failure."
+              "explanation": "`fixme` (like `skip`) doesn't run the test. `test.fail` is the one that runs and expects a failure."
             },
             {
               "type": "quiz",
@@ -1047,7 +1047,7 @@
                 "c",
                 "d"
               ],
-              "explanation": "Before a click, Playwright waits for the element to be visible, stable, enabled and not covered (receiving events). Network idleness is not part of the checks."
+              "explanation": "Before a click, Playwright waits for the element to be visible, stable, enabled, and not covered (receiving events). Network idleness is not part of the checks."
             },
             {
               "type": "quiz",
@@ -1112,7 +1112,7 @@
               "run": "npx playwright test tests/day9/signin-page.spec.ts --project=chromium",
               "hints": [
                 "The page title: `await expect(page).toHaveTitle('…')`.",
-                "Use a different locator type for 3, 4 and 5: getByAltText, getByPlaceholder, getByRole('checkbox', …).",
+                "Use a different locator type for 3, 4, and 5: getByAltText, getByPlaceholder, getByRole('checkbox', …).",
                 "Not ticked: `.not.toBeChecked()`."
               ],
               "solution": "import { test, expect } from '@playwright/test';\nimport { signInPage } from './practice-pages';\n\ntest('TC-206 sign-in page shows everything a new visitor needs', async ({ page }) => {\n  await page.setContent(signInPage);\n\n  await expect(page).toHaveTitle('QA Academy - Sign in');\n  await expect(page.getByRole('heading', { name: 'Sign in to QA Academy' })).toBeVisible();\n  await expect(page.getByAltText('QA Academy logo')).toBeVisible();\n  await expect(page.getByPlaceholder('you@example.com')).toBeEmpty();\n  await expect(page.getByRole('checkbox', { name: 'Remember me' })).not.toBeChecked();\n  await expect(page.getByRole('link', { name: 'Forgot password?' })).toBeVisible();\n});",
@@ -1152,7 +1152,7 @@
               "file": "tests/day9/dashboard.spec.ts",
               "run": "npx playwright test tests/day9/dashboard.spec.ts --project=chromium",
               "hints": [
-                "`Your courses` is an `<h2>` — still the role heading.",
+                "`Your courses` is an `<h2>` — its role is still `heading`.",
                 "Check a whole list, in order: `await expect(page.getByRole('listitem')).toHaveText([ … ]);`"
               ],
               "solution": "import { test, expect } from '@playwright/test';\nimport { signInPage } from './practice-pages';\n\ntest(\"TC-210 dashboard lists the student's courses\", async ({ page }) => {\n  // Steps 1–3: sign in\n  await page.setContent(signInPage);\n  await page.getByLabel('Email').fill('student@qa.academy');\n  await page.getByLabel('Password').fill('Learn@123');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n\n  // Expected: the dashboard, with a greeting and three courses in order\n  await expect(page).toHaveTitle('QA Academy - Dashboard');\n  await expect(page.getByText('Welcome back, Student!')).toBeVisible();\n  await expect(page.getByRole('heading', { name: 'Your courses' })).toBeVisible();\n  await expect(page.getByRole('listitem')).toHaveText(['Playwright Basics', 'API Testing', 'Performance Testing']);\n});",
@@ -1189,7 +1189,7 @@
               "id": "d9-ex5",
               "title": "Optional challenge: data-driven sign-in tests",
               "level": "challenge",
-              "prompt": "On Day 7 you looped over test data by hand. Playwright can **create one test per row**: put `test(…)` inside a `for...of` loop. Each row becomes a separate test, with its own title, its own fresh page and its own pass/fail result.\n\nCreate `tests/day9/signin-data.spec.ts`:\n\n1. A type `SignInCase` with `id`, `email`, `password` and `expectedMessage` (all strings).\n2. An array `cases` with these five rows:\n\n| id | email | password | expectedMessage |\n|---|---|---|---|\n| TC-221 | *(empty)* | *(empty)* | Please enter your email and password |\n| TC-222 | student@qa.academy | *(empty)* | Please enter your email and password |\n| TC-223 | student@qa.academy | learn@123 | Invalid email or password |\n| TC-224 | someone@qa.academy | Learn@123 | Invalid email or password |\n| TC-225 | student@qa.academy | Learn@123 | Signing in… |\n\n3. A `for...of` loop that registers one test per row. Give each a **unique** title built from the row, such as `` `${c.id} sign-in with \"${c.email}\" / \"${c.password}\"` ``. The test fills both fields, clicks *Sign in*, and asserts the alert's text.\n\nRun it: you should see 5 separate tests.",
+              "prompt": "On Day 7 you looped over test data by hand. Playwright can **create one test per row**: put `test(…)` inside a `for...of` loop. Each row becomes a separate test, with its own title, its own fresh page, and its own pass/fail result.\n\nCreate `tests/day9/signin-data.spec.ts`:\n\n1. A type `SignInCase` with `id`, `email`, `password`, and `expectedMessage` (all strings).\n2. An array `cases` with these five rows:\n\n| id | email | password | expectedMessage |\n|---|---|---|---|\n| TC-221 | *(empty)* | *(empty)* | Please enter your email and password |\n| TC-222 | student@qa.academy | *(empty)* | Please enter your email and password |\n| TC-223 | student@qa.academy | learn@123 | Invalid email or password |\n| TC-224 | someone@qa.academy | Learn@123 | Invalid email or password |\n| TC-225 | student@qa.academy | Learn@123 | Signing in… |\n\n3. A `for...of` loop that registers one test per row. Give each a **unique** title built from the row, such as `` `${c.id} sign-in with \"${c.email}\" / \"${c.password}\"` ``. The test fills both fields, clicks *Sign in*, and asserts the alert's text.\n\nRun it: you should see 5 separate tests.",
               "file": "tests/day9/signin-data.spec.ts",
               "run": "npx playwright test tests/day9/signin-data.spec.ts --project=chromium",
               "hints": [
@@ -1212,7 +1212,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "1. Map each part of a Playwright test to a part of a manual test case.\n2. Why does every test start by opening the page, even if the test before it already did?\n3. Why is `getByRole` preferred over a CSS selector like `#submit`?\n4. What's the difference between `await expect(locator).toHaveText('x')` and `expect(await locator.textContent()).toBe('x')`?\n5. When would you use `test.skip`, `test.fixme` and `test.fail`?\n6. A test fails on CI but passes on your machine. Which tool do you reach for first, and why?"
+              "content": "1. Map each part of a Playwright test to a part of a manual test case.\n2. Why does every test start by opening the page, even if the test before it already did?\n3. Why is `getByRole` preferred over a CSS selector like `#submit`?\n4. What's the difference between `await expect(locator).toHaveText('x')` and `expect(await locator.textContent()).toBe('x')`?\n5. When would you use `test.skip`, `test.fixme`, and `test.fail`?\n6. A test fails on CI but passes on your machine. Which tool do you reach for first, and why?"
             },
             {
               "type": "callout",

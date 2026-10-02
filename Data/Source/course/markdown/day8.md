@@ -12,7 +12,7 @@ topics:
   - Modules — export and import
 objectives:
   - Declare and call functions with typed parameters and return values
-  - Use optional, default and rest parameters
+  - Use optional, default, and rest parameters
   - Write arrow functions, and pass functions to other functions as callbacks
   - Explain why browser automation is asynchronous, and use async/await correctly
   - Recognise the missing-await bug and why `forEach` doesn't wait
@@ -20,8 +20,8 @@ objectives:
   - Split code across files with export and import — and decode the first line of every Playwright test
   - Build a mini test runner that works like Playwright Test
 prerequisitesFromEarlierDays:
-  - "Day 6: arrays, objects, type aliases, `unknown`, `??` and `?.`"
-  - "Day 7: if / else, loops (especially for...of), array methods and the arrow shape `(item) => …`"
+  - "Day 6: arrays, objects, type aliases, `unknown`, `??`, and `?.`"
+  - "Day 7: if / else, loops (especially for...of), array methods, and the arrow shape `(item) => …`"
 workspace: pw-course/ts-basics/day8/
 ---
 
@@ -43,7 +43,7 @@ options:
   - "true"
   - "1200"
 answer: a
-explanation: filter keeps every item that passes the check, in a new array.
+explanation: `filter` keeps every item that passes the check, in a new array.
 ```
 
 ```quiz
@@ -56,7 +56,7 @@ options:
   - "3"
   - "0"
 answer: b
-explanation: for...of runs once per item, and the list has two items.
+explanation: `for...of` runs once per item, and the list has two items.
 ```
 
 ## P2 · Shared steps and waiting — two ideas you already use
@@ -153,7 +153,7 @@ function formatDuration(ms: number): string {
   if (ms < 1000) {
     return `${ms} ms`;          // for short durations, the function ends here…
   }
-  return `${ms / 1000} s`;      // …so this line only runs for 1000 ms or more
+  return `${ms / 1000} s`;      // …so this line runs only for 1000 ms or more
 }
 ```
 
@@ -171,7 +171,7 @@ function logStep(step: number, action: string): void {
 
 ### Variables inside functions stay inside
 
-A function's body is a block, so `let` and `const` declared inside it only exist inside it (Day 5 · F3). Each call gets fresh variables — two calls can't mess up each other's values.
+A function's body is a block, so `let` and `const` declared inside it exist only inside it (Day 5 · F3). Each call gets fresh variables — two calls can't mess up each other's values.
 
 > [!TIP] One job per function
 > A good function does one clear thing, and its name says what: `parsePrice`, `buildEmail`, `validatePassword`. If you need "and" to describe it, it probably wants to be two functions.
@@ -199,7 +199,7 @@ options:
   - "'positive', then 'not positive'"
   - "undefined"
 answer: a
-explanation: "return ends the function immediately, so the second return is never reached for 5."
+explanation: "`return` ends the function immediately, so the second `return` is never reached for 5."
 ```
 
 ```quiz
@@ -215,7 +215,7 @@ answer: b
 explanation: "void means \"returns nothing useful\". Calling it still runs its steps."
 ```
 
-## F2 · Parameters: optional, default and rest
+## F2 · Parameters: optional, default, and rest
 
 By default every parameter is **required**, and the call must give exactly one argument per parameter. Three variations make functions more flexible:
 
@@ -241,7 +241,7 @@ buildEmail('Asha', 1);               // 'asha.1@example.com'  — the default is
 buildEmail('Ravi', 2, 'test.org');   // 'ravi.2@test.org'     — the default is overridden
 ```
 
-A default is often better than optional: inside the function the value is never `undefined`, so there's nothing to check.
+A default is often better than making a parameter optional: inside the function the value is never `undefined`, so there's nothing to check.
 
 ### Rest parameters — `...` for "any number of"
 
@@ -307,7 +307,7 @@ const isSlowArrow = (ms: number): boolean => ms > 3000;
 |---|---|---|
 | One expression after `=>` | `(ms: number) => ms > 3000` | The result is returned automatically — no `return`, no braces |
 | A block after `=>` | `` (ms: number) => { const s = ms / 1000; return `${s} s`; } `` | Several statements, so you write `return` yourself |
-| No parameters | `() => console.log('done')` | Empty brackets are still needed |
+| No parameters | `() => console.log('done')` | Empty parentheses are still needed |
 
 Both forms are functions; you call them the same way: `isSlowArrow(4500)`. Most Playwright code uses arrow functions.
 
@@ -318,11 +318,11 @@ A function can be stored in a variable and **passed to another function**, just 
 ```ts mode=read
 const durations: number[] = [1200, 4500, 800];
 
-durations.filter(isSlowArrow);              // pass the function itself (no brackets!) → [4500]
+durations.filter(isSlowArrow);              // pass the function itself (no parentheses!) → [4500]
 durations.filter((ms) => ms > 3000);        // or write it on the spot → [4500]
 ```
 
-Note `filter(isSlowArrow)` with **no brackets**: you hand over the function for `filter` to call, once per item. `filter(isSlowArrow())` would call it immediately yourself — not what you want.
+Note `filter(isSlowArrow)` with **no parentheses**: you hand over the function for `filter` to call, once per item. `filter(isSlowArrow())` would call it immediately yourself — not what you want.
 
 Here, TypeScript already knows `ms` must be a number (because `durations` is a `number[]`), so the callback doesn't need a type annotation.
 
@@ -356,7 +356,7 @@ question: "What does `const double = (n: number) => n * 2;` give for `double(21)
 options:
   - "21"
   - "42"
-  - "undefined — there's no return"
+  - "`undefined` — there's no `return`"
   - "An error"
 answer: b
 explanation: "With a single expression after the arrow, its value is returned automatically."
@@ -372,14 +372,14 @@ options:
   - A callback function that Playwright calls when it runs the test
   - A string describing the steps
 answer: c
-explanation: "test() receives the title and a function; Playwright calls that function later, passing in the fixtures such as page."
+explanation: "`test()` receives the title and a function; Playwright calls that function later, passing in fixtures such as `page`."
 ```
 
 ## F4 · Asynchronous code — why tests must wait
 
 ### Synchronous code: one line at a time
 
-Everything you've written so far is **synchronous**: each line finishes completely before the next one starts. Adding numbers, joining text and looping over an array are all instant.
+Everything you've written so far is **synchronous**: each line finishes completely before the next one starts. Adding numbers, joining text, and looping over an array are all instant.
 
 ### Asynchronous work: things that take time
 
@@ -431,7 +431,7 @@ function sleep(ms: number): Promise<void> {
 `sleep` isn't marked `async` (F5), but it returns a Promise — and `await` works on any Promise.
 
 > [!WARNING] `sleep` is for learning, not for tests
-> Fixed waits make real tests slow and flaky (Day 2). Playwright waits automatically for the page; you'll only use `sleep` today to **pretend** that something takes time.
+> Fixed waits make real tests slow and flaky (Day 2). Playwright waits automatically for the page; you'll use `sleep` today only to **pretend** that something takes time.
 
 ```quiz
 id: d8-f4-q1
@@ -468,7 +468,7 @@ Two keywords make asynchronous code read like normal step-by-step code:
 | `async` | Before a function | "This function does slow work." It always returns a Promise |
 | `await` | Before a Promise | "Pause **this function** until the Promise finishes, then give me the result." Other work that was already started keeps running |
 
-On an arrow function, `async` goes before the brackets: `async () => { … }`, `async ({ page }) => { … }`.
+On an arrow function, `async` goes before the parentheses: `async () => { … }`, `async ({ page }) => { … }`.
 
 ```ts mode=read
 async function getPageTitle(): Promise<string> {
@@ -480,7 +480,7 @@ const title = await getPageTitle();   // await unwraps Promise<string> into a st
 console.log(title);                    // My Shop – Home
 ```
 
-`await` only works inside an `async` function — or at the top level of a module file, like the files in `ts-basics` (the `"type": "module"` setting from Day 4 makes them modules). That's why every Playwright test body is written `async ({ page }) => { … }`: it needs `await` inside.
+`await` works only inside an `async` function — or at the top level of a module file, like the files in `ts-basics` (the `"type": "module"` setting from Day 4 makes them modules). That's why every Playwright test body is written `async ({ page }) => { … }`: it needs `await` inside.
 
 ### The #1 Playwright bug: a missing `await`
 
@@ -494,7 +494,7 @@ await click('Log in');           // ✅ the click finishes first
 await checkDashboard();
 ```
 
-In a real test that leads to random failures, or worse, tests that pass without checking anything. TypeScript usually **doesn't** warn you: calling a function without `await` is perfectly legal code. You'll see it happen in I4.
+In a real test, that leads to random failures or, worse, tests that pass without checking anything. TypeScript usually **doesn't** warn you: calling a function without `await` is perfectly legal code. You'll see it happen in I4.
 
 ### `forEach` doesn't wait
 
@@ -523,7 +523,7 @@ options:
   - undefined
   - Whatever type you declare, without a Promise
 answer: b
-explanation: "An async function always returns a Promise — `Promise<string>`, `Promise<void>` and so on. Use await to get the value inside."
+explanation: "An async function always returns a Promise — `Promise<string>`, `Promise<void>`, and so on. Use `await` to get the value inside."
 ```
 
 ```quiz
@@ -536,7 +536,7 @@ options:
   - TypeScript refuses to run the file
   - The click happens twice
 answer: b
-explanation: "Auto-waiting happens INSIDE the click, but without await your test doesn't wait for the click to finish before moving on."
+explanation: "Auto-waiting happens INSIDE the click, but without `await`, your test doesn't wait for the click to finish before moving on."
 ```
 
 ```quiz
@@ -549,7 +549,7 @@ options:
   - "`for (const p in products) { await check(p); }`"
   - "`products.map((p) => check(p));`"
 answer: b
-explanation: "for...of with await waits for each check in turn. forEach and map start them all without waiting, and for...in gives indexes, not products."
+explanation: "`for...of` with `await` waits for each check in turn. `forEach` and `map` start them all without waiting, and for...in gives indexes, not products."
 ```
 
 ## F6 · Errors — `throw`, `try`, `catch`, `finally`
@@ -610,19 +610,19 @@ try {
 ```
 
 > [!TESTER]
-> This is how Playwright tests fail. When an assertion like `await expect(page).toHaveTitle('Shop')` doesn't match, it keeps retrying until its timeout (5 seconds by default, Day 2), then **throws** an error. Playwright's runner catches it, marks the test as failed, records the message and moves on to the next test. So in tests you rarely write `try/catch` yourself — letting the error reach the runner is exactly what you want. You'll build a runner that does this in I6.
+> This is how Playwright tests fail. When an assertion like `await expect(page).toHaveTitle('Shop')` doesn't match, it keeps retrying until its timeout (5 seconds by default, Day 2), then **throws** an error. Playwright's runner catches it, marks the test as failed, records the message, and moves on to the next test. So in tests you rarely write `try/catch` yourself — letting the error reach the runner is exactly what you want. You'll build a runner that does this in I6.
 
 ```quiz
 id: d8-f6-q1
 type: single
-question: "`try { A(); B(); } catch (e) { C(); } finally { D(); }` — A() throws an error. Which run?"
+question: "`try { A(); B(); } catch (e) { C(); } finally { D(); }` — A() throws an error. Which ones run?"
 options:
   - A, B, C, D
   - A, C, D
   - A, C
   - A, D
 answer: b
-explanation: "A throws, so B is skipped and catch runs C. finally always runs D."
+explanation: "A throws, so B is skipped and catch runs C. `finally` always runs D."
 ```
 
 ```quiz
@@ -688,7 +688,7 @@ import { products, type Product } from './data/products.ts';   // one value, one
 import type { Product } from './data/products.ts';             // only types
 ```
 
-If you import a type **without** marking it, TypeScript's check passes, but running the file with Node.js fails: `SyntaxError: The requested module './data/products.ts' does not provide an export named 'Product'`. Node looked for `Product` in the running code, and there's no such thing. (Inside Playwright tests both forms work, but marking types is a good habit.)
+If you import a type **without** marking it, TypeScript's check passes, but running the file with Node.js fails: `SyntaxError: The requested module './data/products.ts' does not provide an export named 'Product'`. Node looked for `Product` in the running code, and there's no such thing. (Inside Playwright tests, both forms work, but marking types is a good habit.)
 
 > [!NOTE] File extensions
 > In the `ts-basics` playground, imports of your own files include `.ts`: `'./data/products.ts'`. That's what Node.js requires (and why the `check` command has `--allowImportingTsExtensions`). In Playwright projects you normally leave the extension out — `'../data/products'` — because Playwright finds the file for you.
@@ -730,7 +730,7 @@ explanation: "Anything not exported is private to its module."
 
 # Implementation
 
-All files today go in `ts-basics/day8`. Run with `node day8/<file>.ts`, check with `npm run check -- day8/<file>.ts`.
+All files today go in `ts-basics/day8`. Run with `node day8/<file>.ts`; check with `npm run check -- day8/<file>.ts`.
 
 ## I1 · A toolbox of helper functions
 
@@ -751,7 +751,7 @@ function formatDuration(ms: number): string {
   if (ms < 1000) {
     return `${ms} ms`;           // return ends the function here…
   }
-  return `${ms / 1000} s`;       // …so this line only runs for 1000 ms or more
+  return `${ms / 1000} s`;       // …so this line runs only for 1000 ms or more
 }
 
 // A function that does something but gives nothing back: void
@@ -786,7 +786,7 @@ On Day 6 you cleaned one price with a chain of text methods. Now `parsePrice` do
 
 ## I2 · Extra practice (optional): refactor the password checker into functions
 
-Day 7's password checker lived inside a loop. Moved into functions, the same logic is easier to read, test and reuse:
+Day 7's password checker lived inside a loop. Moved into functions, the same logic is easier to read, test, and reuse:
 
 ```ts file=ts-basics/day8/password-check.ts mode=editor run="node day8/password-check.ts"
 // One job per function: small, named, reusable checks
@@ -1015,7 +1015,7 @@ Clean-up always runs
 The program carries on
 ```
 
-**Try it:** remove the `try {`, the whole `catch` block and the `finally` block (keep the lines inside `try`), then run. There's nothing to catch the error, so the program stops with a red error message and `The program carries on` is never printed.
+**Try it:** remove the `try {`, the whole `catch` block, and the `finally` block (keep the lines inside `try`), then run. There's nothing to catch the error, so the program stops with a red error message and `The program carries on` is never printed.
 
 ## I6 · Build your own mini test runner — with modules
 
@@ -1130,7 +1130,7 @@ The failing test threw an error, the runner caught it, reported it, and **carrie
 | `test('title', async () => { … })` | `test('title', async ({ page }) => { … })` |
 | `expectEqual(total, 13297)` | `expect(total).toBe(13297)` |
 | Tests are registered first, then run by `run()` | Tests are registered in `*.spec.ts` files, then run by `npx playwright test` |
-| `try/catch` turns a thrown error into a failed test | The same — and it adds a report, screenshots and traces |
+| `try/catch` turns a thrown error into a failed test | The same — and it adds a report, screenshots, and traces |
 | Runs tests one after another | Runs test files in parallel, with a fresh browser page for every test (tests inside one file run in order by default) |
 
 **Try it:** change the `import { products, type Product }` line to `import { products, Product }` (without `type`) and run the file. Read the `SyntaxError`, then put `type` back.
@@ -1145,7 +1145,7 @@ options:
   - "`for...of` catches errors automatically"
   - No reason — they behave the same here
 answer: b
-explanation: "forEach ignores the Promises returned by async callbacks, so the tests would all start at once and the summary would print before any of them finished."
+explanation: "`forEach` ignores the Promises returned by async callbacks, so the tests would all start at once and the summary would print before any of them finished."
 ```
 
 # Practice
@@ -1162,7 +1162,7 @@ options:
   - "NaN"
   - "An error: 2 arguments expected"
 answer: b
-explanation: "h has the default value 5, so area(4) is 4 × 5."
+explanation: "`h` has the default value 5, so `area(4)` is 4 × 5."
 ```
 
 ```quiz
@@ -1175,7 +1175,7 @@ options:
   - "`const withTax = p: number => p * 1.18;`"
   - "`const withTax => (p: number) p * 1.18;`"
 answer: b
-explanation: "With braces, you must write return yourself — the version with `{ p * 1.18 }` in braces returns undefined. A typed parameter needs brackets around it."
+explanation: "With braces, you must write return yourself — the version with `{ p * 1.18 }` in braces returns undefined. A typed parameter needs parentheses around it."
 ```
 
 ```quiz
@@ -1214,7 +1214,7 @@ options:
   - Always, after try (and catch, if it ran)
   - Only if catch didn't return
 answer: c
-explanation: "finally always runs — which makes it the place for clean-up."
+explanation: "`finally` always runs — which makes it the place for clean-up."
 ```
 
 ```quiz
@@ -1253,7 +1253,7 @@ options:
   - It prints a warning and continues the test
   - It stops the whole test run
 answer: b
-explanation: "Assertions throw on failure. The runner catches the error, records it and moves on to the next test."
+explanation: "Assertions throw on failure. The runner catches the error, records it, and moves on to the next test."
 ```
 
 ## Predict the output
@@ -1274,7 +1274,7 @@ answer: |
   1 x Mouse
   3 m Cable
 
-  In the first call, count uses its default (1) and unit is undefined, so `??` gives 'x'. In the second, both are passed.
+  In the first call, `count` uses its default (1), and `unit` is undefined, so `??` gives 'x'. In the second, both are passed.
 ````
 
 ````exercise
@@ -1299,12 +1299,12 @@ answer: |
   D
   B
 
-  A prints at once. step('B', 200) starts but isn't awaited, so the program moves straight on. It awaits step('C', 100): after 100 ms, C prints, then D. B's 200 ms finish last.
+  A prints at once. `step('B', 200)` starts but isn't awaited, so the program moves straight on. It awaits step('C', 100): after 100 ms, C prints, then D. B's 200 ms wait finishes last.
 ````
 
 ````exercise
 id: d8-pr-p3
-title: Predict — try, catch and finally
+title: Predict — try, catch, and finally
 level: medium
 type: predict
 prompt: What is printed?
@@ -1329,7 +1329,7 @@ answer: |
   checked -1
   caught
 
-  finally runs even when try or catch returns, and it runs before the returned value reaches console.log. So each "checked" line appears before the result.
+  `finally` runs even when `try` or `catch` returns, and it runs before the returned value reaches console.log. So each "checked" line appears before the result.
 ````
 
 ## Exercises
@@ -1515,7 +1515,7 @@ file: ts-basics/day8/runner-plus.ts
 run: node day8/runner-plus.ts
 hints:
   - "`type RegisteredTest = { title: string; body: TestBody; skipped: boolean };`"
-  - "Keep three counters in run(): passed, failed and skipped."
+  - "Keep three counters in run(): passed, failed, and skipped."
   - "In the loop: `if (registered.skipped) { skipped++; console.log(…); continue; }`"
 solution: |
   type TestBody = () => Promise<void>;
@@ -1592,4 +1592,4 @@ expectedOutput: |2
 6. Read `import { test, expect } from '@playwright/test';` aloud as a sentence.
 
 > [!TIP] Coming up on Day 9
-> The real thing: Playwright Test. You'll write tests with `test` and `expect`, find elements with locators, act on them and assert the results — against practice pages in a real browser.
+> The real thing: Playwright Test. You'll write tests with `test` and `expect`, find elements with locators, act on them, and assert the results — against practice pages in a real browser.

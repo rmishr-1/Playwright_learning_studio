@@ -26,7 +26,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "**Introduction to Playwright & Architecture**\n\n*What Playwright is, what comes in the box, and how your test, Playwright and the browser work together — shown live, step by step*\n\n**Time:** 3 hours\n\n**Where you work:** Pre-loaded demo workspace (you install your own on Day 3)\n\n**By the end of the day you can:**\n\n- Explain what test automation and end-to-end testing are, and which manual tests are worth automating\n- Describe how a web page is built (HTML, elements, attributes, the DOM) in plain words\n- Say what Playwright is, who makes it, which browsers and languages it supports\n- Tell the difference between the Playwright Library and Playwright Test\n- Explain the architecture — your test → Playwright → browser — and the protocol used for each browser\n- Explain Browser → Context → Page with an everyday analogy, and why every test gets a fresh context\n- Run demo tests and read the conversation between the test and the browser in the terminal",
+          "text": "**Introduction to Playwright & Architecture**\n\n*What Playwright is, what comes in the box, and how your test, Playwright, and the browser work together — shown live, step by step*\n\n**Time:** 3 hours\n\n**Where you work:** Pre-loaded demo workspace (you install your own on Day 3)\n\n**By the end of the day you can:**\n\n- Explain what test automation and end-to-end testing are, and which manual tests are worth automating\n- Describe how a web page is built (HTML, elements, attributes, the DOM) in plain words\n- Say what Playwright is, who makes it, and which browsers and languages it supports\n- Tell the difference between the Playwright Library and Playwright Test\n- Explain the architecture — your test → Playwright → browser — and the protocol used for each browser\n- Explain Browser → Context → Page with an everyday analogy, and why every test gets a fresh context\n- Run demo tests and read the conversation between the test and the browser in the terminal",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -36,7 +36,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P1 · From manual testing to automated testing\n\nIn manual testing, you read a requirement, write test cases, open the application, click through the steps and compare what you see with what you expected.\n\n**Test automation** means writing those same steps as a script, so that a computer can repeat them — quickly, the same way every time, as often as you like.\n\n| | Manual testing | Automated testing |\n|---|---|---|\n| Who performs the steps | A human tester | A script, run by a tool |\n| Speed | Minutes per test case | Seconds per test case |\n| Running the same test 100 times | Tiring, easy to slip | Easy, identical every time |\n| Finding *new*, unexpected problems | Excellent — human judgement | Weak — it only checks what it was told |\n| Cost | Low to start, high over time | Higher to start, low over time |\n\n### What \"end-to-end\" means\n\nSoftware is tested at several levels. Developers test small pieces of code on their own (**unit tests**), teams test services talking to each other (**API / integration tests**), and someone checks the whole application the way a real user uses it — through the browser, from the first click to the final result. That last level is **end-to-end (E2E) testing**, and it's where most manual testers spend their day.\n\n**Playwright is an end-to-end testing tool.** It opens a real browser and does what your users do.\n\n### What is worth automating?\n\n| Good candidates | Poor candidates |\n|---|---|\n| **Regression tests** — features that work today and must keep working after every change | Features whose design changes every week (the script breaks every week) |\n| **Smoke tests** — \"is the app alive?\" checks after every deployment | One-time checks you'll never repeat |\n| **Data-heavy tests** — the same form with 50 different inputs | \"Does this *look* nice?\" judgements |\n| **Cross-browser checks** — the same flow on Chrome, Firefox and Safari | Exploratory testing |",
+          "text": "## P1 · From manual testing to automated testing\n\nIn manual testing, you read a requirement, write test cases, open the application, click through the steps, and compare what you see with what you expected.\n\n**Test automation** means writing those same steps as a script, so that a computer can repeat them — quickly, the same way every time, as often as you like.\n\n| | Manual testing | Automated testing |\n|---|---|---|\n| Who performs the steps | A human tester | A script, run by a tool |\n| Speed | Minutes per test case | Seconds per test case |\n| Running the same test 100 times | Tiring and error-prone | Easy, identical every time |\n| Finding *new*, unexpected problems | Excellent — human judgement | Weak — it only checks what it was told |\n| Cost | Low to start, high over time | Higher to start, low over time |\n\n### What \"end-to-end\" means\n\nSoftware is tested at several levels. Developers test small pieces of code on their own (**unit tests**), teams test services talking to each other (**API / integration tests**), and someone checks the whole application the way a real user uses it — through the browser, from the first click to the final result. That last level is **end-to-end (E2E) testing**, and it's where most manual testers spend their day.\n\n**Playwright is an end-to-end testing tool.** It opens a real browser and does what your users do.\n\n### What is worth automating?\n\n| Good candidates | Poor candidates |\n|---|---|\n| **Regression tests** — features that work today and must keep working after every change | Features whose design changes every week (the script breaks every week) |\n| **Smoke tests** — \"is the app alive?\" checks after every deployment | One-time checks you'll never repeat |\n| **Data-heavy tests** — the same form with 50 different inputs | \"Does this *look* nice?\" judgements |\n| **Cross-browser checks** — the same flow on Chrome, Firefox, and Safari | Exploratory testing |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -46,7 +46,7 @@
         },
         {
           "type": "callout",
-          "text": "Automation takes over repetitive *checking* — the 200 regression cases you run before every release. That frees you for exploratory testing, usability and edge cases, which need a human brain. The best automation engineers are often former manual testers, because they already know **what** to test and **why**.",
+          "text": "Automation takes over repetitive *checking* — the 200 regression cases you run before every release. That frees you for exploratory testing, usability, and edge cases, which need a human brain. The best automation engineers are often former manual testers, because they already know **what** to test and **why**.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -104,7 +104,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P2 · How a web page reaches your screen\n\nPlaywright controls web pages, so you need a clear picture of what a web page is. You do **not** need to be a web developer.\n\nWhen you type `https://shop.example.com/login` and press Enter:\n\n1. The browser sends a **request** to the server at `shop.example.com`.\n2. The server sends back a **response** — mostly an **HTML** document.\n3. The browser reads the HTML and draws (**renders**) the page.\n4. While you use the page, it may send more requests in the background — for example to check your password — and update the page without reloading it.\n\nEvery page is built from three languages:\n\n| Language | Job | Analogy |\n|---|---|---|\n| **HTML** | *What* is on the page: headings, text boxes, buttons, links | The walls and furniture of a house |\n| **CSS** | *How* it looks: colours, sizes, positions | The paint and decoration |\n| **JavaScript** | *What happens* when you interact: show an error, open a menu, load results | The electricity and plumbing |",
+          "text": "## P2 · How a web page reaches your screen\n\nPlaywright controls web pages, so you need a clear picture of what a web page is. You do **not** need to be a web developer.\n\nWhen you type `https://shop.example.com/login` and press Enter:\n\n1. The browser sends a **request** to the server at `shop.example.com`.\n2. The server sends back a **response** — mostly an **HTML** document.\n3. The browser reads the HTML and draws (**renders**) the page.\n4. While you use the page, it may send more requests in the background — for example, to check your password — and update the page without reloading it.\n\nEvery page is built from three languages:\n\n| Language | Job | Analogy |\n|---|---|---|\n| **HTML** | *What* is on the page: headings, text boxes, buttons, links | The walls and furniture of a house |\n| **CSS** | *How* it looks: colours, sizes, positions | The paint and decoration |\n| **JavaScript** | *What happens* when you interact: show an error, open a menu, load results | The electricity and plumbing |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -148,7 +148,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P3 · HTML elements, attributes and the DOM\n\nHTML describes the page with **tags**. Here is a tiny login page — the same one you'll automate later today:",
+          "text": "## P3 · HTML elements, attributes, and the DOM\n\nHTML describes the page with **tags**. Here is a tiny login page — the same one you'll automate later today:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -260,7 +260,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P4 · Browsers, engines, headed and headless\n\nEvery browser has an **engine** that turns HTML, CSS and JavaScript into the page you see. Three engine families cover almost every browser in use:\n\n| Engine | Browsers built on it | Name in Playwright |\n|---|---|---|\n| **Chromium** (Blink) | Google Chrome, Microsoft Edge, Opera, Brave | `chromium` |\n| **Gecko** | Mozilla Firefox | `firefox` |\n| **WebKit** | Apple Safari on Mac, iPhone and iPad | `webkit` |\n\nIf your app works on one browser of each family, it will very likely work on all browsers built on that family. That's why Playwright supports exactly these three engines.\n\nTwo ways to run a browser:\n\n- **Headed** — the window is visible. Great for learning and debugging.\n- **Headless** — no window is drawn. Faster, and the normal way to run tests on build servers.\n\nSame browser engine, nearly identical behaviour. (For Chromium, Playwright uses a lighter build called the *headless shell* when no window is needed — results are practically the same.)",
+          "text": "## P4 · Browsers, engines, headed and headless\n\nEvery browser has an **engine** that turns HTML, CSS, and JavaScript into the page you see. Three engine families cover almost every browser in use:\n\n| Engine | Browsers built on it | Name in Playwright |\n|---|---|---|\n| **Chromium** (Blink) | Google Chrome, Microsoft Edge, Opera, Brave | `chromium` |\n| **Gecko** | Mozilla Firefox | `firefox` |\n| **WebKit** | Apple Safari on Mac, iPhone, and iPad | `webkit` |\n\nIf your app works on one browser of each family, it will very likely work on all browsers built on that family. That's why Playwright supports exactly these three engines.\n\nTwo ways to run a browser:\n\n- **Headed** — the window is visible. Great for learning and debugging.\n- **Headless** — no window is drawn. Faster, and the normal way to run tests on build servers.\n\nSame browser engine, nearly identical behaviour. (For Chromium, Playwright uses a lighter build called the *headless shell* when no window is needed — results are practically the same.)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -270,7 +270,7 @@
         },
         {
           "type": "checkpoint",
-          "text": "A bug only happens on iPhone Safari. Which Playwright browser is the closest match?",
+          "text": "A bug happens only on iPhone Safari. Which Playwright browser is the closest match?",
           "starter": null,
           "variation": null,
           "checkpoint": {
@@ -283,7 +283,7 @@
               0
             ],
             "kind": "single",
-            "explanation": "Safari on Mac, iPhone and iPad is built on the WebKit engine."
+            "explanation": "Safari on Mac, iPhone, and iPad is built on the WebKit engine."
           },
           "code": null,
           "callout": null,
@@ -291,7 +291,7 @@
         },
         {
           "type": "markdown",
-          "text": "## P5 · Words you'll hear all course\n\n| Term | Plain-English meaning |\n|---|---|\n| **Script** | A file of instructions a computer runs |\n| **Library** | Ready-made code you call from your own code |\n| **Framework** | A ready-made structure plus tools that you build inside |\n| **Test runner** | The program that finds your tests, runs them and reports pass/fail |\n| **Package** | A bundle of ready-made code you install, e.g. `@playwright/test` |\n| **Fixture** | Something the test runner prepares for a test before it starts and cleans up after — for example a fresh browser page |\n| **Protocol** | An agreed \"language\" two programs use to talk to each other |\n| **Action** | Something the test *does*: open a URL, type, click |\n| **Assertion** | Something the test *checks* — an automated \"expected result\" |\n| **Locator** | How a test finds an element — \"the button named *Log in*\" |\n| **Flaky test** | A test that sometimes passes and sometimes fails with no code change — usually a timing problem |\n| **CI (Continuous Integration)** | A server that runs your tests automatically whenever developers change code |\n| **Node.js** | The program that runs JavaScript and TypeScript outside a browser (you install it on Day 3) |\n| **TypeScript** | JavaScript with types — the language we write Playwright tests in (Days 4–8) |",
+          "text": "## P5 · Words you'll hear all course\n\n| Term | Plain-English meaning |\n|---|---|\n| **Script** | A file of instructions a computer runs |\n| **Library** | Ready-made code you call from your own code |\n| **Framework** | A ready-made structure plus tools that you build inside |\n| **Test runner** | The program that finds your tests, runs them, and reports pass/fail |\n| **Package** | A bundle of ready-made code you install, e.g., `@playwright/test` |\n| **Fixture** | Something the test runner prepares for a test before it starts and cleans up after — for example, a fresh browser page |\n| **Protocol** | An agreed \"language\" two programs use to talk to each other |\n| **Action** | Something the test *does*: open a URL, type, click |\n| **Assertion** | Something the test *checks* — an automated \"expected result\" |\n| **Locator** | How a test finds an element — \"the button named *Log in*\" |\n| **Flaky test** | A test that sometimes passes and sometimes fails with no code change — usually a timing problem |\n| **CI (Continuous Integration)** | A server that runs your tests automatically whenever developers change code |\n| **Node.js** | The program that runs JavaScript and TypeScript outside a browser (you install it on Day 3) |\n| **TypeScript** | JavaScript with types — the language we write Playwright tests in (Days 4–8) |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -346,7 +346,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 1 · Fundamentals\n\n## F1 · What is Playwright?\n\n**Playwright** is a free, open-source framework for testing web applications end-to-end. It opens real browsers, performs the actions a user would perform, and checks the results.\n\n| Fact | Detail |\n|---|---|\n| Made by | **Microsoft** |\n| First released | **January 2020** |\n| Licence | Open source (Apache 2.0) — free for any use |\n| Origins | Built by engineers who earlier created **Puppeteer**, Google's Chrome automation library. Playwright extends that idea to *every* major browser engine |\n| Browsers | **Chromium, Firefox and WebKit** — plus installed Google Chrome and Microsoft Edge |\n| Operating systems | Windows, macOS and Linux — on your laptop or a CI server |\n| Modes | Headed or headless; desktop or **emulated mobile** — a desktop browser pretending to be a phone or tablet (screen size, touch, and the way the browser introduces itself to websites) |\n| Languages | **JavaScript/TypeScript**, Python, Java and .NET (C#). This course uses **TypeScript** |\n\n### What people use it for\n\n- **End-to-end testing** of web apps — its main job, and what this course teaches\n- **API testing** — sending requests to a server directly, without a browser\n- **Browser automation** in general — filling forms, taking screenshots, collecting data from pages\n- **AI agents** — Playwright now ships tools that let AI assistants drive a browser (you'll meet these on Day 2)",
+          "text": "# Day 1 · Fundamentals\n\n## F1 · What is Playwright?\n\n**Playwright** is a free, open-source framework for testing web applications end-to-end. It opens real browsers, performs the actions a user would perform, and checks the results.\n\n| Fact | Detail |\n|---|---|\n| Made by | **Microsoft** |\n| First released | **January 2020** |\n| Licence | Open source (Apache 2.0) — free for any use |\n| Origins | Built by engineers who earlier created **Puppeteer**, Google's Chrome automation library. Playwright extends that idea to *every* major browser engine |\n| Browsers | **Chromium, Firefox, and WebKit** — plus installed Google Chrome and Microsoft Edge |\n| Operating systems | Windows, macOS, and Linux — on your laptop or a CI server |\n| Modes | Headed or headless; desktop or **emulated mobile** — a desktop browser pretending to be a phone or tablet (screen size, touch, and the way the browser introduces itself to websites) |\n| Languages | **JavaScript/TypeScript**, Python, Java, and .NET (C#). This course uses **TypeScript** |\n\n### What people use it for\n\n- **End-to-end testing** of web apps — its main job, and what this course teaches\n- **API testing** — sending requests to a server directly, without a browser\n- **Browser automation** in general — filling forms, taking screenshots, collecting data from pages\n- **AI agents** — Playwright now ships tools that let AI assistants drive a browser (you'll meet these on Day 2)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -362,8 +362,8 @@
           "checkpoint": {
             "options": [
               "It can run tests headless or headed",
-              "It supports Chromium, Firefox and WebKit",
-              "It only works with JavaScript",
+              "It supports Chromium, Firefox, and WebKit",
+              "It works only with JavaScript",
               "It is open source and free to use"
             ],
             "answers": [
@@ -372,7 +372,7 @@
               3
             ],
             "kind": "multiple",
-            "explanation": "Playwright is free and open source, supports all three engines and runs headed or headless. Besides JavaScript/TypeScript it also has Python, Java and .NET versions."
+            "explanation": "Playwright is free and open source, supports all three engines, and runs headed or headless. Besides JavaScript/TypeScript, it also has Python, Java, and .NET versions."
           },
           "code": null,
           "callout": null,
@@ -454,7 +454,7 @@
         },
         {
           "type": "callout",
-          "text": "With older tools such as Selenium in JavaScript, you had to assemble these pieces yourself — a browser driver, a test runner like Mocha or Jest, an assertion library and a reporting plugin. Playwright Test ships them together, already wired up.",
+          "text": "With older tools such as Selenium in JavaScript, you had to assemble these pieces yourself — a browser driver, a test runner like Mocha or Jest, an assertion library, and a reporting plugin. Playwright Test ships them together, already wired up.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -467,7 +467,7 @@
         },
         {
           "type": "checkpoint",
-          "text": "Which package gives you the test runner, `expect` assertions and fixtures together?",
+          "text": "Which package gives you the test runner, `expect` assertions, and fixtures together?",
           "starter": null,
           "variation": null,
           "checkpoint": {
@@ -481,7 +481,7 @@
               3
             ],
             "kind": "single",
-            "explanation": "`@playwright/test` (Playwright Test) contains the Library plus the runner, assertions, fixtures, reporters and tools."
+            "explanation": "`@playwright/test` (Playwright Test) contains the Library plus the runner, assertions, fixtures, reporters, and tools."
           },
           "code": null,
           "callout": null,
@@ -531,7 +531,7 @@
         },
         {
           "type": "markdown",
-          "text": "1. **Your test** describes *what* should happen: \"open the login page, fill the email, click Log in, expect the dashboard\".\n2. **Playwright** — often called the *server* or *driver* — turns each command into the browser's own low-level instructions. Before an action it also checks the element is ready, and it collects results and events.\n3. **The browser** carries out the instructions and reports back: page loaded, element found, click done, console message written.\n\nThis is called a **client–server** design: your test is the *client* that asks; Playwright is the *server* that does the work.\n\n### One open line, not one letter per command\n\nClassic Selenium WebDriver sends each command as a separate **HTTP request** — like posting a letter for every instruction and waiting for the reply before sending the next one. (Newer Selenium versions are adding a two-way connection too; you'll compare the tools properly on Day 2.)\n\nPlaywright keeps **one persistent, two-way connection** open for the whole session — like a phone call:\n\n| | One request per command (classic WebDriver) | Persistent connection (Playwright) |\n|---|---|---|\n| Analogy | Posting a letter per instruction | Staying on a phone call |\n| Sending many commands | Each one opens a new request | Fast messages on the open line |\n| The browser telling you something *unprompted* | Hard — it can only answer questions | Easy — it can speak at any time (a new tab opened, a message was logged, a request finished) |\n\nBecause messages are cheap on an open line, Playwright can check \"is the button ready yet?\" many times per second before clicking, and it hears about events the moment they happen. That's the foundation for the reliability features you'll study on Day 2.\n\n### Which \"language\" each browser speaks\n\n| Browser | How Playwright talks to it |\n|---|---|\n| Chromium (and Chrome, Edge) | **Chrome DevTools Protocol (CDP)** — the same low-level protocol Chrome's own Developer Tools use |\n| Firefox | A **Playwright-patched Firefox** build with its own automation protocol |\n| WebKit | A **Playwright-patched WebKit** build with its own automation protocol |\n\n(Since version 1.57, the `chromium` browser Playwright downloads is actually **Chrome for Testing** — Google's own Chrome build made for automation. Same engine, same protocol.)\n\nThis is why Playwright **downloads its own browsers** when you install it. The docs say it plainly: *each version of Playwright needs specific versions of browser binaries to operate* (\"binaries\" simply means the browser programs). Playwright's Firefox tracks the latest stable Firefox, and its WebKit is built from the latest WebKit sources — so you test against current engines. Real **Google Chrome** and **Microsoft Edge** installed on your machine can also be used, through a setting called `channel`.",
+          "text": "1. **Your test** describes *what* should happen: \"open the login page, fill the email, click Log in, expect the dashboard\".\n2. **Playwright** — often called the *server* or *driver* — turns each command into the browser's own low-level instructions. Before an action, it also checks that the element is ready, and it collects results and events.\n3. **The browser** carries out the instructions and reports back: page loaded, element found, click done, console message written.\n\nThis is called a **client–server** design: your test is the *client* that asks; Playwright is the *server* that does the work.\n\n### One open line, not one letter per command\n\nClassic Selenium WebDriver sends each command as a separate **HTTP request** — like posting a letter for every instruction and waiting for the reply before sending the next one. (Newer Selenium versions are adding a two-way connection too; you'll compare the tools properly on Day 2.)\n\nPlaywright keeps **one persistent, two-way connection** open for the whole session — like a phone call:\n\n| | One request per command (classic WebDriver) | Persistent connection (Playwright) |\n|---|---|---|\n| Analogy | Posting a letter per instruction | Staying on a phone call |\n| Sending many commands | Each one opens a new request | Fast messages on the open line |\n| The browser telling you something *unprompted* | Hard — it can only answer questions | Easy — it can speak at any time (a new tab opened, a message was logged, a request finished) |\n\nBecause messages are cheap on an open line, Playwright can check \"is the button ready yet?\" many times per second before clicking, and it hears about events the moment they happen. That's the foundation for the reliability features you'll study on Day 2.\n\n### Which \"language\" each browser speaks\n\n| Browser | How Playwright talks to it |\n|---|---|\n| Chromium (and Chrome, Edge) | **Chrome DevTools Protocol (CDP)** — the same low-level protocol Chrome's own Developer Tools use |\n| Firefox | A **Playwright-patched Firefox** build with its own automation protocol |\n| WebKit | A **Playwright-patched WebKit** build with its own automation protocol |\n\n(Since version 1.57, the `chromium` browser Playwright downloads is actually **Chrome for Testing** — Google's own Chrome build made for automation. Same engine, same protocol.)\n\nThis is why Playwright **downloads its own browsers** when you install it. The docs say it plainly: *each version of Playwright needs specific versions of browser binaries to operate* (\"binaries\" simply means the browser programs). Playwright's Firefox tracks the latest stable Firefox, and its WebKit is built from the latest WebKit sources — so you test against current engines. Real **Google Chrome** and **Microsoft Edge** installed on your machine can also be used, through a setting called `channel`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -541,7 +541,7 @@
         },
         {
           "type": "callout",
-          "text": "In Python, Java and .NET, your test talks to a separate Playwright driver process (written in Node.js). In JavaScript/TypeScript, the Playwright client and server run inside your test's own process, and the server talks to the browser directly — for a locally launched Chromium over a *pipe*, for a remote browser over a *WebSocket*. Either way the idea is identical: a persistent, message-based connection. Low-level protocols like CDP also make features such as network mocking, console capture and trace recording possible without plugins.",
+          "text": "In Python, Java and .NET, your test talks to a separate Playwright driver process (written in Node.js). In JavaScript/TypeScript, the Playwright client and server run inside your test's own process, and the server talks to the browser directly — for a locally launched Chromium over a *pipe*, for a remote browser over a *WebSocket*. Either way, the idea is identical: a persistent, message-based connection. Low-level protocols like CDP also make features such as network mocking, console capture, and trace recording possible without plugins.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -640,7 +640,7 @@
         },
         {
           "type": "markdown",
-          "text": "| Layer | Everyday analogy | What it holds |\n|---|---|---|\n| **Browser** | The Chrome application running on your laptop | The browser process |\n| **Context** | A brand-new **incognito window** (the docs call it an *incognito-like profile*) | Its own cookies, local storage, permissions, screen size and language — everything a website uses to remember you |\n| **Page** | A **tab** in that window (or a pop-up) | One web page: its URL, its elements, your clicks and typing |\n\nTwo rules follow from this:\n\n1. **Tabs in the same context share cookies and local storage** — the places websites keep your login. Log in on one tab and the other tabs of that window are logged in too, exactly like your normal browser.\n2. **Contexts share nothing.** A second context is a stranger to the website, even though it runs in the same browser.\n\n### Why contexts are the secret to reliable tests\n\nThe Playwright docs describe contexts as *fast and cheap to create and completely isolated, even when running in a single browser.* Starting a whole new browser is slow; creating a context takes only milliseconds.\n\nSo **Playwright Test gives every test its own brand-new context and page**:",
+          "text": "| Layer | Everyday analogy | What it holds |\n|---|---|---|\n| **Browser** | The Chrome application running on your laptop | The browser process |\n| **Context** | A brand-new **incognito window** (the docs call it an *incognito-like profile*) | Its own cookies, local storage, permissions, screen size, and language — everything a website uses to remember you |\n| **Page** | A **tab** in that window (or a pop-up) | One web page: its URL, its elements, your clicks and typing |\n\nTwo rules follow from this:\n\n1. **Tabs in the same context share cookies and local storage** — the places websites keep your login. Log in on one tab and the other tabs of that window are logged in too, exactly like your normal browser.\n2. **Contexts share nothing.** A second context is a stranger to the website, even though it runs in the same browser.\n\n### Why contexts are the secret to reliable tests\n\nThe Playwright docs describe contexts as *fast and cheap to create and completely isolated, even when running in a single browser.* Starting a whole new browser is slow; creating a context takes only milliseconds.\n\nSo **Playwright Test gives every test its own brand-new context and page**:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -778,7 +778,7 @@
         },
         {
           "type": "markdown",
-          "text": "For every single step in step 6 — every `fill`, `click` and `expect` — a small conversation happens:\n\n1. Your test sends the command (\"click the button named *Log in*\").\n2. Playwright finds the element in the page.\n3. Playwright checks it is ready (visible, enabled, not moving) and retries until it is.\n4. Playwright performs the action in the browser.\n5. The result comes back, and your test moves on to the next line.\n\nIn the Implementation section you'll switch on a debug log and **watch this conversation happen**, line by line.",
+          "text": "For every single step in step 6 — every `fill`, `click`, and `expect` — a small conversation happens:\n\n1. Your test sends the command (\"click the button named *Log in*\").\n2. Playwright finds the element in the page.\n3. Playwright checks it is ready (visible, enabled, not moving) and retries until it is.\n4. Playwright performs the action in the browser.\n5. The result comes back, and your test moves on to the next line.\n\nIn the Implementation section you'll switch on a debug log and **watch this conversation happen**, line by line.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1012,7 +1012,7 @@
         },
         {
           "type": "markdown",
-          "text": "Here is the output, shortened (the `+12ms` numbers are timings and will differ):\n\n```output\npw:api => browserType.launch started\npw:api <= browserType.launch succeeded\npw:api => browser.newContext started\npw:api <= browser.newContext succeeded\npw:api => browserContext.newPage started\npw:api <= browserContext.newPage succeeded\npw:api => page.setContent started\npw:api <= page.setContent succeeded\npw:api => Expect \"toBeVisible\" started\npw:api waiting for getByRole('heading', { name: 'Welcome back' })\npw:api <= Expect \"toBeVisible\" succeeded\npw:api => locator.fill started\npw:api waiting for getByLabel('Email')\npw:api   locator resolved to <input id=\"email\" type=\"email\" placeholder=\"you@example.com\"/>\npw:api   fill(\"asha@example.com\")\npw:api   waiting for element to be visible, enabled and editable\npw:api <= locator.fill succeeded\n   … the password fill looks the same …\npw:api => locator.click started\npw:api waiting for getByRole('button', { name: 'Log in' })\npw:api   locator resolved to <button>Log in</button>\npw:api   waiting for element to be visible, enabled and stable\npw:api   element is visible, enabled and stable\npw:api   scrolling into view if needed\npw:api   performing click action\npw:api   click action done\npw:api <= locator.click succeeded\npw:api => Expect \"toHaveTitle\" started\npw:api <= Expect \"toHaveTitle\" succeeded\npw:api => Expect \"toBeVisible\" started\npw:api <= Expect \"toBeVisible\" succeeded\npw:api => browserContext.close started\npw:api <= browserContext.close succeeded\n  ✓  1 [chromium] › tests/day1/tc101-login.spec.ts:4:5 › TC-101 successful login (304ms)\npw:api => browser.close started\npw:api <= browser.close succeeded\n```\n\nMatch it to what you learned:\n\n| Log lines | What you're seeing | Lesson |\n|---|---|---|\n| `browserType.launch` | The **browser** starts | F4, F5 step 3 |\n| `browser.newContext` | A fresh **context** is created for this test | F4, F5 step 4 |\n| `browserContext.newPage` | A **page** (tab) opens in it | F4, F5 step 5 |\n| `=> … started` / `<= … succeeded` | One command sent (`=>`) and its reply (`<=`) — the conversation from F3 | F3 |\n| `locator resolved to <input id=\"email\" …>` | Playwright found the element in the **DOM** | P3 |\n| `waiting for element to be visible, enabled and stable` | Playwright checks the element is ready **before** acting | F5 |\n| `browserContext.close` | The context is thrown away: nothing leaks into the next test | F4 |",
+          "text": "Here is the output, shortened (the `+12ms` numbers are timings, and yours will differ):\n\n```output\npw:api => browserType.launch started\npw:api <= browserType.launch succeeded\npw:api => browser.newContext started\npw:api <= browser.newContext succeeded\npw:api => browserContext.newPage started\npw:api <= browserContext.newPage succeeded\npw:api => page.setContent started\npw:api <= page.setContent succeeded\npw:api => Expect \"toBeVisible\" started\npw:api waiting for getByRole('heading', { name: 'Welcome back' })\npw:api <= Expect \"toBeVisible\" succeeded\npw:api => locator.fill started\npw:api waiting for getByLabel('Email')\npw:api   locator resolved to <input id=\"email\" type=\"email\" placeholder=\"you@example.com\"/>\npw:api   fill(\"asha@example.com\")\npw:api   waiting for element to be visible, enabled and editable\npw:api <= locator.fill succeeded\n   … the password fill looks the same …\npw:api => locator.click started\npw:api waiting for getByRole('button', { name: 'Log in' })\npw:api   locator resolved to <button>Log in</button>\npw:api   waiting for element to be visible, enabled and stable\npw:api   element is visible, enabled and stable\npw:api   scrolling into view if needed\npw:api   performing click action\npw:api   click action done\npw:api <= locator.click succeeded\npw:api => Expect \"toHaveTitle\" started\npw:api <= Expect \"toHaveTitle\" succeeded\npw:api => Expect \"toBeVisible\" started\npw:api <= Expect \"toBeVisible\" succeeded\npw:api => browserContext.close started\npw:api <= browserContext.close succeeded\n  ✓  1 [chromium] › tests/day1/tc101-login.spec.ts:4:5 › TC-101 successful login (304ms)\npw:api => browser.close started\npw:api <= browser.close succeeded\n```\n\nMatch it to what you learned:\n\n| Log lines | What you're seeing | Lesson |\n|---|---|---|\n| `browserType.launch` | The **browser** starts | F4, F5 step 3 |\n| `browser.newContext` | A fresh **context** is created for this test | F4, F5 step 4 |\n| `browserContext.newPage` | A **page** (tab) opens in it | F4, F5 step 5 |\n| `=> … started` / `<= … succeeded` | One command sent (`=>`) and its reply (`<=`) — the conversation from F3 | F3 |\n| `locator resolved to <input id=\"email\" …>` | Playwright found the element in the **DOM** | P3 |\n| `waiting for element to be visible, enabled and stable` | Playwright checks the element is ready **before** acting | F5 |\n| `browserContext.close` | The context is thrown away: nothing leaks into the next test | F4 |",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1117,7 +1117,7 @@
         },
         {
           "type": "markdown",
-          "text": "Your test never asked \"did you log anything?\". The browser pushed each message down the open line the moment it happened. Playwright can listen for many events this way — console messages, pop-ups, new tabs, downloads, network requests and dialogs.",
+          "text": "Your test never asked, \"Did you log anything?\" The browser pushed each message down the open line the moment it happened. Playwright can listen for many events this way — console messages, pop-ups, new tabs, downloads, network requests, and dialogs.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1217,7 +1217,7 @@
             "options": [
               "Hello, Asha — because window A logged in",
               "Hello, guest — window B's context never logged in",
-              "Nothing — a context can only have one tab"
+              "Nothing — a context can have only one tab"
             ],
             "answers": [
               1
@@ -1258,7 +1258,7 @@
             "options": [
               "A library for controlling browsers, where you write your own checks and reports",
               "A Microsoft browser engine used by Edge",
-              "An open-source framework that drives Chromium, Firefox and WebKit and adds a test runner, assertions, fixtures and reports",
+              "An open-source framework that drives Chromium, Firefox, and WebKit and adds a test runner, assertions, fixtures, and reports",
               "A recorder that turns clicks into tests, with no code involved"
             ],
             "answers": [
@@ -1333,7 +1333,7 @@
               3
             ],
             "kind": "multiple",
-            "explanation": "Clicking and typing come from the Library, which Playwright Test includes. The runner, retrying assertions and reports are what Playwright Test adds on top."
+            "explanation": "Clicking and typing come from the Library, which Playwright Test includes. The runner, retrying assertions, and reports are what Playwright Test adds on top."
           },
           "code": null,
           "callout": null,
@@ -1397,7 +1397,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "That's shared state leaking between tests. A fresh context per test means settings, cookies and storage never carry over."
+            "explanation": "That's shared state leaking between tests. A fresh context per test means settings, cookies, and storage never carry over."
           },
           "code": null,
           "callout": null,
@@ -1541,7 +1541,7 @@
         },
         {
           "type": "callout",
-          "text": "Why teams are moving to Playwright: auto-waiting, web-first assertions, cross-browser runs, parallel isolation and the built-in tools — each shown with a demo — plus an honest comparison with Selenium and Cypress, the limits, and where AI fits in.",
+          "text": "Why teams are moving to Playwright: auto-waiting, web-first assertions, cross-browser runs, parallel isolation, and the built-in tools — each shown with a demo — plus an honest comparison with Selenium and Cypress, the limits, and where AI fits in.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1559,7 +1559,7 @@
           "difficulty": "Easy",
           "title": "Convert a manual test case",
           "kind": "written",
-          "statement": "Convert this manual test case into an **action / assertion** table like the one in lesson I1.\n\n**TC-205 — Search for a product**\n1. Open `https://shop.example.com`\n2. Type `wireless mouse` in the search box\n3. Press Enter\n4. Expected: the results heading says `Results for \"wireless mouse\"`\n5. Expected: at least one product card is shown\n6. Click the first product\n7. Expected: the product page shows an **Add to cart** button\n\nFor every row, write the manual step, whether it's an **Action** or an **Assertion**, and the plain-English Playwright step (e.g. *click the button named \"Add to cart\"*).",
+          "statement": "Convert this manual test case into an **action / assertion** table like the one in lesson I1.\n\n**TC-205 — Search for a product**\n1. Open `https://shop.example.com`\n2. Type `wireless mouse` in the search box\n3. Press Enter\n4. Expected: the results heading says `Results for \"wireless mouse\"`\n5. Expected: at least one product card is shown\n6. Click the first product\n7. Expected: the product page shows an **Add to cart** button\n\nFor every row, write the manual step, whether it's an **Action** or an **Assertion**, and the plain-English Playwright step (e.g., *click the button named \"Add to cart\"*).",
           "stub": null,
           "hints": [
             "Steps that DO something are actions; steps that CHECK something are assertions.",
@@ -1575,13 +1575,13 @@
           "difficulty": "Easy",
           "title": "Label the architecture",
           "kind": "written",
-          "statement": "For each event below, say **which player** does it — *your test*, *the Playwright server*, or *the browser* — and write one sentence explaining why.\n\n1. Decides that the next step is \"click Log in\".\n2. Checks that the Log in button is visible, enabled and not moving.\n3. Runs the page's JavaScript that shows \"Login failed\".\n4. Sends the message \"Login failed\" back as a console event.\n5. Prints `📨 from the browser: Login failed` in the terminal.",
+          "statement": "For each event below, say **which player** does it — *your test*, *the Playwright server*, or *the browser* — and write one sentence explaining why.\n\n1. Decides that the next step is \"click Log in\".\n2. Checks that the Log in button is visible, enabled, and not moving.\n3. Runs the page's JavaScript that shows \"Login failed\".\n4. Sends the message \"Login failed\" back as a console event.\n5. Prints `📨 from the browser: Login failed` in the terminal.",
           "stub": null,
           "hints": [],
           "file": null,
           "run": null,
           "check": null,
-          "solution": "1. **Your test** — the test describes WHAT should happen, step by step.\n2. **The Playwright server** — before every action it checks the element is ready, retrying until it is.\n3. **The browser** — it renders the page and runs the page's own JavaScript.\n4. **The browser → Playwright server** — the browser reports the event over the open connection and Playwright passes it on.\n5. **Your test** — its `page.on('console', …)` listener received the event and printed it."
+          "solution": "1. **Your test** — the test describes WHAT should happen, step by step.\n2. **The Playwright server** — before every action, it checks that the element is ready, retrying until it is.\n3. **The browser** — it renders the page and runs the page's own JavaScript.\n4. **The browser → Playwright server** — the browser reports the event over the open connection, and Playwright passes it on.\n5. **Your test** — its `page.on('console', …)` listener received the event and printed it."
         },
         {
           "number": 3,
@@ -1623,7 +1623,7 @@
           "statement": "Run your TC-102 test from exercise 4 with the API log switched on:\n\n```\nDEBUG=pw:api npx playwright test tests/day1/tc102-invalid-login.spec.ts --project=chromium\n```\n\nUsing only the log, answer:\n1. How many times was a **context** created, and how many times was one **closed**?\n2. Which HTML element did `getByLabel('Password')` resolve to? Copy the line.\n3. Before the click, what three things did Playwright wait for?\n4. Did `browser.close` happen before or after the ✓ line — and what does that tell you about browsers vs contexts?",
           "stub": null,
           "hints": [
-            "Search the output for `newContext`, `browserContext.close`, `resolved to` and `waiting for element`."
+            "Search the output for `newContext`, `browserContext.close`, `resolved to`, and `waiting for element`."
           ],
           "file": null,
           "run": null,

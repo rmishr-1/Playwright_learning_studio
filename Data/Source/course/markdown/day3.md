@@ -8,23 +8,23 @@ topics:
   - Installation & Project Setup
   - Node.js, npm and VS Code
 objectives:
-  - Explain Node.js, npm, npx, packages and package.json in plain words
+  - Explain Node.js, npm, npx, packages, and package.json in plain words
   - Use basic terminal commands to move between folders and run programs
   - Read version numbers and choose the right Node.js version
-  - Install Node.js, VS Code and the Playwright extension on your own computer
+  - Install Node.js, VS Code, and the Playwright extension on your own computer
   - Create a Playwright + TypeScript project with `npm init playwright@latest` and explain what it does
-  - Run tests headless, headed, per browser, per file and by title, and open the HTML report
+  - Run tests headless, headed, per browser, per file, and by title, and open the HTML report
   - Read a failing test's error message and fix it
   - Add npm script shortcuts and keep Playwright up to date
 prerequisitesFromEarlierDays:
   - "Day 1: headed vs headless, reading test output, the three browser engines"
-  - "Day 2: projects (one per browser), workers, the HTML report and Trace Viewer"
+  - "Day 2: projects (one per browser), workers, the HTML report, and Trace Viewer"
 workspace: pw-course/ (you create it today)
 ---
 
 # Prerequisites
 
-## P1 · Node.js, npm and npx in plain words
+## P1 · Node.js, npm, and npx in plain words
 
 Playwright for TypeScript runs on **Node.js**. Three names come as a set:
 
@@ -38,7 +38,7 @@ Four more words you'll meet today:
 
 | Name | What it is |
 |---|---|
-| **package** | A bundle of published code, e.g. `@playwright/test` |
+| **package** | A bundle of published code, e.g., `@playwright/test` |
 | **`package.json`** | Your project's *ID card and shopping list*: its name, the packages it needs, and handy command shortcuts (**scripts**) |
 | **`node_modules/`** | The folder where npm puts downloaded packages. Big and generated automatically — never edit it, never save it in Git |
 | **`package-lock.json`** | Records the *exact* versions installed, so every teammate gets identical ones |
@@ -55,7 +55,7 @@ options:
   - "`node package.json`"
   - Copy node_modules from the teammate's laptop
 answer: b
-explanation: "`npm install` reads package.json (and package-lock.json) and downloads every dependency into node_modules. node_modules is always re-created, never shared."
+explanation: "`npm install` reads package.json (and package-lock.json) and downloads every dependency into node_modules. `node_modules` is always re-created, never shared."
 ```
 
 ```quiz
@@ -64,16 +64,16 @@ type: single
 question: What is the difference between npm and npx?
 options:
   - They are the same program with two names
-  - npm installs and manages packages; npx runs a command from a package
-  - npx installs packages permanently; npm runs them once
-  - npm is for JavaScript, npx is for TypeScript
+  - `npm` installs and manages packages; `npx` runs a command from a package
+  - `npx` installs packages permanently; `npm` runs them once
+  - `npm` is for JavaScript; `npx` is for TypeScript
 answer: b
 explanation: You'll use npm to install things (`npm install`) and npx to run them (`npx playwright test`).
 ```
 
 ## P2 · Terminal survival kit
 
-The **terminal** (also called command line, shell or console) is a text window where you type commands. On this course platform it's the **Terminal** panel; on your own computer it's also built into VS Code (**View → Terminal**).
+The **terminal** (also called command line, shell, or console) is a text window where you type commands. On this course platform it's the **Terminal** panel; on your own computer it's also built into VS Code (**View → Terminal**).
 
 Everything in a terminal happens **inside a folder** — the *current folder*. Most commands act on the current folder, so knowing where you are is half the job.
 
@@ -93,7 +93,7 @@ Everything in a terminal happens **inside a folder** — the *current folder*. M
 Paths use `/` to separate folders: `tests/day1/tc101-login.spec.ts` means "the file `tc101-login.spec.ts`, inside `day1`, inside `tests`" — starting from the current folder. `..` means "the folder above", and `~` means "my home folder".
 
 > [!TIP]
-> Most "command not found", "no such file" or "missing script" errors mean you're in the **wrong folder**. Run `pwd`, then `cd` to the right place.
+> Most "command not found," "no such file," or "missing script" errors mean you're in the **wrong folder**. Run `pwd`, then `cd` to the right place.
 
 Try it in the terminal panel:
 
@@ -134,7 +134,7 @@ explanation: "`Ctrl + C` interrupts the running command. You'll use it today to 
 
 ## P3 · Reading version numbers
 
-Software versions usually have three parts — **major.minor.patch** — for example Playwright `1.63.0` or Node.js `24.11.0`:
+Software versions usually have three parts — **major.minor.patch** — for example, Playwright `1.63.0` or Node.js `24.11.0`:
 
 | Part | Changes when… | Risk of breaking your tests |
 |---|---|---|
@@ -144,7 +144,7 @@ Software versions usually have three parts — **major.minor.patch** — for exa
 
 Two conventions you'll see today:
 
-- **Node.js LTS** — *Long-Term Support*. LTS versions get years of fixes, so **always install an LTS version**. Until now only even-numbered versions became LTS (22 and 24 are LTS today; 26 is still a "Current" release and becomes LTS in October 2026). From Node.js 27, every major version will become LTS after six months.
+- **Node.js LTS** — *Long-Term Support*. LTS versions get years of fixes, so **always install an LTS version**. Until now, only even-numbered versions became LTS (22 and 24 are LTS today; 26 is still a "Current" release and becomes LTS in October 2026). From Node.js 27, every major version will become LTS after six months.
 - **`^` in package.json** — `"@playwright/test": "^1.63.0"` means "1.63.0 or any newer **1.x**". npm may install newer minor and patch versions, but never 2.0.
 
 ```quiz
@@ -176,7 +176,7 @@ Playwright's official system requirements (always check [playwright.dev/docs/int
 
 | Requirement | Supported |
 |---|---|
-| **Node.js** | Latest **22.x**, **24.x** or **26.x** (install the LTS — 24 today) |
+| **Node.js** | Latest **22.x**, **24.x**, or **26.x** (install the LTS — 24 today) |
 | **Windows** | Windows 11+, Windows Server 2019+, or WSL |
 | **macOS** | macOS 14 (Sonoma) or later |
 | **Linux** | Debian 12/13, Ubuntu 22.04 / 24.04 / 26.04 (x86-64 or arm64) |
@@ -194,7 +194,7 @@ options:
   - Delete the tests folder
   - Use Firefox instead of Chromium
 answer: b
-explanation: Playwright supports Node.js 22, 24 and 26 only. Old versions cause installation and runtime errors.
+explanation: Playwright supports only Node.js 22, 24, and 26. Old versions cause installation and runtime errors.
 ```
 
 ## F2 · Installing the tools on your own computer
@@ -215,7 +215,7 @@ v24.11.0
 11.6.1
 ```
 
-Your numbers will differ. Anything starting with `v22`, `v24` or `v26` works with Playwright.
+Your numbers will differ. Anything starting with `v22`, `v24`, or `v26` works with Playwright.
 
 > [!TIP]
 > "command not found" right after installing? Close the terminal and open a new one — terminals read the list of installed programs only when they start.
@@ -223,14 +223,14 @@ Your numbers will differ. Anything starting with `v22`, `v24` or `v26` works wit
 > [!WARNING] Windows notes
 > - Playwright officially supports **Windows 11**. Windows 10 usually works, but if you hit problems, use **WSL** (Windows Subsystem for Linux).
 > - VS Code's terminal on Windows is **PowerShell**. If `npm` or `npx` fails with *"running scripts is disabled on this system"*, run this once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` — or switch the terminal to **Command Prompt** with the ⌄ arrow next to the + in the terminal panel.
-> - A few commands differ in PowerShell: `ls -a` is `ls -Force`, and `cat` works but `rm -r` is `Remove-Item -Recurse`.
+> - A few commands differ in PowerShell: `ls -a` is `ls -Force`, and `cat` works, but `rm -r` is `Remove-Item -Recurse`.
 
 > [!NOTE] On a company laptop?
 > Installing may need **admin rights** — ask IT for Node.js and VS Code. If browser downloads fail behind a company **proxy**, ask IT for the proxy address; Playwright reads it from the `HTTPS_PROXY` setting. Short on disk space? `npx playwright install chromium` downloads only Chromium.
 
 ### Step 2 — VS Code
 
-Download it from [code.visualstudio.com](https://code.visualstudio.com), install it and open it. The five areas you'll use:
+Download it from [code.visualstudio.com](https://code.visualstudio.com), install it, and open it. The five areas you'll use:
 
 1. **Explorer** (left) — your project's files and folders
 2. **Editor** (centre) — where you write code, one tab per file
@@ -241,7 +241,7 @@ Download it from [code.visualstudio.com](https://code.visualstudio.com), install
 ### Step 3 — The Playwright extension
 
 1. Open **Extensions** (`Ctrl + Shift + X`, or `Cmd + Shift + X` on Mac).
-2. Search **Playwright**. Choose **Playwright Test for VS Code**, published by **Microsoft**.
+2. Search for **Playwright**. Choose **Playwright Test for VS Code**, published by **Microsoft**.
 3. Click **Install**.
 
 ### Step 4 — Create a project on your computer
@@ -255,7 +255,7 @@ Download it from [code.visualstudio.com](https://code.visualstudio.com), install
 > Turn on **File → Auto Save** in VS Code. Otherwise a small white dot on a file's tab means "not saved yet" — and tests run the *saved* version.
 
 > [!TESTER]
-> Think of VS Code as your test-management tool, test editor and execution console in one window.
+> Think of VS Code as your test-management tool, test editor, and execution console in one window.
 
 ```quiz
 id: d3-f2-q1
@@ -292,13 +292,13 @@ It asks a few questions:
 | TypeScript or JavaScript? | **TypeScript** (default) | This course uses TypeScript |
 | Where to put your end-to-end tests? | **tests** (default) | Playwright will look for tests in this folder |
 | Add a GitHub Actions workflow? | **N** for now | GitHub is a popular website for storing code; *GitHub Actions* is its service for running tests automatically on its servers (CI, Day 1) — a later topic |
-| Install Playwright browsers? | **Y** (default) | Downloads Chromium, Firefox and WebKit |
+| Install Playwright browsers? | **Y** (default) | Downloads Chromium, Firefox, and WebKit |
 | *(Linux only)* Install operating system dependencies? | **N** on this platform; **Y** on a fresh Linux machine | Installs system libraries the browsers need. It uses `sudo` ("run as administrator" on Linux), so it asks for your password |
 
 Then it does three jobs:
 
 1. **Installs packages** — `@playwright/test` and `@types/node` go into `node_modules/` and are listed in `package.json`.
-2. **Writes starter files** — a settings file, an example test and a `.gitignore`.
+2. **Writes starter files** — a settings file, an example test, and a `.gitignore`.
 3. **Downloads browsers** — a few hundred MB the first time.
 
 ### Where do the browsers go?
@@ -324,7 +324,7 @@ options:
   - Downloads the browsers (if you answer Y)
   - Writes all the tests for your application
 answer: [a, b, c]
-explanation: It sets up the project and tools. Writing tests for your app is your job — you'll copy and adapt one today, and write them from scratch from Day 9.
+explanation: It sets up the project and tools. Writing tests for your app is your job — you'll copy and adapt one today, and write them from scratch starting on Day 9.
 ```
 
 ## F4 · The generated project at a glance
@@ -353,7 +353,7 @@ Three things to know today (Day 10 goes through the config file in depth, and sh
 
 1. **Test files end in `.spec.ts` or `.test.ts`.** Playwright looks for them inside the tests folder, including its sub-folders. A file called `tests/login.ts` is **not** a test file and is ignored.
 2. **`playwright.config.ts` controls how every test runs** — which browsers (the *projects* you met on Day 2), how many workers, retries, the report.
-3. **`.gitignore` keeps generated things out of Git.** Git is the tool teams use to save and share versions of their code. `node_modules/`, `test-results/` and `playwright-report/` can always be re-created, so they're never saved in it.
+3. **`.gitignore` keeps generated things out of Git.** Git is the tool teams use to save and share versions of their code. `node_modules/`, `test-results/`, and `playwright-report/` can always be re-created, so they're never saved in it.
 
 ```quiz
 id: d3-f4-q1
@@ -362,7 +362,7 @@ question: You create `tests/checkout.ts` with a test in it, but Playwright doesn
 options:
   - Test files must be in the project's top folder
   - Test file names must end in `.spec.ts` or `.test.ts`
-  - Playwright only runs example.spec.ts
+  - Playwright runs only example.spec.ts
   - You must restart the computer
 answer: b
 explanation: Rename it to `tests/checkout.spec.ts` and Playwright will find it.
@@ -378,7 +378,7 @@ options:
   - playwright-report/
   - tests/example.spec.ts
 answer: [a, c]
-explanation: node_modules and the report are generated and already listed in .gitignore. Your settings and tests are the valuable work — always save them.
+explanation: `node_modules` and the report are generated and already listed in .gitignore. Your settings and tests are the valuable work — always save them.
 ```
 
 ## F5 · Running tests: the commands you'll use every day
@@ -437,7 +437,7 @@ With the **Playwright Test for VS Code** extension installed, click the **Testin
 
 | Feature | What it does |
 |---|---|
-| ▶ next to a test, file or folder | Run it |
+| ▶ next to a test, file, or folder | Run it |
 | **Show browser** | Tick it to watch tests run (untick for headless) |
 | **Pick locator** | Click any element in the browser and get the Playwright locator for it |
 | **Record new** | Record a brand-new test by clicking through the site (Codegen inside VS Code) |
@@ -484,7 +484,7 @@ Common problems and fixes:
 | `Executable doesn't exist at …/ms-playwright/…` | Playwright was updated but its browsers weren't | `npx playwright install` |
 | `Missing script: "test"` | You're outside the project folder, or the script doesn't exist | `cd pw-course`; check `package.json` |
 | `npx playwright test` asks *"Need to install the following packages: playwright… Ok to proceed?"* | You're **outside** the project, so npx can't find the project's Playwright and offers to download a different one | Answer **n**, then `cd` into the project |
-| `Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.` and the terminal is stuck | The report opened automatically after a failure | Press `Ctrl + C` (I5 shows how to stop this happening) |
+| `Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.` and the terminal is stuck | The report opened automatically after a failure | Press `Ctrl + C` (I5 shows how to stop this from happening) |
 | Browser fails to start on Linux, mentioning missing libraries | System libraries missing | `npx playwright install --with-deps` |
 
 ```quiz
@@ -512,7 +512,7 @@ npm -v
 pwd
 ```
 
-You should see a Node.js version starting with `v22`, `v24` or `v26`, an npm version, and the folder you're in.
+You should see a Node.js version starting with `v22`, `v24`, or `v26`, an npm version, and the folder you're in.
 
 ## I2 · Create your project
 
@@ -524,7 +524,7 @@ cd pw-course
 npm init playwright@latest
 ```
 
-Answer the questions: **TypeScript**, **tests**, **N** (no GitHub Actions), **Y** (install browsers) and, if asked, **N** for operating-system dependencies (the platform already has them).
+Answer the questions: **TypeScript**, **tests**, **N** (no GitHub Actions), **Y** (install browsers), and, if asked, **N** for operating-system dependencies (the platform already has them).
 
 ```output terminal
 Need to install the following packages:
@@ -864,7 +864,7 @@ options:
   - .gitignore
   - tests/example.spec.ts
 answer: b
-explanation: package.json is the project's ID card — name, devDependencies and scripts.
+explanation: `package.json` is the project's ID card — name, devDependencies, and scripts.
 ```
 
 ```quiz
@@ -877,7 +877,7 @@ options:
   - In a shared cache folder in your user account, reused by every project
   - Inside VS Code
 answer: c
-explanation: For example `~/.cache/ms-playwright` on Linux. That's why a second project doesn't download them again.
+explanation: For example, `~/.cache/ms-playwright` on Linux. That's why a second project doesn't download them again.
 ```
 
 ```quiz
@@ -899,8 +899,8 @@ type: single
 question: "Why did we change the reporter to `[['list'], ['html', { open: 'never' }]]`?"
 options:
   - To make tests run faster
-  - To see each test in the terminal, and stop the report opening (and blocking the terminal) after a failure
-  - To stop the HTML report being created
+  - To see each test in the terminal, and stop the report from opening (and blocking the terminal) after a failure
+  - To stop the HTML report from being created
   - To run tests in Firefox
 answer: b
 explanation: The HTML report is still created — it just opens only when you ask. The list reporter shows each test as it finishes.
@@ -942,7 +942,7 @@ options:
   - Version 16, because it's been around longest
   - Any version works
 answer: b
-explanation: Playwright supports Node.js 22, 24 and 26. LTS versions get long-term fixes, so they're the safe choice.
+explanation: Playwright supports Node.js 22, 24, and 26. LTS versions get long-term fixes, so they're the safe choice.
 ```
 
 ```quiz
@@ -1002,7 +1002,7 @@ modelAnswer: |
   2. Test files must end in `.spec.ts` or `.test.ts`. Rename it to `tests/login.spec.ts`.
   3. The new Playwright version needs matching browsers. Run `npx playwright install`.
   4. They're in the wrong folder — npm reads the `package.json` of the current folder. `cd pw-course` first (check with `pwd`).
-  5. The HTML report opened automatically after the failure. Press `Ctrl + C`. To stop it happening, set `reporter: [['list'], ['html', { open: 'never' }]]` in `playwright.config.ts`.
+  5. The HTML report opened automatically after the failure. Press `Ctrl + C`. To stop it from happening, set `reporter: [['list'], ['html', { open: 'never' }]]` in `playwright.config.ts`.
 ````
 
 ````exercise
@@ -1084,7 +1084,7 @@ solution: |
 
 ## Reflection
 
-1. Explain `npm`, `npx` and `package.json` to a teammate in one sentence each.
+1. Explain `npm`, `npx`, and `package.json` to a teammate in one sentence each.
 2. Which three jobs does `npm init playwright@latest` do?
 3. What are the three defaults of `npx playwright test` (browser window, speed, report)?
 4. When a test fails, which three parts of the error do you read first?

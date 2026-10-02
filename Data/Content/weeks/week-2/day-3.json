@@ -26,7 +26,7 @@
         },
         {
           "type": "at-a-glance",
-          "text": "**Functions, Async & Modules**\n\n*Package steps into reusable functions, make code wait for slow work with async/await, handle failures, and share code between files*\n\n**Time:** 3 hours\n\n**Where you work:** pw-course/ts-basics/day8/\n\n**By the end of the day you can:**\n\n- Declare and call functions with typed parameters and return values\n- Use optional, default and rest parameters\n- Write arrow functions, and pass functions to other functions as callbacks\n- Explain why browser automation is asynchronous, and use async/await correctly\n- Recognise the missing-await bug and why `forEach` doesn't wait\n- Throw and catch errors with try / catch / finally\n- Split code across files with export and import — and decode the first line of every Playwright test\n- Build a mini test runner that works like Playwright Test\n\n**From earlier days:**\n\n- Day 6: arrays, objects, type aliases, `unknown`, `??` and `?.`\n- Day 7: if / else, loops (especially for...of), array methods and the arrow shape `(item) => …`",
+          "text": "**Functions, Async & Modules**\n\n*Package steps into reusable functions, make code wait for slow work with async/await, handle failures, and share code between files*\n\n**Time:** 3 hours\n\n**Where you work:** pw-course/ts-basics/day8/\n\n**By the end of the day you can:**\n\n- Declare and call functions with typed parameters and return values\n- Use optional, default, and rest parameters\n- Write arrow functions, and pass functions to other functions as callbacks\n- Explain why browser automation is asynchronous, and use async/await correctly\n- Recognise the missing-await bug and why `forEach` doesn't wait\n- Throw and catch errors with try / catch / finally\n- Split code across files with export and import — and decode the first line of every Playwright test\n- Build a mini test runner that works like Playwright Test\n\n**From earlier days:**\n\n- Day 6: arrays, objects, type aliases, `unknown`, `??`, and `?.`\n- Day 7: if / else, loops (especially for...of), array methods, and the arrow shape `(item) => …`",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -60,7 +60,7 @@
               1
             ],
             "kind": "single",
-            "explanation": "filter keeps every item that passes the check, in a new array."
+            "explanation": "`filter` keeps every item that passes the check, in a new array."
           },
           "code": null,
           "callout": null,
@@ -82,7 +82,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "for...of runs once per item, and the list has two items."
+            "explanation": "`for...of` runs once per item, and the list has two items."
           },
           "code": null,
           "callout": null,
@@ -250,7 +250,7 @@
         },
         {
           "type": "code",
-          "text": "function formatDuration(ms: number): string {\n  if (ms < 1000) {\n    return `${ms} ms`;          // for short durations, the function ends here…\n  }\n  return `${ms / 1000} s`;      // …so this line only runs for 1000 ms or more\n}",
+          "text": "function formatDuration(ms: number): string {\n  if (ms < 1000) {\n    return `${ms} ms`;          // for short durations, the function ends here…\n  }\n  return `${ms / 1000} s`;      // …so this line runs only for 1000 ms or more\n}",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -294,7 +294,7 @@
         },
         {
           "type": "markdown",
-          "text": "### Variables inside functions stay inside\n\nA function's body is a block, so `let` and `const` declared inside it only exist inside it (Day 5 · F3). Each call gets fresh variables — two calls can't mess up each other's values.",
+          "text": "### Variables inside functions stay inside\n\nA function's body is a block, so `let` and `const` declared inside it exist only inside it (Day 5 · F3). Each call gets fresh variables — two calls can't mess up each other's values.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -353,7 +353,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "return ends the function immediately, so the second return is never reached for 5."
+            "explanation": "`return` ends the function immediately, so the second `return` is never reached for 5."
           },
           "code": null,
           "callout": null,
@@ -375,7 +375,7 @@
               1
             ],
             "kind": "single",
-            "explanation": "void means \"returns nothing useful\". Calling it still runs its steps."
+            "explanation": "`void` means \"returns nothing useful\". Calling it still runs its steps."
           },
           "code": null,
           "callout": null,
@@ -383,7 +383,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F2 · Parameters: optional, default and rest\n\nBy default every parameter is **required**, and the call must give exactly one argument per parameter. Three variations make functions more flexible:\n\n### Optional parameters — `?`",
+          "text": "## F2 · Parameters: optional, default, and rest\n\nBy default every parameter is **required**, and the call must give exactly one argument per parameter. Three variations make functions more flexible:\n\n### Optional parameters — `?`",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -437,7 +437,7 @@
         },
         {
           "type": "markdown",
-          "text": "A default is often better than optional: inside the function the value is never `undefined`, so there's nothing to check.\n\n### Rest parameters — `...` for \"any number of\"",
+          "text": "A default is often better than making a parameter optional: inside the function the value is never `undefined`, so there's nothing to check.\n\n### Rest parameters — `...` for \"any number of\"",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -558,7 +558,7 @@
         },
         {
           "type": "markdown",
-          "text": "| Shape | Example | Notes |\n|---|---|---|\n| One expression after `=>` | `(ms: number) => ms > 3000` | The result is returned automatically — no `return`, no braces |\n| A block after `=>` | `` (ms: number) => { const s = ms / 1000; return `${s} s`; } `` | Several statements, so you write `return` yourself |\n| No parameters | `() => console.log('done')` | Empty brackets are still needed |\n\nBoth forms are functions; you call them the same way: `isSlowArrow(4500)`. Most Playwright code uses arrow functions.\n\n### Functions are values — callbacks\n\nA function can be stored in a variable and **passed to another function**, just like a number or a string. A function you hand to another function, for it to call later, is a **callback**:",
+          "text": "| Shape | Example | Notes |\n|---|---|---|\n| One expression after `=>` | `(ms: number) => ms > 3000` | The result is returned automatically — no `return`, no braces |\n| A block after `=>` | `` (ms: number) => { const s = ms / 1000; return `${s} s`; } `` | Several statements, so you write `return` yourself |\n| No parameters | `() => console.log('done')` | Empty parentheses are still needed |\n\nBoth forms are functions; you call them the same way: `isSlowArrow(4500)`. Most Playwright code uses arrow functions.\n\n### Functions are values — callbacks\n\nA function can be stored in a variable and **passed to another function**, just like a number or a string. A function you hand to another function, for it to call later, is a **callback**:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -568,7 +568,7 @@
         },
         {
           "type": "code",
-          "text": "const durations: number[] = [1200, 4500, 800];\n\ndurations.filter(isSlowArrow);              // pass the function itself (no brackets!) → [4500]\ndurations.filter((ms) => ms > 3000);        // or write it on the spot → [4500]",
+          "text": "const durations: number[] = [1200, 4500, 800];\n\ndurations.filter(isSlowArrow);              // pass the function itself (no parentheses!) → [4500]\ndurations.filter((ms) => ms > 3000);        // or write it on the spot → [4500]",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -585,7 +585,7 @@
         },
         {
           "type": "markdown",
-          "text": "Note `filter(isSlowArrow)` with **no brackets**: you hand over the function for `filter` to call, once per item. `filter(isSlowArrow())` would call it immediately yourself — not what you want.\n\nHere, TypeScript already knows `ms` must be a number (because `durations` is a `number[]`), so the callback doesn't need a type annotation.\n\n### Function types\n\nTo describe a function as a *type* — \"a function that takes a number and returns a boolean\" — write its shape with an arrow:",
+          "text": "Note `filter(isSlowArrow)` with **no parentheses**: you hand over the function for `filter` to call, once per item. `filter(isSlowArrow())` would call it immediately yourself — not what you want.\n\nHere, TypeScript already knows `ms` must be a number (because `durations` is a `number[]`), so the callback doesn't need a type annotation.\n\n### Function types\n\nTo describe a function as a *type* — \"a function that takes a number and returns a boolean\" — write its shape with an arrow:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -657,7 +657,7 @@
               "21",
               "42",
               "An error",
-              "undefined — there's no return"
+              "`undefined` — there's no `return`"
             ],
             "answers": [
               1
@@ -685,7 +685,7 @@
               0
             ],
             "kind": "single",
-            "explanation": "test() receives the title and a function; Playwright calls that function later, passing in the fixtures such as page."
+            "explanation": "`test()` receives the title and a function; Playwright calls that function later, passing in fixtures such as `page`."
           },
           "code": null,
           "callout": null,
@@ -693,7 +693,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F4 · Asynchronous code — why tests must wait\n\n### Synchronous code: one line at a time\n\nEverything you've written so far is **synchronous**: each line finishes completely before the next one starts. Adding numbers, joining text and looping over an array are all instant.\n\n### Asynchronous work: things that take time\n\nBrowser automation is different. Opening a page, clicking a button, waiting for a search result — each takes an unknown amount of time, from milliseconds to seconds. JavaScript doesn't freeze while it waits: it **starts** the slow work and carries on. Code like this is called **asynchronous** (async).\n\nYou can see this with `setTimeout`, which runs a callback after a delay:",
+          "text": "## F4 · Asynchronous code — why tests must wait\n\n### Synchronous code: one line at a time\n\nEverything you've written so far is **synchronous**: each line finishes completely before the next one starts. Adding numbers, joining text, and looping over an array are all instant.\n\n### Asynchronous work: things that take time\n\nBrowser automation is different. Opening a page, clicking a button, waiting for a search result — each takes an unknown amount of time, from milliseconds to seconds. JavaScript doesn't freeze while it waits: it **starts** the slow work and carries on. Code like this is called **asynchronous** (async).\n\nYou can see this with `setTimeout`, which runs a callback after a delay:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -784,7 +784,7 @@
         },
         {
           "type": "callout",
-          "text": "Fixed waits make real tests slow and flaky (Day 2). Playwright waits automatically for the page; you'll only use `sleep` today to **pretend** that something takes time.",
+          "text": "Fixed waits make real tests slow and flaky (Day 2). Playwright waits automatically for the page; you'll use `sleep` today only to **pretend** that something takes time.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -841,7 +841,7 @@
         },
         {
           "type": "markdown",
-          "text": "## F5 · `async` and `await`\n\nTwo keywords make asynchronous code read like normal step-by-step code:\n\n| Keyword | Where | Meaning |\n|---|---|---|\n| `async` | Before a function | \"This function does slow work.\" It always returns a Promise |\n| `await` | Before a Promise | \"Pause **this function** until the Promise finishes, then give me the result.\" Other work that was already started keeps running |\n\nOn an arrow function, `async` goes before the brackets: `async () => { … }`, `async ({ page }) => { … }`.",
+          "text": "## F5 · `async` and `await`\n\nTwo keywords make asynchronous code read like normal step-by-step code:\n\n| Keyword | Where | Meaning |\n|---|---|---|\n| `async` | Before a function | \"This function does slow work.\" It always returns a Promise |\n| `await` | Before a Promise | \"Pause **this function** until the Promise finishes, then give me the result.\" Other work that was already started keeps running |\n\nOn an arrow function, `async` goes before the parentheses: `async () => { … }`, `async ({ page }) => { … }`.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -868,7 +868,7 @@
         },
         {
           "type": "markdown",
-          "text": "`await` only works inside an `async` function — or at the top level of a module file, like the files in `ts-basics` (the `\"type\": \"module\"` setting from Day 4 makes them modules). That's why every Playwright test body is written `async ({ page }) => { … }`: it needs `await` inside.\n\n### The #1 Playwright bug: a missing `await`\n\nForget `await`, and the program **doesn't wait**. It starts the step and rushes straight on to the next line:",
+          "text": "`await` works only inside an `async` function — or at the top level of a module file, like the files in `ts-basics` (the `\"type\": \"module\"` setting from Day 4 makes them modules). That's why every Playwright test body is written `async ({ page }) => { … }`: it needs `await` inside.\n\n### The #1 Playwright bug: a missing `await`\n\nForget `await`, and the program **doesn't wait**. It starts the step and rushes straight on to the next line:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -895,7 +895,7 @@
         },
         {
           "type": "markdown",
-          "text": "In a real test that leads to random failures, or worse, tests that pass without checking anything. TypeScript usually **doesn't** warn you: calling a function without `await` is perfectly legal code. You'll see it happen in I4.\n\n### `forEach` doesn't wait\n\nDay 7 promised an explanation. `forEach` calls its callback for every item, but it **ignores** the Promises that async callbacks return. It starts them all at once and moves on without waiting. A `for...of` loop with `await` inside does wait, one item at a time:",
+          "text": "In a real test, that leads to random failures or, worse, tests that pass without checking anything. TypeScript usually **doesn't** warn you: calling a function without `await` is perfectly legal code. You'll see it happen in I4.\n\n### `forEach` doesn't wait\n\nDay 7 promised an explanation. `forEach` calls its callback for every item, but it **ignores** the Promises that async callbacks return. It starts them all at once and moves on without waiting. A `for...of` loop with `await` inside does wait, one item at a time:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -949,7 +949,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "An async function always returns a Promise — `Promise<string>`, `Promise<void>` and so on. Use await to get the value inside."
+            "explanation": "An async function always returns a Promise — `Promise<string>`, `Promise<void>`, and so on. Use `await` to get the value inside."
           },
           "code": null,
           "callout": null,
@@ -971,7 +971,7 @@
               1
             ],
             "kind": "single",
-            "explanation": "Auto-waiting happens INSIDE the click, but without await your test doesn't wait for the click to finish before moving on."
+            "explanation": "Auto-waiting happens INSIDE the click, but without `await`, your test doesn't wait for the click to finish before moving on."
           },
           "code": null,
           "callout": null,
@@ -993,7 +993,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "for...of with await waits for each check in turn. forEach and map start them all without waiting, and for...in gives indexes, not products."
+            "explanation": "`for...of` with `await` waits for each check in turn. `forEach` and `map` start them all without waiting, and for...in gives indexes, not products."
           },
           "code": null,
           "callout": null,
@@ -1082,7 +1082,7 @@
         },
         {
           "type": "callout",
-          "text": "This is how Playwright tests fail. When an assertion like `await expect(page).toHaveTitle('Shop')` doesn't match, it keeps retrying until its timeout (5 seconds by default, Day 2), then **throws** an error. Playwright's runner catches it, marks the test as failed, records the message and moves on to the next test. So in tests you rarely write `try/catch` yourself — letting the error reach the runner is exactly what you want. You'll build a runner that does this in I6.",
+          "text": "This is how Playwright tests fail. When an assertion like `await expect(page).toHaveTitle('Shop')` doesn't match, it keeps retrying until its timeout (5 seconds by default, Day 2), then **throws** an error. Playwright's runner catches it, marks the test as failed, records the message, and moves on to the next test. So in tests you rarely write `try/catch` yourself — letting the error reach the runner is exactly what you want. You'll build a runner that does this in I6.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1095,7 +1095,7 @@
         },
         {
           "type": "checkpoint",
-          "text": "`try { A(); B(); } catch (e) { C(); } finally { D(); }` — A() throws an error. Which run?",
+          "text": "`try { A(); B(); } catch (e) { C(); } finally { D(); }` — A() throws an error. Which ones run?",
           "starter": null,
           "variation": null,
           "checkpoint": {
@@ -1109,7 +1109,7 @@
               3
             ],
             "kind": "single",
-            "explanation": "A throws, so B is skipped and catch runs C. finally always runs D."
+            "explanation": "A throws, so B is skipped and catch runs C. `finally` always runs D."
           },
           "code": null,
           "callout": null,
@@ -1210,7 +1210,7 @@
         },
         {
           "type": "markdown",
-          "text": "If you import a type **without** marking it, TypeScript's check passes, but running the file with Node.js fails: `SyntaxError: The requested module './data/products.ts' does not provide an export named 'Product'`. Node looked for `Product` in the running code, and there's no such thing. (Inside Playwright tests both forms work, but marking types is a good habit.)",
+          "text": "If you import a type **without** marking it, TypeScript's check passes, but running the file with Node.js fails: `SyntaxError: The requested module './data/products.ts' does not provide an export named 'Product'`. Node looked for `Product` in the running code, and there's no such thing. (Inside Playwright tests, both forms work, but marking types is a good habit.)",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1324,7 +1324,7 @@
       "blocks": [
         {
           "type": "markdown",
-          "text": "# Day 8 · Implementation\n\nAll files today go in `ts-basics/day8`. Run with `node day8/<file>.ts`, check with `npm run check -- day8/<file>.ts`.\n\n## I1 · A toolbox of helper functions",
+          "text": "# Day 8 · Implementation\n\nAll files today go in `ts-basics/day8`. Run with `node day8/<file>.ts`; check with `npm run check -- day8/<file>.ts`.\n\n## I1 · A toolbox of helper functions",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1334,7 +1334,7 @@
         },
         {
           "type": "code",
-          "text": "// Turn price text from a page, like '₹1,499', into the number 1499\nfunction parsePrice(text: string): number {\n  const cleaned = text.trim().replace('₹', '').replaceAll(',', '');\n  return Number(cleaned);\n}\n\n// Build a test email address. domain has a default value.\nfunction buildEmail(name: string, id: number, domain: string = 'example.com'): string {\n  return `${name.toLowerCase()}.${id}@${domain}`;\n}\n\n// Show a duration in readable form. Two different return statements.\nfunction formatDuration(ms: number): string {\n  if (ms < 1000) {\n    return `${ms} ms`;           // return ends the function here…\n  }\n  return `${ms / 1000} s`;       // …so this line only runs for 1000 ms or more\n}\n\n// A function that does something but gives nothing back: void\nfunction logStep(step: number, action: string): void {\n  console.log(`Step ${step}: ${action}`);\n}\n\n// Calling the functions\nconst price = parsePrice(' ₹1,499 ');\nconsole.log(price + 1);                               // a real number now\nconsole.log(parsePrice('₹12,450') > 10000);\nconsole.log(buildEmail('Asha', 1));                   // uses the default domain\nconsole.log(buildEmail('Ravi', 2, 'test.org'));       // overrides it\nconsole.log(formatDuration(450), '|', formatDuration(2500));\nlogStep(1, 'Open the login page');",
+          "text": "// Turn price text from a page, like '₹1,499', into the number 1499\nfunction parsePrice(text: string): number {\n  const cleaned = text.trim().replace('₹', '').replaceAll(',', '');\n  return Number(cleaned);\n}\n\n// Build a test email address. domain has a default value.\nfunction buildEmail(name: string, id: number, domain: string = 'example.com'): string {\n  return `${name.toLowerCase()}.${id}@${domain}`;\n}\n\n// Show a duration in readable form. Two different return statements.\nfunction formatDuration(ms: number): string {\n  if (ms < 1000) {\n    return `${ms} ms`;           // return ends the function here…\n  }\n  return `${ms / 1000} s`;       // …so this line runs only for 1000 ms or more\n}\n\n// A function that does something but gives nothing back: void\nfunction logStep(step: number, action: string): void {\n  console.log(`Step ${step}: ${action}`);\n}\n\n// Calling the functions\nconst price = parsePrice(' ₹1,499 ');\nconsole.log(price + 1);                               // a real number now\nconsole.log(parsePrice('₹12,450') > 10000);\nconsole.log(buildEmail('Asha', 1));                   // uses the default domain\nconsole.log(buildEmail('Ravi', 2, 'test.org'));       // overrides it\nconsole.log(formatDuration(450), '|', formatDuration(2500));\nlogStep(1, 'Open the login page');",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1351,7 +1351,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\n1500\ntrue\nasha.1@example.com\nravi.2@test.org\n450 ms | 2.5 s\nStep 1: Open the login page\n```\n\n`console.log` can take several arguments; it prints them separated by spaces.\n\nOn Day 6 you cleaned one price with a chain of text methods. Now `parsePrice` does it for **any** price text — and if the site changes its currency format, you fix one function.\n\n**Try it:** call `buildEmail('Meera')` and check the file. Read the error, then fix the call.\n\n## I2 · Extra practice (optional): refactor the password checker into functions\n\nDay 7's password checker lived inside a loop. Moved into functions, the same logic is easier to read, test and reuse:",
+          "text": "```output\n1500\ntrue\nasha.1@example.com\nravi.2@test.org\n450 ms | 2.5 s\nStep 1: Open the login page\n```\n\n`console.log` can take several arguments; it prints them separated by spaces.\n\nOn Day 6 you cleaned one price with a chain of text methods. Now `parsePrice` does it for **any** price text — and if the site changes its currency format, you fix one function.\n\n**Try it:** call `buildEmail('Meera')` and check the file. Read the error, then fix the call.\n\n## I2 · Extra practice (optional): refactor the password checker into functions\n\nDay 7's password checker lived inside a loop. Moved into functions, the same logic is easier to read, test, and reuse:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1459,7 +1459,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\nFound: <button>Log in</button>\nCaught: Button \"Sign up\" not found\nClean-up always runs\nThe program carries on\n```\n\n**Try it:** remove the `try {`, the whole `catch` block and the `finally` block (keep the lines inside `try`), then run. There's nothing to catch the error, so the program stops with a red error message and `The program carries on` is never printed.\n\n## I6 · Build your own mini test runner — with modules\n\nTime to put everything together. You'll build a tiny version of Playwright Test, split across three modules:",
+          "text": "```output\nFound: <button>Log in</button>\nCaught: Button \"Sign up\" not found\nClean-up always runs\nThe program carries on\n```\n\n**Try it:** remove the `try {`, the whole `catch` block, and the `finally` block (keep the lines inside `try`), then run. There's nothing to catch the error, so the program stops with a red error message and `The program carries on` is never printed.\n\n## I6 · Build your own mini test runner — with modules\n\nTime to put everything together. You'll build a tiny version of Playwright Test, split across three modules:",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1560,7 +1560,7 @@
         },
         {
           "type": "markdown",
-          "text": "```output\n  ✓ cart total adds up\n  ✓ headset is found by name\n  ✘ every product is in stock\n      Expected true, received false\n2 passed, 1 failed\n```\n\nThe failing test threw an error, the runner caught it, reported it, and **carried on**. That's exactly how Playwright Test behaves. Compare:\n\n| Your mini runner | Playwright Test (Day 9) |\n|---|---|\n| `import { test, expectEqual, run } from './lib/runner.ts'` | `import { test, expect } from '@playwright/test'` |\n| `test('title', async () => { … })` | `test('title', async ({ page }) => { … })` |\n| `expectEqual(total, 13297)` | `expect(total).toBe(13297)` |\n| Tests are registered first, then run by `run()` | Tests are registered in `*.spec.ts` files, then run by `npx playwright test` |\n| `try/catch` turns a thrown error into a failed test | The same — and it adds a report, screenshots and traces |\n| Runs tests one after another | Runs test files in parallel, with a fresh browser page for every test (tests inside one file run in order by default) |\n\n**Try it:** change the `import { products, type Product }` line to `import { products, Product }` (without `type`) and run the file. Read the `SyntaxError`, then put `type` back.",
+          "text": "```output\n  ✓ cart total adds up\n  ✓ headset is found by name\n  ✘ every product is in stock\n      Expected true, received false\n2 passed, 1 failed\n```\n\nThe failing test threw an error, the runner caught it, reported it, and **carried on**. That's exactly how Playwright Test behaves. Compare:\n\n| Your mini runner | Playwright Test (Day 9) |\n|---|---|\n| `import { test, expectEqual, run } from './lib/runner.ts'` | `import { test, expect } from '@playwright/test'` |\n| `test('title', async () => { … })` | `test('title', async ({ page }) => { … })` |\n| `expectEqual(total, 13297)` | `expect(total).toBe(13297)` |\n| Tests are registered first, then run by `run()` | Tests are registered in `*.spec.ts` files, then run by `npx playwright test` |\n| `try/catch` turns a thrown error into a failed test | The same — and it adds a report, screenshots, and traces |\n| Runs tests one after another | Runs test files in parallel, with a fresh browser page for every test (tests inside one file run in order by default) |\n\n**Try it:** change the `import { products, type Product }` line to `import { products, Product }` (without `type`) and run the file. Read the `SyntaxError`, then put `type` back.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1584,7 +1584,7 @@
               2
             ],
             "kind": "single",
-            "explanation": "forEach ignores the Promises returned by async callbacks, so the tests would all start at once and the summary would print before any of them finished."
+            "explanation": "`forEach` ignores the Promises returned by async callbacks, so the tests would all start at once and the summary would print before any of them finished."
           },
           "code": null,
           "callout": null,
@@ -1626,7 +1626,7 @@
               1
             ],
             "kind": "single",
-            "explanation": "h has the default value 5, so area(4) is 4 × 5."
+            "explanation": "`h` has the default value 5, so `area(4)` is 4 × 5."
           },
           "code": null,
           "callout": null,
@@ -1648,7 +1648,7 @@
               1
             ],
             "kind": "single",
-            "explanation": "With braces, you must write return yourself — the version with `{ p * 1.18 }` in braces returns undefined. A typed parameter needs brackets around it."
+            "explanation": "With braces, you must write return yourself — the version with `{ p * 1.18 }` in braces returns undefined. A typed parameter needs parentheses around it."
           },
           "code": null,
           "callout": null,
@@ -1716,7 +1716,7 @@
               1
             ],
             "kind": "single",
-            "explanation": "finally always runs — which makes it the place for clean-up."
+            "explanation": "`finally` always runs — which makes it the place for clean-up."
           },
           "code": null,
           "callout": null,
@@ -1782,7 +1782,7 @@
               3
             ],
             "kind": "single",
-            "explanation": "Assertions throw on failure. The runner catches the error, records it and moves on to the next test."
+            "explanation": "Assertions throw on failure. The runner catches the error, records it, and moves on to the next test."
           },
           "code": null,
           "callout": null,
@@ -1890,7 +1890,7 @@
         },
         {
           "type": "callout",
-          "text": "The real thing: Playwright Test. You'll write tests with `test` and `expect`, find elements with locators, act on them and assert the results — against practice pages in a real browser.",
+          "text": "The real thing: Playwright Test. You'll write tests with `test` and `expect`, find elements with locators, act on them, and assert the results — against practice pages in a real browser.",
           "starter": null,
           "variation": null,
           "checkpoint": null,
@@ -1914,7 +1914,7 @@
           "file": null,
           "run": null,
           "check": null,
-          "solution": "1 x Mouse\n3 m Cable\n\nIn the first call, count uses its default (1) and unit is undefined, so `??` gives 'x'. In the second, both are passed."
+          "solution": "1 x Mouse\n3 m Cable\n\nIn the first call, `count` uses its default (1), and `unit` is undefined, so `??` gives 'x'. In the second, both are passed."
         },
         {
           "number": 2,
@@ -1927,12 +1927,12 @@
           "file": null,
           "run": null,
           "check": null,
-          "solution": "A\nC\nD\nB\n\nA prints at once. step('B', 200) starts but isn't awaited, so the program moves straight on. It awaits step('C', 100): after 100 ms, C prints, then D. B's 200 ms finish last."
+          "solution": "A\nC\nD\nB\n\nA prints at once. `step('B', 200)` starts but isn't awaited, so the program moves straight on. It awaits step('C', 100): after 100 ms, C prints, then D. B's 200 ms wait finishes last."
         },
         {
           "number": 3,
           "difficulty": "Medium",
-          "title": "Predict — try, catch and finally",
+          "title": "Predict — try, catch, and finally",
           "kind": "predict",
           "statement": "What is printed?\n\n```ts\nfunction check(value: number): string {\n  try {\n    if (value < 0) {\n      throw new Error('negative');\n    }\n    return 'ok';\n  } catch (error) {\n    return 'caught';\n  } finally {\n    console.log(`checked ${value}`);\n  }\n}\nconsole.log(check(5));\nconsole.log(check(-1));\n```",
           "stub": null,
@@ -1940,7 +1940,7 @@
           "file": null,
           "run": null,
           "check": null,
-          "solution": "checked 5\nok\nchecked -1\ncaught\n\nfinally runs even when try or catch returns, and it runs before the returned value reaches console.log. So each \"checked\" line appears before the result."
+          "solution": "checked 5\nok\nchecked -1\ncaught\n\n`finally` runs even when `try` or `catch` returns, and it runs before the returned value reaches console.log. So each \"checked\" line appears before the result."
         },
         {
           "number": 4,
@@ -2013,7 +2013,7 @@
           "stub": "// Optional challenge: add skip to the mini runner\n// Save this as ts-basics/day8/runner-plus.ts\n",
           "hints": [
             "`type RegisteredTest = { title: string; body: TestBody; skipped: boolean };`",
-            "Keep three counters in run(): passed, failed and skipped.",
+            "Keep three counters in run(): passed, failed, and skipped.",
             "In the loop: `if (registered.skipped) { skipped++; console.log(…); continue; }`"
           ],
           "file": "ts-basics/day8/runner-plus.ts",

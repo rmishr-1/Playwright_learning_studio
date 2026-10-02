@@ -34,7 +34,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Yesterday you met the word **flaky**: a test that sometimes passes and sometimes fails, although nobody changed the code. Flaky tests are the number one reason automation projects lose trust — when a red result might be \"just flakiness\", people stop believing *any* result.\n\nAlmost every flaky test has one of four causes:\n\n| Cause | What happens | Manual-testing equivalent |\n|---|---|---|\n| **Timing** | The script clicks before the button exists, or checks a message before it appears | Clicking \"Pay\" while the page is still loading |\n| **Shared state** | One test leaves a user logged in, a cart full or a setting changed, and the next test trips over it | Testing on a machine where the previous tester left things half-done |\n| **Fragile locators** | The script finds elements by details that change often (long CSS paths, position on the page) | Test steps that say \"click the third blue button\" |\n| **Environment** | A slow server, a missing test user, a different screen size on the build server | \"It works on my machine\" |\n\nToday is about how Playwright attacks the first two causes directly and helps with the other two. Keep this table in mind — at the end of the Fundamentals you'll map every feature back to one of its rows."
+              "content": "Yesterday you met the word **flaky**: a test that sometimes passes and sometimes fails, although nobody changed the code. Flaky tests are the number one reason automation projects lose trust — when a red result might be \"just flakiness\", people stop believing *any* result.\n\nAlmost every flaky test has one of four causes:\n\n| Cause | What happens | Manual-testing equivalent |\n|---|---|---|\n| **Timing** | The script clicks before the button exists, or checks a message before it appears | Clicking \"Pay\" while the page is still loading |\n| **Shared state** | One test leaves a user logged in, a cart full, or a setting changed, and the next test trips over it | Testing on a machine where the previous tester left things half-done |\n| **Fragile locators** | The script finds elements by details that change often (long CSS paths, position on the page) | Test steps that say \"click the third blue button\" |\n| **Environment** | A slow server, a missing test user, a different screen size on the build server | \"It works on my machine\" |\n\nToday is about how Playwright attacks the first two causes directly and helps with the other two. Keep this table in mind — at the end of the Fundamentals you'll map every feature back to one of its rows."
             },
             {
               "type": "quiz",
@@ -86,7 +86,7 @@
             {
               "type": "callout",
               "variant": "tester",
-              "content": "Think of every \"the button didn't respond\", \"the message didn't appear\" or \"the list was empty\" bug you've seen during a slow day on the test environment. For an automated test, *every* day is a slow day unless the tool knows how to wait."
+              "content": "Think of every \"the button didn't respond,\" \"the message didn't appear,\" or \"the list was empty\" bug you've seen during a slow day on the test environment. For an automated test, *every* day is a slow day unless the tool knows how to wait."
             },
             {
               "type": "quiz",
@@ -134,7 +134,7 @@
             },
             {
               "type": "markdown",
-              "content": "Problem: if the page needs 6 seconds today, the test fails; if it needs 1 second, you wasted 4. Multiply by hundreds of steps and a suite that should take 5 minutes takes 50 — and it's *still* flaky.\n\n**2. Explicit waits** — write a condition for every risky step (\"wait until this button is clickable, for up to 10 seconds\"). Tools such as Selenium provide helpers for this. It works, but *you* must remember to add the right wait in the right place, every time. Forget one, and that step becomes flaky.\n\nPlaywright's answer is to **build the waiting into every action and every assertion** — you'll see exactly how in F1 and F2."
+              "content": "Problem: if the page needs 6 seconds today, the test fails; if it needs 1 second, you wasted 4. Multiply by hundreds of steps, and a suite that should take 5 minutes takes 50 — and it's *still* flaky.\n\n**2. Explicit waits** — write a condition for every risky step (\"wait until this button is clickable, for up to 10 seconds\"). Tools such as Selenium provide helpers for this. It works, but *you* must remember to add the right wait in the right place, every time. Forget one, and that step becomes flaky.\n\nPlaywright's answer is to **build the waiting into every action and every assertion** — you'll see exactly how in F1 and F2."
             },
             {
               "type": "quiz",
@@ -148,7 +148,7 @@
                 },
                 {
                   "id": "b",
-                  "text": "Across hundreds of steps it makes the whole suite very slow"
+                  "text": "Across hundreds of steps, it makes the whole suite very slow"
                 },
                 {
                   "id": "c",
@@ -181,7 +181,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "The Playwright docs describe it like this: *Playwright performs a range of actionability checks on the elements before making actions to ensure these actions behave as expected.* In plain words: **before every click, fill or check, Playwright makes sure the element is really ready — and keeps re-checking until it is.**\n\nThere are five checks:\n\n| Check | Meaning | Real-life example of failing it |\n|---|---|---|\n| **Visible** | The element has a size (it isn't empty or collapsed) and isn't hidden with styling. It may still be scrolled out of view — Playwright scrolls to it | A menu item inside a closed menu |\n| **Stable** | The element has stopped moving (its position is the same for two animation frames in a row) | A pop-up still sliding in |\n| **Receives events** | Nothing is covering it — a click at that spot would really reach it | A \"Saving…\" overlay or cookie banner on top of the button |\n| **Enabled** | It isn't disabled | A greyed-out \"Submit\" button waiting for the terms checkbox |\n| **Editable** | It's enabled *and* not read-only (for typing) | A read-only field showing your account number |\n\nEach kind of action checks only what makes sense for it:\n\n| Action | Visible | Stable | Receives events | Enabled | Editable |\n|---|---|---|---|---|---|\n| `click`, `check`, `uncheck`, `dblclick`, `tap` | ✓ | ✓ | ✓ | ✓ | – |\n| `hover`, `dragTo` | ✓ | ✓ | ✓ | – | – |\n| `fill`, `clear` | ✓ | – | – | ✓ | ✓ |\n| `selectOption` | ✓ | – | – | ✓ | – |\n\nBefore any of this, Playwright also checks that the locator matches **exactly one** element — so it never clicks the wrong \"Delete\" button by accident. (A few actions, such as pressing a key with `press` or focusing a field, need no checks at all.)\n\n### How the waiting works\n\n1. Find the element in the DOM (waiting for it to appear if necessary).\n2. Run the checks.\n3. If a check fails, wait a moment and try again — Playwright retries quickly at first, then less often.\n4. When every check passes, perform the action.\n5. If the checks still don't pass when the time limit runs out, the step fails with a **timeout** error that says which check was failing.\n\nYou'll watch these retries happen in the debug log in Implementation I2."
+              "content": "The Playwright docs describe it like this: *Playwright performs a range of actionability checks on the elements before making actions to ensure these actions behave as expected.* In plain words: **before every click, fill, or check, Playwright makes sure the element is really ready — and keeps re-checking until it is.**\n\nThere are five checks:\n\n| Check | Meaning | Real-life example of failing it |\n|---|---|---|\n| **Visible** | The element has a size (it isn't empty or collapsed) and isn't hidden with styling. It may still be scrolled out of view — Playwright scrolls to it | A menu item inside a closed menu |\n| **Stable** | The element has stopped moving (its position is the same for two animation frames in a row) | A pop-up still sliding in |\n| **Receives events** | Nothing is covering it — a click at that spot would really reach it | A \"Saving…\" overlay or cookie banner on top of the button |\n| **Enabled** | It isn't disabled | A greyed-out \"Submit\" button waiting for the terms checkbox |\n| **Editable** | It's enabled *and* not read-only (for typing) | A read-only field showing your account number |\n\nEach kind of action checks only what makes sense for it:\n\n| Action | Visible | Stable | Receives events | Enabled | Editable |\n|---|---|---|---|---|---|\n| `click`, `check`, `uncheck`, `dblclick`, `tap` | ✓ | ✓ | ✓ | ✓ | – |\n| `hover`, `dragTo` | ✓ | ✓ | ✓ | – | – |\n| `fill`, `clear` | ✓ | – | – | ✓ | ✓ |\n| `selectOption` | ✓ | – | – | ✓ | – |\n\nBefore any of this, Playwright also checks that the locator matches **exactly one** element — so it never clicks the wrong \"Delete\" button by accident. (A few actions, such as pressing a key with `press` or focusing a field, need no checks at all.)\n\n### How the waiting works\n\n1. Find the element in the DOM (waiting for it to appear if necessary).\n2. Run the checks.\n3. If a check fails, wait a moment and try again — Playwright retries quickly at first, then less often.\n4. When every check passes, perform the action.\n5. If the checks still don't pass when the time limit runs out, the step fails with a **timeout** error that says which check was failing.\n\nYou'll watch these retries happen in the debug log in Implementation I2."
             },
             {
               "type": "callout",
@@ -376,7 +376,7 @@
             {
               "type": "callout",
               "variant": "note",
-              "content": "Parallel running only works because tests are isolated. If test B relied on test A logging in first, running them at the same time — or in a different order — would break B. Playwright's design pushes you towards independent tests, which is good practice anyway."
+              "content": "Parallel running works only because tests are isolated. If test B relied on test A logging in first, running them at the same time — or in a different order — would break B. Playwright's design pushes you towards independent tests, which is good practice anyway."
             },
             {
               "type": "quiz",
@@ -414,7 +414,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "The same test runs on **Chromium, Firefox and WebKit** without changing a line of test code. You list the browsers once, in the settings file (you'll meet it on Day 3), as **projects**:"
+              "content": "The same test runs on **Chromium, Firefox, and WebKit** without changing a line of test code. You list the browsers once, in the settings file (you'll meet it on Day 3), as **projects**:"
             },
             {
               "type": "code",
@@ -424,7 +424,7 @@
             },
             {
               "type": "markdown",
-              "content": "Don't worry about the syntax — you'll edit this file on Day 3 and study it properly on Day 10. The idea is simple: every test runs once per project. 10 tests × 3 projects = 30 runs.\n\nThe same list can include **emulated phones and tablets**. Playwright ships a catalogue of device presets — screen size, touch support, pixel density and the browser's self-description (user agent):"
+              "content": "Don't worry about the syntax — you'll edit this file on Day 3 and study it properly on Day 10. The idea is simple: every test runs once per project. 10 tests × 3 projects = 30 runs.\n\nThe same list can include **emulated phones and tablets**. Playwright ships a catalogue of device presets — screen size, touch support, pixel density, and the browser's self-description (user agent):"
             },
             {
               "type": "code",
@@ -483,12 +483,12 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Playwright ships its own tools — no plugins needed.\n\n| Tool | How you start it | What it's for |\n|---|---|---|\n| **Codegen** (test generator) | `npx playwright codegen https://your-site` | Opens a browser and **records your clicks as test code**. The docs note it *prioritises role, text and test id locators* — the same user-facing style you saw on Day 1. You can also record assertions: *assert visibility*, *assert text*, *assert value* |\n| **UI Mode** | `npx playwright test --ui` | A visual window to run tests, watch every step, and \"time travel\" back through them |\n| **Inspector / debug mode** | `npx playwright test --debug` | Opens the browser and the Inspector paused at the start of the test; you then step through it one action at a time |\n| **Trace Viewer** | Record with `--trace on`, open from the HTML report | A full recording of a run: every action, a DOM snapshot before and after each one, network requests, console messages and errors |\n| **HTML report** | `npx playwright show-report` | A web page with all results, filters, errors and attachments |\n| **VS Code extension** | Install \"Playwright Test for VS Code\" | Run, debug and record tests from inside the editor (Day 3) |\n\nThe **Trace Viewer** deserves a special mention. When a test fails on a build server at 2 a.m., you can't watch it. With a trace, you open the recording the next morning and step through exactly what the page looked like at every moment. Its snapshots are real copies of the page, so you can even inspect them with Developer Tools, just like a live page."
+              "content": "Playwright ships its own tools — no plugins needed.\n\n| Tool | How you start it | What it's for |\n|---|---|---|\n| **Codegen** (test generator) | `npx playwright codegen https://your-site` | Opens a browser and **records your clicks as test code**. The docs note it *prioritises role, text and test id locators* — the same user-facing style you saw on Day 1. You can also record assertions: *assert visibility*, *assert text*, *assert value* |\n| **UI Mode** | `npx playwright test --ui` | A visual window to run tests, watch every step, and \"time travel\" back through them |\n| **Inspector / debug mode** | `npx playwright test --debug` | Opens the browser and the Inspector paused at the start of the test; you then step through it one action at a time |\n| **Trace Viewer** | Record with `--trace on`, open from the HTML report | A full recording of a run: every action, a DOM snapshot before and after each one, network requests, console messages, and errors |\n| **HTML report** | `npx playwright show-report` | A web page with all results, filters, errors, and attachments |\n| **VS Code extension** | Install \"Playwright Test for VS Code\" | Run, debug, and record tests from inside the editor (Day 3) |\n\nThe **Trace Viewer** deserves a special mention. When a test fails on a build server at 2 a.m., you can't watch it. With a trace, you open the recording the next morning and step through exactly what the page looked like at every moment. Its snapshots are real copies of the page, so you can even inspect them with Developer Tools, just like a live page."
             },
             {
               "type": "callout",
               "variant": "tester",
-              "content": "The trace is the automated version of a perfect bug report: steps, screenshots at every step, network log and console errors — collected automatically."
+              "content": "The trace is the automated version of a perfect bug report: steps, screenshots at every step, network log, and console errors — collected automatically."
             },
             {
               "type": "quiz",
@@ -554,7 +554,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Because Playwright talks to the browser at a low level (Day 1 · F3), it can do far more than click and type:\n\n| Capability | Example use |\n|---|---|\n| **Network mocking** | Replace a server's answer with your own data: test \"no products\", \"server down\" or \"10,000 results\" without touching the real server |\n| **API testing** | Send requests straight to an API and check the responses — no browser needed |\n| **Multiple tabs and users** | Customer and admin in one test (Day 1 · I5) |\n| **Screenshots and video** | Capture evidence, or compare screenshots to catch visual changes |\n| **Geolocation, time zone, language, permissions** | Test \"shops near me\", a French customer, or a denied camera permission |\n| **Uploads, downloads, dialogs, iframes** | All the awkward parts of real web apps |\n\n**Network mocking** is worth understanding now, because it changes what's *possible* to test. Think of all the states that are hard to create on a real test environment — an empty product list, a failing payment service, a very slow response. With mocking, the test tells the browser: *\"when the page asks the server for products, don't ask the server — give it this answer instead.\"* You'll do exactly that in I6."
+              "content": "Because Playwright talks to the browser at a low level (Day 1 · F3), it can do far more than click and type:\n\n| Capability | Example use |\n|---|---|\n| **Network mocking** | Replace a server's answer with your own data: test \"no products,\" \"server down,\" or \"10,000 results\" without touching the real server |\n| **API testing** | Send requests straight to an API and check the responses — no browser needed |\n| **Multiple tabs and users** | Customer and admin in one test (Day 1 · I5) |\n| **Screenshots and video** | Capture evidence, or compare screenshots to catch visual changes |\n| **Geolocation, time zone, language, permissions** | Test \"shops near me\", a French customer, or a denied camera permission |\n| **Uploads, downloads, dialogs, iframes** | All the awkward parts of real web apps |\n\n**Network mocking** is worth understanding now, because it changes what's *possible* to test. Think of all the states that are hard to create on a real test environment — an empty product list, a failing payment service, a very slow response. With mocking, the test tells the browser: *\"when the page asks the server for products, don't ask the server — give it this answer instead.\"* You'll do exactly that in I6."
             },
             {
               "type": "diagram",
@@ -563,7 +563,7 @@
             },
             {
               "type": "markdown",
-              "content": "### Putting it together: flaky-test causes and the features that fight them\n\n| Cause (from P1) | Playwright features that help |\n|---|---|\n| **Timing** | Auto-waiting (F1), web-first assertions (F2) |\n| **Shared state** | A fresh context per test (F3, Day 1) |\n| **Fragile locators** | User-facing locators like \"the button named *Log in*\" (Day 1, Day 9) and Codegen, which suggests them (F5) |\n| **Environment** | Traces to see what really happened (F5), retries with a \"flaky\" label (F3), mocking to control servers (F6) and settings for timeouts and screen size (Day 10) |"
+              "content": "### Putting it together: flaky-test causes and the features that fight them\n\n| Cause (from P1) | Playwright features that help |\n|---|---|\n| **Timing** | Auto-waiting (F1), web-first assertions (F2) |\n| **Shared state** | A fresh context per test (F3, Day 1) |\n| **Fragile locators** | User-facing locators like \"the button named *Log in*\" (Day 1, Day 9) and Codegen, which suggests them (F5) |\n| **Environment** | Traces to see what really happened (F5), retries with a \"flaky\" label (F3), mocking to control servers (F6), and settings for timeouts and screen size (Day 10) |"
             },
             {
               "type": "quiz",
@@ -601,7 +601,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "All three are respected tools. Here are the five differences that matter most when choosing:\n\n| | **Playwright** | **Selenium WebDriver** | **Cypress** |\n|---|---|---|---|\n| Waiting | Automatic for actions and assertions | Configured by you: a general \"implicit\" wait, or explicit waits written for each risky step | Automatic retries |\n| Browsers | Chromium, Firefox, WebKit (+ installed Chrome, Edge) | Chrome, Edge, Firefox, Safari — the real branded browsers | Chrome-family, Firefox, Electron; WebKit experimental |\n| Languages | JS/TS, Python, Java, .NET | Java, Python, C#, JavaScript, Ruby and more | JS/TS only |\n| Test runner and parallel runs | Built in, workers included | Bring your own runner (TestNG, JUnit, pytest…); Selenium Grid to spread across machines | Built in; parallel through a paid cloud service or third-party tools |\n| Several tabs or users in one test | Yes — pages and contexts | Yes — window handles | Not supported — one tab per test |"
+              "content": "All three are respected tools. Here are the five differences that matter most when choosing:\n\n| | **Playwright** | **Selenium WebDriver** | **Cypress** |\n|---|---|---|---|\n| Waiting | Automatic for actions and assertions | Configured by you: a general \"implicit\" wait, or explicit waits written for each risky step | Automatic retries |\n| Browsers | Chromium, Firefox, WebKit (+ installed Chrome, Edge) | Chrome, Edge, Firefox, Safari — the real branded browsers | Chrome-family, Firefox, Electron; WebKit experimental |\n| Languages | JS/TS, Python, Java, .NET | Java, Python, C#, JavaScript, Ruby, and more | JS/TS only |\n| Test runner and parallel runs | Built in, workers included | Bring your own runner (TestNG, JUnit, pytest…); Selenium Grid to spread across machines | Built in; parallel through a paid cloud service or third-party tools |\n| Several tabs or users in one test | Yes — pages and contexts | Yes — window handles | Not supported — one tab per test |"
             },
             {
               "type": "reference",
@@ -674,7 +674,7 @@
                 "b",
                 "c"
               ],
-              "explanation": "Selenium is older, very mature and supports more languages. Playwright bundles its runner and reports and runs in parallel with workers. Selenium relies on waits you configure or write yourself, so the statement about automatic waiting is false."
+              "explanation": "Selenium is older, very mature, and supports more languages. Playwright bundles its runner and reports, and runs in parallel with workers. Selenium relies on waits you configure or write yourself, so the statement about automatic waiting is false."
             }
           ]
         },
@@ -684,7 +684,7 @@
           "blocks": [
             {
               "type": "markdown",
-              "content": "Playwright is often called \"the future of automation\". Here's what's behind that:\n\n1. **Free and open source.** Apache 2.0 licence, no paid tier needed for parallel runs, reports or tools.\n2. **Built for modern web apps.** Pages that change constantly without reloading are the norm; auto-waiting and web-first assertions were designed for exactly that.\n3. **Trust.** Removing sleeps and shared state attacks the causes of flakiness, so a red result means something.\n4. **Speed.** Parallel workers and cheap contexts make large suites fast enough to run on every code change.\n5. **One tool, many kinds of testing.** UI, API, mobile viewports, visual comparisons and network mocking — one API, one report.\n6. **Very active development.** Microsoft releases a new version roughly every month or two, with updated browsers and new features.\n\n### AI and Playwright\n\nAI assistants increasingly *use* Playwright to work with web pages:\n\n- **Playwright MCP** is a server that gives AI assistants a browser. (MCP, the *Model Context Protocol*, is a standard way for AI assistants to use tools.) The docs explain that it works on the page's **accessibility tree, not pixels**. The accessibility tree is the simplified view of a page that screen readers use: every element with its role and name — \"button *Log in*\", \"heading *Welcome back*\" — the same way Playwright's locators describe elements. The docs call this *far cheaper than DOM dumps or screenshots.*\n- **Playwright Test Agents** are three AI helpers: a **planner** that *explores the app and produces a Markdown test plan*, a **generator** that turns the plan into Playwright tests, and a **healer** that *executes the test suite and automatically repairs failing tests*.\n\nWhat this means for you: AI can draft and repair tests faster than ever, but it still needs someone who knows **what should be tested**, **what \"correct\" looks like**, and **whether a failure is a real bug**. That judgement is the manual tester's core skill — and the reason this course starts from it."
+              "content": "Playwright is often called \"the future of automation\". Here's what's behind that:\n\n1. **Free and open source.** Apache 2.0 licence, no paid tier needed for parallel runs, reports, or tools.\n2. **Built for modern web apps.** Pages that change constantly without reloading are the norm; auto-waiting and web-first assertions were designed for exactly that.\n3. **Trust.** Removing sleeps and shared state attacks the causes of flakiness, so a red result means something.\n4. **Speed.** Parallel workers and cheap contexts make large suites fast enough to run on every code change.\n5. **One tool, many kinds of testing.** UI, API, mobile viewports, visual comparisons, and network mocking — one API, one report.\n6. **Very active development.** Microsoft releases a new version roughly every month or two, with updated browsers and new features.\n\n### AI and Playwright\n\nAI assistants increasingly *use* Playwright to work with web pages:\n\n- **Playwright MCP** is a server that gives AI assistants a browser. (MCP, the *Model Context Protocol*, is a standard way for AI assistants to use tools.) The docs explain that it works on the page's **accessibility tree, not pixels**. The accessibility tree is the simplified view of a page that screen readers use: every element with its role and name — \"button *Log in*\", \"heading *Welcome back*\" — the same way Playwright's locators describe elements. The docs call this *far cheaper than DOM dumps or screenshots.*\n- **Playwright Test Agents** are three AI helpers: a **planner** that *explores the app and produces a Markdown test plan*, a **generator** that turns the plan into Playwright tests, and a **healer** that *executes the test suite and automatically repairs failing tests*.\n\nWhat this means for you: AI can draft and repair tests faster than ever, but it still needs someone who knows **what should be tested**, **what \"correct\" looks like**, and **whether a failure is a real bug**. That judgement is the manual tester's core skill — and the reason this course starts from it."
             },
             {
               "type": "callout",
@@ -717,7 +717,7 @@
               "correct": [
                 "d"
               ],
-              "explanation": "MCP works on the accessibility tree rather than pixels — structured, cheap and precise, using the same roles and names as Playwright's locators."
+              "explanation": "MCP works on the accessibility tree rather than pixels — structured, cheap, and precise, using the same roles and names as Playwright's locators."
             }
           ]
         }
@@ -766,7 +766,7 @@
             },
             {
               "type": "markdown",
-              "content": "**What to notice**\n\n1. The browser pane shows \"Loading payment options…\" for about 2 seconds.\n2. The moment the button appears, it's clicked, and the text changes to \"Payment successful\".\n3. The test took just over 2 seconds — exactly as long as needed.\n\n`page.locator('#status')` is a new way of finding an element: by its **id** (`#` means \"id\"). You'll prefer user-facing locators like `getByRole`, but ids are handy for elements that have no role or label, like this status paragraph.\n\n**Try it:** change `2000` to `8000` and run again — still green, it simply waits longer. Then change it to `40000`: after 30 seconds the test fails with a **timeout**, because a whole test may take at most 30 seconds by default. Change it back to `2000`."
+              "content": "**What to notice**\n\n1. The browser pane shows \"Loading payment options…\" for about 2 seconds.\n2. The moment the button appears, it's clicked, and the text changes to \"Payment successful\".\n3. The test took just over 2 seconds — exactly as long as needed.\n\n`page.locator('#status')` is a new way of finding an element: by its **id** (`#` means \"id\"). You'll prefer user-facing locators like `getByRole`, but ids are handy for elements that have no role or label, like this status paragraph.\n\n**Try it:** change `2000` to `8000` and run again — still green; it simply waits longer. Then change it to `40000`: after 30 seconds the test fails with a **timeout**, because a whole test may take at most 30 seconds by default. Change it back to `2000`."
             }
           ]
         },
@@ -954,7 +954,7 @@
             },
             {
               "type": "markdown",
-              "content": "The exact times depend on your computer — the more CPU cores, the bigger the gain. (These tests share one file, so they run in parallel thanks to the `fullyParallel` setting in this workspace.) (The loop at the top — `for (const name of [...])` — creates one test per name. You'll write loops like this on Day 7.)"
+              "content": "The exact times depend on your computer — the more CPU cores, the bigger the gain. (These tests share one file, so they run in parallel thanks to the `fullyParallel` setting in this workspace.) The loop at the top — `for (const name of [...])` — creates one test per name. You'll write loops like this on Day 7."
             }
           ]
         },
@@ -1017,7 +1017,7 @@
             },
             {
               "type": "markdown",
-              "content": "In the report, click the test, then the **Trace** section. You'll see:\n\n1. A **timeline** across the top — hover to see the page at any moment.\n2. The list of **actions** on the left — click `click getByRole('button', { name: 'Pay now' })` and compare the **Before** and **After** snapshots.\n3. Tabs for **Console**, **Network**, **Source** and **Errors**.\n\nLook at the click in the actions list: its duration is about **2 seconds** — the time Playwright spent waiting for the button. Click it and compare the snapshots: **Before** shows the page when the click was requested (\"Loading payment options…\", no button yet), and **Action** shows the moment of the click, with the button there. That's the auto-wait, recorded.\n\nWhen you're done, press `Ctrl + C` in the terminal to stop the report server.\n\n**On your own computer (optional):** these tools open extra windows, so try them once you've installed Playwright on Day 3:"
+              "content": "In the report, click the test, then the **Trace** section. You'll see:\n\n1. A **timeline** across the top — hover to see the page at any moment.\n2. The list of **actions** on the left — click `click getByRole('button', { name: 'Pay now' })` and compare the **Before** and **After** snapshots.\n3. Tabs for **Console**, **Network**, **Source**, and **Errors**.\n\nLook at the click in the actions list: its duration is about **2 seconds** — the time Playwright spent waiting for the button. Click it and compare the snapshots: **Before** shows the page when the click was requested (\"Loading payment options…\", no button yet), and **Action** shows the moment of the click, with the button there. That's the auto-wait, recorded.\n\nWhen you're done, press `Ctrl + C` in the terminal to stop the report server.\n\n**On your own computer (optional):** these tools open extra windows, so try them once you've installed Playwright on Day 3:"
             },
             {
               "type": "terminal",
@@ -1215,7 +1215,7 @@
               "correct": [
                 "b"
               ],
-              "explanation": "route() intercepts the request; abort() makes it fail. It only affects this test's browser — the real server is untouched."
+              "explanation": "`route()` intercepts the request; `abort()` makes it fail. It affects only this test's browser — the real server is untouched."
             },
             {
               "type": "quiz",
@@ -1243,7 +1243,7 @@
               "correct": [
                 "a"
               ],
-              "explanation": "The Trace Viewer replays the run step by step, with snapshots, network, console and errors."
+              "explanation": "The Trace Viewer replays the run step by step, with snapshots, network, console, and errors."
             },
             {
               "type": "quiz",
@@ -1299,7 +1299,7 @@
               "correct": [
                 "a"
               ],
-              "explanation": "The planner explores and plans, the generator writes tests, the healer runs and repairs failing tests. None of them fix your application's bugs."
+              "explanation": "The planner explores and plans, the generator writes tests, and the healer runs and repairs failing tests. None of them fix your application's bugs."
             },
             {
               "type": "quiz",
@@ -1341,7 +1341,7 @@
               "id": "d2-ex1",
               "title": "Which check is failing?",
               "level": "easy",
-              "prompt": "For each situation, name the actionability check that makes Playwright wait (Visible, Stable, Receives events, Enabled or Editable) and say what the test will do.\n\n1. A \"Next\" button is greyed out until you tick \"I agree\".\n2. A modal dialog is sliding in from the top of the screen when the test tries to click its \"OK\" button.\n3. The test tries to type into an \"Account number\" field that is read-only.\n4. A chat widget pops up over the \"Checkout\" button.\n5. The test tries to click \"Sign out\", which is inside a closed dropdown menu.",
+              "prompt": "For each situation, name the actionability check that makes Playwright wait (Visible, Stable, Receives events, Enabled, or Editable) and say what the test will do.\n\n1. A \"Next\" button is greyed out until you tick \"I agree\".\n2. A modal dialog is sliding in from the top of the screen when the test tries to click its \"OK\" button.\n3. The test tries to type into an \"Account number\" field that is read-only.\n4. A chat widget pops up over the \"Checkout\" button.\n5. The test tries to click \"Sign out\", which is inside a closed dropdown menu.",
               "modelAnswer": "1. **Enabled** — Playwright waits until the button is enabled (after \"I agree\" is ticked), then clicks. If nobody ticks it, the step times out.\n2. **Stable** — it waits until the modal stops moving, then clicks OK.\n3. **Editable** — the field is read-only, so `fill` waits and then times out. That's either a test mistake or a real bug.\n4. **Receives events** — the widget intercepts the click; Playwright waits until the button is no longer covered (the test may need to close the widget first).\n5. **Visible** — the menu item is hidden until the dropdown opens. The test must open the menu first; otherwise the step times out.",
               "check": {
                 "kind": "self"
@@ -1373,7 +1373,7 @@
               "id": "d2-ex3",
               "title": "Mock three products",
               "level": "medium",
-              "prompt": "Create `tests/day2/three-products.spec.ts`. Using the page from `mock-api.spec.ts`, write a test called `shows three mocked products` that:\n\n1. Mocks `/api/products` with **three** products: `Monitor` (₹8999), `Webcam` (₹2499) and `Headset` (₹1799).\n2. Opens `https://shop.test/`.\n3. Checks that there are exactly **3** list items — use `await expect(page.getByRole('listitem')).toHaveCount(3);`\n4. Checks that the **first** item's text is `Monitor - ₹8999` — use `page.getByRole('listitem').first()`.\n\nCopy the `productsPage` HTML from `mock-api.spec.ts` into your new file.",
+              "prompt": "Create `tests/day2/three-products.spec.ts`. Using the page from `mock-api.spec.ts`, write a test called `shows three mocked products` that:\n\n1. Mocks `/api/products` with **three** products: `Monitor` (₹8999), `Webcam` (₹2499), and `Headset` (₹1799).\n2. Opens `https://shop.test/`.\n3. Checks that there are exactly **3** list items — use `await expect(page.getByRole('listitem')).toHaveCount(3);`\n4. Checks that the **first** item's text is `Monitor - ₹8999` — use `page.getByRole('listitem').first()`.\n\nCopy the `productsPage` HTML from `mock-api.spec.ts` into your new file.",
               "file": "tests/day2/three-products.spec.ts",
               "run": "npx playwright test tests/day2/three-products.spec.ts --project=chromium",
               "hints": [
@@ -1393,8 +1393,8 @@
               "id": "d2-ex4",
               "title": "Choose the right tool",
               "level": "medium",
-              "prompt": "For each scenario, say whether Playwright is a good fit and **why**, in one or two sentences.\n\n1. A travel website must work on Chrome, Firefox and Safari. The team writes TypeScript.\n2. A bank wants to automate its native iOS app.\n3. A company has 3,000 stable Selenium + Java tests and an expert Java team.\n4. An e-commerce site's checkout tests fail randomly because pages load at different speeds.\n5. The team needs to test what the page shows when the recommendations service returns an error — something that never happens on the test environment.",
-              "modelAnswer": "1. **Good fit** — one TypeScript suite runs on Chromium, Firefox and WebKit (Safari's engine). WebKit is very close to Safari but not the Safari app itself, so a final check on real Safari may still be worthwhile.\n2. **Not a fit** — Playwright automates web apps, not native mobile apps; use a tool such as Appium.\n3. **Keep Selenium for now** — the suite works and the team is skilled. Playwright could be piloted for new projects; migrating everything may not pay off.\n4. **Good fit** — auto-waiting and web-first assertions remove timing-based flakiness without fixed sleeps.\n5. **Good fit** — network mocking can make that service's request fail on purpose, as a repeatable test.",
+              "prompt": "For each scenario, say whether Playwright is a good fit and **why**, in one or two sentences.\n\n1. A travel website must work on Chrome, Firefox, and Safari. The team writes TypeScript.\n2. A bank wants to automate its native iOS app.\n3. A company has 3,000 stable Selenium + Java tests and an expert Java team.\n4. An e-commerce site's checkout tests fail randomly because pages load at different speeds.\n5. The team needs to test what the page shows when the recommendations service returns an error — something that never happens on the test environment.",
+              "modelAnswer": "1. **Good fit** — one TypeScript suite runs on Chromium, Firefox, and WebKit (Safari's engine). WebKit is very close to Safari but not the Safari app itself, so a final check on real Safari may still be worthwhile.\n2. **Not a fit** — Playwright automates web apps, not native mobile apps; use a tool such as Appium.\n3. **Keep Selenium for now** — the suite works and the team is skilled. Playwright could be piloted for new projects; migrating everything may not pay off.\n4. **Good fit** — auto-waiting and web-first assertions remove timing-based flakiness without fixed sleeps.\n5. **Good fit** — network mocking can make that service's request fail on purpose, as a repeatable test.",
               "check": {
                 "kind": "self"
               }
@@ -1432,7 +1432,7 @@
             {
               "type": "callout",
               "variant": "tip",
-              "content": "Time to set up your own machine: Node.js, the terminal and VS Code, then create a Playwright project with one command, run your first tests and open the HTML report.",
+              "content": "Time to set up your own machine: Node.js, the terminal, and VS Code; then create a Playwright project with one command, run your first tests, and open the HTML report.",
               "title": "Coming up on Day 3"
             }
           ]

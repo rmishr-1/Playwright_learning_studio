@@ -31,7 +31,7 @@ Almost every flaky test has one of four causes:
 | Cause | What happens | Manual-testing equivalent |
 |---|---|---|
 | **Timing** | The script clicks before the button exists, or checks a message before it appears | Clicking "Pay" while the page is still loading |
-| **Shared state** | One test leaves a user logged in, a cart full or a setting changed, and the next test trips over it | Testing on a machine where the previous tester left things half-done |
+| **Shared state** | One test leaves a user logged in, a cart full, or a setting changed, and the next test trips over it | Testing on a machine where the previous tester left things half-done |
 | **Fragile locators** | The script finds elements by details that change often (long CSS paths, position on the page) | Test steps that say "click the third blue button" |
 | **Environment** | A slow server, a missing test user, a different screen size on the build server | "It works on my machine" |
 
@@ -75,7 +75,7 @@ sequenceDiagram
 A human tester waits naturally — you see the spinner and don't click yet. A naïve script doesn't: it clicks the moment the first HTML arrives, and fails. That's the **timing** row from P1.
 
 > [!TESTER]
-> Think of every "the button didn't respond", "the message didn't appear" or "the list was empty" bug you've seen during a slow day on the test environment. For an automated test, *every* day is a slow day unless the tool knows how to wait.
+> Think of every "the button didn't respond," "the message didn't appear," or "the list was empty" bug you've seen during a slow day on the test environment. For an automated test, *every* day is a slow day unless the tool knows how to wait.
 
 ```quiz
 id: d2-p2-q1
@@ -101,7 +101,7 @@ await sleep(5000);            // wait 5 seconds, whether needed or not
 await clickButton('Pay now');
 ```
 
-Problem: if the page needs 6 seconds today, the test fails; if it needs 1 second, you wasted 4. Multiply by hundreds of steps and a suite that should take 5 minutes takes 50 — and it's *still* flaky.
+Problem: if the page needs 6 seconds today, the test fails; if it needs 1 second, you wasted 4. Multiply by hundreds of steps, and a suite that should take 5 minutes takes 50 — and it's *still* flaky.
 
 **2. Explicit waits** — write a condition for every risky step ("wait until this button is clickable, for up to 10 seconds"). Tools such as Selenium provide helpers for this. It works, but *you* must remember to add the right wait in the right place, every time. Forget one, and that step becomes flaky.
 
@@ -115,7 +115,7 @@ options:
   - It wastes time whenever the page is ready sooner
   - It still fails when the page needs longer than 5 seconds
   - It makes the browser slower
-  - Across hundreds of steps it makes the whole suite very slow
+  - Across hundreds of steps, it makes the whole suite very slow
 answer: [a, b, d]
 explanation: Fixed sleeps are both slow and unreliable. The browser itself doesn't get slower — the test just sits idle.
 ```
@@ -124,7 +124,7 @@ explanation: Fixed sleeps are both slow and unreliable. The browser itself doesn
 
 ## F1 · Auto-waiting and actionability checks
 
-The Playwright docs describe it like this: *Playwright performs a range of actionability checks on the elements before making actions to ensure these actions behave as expected.* In plain words: **before every click, fill or check, Playwright makes sure the element is really ready — and keeps re-checking until it is.**
+The Playwright docs describe it like this: *Playwright performs a range of actionability checks on the elements before making actions to ensure these actions behave as expected.* In plain words: **before every click, fill, or check, Playwright makes sure the element is really ready — and keeps re-checking until it is.**
 
 There are five checks:
 
@@ -291,7 +291,7 @@ By default, the test *files* are shared out between workers, and the tests insid
 Playwright can also **retry** a failed test automatically — the project you'll create on Day 3 does this on build servers. If a test fails and then passes on a retry, the report marks it **flaky** instead of simply "passed". That's useful information: something in that test (or the app) is unreliable and deserves investigation. Retries are a safety net, not a cure — never use them to hide a problem.
 
 > [!NOTE]
-> Parallel running only works because tests are isolated. If test B relied on test A logging in first, running them at the same time — or in a different order — would break B. Playwright's design pushes you towards independent tests, which is good practice anyway.
+> Parallel running works only because tests are isolated. If test B relied on test A logging in first, running them at the same time — or in a different order — would break B. Playwright's design pushes you towards independent tests, which is good practice anyway.
 
 ```quiz
 id: d2-f3-q1
@@ -308,7 +308,7 @@ explanation: Isolation is what makes parallel runs safe. Workers then run severa
 
 ## F4 · One test, every browser — and mobile too
 
-The same test runs on **Chromium, Firefox and WebKit** without changing a line of test code. You list the browsers once, in the settings file (you'll meet it on Day 3), as **projects**:
+The same test runs on **Chromium, Firefox, and WebKit** without changing a line of test code. You list the browsers once, in the settings file (you'll meet it on Day 3), as **projects**:
 
 ```ts mode=read
 projects: [
@@ -320,7 +320,7 @@ projects: [
 
 Don't worry about the syntax — you'll edit this file on Day 3 and study it properly on Day 10. The idea is simple: every test runs once per project. 10 tests × 3 projects = 30 runs.
 
-The same list can include **emulated phones and tablets**. Playwright ships a catalogue of device presets — screen size, touch support, pixel density and the browser's self-description (user agent):
+The same list can include **emulated phones and tablets**. Playwright ships a catalogue of device presets — screen size, touch support, pixel density, and the browser's self-description (user agent):
 
 ```ts mode=read
 { name: 'Mobile Chrome', use: { ...devices['Pixel 5'] } },
@@ -357,14 +357,14 @@ Playwright ships its own tools — no plugins needed.
 | **Codegen** (test generator) | `npx playwright codegen https://your-site` | Opens a browser and **records your clicks as test code**. The docs note it *prioritises role, text and test id locators* — the same user-facing style you saw on Day 1. You can also record assertions: *assert visibility*, *assert text*, *assert value* |
 | **UI Mode** | `npx playwright test --ui` | A visual window to run tests, watch every step, and "time travel" back through them |
 | **Inspector / debug mode** | `npx playwright test --debug` | Opens the browser and the Inspector paused at the start of the test; you then step through it one action at a time |
-| **Trace Viewer** | Record with `--trace on`, open from the HTML report | A full recording of a run: every action, a DOM snapshot before and after each one, network requests, console messages and errors |
-| **HTML report** | `npx playwright show-report` | A web page with all results, filters, errors and attachments |
-| **VS Code extension** | Install "Playwright Test for VS Code" | Run, debug and record tests from inside the editor (Day 3) |
+| **Trace Viewer** | Record with `--trace on`, open from the HTML report | A full recording of a run: every action, a DOM snapshot before and after each one, network requests, console messages, and errors |
+| **HTML report** | `npx playwright show-report` | A web page with all results, filters, errors, and attachments |
+| **VS Code extension** | Install "Playwright Test for VS Code" | Run, debug, and record tests from inside the editor (Day 3) |
 
 The **Trace Viewer** deserves a special mention. When a test fails on a build server at 2 a.m., you can't watch it. With a trace, you open the recording the next morning and step through exactly what the page looked like at every moment. Its snapshots are real copies of the page, so you can even inspect them with Developer Tools, just like a live page.
 
 > [!TESTER]
-> The trace is the automated version of a perfect bug report: steps, screenshots at every step, network log and console errors — collected automatically.
+> The trace is the automated version of a perfect bug report: steps, screenshots at every step, network log, and console errors — collected automatically.
 
 ```quiz
 id: d2-f5-q1
@@ -398,7 +398,7 @@ Because Playwright talks to the browser at a low level (Day 1 · F3), it can do 
 
 | Capability | Example use |
 |---|---|
-| **Network mocking** | Replace a server's answer with your own data: test "no products", "server down" or "10,000 results" without touching the real server |
+| **Network mocking** | Replace a server's answer with your own data: test "no products," "server down," or "10,000 results" without touching the real server |
 | **API testing** | Send requests straight to an API and check the responses — no browser needed |
 | **Multiple tabs and users** | Customer and admin in one test (Day 1 · I5) |
 | **Screenshots and video** | Capture evidence, or compare screenshots to catch visual changes |
@@ -421,7 +421,7 @@ flowchart LR
 | **Timing** | Auto-waiting (F1), web-first assertions (F2) |
 | **Shared state** | A fresh context per test (F3, Day 1) |
 | **Fragile locators** | User-facing locators like "the button named *Log in*" (Day 1, Day 9) and Codegen, which suggests them (F5) |
-| **Environment** | Traces to see what really happened (F5), retries with a "flaky" label (F3), mocking to control servers (F6) and settings for timeouts and screen size (Day 10) |
+| **Environment** | Traces to see what really happened (F5), retries with a "flaky" label (F3), mocking to control servers (F6), and settings for timeouts and screen size (Day 10) |
 
 ```quiz
 id: d2-f6-q1
@@ -444,7 +444,7 @@ All three are respected tools. Here are the five differences that matter most wh
 |---|---|---|---|
 | Waiting | Automatic for actions and assertions | Configured by you: a general "implicit" wait, or explicit waits written for each risky step | Automatic retries |
 | Browsers | Chromium, Firefox, WebKit (+ installed Chrome, Edge) | Chrome, Edge, Firefox, Safari — the real branded browsers | Chrome-family, Firefox, Electron; WebKit experimental |
-| Languages | JS/TS, Python, Java, .NET | Java, Python, C#, JavaScript, Ruby and more | JS/TS only |
+| Languages | JS/TS, Python, Java, .NET | Java, Python, C#, JavaScript, Ruby, and more | JS/TS only |
 | Test runner and parallel runs | Built in, workers included | Bring your own runner (TestNG, JUnit, pytest…); Selenium Grid to spread across machines | Built in; parallel through a paid cloud service or third-party tools |
 | Several tabs or users in one test | Yes — pages and contexts | Yes — window handles | Not supported — one tab per test |
 
@@ -492,18 +492,18 @@ options:
   - Selenium automatically waits before every action, exactly like Playwright
   - Playwright can run tests in parallel on one machine without an extra server
 answer: [a, b, d]
-explanation: Selenium is older, very mature and supports more languages. Playwright bundles its runner and reports and runs in parallel with workers. Selenium relies on waits you configure or write yourself, so the statement about automatic waiting is false.
+explanation: Selenium is older, very mature, and supports more languages. Playwright bundles its runner and reports, and runs in parallel with workers. Selenium relies on waits you configure or write yourself, so the statement about automatic waiting is false.
 ```
 
 ## F8 · The future of automation — and where AI fits
 
 Playwright is often called "the future of automation". Here's what's behind that:
 
-1. **Free and open source.** Apache 2.0 licence, no paid tier needed for parallel runs, reports or tools.
+1. **Free and open source.** Apache 2.0 licence, no paid tier needed for parallel runs, reports, or tools.
 2. **Built for modern web apps.** Pages that change constantly without reloading are the norm; auto-waiting and web-first assertions were designed for exactly that.
 3. **Trust.** Removing sleeps and shared state attacks the causes of flakiness, so a red result means something.
 4. **Speed.** Parallel workers and cheap contexts make large suites fast enough to run on every code change.
-5. **One tool, many kinds of testing.** UI, API, mobile viewports, visual comparisons and network mocking — one API, one report.
+5. **One tool, many kinds of testing.** UI, API, mobile viewports, visual comparisons, and network mocking — one API, one report.
 6. **Very active development.** Microsoft releases a new version roughly every month or two, with updated browsers and new features.
 
 ### AI and Playwright
@@ -528,7 +528,7 @@ options:
   - It reads the website's source code from the server
   - It asks a human to describe the page
 answer: b
-explanation: MCP works on the accessibility tree rather than pixels — structured, cheap and precise, using the same roles and names as Playwright's locators.
+explanation: MCP works on the accessibility tree rather than pixels — structured, cheap, and precise, using the same roles and names as Playwright's locators.
 ```
 
 # Implementation
@@ -588,7 +588,7 @@ Running 1 test using 1 worker
 
 `page.locator('#status')` is a new way of finding an element: by its **id** (`#` means "id"). You'll prefer user-facing locators like `getByRole`, but ids are handy for elements that have no role or label, like this status paragraph.
 
-**Try it:** change `2000` to `8000` and run again — still green, it simply waits longer. Then change it to `40000`: after 30 seconds the test fails with a **timeout**, because a whole test may take at most 30 seconds by default. Change it back to `2000`.
+**Try it:** change `2000` to `8000` and run again — still green; it simply waits longer. Then change it to `40000`: after 30 seconds the test fails with a **timeout**, because a whole test may take at most 30 seconds by default. Change it back to `2000`.
 
 ## I2 · Watch the actionability checks in the log
 
@@ -814,7 +814,7 @@ Running 4 tests using 4 workers
   4 passed (6.6s)
 ```
 
-The exact times depend on your computer — the more CPU cores, the bigger the gain. (These tests share one file, so they run in parallel thanks to the `fullyParallel` setting in this workspace.) (The loop at the top — `for (const name of [...])` — creates one test per name. You'll write loops like this on Day 7.)
+The exact times depend on your computer — the more CPU cores, the bigger the gain. (These tests share one file, so they run in parallel thanks to the `fullyParallel` setting in this workspace.) The loop at the top — `for (const name of [...])` — creates one test per name. You'll write loops like this on Day 7.
 
 ## I6 · Mock the server
 
@@ -904,7 +904,7 @@ In the report, click the test, then the **Trace** section. You'll see:
 
 1. A **timeline** across the top — hover to see the page at any moment.
 2. The list of **actions** on the left — click `click getByRole('button', { name: 'Pay now' })` and compare the **Before** and **After** snapshots.
-3. Tabs for **Console**, **Network**, **Source** and **Errors**.
+3. Tabs for **Console**, **Network**, **Source**, and **Errors**.
 
 Look at the click in the actions list: its duration is about **2 seconds** — the time Playwright spent waiting for the button. Click it and compare the snapshots: **Before** shows the page when the click was requested ("Loading payment options…", no button yet), and **Action** shows the moment of the click, with the button there. That's the auto-wait, recorded.
 
@@ -999,7 +999,7 @@ options:
   - Opens the orders page
   - Records a trace of the orders request
 answer: b
-explanation: route() intercepts the request; abort() makes it fail. It only affects this test's browser — the real server is untouched.
+explanation: `route()` intercepts the request; `abort()` makes it fail. It affects only this test's browser — the real server is untouched.
 ```
 
 ```quiz
@@ -1012,7 +1012,7 @@ options:
   - UI Mode's test list
   - The terminal output
 answer: b
-explanation: The Trace Viewer replays the run step by step, with snapshots, network, console and errors.
+explanation: The Trace Viewer replays the run step by step, with snapshots, network, console, and errors.
 ```
 
 ```quiz
@@ -1038,7 +1038,7 @@ options:
   - Runs the tests and automatically repairs failing ones
   - Fixes bugs in the application
 answer: c
-explanation: The planner explores and plans, the generator writes tests, the healer runs and repairs failing tests. None of them fix your application's bugs.
+explanation: The planner explores and plans, the generator writes tests, and the healer runs and repairs failing tests. None of them fix your application's bugs.
 ```
 
 ```quiz
@@ -1062,7 +1062,7 @@ title: Which check is failing?
 level: easy
 type: written
 prompt: |
-  For each situation, name the actionability check that makes Playwright wait (Visible, Stable, Receives events, Enabled or Editable) and say what the test will do.
+  For each situation, name the actionability check that makes Playwright wait (Visible, Stable, Receives events, Enabled, or Editable) and say what the test will do.
 
   1. A "Next" button is greyed out until you tick "I agree".
   2. A modal dialog is sliding in from the top of the screen when the test tries to click its "OK" button.
@@ -1130,7 +1130,7 @@ type: code
 prompt: |
   Create `tests/day2/three-products.spec.ts`. Using the page from `mock-api.spec.ts`, write a test called `shows three mocked products` that:
 
-  1. Mocks `/api/products` with **three** products: `Monitor` (₹8999), `Webcam` (₹2499) and `Headset` (₹1799).
+  1. Mocks `/api/products` with **three** products: `Monitor` (₹8999), `Webcam` (₹2499), and `Headset` (₹1799).
   2. Opens `https://shop.test/`.
   3. Checks that there are exactly **3** list items — use `await expect(page.getByRole('listitem')).toHaveCount(3);`
   4. Checks that the **first** item's text is `Monitor - ₹8999` — use `page.getByRole('listitem').first()`.
@@ -1187,13 +1187,13 @@ type: written
 prompt: |
   For each scenario, say whether Playwright is a good fit and **why**, in one or two sentences.
 
-  1. A travel website must work on Chrome, Firefox and Safari. The team writes TypeScript.
+  1. A travel website must work on Chrome, Firefox, and Safari. The team writes TypeScript.
   2. A bank wants to automate its native iOS app.
   3. A company has 3,000 stable Selenium + Java tests and an expert Java team.
   4. An e-commerce site's checkout tests fail randomly because pages load at different speeds.
   5. The team needs to test what the page shows when the recommendations service returns an error — something that never happens on the test environment.
 modelAnswer: |
-  1. **Good fit** — one TypeScript suite runs on Chromium, Firefox and WebKit (Safari's engine). WebKit is very close to Safari but not the Safari app itself, so a final check on real Safari may still be worthwhile.
+  1. **Good fit** — one TypeScript suite runs on Chromium, Firefox, and WebKit (Safari's engine). WebKit is very close to Safari but not the Safari app itself, so a final check on real Safari may still be worthwhile.
   2. **Not a fit** — Playwright automates web apps, not native mobile apps; use a tool such as Appium.
   3. **Keep Selenium for now** — the suite works and the team is skilled. Playwright could be piloted for new projects; migrating everything may not pay off.
   4. **Good fit** — auto-waiting and web-first assertions remove timing-based flakiness without fixed sleeps.
@@ -1267,4 +1267,4 @@ solution: |
 4. Give one situation where you would *not* choose Playwright.
 
 > [!TIP] Coming up on Day 3
-> Time to set up your own machine: Node.js, the terminal and VS Code, then create a Playwright project with one command, run your first tests and open the HTML report.
+> Time to set up your own machine: Node.js, the terminal, and VS Code; then create a Playwright project with one command, run your first tests, and open the HTML report.
