@@ -25,7 +25,39 @@ export function savePreview(html: string): string {
   return 'http://127.0.0.1:' + listening.reportPort + previewPath() + '/' + id;
 }
 
-export const previewPage = (id: string): string | undefined => pages.get(id);
+/**
+ * The sandbox gives the page no storage: reading localStorage throws, and a practice page that
+ * remembers a login with it (Day 1's shop-home.ts) stopped on its first line. In a test the page has
+ * a real origin and real storage. This stands in for both kinds of storage, kept in memory for as
+ * long as the tab is open, before the page's own scripts run.
+ */
+const STORAGE = `<script>
+(() => {
+  const memory = () => {
+    const items = new Map();
+    return {
+      get length() { return items.size; },
+      key: (i) => [...items.keys()][i] ?? null,
+      getItem: (k) => (items.has(String(k)) ? items.get(String(k)) : null),
+      setItem: (k, v) => void items.set(String(k), String(v)),
+      removeItem: (k) => void items.delete(String(k)),
+      clear: () => items.clear(),
+    };
+  };
+  for (const name of ['localStorage', 'sessionStorage']) {
+    try { window[name]; } catch { Object.defineProperty(window, name, { value: memory(), configurable: true }); }
+  }
+})();
+</script>
+`;
+
+/** A kept page, with the storage stand-in first: after its doctype, if it has one. */
+export function previewPage(id: string): string | undefined {
+  const html = pages.get(id);
+  if (html === undefined) return undefined;
+  const doctype = /^\s*<!doctype[^>]*>/i.exec(html)?.[0] ?? '';
+  return doctype + STORAGE + html.slice(doctype.length);
+}
 
 /**
  * The page's own origin, with scripts, forms and dialogs allowed, as they are in a test. Nothing it
