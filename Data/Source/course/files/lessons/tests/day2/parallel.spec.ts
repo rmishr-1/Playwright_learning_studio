@@ -1,10 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-// Four independent tests. Each one opens a page that takes 3 seconds to show its result.
-const slowPage = `
-  <p id="done"></p>
-  <script>setTimeout(() => (document.getElementById('done').textContent = 'Done'), 3000);</script>
-`;
+import { slowPage } from './slow-page';
 
 for (const name of ['cart', 'search', 'profile', 'checkout']) {
   test(`${name} page loads`, async ({ page }) => {

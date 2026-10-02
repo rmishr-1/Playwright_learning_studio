@@ -128,61 +128,82 @@ function allowed(url: string): boolean {
   });
 }
 
-export const test = base.extend({
-  // No service workers: their requests would not pass through the gate below.
-  serviceWorkers: 'block',
-  context: async ({ context }, use) => {
-    await context.route('**/*', (route) => {
-      const request = route.request();
-      const url = request.url();
-      const topLevel = request.isNavigationRequest() && request.frame().parentFrame() === null;
-      if (!topLevel || url.startsWith('data:') || url.startsWith('about:') || allowed(url)) {
-        return route.fallback();
-      }
-      console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
-      return route.abort('blockedbyclient');
-    });
-    // Playwright routes only the first request of a redirect: a redirect to a site not allowed is
-    // caught where it lands, and the page is taken back to a blank one.
-    context.on('page', (page) => {
-      page.on('framenavigated', (frame) => {
-        if (frame !== page.mainFrame()) return;
-        const url = frame.url();
-        if (url === '' || url.startsWith('about:') || url.startsWith('data:') || url.startsWith('chrome-error:') || allowed(url)) return;
-        console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
-        page.goto('about:blank').catch(() => {});
-      });
-    });
-    await use(context);
-  },
-  page: async ({ page, browserName }, use) => {
-    let cdp: any = null;
-    if (FRAME_URL && browserName === 'chromium') {
-      let sending = false;
-      try {
-        cdp = await page.context().newCDPSession(page);
-        cdp.on('Page.screencastFrame', (f: any) => {
-          cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {});
-          // Drop a frame rather than queue it, so the view stays current on a slow machine.
-          if (sending) return;
-          sending = true;
-          fetch(FRAME_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Studio-Frame-Key': FRAME_KEY },
-            body: JSON.stringify({ data: f.data, width: f.metadata?.deviceWidth ?? 1280, height: f.metadata?.deviceHeight ?? 720 }),
-          })
-            .catch(() => {})
-            .finally(() => { sending = false; });
-        });
-        await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 60, maxWidth: 1280, maxHeight: 720 });
-      } catch {
-        // The live view is a convenience. A test must never fail because of it.
-        cdp = null;
-      }
+// Navigation gate: a page may only open the course's practice sites.
+async function guard(context: any): Promise<void> {
+  await context.route('**/*', (route: any) => {
+    const request = route.request();
+    const url = request.url();
+    const topLevel = request.isNavigationRequest() && request.frame().parentFrame() === null;
+    if (!topLevel || url.startsWith('data:') || url.startsWith('about:') || allowed(url)) {
+      return route.fallback();
     }
-    await use(page);
-    if (cdp) await cdp.send('Page.stopScreencast').catch(() => {});
-  },
+    console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
+    return route.abort('blockedbyclient');
+  });
+  // Playwright routes only the first request of a redirect: a redirect to a site not allowed is
+  // caught where it lands, and the page is taken back to a blank one.
+  context.on('page', (page: any) => {
+    page.on('framenavigated', (frame: any) => {
+      if (frame !== page.mainFrame()) return;
+      const url = frame.url();
+      if (url === '' || url.startsWith('about:') || url.startsWith('data:') || url.startsWith('chrome-error:') || allowed(url)) return;
+      console.log('Navigation blocked: ' + url + '. The studio only lets tests reach the practice sites that the course uses.');
+      page.goto('about:blank').catch(() => {});
+    });
+  });
+}
+
+// The live view follows the newest page: a test that opens a second tab or window shows that one.
+let watching: { cdp: any } | null = null;
+async function stream(context: any, page: any): Promise<void> {
+  if (!FRAME_URL) return;
+  if (watching) {
+    const previous = watching.cdp;
+    watching = null;
+    previous.send('Page.stopScreencast').catch(() => {});
+  }
+  try {
+    const cdp = await context.newCDPSession(page);
+    const mine = { cdp };
+    watching = mine;
+    let sending = false;
+    cdp.on('Page.screencastFrame', (f: any) => {
+      cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {});
+      // Drop a frame rather than queue it, so the view stays current on a slow machine.
+      if (sending || watching !== mine) return;
+      sending = true;
+      fetch(FRAME_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Studio-Frame-Key': FRAME_KEY },
+        body: JSON.stringify({ data: f.data, width: f.metadata?.deviceWidth ?? 1280, height: f.metadata?.deviceHeight ?? 720 }),
+      })
+        .catch(() => {})
+        .finally(() => { sending = false; });
+    });
+    await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 60, maxWidth: 1280, maxHeight: 720 });
+  } catch {
+    // The live view is a convenience. A test must never fail because of it.
+  }
+}
+
+export const test = base.extend({
+  // No service workers: their requests would not pass through the gate.
+  serviceWorkers: 'block',
+  // Every context, the one behind the page fixture and any a test opens with browser.newContext(),
+  // gets the gate, and each page in it the live view (Chromium only: the screencast is Chromium's).
+  browser: [
+    async ({ browser, browserName }, use) => {
+      const newContext = browser.newContext.bind(browser);
+      browser.newContext = async (options?: any) => {
+        const context = await newContext({ ...(options ?? {}), serviceWorkers: 'block' });
+        await guard(context);
+        if (browserName === 'chromium') context.on('page', (page: any) => { stream(context, page); });
+        return context;
+      };
+      await use(browser);
+    },
+    { scope: 'worker' },
+  ],
 });
 
 export default test;

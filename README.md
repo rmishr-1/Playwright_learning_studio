@@ -191,6 +191,12 @@ command. **Run** beside a command in a lesson types that command into the Termin
   `chromium.launch()` still runs headless, and the run shows in the Browser panel (Chromium) or
   only in the output (Firefox, WebKit). Its **⇱** button detaches it when the learner wants a
   window. The Terminal's wrapper (`.studio/test.ts`) and the Run program both force this.
+- The live view follows the newest page, so a test that opens its own windows with
+  `browser.newContext()` shows them too, and those windows get the same navigation gate. The first
+  frame of a run brings the Browser panel into view even if the learner hid it last time.
+- A lesson keeps a practice page and the test that uses it in separate files: the page block
+  (`tests/day2/checkout-page.ts`, with **View in Page**) comes first, and the test below it imports
+  it (`import { checkoutPage } from './checkout-page';`), as `practice-shop.ts` does on Day 1.
 - **View in Page.** A file that only defines practice pages, such as `practice-shop.ts` (HTML in
   named strings), or an HTML sample, has no program to run, so in place of **Run** it gets **View in
   Page**, which opens the page in a new browser tab (the computer's own browser in the desktop app);

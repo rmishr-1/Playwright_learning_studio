@@ -590,7 +590,7 @@ explanation: Context first, then a page inside it, then your steps; finally the 
 # Implementation
 
 > [!PLATFORM]
-> Days 1–2 run before learners install anything (that's Day 3). Pre-load a workspace with Playwright installed (`npm init playwright@latest`), the config from `platform/playwright.config.ts`, and these Day 1 files: `tests/day1/practice-shop.ts`, `tests/day1/tc101-login.spec.ts`, `tests/day1/events.spec.ts`, `tests/day1/tabs-and-windows.spec.ts`.
+> Days 1–2 run before learners install anything (that's Day 3). Pre-load a workspace with Playwright installed (`npm init playwright@latest`), the config from `platform/playwright.config.ts`, and these Day 1 files: `tests/day1/practice-shop.ts`, `tests/day1/tc101-login.spec.ts`, `tests/day1/events.spec.ts`, `tests/day1/shop-home.ts`, `tests/day1/tabs-and-windows.spec.ts`.
 
 ## I1 · Turn a manual test case into automation steps
 
@@ -895,12 +895,10 @@ This demo proves the two rules from F4 on a pretend website at `https://shop.tes
 
 The website doesn't exist on the internet: Playwright answers the browser's request for that address with a small HTML page. The page greets you as a **guest** until you click **Log in as Asha**, and then *remembers* the login in **local storage** — a small storage area the browser keeps for each website, which real sites use to remember you.
 
-```ts file=tests/day1/tabs-and-windows.spec.ts mode=editor run="npx playwright test tests/day1/tabs-and-windows.spec.ts --project=chromium --headed"
-import { test, expect } from '@playwright/test';
-
+```ts file=tests/day1/shop-home.ts mode=editor
 // A pretend website at https://shop.test. Playwright answers the browser's
 // request with this HTML, so the demo works without internet.
-const shopHome = `
+export const shopHome = `
 <title>My Shop</title>
 <h1 id="greeting"></h1>
 <button>Log in as Asha</button>
@@ -913,6 +911,11 @@ const shopHome = `
   };
 </script>
 `;
+```
+
+```ts file=tests/day1/tabs-and-windows.spec.ts mode=editor run="npx playwright test tests/day1/tabs-and-windows.spec.ts --project=chromium --headed"
+import { test, expect } from '@playwright/test';
+import { shopHome } from './shop-home';
 
 test('tabs share a context, windows do not', async ({ browser }) => {
   // Two separate "incognito windows"
@@ -955,7 +958,7 @@ npx playwright test tests/day1/tabs-and-windows.spec.ts --project=chromium --hea
 Running 1 test using 1 worker
 
 Window A has 2 tabs, window B has 1
-  ✓  1 [chromium] › tests/day1/tabs-and-windows.spec.ts:19:5 › tabs share a context, windows do not (538ms)
+  ✓  1 [chromium] › tests/day1/tabs-and-windows.spec.ts:4:5 › tabs share a context, windows do not (538ms)
 
   1 passed (1.6s)
 ```

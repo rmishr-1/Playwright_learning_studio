@@ -14,7 +14,7 @@ function formatDuration(ms: number): string {
   if (ms < 1000) {
     return `${ms} ms`;           // return ends the function here…
   }
-  return `${ms / 1000} s`;       // …so this line only runs for 1000 ms or more
+  return `${ms / 1000} s`;       // …so this line runs only for 1000 ms or more
 }
 
 // A function that does something but gives nothing back: void

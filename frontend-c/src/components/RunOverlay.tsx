@@ -149,13 +149,22 @@ export function RunOverlay({
   const [session] = useState(
     () => new TerminalSession(() => editorRef.current, { onStart: () => undefined, onFrame: () => undefined, onEnd: () => undefined }),
   );
+  // A test's first page brings the Browser panel into view, even when it was hidden last time.
+  const framed = useRef(false);
   session.events = {
     onStart: () => {
       setSource('terminal');
       setTermFrame(null);
       setTermStatus('running');
+      framed.current = false;
     },
-    onFrame: setTermFrame,
+    onFrame: (frame) => {
+      setTermFrame(frame);
+      if (!framed.current) {
+        framed.current = true;
+        show('browser');
+      }
+    },
     onEnd: (exitCode) => setTermStatus(exitCode === 0 ? 'ok' : exitCode === 130 ? 'stopped' : 'error'),
   };
   useEffect(() => {
@@ -263,7 +272,9 @@ export function RunOverlay({
               {browserStatus === 'running'
                 ? 'Waiting for the browser…'
                 : source === 'terminal'
-                  ? 'Run npx playwright test in the Terminal to see the browser here.'
+                  ? termStatus
+                    ? 'This command did not open a page in Chromium, so there is nothing to show. (The live view shows Chromium only.)'
+                    : 'Run npx playwright test in the Terminal to see the browser here.'
                   : 'This run never opened a page.'}
             </span>
           )}

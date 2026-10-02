@@ -27,7 +27,7 @@ export class EnrolPage {
     await this.page.goto('/enrol');
   }
 
-  // Fill the whole form, accept the terms and submit
+  // Fill the whole form, accept the terms, and submit
   async enrol(enrolment: Enrolment): Promise<void> {
     await this.nameField.fill(enrolment.fullName);
     await this.emailField.fill(enrolment.email);

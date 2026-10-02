@@ -730,7 +730,7 @@
         {
           "type": "callout",
           "variant": "platform",
-          "content": "Pre-load these files in the Days 1–2 workspace: `tests/day2/auto-wait.spec.ts`, `tests/day2/not-ready-yet.spec.ts`, `tests/day2/retrying-vs-once.spec.ts`, `tests/day2/browsers.spec.ts`, `tests/day2/parallel.spec.ts`, `tests/day2/mock-api.spec.ts`. The cross-browser lesson (I4) needs Firefox and WebKit installed (`npx playwright install`)."
+          "content": "Pre-load these files in the Days 1–2 workspace: `tests/day2/auto-wait.spec.ts`, `tests/day2/not-ready-yet.spec.ts`, `tests/day2/retrying-vs-once.spec.ts`, `tests/day2/browsers.spec.ts`, `tests/day2/parallel.spec.ts`, `tests/day2/mock-api.spec.ts`, and the pages they import (`checkout-page.ts`, `order-page.ts`, `settings-page.ts`, `slow-page.ts`, `products-page.ts`). The cross-browser lesson (I4) needs Firefox and WebKit installed (`npx playwright install`)."
         }
       ],
       "lessons": [
@@ -745,11 +745,18 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\n\n// A practice checkout page. The \"Pay now\" button is added 2 seconds after the page loads,\n// like a real page waiting for a payment service to respond.\nconst checkoutPage = `\n  <h1>Checkout</h1>\n  <p id=\"status\">Loading payment options…</p>\n  <script>\n    setTimeout(() => {\n      document.getElementById('status').textContent = 'Ready to pay';\n      const button = document.createElement('button');\n      button.textContent = 'Pay now';\n      button.onclick = () => {\n        document.getElementById('status').textContent = 'Payment successful';\n      };\n      document.body.appendChild(button);\n    }, 2000);\n  </script>\n`;\n\ntest('Playwright waits for the Pay now button by itself', async ({ page }) => {\n  await page.setContent(checkoutPage);                                   // open the page\n  await page.getByRole('button', { name: 'Pay now' }).click();           // the button doesn't exist yet — Playwright waits\n  await expect(page.locator('#status')).toHaveText('Payment successful'); // check the result\n});",
+              "content": "// A practice checkout page. The \"Pay now\" button is added 2 seconds after the page loads,\n// like a real page waiting for a payment service to respond.\nexport const checkoutPage = `\n  <h1>Checkout</h1>\n  <p id=\"status\">Loading payment options…</p>\n  <script>\n    setTimeout(() => {\n      document.getElementById('status').textContent = 'Ready to pay';\n      const button = document.createElement('button');\n      button.textContent = 'Pay now';\n      button.onclick = () => {\n        document.getElementById('status').textContent = 'Payment successful';\n      };\n      document.body.appendChild(button);\n    }, 2000);\n  </script>\n`;\n",
+              "mode": "editor",
+              "file": "tests/day2/checkout-page.ts"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\nimport { checkoutPage } from './checkout-page';\n\ntest('Playwright waits for the Pay now button by itself', async ({ page }) => {\n  await page.setContent(checkoutPage);                                   // open the page\n  await page.getByRole('button', { name: 'Pay now' }).click();           // the button doesn't exist yet — Playwright waits\n  await expect(page.locator('#status')).toHaveText('Payment successful'); // check the result\n});",
               "mode": "editor",
               "file": "tests/day2/auto-wait.spec.ts",
               "run": "npx playwright test tests/day2/auto-wait.spec.ts --project=chromium --headed",
-              "expectedOutput": "Running 1 test using 1 worker\n\n  ✓  1 [chromium] › tests/day2/auto-wait.spec.ts:21:5 › Playwright waits for the Pay now button by itself (2.3s)\n\n  1 passed (3.1s)",
+              "expectedOutput": "Running 1 test using 1 worker\n\n  ✓  1 [chromium] › tests/day2/auto-wait.spec.ts:4:5 › Playwright waits for the Pay now button by itself (2.3s)\n\n  1 passed (3.1s)",
               "expectedOutputTarget": "terminal"
             },
             {
@@ -762,7 +769,7 @@
             {
               "type": "output",
               "target": "terminal",
-              "content": "Running 1 test using 1 worker\n\n  ✓  1 [chromium] › tests/day2/auto-wait.spec.ts:21:5 › Playwright waits for the Pay now button by itself (2.3s)\n\n  1 passed (3.1s)"
+              "content": "Running 1 test using 1 worker\n\n  ✓  1 [chromium] › tests/day2/auto-wait.spec.ts:4:5 › Playwright waits for the Pay now button by itself (2.3s)\n\n  1 passed (3.1s)"
             },
             {
               "type": "markdown",
@@ -781,7 +788,14 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\n\n// The \"Place order\" button starts DISABLED and is covered by a \"Saving…\" overlay.\n// After 1 second the button is enabled; after 2 seconds the overlay disappears.\nconst orderPage = `\n  <h1>Your order</h1>\n  <button id=\"place\" disabled>Place order</button>\n  <div id=\"overlay\" style=\"position:fixed; inset:0; background:rgba(255,255,255,0.8)\">Saving…</div>\n  <p id=\"result\"></p>\n  <script>\n    setTimeout(() => (document.getElementById('place').disabled = false), 1000);\n    setTimeout(() => document.getElementById('overlay').remove(), 2000);\n    document.getElementById('place').onclick = () => {\n      document.getElementById('result').textContent = 'Order placed';\n    };\n  </script>\n`;\n\ntest('click waits until the button can really be clicked', async ({ page }) => {\n  await page.setContent(orderPage);\n  await page.getByRole('button', { name: 'Place order' }).click();   // waits for: enabled + not covered\n  await expect(page.locator('#result')).toHaveText('Order placed');\n});",
+              "content": "// The \"Place order\" button starts DISABLED and is covered by a \"Saving…\" overlay.\n// After 1 second the button is enabled; after 2 seconds the overlay disappears.\nexport const orderPage = `\n  <h1>Your order</h1>\n  <button id=\"place\" disabled>Place order</button>\n  <div id=\"overlay\" style=\"position:fixed; inset:0; background:rgba(255,255,255,0.8)\">Saving…</div>\n  <p id=\"result\"></p>\n  <script>\n    setTimeout(() => (document.getElementById('place').disabled = false), 1000);\n    setTimeout(() => document.getElementById('overlay').remove(), 2000);\n    document.getElementById('place').onclick = () => {\n      document.getElementById('result').textContent = 'Order placed';\n    };\n  </script>\n`;\n",
+              "mode": "editor",
+              "file": "tests/day2/order-page.ts"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\nimport { orderPage } from './order-page';\n\ntest('click waits until the button can really be clicked', async ({ page }) => {\n  await page.setContent(orderPage);\n  await page.getByRole('button', { name: 'Place order' }).click();   // waits for: enabled + not covered\n  await expect(page.locator('#result')).toHaveText('Order placed');\n});",
               "mode": "editor",
               "file": "tests/day2/not-ready-yet.spec.ts",
               "run": "npx playwright test tests/day2/not-ready-yet.spec.ts --project=chromium --headed",
@@ -853,12 +867,19 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\n\n// After clicking Save, the page shows \"Saved!\" — but only 1 second later,\n// like a real page waiting for the server.\nconst settingsPage = `\n  <h1>Settings</h1>\n  <button>Save</button>\n  <p id=\"message\"></p>\n  <script>\n    document.querySelector('button').onclick = () => {\n      setTimeout(() => (document.getElementById('message').textContent = 'Saved!'), 1000);\n    };\n  </script>\n`;\n\ntest('web-first assertion: keeps checking until \"Saved!\" appears', async ({ page }) => {\n  await page.setContent(settingsPage);\n  await page.getByRole('button', { name: 'Save' }).click();\n  await expect(page.locator('#message')).toHaveText('Saved!');          // retries for up to 5 seconds\n});\n\ntest('one-shot check: looks once, too early, and fails', async ({ page }) => {\n  await page.setContent(settingsPage);\n  await page.getByRole('button', { name: 'Save' }).click();\n  const textRightNow = await page.locator('#message').textContent();   // read the text ONE time\n  expect(textRightNow).toBe('Saved!');                                  // no retrying — fails\n});",
+              "content": "// After clicking Save, the page shows \"Saved!\" — but only 1 second later,\n// like a real page waiting for the server.\nexport const settingsPage = `\n  <h1>Settings</h1>\n  <button>Save</button>\n  <p id=\"message\"></p>\n  <script>\n    document.querySelector('button').onclick = () => {\n      setTimeout(() => (document.getElementById('message').textContent = 'Saved!'), 1000);\n    };\n  </script>\n`;\n",
+              "mode": "editor",
+              "file": "tests/day2/settings-page.ts"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\nimport { settingsPage } from './settings-page';\n\ntest('web-first assertion: keeps checking until \"Saved!\" appears', async ({ page }) => {\n  await page.setContent(settingsPage);\n  await page.getByRole('button', { name: 'Save' }).click();\n  await expect(page.locator('#message')).toHaveText('Saved!');          // retries for up to 5 seconds\n});\n\ntest('one-shot check: looks once, too early, and fails', async ({ page }) => {\n  await page.setContent(settingsPage);\n  await page.getByRole('button', { name: 'Save' }).click();\n  const textRightNow = await page.locator('#message').textContent();   // read the text ONE time\n  expect(textRightNow).toBe('Saved!');                                  // no retrying — fails\n});",
               "mode": "editor",
               "file": "tests/day2/retrying-vs-once.spec.ts",
               "run": "npx playwright test tests/day2/retrying-vs-once.spec.ts --project=chromium",
               "expectError": true,
-              "expectedOutput": "Running 2 tests using 1 worker\n\n  ✓  1 [chromium] › tests/day2/retrying-vs-once.spec.ts:16:5 › web-first assertion: keeps checking until \"Saved!\" appears (1.2s)\n  ✘  2 [chromium] › tests/day2/retrying-vs-once.spec.ts:22:5 › one-shot check: looks once, too early, and fails (80ms)\n\n  1) [chromium] › tests/day2/retrying-vs-once.spec.ts:22:5 › one-shot check: looks once, too early, and fails\n\n    Error: expect(received).toBe(expected) // Object.is equality\n\n    Expected: \"Saved!\"\n    Received: \"\"\n\n      25 |   const textRightNow = await page.locator('#message').textContent();   // read the text ONE time\n    > 26 |   expect(textRightNow).toBe('Saved!');                                  // no retrying — fails\n         |                        ^\n\n  1 failed\n  1 passed (2.1s)",
+              "expectedOutput": "Running 2 tests using 1 worker\n\n  ✓  1 [chromium] › tests/day2/retrying-vs-once.spec.ts:4:5 › web-first assertion: keeps checking until \"Saved!\" appears (1.2s)\n  ✘  2 [chromium] › tests/day2/retrying-vs-once.spec.ts:10:5 › one-shot check: looks once, too early, and fails (80ms)\n\n  1) [chromium] › tests/day2/retrying-vs-once.spec.ts:10:5 › one-shot check: looks once, too early, and fails\n\n    Error: expect(received).toBe(expected) // Object.is equality\n\n    Expected: \"Saved!\"\n    Received: \"\"\n\n      25 |   const textRightNow = await page.locator('#message').textContent();   // read the text ONE time\n    > 26 |   expect(textRightNow).toBe('Saved!');                                  // no retrying — fails\n         |                        ^\n\n  1 failed\n  1 passed (2.1s)",
               "expectedOutputTarget": "terminal"
             },
             {
@@ -871,7 +892,7 @@
             {
               "type": "output",
               "target": "terminal",
-              "content": "Running 2 tests using 1 worker\n\n  ✓  1 [chromium] › tests/day2/retrying-vs-once.spec.ts:16:5 › web-first assertion: keeps checking until \"Saved!\" appears (1.2s)\n  ✘  2 [chromium] › tests/day2/retrying-vs-once.spec.ts:22:5 › one-shot check: looks once, too early, and fails (80ms)\n\n  1) [chromium] › tests/day2/retrying-vs-once.spec.ts:22:5 › one-shot check: looks once, too early, and fails\n\n    Error: expect(received).toBe(expected) // Object.is equality\n\n    Expected: \"Saved!\"\n    Received: \"\"\n\n      25 |   const textRightNow = await page.locator('#message').textContent();   // read the text ONE time\n    > 26 |   expect(textRightNow).toBe('Saved!');                                  // no retrying — fails\n         |                        ^\n\n  1 failed\n  1 passed (2.1s)"
+              "content": "Running 2 tests using 1 worker\n\n  ✓  1 [chromium] › tests/day2/retrying-vs-once.spec.ts:4:5 › web-first assertion: keeps checking until \"Saved!\" appears (1.2s)\n  ✘  2 [chromium] › tests/day2/retrying-vs-once.spec.ts:10:5 › one-shot check: looks once, too early, and fails (80ms)\n\n  1) [chromium] › tests/day2/retrying-vs-once.spec.ts:10:5 › one-shot check: looks once, too early, and fails\n\n    Error: expect(received).toBe(expected) // Object.is equality\n\n    Expected: \"Saved!\"\n    Received: \"\"\n\n      25 |   const textRightNow = await page.locator('#message').textContent();   // read the text ONE time\n    > 26 |   expect(textRightNow).toBe('Saved!');                                  // no retrying — fails\n         |                        ^\n\n  1 failed\n  1 passed (2.1s)"
             },
             {
               "type": "markdown",
@@ -932,7 +953,14 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\n\n// Four independent tests. Each one opens a page that takes 3 seconds to show its result.\nconst slowPage = `\n  <p id=\"done\"></p>\n  <script>setTimeout(() => (document.getElementById('done').textContent = 'Done'), 3000);</script>\n`;\n\nfor (const name of ['cart', 'search', 'profile', 'checkout']) {\n  test(`${name} page loads`, async ({ page }) => {\n    await page.setContent(slowPage);\n    await expect(page.locator('#done')).toHaveText('Done');\n  });\n}",
+              "content": "// Four independent tests. Each one opens a page that takes 3 seconds to show its result.\nexport const slowPage = `\n  <p id=\"done\"></p>\n  <script>setTimeout(() => (document.getElementById('done').textContent = 'Done'), 3000);</script>\n`;\n",
+              "mode": "editor",
+              "file": "tests/day2/slow-page.ts"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\nimport { slowPage } from './slow-page';\n\nfor (const name of ['cart', 'search', 'profile', 'checkout']) {\n  test(`${name} page loads`, async ({ page }) => {\n    await page.setContent(slowPage);\n    await expect(page.locator('#done')).toHaveText('Done');\n  });\n}",
               "mode": "editor",
               "file": "tests/day2/parallel.spec.ts",
               "run": "npx playwright test tests/day2/parallel.spec.ts --project=chromium --workers=4",
@@ -969,11 +997,18 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\n\n// A pretend shop page at https://shop.test. When it loads, its JavaScript asks\n// the server for the product list at /api/products and shows each product.\nconst productsPage = `\n  <meta charset=\"utf-8\">\n  <h1>Products</h1>\n  <ul id=\"list\"><li>Loading…</li></ul>\n  <script>\n    fetch('/api/products')\n      .then((response) => response.json())\n      .then((products) => {\n        document.getElementById('list').innerHTML =\n          products.map((p) => '<li>' + p.name + ' - ₹' + p.price + '</li>').join('');\n      })\n      .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));\n  </script>\n`;\n\ntest('show products from a mocked server', async ({ page }) => {\n  // Serve the page itself\n  await page.route('https://shop.test/', (route) =>\n    route.fulfill({ contentType: 'text/html', body: productsPage }));\n\n  // Pretend to be the server: answer /api/products with our own test data\n  await page.route('https://shop.test/api/products', (route) =>\n    route.fulfill({ json: [{ name: 'Wireless Mouse', price: 799 }, { name: 'Keyboard', price: 1499 }] }));\n\n  await page.goto('https://shop.test/');\n  await expect(page.getByRole('listitem')).toHaveText(['Wireless Mouse - ₹799', 'Keyboard - ₹1499']);\n});\n\ntest('show an error when the server is down', async ({ page }) => {\n  await page.route('https://shop.test/', (route) =>\n    route.fulfill({ contentType: 'text/html', body: productsPage }));\n\n  // Pretend the server is broken\n  await page.route('https://shop.test/api/products', (route) => route.abort());\n\n  await page.goto('https://shop.test/');\n  await expect(page.getByRole('listitem')).toHaveText('Could not load products');\n});",
+              "content": "// A pretend shop page at https://shop.test. When it loads, its JavaScript asks\n// the server for the product list at /api/products and shows each product.\nexport const productsPage = `\n  <meta charset=\"utf-8\">\n  <h1>Products</h1>\n  <ul id=\"list\"><li>Loading…</li></ul>\n  <script>\n    fetch('/api/products')\n      .then((response) => response.json())\n      .then((products) => {\n        document.getElementById('list').innerHTML =\n          products.map((p) => '<li>' + p.name + ' - ₹' + p.price + '</li>').join('');\n      })\n      .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));\n  </script>\n`;\n",
+              "mode": "editor",
+              "file": "tests/day2/products-page.ts"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\nimport { productsPage } from './products-page';\n\ntest('show products from a mocked server', async ({ page }) => {\n  // Serve the page itself\n  await page.route('https://shop.test/', (route) =>\n    route.fulfill({ contentType: 'text/html', body: productsPage }));\n\n  // Pretend to be the server: answer /api/products with our own test data\n  await page.route('https://shop.test/api/products', (route) =>\n    route.fulfill({ json: [{ name: 'Wireless Mouse', price: 799 }, { name: 'Keyboard', price: 1499 }] }));\n\n  await page.goto('https://shop.test/');\n  await expect(page.getByRole('listitem')).toHaveText(['Wireless Mouse - ₹799', 'Keyboard - ₹1499']);\n});\n\ntest('show an error when the server is down', async ({ page }) => {\n  await page.route('https://shop.test/', (route) =>\n    route.fulfill({ contentType: 'text/html', body: productsPage }));\n\n  // Pretend the server is broken\n  await page.route('https://shop.test/api/products', (route) => route.abort());\n\n  await page.goto('https://shop.test/');\n  await expect(page.getByRole('listitem')).toHaveText('Could not load products');\n});",
               "mode": "editor",
               "file": "tests/day2/mock-api.spec.ts",
               "run": "npx playwright test tests/day2/mock-api.spec.ts --project=chromium --headed",
-              "expectedOutput": "Running 2 tests using 1 worker\n\n  ✓  1 [chromium] › tests/day2/mock-api.spec.ts:20:5 › show products from a mocked server (260ms)\n  ✓  2 [chromium] › tests/day2/mock-api.spec.ts:33:5 › show an error when the server is down (190ms)\n\n  2 passed (1.3s)",
+              "expectedOutput": "Running 2 tests using 1 worker\n\n  ✓  1 [chromium] › tests/day2/mock-api.spec.ts:4:5 › show products from a mocked server (260ms)\n  ✓  2 [chromium] › tests/day2/mock-api.spec.ts:17:5 › show an error when the server is down (190ms)\n\n  2 passed (1.3s)",
               "expectedOutputTarget": "terminal"
             },
             {
@@ -986,7 +1021,7 @@
             {
               "type": "output",
               "target": "terminal",
-              "content": "Running 2 tests using 1 worker\n\n  ✓  1 [chromium] › tests/day2/mock-api.spec.ts:20:5 › show products from a mocked server (260ms)\n  ✓  2 [chromium] › tests/day2/mock-api.spec.ts:33:5 › show an error when the server is down (190ms)\n\n  2 passed (1.3s)"
+              "content": "Running 2 tests using 1 worker\n\n  ✓  1 [chromium] › tests/day2/mock-api.spec.ts:4:5 › show products from a mocked server (260ms)\n  ✓  2 [chromium] › tests/day2/mock-api.spec.ts:17:5 › show an error when the server is down (190ms)\n\n  2 passed (1.3s)"
             },
             {
               "type": "markdown",
@@ -1360,7 +1395,7 @@
                 "The first test in the same file already shows the correct pattern.",
                 "`await expect(page.locator('#message')).toHaveText(...)`"
               ],
-              "solution": "import { test, expect } from '@playwright/test';\n\n// After clicking Save, the page shows \"Saved!\" — but only 1 second later,\n// like a real page waiting for the server.\nconst settingsPage = `\n  <h1>Settings</h1>\n  <button>Save</button>\n  <p id=\"message\"></p>\n  <script>\n    document.querySelector('button').onclick = () => {\n      setTimeout(() => (document.getElementById('message').textContent = 'Saved!'), 1000);\n    };\n  </script>\n`;\n\ntest('web-first assertion: keeps checking until \"Saved!\" appears', async ({ page }) => {\n  await page.setContent(settingsPage);\n  await page.getByRole('button', { name: 'Save' }).click();\n  await expect(page.locator('#message')).toHaveText('Saved!');\n});\n\ntest('fixed: waits for \"Saved!\" properly', async ({ page }) => {\n  await page.setContent(settingsPage);\n  await page.getByRole('button', { name: 'Save' }).click();\n  await expect(page.locator('#message')).toHaveText('Saved!');   // web-first: retries until it matches\n});",
+              "solution": "import { test, expect } from '@playwright/test';\nimport { settingsPage } from './settings-page';\n\ntest('web-first assertion: keeps checking until \"Saved!\" appears', async ({ page }) => {\n  await page.setContent(settingsPage);\n  await page.getByRole('button', { name: 'Save' }).click();\n  await expect(page.locator('#message')).toHaveText('Saved!');\n});\n\ntest('fixed: waits for \"Saved!\" properly', async ({ page }) => {\n  await page.setContent(settingsPage);\n  await page.getByRole('button', { name: 'Save' }).click();\n  await expect(page.locator('#message')).toHaveText('Saved!');   // web-first: retries until it matches\n});",
               "check": {
                 "kind": "testsPass",
                 "cwd": "pw-course",
@@ -1373,14 +1408,14 @@
               "id": "d2-ex3",
               "title": "Mock three products",
               "level": "medium",
-              "prompt": "Create `tests/day2/three-products.spec.ts`. Using the page from `mock-api.spec.ts`, write a test called `shows three mocked products` that:\n\n1. Mocks `/api/products` with **three** products: `Monitor` (₹8999), `Webcam` (₹2499), and `Headset` (₹1799).\n2. Opens `https://shop.test/`.\n3. Checks that there are exactly **3** list items — use `await expect(page.getByRole('listitem')).toHaveCount(3);`\n4. Checks that the **first** item's text is `Monitor - ₹8999` — use `page.getByRole('listitem').first()`.\n\nCopy the `productsPage` HTML from `mock-api.spec.ts` into your new file.",
+              "prompt": "Create `tests/day2/three-products.spec.ts`. Using the page in `products-page.ts`, write a test called `shows three mocked products` that:\n\n1. Mocks `/api/products` with **three** products: `Monitor` (₹8999), `Webcam` (₹2499), and `Headset` (₹1799).\n2. Opens `https://shop.test/`.\n3. Checks that there are exactly **3** list items — use `await expect(page.getByRole('listitem')).toHaveCount(3);`\n4. Checks that the **first** item's text is `Monitor - ₹8999` — use `page.getByRole('listitem').first()`.\n\nImport the page into your new file: `import { productsPage } from './products-page';`",
               "file": "tests/day2/three-products.spec.ts",
               "run": "npx playwright test tests/day2/three-products.spec.ts --project=chromium",
               "hints": [
                 "Keep the two `page.route(...)` lines from the first mock test; only the data inside `json: [...]` changes.",
                 "Each product looks like `{ name: 'Monitor', price: 8999 }`, separated by commas."
               ],
-              "solution": "import { test, expect } from '@playwright/test';\n\n// Same pretend shop page as in mock-api.spec.ts\nconst productsPage = `\n  <meta charset=\"utf-8\">\n  <h1>Products</h1>\n  <ul id=\"list\"><li>Loading…</li></ul>\n  <script>\n    fetch('/api/products')\n      .then((response) => response.json())\n      .then((products) => {\n        document.getElementById('list').innerHTML =\n          products.map((p) => '<li>' + p.name + ' - ₹' + p.price + '</li>').join('');\n      })\n      .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));\n  </script>\n`;\n\ntest('shows three mocked products', async ({ page }) => {\n  // Serve the page\n  await page.route('https://shop.test/', (route) =>\n    route.fulfill({ contentType: 'text/html', body: productsPage }));\n\n  // Mock the product list with three products\n  await page.route('https://shop.test/api/products', (route) =>\n    route.fulfill({ json: [\n      { name: 'Monitor', price: 8999 },\n      { name: 'Webcam', price: 2499 },\n      { name: 'Headset', price: 1799 },\n    ] }));\n\n  await page.goto('https://shop.test/');\n  await expect(page.getByRole('listitem')).toHaveCount(3);                          // exactly three items\n  await expect(page.getByRole('listitem').first()).toHaveText('Monitor - ₹8999');   // first item\n});",
+              "solution": "import { test, expect } from '@playwright/test';\nimport { productsPage } from './products-page';\n\ntest('shows three mocked products', async ({ page }) => {\n  // Serve the page\n  await page.route('https://shop.test/', (route) =>\n    route.fulfill({ contentType: 'text/html', body: productsPage }));\n\n  // Mock the product list with three products\n  await page.route('https://shop.test/api/products', (route) =>\n    route.fulfill({ json: [\n      { name: 'Monitor', price: 8999 },\n      { name: 'Webcam', price: 2499 },\n      { name: 'Headset', price: 1799 },\n    ] }));\n\n  await page.goto('https://shop.test/');\n  await expect(page.getByRole('listitem')).toHaveCount(3);                          // exactly three items\n  await expect(page.getByRole('listitem').first()).toHaveText('Monitor - ₹8999');   // first item\n});",
               "check": {
                 "kind": "testsPass",
                 "cwd": "pw-course",
@@ -1405,14 +1440,14 @@
               "id": "d2-ex5",
               "title": "Optional challenge: a slow server",
               "level": "challenge",
-              "prompt": "Prove that web-first assertions cope with a **slow** server. Create `tests/day2/slow-server.spec.ts` with a test called `waits for a slow product list`:\n\n1. Use the `productsPage` HTML from `mock-api.spec.ts`.\n2. Mock `/api/products` so the answer arrives **2 seconds late**: inside the route handler, wait first, then fulfill:\n   ```ts\n   await page.route('https://shop.test/api/products', async (route) => {\n     await new Promise((resolve) => setTimeout(resolve, 2000));   // pretend the server is slow\n     await route.fulfill({ json: [{ name: 'Tablet', price: 19999 }] });\n   });\n   ```\n   Copy the waiting line exactly as it is — you'll understand how it works on Day 8.\n3. Open the page and assert the single list item reads `Tablet - ₹19999`.\n4. Run it headed. What does the list show during the first 2 seconds? Why does the test still pass without any sleep?",
+              "prompt": "Prove that web-first assertions cope with a **slow** server. Create `tests/day2/slow-server.spec.ts` with a test called `waits for a slow product list`:\n\n1. Use the `productsPage` page: `import { productsPage } from './products-page';`\n2. Mock `/api/products` so the answer arrives **2 seconds late**: inside the route handler, wait first, then fulfill:\n   ```ts\n   await page.route('https://shop.test/api/products', async (route) => {\n     await new Promise((resolve) => setTimeout(resolve, 2000));   // pretend the server is slow\n     await route.fulfill({ json: [{ name: 'Tablet', price: 19999 }] });\n   });\n   ```\n   Copy the waiting line exactly as it is — you'll understand how it works on Day 8.\n3. Open the page and assert the single list item reads `Tablet - ₹19999`.\n4. Run it headed. What does the list show during the first 2 seconds? Why does the test still pass without any sleep?",
               "file": "tests/day2/slow-server.spec.ts",
               "run": "npx playwright test tests/day2/slow-server.spec.ts --project=chromium --headed",
               "hints": [
                 "The page shows \"Loading…\" until the answer arrives.",
                 "`toHaveText` keeps retrying for up to 5 seconds; 2 seconds is well within that."
               ],
-              "solution": "import { test, expect } from '@playwright/test';\n\n// Same pretend shop page as in mock-api.spec.ts\nconst productsPage = `\n  <meta charset=\"utf-8\">\n  <h1>Products</h1>\n  <ul id=\"list\"><li>Loading…</li></ul>\n  <script>\n    fetch('/api/products')\n      .then((response) => response.json())\n      .then((products) => {\n        document.getElementById('list').innerHTML =\n          products.map((p) => '<li>' + p.name + ' - ₹' + p.price + '</li>').join('');\n      })\n      .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));\n  </script>\n`;\n\ntest('waits for a slow product list', async ({ page }) => {\n  await page.route('https://shop.test/', (route) =>\n    route.fulfill({ contentType: 'text/html', body: productsPage }));\n\n  // The \"server\" answers 2 seconds late\n  await page.route('https://shop.test/api/products', async (route) => {\n    await new Promise((resolve) => setTimeout(resolve, 2000));   // pretend the server is slow\n    await route.fulfill({ json: [{ name: 'Tablet', price: 19999 }] });\n  });\n\n  await page.goto('https://shop.test/');\n  // The list shows \"Loading…\" for 2 seconds; the web-first assertion keeps retrying until the product appears\n  await expect(page.getByRole('listitem')).toHaveText('Tablet - ₹19999');\n});",
+              "solution": "import { test, expect } from '@playwright/test';\nimport { productsPage } from './products-page';\n\ntest('waits for a slow product list', async ({ page }) => {\n  await page.route('https://shop.test/', (route) =>\n    route.fulfill({ contentType: 'text/html', body: productsPage }));\n\n  // The \"server\" answers 2 seconds late\n  await page.route('https://shop.test/api/products', async (route) => {\n    await new Promise((resolve) => setTimeout(resolve, 2000));   // pretend the server is slow\n    await route.fulfill({ json: [{ name: 'Tablet', price: 19999 }] });\n  });\n\n  await page.goto('https://shop.test/');\n  // The list shows \"Loading…\" for 2 seconds; the web-first assertion keeps retrying until the product appears\n  await expect(page.getByRole('listitem')).toHaveText('Tablet - ₹19999');\n});",
               "check": {
                 "kind": "testsPass",
                 "cwd": "pw-course",

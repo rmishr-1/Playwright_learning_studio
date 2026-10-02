@@ -725,7 +725,7 @@
         {
           "type": "callout",
           "variant": "platform",
-          "content": "Days 1–2 run before learners install anything (that's Day 3). Pre-load a workspace with Playwright installed (`npm init playwright@latest`), the config from `platform/playwright.config.ts`, and these Day 1 files: `tests/day1/practice-shop.ts`, `tests/day1/tc101-login.spec.ts`, `tests/day1/events.spec.ts`, `tests/day1/tabs-and-windows.spec.ts`."
+          "content": "Days 1–2 run before learners install anything (that's Day 3). Pre-load a workspace with Playwright installed (`npm init playwright@latest`), the config from `platform/playwright.config.ts`, and these Day 1 files: `tests/day1/practice-shop.ts`, `tests/day1/tc101-login.spec.ts`, `tests/day1/events.spec.ts`, `tests/day1/shop-home.ts`, `tests/day1/tabs-and-windows.spec.ts`."
         }
       ],
       "lessons": [
@@ -986,11 +986,18 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "import { test, expect } from '@playwright/test';\n\n// A pretend website at https://shop.test. Playwright answers the browser's\n// request with this HTML, so the demo works without internet.\nconst shopHome = `\n<title>My Shop</title>\n<h1 id=\"greeting\"></h1>\n<button>Log in as Asha</button>\n<script>\n  const user = localStorage.getItem('user');            // remembered login (like a session)\n  document.getElementById('greeting').textContent = user ? 'Hello, ' + user : 'Hello, guest';\n  document.querySelector('button').onclick = () => {\n    localStorage.setItem('user', 'Asha');\n    document.getElementById('greeting').textContent = 'Hello, Asha';\n  };\n</script>\n`;\n\ntest('tabs share a context, windows do not', async ({ browser }) => {\n  // Two separate \"incognito windows\"\n  const windowA = await browser.newContext();\n  const windowB = await browser.newContext();\n  // In both windows, answer any request to https://shop.test with our HTML page\n  for (const window of [windowA, windowB]) {\n    await window.route('https://shop.test/**', (route) =>\n      route.fulfill({ contentType: 'text/html', body: shopHome }));\n  }\n\n  // Window A, tab 1: log in\n  const tab1 = await windowA.newPage();\n  await tab1.goto('https://shop.test/');\n  await tab1.getByRole('button', { name: 'Log in as Asha' }).click();\n  await expect(tab1.getByRole('heading')).toHaveText('Hello, Asha');\n\n  // Window A, tab 2: SAME context → already logged in\n  const tab2 = await windowA.newPage();\n  await tab2.goto('https://shop.test/');\n  await expect(tab2.getByRole('heading')).toHaveText('Hello, Asha');\n\n  // Window B: DIFFERENT context → a stranger to the site\n  const otherTab = await windowB.newPage();\n  await otherTab.goto('https://shop.test/');\n  await expect(otherTab.getByRole('heading')).toHaveText('Hello, guest');\n\n  // Count the tabs in each window, then close both windows\n  console.log(`Window A has ${windowA.pages().length} tabs, window B has ${windowB.pages().length}`);\n  await windowA.close();\n  await windowB.close();\n});",
+              "content": "// A pretend website at https://shop.test. Playwright answers the browser's\n// request with this HTML, so the demo works without internet.\nexport const shopHome = `\n<title>My Shop</title>\n<h1 id=\"greeting\"></h1>\n<button>Log in as Asha</button>\n<script>\n  const user = localStorage.getItem('user');            // remembered login (like a session)\n  document.getElementById('greeting').textContent = user ? 'Hello, ' + user : 'Hello, guest';\n  document.querySelector('button').onclick = () => {\n    localStorage.setItem('user', 'Asha');\n    document.getElementById('greeting').textContent = 'Hello, Asha';\n  };\n</script>\n`;\n",
+              "mode": "editor",
+              "file": "tests/day1/shop-home.ts"
+            },
+            {
+              "type": "code",
+              "language": "ts",
+              "content": "import { test, expect } from '@playwright/test';\nimport { shopHome } from './shop-home';\n\ntest('tabs share a context, windows do not', async ({ browser }) => {\n  // Two separate \"incognito windows\"\n  const windowA = await browser.newContext();\n  const windowB = await browser.newContext();\n  // In both windows, answer any request to https://shop.test with our HTML page\n  for (const window of [windowA, windowB]) {\n    await window.route('https://shop.test/**', (route) =>\n      route.fulfill({ contentType: 'text/html', body: shopHome }));\n  }\n\n  // Window A, tab 1: log in\n  const tab1 = await windowA.newPage();\n  await tab1.goto('https://shop.test/');\n  await tab1.getByRole('button', { name: 'Log in as Asha' }).click();\n  await expect(tab1.getByRole('heading')).toHaveText('Hello, Asha');\n\n  // Window A, tab 2: SAME context → already logged in\n  const tab2 = await windowA.newPage();\n  await tab2.goto('https://shop.test/');\n  await expect(tab2.getByRole('heading')).toHaveText('Hello, Asha');\n\n  // Window B: DIFFERENT context → a stranger to the site\n  const otherTab = await windowB.newPage();\n  await otherTab.goto('https://shop.test/');\n  await expect(otherTab.getByRole('heading')).toHaveText('Hello, guest');\n\n  // Count the tabs in each window, then close both windows\n  console.log(`Window A has ${windowA.pages().length} tabs, window B has ${windowB.pages().length}`);\n  await windowA.close();\n  await windowB.close();\n});",
               "mode": "editor",
               "file": "tests/day1/tabs-and-windows.spec.ts",
               "run": "npx playwright test tests/day1/tabs-and-windows.spec.ts --project=chromium --headed",
-              "expectedOutput": "Running 1 test using 1 worker\n\nWindow A has 2 tabs, window B has 1\n  ✓  1 [chromium] › tests/day1/tabs-and-windows.spec.ts:19:5 › tabs share a context, windows do not (538ms)\n\n  1 passed (1.6s)",
+              "expectedOutput": "Running 1 test using 1 worker\n\nWindow A has 2 tabs, window B has 1\n  ✓  1 [chromium] › tests/day1/tabs-and-windows.spec.ts:4:5 › tabs share a context, windows do not (538ms)\n\n  1 passed (1.6s)",
               "expectedOutputTarget": "terminal"
             },
             {
@@ -1003,7 +1010,7 @@
             {
               "type": "output",
               "target": "terminal",
-              "content": "Running 1 test using 1 worker\n\nWindow A has 2 tabs, window B has 1\n  ✓  1 [chromium] › tests/day1/tabs-and-windows.spec.ts:19:5 › tabs share a context, windows do not (538ms)\n\n  1 passed (1.6s)"
+              "content": "Running 1 test using 1 worker\n\nWindow A has 2 tabs, window B has 1\n  ✓  1 [chromium] › tests/day1/tabs-and-windows.spec.ts:4:5 › tabs share a context, windows do not (538ms)\n\n  1 passed (1.6s)"
             },
             {
               "type": "markdown",

@@ -25,7 +25,7 @@ test('recommended locators on the sign-in page', async ({ page }) => {
 test('matching rules, strictness and lists on the enrol page', async ({ page }) => {
   await page.setContent(enrolPage);
 
-  // By test id: data-testid="seats"
+  // By test ID: data-testid="seats"
   await expect(page.getByTestId('seats')).toHaveText('Seats left: 12');
 
   // Names match case-insensitively and by substring… unless exact: true

@@ -1,20 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-// Same pretend shop page as in mock-api.spec.ts
-const productsPage = `
-  <meta charset="utf-8">
-  <h1>Products</h1>
-  <ul id="list"><li>Loading…</li></ul>
-  <script>
-    fetch('/api/products')
-      .then((response) => response.json())
-      .then((products) => {
-        document.getElementById('list').innerHTML =
-          products.map((p) => '<li>' + p.name + ' - ₹' + p.price + '</li>').join('');
-      })
-      .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));
-  </script>
-`;
+import { productsPage } from './products-page';
 
 test('shows three mocked products', async ({ page }) => {
   // Serve the page

@@ -7,7 +7,7 @@ const discountPercent = 10;
 const subtotal = unitPrice * quantity;                   // 3897
 const discount = (subtotal * discountPercent) / 100;     // 389.7
 const afterDiscount = subtotal - discount;               // 3507.3
-const shipping = afterDiscount >= 3000 ? 0 : 99;         // free above 3000
+const shipping = afterDiscount >= 3000 ? 0 : 99;         // free at 3000 or more
 const totalToPay = afterDiscount + shipping;
 
 // Output

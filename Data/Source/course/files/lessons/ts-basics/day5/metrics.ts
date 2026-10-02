@@ -5,7 +5,7 @@ const failed: number = 4;
 const skipped = total - passed - failed;          // whatever is left over
 
 // Percentages
-const passRate = (passed / total) * 100;          // brackets first, then × 100
+const passRate = (passed / total) * 100;          // parentheses first, then × 100
 const passRateText = passRate.toFixed(1);         // round to 1 decimal place (gives text)
 
 // Decisions

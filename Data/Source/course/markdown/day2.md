@@ -534,18 +534,16 @@ explanation: MCP works on the accessibility tree rather than pixels — structur
 # Implementation
 
 > [!PLATFORM]
-> Pre-load these files in the Days 1–2 workspace: `tests/day2/auto-wait.spec.ts`, `tests/day2/not-ready-yet.spec.ts`, `tests/day2/retrying-vs-once.spec.ts`, `tests/day2/browsers.spec.ts`, `tests/day2/parallel.spec.ts`, `tests/day2/mock-api.spec.ts`. The cross-browser lesson (I4) needs Firefox and WebKit installed (`npx playwright install`).
+> Pre-load these files in the Days 1–2 workspace: `tests/day2/auto-wait.spec.ts`, `tests/day2/not-ready-yet.spec.ts`, `tests/day2/retrying-vs-once.spec.ts`, `tests/day2/browsers.spec.ts`, `tests/day2/parallel.spec.ts`, `tests/day2/mock-api.spec.ts`, and the pages they import (`checkout-page.ts`, `order-page.ts`, `settings-page.ts`, `slow-page.ts`, `products-page.ts`). The cross-browser lesson (I4) needs Firefox and WebKit installed (`npx playwright install`).
 
 ## I1 · Auto-waiting in action
 
 This practice checkout page adds its **Pay now** button 2 seconds after loading — like a page waiting for a payment service. The test contains **no** "wait 2 seconds" instruction.
 
-```ts file=tests/day2/auto-wait.spec.ts mode=editor run="npx playwright test tests/day2/auto-wait.spec.ts --project=chromium --headed"
-import { test, expect } from '@playwright/test';
-
+```ts file=tests/day2/checkout-page.ts mode=editor
 // A practice checkout page. The "Pay now" button is added 2 seconds after the page loads,
 // like a real page waiting for a payment service to respond.
-const checkoutPage = `
+export const checkoutPage = `
   <h1>Checkout</h1>
   <p id="status">Loading payment options…</p>
   <script>
@@ -560,6 +558,11 @@ const checkoutPage = `
     }, 2000);
   </script>
 `;
+```
+
+```ts file=tests/day2/auto-wait.spec.ts mode=editor run="npx playwright test tests/day2/auto-wait.spec.ts --project=chromium --headed"
+import { test, expect } from '@playwright/test';
+import { checkoutPage } from './checkout-page';
 
 test('Playwright waits for the Pay now button by itself', async ({ page }) => {
   await page.setContent(checkoutPage);                                   // open the page
@@ -575,7 +578,7 @@ npx playwright test tests/day2/auto-wait.spec.ts --project=chromium --headed
 ```output terminal
 Running 1 test using 1 worker
 
-  ✓  1 [chromium] › tests/day2/auto-wait.spec.ts:21:5 › Playwright waits for the Pay now button by itself (2.3s)
+  ✓  1 [chromium] › tests/day2/auto-wait.spec.ts:4:5 › Playwright waits for the Pay now button by itself (2.3s)
 
   1 passed (3.1s)
 ```
@@ -594,12 +597,10 @@ Running 1 test using 1 worker
 
 This order page is harder: its **Place order** button starts **disabled**, and a "Saving…" overlay **covers** it. After 1 second the button is enabled; after 2 seconds the overlay disappears.
 
-```ts file=tests/day2/not-ready-yet.spec.ts mode=editor run="npx playwright test tests/day2/not-ready-yet.spec.ts --project=chromium --headed"
-import { test, expect } from '@playwright/test';
-
+```ts file=tests/day2/order-page.ts mode=editor
 // The "Place order" button starts DISABLED and is covered by a "Saving…" overlay.
 // After 1 second the button is enabled; after 2 seconds the overlay disappears.
-const orderPage = `
+export const orderPage = `
   <h1>Your order</h1>
   <button id="place" disabled>Place order</button>
   <div id="overlay" style="position:fixed; inset:0; background:rgba(255,255,255,0.8)">Saving…</div>
@@ -612,6 +613,11 @@ const orderPage = `
     };
   </script>
 `;
+```
+
+```ts file=tests/day2/not-ready-yet.spec.ts mode=editor run="npx playwright test tests/day2/not-ready-yet.spec.ts --project=chromium --headed"
+import { test, expect } from '@playwright/test';
+import { orderPage } from './order-page';
 
 test('click waits until the button can really be clicked', async ({ page }) => {
   await page.setContent(orderPage);
@@ -684,12 +690,10 @@ explanation: That's the "receives events" check failing. Playwright retries unti
 
 This settings page shows "Saved!" **1 second** after you click Save. The file has two tests that check the same thing in two different ways. One of them fails **on purpose**.
 
-```ts file=tests/day2/retrying-vs-once.spec.ts mode=editor expect=error run="npx playwright test tests/day2/retrying-vs-once.spec.ts --project=chromium"
-import { test, expect } from '@playwright/test';
-
+```ts file=tests/day2/settings-page.ts mode=editor
 // After clicking Save, the page shows "Saved!" — but only 1 second later,
 // like a real page waiting for the server.
-const settingsPage = `
+export const settingsPage = `
   <h1>Settings</h1>
   <button>Save</button>
   <p id="message"></p>
@@ -699,6 +703,11 @@ const settingsPage = `
     };
   </script>
 `;
+```
+
+```ts file=tests/day2/retrying-vs-once.spec.ts mode=editor expect=error run="npx playwright test tests/day2/retrying-vs-once.spec.ts --project=chromium"
+import { test, expect } from '@playwright/test';
+import { settingsPage } from './settings-page';
 
 test('web-first assertion: keeps checking until "Saved!" appears', async ({ page }) => {
   await page.setContent(settingsPage);
@@ -721,10 +730,10 @@ npx playwright test tests/day2/retrying-vs-once.spec.ts --project=chromium
 ```output terminal
 Running 2 tests using 1 worker
 
-  ✓  1 [chromium] › tests/day2/retrying-vs-once.spec.ts:16:5 › web-first assertion: keeps checking until "Saved!" appears (1.2s)
-  ✘  2 [chromium] › tests/day2/retrying-vs-once.spec.ts:22:5 › one-shot check: looks once, too early, and fails (80ms)
+  ✓  1 [chromium] › tests/day2/retrying-vs-once.spec.ts:4:5 › web-first assertion: keeps checking until "Saved!" appears (1.2s)
+  ✘  2 [chromium] › tests/day2/retrying-vs-once.spec.ts:10:5 › one-shot check: looks once, too early, and fails (80ms)
 
-  1) [chromium] › tests/day2/retrying-vs-once.spec.ts:22:5 › one-shot check: looks once, too early, and fails
+  1) [chromium] › tests/day2/retrying-vs-once.spec.ts:10:5 › one-shot check: looks once, too early, and fails
 
     Error: expect(received).toBe(expected) // Object.is equality
 
@@ -782,14 +791,17 @@ One test, three runs — `[chromium]`, `[firefox]`, `[webkit]` — done by three
 
 This file creates four independent tests; each one waits about 3 seconds for its page. First run them on **one** worker, then on **four**:
 
-```ts file=tests/day2/parallel.spec.ts mode=editor run="npx playwright test tests/day2/parallel.spec.ts --project=chromium --workers=4"
-import { test, expect } from '@playwright/test';
-
+```ts file=tests/day2/slow-page.ts mode=editor
 // Four independent tests. Each one opens a page that takes 3 seconds to show its result.
-const slowPage = `
+export const slowPage = `
   <p id="done"></p>
   <script>setTimeout(() => (document.getElementById('done').textContent = 'Done'), 3000);</script>
 `;
+```
+
+```ts file=tests/day2/parallel.spec.ts mode=editor run="npx playwright test tests/day2/parallel.spec.ts --project=chromium --workers=4"
+import { test, expect } from '@playwright/test';
+import { slowPage } from './slow-page';
 
 for (const name of ['cart', 'search', 'profile', 'checkout']) {
   test(`${name} page loads`, async ({ page }) => {
@@ -820,12 +832,10 @@ The exact times depend on your computer — the more CPU cores, the bigger the g
 
 This pretend shop page asks the server for its product list at `/api/products` and shows each product. The test plays the **server**: it answers that request itself. The second test pretends the server is **down**.
 
-```ts file=tests/day2/mock-api.spec.ts mode=editor run="npx playwright test tests/day2/mock-api.spec.ts --project=chromium --headed"
-import { test, expect } from '@playwright/test';
-
+```ts file=tests/day2/products-page.ts mode=editor
 // A pretend shop page at https://shop.test. When it loads, its JavaScript asks
 // the server for the product list at /api/products and shows each product.
-const productsPage = `
+export const productsPage = `
   <meta charset="utf-8">
   <h1>Products</h1>
   <ul id="list"><li>Loading…</li></ul>
@@ -839,6 +849,11 @@ const productsPage = `
       .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));
   </script>
 `;
+```
+
+```ts file=tests/day2/mock-api.spec.ts mode=editor run="npx playwright test tests/day2/mock-api.spec.ts --project=chromium --headed"
+import { test, expect } from '@playwright/test';
+import { productsPage } from './products-page';
 
 test('show products from a mocked server', async ({ page }) => {
   // Serve the page itself
@@ -872,8 +887,8 @@ npx playwright test tests/day2/mock-api.spec.ts --project=chromium --headed
 ```output terminal
 Running 2 tests using 1 worker
 
-  ✓  1 [chromium] › tests/day2/mock-api.spec.ts:20:5 › show products from a mocked server (260ms)
-  ✓  2 [chromium] › tests/day2/mock-api.spec.ts:33:5 › show an error when the server is down (190ms)
+  ✓  1 [chromium] › tests/day2/mock-api.spec.ts:4:5 › show products from a mocked server (260ms)
+  ✓  2 [chromium] › tests/day2/mock-api.spec.ts:17:5 › show an error when the server is down (190ms)
 
   2 passed (1.3s)
 ```
@@ -1095,19 +1110,7 @@ hints:
   - "`await expect(page.locator('#message')).toHaveText(...)`"
 solution: |
   import { test, expect } from '@playwright/test';
-
-  // After clicking Save, the page shows "Saved!" — but only 1 second later,
-  // like a real page waiting for the server.
-  const settingsPage = `
-    <h1>Settings</h1>
-    <button>Save</button>
-    <p id="message"></p>
-    <script>
-      document.querySelector('button').onclick = () => {
-        setTimeout(() => (document.getElementById('message').textContent = 'Saved!'), 1000);
-      };
-    </script>
-  `;
+  import { settingsPage } from './settings-page';
 
   test('web-first assertion: keeps checking until "Saved!" appears', async ({ page }) => {
     await page.setContent(settingsPage);
@@ -1128,14 +1131,14 @@ title: Mock three products
 level: medium
 type: code
 prompt: |
-  Create `tests/day2/three-products.spec.ts`. Using the page from `mock-api.spec.ts`, write a test called `shows three mocked products` that:
+  Create `tests/day2/three-products.spec.ts`. Using the page in `products-page.ts`, write a test called `shows three mocked products` that:
 
   1. Mocks `/api/products` with **three** products: `Monitor` (₹8999), `Webcam` (₹2499), and `Headset` (₹1799).
   2. Opens `https://shop.test/`.
   3. Checks that there are exactly **3** list items — use `await expect(page.getByRole('listitem')).toHaveCount(3);`
   4. Checks that the **first** item's text is `Monitor - ₹8999` — use `page.getByRole('listitem').first()`.
 
-  Copy the `productsPage` HTML from `mock-api.spec.ts` into your new file.
+  Import the page into your new file: `import { productsPage } from './products-page';`
 file: tests/day2/three-products.spec.ts
 run: npx playwright test tests/day2/three-products.spec.ts --project=chromium
 hints:
@@ -1143,22 +1146,7 @@ hints:
   - "Each product looks like `{ name: 'Monitor', price: 8999 }`, separated by commas."
 solution: |
   import { test, expect } from '@playwright/test';
-
-  // Same pretend shop page as in mock-api.spec.ts
-  const productsPage = `
-    <meta charset="utf-8">
-    <h1>Products</h1>
-    <ul id="list"><li>Loading…</li></ul>
-    <script>
-      fetch('/api/products')
-        .then((response) => response.json())
-        .then((products) => {
-          document.getElementById('list').innerHTML =
-            products.map((p) => '<li>' + p.name + ' - ₹' + p.price + '</li>').join('');
-        })
-        .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));
-    </script>
-  `;
+  import { productsPage } from './products-page';
 
   test('shows three mocked products', async ({ page }) => {
     // Serve the page
@@ -1208,7 +1196,7 @@ type: code
 prompt: |
   Prove that web-first assertions cope with a **slow** server. Create `tests/day2/slow-server.spec.ts` with a test called `waits for a slow product list`:
 
-  1. Use the `productsPage` HTML from `mock-api.spec.ts`.
+  1. Use the `productsPage` page: `import { productsPage } from './products-page';`
   2. Mock `/api/products` so the answer arrives **2 seconds late**: inside the route handler, wait first, then fulfill:
      ```ts
      await page.route('https://shop.test/api/products', async (route) => {
@@ -1226,22 +1214,7 @@ hints:
   - "`toHaveText` keeps retrying for up to 5 seconds; 2 seconds is well within that."
 solution: |
   import { test, expect } from '@playwright/test';
-
-  // Same pretend shop page as in mock-api.spec.ts
-  const productsPage = `
-    <meta charset="utf-8">
-    <h1>Products</h1>
-    <ul id="list"><li>Loading…</li></ul>
-    <script>
-      fetch('/api/products')
-        .then((response) => response.json())
-        .then((products) => {
-          document.getElementById('list').innerHTML =
-            products.map((p) => '<li>' + p.name + ' - ₹' + p.price + '</li>').join('');
-        })
-        .catch(() => (document.getElementById('list').innerHTML = '<li>Could not load products</li>'));
-    </script>
-  `;
+  import { productsPage } from './products-page';
 
   test('waits for a slow product list', async ({ page }) => {
     await page.route('https://shop.test/', (route) =>
