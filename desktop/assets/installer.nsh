@@ -84,7 +84,7 @@ Var pid
           !insertmacro STUDIO_KILL_PROCESS "${APP_EXECUTABLE_FILENAME}" 1 # 1 = force kill
           !insertmacro STUDIO_FIND_PROCESS "${APP_EXECUTABLE_FILENAME}" $R0
           ${if} $R0 == 0
-            DetailPrint `Waiting for "${PRODUCT_NAME}" to close.`
+            DetailPrint `Waiting for ${PRODUCT_NAME} to close...`
             Sleep 2000
           ${else}
             Goto studioNotRunning
@@ -133,4 +133,15 @@ Var pid
     System::Call "user32::SetWindowPos(p r2, p 0, i r7, i r5, i 0, i 0, i 0x15)"
     System::Call "user32::SetWindowPos(p r1, p 0, i r4, i r3, i 0, i 0, i 0x15)"
   FunctionEnd
+!macroend
+
+; A standard build downloads Node and the browsers on its first start into
+; %LOCALAPPDATA%\<product>\runtime (src/env.ts, src/runtime-install.ts), not into the install folder,
+; so an update keeps them. They are not the learner's data (that is %APPDATA%\<product>), so they go
+; when the app is uninstalled - but not when an update runs the old version's uninstaller first.
+!macro customUnInstall
+  ${ifNot} ${isUpdated}
+    RMDir /r "$LOCALAPPDATA\${PRODUCT_NAME}\runtime"
+    RMDir "$LOCALAPPDATA\${PRODUCT_NAME}"
+  ${endIf}
 !macroend

@@ -1,26 +1,107 @@
 {
-    "_comment": "Data/Progress/progress.json - the ONE progress record this server keeps. There are no accounts: each clone of this repo is run by one person, so there is nothing to identify and nothing to authenticate.",
+    "_comment": "Data/Progress/progress.json - the ONE progress record this server keeps. There are no accounts: each clone of this repo is run by one person, so there is nothing to identify and nothing to authenticate. Keys added after the first version are optional and dropped one by one if malformed; keys a version does not know are kept as they are, so an older studio never deletes what a newer one wrote.",
     "schema": {
         "value": "progress/v1"
     },
     "resume": {
         "_comment": "Where the app sends you back to on your next visit. null until you have opened anything.",
-        "week": { "value": 1 },
-        "day": { "value": 1 },
-        "part": { "value": 1 }
+        "week": {
+            "value": 1
+        },
+        "day": {
+            "value": 1
+        },
+        "part": {
+            "value": 1
+        },
+        "day_id": {
+            "_comment": "The day's identity (invariant 10), so the resume point follows the day when a course update moves it. Optional.",
+            "value": "d1"
+        }
     },
     "progress": {
         "_comment": "Keyed 'w<week>d<day>'. A part completes when viewed; a day completes when all of its parts have. attempted_problems records practice problems you have run code against.",
         "_itemTemplate": {
             "parts_viewed": {
-                "options": [1, 2, 3, 4],
+                "options": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
                 "value": []
             },
-            "completed": { "value": false },
-            "attempted_problems": { "value": [] },
-            "first_opened_at": { "value": "2026-09-19T00:00:00Z" },
-            "completed_at": { "value": null }
+            "completed": {
+                "value": false
+            },
+            "attempted_problems": {
+                "value": []
+            },
+            "first_opened_at": {
+                "value": "2026-09-19T00:00:00Z"
+            },
+            "completed_at": {
+                "value": null
+            },
+            "day_id": {
+                "_comment": "The day's identity (invariant 10), so the record follows the day when a course update moves it. Optional.",
+                "value": "d1"
+            }
         },
         "value": {}
+    },
+    "day_tags": {
+        "_comment": "Optional. The tag on a day's card, by day identity: 'new' (the day was not in the course at the previous launch) or 'updated' (it changed since). Removed when the learner opens the day. Never set on the first launch.",
+        "_itemTemplate": {
+            "options": [
+                "new",
+                "updated"
+            ],
+            "value": "updated"
+        },
+        "value": {}
+    },
+    "attempts": {
+        "_comment": "Optional. The exercises the learner worked on (a Check, or a Terminal command that saved the exercise's file), by exercise identity, with the exercise's revision at the time: a later change shows 'Updated since you worked on it'.",
+        "_itemTemplate": {
+            "revision": {
+                "value": "0123456789ab"
+            },
+            "at": {
+                "value": "2026-09-19T00:00:00Z"
+            }
+        },
+        "value": {}
+    },
+    "content_seen": {
+        "_comment": "Optional, internal: never sent to the page. What the course was at the last reconcile (backend/src/reconcile.ts): a fingerprint of the whole course, each open day's revision by day identity, and each exercise's file now and before (newest last, at most 4), so saved code is still found after an update moves it.",
+        "fingerprint": {
+            "value": ""
+        },
+        "days": {
+            "value": {}
+        },
+        "files": {
+            "_itemTemplate": {
+                "at": {
+                    "workspace": {
+                        "options": [
+                            "demo",
+                            "project"
+                        ],
+                        "value": "project"
+                    },
+                    "file": {
+                        "value": "tests/day4/x.spec.ts"
+                    },
+                    "value": null
+                },
+                "moved_from": {
+                    "value": []
+                }
+            },
+            "value": {}
+        },
+        "value": null
     }
 }

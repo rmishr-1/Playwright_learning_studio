@@ -6,8 +6,12 @@
  * (desktop/) sets these variables before it loads the backend:
  *
  *   STUDIO_DATA_DIR       writable: progress, the Terminal's workspaces, the config file
- *   STUDIO_CONTENT_PACK   the course, encrypted (see content.ts), in place of Data/Content/
- *   STUDIO_WEB_DIR        the built Option C page, which the backend then serves itself
+ *   STUDIO_CONTENT_SOURCE 'memory': the course is handed over in memory (content.ts), never read
+ *                         from Data/Content/
+ *   STUDIO_RUN_PREFIX     what a Run's scratch folder is called (runner.ts), one per app, so an
+ *                         app's clean-up never touches another's
+ *   STUDIO_WEB_DIR        the built Option C page, which the backend then serves itself (the
+ *                         desktop app hands the page over in memory instead, server.ts)
  *   STUDIO_NODE_PATH      the Node that runs the learner's code; the desktop app ships its own
  *   STUDIO_PORT           0 picks a free port
  *   PLAYWRIGHT_BROWSERS_PATH   the browsers the app ships; every learner process inherits it
@@ -19,10 +23,14 @@ import { z } from 'zod';
 
 export const ROOT = path.resolve(__dirname, '..', '..');
 export const DATA = process.env.STUDIO_DATA_DIR ? path.resolve(process.env.STUDIO_DATA_DIR) : path.join(ROOT, 'Data');
-/** The course as plain files, read when there is no content pack. */
-export const CONTENT = path.join(ROOT, 'Data', 'Content');
-export const CONTENT_PACK = process.env.STUDIO_CONTENT_PACK || null;
+/**
+ * The course as plain files, read when the course is not handed over in memory (the desktop app
+ * downloads it). STUDIO_CONTENT_DIR points elsewhere, for tests that change the course.
+ */
+export const CONTENT = process.env.STUDIO_CONTENT_DIR ? path.resolve(process.env.STUDIO_CONTENT_DIR) : path.join(ROOT, 'Data', 'Content');
 export const WEB_DIR = process.env.STUDIO_WEB_DIR || null;
+/** The start of every Run's scratch folder's name, in the system's temporary folder. */
+export const RUN_PREFIX = /^studio-run-[0-9a-f]{0,16}-?$/.test(process.env.STUDIO_RUN_PREFIX ?? '') ? process.env.STUDIO_RUN_PREFIX! : 'studio-run-';
 /**
  * The Node that runs the learner's code: `node day3/hello.ts`, the test runner, the type checker
  * and a Run. The lessons need Node 22.18 or later, for its TypeScript support.

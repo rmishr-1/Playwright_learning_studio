@@ -5,7 +5,7 @@ import { RunView } from './screens/RunView';
 import { Dashboard } from './screens/Dashboard';
 import { AppHeader } from './components/AppHeader';
 import { getCourse, getMyProgress } from './api/client';
-import type { CourseIndex } from '../../shared/contracts/course_index';
+import type { CourseResponse } from '../../shared/contracts/course_index';
 import { editorThemeFor, isTheme, nextTheme, type Theme } from './lib/theme';
 
 const THEME_KEY = 'studio.theme';
@@ -51,7 +51,7 @@ export function App() {
    */
   const [weeksOpen, setWeeksOpen] = useState<boolean>(readWeeksOpen);
   // The header shows where you are on a lesson - week, module, day and title - from the index.
-  const [index, setIndex] = useState<CourseIndex | null>(null);
+  const [index, setIndex] = useState<CourseResponse | null>(null);
   useEffect(() => {
     getCourse().then(setIndex).catch(() => undefined);
   }, []);

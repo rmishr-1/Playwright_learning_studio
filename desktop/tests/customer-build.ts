@@ -6,7 +6,9 @@
  *   npm run test:customer [-- <logo.png>]
  *
  *   - it accepts only that customer's licence: every other one is refused, even a valid one
- *   - without that licence it opens nothing, and its course cannot even be decrypted
+ *   - without that licence it opens nothing, and it carries no course: the course is downloaded
+ *     (here from this computer: build.ts devLocal; tests/distribution.ts drives the download)
+ *   - a licence without a seal is refused: it cannot open a downloaded course
  *   - its lessons carry that customer's licence ID as their watermark
  *   - the header shows the customer's logo right of the theme switch
  */
@@ -42,7 +44,7 @@ function reset(licenceText: string | null): void {
 
 async function setupStep(app: ElectronApplication): Promise<{ page: Page; step: string; reason: string }> {
   const page = await app.firstWindow();
-  await page.waitForSelector('#product:not(:empty)');
+  await page.waitForSelector('#licence:not([hidden]), #problem:not([hidden])', { timeout: 60_000 });
   const step = (await page.isVisible('#licence')) ? 'licence' : 'studio';
   const reason = (await page.isVisible('#reason')) ? ((await page.textContent('#reason')) ?? '') : '';
   return { page, step, reason };
@@ -68,7 +70,7 @@ async function main(): Promise<void> {
   const licenceFile = path.join(OUT, 'customer-test.lic');
   fs.writeFileSync(licenceFile, licenceText);
   console.log('Building a copy for ' + customer.licensee + ', sealed to its licence, obfuscated like a release...');
-  await build({ release: false, obfuscate: true, licenceFile, carryLicence: false, publicKeyFile: keys.publicKeyFile });
+  await build({ release: false, obfuscate: true, licenceFile, carryLicence: false, publicKeyFile: keys.publicKeyFile, devLocal: true });
   expect(!fs.existsSync(path.join(DESKTOP, 'build', 'app', 'licence.lic')), 'the build does not carry the licence');
   const exe = await packedApp();
   const launch = () => electron.launch({ executablePath: exe, args: [], timeout: 60_000 });
@@ -77,7 +79,7 @@ async function main(): Promise<void> {
   const otherLicence: Licence = { ...customer, id: 'EVK-0DDC0FFE', licensee: 'Another Customer', logo: null, seal: crypto.randomBytes(32).toString('hex'), machine: machineCode() };
   const other = JSON.stringify(sign(otherLicence, keys.privateKey));
   const verdict = verify(other, keys.publicKey, { onlyId: customer.id, machine: machineCode() });
-  expect(!verdict.ok && /not the one this copy was made for/.test(verdict.reason), 'the check refuses other licences', verdict.ok ? '' : verdict.reason);
+  expect(!verdict.ok && /not issued for this installation/.test(verdict.reason), 'the check refuses other licences', verdict.ok ? '' : verdict.reason);
 
   reset(null);
   let app = await launch();
@@ -88,19 +90,32 @@ async function main(): Promise<void> {
   reset(other);
   app = await launch();
   s = await setupStep(app);
-  expect(s.step === 'licence' && /not the one this copy was made for/.test(s.reason), 'another customer\'s valid licence is refused', s.reason);
+  expect(s.step === 'licence' && /not issued for this installation/.test(s.reason), 'another customer\'s valid licence is refused', s.reason);
   await s.page.screenshot({ path: path.join(OUT, 'customer-1-other-licence.png') });
   await app.close();
 
-  // The course is sealed: the key built into the app opens it only with this customer's seal.
-  const pack = fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'content.pack'));
-  const mainJs = fs.readFileSync(path.join(DESKTOP, 'build', 'app', 'main.js'), 'utf-8');
-  expect(pack.subarray(0, 4).toString('latin1') === 'SPK1' && !mainJs.includes(customer.seal!), 'the seal is not in the app: it comes only with the licence');
+  // A licence of this customer's issued before seals: it could not open a downloaded course.
+  const unsealed = JSON.stringify(sign({ ...customer, seal: null }, keys.privateKey));
+  reset(unsealed);
+  app = await launch();
+  s = await setupStep(app);
+  expect(s.step === 'licence' && /cannot open it/.test(s.reason), 'a licence without a seal is refused', s.reason);
+  await app.close();
+
+  // The app carries no course and no studio page: those are downloaded, and open only with the seal.
+  const appDir = path.join(DESKTOP, 'build', 'app');
+  const mainJs = fs.readFileSync(path.join(appDir, 'main.js'), 'utf-8');
+  expect(!fs.existsSync(path.join(appDir, 'content.pack')) && !fs.existsSync(path.join(appDir, 'web')), 'the app carries no course and no page');
+  expect(!mainJs.includes(customer.seal!), 'the seal is not in the app: it comes only with the licence');
 
   reset(licenceText);
   app = await launch();
-  // With its own licence there is no setup step and no agreement: the studio opens at once.
-  const page = await app.firstWindow();
+  // With its own licence there is no setup step and no agreement: the studio opens.
+  let page = await app.firstWindow();
+  for (let i = 0; i < 240 && !page.url().startsWith('http://127.0.0.1:'); i++) {
+    await new Promise((r) => setTimeout(r, 250));
+    page = app.windows().find((w) => w.url().startsWith('http://127.0.0.1:')) ?? page;
+  }
   await page.waitForSelector('text=Week 1', { timeout: 30_000 });
   expect(true, 'with its own licence, the sealed course opens');
   const day = await page.evaluate(() => fetch('/api/course/1/3').then((r) => r.text()));

@@ -21,7 +21,7 @@ export default defineConfig({
     cors: false,
     fs: {
       strict: true,
-      allow: ['.', '../shared', '../Data/Content/course-plan.json'],
+      allow: ['.', '../shared'],
       deny: ['.env', '.env.*', '*.{pem,key,pfx,p12,dpapi,lic,crt}', '**/.git/**'],
     },
     // Fail rather than drift to another port: the backend accepts only this page's origin in development.

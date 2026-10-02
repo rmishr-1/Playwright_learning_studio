@@ -13,6 +13,9 @@
  *                           desktop/src/licence-public.pem that does not match it, or a computer
  *                           without it
  *   issued.csv, seals.json  the record of every licence issued, and each licence ID's seal
+ *   app-secret.dpapi        the secret built into every launcher, derived from the key (encrypted
+ *                           for this Windows user, like the key)
+ *   dist\                   the publisher's clones of the distribution repositories (publish.ts)
  *
  * Because the DPAPI file opens only for this Windows user, keep a backup made with
  * `npm run licence:backup-key` (encrypted with a passphrase you choose) somewhere safe and offline.
@@ -24,6 +27,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { systemExe } from '../../backend/src/system-exe';
 import { secret } from './prompt';
+import { appSecret, seedOf } from '../src/release-format';
 
 export const DESKTOP = path.resolve(__dirname, '..');
 export const KEY_DIR = process.env.STUDIO_KEY_DIR || path.join(os.homedir(), '.evoke-studio');
@@ -172,6 +176,42 @@ export function checkedPublicKey(file = PUBLIC_KEY_FILE): string {
     );
   }
   return pem;
+}
+
+// ---------------------------------------------------------------- the app secret
+
+/**
+ * The secret every launcher carries (src/release-format.ts: half of what opens a release; the
+ * licence's seal is the other half). It is derived from the private key, so nothing new needs a
+ * backup; it is kept here, encrypted for this Windows user, with the fingerprint of the key it came
+ * from, so building a launcher does not ask for the key's passphrase every time.
+ */
+export const APP_SECRET_FILE = path.join(KEY_DIR, 'app-secret.dpapi');
+
+/** The fingerprint of a private key's public half. */
+export const keyFingerprint = (privateKeyPem: string): string =>
+  publicFingerprint(crypto.createPublicKey(privateKeyPem).export({ type: 'spki', format: 'pem' }).toString());
+
+/** Evoke's app secret: from the cache when it was made from Evoke's key, else from the key itself. */
+export async function loadAppSecret(): Promise<Buffer> {
+  try {
+    const cached = JSON.parse(dpapi('Unprotect', Buffer.from(fs.readFileSync(APP_SECRET_FILE, 'utf-8').trim(), 'base64')).toString('utf-8')) as {
+      key?: string;
+      secret?: string;
+    };
+    if (cached.key === EVOKE_KEY_FINGERPRINT && typeof cached.secret === 'string' && /^[0-9a-f]{64}$/.test(cached.secret)) {
+      return Buffer.from(cached.secret, 'hex');
+    }
+  } catch {
+    // None yet, or made for another user or key: derived again below.
+  }
+  const pem = await loadPrivateKey();
+  if (keyFingerprint(pem) !== EVOKE_KEY_FINGERPRINT) throw new Error('The signing key in ' + KEY_DIR + " is not Evoke's key; the build stops.");
+  const secret = appSecret(seedOf(pem));
+  const temp = APP_SECRET_FILE + '.new';
+  fs.writeFileSync(temp, dpapi('Protect', Buffer.from(JSON.stringify({ key: EVOKE_KEY_FINGERPRINT, secret: secret.toString('hex') }), 'utf-8')).toString('base64') + '\n');
+  fs.renameSync(temp, APP_SECRET_FILE);
+  return secret;
 }
 
 // ---------------------------------------------------------------- passphrase and backups

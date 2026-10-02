@@ -102,9 +102,9 @@ function collect(): Item[] {
 }
 
 /**
- * Every built exercise with an automatic check, paired with its model answer from the source. The
- * built day's exercises are numbered in the order the source lists them, so exercise N of a day is
- * the source day's Nth exercise.
+ * Every built exercise with an automatic check, paired with its model answer from the source, found
+ * by the exercise's id (a reused id is built as `<id>~<generation>`, so that suffix is dropped). For
+ * content built without ids, exercise N of a day is the source day's Nth exercise.
  */
 function checkItems(): { label: string; problem: PracticeProblem; request: CheckRequest }[] {
   const out: { label: string; problem: PracticeProblem; request: CheckRequest }[] = [];
@@ -114,6 +114,7 @@ function checkItems(): { label: string; problem: PracticeProblem; request: Check
     .filter((e) => e.isDirectory() && e.name !== 'workspace' && fs.existsSync(path.join(source, e.name, 'json')))
     .map((e) => e.name);
   const solutions = new Map<number, string[]>();
+  const byId = new Map<string, string>();
   for (const pkg of packages) {
     const json = path.join(source, pkg, 'json');
     for (const f of fs.readdirSync(json).filter((n) => /^day\d+\.json$/.test(n))) {
@@ -123,6 +124,7 @@ function checkItems(): { label: string; problem: PracticeProblem; request: Check
       };
       const exercises = day.sections.flatMap((s) => s.lessons.flatMap((l) => l.blocks.filter((b) => b.type === 'exercise')));
       solutions.set(day.day, exercises.map((b) => (typeof b.solution === 'string' ? b.solution : '')));
+      for (const b of exercises) if (typeof b.id === 'string') byId.set(b.id, typeof b.solution === 'string' ? b.solution : '');
     }
   }
   const weeks = path.join(ROOT, 'Data', 'Content', 'weeks');
@@ -135,13 +137,22 @@ function checkItems(): { label: string; problem: PracticeProblem; request: Check
           // An answer to a test exercise that is notes plus the one changed line is not a file the
           // check can run. For those, the file the exercise starts from is a correct answer: it is
           // the lesson's own working test, which the learner breaks and then fixes.
-          const solution = solutions.get(day.number)?.[problem.number - 1] ?? '';
+          const authored = problem.id?.replace(/~\d+$/, '');
+          const solution = (authored ? byId.get(authored) : undefined) ?? solutions.get(day.number)?.[problem.number - 1] ?? '';
           const wholeFile = !problem.file?.endsWith('.spec.ts') || /\btest\s*(\.\w+\s*)?\(/.test(solution);
           const code = wholeFile ? solution : (problem.stub ?? '');
           out.push({
             label: 'day ' + day.number + ' exercise ' + problem.number + ' ' + problem.file,
             problem,
-            request: { week: day.week, day: day.day, part: part.part, problem: problem.number, code, workspace: day.workspace },
+            request: {
+              week: day.week,
+              day: day.day,
+              part: part.part,
+              problem: problem.number,
+              ...(problem.id ? { problem_id: problem.id } : {}),
+              code,
+              workspace: day.workspace,
+            },
           });
         }
       }

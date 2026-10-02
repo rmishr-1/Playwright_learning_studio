@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError, getCourse, getMyProgress, recordProgress } from '../api/client';
 import { planWeeks } from '../lib/coursePlan';
+import { TAG_LABEL } from '../lib/dayTags';
 import { PRODUCT_NAME } from '../components/AppHeader';
-import type { CourseIndex } from '../../../shared/contracts/course_index';
-import type { Progress } from '../../../shared/contracts/progress';
+import type { CourseResponse, IndexDay } from '../../../shared/contracts/course_index';
+import { dayIdentity } from '../../../shared/contracts/common';
+import type { DayTag, Progress } from '../../../shared/contracts/progress';
 
 const dayUrl = (week: number, day: number, part = 1): string => '/learn/w' + week + '/d' + day + '/p' + part;
 
@@ -37,7 +39,7 @@ const LockIcon = () => (
  * day. The days are the week's key topics; a week not built yet says it opens soon.
  */
 export function Dashboard({ active = true }: { active?: boolean }) {
-  const [index, setIndex] = useState<CourseIndex | null>(null);
+  const [index, setIndex] = useState<CourseResponse | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [error, setError] = useState('');
   /** The weeks whose days are folded away in Your path. Every week starts open. */
@@ -86,6 +88,8 @@ export function Dashboard({ active = true }: { active?: boolean }) {
   const weeks = planWeeks(index);
   const dayRecord = (w: number, d: number) => progress?.progress['w' + w + 'd' + d];
   const isDone = (w: number, d: number): boolean => !!dayRecord(w, d)?.completed;
+  /** "New" or "Updated": the day changed since the learner's previous launch, and they have not opened it since. */
+  const tagOf = (d: IndexDay): DayTag | undefined => progress?.day_tags?.[dayIdentity(d)];
   const openDays = weeks.filter((w) => w.open).flatMap((w) => w.days.filter((d) => !d.locked).map((d) => ({ week: w.week, day: d })));
 
   // Overall progress, counted over open days only.
@@ -200,6 +204,7 @@ export function Dashboard({ active = true }: { active?: boolean }) {
                           const tileDone = isDone(w.week, d.day);
                           const here = next?.week === w.week && next.day.day === d.day;
                           const key = w.week + '/' + d.day;
+                          const tag = d.locked ? undefined : tagOf(d);
                           const body = (
                             <>
                               <span className="tile-top">
@@ -208,6 +213,7 @@ export function Dashboard({ active = true }: { active?: boolean }) {
                                 {tileDone && <span className="tile-done" aria-hidden="true">✓ Done</span>}
                               </span>
                               <span className="tile-title">{d.title}</span>
+                              {tag && <span className="tile-tag">{TAG_LABEL[tag]}</span>}
                               {here && <span className="here">You are here</span>}
                             </>
                           );
@@ -218,7 +224,7 @@ export function Dashboard({ active = true }: { active?: boolean }) {
                               <Link
                                 to={dayUrl(w.week, d.day)}
                                 className={'day-tile' + (tileDone ? ' done' : '')}
-                                aria-label={'Open Week ' + w.week + ' Day ' + d.day + ': ' + d.title}
+                                aria-label={'Open Week ' + w.week + ' Day ' + d.day + ': ' + d.title + (tag ? ', ' + TAG_LABEL[tag].toLowerCase() + ' since your last visit' : '')}
                               >
                                 {body}
                               </Link>

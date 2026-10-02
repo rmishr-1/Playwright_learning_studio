@@ -1,0 +1,106 @@
+{
+  "_comment": "Where a standard installer's first start downloads Node and the browsers from, and what each must be (scripts/runtime.ts, src/runtime-install.ts). Written by `npm run runtime -- --fresh --pin`; commit it with runtime-pins.json.",
+  "allow": [
+    "https://nodejs.org/dist/",
+    "https://storage.googleapis.com/chrome-for-testing-public/",
+    "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/",
+    "https://cdn.playwright.dev/"
+  ],
+  "pieces": [
+    {
+      "name": "node",
+      "kind": "node",
+      "urls": [
+        "https://nodejs.org/dist/v24.21.0/node-v24.21.0-win-x64.zip"
+      ],
+      "exe": "node.exe",
+      "archiveRoot": "node-v24.21.0-win-x64",
+      "size": 37618919,
+      "sha256": "158f7685b44de51f6c0df1d153526cbcd3e1bc739a8dfc607721cef75de9e541",
+      "tree": "6841e24a61c80a4e208955b20137d1bc8d470bfc9bc0c88c4700b74d4be7db3d",
+      "unpacked": 93740667
+    },
+    {
+      "name": "chromium-1243",
+      "kind": "browser",
+      "urls": [
+        "https://storage.googleapis.com/chrome-for-testing-public/153.0.8010.12/win64/chrome-win64.zip",
+        "https://cdn.playwright.dev/builds/cft/153.0.8010.12/win64/chrome-win64.zip"
+      ],
+      "exe": "chrome-win64/chrome.exe",
+      "size": 205123748,
+      "sha256": "415968b02065d4a9e2c10b85f0ae9f489b8fba500e94d9d0a7b7c4852a7234c1",
+      "tree": "5ece9ac9b1f3b5e14b8b92c59675623f8942e055012f8703fb02d0f8f11030c4",
+      "unpacked": 452900525
+    },
+    {
+      "name": "chromium_headless_shell-1243",
+      "kind": "browser",
+      "urls": [
+        "https://storage.googleapis.com/chrome-for-testing-public/153.0.8010.12/win64/chrome-headless-shell-win64.zip",
+        "https://cdn.playwright.dev/builds/cft/153.0.8010.12/win64/chrome-headless-shell-win64.zip"
+      ],
+      "exe": "chrome-headless-shell-win64/chrome-headless-shell.exe",
+      "size": 120200717,
+      "sha256": "7aec872f3090e639c4237467624ea863c20fe2878914c93a6556bdbb52aa6c4c",
+      "tree": "1a87dbbe9aa99c4449727026203bd54140aadb0817f0d41858cbe20342ef5722",
+      "unpacked": 283217434
+    },
+    {
+      "name": "firefox-1543",
+      "kind": "browser",
+      "urls": [
+        "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1543/firefox-win64.zip",
+        "https://cdn.playwright.dev/builds/firefox/1543/firefox-win64.zip",
+        "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1543/firefox-win64.zip"
+      ],
+      "exe": "firefox/firefox.exe",
+      "size": 127960949,
+      "sha256": "cb0cd830e2a5d6dc6f2122649de45123d778b7e94f9259e2f2c1436f425f5d69",
+      "tree": "35299ab1204f31915e75436d795fefe75eaa96fa1686078a026db9881ebbf48d",
+      "unpacked": 358344918
+    },
+    {
+      "name": "webkit-2359",
+      "kind": "browser",
+      "urls": [
+        "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip",
+        "https://cdn.playwright.dev/builds/webkit/2359/webkit-win64.zip",
+        "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip"
+      ],
+      "exe": "Playwright.exe",
+      "size": 62672093,
+      "sha256": "b9a4d90a004b0119ff590e26fddc84e2df0bb512304823974003a79b7d0bd2db",
+      "tree": "5918add055440d0cf12ee78d050d13a1426f442cc57db995edbc6377243dec2e",
+      "unpacked": 177680877
+    },
+    {
+      "name": "ffmpeg-1011",
+      "kind": "browser",
+      "urls": [
+        "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-win64.zip",
+        "https://cdn.playwright.dev/builds/ffmpeg/1011/ffmpeg-win64.zip",
+        "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-win64.zip"
+      ],
+      "exe": "ffmpeg-win64.exe",
+      "size": 1411741,
+      "sha256": "8d08827c019ad36e7b9d49d3648447d884534cb2acf200e71c715f6dd834cc50",
+      "tree": "b38587c11b477c314e337243b3725a518d78413808bce4280435018767144e66",
+      "unpacked": 3517342
+    },
+    {
+      "name": "winldd-1007",
+      "kind": "browser",
+      "urls": [
+        "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip",
+        "https://cdn.playwright.dev/builds/winldd/1007/winldd-win64.zip",
+        "https://cdn.playwright.dev/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip"
+      ],
+      "exe": "PrintDeps.exe",
+      "size": 128684,
+      "sha256": "0069f0d11d4ad6df068a068c003d22fe7dbec192a47bba64b2e115e9c8ce41d8",
+      "tree": "675ea1987da8b37c5afb84a9089b14ffa86bbb6d3c4c30aa50cc5224bf699541",
+      "unpacked": 258560
+    }
+  ]
+}

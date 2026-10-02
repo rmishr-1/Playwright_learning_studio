@@ -12,6 +12,7 @@
         "dev:frontend": "npm run dev --workspace frontend-c",
         "build:content": "tsx scripts/build-content.ts",
         "verify:content": "tsx scripts/verify-content.ts",
+        "test:progress": "tsx backend/test/progress-identity.ts",
         "typecheck": "npm run typecheck --workspaces --if-present"
     },
     "devDependencies": {

@@ -1,6 +1,8 @@
 node_modules/
-# Gathered by `npm run runtime`: Node and the browsers the app ships.
+# Gathered by `npm run runtime`: Node and the browsers the app ships, and the official archives
+# they came from (reused by the next gather and by the tests).
 runtime/
+runtime-archives/
 # Build output: the staged app and the installers.
 build/
 release/

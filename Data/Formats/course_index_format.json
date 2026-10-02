@@ -51,6 +51,14 @@
                     },
                     "locked": {
                         "value": false
+                    },
+                    "id": {
+                        "_comment": "Optional: the day's own identity, when its front matter sets one. Otherwise its identity is 'd' + number (invariant 10).",
+                        "value": null
+                    },
+                    "revision": {
+                        "_comment": "Changes whenever anything in the day changes; the studio tags a day whose revision differs from the learner's previous launch. Opaque (invariant 11).",
+                        "value": "0123456789ab"
                     }
                 },
                 "value": []

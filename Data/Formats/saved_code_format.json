@@ -1,0 +1,7 @@
+{
+    "_comment": "GET /api/exercise/:week/:day/:id/saved - the code the learner last saved for a code exercise, so 'Start this in the editor' brings their own work back rather than the starting code. Looked for where the exercise's file is now, then where it was before a course update moved it (newest first). An untouched starting file, or code equal to the starting code, is not the learner's work and is not returned.",
+    "code": { "_comment": "null when the learner has saved nothing of their own for it.", "value": null },
+    "file": { "_comment": "Where it was found, in the workspace.", "value": null },
+    "moved": { "_comment": "Found where the exercise's file used to be, before a course update moved it.", "value": false },
+    "too_large": { "_comment": "The learner's file is there but longer than the editor takes (64,000 characters).", "value": false }
+}

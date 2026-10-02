@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DayNumber, PartNumber, ProblemNumber, WeekNumber } from './common';
+import { ContentId, DayNumber, PartNumber, ProblemNumber, WeekNumber } from './common';
 import { Workspace } from './course_day';
 
 /** Mirrors Data/Formats/check_format.json. "Check my answer" on a code exercise. */
@@ -10,6 +10,8 @@ export const CheckRequest = z.object({
   part: PartNumber,
   /** The exercise's number within the part. The server looks up its check in the course. */
   problem: ProblemNumber,
+  /** The exercise's identity: looked up first, so a renumbered exercise is still the one checked. */
+  problem_id: ContentId.optional(),
   /** The learner's answer: the editor's code, saved as the exercise's file before the check runs. */
   code: z.string().max(64_000),
   workspace: Workspace,

@@ -13,8 +13,8 @@ only process that touches `Data/`, so a keyed mutex is sufficient and there is n
 | Path | Holds | Written by | Read by |
 |---|---|---|---|
 | `Data/Formats/` | These wire contracts | format changes only | both sides |
-| `Data/Source/` | The course source: the course package (`course/`, holding every week), and the files every Terminal workspace starts with (`workspace/`) | authors | `npm run build:content` |
-| `Data/Content/` | The built course — `course-index.json`, `weeks/week-N/day-N.json`, `workspaces.json` | `npm run build:content` **only** | backend |
+| `Data/Source/` | The course source: the course package (`course/`, holding every week), the files every Terminal workspace starts with (`workspace/`), the course plan (`course-plan.json`), and the record of published exercise ids (`published-ids.json`, invariant 10) | authors (the id record: the build) | `npm run build:content` |
+| `Data/Content/` | The built course — `course-index.json`, `weeks/week-N/day-N.json`, `workspaces.json`, `course-plan.json` | `npm run build:content` **only** | backend; the desktop publisher (`desktop/scripts/publish.ts`) |
 | `Data/Workspace/` | The Terminal's workspaces, `demo/` and `project/`, with the files the learner saved | backend | backend |
 | `Data/Progress/` | The ONE progress record. No accounts: each clone of this repo is run by one person | backend | backend |
 | `Data/Config/` | `studio.config.json` — run limits and allowed sites | operator | backend |
@@ -43,8 +43,10 @@ Legend: **F** = frontend (`frontend-c/src`), **B** = backend (`backend/src`), **
 |---|---|---|---|
 | `problem_error_format.json` | response | B → F | every non-2xx |
 | `course_index_format.json` | content | S → B → F | `GET /api/course` |
+| `course_plan_format.json` | content | S → B → F | `GET /api/course` (as `plan`) |
 | `course_day_format.json` | content | S → B → F | `GET /api/course/:week/:day` |
-| `progress_format.json` | state | F ↔ B | `GET /api/progress`, `POST /api/progress` |
+| `progress_format.json` | state | F ↔ B | `GET /api/progress`, `POST /api/progress` (`content_seen` is never sent) |
+| `saved_code_format.json` | response | B → F | `GET /api/exercise/:week/:day/:id/saved` |
 | `check_format.json` | req/resp | F ↔ B | `POST /api/check` |
 | `run_format.json` | req/resp | F ↔ B | `POST /api/run` + `WS /api/run/:run_id/stream` |
 
@@ -79,6 +81,26 @@ Legend: **F** = frontend (`frontend-c/src`), **B** = backend (`backend/src`), **
    gates progress on one. This studio is deliberately not the assessment portal: the moment a
    checkpoint is recorded, a wrong answer starts costing something, and the learner stops using it
    to think with. Adding a scored quiz means a new format and a new invariant, not a field here.
+10. **Identities are permanent, and what the learner did is kept by identity.** A day's identity is
+    its front-matter `id`, or `'d' + number`; an exercise's is its authored `id` (`d4-ex1`). Positions
+    (`w1d4`, exercise numbers, block indexes) change when the course is edited; identities do not.
+    The learner's attempts, the tag on a day's card and the place of their saved code are recorded by
+    identity, so a course update that edits, renumbers or moves something never hands the learner's
+    work to something else. An id is never reused for a different exercise: `npm run build:content`
+    checks every id against `Data/Source/published-ids.json` and stops when one seems to now mean a
+    different exercise (`--same <id>` says it is the same exercise, edited; `--new-identity <id>`
+    gives the new exercise its own identity, `<id>~2`). Commit that file with the content. Quiz ids are
+    only ever keys, so invariant 9 still holds.
+11. **Revisions are opaque tokens over the course as written.** `IndexDay.revision` and
+    `PracticeProblem.revision` change when the day, or what the exercise asks, changes. They are
+    compared only for equality, never parsed, and computed on content with its watermarks stripped
+    and its line endings made plain (`shared/revision.ts`), so the licence a lesson is served under,
+    or the computer that built it, never makes it look changed. The publisher may keep a day's
+    previous token for a change too small to tell learners about (`publish content --quiet w1d4`).
+12. **Progress survives every version.** Every key added to `progress_format` after the first is
+    optional, and a malformed one is dropped on its own (`.catch`), never costing the learner the whole
+    record; keys a version does not know are kept (`.passthrough`), so an older studio never deletes
+    what a newer one wrote.
 
 ## Verification checklist
 

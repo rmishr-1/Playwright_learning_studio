@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
-set "REPO=https://rmishr-1@github.com/rmishr-1/Playwright_learning_studio.git"
+set "REPO=https://github.com/rmishr-1/Playwright_learning_studio.git"
 set "GITCMD=%ProgramFiles%\Git\cmd"
 set "GITCMD2=%LocalAppData%\Programs\Git\cmd"
 

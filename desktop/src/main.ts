@@ -1,18 +1,22 @@
 /**
- * The desktop app's main process.
+ * The desktop app's main process: the launcher. The studio itself (its backend and its page) and the
+ * course are not installed: they are downloaded at every start, encrypted, and opened in memory.
  *
  *   1. Refuses to run under a debugger in a release build.
- *   2. Asks for a licence until it has a valid one (licence.ts), in the setup window (setup.html).
- *      The licence agreement is installed beside the app (legal/EULA.txt) and is not shown.
- *   3. Starts the backend inside this process, on 127.0.0.1, with a new random token, and opens the
- *      studio in a window that holds the token as a cookie. Nothing else on the computer can use
- *      the API.
+ *   2. Asks for a licence until it has a valid one (licence.ts), in the launch window (setup.html).
+ *   3. Downloads the studio's code and the course from Evoke's distribution repositories on GitHub
+ *      (release.ts) and opens them with the licence's seal and the app's secret: the licence alone,
+ *      or the app alone, opens nothing. Without the internet the studio does not open.
+ *   4. Runs the studio's code (bundle-loader.ts), which starts its server on 127.0.0.1 with a new
+ *      random token, and opens the studio in a window that holds the token as a cookie. Nothing else
+ *      on the computer can use the API.
+ *   5. At quit, stops the studio and takes the course's traces off the disk again (cleanup.ts).
  *
  * Every window is locked down: no Node in the page, context isolation, a sandbox, no DevTools in a
  * release build, no navigating away from the studio. Links elsewhere open in the learner's browser.
  */
 import './env';
-import { APP_DIR, USER_DIR } from './env';
+import { APP_DIR, RUNTIME_DIR, USER_DIR } from './env';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -29,14 +33,17 @@ import {
   type WebContents,
   type WebPreferences,
 } from 'electron';
-import { startServer, type RunningServer } from '../../backend/src/server';
-import { stopAll } from '../../backend/src/terminal';
-import { stopRuns } from '../../backend/src/runner';
-import { setBranding } from '../../backend/src/branding';
-import { useLicence } from '../../backend/src/content';
-import { machineCode, verify, type Licence, type Verdict } from './licence';
+import { fingerprint, machineCode, verify, type Licence, type LicenceFile, type Verdict } from './licence';
 import { systemExe } from '../../backend/src/system-exe';
 import { execFileSync } from 'node:child_process';
+import { NetworkError, openReleases, publishedDay, type Opened } from './release';
+import { ReleaseError, appSecretFingerprint, unpackContainer } from './release-format';
+import { openFetchSession, type Fetcher } from './fetch-session';
+import { RuntimeError, ensureRuntime, isInstalled, type RuntimePiece } from './runtime-install';
+import { loadBundle } from './bundle-loader';
+import { SetupError, runSetupSteps } from './setup-steps';
+import { removeCourseLeftovers } from './cleanup';
+import type { RunningStudio, StudioHostV1 } from '../../shared/studio-host';
 
 declare const __STUDIO_RELEASE__: boolean;
 declare const __STUDIO_BUILD__: {
@@ -52,13 +59,30 @@ declare const __STUDIO_BUILD__: {
   revoked: string[];
   /** The day the app was built (YYYY-MM-DD): no licence check counts a day before it. */
   built: string;
+  /** The launcher API (shared/studio-host.ts): which channel of the app repository it reads. */
+  api: number;
+  /** Where the course and the studio's code are downloaded from (distribution.json); null in a development build without them. */
+  dist: { content: string; app: string } | null;
+  /** What this variant's Run scratch folders are called (backend/src/config.ts RUN_PREFIX). */
+  runPrefix: string;
+  /** The hash of the app secret built in, to check the halves against. */
+  secretFingerprint: string | null;
+  /**
+   * Node and the browsers: carried in the app's resources (a full build), or downloaded on the first
+   * start from their official servers (a standard build), checked against these pins
+   * (runtime-sources.json, runtime-install.ts).
+   */
+  runtime: { mode: 'bundled' } | { mode: 'download'; allow: string[]; pieces: RuntimePiece[] };
 };
+/** The app secret, as two halves that XOR to it (scripts/build.ts); null in a development build without one. */
+declare const __STUDIO_SECRET__: [string, string] | null;
 
 const RELEASE = __STUDIO_RELEASE__;
 const BUILD = __STUDIO_BUILD__;
-const COPYRIGHT = 'Copyright © 2026 Evoke Technologies. All rights reserved.';
 /** The navy title bar's height, in pixels: Windows' buttons on it and the page's strip under them. */
 const TITLE_BAR_HEIGHT = 28;
+/** What the launcher keeps about releases: the manifests it accepted (no course), and the setup steps done. */
+const STATE_DIR = path.join(USER_DIR, 'release-state');
 
 // ---------------------------------------------------------------- start-up guards
 
@@ -135,9 +159,11 @@ const MACHINE = machineCode();
  */
 const LAST_SEEN_FILE = path.join(USER_DIR, 'last-seen.json');
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
+/** The day the newest release this start downloaded was published: no clock is earlier than that. */
+let publishedFloor = '';
 function licenceToday(): { today: string; now: string } {
   const now = new Date().toISOString().slice(0, 10);
-  const marks: string[] = [];
+  const marks: string[] = [publishedFloor];
   try {
     marks.push((JSON.parse(fs.readFileSync(LAST_SEEN_FILE, 'utf-8')) as { day: string }).day);
   } catch {
@@ -186,53 +212,57 @@ function licenceToday(): { today: string; now: string } {
   return { today, now };
 }
 
+/** Licence files Evoke has withdrawn since this copy was built, as the latest release lists them. */
+let releaseRevoked: string[] = [];
+
 function check(text: string): Verdict {
   const { today, now } = licenceToday();
-  const verdict = verify(text, BUILD.publicKey, { onlyId: BUILD.onlyId, machine: MACHINE, today, revoked: BUILD.revoked });
+  const verdict = verify(text, BUILD.publicKey, { onlyId: BUILD.onlyId, machine: MACHINE, today, revoked: [...BUILD.revoked, ...releaseRevoked] });
+  // The seal is half of what opens the course: a licence without one (issued before seals) opens nothing.
+  if (verdict.ok && !verdict.licence.seal) {
+    return { ok: false, reason: 'This licence was issued before the current course system and cannot open it. Please request a new licence file from Evoke.', licence: verdict.licence };
+  }
   // Said plainly when it is the clock, not the licence, that is wrong.
   if (!verdict.ok && verdict.expired && verdict.licence?.expires && now <= verdict.licence.expires) {
     return {
       ...verdict,
       reason:
-        "This computer's clock says " + now + ', but the studio has already been used on ' + today + ', after the licence ' +
-        'ended (' + verdict.licence.expires + '). Set the clock to the right date. If it was ever set ahead by mistake, ' +
-        'ask Evoke for a renewed licence: the studio keeps the latest date it has seen.',
+        "This computer's clock says " + now + ', but the application has already been used on ' + today + ', which is after this licence ' +
+        'expired (' + verdict.licence.expires + '). Please set the clock to the correct date. If it was previously set ahead in error, please ' +
+        'request a renewed licence from Evoke; the application retains the latest date it has observed.',
     };
   }
   return verdict;
 }
 
-/** The licence the learner added, else the one built into a customer's copy. */
-function currentLicence(): Verdict {
+/** The licence the learner added, else the one built into a customer's copy, with its file's fingerprint. */
+function currentLicence(): Verdict & { fingerprint?: string } {
   let verdict: Verdict = { ok: false, reason: '' };
   for (const file of [LICENCE_FILE, BUILT_IN_LICENCE]) {
     if (!fs.existsSync(file)) continue;
-    verdict = check(fs.readFileSync(file, 'utf-8'));
-    if (verdict.ok) return verdict;
+    const text = fs.readFileSync(file, 'utf-8');
+    verdict = check(text);
+    if (verdict.ok) return { ...verdict, fingerprint: fingerprint(JSON.parse(text) as LicenceFile) };
   }
   return verdict;
 }
 
+/**
+ * What the launch window shows: the licence step, the download's progress, or a problem the
+ * learner can retry (no internet, GitHub busy) or must take to Evoke.
+ */
 type SetupState = {
-  step: 'licence';
+  step: 'licence' | 'working' | 'problem';
   product: string;
   version: string;
-  copyright: string;
   machine: string;
+  /** licence: why the licence there is refused, if one is. */
   reason: string;
+  /** working: what is happening; problem: what went wrong. */
+  message: string;
+  /** problem: what to do about it. */
+  detail: string;
 };
-
-function setupState(reason?: string): SetupState {
-  const verdict = currentLicence();
-  return {
-    step: 'licence',
-    product: BUILD.product,
-    version: BUILD.version,
-    copyright: COPYRIGHT,
-    machine: MACHINE,
-    reason: reason ?? (verdict.ok ? '' : verdict.reason),
-  };
-}
 
 const SAFE: WebPreferences = {
   contextIsolation: true,
@@ -243,96 +273,336 @@ const SAFE: WebPreferences = {
   spellcheck: false,
 };
 
-/**
- * Shows the setup window until there is a valid licence. The window
- * stays open until `close` is called, once the studio's own window is there: with no window at
- * all for a moment, the app would quit.
- */
-function runSetup(): Promise<{ licence: Licence; close: () => void }> {
-  return new Promise((resolve) => {
-    const win = new BrowserWindow({
-      width: 780,
-      height: 680,
-      minWidth: 560,
-      minHeight: 480,
-      title: BUILD.product,
-      backgroundColor: '#f4f6fa',
-      show: false,
-      webPreferences: { ...SAFE, preload: path.join(APP_DIR, 'setup-preload.js') },
-    });
-    let done = false;
-    setupContents.add(win.webContents.id);
-    const finish = (licence: Licence): void => {
-      done = true;
-      for (const channel of ['setup:state', 'setup:choose', 'setup:copy-machine', 'setup:quit']) {
-        ipcMain.removeHandler(channel);
-      }
-      win.hide();
-      resolve({ licence, close: () => win.close() });
-    };
-    // Only the setup page, in the setup window, may call these.
-    const fromSetup = (e: Electron.IpcMainInvokeEvent): boolean =>
-      e.sender.id === win.webContents.id && (e.senderFrame?.url ?? '') === SETUP_ORIGIN + '/setup.html';
-    const handle = (channel: string, fn: () => unknown): void =>
-      ipcMain.handle(channel, (e) => {
-        if (!fromSetup(e)) throw new Error('Not allowed.');
-        return fn();
-      });
-    handle('setup:state', () => setupState());
-    handle('setup:choose', async () => {
-      const picked = await dialog.showOpenDialog(win, {
-        title: 'Choose your licence file',
-        filters: [{ name: 'Licence', extensions: ['lic', 'json'] }],
-        properties: ['openFile'],
-      });
-      if (picked.canceled || !picked.filePaths[0]) return setupState();
-      const text = fs.readFileSync(picked.filePaths[0], 'utf-8');
-      const verdict = check(text);
-      if (!verdict.ok) return setupState(verdict.reason);
-      fs.mkdirSync(USER_DIR, { recursive: true });
-      fs.writeFileSync(LICENCE_FILE, text);
-      // A valid licence is all the studio needs: it opens at once.
-      const saved = currentLicence();
-      if (!saved.ok) return setupState(saved.reason);
-      finish(saved.licence);
-      return null;
-    });
-    handle('setup:copy-machine', () => clipboard.writeText(MACHINE));
-    handle('setup:quit', () => app.quit());
-    win.on('closed', () => {
-      if (!done) app.quit();
-    });
-    win.once('ready-to-show', () => win.show());
-    void win.loadURL(SETUP_ORIGIN + '/setup.html');
+type LaunchWindow = {
+  /** Shows progress. */
+  working(message: string): void;
+  /** Asks for a licence file until a valid one is chosen. */
+  askLicence(reason: string): Promise<Licence>;
+  /** Shows a problem; resolves when the learner presses Retry. */
+  problem(message: string, detail: string): Promise<void>;
+  /** Closes the window, once the studio's own window is there: with no window at all for a moment, the app would quit. */
+  close(): void;
+};
+
+/** The launch window: one window from the licence to the studio opening. Closing it quits. */
+function openLaunchWindow(): LaunchWindow {
+  const win = new BrowserWindow({
+    width: 780,
+    height: 680,
+    minWidth: 560,
+    minHeight: 480,
+    title: BUILD.product,
+    backgroundColor: '#f4f6fa',
+    show: false,
+    webPreferences: { ...SAFE, preload: path.join(APP_DIR, 'setup-preload.js') },
   });
+  setupContents.add(win.webContents.id);
+  let done = false;
+  let state: SetupState = {
+    step: 'working',
+    product: BUILD.product,
+    version: BUILD.version,
+    machine: MACHINE,
+    reason: '',
+    message: 'Starting',
+    detail: '',
+  };
+  let onLicence: ((l: Licence) => void) | null = null;
+  let onRetry: (() => void) | null = null;
+  const set = (next: Partial<SetupState>): SetupState => {
+    state = { ...state, ...next };
+    if (!win.isDestroyed()) win.webContents.send('setup:update', state);
+    return state;
+  };
+
+  // Only the launch page, in the launch window, may call these.
+  const fromSetup = (e: Electron.IpcMainInvokeEvent): boolean =>
+    e.sender.id === win.webContents.id && (e.senderFrame?.url ?? '') === SETUP_ORIGIN + '/setup.html';
+  const channels = ['setup:state', 'setup:choose', 'setup:copy-machine', 'setup:retry', 'setup:quit'];
+  const handle = (channel: string, fn: () => unknown): void =>
+    ipcMain.handle(channel, (e) => {
+      if (!fromSetup(e)) throw new Error('Not allowed.');
+      return fn();
+    });
+  handle('setup:state', () => state);
+  handle('setup:choose', async () => {
+    if (state.step !== 'licence') return state;
+    const picked = await dialog.showOpenDialog(win, {
+      title: 'Choose your licence file',
+      filters: [{ name: 'Licence', extensions: ['lic', 'json'] }],
+      properties: ['openFile'],
+    });
+    if (picked.canceled || !picked.filePaths[0]) return state;
+    const text = fs.readFileSync(picked.filePaths[0], 'utf-8');
+    const verdict = check(text);
+    if (!verdict.ok) return set({ reason: verdict.reason });
+    fs.mkdirSync(USER_DIR, { recursive: true });
+    fs.writeFileSync(LICENCE_FILE, text);
+    const saved = currentLicence();
+    if (!saved.ok) return set({ reason: saved.reason });
+    const resolve = onLicence;
+    onLicence = null;
+    set({ step: 'working', message: 'Starting', reason: '' });
+    resolve?.(saved.licence);
+    return state;
+  });
+  handle('setup:copy-machine', () => clipboard.writeText(MACHINE));
+  handle('setup:retry', () => {
+    if (state.step !== 'problem') return state;
+    const resolve = onRetry;
+    onRetry = null;
+    set({ step: 'working', message: 'Starting', detail: '' });
+    resolve?.();
+    return state;
+  });
+  handle('setup:quit', () => app.quit());
+  win.on('closed', () => {
+    for (const channel of channels) ipcMain.removeHandler(channel);
+    if (!done) app.quit();
+  });
+  win.once('ready-to-show', () => win.show());
+  void win.loadURL(SETUP_ORIGIN + '/setup.html');
+
+  return {
+    working: (message) => void set({ step: 'working', message, detail: '' }),
+    askLicence: (reason) =>
+      new Promise((resolve) => {
+        onLicence = resolve;
+        set({ step: 'licence', reason, message: '', detail: '' });
+      }),
+    problem: (message, detail) =>
+      new Promise((resolve) => {
+        onRetry = resolve;
+        set({ step: 'problem', message, detail });
+      }),
+    close: () => {
+      done = true;
+      if (!win.isDestroyed()) win.close();
+    },
+  };
+}
+
+// ---------------------------------------------------------------- the course and the studio's code
+
+/** The app secret, from its halves, checked against the hash built beside them. */
+function appSecret(): Buffer | null {
+  if (!__STUDIO_SECRET__) return null;
+  const [a, b] = __STUDIO_SECRET__.map((h) => Buffer.from(h, 'hex'));
+  const secret = Buffer.alloc(32);
+  for (let i = 0; i < 32; i++) secret[i] = a[i] ^ b[i];
+  if (appSecretFingerprint(secret) !== BUILD.secretFingerprint) throw new Error('This copy of the studio is damaged. Install it again.');
+  return secret;
+}
+
+/** Text files of a folder, by their path in it: the course as `npm run build:content` writes it. */
+function readFolder(dir: string, prefix = ''): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (e.isDirectory()) for (const [p, t] of readFolder(path.join(dir, e.name), prefix + e.name + '/')) out.set(p, t);
+    else if (e.name.endsWith('.json')) out.set(prefix + e.name, fs.readFileSync(path.join(dir, e.name), 'utf-8'));
+  }
+  return out;
+}
+
+/**
+ * A test server on 127.0.0.1 a development build may be pointed at, in place of GitHub
+ * (STUDIO_DIST_BASE) or the runtime's official servers (STUDIO_RUNTIME_BASE). A release never is.
+ */
+const localBase = (name: string): string | null =>
+  !RELEASE && /^http:\/\/127\.0\.0\.1:\d{1,5}\/$/.test(process.env[name] ?? '') ? process.env[name]! : null;
+const DIST_OVERRIDE = localBase('STUDIO_DIST_BASE');
+const RUNTIME_OVERRIDE = localBase('STUDIO_RUNTIME_BASE');
+
+/** Where the course and the studio's code are downloaded from. */
+const distBase = (): { content: string; app: string } | null =>
+  DIST_OVERRIDE ? { content: DIST_OVERRIDE + 'content/', app: DIST_OVERRIDE + 'app/' } : BUILD.dist;
+
+/** What a standard build downloads on its first start: none for a full build. */
+function runtimePieces(): RuntimePiece[] {
+  if (BUILD.runtime.mode !== 'download') return [];
+  return BUILD.runtime.pieces.map((p) => (RUNTIME_OVERRIDE ? { ...p, urls: [RUNTIME_OVERRIDE + p.name + '.zip'] } : p));
+}
+
+/** The one session the launcher downloads with (fetch-session.ts), made once. */
+let fetcherMade: Promise<Fetcher> | null = null;
+function fetcher(): Promise<Fetcher> {
+  if (!fetcherMade) {
+    const base = distBase();
+    const runtime = BUILD.runtime.mode === 'download' ? (RUNTIME_OVERRIDE ? [RUNTIME_OVERRIDE] : BUILD.runtime.allow) : [];
+    fetcherMade = openFetchSession(base ? [base.content, base.app] : [], runtime, DIST_OVERRIDE !== null || RUNTIME_OVERRIDE !== null).catch((e: unknown) => {
+      fetcherMade = null;
+      throw e;
+    });
+  }
+  return fetcherMade;
+}
+
+const MB = 1024 * 1024;
+const PIECE_NAMES: Record<string, string> = {
+  chromium: 'Chromium',
+  chromium_headless_shell: 'Chromium (headless)',
+  firefox: 'Firefox',
+  webkit: 'WebKit',
+  ffmpeg: 'ffmpeg',
+  winldd: 'winldd',
+};
+const pieceName = (p: RuntimePiece): string => (p.kind === 'node' ? 'Node.js' : (PIECE_NAMES[p.name.replace(/-\d+$/, '')] ?? p.name));
+
+/**
+ * A standard build's first start, or the first after an update that pins other versions: Node and
+ * the browsers, downloaded from their official servers and checked (runtime-install.ts). Pieces
+ * already in place are kept, so Retry carries on where a failed start stopped.
+ */
+async function installRuntime(launch: LaunchWindow): Promise<void> {
+  const pieces = runtimePieces();
+  if (!pieces.length || pieces.every((p) => isInstalled(RUNTIME_DIR, p))) return;
+  const { download } = await fetcher();
+  let shown = 0;
+  await ensureRuntime(RUNTIME_DIR, pieces, download, {
+    onProgress: (p) => {
+      const now = Date.now();
+      if (p.phase === 'download' && now - shown < 250 && p.bytes < p.piece.size) return;
+      shown = now;
+      launch.working(
+        p.phase === 'unpack'
+          ? 'Installing ' + pieceName(p.piece) + ' (first start only)'
+          : 'Downloading required components (first start only): ' + Math.floor(p.done / MB) + ' MB of ' + Math.ceil(p.total / MB) + ' MB',
+      );
+    },
+  });
+}
+
+/** What went wrong setting up Node and the browsers, said so the learner (or their IT team) knows what to do. */
+function explainRuntime(e: unknown): { message: string; detail: string } {
+  const size = Math.ceil(runtimePieces().reduce((sum, p) => sum + p.size, 0) / MB);
+  if (e instanceof RuntimeError) {
+    if (e.code === 'space') return { message: 'There is not enough free disk space.', detail: e.message + ' Please free some disk space, then select Retry.' };
+    if (e.code === 'checksum') {
+      return {
+        message: 'A download could not be verified.',
+        detail:
+          e.message + ' Please select Retry to download it again. If the problem persists, please contact your IT department, as downloads on this ' +
+          'network may be altered in transit.',
+      };
+    }
+    return { message: 'The required components could not be installed.', detail: e.message + ' Please select Retry.' };
+  }
+  if (e instanceof NetworkError) {
+    if (e.code === 'certificate') {
+      return {
+        message: 'The connection could not be verified.',
+        detail: 'A device on this network is intercepting secure connections. Please contact your IT department. (' + e.message + ')',
+      };
+    }
+    return {
+      message: 'The required components could not be downloaded.',
+      detail:
+        'On its first start, the application downloads the components it needs to run the course (approximately ' + size + ' MB). The internet could ' +
+        'not be reached. Please check the connection, then select Retry; completed downloads are retained. On a corporate network, your IT department ' +
+        'may need to allow the websites listed in the installation guide provided by Evoke. (' + e.message + ')',
+    };
+  }
+  return { message: 'The application could not start.', detail: (e as Error)?.message ?? String(e) };
+}
+
+/**
+ * The studio's code and the course for this start. A development build made with a local bundle
+ * (build.ts devLocal) opens them from this computer; every other build downloads them. A development
+ * build may be pointed at a test server on 127.0.0.1 (STUDIO_DIST_BASE); a release never.
+ */
+async function fetchStudio(licence: Licence, licenceFingerprint: string, progress: (text: string) => void): Promise<Opened> {
+  if (!RELEASE) {
+    const local = path.join(APP_DIR, 'dev-local.json');
+    if (fs.existsSync(local)) {
+      const where = JSON.parse(fs.readFileSync(local, 'utf-8')) as { bundle: string; content: string };
+      const stamp = { format: 1, version: 1, published: new Date().toISOString().slice(0, 19) + 'Z', release: { id: '0'.repeat(32), payload: 1, kek: 1 } };
+      return {
+        app: { manifest: { ...stamp, kind: 'app', channel: 'api-' + BUILD.api, blob: { path: 'blobs/' + '0'.repeat(64) + '.bin', sha256: '0'.repeat(64), size: 1 }, grants: {}, revoked: [], minApp: null, setup: [], retired: null }, files: unpackContainer(fs.readFileSync(where.bundle)) },
+        content: { manifest: { ...stamp, kind: 'content', channel: 'content', blob: { path: 'blobs/' + '0'.repeat(64) + '.bin', sha256: '0'.repeat(64), size: 1 }, grants: {}, revoked: [], minApp: null, setup: [], retired: null }, files: readFolder(where.content) },
+      } as Opened;
+    }
+  }
+  const base = distBase();
+  if (!base) throw new Error('This build does not say where to download the course from.');
+  const secret = appSecret();
+  if (!secret) throw new Error('This build cannot open the course.');
+  try {
+    return await openReleases({
+      base,
+      publicKey: BUILD.publicKey,
+      seal: licence.seal ?? '',
+      licenceFingerprint,
+      secret,
+      api: BUILD.api,
+      stateDir: STATE_DIR,
+      get: (await fetcher()).get,
+      progress,
+    });
+  } finally {
+    secret.fill(0);
+  }
+}
+
+/** What went wrong at the start, said so the learner knows what to do. Withdrawn licences go back to the licence step. */
+function explain(e: unknown, licence: Licence): { message: string; detail: string } {
+  if (e instanceof NetworkError) {
+    switch (e.code) {
+      case 'rate-limited':
+        return {
+          message: 'The service is temporarily busy.',
+          detail: 'The latest course could not be downloaded because the service is busy. Please wait a few minutes, then select Retry.',
+        };
+      case 'certificate':
+        return {
+          message: 'The connection could not be verified.',
+          detail: 'A device on this network is intercepting secure connections. Please contact your IT department. (' + e.message + ')',
+        };
+      case 'not-found':
+        return { message: 'The course could not be located.', detail: 'Please try again in a few minutes. If the problem persists, please contact Evoke.' };
+      case 'timeout':
+        return { message: 'The download took too long.', detail: 'The connection may be slow. Please select Retry to try again.' };
+      default:
+        return { message: 'The application requires an internet connection to start.', detail: '' };
+    }
+  }
+  if (e instanceof ReleaseError) {
+    switch (e.code) {
+      case 'no-access':
+        return { message: 'This licence does not have access to the course yet.', detail: 'Please ask Evoke to grant licence ' + licence.id + ' access, then select Retry.' };
+      case 'retired':
+      case 'too-old':
+        return {
+          message: 'Install the new version of the application.',
+          detail: (e.code === 'retired' ? e.message + ' ' : '') + 'This version can no longer open the course. Your progress is retained when you install the new version.',
+        };
+      default:
+        return {
+          message: 'The download could not be verified.',
+          detail: 'The downloaded files do not match what Evoke published (' + e.message + '). Please select Retry. If the problem persists, please contact Evoke.',
+        };
+    }
+  }
+  if (e instanceof SetupError) return { message: 'The application could not complete its setup.', detail: e.message + ' Please select Retry.' };
+  return { message: 'The application could not start.', detail: (e as Error)?.message ?? String(e) };
 }
 
 // ---------------------------------------------------------------- the studio
 
-let server: RunningServer | null = null;
+let instance: RunningStudio | null = null;
+let versions = { app: 0, content: 0 };
 
 /**
  * The port is chosen at random the first time and kept, because the page keeps its settings
- * (theme, layout) per address. Any free port does if that one is taken.
+ * (theme, layout) per address. The studio takes any free port if that one is taken.
  */
-async function startBackend(token: string): Promise<RunningServer> {
-  const portFile = path.join(USER_DIR, 'port.json');
-  let port = 0;
+function keptPort(): number {
   try {
-    port = (JSON.parse(fs.readFileSync(portFile, 'utf-8')) as { port: number }).port;
+    const port = (JSON.parse(fs.readFileSync(path.join(USER_DIR, 'port.json'), 'utf-8')) as { port: number }).port;
+    if (Number.isInteger(port) && port > 0 && port < 65536) return port;
   } catch {
-    port = 20000 + crypto.randomInt(30000);
+    // None kept yet.
   }
-  const webDir = process.env.STUDIO_WEB_DIR ?? null;
-  let started: RunningServer;
-  try {
-    started = await startServer({ port, token, webDir });
-  } catch {
-    started = await startServer({ port: 0, token, webDir });
-  }
-  fs.mkdirSync(USER_DIR, { recursive: true });
-  fs.writeFileSync(portFile, JSON.stringify({ port: started.port }));
-  return started;
+  return 20000 + crypto.randomInt(30000);
 }
 
 function about(win: BrowserWindow, licence: Licence): void {
@@ -348,23 +618,38 @@ function about(win: BrowserWindow, licence: Licence): void {
       (licence.expires ? ', valid until ' + licence.expires : '') +
       '\nMachine code ' +
       MACHINE +
-      '\n\n' +
-      COPYRIGHT +
-      '\nThis software and its course content are licensed, not sold, under the licence agreement you accepted.' +
-      ' Copying, sharing or extracting them is not permitted.' +
+      '\nApplication release ' + versions.app + ', course release ' + versions.content +
       '\n\nThird-party software notices: ' +
       path.join(process.resourcesPath, 'legal', 'THIRD-PARTY-NOTICES.txt'),
   });
 }
 
-async function openStudio(licence: Licence): Promise<void> {
+/** Runs the downloaded studio and opens its window. */
+async function openStudio(licence: Licence, opened: Opened, launch: LaunchWindow): Promise<void> {
+  const files = opened.app.files;
+  const code = files.get('studio-app.js');
+  if (!code) throw new Error('The studio that was downloaded is incomplete.');
+  const bundle = loadBundle(code.toString('utf-8'), APP_DIR);
+  const shared = {
+    api: 1 as const,
+    release: RELEASE,
+    launcher: { product: BUILD.product, appId: BUILD.appId, version: BUILD.version, built: BUILD.built },
+    licence: { id: licence.id, licensee: licence.licensee, logo: licence.logo ?? null, expires: licence.expires },
+    content: { version: opened.content.manifest.version, published: opened.content.manifest.published, files: opened.content.files },
+    log: (level: 'info' | 'warn' | 'error', message: string) => (level === 'error' ? console.error : console.log)('[studio] ' + message),
+  };
+  await runSetupSteps(opened.app.manifest.setup, bundle, { ...shared, progress: (text) => launch.working(text) }, STATE_DIR, files, path.join(USER_DIR, 'Workspace'));
+
+  launch.working('Opening the studio');
+  const web = new Map<string, Uint8Array>();
+  for (const [p, b] of files) if (p.startsWith('web/')) web.set(p.slice(4), b);
   const token = crypto.randomBytes(32).toString('hex');
-  // The page shows the customer's logo, when their licence carries one, beside the theme switch.
-  setBranding({ licensee: licence.licensee, logo: licence.logo ?? null });
-  // The seal opens a pack made for this customer; the ID marks every lesson the app serves.
-  useLicence({ seal: licence.seal ?? null, mark: licence.id });
-  server = await startBackend(token);
-  const origin = 'http://127.0.0.1:' + server.port;
+  const host: StudioHostV1 = { ...shared, web, token, port: keptPort() };
+  instance = await bundle.start(host);
+  versions = { app: opened.app.manifest.release.payload, content: opened.content.manifest.release.payload };
+  fs.mkdirSync(USER_DIR, { recursive: true });
+  fs.writeFileSync(path.join(USER_DIR, 'port.json'), JSON.stringify({ port: instance.port }));
+  const origin = 'http://127.0.0.1:' + instance.port;
   await session.defaultSession.cookies.set({
     url: origin,
     name: 'studio_token',
@@ -420,8 +705,8 @@ function warnOfExpiry(licence: Licence): void {
   const message = {
     type: 'info' as const,
     title: BUILD.product,
-    message: days <= 0 ? 'Your licence ends today.' : 'Your licence ends in ' + days + (days === 1 ? ' day' : ' days') + ', on ' + licence.expires + '.',
-    detail: 'Ask your training contact, or Evoke, for a renewed licence to keep using the studio after that.',
+    message: days <= 0 ? 'Your licence expires today.' : 'Your licence expires in ' + days + (days === 1 ? ' day' : ' days') + ', on ' + licence.expires + '.',
+    detail: 'Please request a renewed licence from your training contact or from Evoke to continue using the application after this date.',
   };
   void (win ? dialog.showMessageBox(win, message) : dialog.showMessageBox(message));
 }
@@ -504,19 +789,51 @@ app.on('second-instance', () => {
   }
 });
 
-app.on('before-quit', () => {
-  stopAll();
-  stopRuns();
-  void server?.close();
-  void session.defaultSession.clearCache();
+/**
+ * Quitting: the studio is stopped (its server, every Run and Terminal command; at most 5 seconds),
+ * the windows' cache is cleared, and the course's traces leave the disk (cleanup.ts). Then the app
+ * quits for real.
+ */
+let cleanedUp = false;
+let quitting = false;
+function cleanUpNow(): void {
+  try {
+    removeCourseLeftovers(USER_DIR, BUILD.runPrefix);
+  } catch {
+    // Whatever is left, the next start takes.
+  }
+}
+app.on('before-quit', (e) => {
+  if (cleanedUp) return;
+  e.preventDefault();
+  if (quitting) return;
+  quitting = true;
+  void (async () => {
+    try {
+      await Promise.race([instance?.stop(), new Promise((r) => setTimeout(r, 5000))]);
+    } catch {
+      // Stopping failed: the process ends anyway, and its children with it.
+    }
+    instance = null;
+    try {
+      await session.defaultSession.clearCache();
+    } catch {
+      // Nothing cached, or it cannot be cleared now: the next start clears it (lockSession).
+    }
+    cleanUpNow();
+    cleanedUp = true;
+    app.quit();
+  })();
 });
+// Windows signing out or shutting down does not wait for the above: the files go at once.
+app.on('browser-window-created', (_e, win) => win.on('session-end', cleanUpNow));
 
 app.on('window-all-closed', () => app.quit());
 
 /**
  * The session every window uses: no proxy (so nothing can route the studio's traffic elsewhere),
  * no cache of what earlier versions kept, no request to anything but the studio and the app's own
- * pages (the app works offline, and nothing it shows may reach out), no studio token sent anywhere
+ * pages (nothing the studio shows may reach out: only the launcher downloads, in a session of its own, fetch-session.ts), no studio token sent anywhere
  * but the studio, and no permissions beyond the clipboard.
  */
 async function lockSession(): Promise<void> {
@@ -571,35 +888,92 @@ void app.whenReady().then(async () => {
   if (RELEASE && othersCanChange(path.dirname(process.execPath)) === true) {
     dialog.showErrorBox(
       BUILD.product,
-      'The studio is in a folder that other people who use this computer can change (' + path.dirname(process.execPath) + '), ' +
-        'so it will not start there. Move the whole folder into your own Programs folder, for example ' +
+      'The application is located in a folder that other users of this computer can modify (' + path.dirname(process.execPath) + '), ' +
+        'and will not start there. Please move the entire folder into your own Programs folder, for example ' +
         '%LOCALAPPDATA%\\Programs\\' + BUILD.product + ', and start it from there.',
     );
     app.quit();
     return;
   }
+  // The same for the folder a standard build keeps Node and the browsers in: the learner's code runs on them.
+  if (RELEASE && BUILD.runtime.mode === 'download') {
+    fs.mkdirSync(RUNTIME_DIR, { recursive: true });
+    if (othersCanChange(RUNTIME_DIR) === true) {
+      dialog.showErrorBox(
+        BUILD.product,
+        'The folder in which the application stores Node and its browsers (' + RUNTIME_DIR + ') can be modified by other users of this computer, ' +
+          'so the application will not start. Please ask your IT department to restrict it to your account, or delete it; the application will download it again.',
+      );
+      app.quit();
+      return;
+    }
+  }
+  // Whatever a crash or a power cut left on the disk last time.
+  cleanUpNow();
   serveSetupFiles();
   await lockSession();
-  const verdict = currentLicence();
-  const setup = verdict.ok ? { licence: verdict.licence, close: () => {} } : await runSetup();
-  try {
-    await openStudio(setup.licence);
-    setup.close();
-    warnOfExpiry(setup.licence);
-    // A licence can expire, or be seen to have expired, while the app is open: the learner is told,
-    // and has ten minutes to finish what they are doing before the studio closes.
-    let closing = false;
-    setInterval(() => {
-      const now = currentLicence();
-      if (now.ok || closing) return;
-      closing = true;
-      const win = BrowserWindow.getAllWindows()[0];
-      const message = { type: 'warning' as const, title: BUILD.product, message: now.reason, detail: 'The studio will close in 10 minutes. Your progress is saved.' };
-      void (win ? dialog.showMessageBox(win, message) : dialog.showMessageBox(message));
-      setTimeout(() => app.quit(), 10 * 60 * 1000);
-    }, 60 * 60 * 1000);
-  } catch (e) {
-    dialog.showErrorBox(BUILD.product, 'The studio could not start: ' + (e as Error).message);
-    app.quit();
+  const launch = openLaunchWindow();
+  let licence: Licence;
+  for (;;) {
+    // From the licence every time: Retry after a withdrawn licence, or a new one chosen, starts over.
+    const verdict = currentLicence();
+    licence = verdict.ok ? verdict.licence : await launch.askLicence(verdict.reason);
+    const chosen = currentLicence();
+    if (!chosen.ok || !chosen.fingerprint) continue;
+    launch.working('Starting');
+    // A standard build's first start: Node and the browsers, before anything needs them.
+    try {
+      await installRuntime(launch);
+    } catch (e) {
+      const { message, detail } = explainRuntime(e);
+      await launch.problem(message, detail);
+      continue;
+    }
+    let opened: Opened;
+    try {
+      opened = await fetchStudio(licence, chosen.fingerprint, (text) => launch.working(text));
+    } catch (e) {
+      if (e instanceof ReleaseError && e.code === 'withdrawn') {
+        releaseRevoked = [chosen.fingerprint];
+        continue;
+      }
+      const { message, detail } = explain(e, licence);
+      await launch.problem(message, detail);
+      continue;
+    }
+    // Evoke's latest withdrawals, and the day the release was published, count from now on.
+    releaseRevoked = [...new Set(opened.app.manifest.revoked.concat(opened.content.manifest.revoked))];
+    publishedFloor = publishedDay(opened);
+    const again = currentLicence();
+    if (!again.ok) continue;
+    try {
+      await openStudio(again.licence, opened, launch);
+    } catch (e) {
+      try {
+        await instance?.stop();
+      } catch {
+        // It did not start far enough to stop.
+      }
+      instance = null;
+      const { message, detail } = explain(e, licence);
+      await launch.problem(message, detail);
+      continue;
+    }
+    licence = again.licence;
+    break;
   }
+  launch.close();
+  warnOfExpiry(licence);
+  // A licence can expire, or be seen to have expired, while the app is open: the learner is told,
+  // and has ten minutes to finish what they are doing before the studio closes.
+  let closing = false;
+  setInterval(() => {
+    const now = currentLicence();
+    if (now.ok || closing) return;
+    closing = true;
+    const win = BrowserWindow.getAllWindows()[0];
+    const message = { type: 'warning' as const, title: BUILD.product, message: now.reason, detail: 'The application will close in 10 minutes. Your progress has been saved.' };
+    void (win ? dialog.showMessageBox(win, message) : dialog.showMessageBox(message));
+    setTimeout(() => app.quit(), 10 * 60 * 1000);
+  }, 60 * 60 * 1000);
 });

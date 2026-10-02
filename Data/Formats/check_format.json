@@ -4,7 +4,8 @@
         "week": { "value": 1 },
         "day": { "_comment": "Position within the week, 1-5.", "value": 5 },
         "part": { "value": 4 },
-        "problem": { "_comment": "The exercise's number within the part.", "value": 3 },
+        "problem": { "_comment": "The exercise's number, counted across the day.", "value": 3 },
+        "problem_id": { "_comment": "Optional: the exercise's identity (invariant 10). Looked up first, so a renumbered exercise is still the one checked.", "value": "d5-ex1" },
         "code": { "_comment": "The editor's code: the learner's answer.", "value": "" },
         "workspace": { "options": ["demo", "project"], "value": "project" }
     },

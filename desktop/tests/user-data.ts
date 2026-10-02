@@ -31,7 +31,20 @@ export function keepUserData(dir: string, exeName: string): void {
   if (fs.existsSync(dir)) fs.renameSync(dir, backup);
   const restore = (): void => {
     if (!fs.existsSync(backup)) return;
-    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    try {
+      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    } catch {
+      // A test copy of the app still running holds files: its data is set aside instead.
+      try {
+        fs.renameSync(dir, dir + '.test-leftover-' + Date.now());
+      } catch {
+        console.error(
+          '\nThe test could not put the app\'s data folder back: a test copy of the app is still running. Close it ' +
+            '(Task Manager, build\\test-app), then rename "' + backup + '" back to "' + dir + '".',
+        );
+        return;
+      }
+    }
     fs.renameSync(backup, dir);
   };
   process.on('exit', restore);

@@ -22,7 +22,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "at-a-glance",
@@ -32,7 +33,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -42,7 +44,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -64,7 +67,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-p1-q1"
         },
         {
           "type": "checkpoint",
@@ -86,7 +90,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-p1-q2"
         },
         {
           "type": "markdown",
@@ -96,7 +101,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "diagram",
@@ -106,7 +112,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -119,7 +126,8 @@
             "variant": "tester",
             "title": null
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -129,7 +137,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -151,7 +160,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-p2-q1"
         }
       ],
       "problems": []
@@ -171,7 +181,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -188,7 +199,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -198,7 +210,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -215,7 +228,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -225,7 +239,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -242,7 +257,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -252,7 +268,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -274,7 +291,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f1-q1"
         },
         {
           "type": "markdown",
@@ -284,7 +302,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -301,7 +320,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -311,7 +331,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -333,7 +354,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f2-q1"
         },
         {
           "type": "checkpoint",
@@ -355,7 +377,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f2-q2"
         },
         {
           "type": "markdown",
@@ -365,7 +388,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -382,7 +406,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -392,7 +417,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -405,7 +431,8 @@
             "variant": "note",
             "title": null
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -415,7 +442,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -428,7 +456,8 @@
             "variant": "tester",
             "title": null
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -451,7 +480,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f3-q1"
         },
         {
           "type": "checkpoint",
@@ -473,7 +503,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f3-q2"
         },
         {
           "type": "markdown",
@@ -483,7 +514,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -500,7 +532,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -510,7 +543,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -527,7 +561,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -537,7 +572,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -554,7 +590,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -564,7 +601,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -586,7 +624,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f4-q1"
         },
         {
           "type": "markdown",
@@ -596,7 +635,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -618,7 +658,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f5-q1"
         },
         {
           "type": "checkpoint",
@@ -640,7 +681,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f5-q2"
         },
         {
           "type": "markdown",
@@ -650,7 +692,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -672,7 +715,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f6-q1"
         },
         {
           "type": "checkpoint",
@@ -694,7 +738,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f6-q2"
         },
         {
           "type": "markdown",
@@ -704,7 +749,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -721,7 +767,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -731,7 +778,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -748,7 +796,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -758,7 +807,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -780,7 +830,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f7-q1"
         },
         {
           "type": "checkpoint",
@@ -802,7 +853,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-f7-q2"
         }
       ],
       "problems": []
@@ -822,7 +874,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -839,7 +892,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "terminal",
@@ -849,7 +903,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -859,7 +914,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -876,7 +932,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -886,7 +943,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -903,7 +961,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -913,7 +972,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -926,7 +986,8 @@
             "variant": "note",
             "title": "Why `: number` on the first three lines?"
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -936,7 +997,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -958,7 +1020,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-i3-q1"
         },
         {
           "type": "markdown",
@@ -968,7 +1031,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -985,7 +1049,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "terminal",
@@ -995,7 +1060,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1005,7 +1071,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -1022,7 +1089,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1032,7 +1100,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -1045,7 +1114,8 @@
             "variant": "tester",
             "title": null
           },
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1055,7 +1125,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -1072,7 +1143,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "terminal",
@@ -1082,7 +1154,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1092,7 +1165,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "code",
@@ -1109,7 +1183,8 @@
             "network": false
           },
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "markdown",
@@ -1119,7 +1194,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         }
       ],
       "problems": []
@@ -1139,7 +1215,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "checkpoint",
@@ -1161,7 +1238,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-q1"
         },
         {
           "type": "checkpoint",
@@ -1183,7 +1261,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-q2"
         },
         {
           "type": "checkpoint",
@@ -1205,7 +1284,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-q3"
         },
         {
           "type": "checkpoint",
@@ -1227,7 +1307,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-q4"
         },
         {
           "type": "checkpoint",
@@ -1249,7 +1330,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-q5"
         },
         {
           "type": "checkpoint",
@@ -1271,7 +1353,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-q6"
         },
         {
           "type": "checkpoint",
@@ -1293,7 +1376,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-q7"
         },
         {
           "type": "checkpoint",
@@ -1316,7 +1400,8 @@
           },
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-q8"
         },
         {
           "type": "markdown",
@@ -1326,7 +1411,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "problem-ref",
@@ -1336,7 +1422,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-p1"
         },
         {
           "type": "problem-ref",
@@ -1346,7 +1433,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-p2"
         },
         {
           "type": "problem-ref",
@@ -1356,7 +1444,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-pr-p3"
         },
         {
           "type": "markdown",
@@ -1366,7 +1455,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "problem-ref",
@@ -1376,7 +1466,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-ex1"
         },
         {
           "type": "problem-ref",
@@ -1386,7 +1477,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-ex2"
         },
         {
           "type": "problem-ref",
@@ -1396,7 +1488,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-ex3"
         },
         {
           "type": "problem-ref",
@@ -1406,7 +1499,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-ex4"
         },
         {
           "type": "problem-ref",
@@ -1416,7 +1510,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": "d5-ex5"
         },
         {
           "type": "markdown",
@@ -1426,7 +1521,8 @@
           "checkpoint": null,
           "code": null,
           "callout": null,
-          "title": null
+          "title": null,
+          "id": null
         },
         {
           "type": "callout",
@@ -1439,12 +1535,15 @@
             "variant": "tip",
             "title": "Coming up on Day 6"
           },
-          "title": null
+          "title": null,
+          "id": null
         }
       ],
       "problems": [
         {
           "number": 1,
+          "id": "d5-pr-p1",
+          "revision": "3a86d4e3c2b0",
           "difficulty": "Easy",
           "title": "Predict — text and numbers",
           "kind": "predict",
@@ -1458,6 +1557,8 @@
         },
         {
           "number": 2,
+          "id": "d5-pr-p2",
+          "revision": "1d12f459a646",
           "difficulty": "Easy",
           "title": "Predict — let and shortcuts",
           "kind": "predict",
@@ -1471,6 +1572,8 @@
         },
         {
           "number": 3,
+          "id": "d5-pr-p3",
+          "revision": "7878485af7b8",
           "difficulty": "Medium",
           "title": "Predict — the order of operations",
           "kind": "predict",
@@ -1484,6 +1587,8 @@
         },
         {
           "number": 4,
+          "id": "d5-ex1",
+          "revision": "df63b7665b0f",
           "difficulty": "Easy",
           "title": "Tester profile card",
           "kind": "code",
@@ -1503,6 +1608,8 @@
         },
         {
           "number": 5,
+          "id": "d5-ex2",
+          "revision": "cdb1bb68dc47",
           "difficulty": "Medium",
           "title": "Shopping-cart calculator",
           "kind": "code",
@@ -1523,6 +1630,8 @@
         },
         {
           "number": 6,
+          "id": "d5-ex3",
+          "revision": "bab22bdb4248",
           "difficulty": "Medium",
           "title": "Check the page's numbers",
           "kind": "code",
@@ -1543,6 +1652,8 @@
         },
         {
           "number": 7,
+          "id": "d5-ex4",
+          "revision": "44a196abe25a",
           "difficulty": "Medium",
           "title": "Fix the settings file",
           "kind": "code",
@@ -1565,6 +1676,8 @@
         },
         {
           "number": 8,
+          "id": "d5-ex5",
+          "revision": "2bca9a20e09d",
           "difficulty": "Challenge",
           "title": "Challenge: build a URL and a test title",
           "kind": "code",

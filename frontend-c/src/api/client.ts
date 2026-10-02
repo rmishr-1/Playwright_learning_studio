@@ -6,11 +6,13 @@
  * server keeps exactly one progress record for whoever is running this clone.
  */
 import type { CourseDay } from '../../../shared/contracts/course_day';
-import type { CourseIndex } from '../../../shared/contracts/course_index';
+import type { CourseResponse } from '../../../shared/contracts/course_index';
 import type { Progress, ProgressUpdate } from '../../../shared/contracts/progress';
 import type { RunResult, RunStreamEvent } from '../../../shared/contracts/run';
 import type { ErrorCode } from '../../../shared/contracts/problem_error';
 import type { CheckRequest, CheckResult } from '../../../shared/contracts/check';
+import type { SavedCode } from '../../../shared/contracts/saved_code';
+import type { ExerciseRef } from '../components/LessonBlocks';
 
 export class ApiError extends Error {
   constructor(
@@ -44,7 +46,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 
 // ---------------------------------------------------------------- content
 
-export const getCourse = (): Promise<CourseIndex> => call('/course');
+/** GET /api/course: the course index, with the course plan (null when the course has none). */
+export const getCourse = (): Promise<CourseResponse> => call('/course');
 
 export const getDay = (week: number, day: number): Promise<CourseDay> =>
   call('/course/' + week + '/' + day);
@@ -52,6 +55,10 @@ export const getDay = (week: number, day: number): Promise<CourseDay> =>
 // ---------------------------------------------------------------- progress
 
 export const getMyProgress = (): Promise<Progress> => call('/progress');
+
+/** The code the learner last saved for a code exercise, so "Start this in the editor" can bring it back. */
+export const getSavedCode = (week: number, day: number, id: string): Promise<SavedCode> =>
+  call('/exercise/' + week + '/' + day + '/' + encodeURIComponent(id) + '/saved');
 
 /** Who the studio is licensed to, and their logo. Both null outside the desktop app. */
 export type Branding = { licensee: string | null; logo: string | null };
@@ -74,6 +81,7 @@ export type RunPayload = {
   day: number;
   part: number;
   problem_number?: number | null;
+  problem_id?: string | null;
   code: string;
 };
 
@@ -106,8 +114,9 @@ export const runTerminal = (
   code: string,
   file: string | null,
   workspace: 'demo' | 'project',
+  exercise: ExerciseRef | null = null,
 ): Promise<{ ok: boolean }> =>
-  call('/terminal', { method: 'POST', body: JSON.stringify({ run_id: runId, command, code, file, workspace }) });
+  call('/terminal', { method: 'POST', body: JSON.stringify({ run_id: runId, command, code, file, workspace, exercise }) });
 
 /** Ctrl+C for the command started with `runId`. */
 export const stopTerminal = (runId: string): Promise<{ stopped: boolean }> =>

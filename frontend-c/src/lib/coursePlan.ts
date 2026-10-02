@@ -1,13 +1,14 @@
-import plan from '../../../Data/Content/course-plan.json';
-import type { CourseIndex, IndexDay } from '../../../shared/contracts/course_index';
+import type { CourseResponse, IndexDay } from '../../../shared/contracts/course_index';
+import type { PlanModule } from '../../../shared/contracts/course_plan';
 
 /**
- * The course plan (Data/Content/course-plan.json) says which module each week belongs to and what
- * it focuses on. It lists every week of the course, written or not; the course index lists only
- * the weeks that are built. A week's days - its key topics - always come from the index, so a
- * planned week with no days yet shows as "opens soon". Vite reloads the page when the plan changes.
+ * The course plan says which module each week belongs to and what it focuses on. It is part of the
+ * course (Data/Content/course-plan.json), so it comes with it: GET /api/course returns it as `plan`.
+ * It lists every week of the course, written or not; the course index lists only the weeks that are
+ * built. A week's days - its key topics - always come from the index, so a planned week with no days
+ * yet shows as "opens soon". A course without a plan still shows every built week.
  */
-export type PlanModule = { name: string; color: string };
+export type { PlanModule };
 
 export type PlanWeek = {
   week: number;
@@ -18,39 +19,27 @@ export type PlanWeek = {
   days: IndexDay[];
 };
 
-type RawPlan = {
-  description?: string;
-  modules: Record<string, PlanModule>;
-  weeks: { week: number; module: string; focus: string }[];
-};
-
-const RAW = plan as RawPlan;
-
-/** The course's description, shown under its name on the course index. Empty if the plan has none. */
-export const courseDescription = RAW.description ?? '';
-
 /** A built week the plan does not mention yet still shows, under a neutral module. */
 const fallbackModule = (week: number): PlanModule => ({ name: 'Week ' + week, color: '#334155' });
 
 /** Every week in order: the plan's weeks, plus any built week the plan has not caught up with. */
-export function planWeeks(index: CourseIndex | null): PlanWeek[] {
+export function planWeeks(index: CourseResponse | null): PlanWeek[] {
+  const plan = index?.plan ?? null;
+  const planned = plan?.weeks ?? [];
   const built = new Map((index?.weeks ?? []).map((w) => [w.week, w]));
-  const numbers = [...new Set([...RAW.weeks.map((w) => w.week), ...built.keys()])].sort((a, b) => a - b);
+  const numbers = [...new Set([...planned.map((w) => w.week), ...built.keys()])].sort((a, b) => a - b);
   return numbers.map((n) => {
-    const planned = RAW.weeks.find((w) => w.week === n);
+    const p = planned.find((w) => w.week === n);
     const b = built.get(n);
     return {
       week: n,
-      module: (planned && RAW.modules[planned.module]) || fallbackModule(n),
-      focus: planned?.focus ?? b?.theme ?? '',
+      module: (p && plan?.modules[p.module]) || fallbackModule(n),
+      focus: p?.focus ?? b?.theme ?? '',
       open: !!b && !b.locked,
       days: b?.days ?? [],
     };
   });
 }
-
-/** How many distinct modules the plan uses. */
-export const moduleCount = new Set(RAW.weeks.map((w) => w.module)).size;
 
 /** "Week 3", "Weeks 3–7", or "Weeks 3, 5 & 7" - the not-yet-built weeks, as one short phrase. */
 export function weeksPhrase(numbers: number[]): string {

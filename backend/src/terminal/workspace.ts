@@ -23,13 +23,13 @@
  * files are written again before every command, so an edit to them, or an upgrade of Playwright,
  * can never leave a workspace broken. Data/Workspace/ is ignored by Git.
  */
-import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { WORKSPACE_ROOT, onDisk } from '../config';
 import { readContent } from '../content';
 import { lockedDayNumbers } from '../store';
-import { PROJECT_FILE, WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
+import { WorkspaceSeeds, type Workspace } from '../../../shared/contracts/course_day';
+import { fingerprint, insideWorkspace, isUntouchedSeed, readSeedRecord, removeUntouchedSeeds, SEED_RECORD } from '../../../shared/workspace-seeds';
 
 const ROOT = WORKSPACE_ROOT;
 export const workspaceDir = (name: Workspace): string => path.join(ROOT, name);
@@ -202,12 +202,8 @@ function readSeeds(): WorkspaceSeeds['workspaces'] {
  * workspace.
  */
 export function resolveInside(name: Workspace, rel: string): string | null {
-  const clean = rel.replace(/\\/g, '/').replace(/^\.\//, '');
-  if (!PROJECT_FILE.test(clean) || clean.split('/').includes('..')) return null;
-  return path.join(workspaceDir(name), ...clean.split('/'));
+  return insideWorkspace(workspaceDir(name), rel);
 }
-
-const fingerprint = (text: string): string => crypto.createHash('sha256').update(text).digest('hex').slice(0, 16);
 
 /**
  * Files an earlier version of the course put into the workspaces, before .studio/seeded.json
@@ -265,22 +261,13 @@ export function prepareWorkspace(name: Workspace): void {
   fs.writeFileSync(path.join(dir, '.studio', 'run-playwright.cjs'), RUN_PLAYWRIGHT);
   fs.mkdirSync(path.join(dir, 'tests'), { recursive: true });
 
-  const recordFile = path.join(dir, '.studio', 'seeded.json');
+  const recordFile = path.join(dir, SEED_RECORD);
   // The record is the learner's to damage (their code can write here): one that cannot be read is
   // treated as none.
-  let before: Record<string, readonly string[]> = LEGACY_SEEDS;
-  try {
-    const record = JSON.parse(fs.readFileSync(recordFile, 'utf-8')) as unknown;
-    if (record && typeof record === 'object' && !Array.isArray(record)) {
-      before = Object.fromEntries(
-        Object.entries(record as Record<string, unknown>)
-          .filter((e): e is [string, string] => typeof e[1] === 'string')
-          .map(([k, v]) => [k, [v]]),
-      );
-    }
-  } catch {
-    // No record yet, or a damaged one.
-  }
+  const record = readSeedRecord(dir);
+  const before: Record<string, readonly string[]> = record
+    ? Object.fromEntries(Object.entries(record).map(([k, v]) => [k, [v]]))
+    : LEGACY_SEEDS;
   const seeds = readSeeds()[name]?.files ?? {};
   // Every path, from the course or from .studio/seeded.json (which the learner's code can write),
   // must stay inside the project's own folders of this workspace; anything else is skipped.
@@ -325,6 +312,27 @@ export function saveFile(name: Workspace, rel: string, code: string): string | n
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, code.endsWith('\n') ? code : code + '\n');
   return path.relative(workspaceDir(name), file).split(path.sep).join('/');
+}
+
+/**
+ * The learner's own text of a workspace file, for "Start this in the editor": null when it is not
+ * there, or is a starting file they have not changed (that is the course's, not their work).
+ */
+export function readLearnerFile(name: Workspace, rel: string): string | null {
+  const file = resolveInside(name, rel);
+  if (!file || !fs.existsSync(file)) return null;
+  let text: string;
+  try {
+    text = fs.readFileSync(file, 'utf-8');
+  } catch {
+    return null;
+  }
+  return isUntouchedSeed(workspaceDir(name), rel, text) ? null : text;
+}
+
+/** Takes the untouched starting files out of both workspaces (shared/workspace-seeds.ts). */
+export function removeStartingFiles(): number {
+  return removeUntouchedSeeds(workspaceDir('demo')) + removeUntouchedSeeds(workspaceDir('project'));
 }
 
 export function fileExists(name: Workspace, rel: string): boolean {

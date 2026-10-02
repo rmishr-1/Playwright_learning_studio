@@ -1,14 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import { Markdown, isSpecFile } from './Markdown';
 import { fence } from '../lib/fence';
-import { Callout, CodeBlock, Diagram, TerminalBlock, type EditorFile } from './LessonBlocks';
+import { Callout, CodeBlock, Diagram, TerminalBlock, type EditorFile, type ExerciseRef } from './LessonBlocks';
 import type { ContentBlock, CoursePart, PracticeProblem } from '../../../shared/contracts/course_day';
 import type { CheckResult } from '../../../shared/contracts/check';
+import type { Attempt } from '../../../shared/contracts/progress';
+import type { SavedCode } from '../../../shared/contracts/saved_code';
+import { exerciseIdentity } from '../../../shared/contracts/common';
+import { getSavedCode } from '../api/client';
 // Its own file, so the Check my answer styles travel with the component that uses them.
 import './check.css';
 
 /** What checking an answer can come back with: a verdict, or a reason there is none yet. */
 export type CheckOutcome = CheckResult | { status: 'not-in-editor' } | { status: 'error'; message: string };
+
+/** Which exercise "Start this in the editor" opened: by number, for a Run, and by identity. */
+export type ProblemRef = { number: number; id: string | null };
+
+/**
+ * Puts an exercise's code in the editor. `exact` keeps the code as it is (the learner's own saved
+ * file), rather than tidying the course's starting code.
+ */
+export type StartProblem = (code: string, ref: ProblemRef, meta: EditorFile, exact?: boolean) => void;
 
 /**
  * Option labels are one line of phrasing content inside a `<button>`, where the Markdown
@@ -156,17 +169,30 @@ function CheckVerdict({ outcome }: { outcome: CheckOutcome }) {
 
 function Problem({
   problem,
+  exercise,
+  attempt,
   onStart,
   onCheck,
 }: {
   problem: PracticeProblem;
-  onStart: (code: string, problemNumber: number, meta: EditorFile) => void;
+  /** The exercise's day and identity, when the course gives it one. */
+  exercise: ExerciseRef | null;
+  /** The learner's last work on it, if any. */
+  attempt: Attempt | undefined;
+  onStart: StartProblem;
   onCheck: (problem: PracticeProblem) => Promise<CheckOutcome>;
 }) {
   const [revealed, setRevealed] = useState(false);
   const [hints, setHints] = useState(0);
   const [checking, setChecking] = useState(false);
   const [outcome, setOutcome] = useState<CheckOutcome | null>(null);
+  /** What "Start this in the editor" found of the learner's own: their saved code, or that it was too long. */
+  const [saved, setSaved] = useState<SavedCode | null>(null);
+  const [starting, setStarting] = useState(false);
+  const ref: ProblemRef = { number: problem.number, id: exercise?.id ?? null };
+  // The exercise changed since the learner last worked on it (a Check, or a Terminal command that
+  // saved its file): say so, so their earlier answer is read against what it asks now.
+  const changed = !!attempt && !!problem.revision && attempt.revision !== null && attempt.revision !== problem.revision;
   const check = async (): Promise<void> => {
     setChecking(true);
     setOutcome(null);
@@ -179,12 +205,38 @@ function Problem({
     }
   };
   // A code exercise belongs to a file, so the editor saves it there and Run runs its command.
-  const meta: EditorFile = problem.kind === 'code' ? { file: problem.file, run: problem.run } : { file: null, run: null };
+  const meta: EditorFile = problem.kind === 'code' ? { file: problem.file, run: problem.run, exercise } : { file: null, run: null };
   // A model answer loads as the exercise's file only when it is the whole file. Some answers to a
   // test exercise are notes plus the one line that changes, and saving those over the test file
   // would break it.
   const solutionMeta = (code: string): EditorFile =>
     meta.file?.endsWith('.spec.ts') && !isSpecFile(code) ? { file: null, run: null } : meta;
+
+  /**
+   * Opens the exercise in the editor: the learner's own saved code when they have some (it may be
+   * where the exercise's file was before a course update moved it; it is then saved to where the file
+   * is now), otherwise the course's starting code.
+   */
+  const start = async (): Promise<void> => {
+    const stub = problem.stub!;
+    if (!exercise || problem.kind !== 'code' || !problem.file) return onStart(stub, ref, meta);
+    setStarting(true);
+    let found: SavedCode | null = null;
+    try {
+      found = await getSavedCode(exercise.week, exercise.day, exercise.id);
+    } catch {
+      found = null;
+    } finally {
+      setStarting(false);
+    }
+    setSaved(found && (found.code !== null || found.too_large) ? found : null);
+    if (found?.code) onStart(found.code, ref, meta, true);
+    else onStart(stub, ref, meta);
+  };
+  const startAgain = (): void => {
+    setSaved(null);
+    onStart(problem.stub!, ref, meta);
+  };
 
   return (
     <div className="problem">
@@ -192,6 +244,11 @@ function Problem({
         <span className="num">Exercise {problem.number}</span>
         {problem.difficulty && <span className={'diff ' + problem.difficulty}>{problem.difficulty}</span>}
         <span className="kind">{KIND_LABELS[problem.kind]}</span>
+        {changed && (
+          <span className="updated-note" title="The course changed this exercise since you last checked or ran your answer.">
+            Updated since you worked on it
+          </span>
+        )}
       </div>
       {problem.title && <h3 className="problem-title">{problem.title}</h3>}
       <Markdown text={problem.statement} />
@@ -223,8 +280,8 @@ function Problem({
         {/* Only where the editor helps: an answer in words, a prediction, or commands for the
             Terminal has no stub, and then no button. */}
         {problem.stub !== null && (
-          <button className="btn small" onClick={() => onStart(problem.stub!, problem.number, meta)}>
-            Start this in the editor
+          <button className="btn small" onClick={() => void start()} disabled={starting}>
+            {starting ? 'Opening…' : 'Start this in the editor'}
           </button>
         )}
         {problem.check && (
@@ -243,6 +300,18 @@ function Problem({
           </button>
         )}
       </div>
+      {saved && (
+        <p className="saved-note">
+          {saved.too_large
+            ? 'Your saved ' + saved.file + ' is too long to open in the editor, so it opened with the starting code. Your file is unchanged.'
+            : 'Opened the code you saved' + (saved.moved ? ' (from ' + saved.file + ', where this exercise used to be)' : '') + '.'}{' '}
+          {!saved.too_large && (
+            <button className="btn small ghost" onClick={startAgain}>
+              Start again from the starting code
+            </button>
+          )}
+        </p>
+      )}
       {checking && (
         <p className="check-running">
           {problem.check?.kind === 'testsPass' ? 'Running the tests…' : 'Running your program…'}
@@ -260,7 +329,7 @@ function Problem({
           {/* Solutions are markdown, not bare code: a worked answer to a written or terminal
               exercise is prose. A code answer can be loaded into the editor as the exercise's
               file. */}
-          <Markdown text={problem.solution} offerAll onLoadIntoEditor={(c) => onStart(c, problem.number, solutionMeta(c))} />
+          <Markdown text={problem.solution} offerAll onLoadIntoEditor={(c) => onStart(c, ref, solutionMeta(c))} />
         </div>
       )}
     </div>
@@ -268,6 +337,10 @@ function Problem({
 }
 
 export function TheoryPane({
+  week,
+  day,
+  dayNumber,
+  attempts,
   parts,
   active,
   onSelect,
@@ -283,6 +356,12 @@ export function TheoryPane({
   nextDay,
   onReachedEnd,
 }: {
+  /** The day this is: its place (for the API) and its number across the course (for identities). */
+  week: number;
+  day: number;
+  dayNumber: number;
+  /** The learner's attempts, by exercise identity (progress.attempts). */
+  attempts?: Record<string, Attempt>;
   parts: CoursePart[];
   active: number;
   onSelect: (part: number) => void;
@@ -291,7 +370,7 @@ export function TheoryPane({
   onLoadIntoEditor: (code: string, meta?: EditorFile) => void;
   /** Runs a command in the Terminal, after putting `load` in the editor when it is given. */
   onRunCommand: (command: string, load?: { code: string; meta: EditorFile }) => void;
-  onStartProblem: (code: string, problemNumber: number, meta: EditorFile) => void;
+  onStartProblem: StartProblem;
   /** Grades an exercise of this part with its automatic check. */
   onCheckAnswer: (part: number, problem: PracticeProblem) => Promise<CheckOutcome>;
   /** Whether the week list is open, so the one button can say which way it goes. */
@@ -308,6 +387,12 @@ export function TheoryPane({
 }) {
   const part = parts.find((p) => p.part === active) ?? parts[0];
   const endRef = useRef<HTMLDivElement>(null);
+  /** An exercise's identity, and the learner's last attempt at it. */
+  const exerciseOf = (p: PracticeProblem): ExerciseRef | null => (p.id ? { week, day, id: p.id } : null);
+  const attemptOf = (p: PracticeProblem): Attempt | undefined => attempts?.[exerciseIdentity(dayNumber, p)];
+  /** Whether a problem-ref block places this exercise: by identity, or by number in older content. */
+  const places = (b: ContentBlock, p: PracticeProblem): boolean =>
+    b.type === 'problem-ref' && (b.id ? b.id === p.id : b.text === String(p.number));
 
   // Report when the marker at the end of the content scrolls into view in the lesson pane - or is
   // in view already, for a part short enough to fit. It starts watching after a moment, so
@@ -370,11 +455,13 @@ export function TheoryPane({
           switch (block.type) {
             case 'problem-ref': {
               // Render the exercise exactly where it sat in the source document.
-              const problem = part.problems.find((p) => String(p.number) === block.text);
+              const problem = part.problems.find((p) => places(block, p));
               return problem ? (
                 <Problem
-                  key={'p' + block.text}
+                  key={'p:' + (problem.id ?? problem.number)}
                   problem={problem}
+                  exercise={exerciseOf(problem)}
+                  attempt={attemptOf(problem)}
                   onStart={onStartProblem}
                   onCheck={(q) => onCheckAnswer(part.part, q)}
                 />
@@ -398,7 +485,9 @@ export function TheoryPane({
             case 'diagram':
               return <Diagram key={i} source={block.text} />;
             case 'checkpoint':
-              return <Checkpoint key={i} block={block} />;
+              // Keyed by the quiz's id: the pane is not remounted when the tab changes, so a key by
+              // position would hand one tab's answered question to another tab's question there.
+              return <Checkpoint key={'q:' + (block.id ?? part.part + ':' + i)} block={block} />;
             case 'at-a-glance':
             case 'recap':
               // Cards rather than more prose: a learner scanning for "what is this for" or "what do
@@ -433,9 +522,16 @@ export function TheoryPane({
 
         {/* Any exercise the blocks did not place - a safety net, not the normal path. */}
         {part.problems
-          .filter((p) => !part.blocks.some((b) => b.type === 'problem-ref' && b.text === String(p.number)))
+          .filter((p) => !part.blocks.some((b) => places(b, p)))
           .map((p) => (
-            <Problem key={p.number} problem={p} onStart={onStartProblem} onCheck={(q) => onCheckAnswer(part.part, q)} />
+            <Problem
+              key={'p:' + (p.id ?? p.number)}
+              problem={p}
+              exercise={exerciseOf(p)}
+              attempt={attemptOf(p)}
+              onStart={onStartProblem}
+              onCheck={(q) => onCheckAnswer(part.part, q)}
+            />
           ))}
 
         {/* Previous / next tab, so a learner can move through the day without scrolling back up. */}

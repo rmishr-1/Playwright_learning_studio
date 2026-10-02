@@ -11,17 +11,18 @@ import {
   recordProgress,
   runCode,
 } from '../api/client';
-import { TheoryPane, type CheckOutcome, type DayLink } from '../components/TheoryPane';
+import { TheoryPane, type CheckOutcome, type DayLink, type ProblemRef } from '../components/TheoryPane';
 import { OpenWeeks } from '../components/Markdown';
 import { CodePane } from '../components/CodePane';
 import type { RunState } from '../components/RunOverlay';
 import type { EditorFile } from '../components/LessonBlocks';
 import { planWeeks, weeksPhrase, type PlanWeek } from '../lib/coursePlan';
+import { TAG_LABEL } from '../lib/dayTags';
 import { PRODUCT_NAME } from '../components/AppHeader';
 import type { CourseDay, PracticeProblem } from '../../../shared/contracts/course_day';
-import type { CourseIndex } from '../../../shared/contracts/course_index';
+import type { CourseResponse } from '../../../shared/contracts/course_index';
 import type { Progress } from '../../../shared/contracts/progress';
-import type { PartNumber } from '../../../shared/contracts/common';
+import { dayIdentity, type PartNumber } from '../../../shared/contracts/common';
 
 const STARTER = `// Open a lesson's code in the editor, or write your own here, then select Run.
 // launch() opens a browser and show(page) takes a screenshot. You do not need to import them.
@@ -109,6 +110,8 @@ function Sidebar({
               {w.days.map((d) => {
                 const on = w.week === week && d.day === day;
                 const dayDone = isDone(w.week, d.day);
+                // A day that changed since the learner's previous launch, until they open it.
+                const tag = d.locked ? undefined : progress?.day_tags?.[dayIdentity(d)];
                 const url = '/learn/w' + w.week + '/d' + d.day + '/p1';
                 return (
                   <a
@@ -116,7 +119,7 @@ function Sidebar({
                     href={d.locked ? undefined : url}
                     className={'sb-day' + (on ? ' on' : '') + (dayDone ? ' done' : '') + (d.locked ? ' locked' : '')}
                     aria-current={on ? 'page' : undefined}
-                    aria-label={'Day ' + d.day + ': ' + d.title + (dayDone ? ', done' : '')}
+                    aria-label={'Day ' + d.day + ': ' + d.title + (dayDone ? ', done' : '') + (tag ? ', ' + TAG_LABEL[tag].toLowerCase() : '')}
                     onClick={(e) => {
                       e.preventDefault();
                       if (!d.locked) navigate(url);
@@ -124,7 +127,10 @@ function Sidebar({
                   >
                     {/* A day that is done keeps its label, in the done colour. */}
                     <span className="sb-num" aria-hidden="true">Day {d.day}</span>
-                    <span className="sb-title">{d.title}</span>
+                    <span className="sb-title">
+                      {d.title}
+                      {tag && <span className="sb-tag"> · {TAG_LABEL[tag]}</span>}
+                    </span>
                   </a>
                 );
               })}
@@ -185,7 +191,7 @@ export function Day({
   // number of tabs is only known once the day has loaded.
   const wantsLast = params.part === 'plast';
 
-  const [index, setIndex] = useState<CourseIndex | null>(null);
+  const [index, setIndex] = useState<CourseResponse | null>(null);
   const [content, setContent] = useState<CourseDay | null>(null);
   const [locked, setLocked] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -205,7 +211,8 @@ export function Day({
   // on every day.
   const weeksShown = weeksOpen;
   const setWeeksShown = onSetWeeksOpen;
-  const problemRef = useRef<number | null>(null);
+  /** The exercise "Start this in the editor" opened, so a Run can be recorded as an attempt at it. */
+  const problemRef = useRef<ProblemRef | null>(null);
   const draggingRef = useRef(false);
   // The week list's width, dragged from the bar on its right edge like the lesson/editor bar.
   const [sidebarW, setSidebarW] = useState(readSidebarWidth);
@@ -320,9 +327,10 @@ export function Day({
     setHidePanels(Date.now());
   }, []);
 
-  const startProblem = useCallback((snippet: string, problemNumber: number, meta: EditorFile) => {
-    problemRef.current = problemNumber;
-    setCode(snippet.trim() + '\n');
+  const startProblem = useCallback((snippet: string, ref: ProblemRef, meta: EditorFile, exact = false) => {
+    problemRef.current = ref;
+    // The learner's own saved code goes in exactly as they left it; the course's is tidied.
+    setCode(exact ? snippet : snippet.trim() + '\n');
     setEditorFile(meta);
     setHidePanels(Date.now());
   }, []);
@@ -331,7 +339,18 @@ export function Day({
   // checking whatever else is open would mark the wrong code.
   const checkExercise = async (checkPart: number, problem: PracticeProblem): Promise<CheckOutcome> => {
     if (!content || !problem.file || editorFile.file !== problem.file) return { status: 'not-in-editor' };
-    return checkAnswer({ week, day, part: checkPart as PartNumber, problem: problem.number, code, workspace: content.workspace });
+    const result = await checkAnswer({
+      week,
+      day,
+      part: checkPart as PartNumber,
+      problem: problem.number,
+      ...(problem.id ? { problem_id: problem.id } : {}),
+      code,
+      workspace: content.workspace,
+    });
+    // The check recorded an attempt: read it back, so "Updated since you worked on it" goes away.
+    getMyProgress().then(setProgress).catch(() => undefined);
+    return result;
   };
 
   const runCommand = useCallback((text: string, load?: { code: string; meta: EditorFile }) => {
@@ -367,7 +386,8 @@ export function Day({
         week,
         day,
         part,
-        problem_number: problemRef.current,
+        problem_number: problemRef.current?.number ?? null,
+        problem_id: problemRef.current?.id ?? null,
         code,
       });
       setRun((prev) => ({
@@ -500,6 +520,10 @@ export function Day({
       <div className="split">
         <div style={{ flex: '0 0 ' + split + '%', minWidth: 'min(' + LESSON_MIN_PX + 'px, 50%)', display: 'flex' }}>
           <TheoryPane
+            week={week}
+            day={day}
+            dayNumber={content.number}
+            attempts={progress?.attempts}
             parts={content.parts}
             active={activePart.part}
             onSelect={(p) => navigate('/learn/w' + week + '/d' + day + '/p' + p)}

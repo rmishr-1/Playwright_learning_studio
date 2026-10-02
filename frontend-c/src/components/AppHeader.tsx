@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { getBranding, type Branding } from '../api/client';
 import { planWeeks } from '../lib/coursePlan';
 import { nextTheme, THEME_NAMES, type Theme } from '../lib/theme';
-import type { CourseIndex } from '../../../shared/contracts/course_index';
+import type { CourseResponse } from '../../../shared/contracts/course_index';
 import { PRODUCT_NAME } from '../product';
 
 /** The product's name (product.ts): in the top strip on the course index, and heading the week list. */
@@ -41,7 +41,7 @@ export function AppHeader({
   theme,
   onToggleTheme,
 }: {
-  index: CourseIndex | null;
+  index: CourseResponse | null;
   /** Where "Lessons" goes from the index: the resume point, else the first day. */
   lessonsTo: string;
   theme: Theme;

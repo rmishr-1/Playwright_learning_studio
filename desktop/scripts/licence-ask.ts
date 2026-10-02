@@ -3,7 +3,7 @@
  *
  *   licence-ask.ts issue     a new licence, or a reissue of one already issued (a new end date, a
  *                            different computer), keeping its ID so the app it opens still opens
- *   licence-ask.ts revoke    withdraws a licence file: builds made from now on refuse it
+ *   licence-ask.ts revoke    withdraws a licence file: installed copies refuse it once published
  *
  * The same jobs without questions: npm run licence:issue and npm run licence:revoke (README).
  */
@@ -14,7 +14,7 @@ import { fingerprint, type LicenceFile } from '../src/licence';
 import { LICENCES_DIR, issueLicence, problemWith, type IssueOptions } from './issue-licence';
 import { readRevoked, revoke } from './revoke-licence';
 import { PRIVATE_FILE, hasPrivateKey } from './signing-key';
-import { INTERNAL_CODE, variantByLicenceId } from './variants';
+import { variantByLicenceId } from './variants';
 
 /** A path typed, pasted, or dragged into the window (which adds quotes). */
 const cleanPath = (p: string): string => p.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
@@ -94,13 +94,6 @@ async function pick(a: Asker, items: Held[], what: string): Promise<Held> {
   return items[Number(n) - 1];
 }
 
-/** What to rebuild so a change reaches the app the licence opens. */
-function rebuildHint(id: string): string {
-  const v = variantByLicenceId(id);
-  const code = v ? v.code : INTERNAL_CODE;
-  return 'build-app.bat, choosing ' + code + ' (or: npm run build-variant -- ' + code + ')';
-}
-
 async function issue(): Promise<void> {
   if (!hasPrivateKey()) {
     throw new Error("Evoke's licence signing key is not on this computer (" + PRIVATE_FILE + '). Licences can only be issued where it is.');
@@ -155,8 +148,7 @@ async function issue(): Promise<void> {
     );
     console.log('');
     console.log('  If the licence file got out (someone who should not have it has it), give it a new seal:');
-    console.log('  the old file then cannot open any build made from now on, and the app it opens must be');
-    console.log('  rebuilt and sent again.');
+    console.log('  the old file then opens nothing published from now on.');
     const newSeal = await a.yes('  Did it leak? Give it a new seal?', false);
     options = {
       id: l.id,
@@ -191,10 +183,12 @@ async function issue(): Promise<void> {
   for (const w of warnings) console.log('\n  WARNING: ' + w);
   console.log('');
   if (previous) {
-    console.log('  The earlier file is revoked. Commit desktop/revoked.json, then rebuild the app it opens so it refuses');
-    console.log('  the earlier file: ' + rebuildHint(licence.id) + '. Send the new licence' + (options.newSeal ? ' and the new build.' : '.'));
+    console.log('  The earlier file is revoked. Commit desktop/revoked.json, then run publish-access.bat' + (options.newSeal ? ' and choose new keys' : ''));
+    console.log('  (npm run publish -- grants' + (options.newSeal ? ' --rekey' : '') + '): installed copies refuse the earlier file at their next start.');
+    console.log('  Send the new licence file.');
   } else {
-    console.log('  Send the licence file to ' + licence.licensee + '. In the app, they choose "Choose licence file..." and pick it.');
+    console.log('  Next: run publish-access.bat (npm run publish -- grants), so the licence opens the course.');
+    console.log('  Then send the licence file to ' + licence.licensee + '. In the app, they choose "Choose licence file..." and pick it.');
   }
 }
 
@@ -205,10 +199,9 @@ async function withdraw(): Promise<void> {
   console.log('');
   console.log('  Revoke a licence');
   console.log('');
-  console.log('  Builds made from now on refuse the licence file. A copy of the app already installed');
-  console.log('  keeps accepting it until that app is rebuilt and installed again (or the licence\'s end');
-  console.log('  date passes). To change a licence instead (a new end date or computer), use');
-  console.log('  issue-licence.bat and reissue it.');
+  console.log('  Once published (publish-access.bat, new keys), every installed copy refuses the licence');
+  console.log('  file at its next start, and what is published from then on is under keys it never had.');
+  console.log('  To change a licence instead (a new end date or computer), use issue-licence.bat and reissue it.');
   console.log('');
   const chosen = await pick(a, items, 'Which licence to revoke');
   const go = await a.yes('\n  Revoke ' + chosen.licence.id + ' (' + chosen.licence.licensee + ')?', false);
@@ -233,8 +226,8 @@ async function withdraw(): Promise<void> {
   a.close();
   console.log(done ? '\n> Revoked ' + chosen.licence.id + '.' : '\n> That licence file was already revoked.');
   console.log('');
-  console.log('  Next: commit desktop/revoked.json, then rebuild the app it opens and have it installed again:');
-  console.log('  ' + rebuildHint(chosen.licence.id) + '.');
+  console.log('  Next: commit desktop/revoked.json, then run publish-access.bat and choose new keys');
+  console.log('  (npm run publish -- grants --rekey). Installed copies refuse the licence at their next start.');
 }
 
 const job = process.argv[2];

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Difficulty, DayNumber, PartNumber, ProblemNumber, WeekNumber } from './common';
+import { ContentId, Difficulty, DayNumber, PartNumber, ProblemNumber, WeekNumber } from './common';
 
 /**
  * Mirrors Data/Formats/course_day_format.json. One day of the course, built from the course source
@@ -95,6 +95,11 @@ export const ContentBlock = z.object({
   callout: CalloutMeta.nullable().default(null),
   /** A 'reference' block's title, shown while it is collapsed. null for every other block type. */
   title: z.string().nullable().default(null),
+  /**
+   * A 'checkpoint' block's quiz id, a 'problem-ref' block's exercise id; null otherwise and in
+   * content built before ids. Only ever a key: nothing about a checkpoint is recorded (invariant 9).
+   */
+  id: ContentId.nullable().default(null),
 });
 
 export const Workspace = z.enum(['demo', 'project']);
@@ -129,7 +134,19 @@ export const ExerciseCheck = z.discriminatedUnion('kind', [
 export const PartKind = z.enum(['prerequisite', 'concept', 'practice']);
 
 export const PracticeProblem = z.object({
+  /** Counted across the day, in the order the exercises appear. Changes when one is added before it. */
   number: ProblemNumber,
+  /**
+   * The exercise's identity for good (invariant 10): what the learner did follows it when it is
+   * renumbered or edited. null in content built before ids (see exerciseIdentity).
+   */
+  id: ContentId.nullable().default(null),
+  /**
+   * Changes when what the learner is asked to do changes (statement, starting code, file, command,
+   * check) - not for a renumbering, a new title, hints or a better model answer. Opaque (invariant
+   * 11): only ever compared for equality.
+   */
+  revision: z.string().nullable().default(null),
   /** null for an exercise that carries no level. */
   difficulty: Difficulty.nullable(),
   title: z.string().nullable().default(null),
@@ -173,6 +190,8 @@ export const CoursePart = z.object({
 
 export const CourseDay = z.object({
   schema: z.literal('course-day/v2'),
+  /** The day's own identity, when the course sets one; otherwise it is 'd' + number (dayIdentity). */
+  id: ContentId.optional(),
   week: WeekNumber,
   day: DayNumber,
   /**

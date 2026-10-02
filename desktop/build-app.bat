@@ -5,9 +5,11 @@ rem Windows' own programs, by their full path: a folder early in PATH cannot sta
 set "SYS=%SystemRoot%\System32"
 cd /d "%~dp0" || (echo [ERROR] Could not open the folder this file is in. & pause & exit /b 1)
 rem Builds one of the apps in variants.json: lists them and asks which ("Evoke Training Studio",
-rem Evoke's own, or a customer's such as "Evoke Training Studio BU"), then whether as an installer
-rem or a zip. What to send goes into desktop\deliveries\<code>\. A customer's app builds only on the
-rem computer that holds their licence (desktop\licences\). A new customer: new-customer.bat.
+rem Evoke's own, or a customer's such as "Evoke Training Studio BU"), then standard (its first start
+rem downloads Node and the browsers) or full (it carries them), then whether as an installer or a
+rem zip. What to send goes into desktop\deliveries\<code>\ (a full one into <code>-full\). A
+rem customer's app builds only on the computer that holds their licence (desktop\licences\). A new
+rem customer: new-customer.bat.
 
 rem Packages' install scripts run only where package.json allows them (allowScripts, with
 rem strict-allow-scripts in .npmrc). Only an npm that knows that setting enforces it: an older one

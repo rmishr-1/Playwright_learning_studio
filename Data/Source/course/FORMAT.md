@@ -189,6 +189,23 @@ tsc --noEmit --strict --target esnext --module preserve --moduleResolution bundl
 - `--ignoreConfig` makes `tsc` check just the named file even though `ts-basics/tsconfig.json` exists (TypeScript 7 otherwise stops with error TS5112).
 - `--pretty false` prints each error on one line, so the output matches the lessons.
 
+#### Ids are for good
+
+The studio keeps what a learner did with an exercise — their attempts and the code they saved — by
+the exercise's `id`. So an `id` belongs to one exercise for good:
+
+- **Keep the id** when you edit, reword, renumber or move an exercise. Its learners keep their work.
+- **Never reuse an id** for a different exercise, even after deleting the old one. Give the new
+  exercise an id of its own (`d9-ex7`, not the freed `d9-ex1`).
+- `npm run build:content` checks this against `Data/Source/published-ids.json` (commit it with the
+  content). When an id's title **and** file both change, or its type changes, the build stops and
+  asks which it is: `--same d9-ex1` (the same exercise, edited) or `--new-identity d9-ex1` (a new
+  exercise; it is built as `d9-ex1~2`, so no earlier work is attached to it).
+- A day may set `id:` in its front matter. Without one its identity is its `day:` number, which is
+  fine unless days are ever inserted before it.
+
+Quiz ids only need to be unique within the day; nothing about a quiz answer is ever recorded.
+
 ## 4. Learner workspace assumed by the content
 
 ```

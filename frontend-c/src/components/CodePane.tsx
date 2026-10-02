@@ -228,6 +228,7 @@ export function CodePane({
           run={run}
           code={code}
           file={editorFile.file}
+          exercise={editorFile.exercise ?? null}
           workspace={workspace}
           request={request}
           hidden={panelsHidden}
