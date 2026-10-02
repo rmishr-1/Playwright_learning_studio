@@ -40,10 +40,15 @@ no trademark, no licence agreement; only the third-party notices the open-source
 
 ## Double-click jobs
 
-In this folder, each asks for what it needs and waits for a key at the end:
+**`studio-tools.bat`** opens a window that lists every job here and in the studio folder, by
+stage, shows the state of this computer (the signing key, the licences, the apps, what is
+published, git) and what to run next, and runs the job you choose in a terminal inside the window
+(below). The jobs themselves are these files; each asks for what it needs and waits for a key at
+the end:
 
 | File | What it does |
 |---|---|
+| `studio-tools.bat` | The window above: every job in one place, with the state of this computer. |
 | `build-app.bat` | Lists the apps (`variants.json`), asks which to build, whether standard or full, and whether as an installer or a zip, and puts it in `deliveries/<code>/` (a full one in `deliveries/<code>-full/`). Choose "Evoke Training Studio" for the internal app. |
 | `new-customer.bat` | A new customer: their short code, licence and app, built (below). |
 | `issue-licence.bat` | A new licence for a person or team at Evoke (it opens the internal app), or a reissue of one already issued: a new end date or computer, keeping its ID and, unless changed, its logo. |
@@ -52,6 +57,31 @@ In this folder, each asks for what it needs and waits for a key at the end:
 | `publish-app.bat` | Builds the studio's code (backend and page) and publishes it: a new feature or fix, with no new installer. Needs the key's passphrase. |
 | `publish-access.bat` | Publishes who has access: after a licence is issued or reissued, or (new keys) withdrawn. |
 | `make-setup-kit.bat` | Makes `Evoke-Studio-Setup-Kit.exe` on your desktop, to set up another computer (below). |
+
+### The Studio Tools window
+
+`studio-tools.bat` builds the window (`tools/`, esbuild only) and opens it. What it shows:
+
+- **The status strip**: Node, npm and git; whether the packages are installed; the signing key
+  (present, passphrase set, public key matching); every licence in `licences/` and whether it opens
+  the course; every app in `variants.json` and when it was last built; the course and studio
+  releases published from this computer (**Check GitHub** asks GitHub what is live); the git branch
+  and what is uncommitted. **Suggested next** says what to do about any of it, and opens the job.
+- **The jobs**, by stage: this computer (set up, the key, a setup kit); customers and licences;
+  build an installer; publish an update; source code (the studio from source, `git-sync.bat`, the
+  collaborator scripts). Each says what it needs, what it produces, and what to run after it.
+- **The terminal** the job runs in. It is a real console (ConPTY): the job's questions, `[Y/n]`
+  answers and the key's passphrase (typed without echo) all work as they do when double-clicked.
+  The form above it fills in what it can (`build-app.bat <code> [--full] [--zip] [--unsigned]`,
+  `new-customer.bat --code ... --licensee ...`, `publish-access.bat 1|2` take those arguments now);
+  anything left blank is asked in the terminal.
+
+One job at a time: the builds share `build/` and `release/`, and two at once corrupt each other.
+**Stop** ends the running job and everything it started. The window keeps its own copy of
+Electron in `%LOCALAPPDATA%\EvokeStudioTools` (once per Electron version), so a job's `npm ci`
+can refresh `node_modules` while it is open. Nothing of it ships: `test:release` checks that no app
+carries `tools/` or node-pty. `git-pull.bat` and `git-push.bat` in the studio folder are older
+than `git-sync.bat`, which replaces them; the window does not offer them.
 
 ### Another computer
 

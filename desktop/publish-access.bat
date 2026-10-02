@@ -18,17 +18,21 @@ if errorlevel 1 ( echo [BLOCKING] Node.js is not on PATH. & pause & exit /b 1 )
 %SYS%\where.exe git >nul 2>&1
 if errorlevel 1 ( echo [BLOCKING] git is not on PATH. & pause & exit /b 1 )
 
-echo.
-echo   1. A licence was issued or reissued: give it access.
-echo   2. A licence was withdrawn: new keys, so it opens nothing from now on.
-echo.
-set "CHOICE="
-set /p "CHOICE=  Choose 1 or 2: "
+rem With an argument (publish-access.bat 1, or 2) there is no question: the Studio Tools window
+rem passes it. Double-clicked, it asks.
+set "CHOICE=%~1"
+if not defined CHOICE (
+  echo.
+  echo   1. A licence was issued or reissued: give it access.
+  echo   2. A licence was withdrawn: new keys, so it opens nothing from now on.
+  echo.
+  set /p "CHOICE=  Choose 1 or 2: "
+)
 set "REKEY="
 if "%CHOICE%"=="2" set "REKEY=--rekey"
 if not "%CHOICE%"=="1" if not "%CHOICE%"=="2" ( echo Nothing was published. & pause & exit /b 1 )
 rem CALL: node may be a .cmd shim from a version manager, which would otherwise not return here.
 call node "..\node_modules\tsx\dist\cli.mjs" "scripts\publish.ts" grants %REKEY%
 echo.
-pause
+if not defined STUDIO_TOOLS pause
 endlocal

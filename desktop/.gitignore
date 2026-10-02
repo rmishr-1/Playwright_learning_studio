@@ -14,3 +14,5 @@ licences/
 test-output/
 # What new-customer.bat makes: each customer's zip, licence and read-me, ready to send.
 deliveries/
+# The Studio Tools window, built by studio-tools.bat (tools/build.ts).
+tools/dist/

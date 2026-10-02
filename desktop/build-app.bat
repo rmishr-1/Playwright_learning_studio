@@ -40,7 +40,7 @@ echo Installing the build tools as desktop\package-lock.json lists them...
 call npm ci --no-audit --no-fund --strict-allow-scripts --no-dangerously-allow-all-scripts
 if errorlevel 1 ( echo [BLOCKING] npm ci failed in desktop. & pause & exit /b 1 )
 
-call npm run build-variant --silent
+call npm run build-variant --silent -- %*
 echo.
-pause
+if not defined STUDIO_TOOLS pause
 endlocal

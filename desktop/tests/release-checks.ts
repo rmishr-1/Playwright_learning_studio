@@ -167,6 +167,9 @@ async function main(): Promise<void> {
   const unpacked = path.join(UNPACKED, 'resources', 'app.asar.unpacked');
   const unpackedOwn = fs.existsSync(unpacked) ? fs.readdirSync(unpacked).filter((n) => n !== 'node_modules') : [];
   expect(unpackedOwn.length === 0, 'only third-party packages are unpacked', unpackedOwn.join(', '));
+  // Evoke's own Studio Tools window (desktop/tools, node-pty) is for the computer that builds: never in an app.
+  expect(!files.some((f) => f.startsWith('/tools/')), 'the Studio Tools window is not in the app');
+  expect(!files.some((f) => f.includes('/node_modules/node-pty/')) && !fs.existsSync(path.join(unpacked, 'node_modules', 'node-pty')), 'node-pty is not shipped');
   const tsLib = path.join(unpacked, 'node_modules', 'typescript', 'lib');
   expect(fs.existsSync(tsLib) && fs.readdirSync(tsLib).join() === 'typescript.js', 'of the TypeScript package, only the one file a Run needs ships');
   if (STANDARD) {

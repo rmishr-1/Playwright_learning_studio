@@ -26,5 +26,5 @@ if errorlevel 1 ( popd & echo [BLOCKING] The course did not build. Nothing was p
 popd
 call node "..\node_modules\tsx\dist\cli.mjs" "scripts\publish.ts" content
 echo.
-pause
+if not defined STUDIO_TOOLS pause
 endlocal

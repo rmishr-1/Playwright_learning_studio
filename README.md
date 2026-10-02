@@ -21,6 +21,9 @@ launcher.bat
 - `launcher.bat` reuses a backend or studio that is already running instead of starting a second
   copy, waits until the servers answer before opening the browser, and keeps each server's window
   open if it crashes, so the error stays readable. `/noopen` starts without opening the browser.
+- `desktop\studio-tools.bat` opens a window with these two, the Git scripts below and every job
+  in `desktop\` (licences, customers, builds, publishing), with the state of this computer and
+  what to run next. See `desktop/README.md`.
 
 ### Git
 

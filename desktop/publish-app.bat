@@ -42,5 +42,5 @@ if errorlevel 1 ( echo [BLOCKING] npm ci failed in desktop. & pause & exit /b 1 
 rem CALL: node may be a .cmd shim from a version manager, which would otherwise not return here.
 call node "..\node_modules\tsx\dist\cli.mjs" "scripts\publish.ts" app
 echo.
-pause
+if not defined STUDIO_TOOLS pause
 endlocal
