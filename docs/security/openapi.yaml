@@ -1,0 +1,741 @@
+openapi: 3.1.0
+info:
+  title: Evoke Training Studio - local API
+  version: "1.0.0"
+  summary: The HTTP and WebSocket API the studio serves on 127.0.0.1, and its second (report) server.
+  description: |
+    For Evoke's security team. Every schema, limit and header here is taken from the code
+    (backend/src/server.ts, backend/src/routes.ts, shared/contracts/*.ts). See README.md beside this
+    file for the threat model, the desktop IPC bridges, the outgoing downloads and the observations.
+
+    **Two servers, both bound to 127.0.0.1 only**
+    - The studio API (`studio` server below): the page's backend. Desktop builds pick a port in
+      20000-49999 (kept in `%APPDATA%\<product>\port.json`); development uses 3010 (`STUDIO_PORT`).
+    - The report server (`report` server below): a random free port, and a random 32-hex secret path
+      prefix (`reportPath`), both new at every start. It serves the Playwright HTML report and the
+      View in Page practice pages.
+
+    **Gate in front of every studio route, the WebSocket included** (server.ts:200-210)
+    1. `Host` must be exactly `127.0.0.1:<port>` (desktop). Development also accepts `localhost:<port>`.
+    2. `Origin`, when sent, must be exactly `http://127.0.0.1:<port>` (desktop). Development also accepts
+       `http://127.0.0.1|localhost:` on the backend port or 5185 (the Vite page). `Origin: null` is refused.
+    3. Desktop: the `studio_token` cookie must equal the start's token (crypto.timingSafeEqual).
+       Development has **no token at all** (see README, observation 1).
+    4. Exception: `POST /api/terminal/{run_id}/frame` skips the cookie and is checked by its own
+       `X-Studio-Frame-Key` and a loopback check instead.
+
+    A refusal is `401 text/plain "Unauthorized"` (a WebSocket upgrade is destroyed without a response).
+    There is no CORS (no `Access-Control-*` header is ever sent), no CSRF token (the Origin check,
+    the SameSite=Strict cookie and JSON-only bodies stand in for it), and no rate limiter.
+
+    **Every response** carries `Cache-Control: no-store`, `Pragma: no-cache`,
+    `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
+    `Cross-Origin-Resource-Policy: same-origin`; `X-Powered-By` is off.
+    The page (not /api) also carries `X-Frame-Options: DENY` and the CSP in
+    `components.headers.PageCSP`.
+
+    **Bodies** are parsed by `express.json({ limit: '2mb' })`: anything that is not
+    `application/json` leaves the body empty and fails validation with 400. zod objects are not
+    strict, so unknown keys are dropped silently. Over 2 MB gives 413; malformed JSON 400 (both
+    problem+json, detail "The request could not be read."). An unknown /api path gets Express's
+    default HTML 404 ("Cannot GET ...").
+  x-limits:
+    json_body: 2 MB
+    websocket_incoming_payload: 64 KiB (client messages are ignored)
+    runs_at_once: config.run.max_concurrent, default 3 (1-16), then 429 RUN_QUEUE_FULL
+    run_timeout_ms: config.run.timeout_ms, default 30000 (1000-600000)
+    terminal_timeout_ms: config.run.terminal_timeout_ms, default 300000 (1000-3600000)
+    terminal_commands_at_once: 1 (shared with /api/check)
+    streams_held: 64, then 429 RUN_QUEUE_FULL
+    run_output_kept: 1000000 characters (stdout + stderr)
+    terminal_output_kept: 2000000 characters
+    preview_pages_kept: 20 (in memory, oldest dropped)
+servers:
+  - url: http://127.0.0.1:{port}
+    description: studio - the page's API (desktop port 20000-49999, development 3010)
+    variables:
+      port:
+        default: "3010"
+  - url: http://127.0.0.1:{reportPort}
+    description: report - the Playwright HTML report and View in Page (random port and secret path)
+    variables:
+      reportPort:
+        default: "0"
+security:
+  - studioToken: []
+tags:
+  - name: course
+    description: Lesson content, branding.
+  - name: progress
+    description: The learner's progress record.
+  - name: run
+    description: The Run button - runs the learner's code in a child Node process with a browser.
+  - name: check
+    description: Check my answer - runs an exercise's check in the Terminal's workspace.
+  - name: terminal
+    description: The Terminal tab - an allowlisted `npx playwright test` / `node` / `npm run check`.
+  - name: preview
+    description: View in Page - keeps a practice page and returns its address on the report server.
+  - name: report-server
+    description: The second server. No token, cookie or Origin check; its secret path is the only key.
+paths:
+  /health:
+    get:
+      tags: [course]
+      summary: Liveness
+      description: Behind the gate like every other route.
+      responses:
+        "200":
+          description: Up
+          content:
+            application/json:
+              schema: { type: object, properties: { ok: { const: true } }, required: [ok] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/course:
+    get:
+      tags: [course]
+      summary: The course index and plan
+      description: Locked weeks are left out (routes.ts:71).
+      responses:
+        "200":
+          description: The index
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503": { $ref: "#/components/responses/Problem" }
+  /api/course/{week}/{day}:
+    get:
+      tags: [course]
+      summary: One day of the course
+      description: |
+        The path params are turned into numbers with `Number()` and nothing else (routes.ts:85-102);
+        the file read is `weeks/week-<n>/day-<n>.json`, so only digits, `.`, `-`, `e`, NaN or Infinity
+        can reach it. A licence mark watermarks the text. The response includes every practice
+        problem's `solution` and `check` (see README, observations).
+      parameters:
+        - { name: week, in: path, required: true, schema: { type: string, examples: ["1"] } }
+        - { name: day, in: path, required: true, schema: { type: string, examples: ["1"] } }
+      responses:
+        "200":
+          description: The day
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseDay" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "423": { $ref: "#/components/responses/Problem" }
+  /api/branding:
+    get:
+      tags: [course]
+      summary: The licensee's name and logo
+      responses:
+        "200":
+          description: Branding
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [licensee, logo]
+                properties:
+                  licensee: { type: [string, "null"] }
+                  logo:
+                    type: [string, "null"]
+                    pattern: "^data:image/(png|jpeg);base64,[A-Za-z0-9+/]+=*$"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/progress:
+    get:
+      tags: [progress]
+      summary: The learner's progress (without content_seen)
+      responses:
+        "200":
+          description: Progress
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Progress" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [progress]
+      summary: Record a part read, an exercise attempted, or reset a day
+      description: Any validation failure answers 400 PART_NOT_FOUND (routes.ts:118-131).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProgressUpdate" }
+      responses:
+        "200":
+          description: The updated progress
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Progress" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "423": { $ref: "#/components/responses/Problem" }
+        "500": { $ref: "#/components/responses/Problem" }
+  /api/run/prepare:
+    post:
+      tags: [run]
+      summary: Mint a run id
+      description: |
+        Two steps, so the page can open the WebSocket before the run starts. The body is ignored.
+        An id nobody uses is dropped after 120 s.
+      responses:
+        "200":
+          description: The id
+          content:
+            application/json:
+              schema: { type: object, required: [run_id], properties: { run_id: { type: string, format: uuid } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/Problem" }
+  /api/run:
+    post:
+      tags: [run]
+      summary: Run the learner's code (the Run button)
+      description: |
+        **Code execution by design.** The code is TypeScript, transpiled and run by Node as the
+        learner's user, in a temp folder (`os.tmpdir()/<RUN_PREFIX>*`), with the environment allowlist
+        and module guard described in README.md. There is no OS sandbox. A browser is available as
+        `launch()` / `chromium`; every launch is forced headless, every context gets the navigation
+        allowlist (`blocked` status when a top-level navigation is refused). The response is held
+        until the run ends (up to the run timeout). Frames and stdout stream on the WebSocket.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RunRequest" }
+      responses:
+        "200":
+          description: The result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunResult" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "423": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "500": { $ref: "#/components/responses/Problem" }
+  /api/run/{run_id}/last-frame:
+    get:
+      tags: [run]
+      summary: The last live-view frame and status of a run
+      description: "`run_id` is not format-checked (routes.ts:191-193)."
+      parameters:
+        - { name: run_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Frame (base64 JPEG) and status, either may be null
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [frame, status]
+                properties:
+                  frame: { type: [string, "null"], contentEncoding: base64 }
+                  status: { type: [string, "null"] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/run/{run_id}/stream:
+    get:
+      tags: [run]
+      summary: "WebSocket: a run's or a Terminal command's events"
+      description: |
+        Upgrade only. The URL must match exactly `^/api/run/([0-9a-f-]{36})/stream$` (no query
+        string) and pass the gate; otherwise the socket is destroyed with no HTTP response.
+        Server to client only: JSON text frames, one `RunStreamEvent` each (see the schema).
+        Client messages are ignored (maxPayload 64 KiB). An unknown id receives nothing. Events sent
+        while nobody listens are buffered (200 events / 16 MB) and replayed on connect. Over 8 MB
+        unsent, events are dropped except `ended` and `exit`. A frame over 4,000,000 characters is
+        dropped; a stdout line is cut at 20,000 characters.
+      parameters:
+        - { name: run_id, in: path, required: true, schema: { type: string, pattern: "^[0-9a-f-]{36}$" } }
+        - { name: Upgrade, in: header, required: true, schema: { const: websocket } }
+      responses:
+        "101":
+          description: Switching protocols; then RunStreamEvent messages
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunStreamEvent" }
+  /api/check:
+    post:
+      tags: [check]
+      summary: Check an exercise answer
+      description: |
+        Saves `code` as the exercise's file and runs the exercise's check in the Terminal's workspace
+        (shares the Terminal's one slot: `busy` when it is in use). The server takes `part`,
+        `problem` and `workspace` from the course, not from the request (routes.ts:222).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CheckRequest" }
+      responses:
+        "200":
+          description: The verdict
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CheckResult" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "423": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "500": { $ref: "#/components/responses/Problem" }
+  /api/terminal:
+    post:
+      tags: [terminal]
+      summary: Run one Terminal command
+      description: |
+        **Code execution by design, through an allowlist.** The command line is split quote-aware
+        and parsed (backend/src/terminal/commands.ts); only these run, as an argument array with no
+        shell: `node <ts-basics file>.ts`, `npm run check [--] <file>`, `[npx] playwright test
+        [allowlisted flags] [tests/... paths] [filters]`, `npx playwright show-report`, and version /
+        help commands. Everything else is refused with a message. When `code` and `file` are given,
+        the editor is first saved as `file` (must match `PROJECT_FILE`, no `..`). Output streams on
+        the WebSocket of `run_id` (`term` and `exit` events). No locked-day check (README,
+        observations).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TerminalRequest" }
+      responses:
+        "200":
+          description: Started
+          content:
+            application/json:
+              schema: { type: object, required: [ok], properties: { ok: { const: true } } }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/Problem" }
+  /api/terminal/{run_id}/stop:
+    post:
+      tags: [terminal]
+      summary: Ctrl+C
+      description: |
+        Stops the running command when its id matches: a gentle stop (the runner's own SIGINT
+        through stdin), then by force after 8 s; a second call stops by force. `run_id` is not
+        format-checked.
+      parameters:
+        - { name: run_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Whether something was stopped
+          content:
+            application/json:
+              schema: { type: object, required: [stopped], properties: { stopped: { type: boolean } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/terminal/{run_id}/frame:
+    post:
+      tags: [terminal]
+      summary: Live-view frame from a running test process (internal callback)
+      description: |
+        Posted by the workspace's test wrapper (`.studio/test.ts`) inside the learner's test
+        processes, which get `STUDIO_FRAME_URL` and `STUDIO_FRAME_KEY` in their environment.
+        Exempt from the cookie only when the path matches exactly
+        `^/api/terminal/[0-9a-f-]{36}/frame$` (lower case, no query); Host and Origin are still
+        checked. Then: wrong or missing key, or no such running command: 410 before the body is read;
+        remote address not loopback: 403; `data` not a string: 410.
+      security:
+        - frameKey: []
+      parameters:
+        - { name: run_id, in: path, required: true, schema: { type: string, pattern: "^[0-9a-f-]{36}$" } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [data]
+              properties:
+                data: { type: string, contentEncoding: base64, description: A JPEG }
+                width: { type: number }
+                height: { type: number }
+      responses:
+        "204": { description: Taken }
+        "403": { description: Not from a loopback address (empty body) }
+        "410": { description: "Wrong key, no such running command, or no data (empty body)" }
+  /api/exercise/{week}/{day}/{id}/saved:
+    get:
+      tags: [course]
+      summary: The learner's saved work for an exercise
+      description: "`week`/`day` must be integers; `id` must match ContentId. A file over 64,000 characters is not returned (`too_large`)."
+      parameters:
+        - { name: week, in: path, required: true, schema: { type: integer, minimum: 1, maximum: 8 } }
+        - { name: day, in: path, required: true, schema: { type: integer, minimum: 1, maximum: 5 } }
+        - { name: id, in: path, required: true, schema: { $ref: "#/components/schemas/ContentId" } }
+      responses:
+        "200":
+          description: Saved code
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SavedCode" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "423": { $ref: "#/components/responses/Problem" }
+        "500": { $ref: "#/components/responses/Problem" }
+  /api/preview:
+    post:
+      tags: [preview]
+      summary: Keep a practice page for View in Page
+      description: |
+        Keeps `html` (and optional sample `responses`, path to JSON) in memory and returns its
+        address on the report server, where it is served sandboxed (see the report server's
+        `/{reportPath}-page/{id}`). The page's scripts run in the learner's own browser.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PreviewRequest" }
+      responses:
+        "200":
+          description: Where the page is served
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url:
+                    type: string
+                    pattern: "^http://127\\.0\\.0\\.1:\\d+/[0-9a-f]{32}-page/[0-9a-f]{32}$"
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /{reportPath}/{file}:
+    servers:
+      - url: http://127.0.0.1:{reportPort}
+        variables: { reportPort: { default: "0" } }
+    get:
+      tags: [report-server]
+      summary: The Playwright HTML report (report server)
+      description: |
+        Files of `<workspace>/playwright-report` for the workspace of the last test run, under the
+        start's secret `reportPath` (32 hex). Host must be `127.0.0.1:<rp>` or `localhost:<rp>`
+        (else 403). No token, cookie or Origin check. Path: `decodeURIComponent`, joined, then
+        `realpath` must stay inside the report folder's realpath (else 403; missing 404); served by
+        express.static with `dotfiles: 'deny'`. **No CSP** on these files (README, observations).
+        The address reaches the page as `open_url` in the Terminal's `exit` event and is opened in
+        the learner's own browser.
+      security: []
+      parameters:
+        - { name: reportPath, in: path, required: true, schema: { type: string, pattern: "^[0-9a-f]{32}$" } }
+        - { name: file, in: path, required: true, schema: { type: string, examples: ["index.html"] } }
+      responses:
+        "200": { description: The file }
+        "403": { description: "Host not allowed, or the path leaves the report folder" }
+        "404": { description: Missing }
+  /{reportPath}-page/{id}:
+    servers:
+      - url: http://127.0.0.1:{reportPort}
+        variables: { reportPort: { default: "0" } }
+    get:
+      tags: [report-server]
+      summary: A View in Page practice page (report server)
+      description: |
+        The kept HTML, with a helper script injected after its doctype: in-memory
+        localStorage/sessionStorage, `fetch` answers for the page's sample `responses` (embedded as
+        JSON with `<` escaped), a note instead of following links that lead nowhere, and an empty
+        icon. Served with `Content-Security-Policy: sandbox allow-scripts allow-forms allow-modals
+        allow-popups` (an opaque origin: the page cannot read the report server's or the studio's
+        storage or responses) and `nosniff`. No connect-src limit: the page's scripts may fetch
+        anywhere the learner's browser can.
+      security: []
+      parameters:
+        - { name: reportPath, in: path, required: true, schema: { type: string, pattern: "^[0-9a-f]{32}$" } }
+        - { name: id, in: path, required: true, schema: { type: string, pattern: "^[0-9a-f]{32}$" } }
+      responses:
+        "200":
+          description: The page
+          headers:
+            Content-Security-Policy:
+              schema: { const: "sandbox allow-scripts allow-forms allow-modals allow-popups" }
+          content:
+            text/html:
+              schema: { type: string }
+        "404":
+          description: "Unknown id: text/plain \"This page is no longer available. Select View in Page again.\""
+components:
+  securitySchemes:
+    studioToken:
+      type: apiKey
+      in: cookie
+      name: studio_token
+      description: |
+        64 hex characters (crypto.randomBytes(32)), new at every start. Set by the desktop launcher
+        on its own window session as httpOnly, SameSite=Strict, no Secure (plain http on loopback),
+        session cookie. Compared with crypto.timingSafeEqual. No header or bearer alternative.
+        Development builds run without a token (no authentication).
+    frameKey:
+      type: apiKey
+      in: header
+      name: X-Studio-Frame-Key
+      description: 32 hex characters, new for every Terminal command, given to its test processes in STUDIO_FRAME_KEY.
+  headers:
+    PageCSP:
+      description: Sent with the page (not /api responses), with X-Frame-Options DENY.
+      schema:
+        const: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+  responses:
+    Unauthorized:
+      description: The gate refused the request (Host, Origin or cookie).
+      content:
+        text/plain:
+          schema: { const: Unauthorized }
+    Problem:
+      description: problem+json (routes.ts:34-42). `detail` is the first validation message for 400.
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/ProblemError" }
+  schemas:
+    WeekNumber: { type: integer, minimum: 1, maximum: 8 }
+    DayNumber: { type: integer, minimum: 1, maximum: 5 }
+    PartNumber: { type: integer, enum: [1, 2, 3, 4] }
+    ProblemNumber: { type: integer, minimum: 1, maximum: 20 }
+    ContentId: { type: string, pattern: "^[A-Za-z0-9][\\w.~-]{0,63}$" }
+    Timestamp: { type: string, pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" }
+    Workspace: { type: string, enum: [demo, project] }
+    ErrorCode:
+      type: string
+      description: Emitted today - DAY_NOT_FOUND, DAY_LOCKED, PART_NOT_FOUND, CONTENT_MISSING, CODE_REQUIRED, RUN_QUEUE_FULL, EXERCISE_NOT_FOUND, BAD_REQUEST, INTERNAL_ERROR. The others are defined but never sent.
+      enum: [DAY_NOT_FOUND, DAY_LOCKED, PART_NOT_FOUND, CONTENT_MISSING, CODE_REQUIRED, RUN_QUEUE_FULL, RUN_TIMEOUT, NAVIGATION_NOT_ALLOWED, SOLUTION_NOT_AUTHORED, EXERCISE_NOT_FOUND, TRAINER_CODE_REQUIRED, TRAINER_CODE_INCORRECT, BAD_REQUEST, INTERNAL_ERROR]
+    ProblemError:
+      type: object
+      required: [type, title, status, code, detail]
+      properties:
+        type: { type: string, default: about:blank }
+        title: { type: string, description: Same as code }
+        status: { type: integer }
+        code: { $ref: "#/components/schemas/ErrorCode" }
+        detail: { type: string, description: "For thrown errors: 'The studio hit an error.' (5xx) or 'The request could not be read.'. No stack trace." }
+    CourseResponse:
+      type: object
+      required: [schema, title, totals, weeks, plan]
+      properties:
+        schema: { const: course-index/v1 }
+        title: { type: string }
+        totals:
+          type: object
+          properties:
+            weeks: { type: integer }
+            days: { type: integer }
+            parts: { type: integer }
+            practice_problems: { type: integer }
+            available_days: { type: integer }
+        weeks:
+          type: array
+          items:
+            type: object
+            properties:
+              week: { $ref: "#/components/schemas/WeekNumber" }
+              theme: { type: string }
+              locked: { type: boolean }
+              days:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    day: { $ref: "#/components/schemas/DayNumber" }
+                    number: { type: integer }
+                    title: { type: string }
+                    locked: { type: boolean }
+                    id: { $ref: "#/components/schemas/ContentId" }
+                    revision: { type: string }
+        plan:
+          type: [object, "null"]
+          properties:
+            schema: { const: course-plan/v1 }
+            description: { type: string }
+            modules:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  name: { type: string }
+                  color: { type: string, pattern: "^#[0-9a-fA-F]{6}$" }
+            weeks:
+              type: array
+              items:
+                type: object
+                properties:
+                  week: { type: integer }
+                  module: { type: string }
+                  focus: { type: string }
+    CourseDay:
+      type: object
+      description: shared/contracts/course_day.ts. Abridged to the fields a tester needs; blocks carry lesson text and code samples.
+      required: [schema, week, day, number, title, locked, workspace, parts]
+      properties:
+        schema: { const: course-day/v2 }
+        id: { $ref: "#/components/schemas/ContentId" }
+        week: { $ref: "#/components/schemas/WeekNumber" }
+        day: { $ref: "#/components/schemas/DayNumber" }
+        number: { type: integer, minimum: 1 }
+        title: { type: string }
+        locked: { type: boolean }
+        workspace: { $ref: "#/components/schemas/Workspace" }
+        parts:
+          type: array
+          minItems: 1
+          maxItems: 4
+          items:
+            type: object
+            properties:
+              part: { $ref: "#/components/schemas/PartNumber" }
+              kind: { type: string, enum: [prerequisite, concept, practice] }
+              title: { type: string }
+              tab_label: { type: string }
+              has_runnable_code: { type: boolean }
+              blocks: { type: array, items: { type: object, additionalProperties: true } }
+              problems:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    number: { $ref: "#/components/schemas/ProblemNumber" }
+                    id: { type: [string, "null"] }
+                    kind: { type: string, enum: [code, terminal, written, predict] }
+                    statement: { type: string }
+                    stub: { type: [string, "null"] }
+                    hints: { type: array, items: { type: string } }
+                    file: { type: [string, "null"] }
+                    run: { type: [string, "null"] }
+                    check:
+                      type: [object, "null"]
+                      description: "{kind: stdoutEquals, run, expected} or {kind: testsPass, run}"
+                    solution: { type: [string, "null"], description: "The model answer, sent to the page" }
+    Progress:
+      type: object
+      description: "progress/v1 (shared/contracts/progress.ts). Passthrough: unknown keys are kept."
+      required: [schema, resume, progress]
+      properties:
+        schema: { const: progress/v1 }
+        resume:
+          type: [object, "null"]
+          properties:
+            week: { $ref: "#/components/schemas/WeekNumber" }
+            day: { $ref: "#/components/schemas/DayNumber" }
+            part: { $ref: "#/components/schemas/PartNumber" }
+            day_id: { type: string, maxLength: 64 }
+        progress:
+          type: object
+          description: Keyed w<week>d<day>
+          additionalProperties:
+            type: object
+            properties:
+              parts_viewed: { type: array, items: { $ref: "#/components/schemas/PartNumber" } }
+              completed: { type: boolean }
+              attempted_problems: { type: array, items: { $ref: "#/components/schemas/ProblemNumber" } }
+              first_opened_at: { $ref: "#/components/schemas/Timestamp" }
+              completed_at: { type: [string, "null"] }
+              day_id: { type: string, maxLength: 64 }
+        day_tags: { type: object, additionalProperties: { type: string, enum: [new, updated] } }
+        attempts:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              revision: { type: [string, "null"] }
+              at: { $ref: "#/components/schemas/Timestamp" }
+    ProgressUpdate:
+      type: object
+      required: [week, day, part]
+      properties:
+        week: { $ref: "#/components/schemas/WeekNumber" }
+        day: { $ref: "#/components/schemas/DayNumber" }
+        part: { $ref: "#/components/schemas/PartNumber" }
+        attempted_problem: { type: [integer, "null"], minimum: 1, maximum: 20 }
+        attempted_exercise: { $ref: "#/components/schemas/ContentId" }
+        viewed: { type: boolean, description: Omitted means true }
+        reset_day: { type: boolean, description: true clears the whole day }
+    RunRequest:
+      type: object
+      required: [run_id, week, day, part, code]
+      properties:
+        run_id: { type: string, format: uuid, description: From /api/run/prepare }
+        week: { $ref: "#/components/schemas/WeekNumber" }
+        day: { $ref: "#/components/schemas/DayNumber" }
+        part: { $ref: "#/components/schemas/PartNumber" }
+        problem_number: { type: [integer, "null"], minimum: 1, maximum: 20 }
+        problem_id: { type: [string, "null"] }
+        code: { type: string, minLength: 1, maxLength: 64000, description: TypeScript; export is ignored }
+    RunStatus: { type: string, enum: [ok, error, timeout, blocked, queued_out] }
+    RunResult:
+      type: object
+      required: [run_id, status, stdout, stderr, error, screenshot, duration_ms, blocked_url]
+      properties:
+        run_id: { type: string }
+        status: { $ref: "#/components/schemas/RunStatus" }
+        stdout: { type: string }
+        stderr: { type: string }
+        error:
+          type: [object, "null"]
+          properties: { message: { type: string }, stack: { type: string } }
+        screenshot: { type: [string, "null"], contentEncoding: base64 }
+        duration_ms: { type: integer }
+        blocked_url: { type: [string, "null"], maxLength: 2000 }
+    RunStreamEvent:
+      description: One WebSocket message (shared/contracts/run.ts:44-54).
+      oneOf:
+        - { type: object, required: [event], properties: { event: { const: started } } }
+        - { type: object, required: [event, data, width, height], properties: { event: { const: frame }, data: { type: string, contentEncoding: base64, description: JPEG }, width: { type: number }, height: { type: number } } }
+        - { type: object, required: [event, text], properties: { event: { const: stdout }, text: { type: string, maxLength: 20020 } } }
+        - { type: object, required: [event, status], properties: { event: { const: ended }, status: { $ref: "#/components/schemas/RunStatus" } } }
+        - { type: object, required: [event, data], properties: { event: { const: term }, data: { type: string, description: Raw terminal output with ANSI codes } } }
+        - { type: object, required: [event, code], properties: { event: { const: exit }, code: { type: [integer, "null"] }, open_url: { type: string, description: Set by show-report - the report server address } } }
+    CheckRequest:
+      type: object
+      required: [week, day, part, problem, code, workspace]
+      properties:
+        week: { $ref: "#/components/schemas/WeekNumber" }
+        day: { $ref: "#/components/schemas/DayNumber" }
+        part: { $ref: "#/components/schemas/PartNumber" }
+        problem: { $ref: "#/components/schemas/ProblemNumber" }
+        problem_id: { $ref: "#/components/schemas/ContentId" }
+        code: { type: string, maxLength: 64000 }
+        workspace: { $ref: "#/components/schemas/Workspace" }
+    CheckResult:
+      type: object
+      required: [status, message, expected, actual, output]
+      properties:
+        status: { type: string, enum: [passed, failed, busy] }
+        message: { type: string }
+        expected: { type: [string, "null"] }
+        actual: { type: [string, "null"] }
+        output: { type: [string, "null"], description: Last 40 lines of the run }
+    TerminalRequest:
+      type: object
+      required: [run_id, command, code]
+      properties:
+        run_id: { type: string, format: uuid }
+        command: { type: string, minLength: 1, maxLength: 2000 }
+        code: { type: string, maxLength: 64000, description: "The editor, saved as file before the command" }
+        file:
+          type: [string, "null"]
+          maxLength: 200
+          default: null
+          description: "Must match ^(tests|pages|fixtures|test-data|utils|ts-basics)/[\\w./-]+$ with no .. segment; backslashes become /"
+        workspace: { $ref: "#/components/schemas/Workspace", default: project }
+        exercise:
+          type: [object, "null"]
+          default: null
+          properties:
+            week: { $ref: "#/components/schemas/WeekNumber" }
+            day: { $ref: "#/components/schemas/DayNumber" }
+            id: { $ref: "#/components/schemas/ContentId" }
+    SavedCode:
+      type: object
+      required: [code, file, moved, too_large]
+      properties:
+        code: { type: [string, "null"] }
+        file: { type: [string, "null"] }
+        moved: { type: boolean }
+        too_large: { type: boolean, description: The file is over 64,000 characters }
+    PreviewRequest:
+      type: object
+      required: [html]
+      properties:
+        html: { type: string, minLength: 1, maxLength: 500000 }
+        responses:
+          type: object
+          additionalProperties: true
+          description: Path to JSON answer, e.g. {"/api/products":[...]}. JSON-encoded at most 200,000 characters.

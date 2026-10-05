@@ -311,6 +311,13 @@ Also worth walking by hand before a cohort uses it:
 
 ---
 
+## Security testing
+
+`docs/security/` is for Evoke's security team: `openapi.yaml` (OpenAPI 3.1 of the local API, its
+WebSocket and the report server, importable into Burp, ZAP or Postman), `swagger.html` (the same in
+Swagger UI; serve the folder over http), and `README.md` (trust boundaries, the launcher and Studio
+Tools IPC bridges, outgoing downloads, licences, data on disk, observations, and a test plan).
+
 ## Known gaps
 
 - **Practice solutions may not be written for every problem.** Where `solution` is `null` the

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Studio API - Swagger</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css" />
+    <style>
+      body { margin: 0; background: #fff; }
+      .note { font: 14px/1.5 system-ui, sans-serif; background: #fff8e1; border-bottom: 1px solid #f0d58a; padding: 10px 20px; }
+    </style>
+  </head>
+  <body>
+    <div class="note">
+      Evoke internal - security testing. The studio API listens on 127.0.0.1 only; "Try it out" works
+      against a development backend (<code>npm run dev:backend</code>, port 3010). Threat model and
+      observations: <a href="README.md">README.md</a>.
+    </div>
+    <div id="swagger"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js"></script>
+    <script>
+      // Serve this folder over http (npx http-server docs/security, or python -m http.server) so the
+      // page can read openapi.yaml beside it.
+      window.ui = SwaggerUIBundle({
+        url: 'openapi.yaml',
+        dom_id: '#swagger',
+        docExpansion: 'list',
+        defaultModelsExpandDepth: 0,
+        tryItOutEnabled: false,
+      });
+    </script>
+  </body>
+</html>
