@@ -4,7 +4,9 @@
   font-family: 'Segoe UI', system-ui, sans-serif; color: var(--ink);
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
+/* The window itself never scrolls: the job list, the job card, the details and the terminal each
+   scroll on their own. A page scrollbar would narrow the terminal, which refits, and back again. */
+html, body { height: 100%; margin: 0; overflow: hidden; }
 body { background: var(--page); display: flex; flex-direction: column; font-size: 14px; }
 button { font: inherit; font-size: 14px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); cursor: pointer; }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
@@ -44,7 +46,7 @@ th { color: var(--muted); font-weight: 600; }
 .linkish { color: var(--accent); cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; font-size: inherit; }
 
 /* ---------- main */
-main { flex: 1; display: grid; grid-template-columns: 300px 1fr; min-height: 0; }
+main { flex: 1; display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 0; overflow: hidden; }
 #jobs { border-right: 1px solid var(--rule); background: var(--paper); overflow: auto; padding: 10px 0; }
 #jobs .group { padding: 10px 16px 4px; }
 #jobs .group .title { font-weight: 600; font-size: 13px; }
@@ -54,9 +56,8 @@ main { flex: 1; display: grid; grid-template-columns: 300px 1fr; min-height: 0; 
 #jobs .job.selected { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
 #jobs .job.next { box-shadow: inset 3px 0 0 var(--accent); }
 #jobs .job:disabled { opacity: .55; }
-#work { display: grid; grid-template-rows: auto 1fr; min-height: 0; }
+#work { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; min-width: 0; overflow: hidden; }
 .jobcard { padding: 16px 22px; background: var(--paper); border-bottom: 1px solid var(--rule); max-height: 38vh; overflow: auto; }
-#termwrap { min-height: 260px; }
 .jobcard h2 { margin: 0 0 6px; font-size: 19px; }
 .jobcard p { margin: 0 0 8px; line-height: 1.55; }
 .jobcard .facts { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin: 10px 0; font-size: 13.5px; }
@@ -76,12 +77,14 @@ main { flex: 1; display: grid; grid-template-columns: 300px 1fr; min-height: 0; 
 .jobcard .then ul { margin: 6px 0 0; padding-left: 18px; line-height: 1.6; }
 
 /* ---------- terminal */
-#termwrap { display: grid; grid-template-rows: auto 1fr; min-height: 0; background: #12161e; }
+#termwrap { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; min-width: 0; overflow: hidden; background: #12161e; }
 #termbar { display: flex; align-items: center; gap: 12px; padding: 6px 12px; background: #1a2030; color: #dbe2ee; font-size: 13px; border-bottom: 1px solid #2a3245; }
 #termbar .muted { color: #93a0b8; }
 #termbar button { background: #243049; border-color: #34405a; color: #dbe2ee; }
 #termbar button.danger { background: var(--bad); border-color: var(--bad); color: #fff; }
 #termstate.ok { color: #6ee7a7; }
 #termstate.bad { color: #fda29b; }
-#terminal { min-height: 0; padding: 6px 0 0 8px; }
+/* xterm fits whole rows into the space and rounds up, so its screen can be a pixel or two taller
+   than the box (the job card above is a fraction of a pixel tall): the box clips it. */
+#terminal { min-height: 0; min-width: 0; overflow: hidden; padding: 6px 0 0 8px; }
 #terminal .xterm { height: 100%; }
