@@ -315,7 +315,7 @@ Also worth walking by hand before a cohort uses it:
 
 `docs/security/` is for Evoke's security team: `openapi.yaml` (OpenAPI 3.1 of the local API, its
 WebSocket and the report server, importable into Burp, ZAP or Postman), `swagger.html` (the same in
-Swagger UI; serve the folder over http), and `README.md` (trust boundaries, the launcher and Studio
+Swagger UI; double-click to open; `embed-spec.py` refreshes its copy of the spec), and `README.md` (trust boundaries, the launcher and Studio
 Tools IPC bridges, outgoing downloads, licences, data on disk, observations, and a test plan).
 
 ## Known gaps

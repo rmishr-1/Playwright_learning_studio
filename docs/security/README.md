@@ -6,7 +6,7 @@ each is protected, and where to look first. Nothing here goes to customers.
 | File | What it is |
 |---|---|
 | [`openapi.yaml`](openapi.yaml) | OpenAPI 3.1 spec of the studio's local HTTP API, its WebSocket and the report server. Import it into Burp, ZAP or Postman. |
-| [`swagger.html`](swagger.html) | The same spec in Swagger UI. Serve this folder (`npx http-server docs/security` or `python -m http.server`) and open `swagger.html`. |
+| [`swagger.html`](swagger.html) | The same spec in Swagger UI. Double-click to open (it carries a copy of the spec; it loads Swagger UI from cdnjs, so it needs the internet). After changing `openapi.yaml`, run `python3 docs/security/embed-spec.py` to refresh the copy. |
 | this file | Architecture, trust boundaries, the two desktop IPC bridges, outgoing downloads, licences, data on disk, observations, and a test plan. |
 
 Everything below comes from the code as of this commit. File references are `path:line`.
