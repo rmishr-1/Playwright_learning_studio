@@ -151,8 +151,9 @@ visit, because a browser opens a window only when the learner clicks something.
 The **Terminal** panel (also opened by **>_ Terminal** in the editor toolbar) runs the course's
 commands: `npx playwright test` with its common options (`--list`, `--headed`, `--project`, `-g`,
 `--workers`, `--retries`, `--trace`, `--reporter`, `--last-failed`), `npx playwright show-report`,
-`node day3/hello.ts` and `npm run check -- day3/hello.ts` for the TypeScript lessons, and the
-version commands. Type `help` for the list. Setup commands such as `npm init` get a message saying
+`node day3/hello.ts` and `npm run check -- day3/hello.ts` for the TypeScript lessons, script
+shortcuts (`npm pkg set scripts.test="playwright test"`, then `npm test` or `npm run <name> -- <options>`),
+and the version commands. Type `help` for the list. Setup commands such as `npm init` get a grey note (chip *not available*, not an error) saying
 the studio is already set up, and a line is never handed to a shell:
 `backend/src/terminal/commands.ts` splits it into words and checks every option and path.
 

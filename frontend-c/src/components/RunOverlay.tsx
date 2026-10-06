@@ -23,6 +23,7 @@ const STATUS_TEXT: Record<string, string> = {
   blocked: 'blocked',
   queued_out: 'queue full',
   stopped: 'stopped',
+  refused: 'not available',
 };
 
 export type PanelId = 'browser' | 'console' | 'terminal';
@@ -30,7 +31,7 @@ export type PanelId = 'browser' | 'console' | 'terminal';
 export type OverlayRequest = { tab: PanelId; nonce: number; command?: string };
 
 /** Terminal command status, shown in the same kind of chip as a Run's. */
-type TermStatus = 'running' | 'ok' | 'error' | 'stopped' | null;
+type TermStatus = 'running' | 'ok' | 'error' | 'stopped' | 'refused' | null;
 
 const PANELS: { id: PanelId; label: string }[] = [
   { id: 'browser', label: 'Browser' },
@@ -165,7 +166,7 @@ export function RunOverlay({
         show('browser');
       }
     },
-    onEnd: (exitCode) => setTermStatus(exitCode === 0 ? 'ok' : exitCode === 130 ? 'stopped' : 'error'),
+    onEnd: (exitCode) => setTermStatus(exitCode === 0 ? 'ok' : exitCode === 130 ? 'stopped' : exitCode === 127 ? 'refused' : 'error'),
   };
   useEffect(() => {
     session.revive();

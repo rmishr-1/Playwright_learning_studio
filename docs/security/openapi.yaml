@@ -289,8 +289,10 @@ paths:
         **Code execution by design, through an allowlist.** The command line is split quote-aware
         and parsed (backend/src/terminal/commands.ts); only these run, as an argument array with no
         shell: `node <ts-basics file>.ts`, `npm run check [--] <file>`, `[npx] playwright test
-        [allowlisted flags] [tests/... paths] [filters]`, `npx playwright show-report`, and version /
-        help commands. Everything else is refused with a message. When `code` and `file` are given,
+        [allowlisted flags] [tests/... paths] [filters]`, `npx playwright show-report`, `npm pkg set
+        scripts.<name>=...` (the value must itself parse as `playwright test` or `show-report`),
+        `npm test` / `npm run <name> [-- args]` (the script is re-parsed through the same allowlist),
+        and version / help commands. Everything else is refused with a message. When `code` and `file` are given,
         the editor is first saved as `file` (must match `PROJECT_FILE`, no `..`). Output streams on
         the WebSocket of `run_id` (`term` and `exit` events). No locked-day check (README,
         observations).

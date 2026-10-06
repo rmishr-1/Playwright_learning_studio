@@ -7,6 +7,8 @@
  *   npx playwright show-report
  *   node day3/hello.ts                      in ts-basics/, as the TypeScript lessons do
  *   npm run check -- day3/hello.ts          the TypeScript type checker, in ts-basics/
+ *   npm pkg set scripts.test="playwright test"   a script shortcut in the project's package.json
+ *   npm test, npm run <script> [-- options]      runs that script, which is itself one of the above
  *   node -v, npm -v, npx playwright --version
  *
  * A line is never handed to a shell: it is split into words here, every option and path is
@@ -24,6 +26,12 @@ export type Parsed =
   | { kind: 'version'; program: 'node' | 'npm' | 'playwright' }
   | { kind: 'show-report' }
   | { kind: 'help' }
+  /** `npm pkg set scripts.<name>="..."`: each value is a `playwright test` or `show-report` command. */
+  | { kind: 'pkg-set'; scripts: Record<string, string> }
+  /** `npm test`, `npm run <name>`: the script's own command, then `extra` (what follows `--`). */
+  | { kind: 'npm-script'; name: string; extra: string[] }
+  /** `npm run` on its own lists the scripts. */
+  | { kind: 'npm-list' }
   | { kind: 'refused'; message: string };
 
 /** The file the editor is saved as when it holds no file of its own and the command names none. */
@@ -78,8 +86,12 @@ const NOT_HERE: Record<string, string> = {
 /** Commands that set up the learner's own computer. The studio's workspace is already set up. */
 const SETUP = new Set(['npm', 'mkdir', 'cd', 'code', 'ls', 'dir', 'pwd', 'npx']);
 const SETUP_MESSAGE =
-  'That command sets up your own computer. The studio already has a project ready, with a ts-basics\n' +
-  'folder, so there is nothing to set up here. Type help to see the commands you can run.';
+  "That command is for setting up your own computer; the studio's project is already set up. Type help to see the commands you can run.";
+
+/** A script name as npm writes it: test, test:headed, report. */
+const SCRIPT_NAME = /^[A-Za-z][\w:.-]{0,39}$/;
+const PKG_SET_HELP =
+  'Here, npm pkg set adds a script that runs playwright test or playwright show-report, such as: npm pkg set scripts.test="playwright test"';
 
 export const HELP = [
   'This terminal runs the commands the course uses, on the files in the editor and in your project.',
@@ -93,6 +105,8 @@ export const HELP = [
   '  npx playwright show-report                  Open the report of the last run',
   '  node day3/hello.ts                          Run a TypeScript file from ts-basics',
   '  npm run check -- day3/hello.ts              Check a TypeScript file for type errors',
+  '  npm pkg set scripts.test="playwright test"  Add a script shortcut to package.json',
+  '  npm test, npm run <script> -- <options>     Run a script; npm run lists them',
   '  node -v, npm -v, npx playwright --version   Show a version',
   '  clear                                       Clear the terminal',
   '',
@@ -177,6 +191,30 @@ function parseTest(words: string[]): Parsed {
   return { kind: 'test', args, paths };
 }
 
+/** `npm pkg set scripts.a="..." scripts.b="..."`: only Playwright commands the Terminal runs. */
+function parsePkgSet(words: string[]): Parsed {
+  if (words.length === 0) return { kind: 'refused', message: PKG_SET_HELP };
+  const scripts: Record<string, string> = {};
+  for (const w of words) {
+    const m = /^scripts\.([^=]+)=(.*)$/s.exec(w);
+    if (!m || !SCRIPT_NAME.test(m[1])) return { kind: 'refused', message: PKG_SET_HELP };
+    const value = m[2].trim().replace(/\s+/g, ' ');
+    const kind = /^(npx )?playwright /.test(value) ? parse(value).kind : 'refused';
+    if (kind !== 'test' && kind !== 'show-report') return { kind: 'refused', message: PKG_SET_HELP };
+    scripts[m[1]] = value;
+  }
+  return { kind: 'pkg-set', scripts };
+}
+
+/** `npm test` / `npm run <name>`, with the script's extra options after `--`, as npm takes them. */
+function npmScript(name: string | undefined, after: string[]): Parsed {
+  if (name === undefined || !SCRIPT_NAME.test(name)) return { kind: 'refused', message: 'Name a script to run, such as: npm run test:chromium. npm run on its own lists them.' };
+  if (after.length > 0 && after[0] !== '--') {
+    return { kind: 'refused', message: 'Put extra options after --, as npm needs them: npm run ' + name + ' -- -g "title"' };
+  }
+  return { kind: 'npm-script', name, extra: after.slice(1) };
+}
+
 export function parse(line: string): Parsed {
   const words = tokenize(line.trim());
   if (!words) return { kind: 'refused', message: 'A quote is not closed. Close it, and run the command again.' };
@@ -201,6 +239,12 @@ export function parse(line: string): Parsed {
       return file
         ? { kind: 'check', file }
         : { kind: 'refused', message: 'Name one TypeScript file to check, such as: npm run check -- day3/hello.ts' };
+    }
+    if (rest[0] === 'pkg' && rest[1] === 'set') return parsePkgSet(rest.slice(2));
+    if (rest[0] === 'test' || rest[0] === 't') return npmScript('test', rest.slice(1));
+    if (rest[0] === 'run' || rest[0] === 'run-script') {
+      if (rest.length === 1) return { kind: 'npm-list' };
+      return npmScript(rest[1], rest.slice(2));
     }
     return { kind: 'refused', message: SETUP_MESSAGE };
   }

@@ -101,7 +101,10 @@ The page also gets `X-Frame-Options: DENY` and a strict CSP (`script-src 'self'`
 
 **Terminal** (backend/src/terminal/commands.ts, index.ts): no shell; the line is parsed and only
 `node <file>.ts` (in `ts-basics/`), `npm run check <file>`, `[npx] playwright test` with
-allowlisted flags/values/paths, `npx playwright show-report`, and version/help run. `--ui`,
+allowlisted flags/values/paths, `npx playwright show-report`, and version/help run. `npm pkg set
+scripts.<name>=...` writes a script to the workspace's package.json only when its value itself
+parses as `playwright test` or `show-report`; `npm test` / `npm run <name> [-- args]` re-parse that
+script plus the args through the same allowlist. `--ui`,
 `--debug`, `codegen`, `install`, `init` and anything else are refused. One command at a time,
 default limit 5 min. Test processes load `.studio/test.ts`: headless forced, same navigation gate,
 frames posted to the frame callback.

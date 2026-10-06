@@ -212,7 +212,7 @@ export default test;
 
 // Playwright writes test-results/ and playwright-report/ next to the nearest package.json. Without
 // one here, that would be the studio's own, at the root of the repository.
-const PACKAGE = JSON.stringify({ name: 'studio-workspace', private: true }, null, 2) + '\n';
+const PACKAGE = { name: 'studio-workspace', private: true };
 
 function readSeeds(): WorkspaceSeeds['workspaces'] {
   const text = readContent('workspaces.json');
@@ -277,6 +277,31 @@ process.stdin.unref();
 require(cli);
 `;
 
+/**
+ * The scripts the learner added with `npm pkg set` (see commands.ts). Only names and values the
+ * Terminal could have written are kept; each value is checked again when it is run.
+ */
+export function readScripts(name: Workspace): Record<string, string> {
+  const scripts: Record<string, string> = {};
+  try {
+    const found = (JSON.parse(fs.readFileSync(path.join(workspaceDir(name), 'package.json'), 'utf8')) as { scripts?: unknown }).scripts;
+    if (found && typeof found === 'object') {
+      for (const [key, value] of Object.entries(found)) {
+        if (/^[A-Za-z][\w:.-]{0,39}$/.test(key) && typeof value === 'string' && value.length <= 300) scripts[key] = value;
+      }
+    }
+  } catch {
+    // No package.json yet, or not one the studio wrote: no scripts.
+  }
+  return scripts;
+}
+
+/** Writes the workspace's package.json, with these scripts. */
+export function writePackage(name: Workspace, scripts: Record<string, string>): void {
+  const pkg = Object.keys(scripts).length > 0 ? { ...PACKAGE, scripts } : PACKAGE;
+  fs.writeFileSync(path.join(workspaceDir(name), 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
+}
+
 /** The script that starts the test runner in this workspace (RUN_PLAYWRIGHT). */
 export const playwrightStarter = (name: Workspace): string => path.join(workspaceDir(name), '.studio', 'run-playwright.cjs');
 
@@ -291,7 +316,7 @@ export const playwrightStarter = (name: Workspace): string => path.join(workspac
 export function prepareWorkspace(name: Workspace): void {
   const dir = workspaceDir(name);
   fs.mkdirSync(path.join(dir, '.studio'), { recursive: true });
-  fs.writeFileSync(path.join(dir, 'package.json'), PACKAGE);
+  writePackage(name, readScripts(name));
   fs.writeFileSync(path.join(dir, 'playwright.config.ts'), CONFIG);
   fs.writeFileSync(path.join(dir, 'tsconfig.json'), TSCONFIG);
   fs.writeFileSync(path.join(dir, '.studio', 'test.ts'), wrapper());

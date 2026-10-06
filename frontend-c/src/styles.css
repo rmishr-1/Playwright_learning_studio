@@ -636,6 +636,7 @@ body.dragging-divider { cursor: col-resize; user-select: none; }
 .panel .status.ok { background: #14351f; color: #6ee7a0; }
 .panel .status.error, .panel .status.timeout, .panel .status.blocked { background: #3d1b1b; color: #fca5a5; }
 .panel .status.stopped { background: #3a3218; color: #fcd34d; }
+.panel .status.refused { background: #262c38; color: #aab3c2; }
 .panel .status.muted { background: none; color: #8a94a6; padding: 0; }
 .panel .view { flex: 1; min-height: 0; overflow: auto; }
 .panel .view.browser { display: flex; align-items: center; justify-content: center; background: #05070a; }

@@ -19,7 +19,7 @@ import { NODE_BIN, config, listening, onDisk } from '../config';
 import { emit, retireStream } from '../runner';
 import { learnerEnv, systemExe } from '../child-env';
 import { DEFAULT_SPEC, HELP, parse, type Parsed } from './commands';
-import { PLAYWRIGHT_CLI, fileExists, hasReport, playwrightStarter, prepareWorkspace, reportDir, saveFile, workspaceDir } from './workspace';
+import { PLAYWRIGHT_CLI, fileExists, hasReport, playwrightStarter, prepareWorkspace, readScripts, reportDir, saveFile, workspaceDir, writePackage } from './workspace';
 import type { Workspace } from '../../../shared/contracts/course_day';
 
 /**
@@ -79,6 +79,15 @@ const MAX_TERMINAL_OUTPUT = 2_000_000;
 
 /** Text from the page, shown in the Terminal: no control characters, so no escape sequences. */
 const printable = (s: string): string => s.replace(/[\x00-\x1f\x7f]/g, '?');
+/**
+ * Ends a command the Terminal does not run, with a plain note: not an error, so the panel shows
+ * "not available" rather than a failure.
+ */
+export const NOT_RUN = 127;
+const note = (runId: string, message: string): void => {
+  say(runId, DIM(printable(message)));
+  done(runId, NOT_RUN);
+};
 const done = (runId: string, code: number | null, openUrl?: string): void => {
   emit(runId, openUrl ? { event: 'exit', code, open_url: openUrl } : { event: 'exit', code });
   retireStream(runId);
@@ -175,7 +184,37 @@ export function startCommand(runId: string, line: string, code: string, file: st
     done(runId, 1);
     return null;
   }
-  const parsed = parse(line);
+  let parsed = parse(line);
+
+  if (parsed.kind === 'pkg-set') {
+    prepareWorkspace(ws);
+    writePackage(ws, { ...readScripts(ws), ...parsed.scripts });
+    for (const [name, value] of Object.entries(parsed.scripts)) say(runId, 'Added the script ' + name + ': ' + value);
+    done(runId, 0);
+    return null;
+  }
+  if (parsed.kind === 'npm-list') {
+    const scripts = Object.entries(readScripts(ws));
+    say(runId, scripts.length === 0
+      ? 'There are no scripts yet. Add one with: npm pkg set scripts.test="playwright test"'
+      : 'Scripts in package.json:\n' + scripts.map(([name, value]) => '  ' + name + '\n    ' + printable(value)).join('\n'));
+    done(runId, 0);
+    return null;
+  }
+  if (parsed.kind === 'npm-script') {
+    const script = readScripts(ws)[parsed.name];
+    if (script === undefined) {
+      note(runId, 'There is no script called ' + parsed.name + ' yet. Type npm run to see the scripts, or add it with npm pkg set.');
+      return null;
+    }
+    const command = [script, ...parsed.extra.map((w) => (/^[\w.,:=/@+-]+$/.test(w) ? w : JSON.stringify(w)))].join(' ');
+    say(runId, DIM('> ' + printable(command)));
+    parsed = parse(command);
+    if (parsed.kind !== 'test' && parsed.kind !== 'show-report' && parsed.kind !== 'refused') {
+      note(runId, 'That script runs something other than playwright test or show-report, which the Terminal does not run.');
+      return null;
+    }
+  }
 
   if (parsed.kind === 'help') {
     say(runId, HELP);
@@ -183,8 +222,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
     return null;
   }
   if (parsed.kind === 'refused') {
-    say(runId, YELLOW(printable(parsed.message)));
-    done(runId, 1);
+    note(runId, parsed.message);
     return null;
   }
   if (parsed.kind === 'version') {
@@ -200,8 +238,7 @@ export function startCommand(runId: string, line: string, code: string, file: st
   }
   if (parsed.kind === 'show-report') {
     if (!hasReport(reportFrom)) {
-      say(runId, YELLOW('There is no report yet. Run npx playwright test first.'));
-      done(runId, 1);
+      note(runId, 'There is no report yet. Run npx playwright test first.');
       return null;
     }
     say(runId, 'Opening the report of the last run in a new browser tab.');
