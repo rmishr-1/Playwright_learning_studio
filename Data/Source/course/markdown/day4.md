@@ -114,8 +114,6 @@ Every programmer sees errors all day. An error message is not a failure — it's
 
 ```text mode=read
 day4/example.ts(3,7): error TS2322: Type 'string' is not assignable to type 'number'.
-└──── where ──┘ └┬─┘  └──┬──┘ └──────────────── what ─────────────────────────────┘
-   file (line,column)  code
 ```
 
 | Part | Meaning |
