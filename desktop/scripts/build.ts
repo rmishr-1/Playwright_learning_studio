@@ -43,6 +43,7 @@ import { packageDirOf, withDependencies, writeNotices } from './notices';
 import { checkedPublicKey, loadAppSecret } from './signing-key';
 import { distribution, rawBase, readDistribution, type Distribution } from './distribution';
 import { appSecretFingerprint, packContainer } from '../src/release-format';
+import { runtimeFilesFrom } from '../src/integrity';
 import { LAUNCHER_API } from '../../shared/studio-host';
 import { checkedRuntimeSources } from './runtime';
 import { systemExe } from '../../backend/src/system-exe';
@@ -354,7 +355,8 @@ export async function build(opts: {
     platform: 'node',
     format: 'cjs',
     target: 'node22',
-    external: ['electron', ...RUNTIME_PACKAGES],
+    // original-fs: Electron's fs without its app.asar handling, to read app.asar's header (integrity.ts).
+    external: ['electron', 'original-fs', ...RUNTIME_PACKAGES],
     alias: NO_NATIVE_WS,
     define: {
       __STUDIO_RELEASE__: JSON.stringify(opts.release),
@@ -393,6 +395,18 @@ export async function build(opts: {
     fs.readFileSync(path.join(DESKTOP, 'src', 'setup.html'), 'utf-8').replace(/<title>[^<]*<\/title>/, '<title>' + product + '</title>'),
   );
   fs.copyFileSync(path.join(ROOT, 'frontend-c', 'public', 'evoke-logo.png'), path.join(APP, 'logo.png'));
+  // What every start checks Node and the browsers against (integrity.ts). desktop/runtime, which
+  // packaging has just checked against its manifest and the pins, holds the same files a standard
+  // build downloads.
+  const runtimeManifest = path.join(DESKTOP, 'runtime', 'MANIFEST.sha256');
+  if (fs.existsSync(runtimeManifest)) {
+    const files = runtimeFilesFrom(path.join(DESKTOP, 'runtime'), fs.readFileSync(runtimeManifest, 'utf-8'));
+    const unlisted = (sources?.pieces ?? []).filter((p) => !files[p.name]).map((p) => p.name);
+    if (unlisted.length) throw new Error('desktop/runtime does not have ' + unlisted.join(', ') + '. Run `npm run runtime -- --fresh`.');
+    fs.writeFileSync(path.join(APP, 'runtime-files.json'), JSON.stringify(files) + '\n');
+  } else if (opts.release) {
+    throw new Error('desktop/runtime has no manifest. Run `npm run runtime` first.');
+  }
   if (licence && opts.licenceFile && opts.carryLicence === true) fs.copyFileSync(opts.licenceFile, path.join(APP, 'licence.lic'));
   const dependencies = Object.fromEntries(
     ['@playwright/test', 'playwright', 'typescript', 'typescript-learner'].map((n) => [n, installedVersion(n)]),

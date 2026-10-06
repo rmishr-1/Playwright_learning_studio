@@ -39,7 +39,9 @@ import { execFileSync } from 'node:child_process';
 import { NetworkError, openReleases, publishedDay, type Opened } from './release';
 import { ReleaseError, appSecretFingerprint, unpackContainer } from './release-format';
 import { openFetchSession, type Fetcher } from './fetch-session';
-import { RuntimeError, ensureRuntime, isInstalled, type RuntimePiece } from './runtime-install';
+import { RuntimeError, ensureRuntime, forgetPiece, isInstalled, type RuntimePiece } from './runtime-install';
+import { checkRuntimePiece, checkUnpacked, type RuntimeFiles } from './integrity';
+import * as originalFs from 'original-fs';
 import { loadBundle } from './bundle-loader';
 import { SetupError, runSetupSteps } from './setup-steps';
 import { removeCourseLeftovers } from './cleanup';
@@ -455,7 +457,20 @@ const pieceName = (p: RuntimePiece): string => (p.kind === 'node' ? 'Node.js' : 
  */
 async function installRuntime(launch: LaunchWindow): Promise<void> {
   const pieces = runtimePieces();
+  // A piece installed earlier that has changed since (integrity.ts) is downloaded and checked again.
+  let repair = false;
+  if (CHECK_FILES) {
+    const files = runtimeFiles();
+    for (const piece of pieces) {
+      const want = files[piece.name];
+      if (want && isInstalled(RUNTIME_DIR, piece) && (await checkRuntimePiece(originalFs, RUNTIME_DIR, want)) !== null) {
+        forgetPiece(RUNTIME_DIR, piece);
+        repair = true;
+      }
+    }
+  }
   if (!pieces.length || pieces.every((p) => isInstalled(RUNTIME_DIR, p))) return;
+  const once = repair ? '' : ' (first start only)';
   const { download } = await fetcher();
   let shown = 0;
   await ensureRuntime(RUNTIME_DIR, pieces, download, {
@@ -465,11 +480,36 @@ async function installRuntime(launch: LaunchWindow): Promise<void> {
       shown = now;
       launch.working(
         p.phase === 'unpack'
-          ? 'Installing ' + pieceName(p.piece) + ' (first start only)'
-          : 'Downloading required components (first start only): ' + Math.floor(p.done / MB) + ' MB of ' + Math.ceil(p.total / MB) + ' MB',
+          ? (repair ? 'Repairing ' : 'Installing ') + pieceName(p.piece) + once
+          : 'Downloading required components' + once + ': ' + Math.floor(p.done / MB) + ' MB of ' + Math.ceil(p.total / MB) + ' MB',
       );
     },
   });
+}
+
+/** Whether this start checks the files outside app.asar (integrity.ts): a release, as installed. */
+const CHECK_FILES = RELEASE && app.isPackaged;
+
+/** What Node and the browsers are checked against: runtime-files.json, inside app.asar (scripts/build.ts). */
+function runtimeFiles(): RuntimeFiles {
+  return JSON.parse(fs.readFileSync(path.join(APP_DIR, 'runtime-files.json'), 'utf-8')) as RuntimeFiles;
+}
+
+/**
+ * The first program file outside app.asar that has changed since the app was installed, or null:
+ * the packages the learner's code runs on, and in a full build Node and the browsers too (a
+ * standard build checks those as it starts them, installRuntime).
+ */
+async function changedAppFile(): Promise<string | null> {
+  if (!CHECK_FILES) return null;
+  const unpacked = await checkUnpacked(originalFs, path.join(process.resourcesPath, 'app.asar'));
+  if (unpacked) return path.join('resources', 'app.asar.unpacked', ...unpacked.split('/'));
+  if (BUILD.runtime.mode === 'download') return null;
+  for (const piece of Object.values(runtimeFiles())) {
+    const wrong = await checkRuntimePiece(originalFs, RUNTIME_DIR, piece);
+    if (wrong) return path.join('resources', ...wrong.split('/'));
+  }
+  return null;
 }
 
 /** What went wrong setting up Node and the browsers, said so the learner (or their IT team) knows what to do. */
@@ -913,6 +953,18 @@ void app.whenReady().then(async () => {
   serveSetupFiles();
   await lockSession();
   const launch = openLaunchWindow();
+  // The program files outside app.asar, which Electron does not check (integrity.ts).
+  launch.working('Checking the application files');
+  const changed = await changedAppFile();
+  if (changed) {
+    dialog.showErrorBox(
+      BUILD.product,
+      'The application files have been modified or are damaged (' + changed + '), so the application will not start. ' +
+        'Please uninstall the application and install it again.',
+    );
+    app.quit();
+    return;
+  }
   let licence: Licence;
   for (;;) {
     // From the licence every time: Retry after a withdrawn licence, or a new one chosen, starts over.

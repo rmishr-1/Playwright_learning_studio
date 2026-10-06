@@ -171,6 +171,11 @@ export function isInstalled(root: string, piece: RuntimePiece): boolean {
   }
 }
 
+/** Marks a piece as not installed, so the next ensureRuntime downloads and checks it again. */
+export function forgetPiece(root: string, piece: Pick<RuntimePiece, 'name'>): void {
+  fs.rmSync(markerFile(root, piece.name), { force: true });
+}
+
 /** What a piece turned out to be: what scripts/runtime.ts pins when it records a new one. */
 export type Measured = { sha256: string; size: number; tree: string; unpacked: number };
 
