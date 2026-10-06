@@ -1666,3 +1666,18 @@ a:is(.ypc-day, .ypf-day, .yps-day, .ypk-day):focus-visible { outline: 2px solid 
 .pane-theory { overflow-x: hidden; }
 .lesson { min-width: 0; overflow-wrap: break-word; }
 .example pre, .terminal-block .lines { overflow-x: auto; }
+
+/* ---------------------------------------------------------------- reference (folded table or list) */
+.lesson details.reference, details.reference {
+  margin: 16px 0; border: 1px solid var(--rule); border-radius: 10px; background: var(--paper);
+}
+details.reference > summary {
+  cursor: pointer; padding: 10px 14px; font-weight: 600; color: var(--graphite); list-style: none;
+  display: flex; align-items: center; gap: 8px;
+}
+details.reference > summary::-webkit-details-marker { display: none; }
+details.reference > summary::before { content: '▸'; color: var(--muted, #6b7280); transition: transform .15s; }
+details.reference[open] > summary::before { transform: rotate(90deg); }
+details.reference > summary:hover { background: var(--page); border-radius: 10px; }
+details.reference[open] > summary { border-bottom: 1px solid var(--rule); border-radius: 10px 10px 0 0; }
+details.reference > :not(summary) { padding: 0 14px 4px; overflow-x: auto; }

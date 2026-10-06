@@ -498,6 +498,15 @@ export function TheoryPane({
                   <Markdown text={block.text} />
                 </div>
               );
+            case 'reference':
+              // A full table or list, folded behind its title: the lesson teaches the first few
+              // rows and keeps the rest for later.
+              return (
+                <details className="reference" key={i}>
+                  <summary>{block.title ?? 'More'}</summary>
+                  <Markdown text={block.text} onLoadIntoEditor={(c) => onLoadIntoEditor(c)} />
+                </details>
+              );
             case 'your-turn': {
               const prompt = block.variation?.prompt ?? block.text.replace(/^\s*\/\/\s?/gm, '').trim();
               const starting = block.starter ? block.text + '\n\n' + block.starter : block.text;
