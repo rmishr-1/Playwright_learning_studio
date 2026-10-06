@@ -198,6 +198,24 @@ let drawCount = 0;
 let drawQueue: Promise<unknown> = Promise.resolve();
 
 /**
+ * Where mermaid draws before the SVG text is handed back. Left to itself it adds its scratch
+ * element at the end of the page, below the app, for a few frames: the page grew taller than the
+ * window and its scrollbar flashed on every tab with a diagram. A fixed, hidden box adds nothing
+ * to the page's size, and is still laid out, so mermaid can measure its text.
+ */
+function scratch(): HTMLElement {
+  let box = document.getElementById('diagram-scratch');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'diagram-scratch';
+    box.setAttribute('aria-hidden', 'true');
+    box.style.cssText = 'position:fixed;left:0;top:0;width:1200px;height:0;overflow:hidden;visibility:hidden;pointer-events:none;z-index:-1';
+    document.body.append(box);
+  }
+  return box;
+}
+
+/**
  * Draws one diagram as SVG text, one draw at a time. Each draw has an id never used before:
  * before drawing, mermaid removes whatever element on the page already has the id it is given,
  * and reusing an id - the same diagram drawn again in the same theme, or two overlapping draws
@@ -219,7 +237,7 @@ function drawDiagram(base: string, source: string, theme: string): Promise<strin
     for (let attempt = 1; ; attempt++) {
       const id = base + 'x' + ++drawCount;
       try {
-        return (await mermaid.render(id, source)).svg;
+        return (await mermaid.render(id, source, scratch())).svg;
       } catch (e) {
         // A failed draw can leave its scratch elements behind; clear them before trying again.
         document.getElementById(id)?.remove();
