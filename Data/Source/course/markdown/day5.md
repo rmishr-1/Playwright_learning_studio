@@ -102,16 +102,14 @@ explanation: "`price * quantity` calculates a value. `const price` and `let tota
 
 Creating a variable is called **declaring** it. The full form has four parts:
 
-```text mode=read
-let   passedTests :  number  =  0 ;
-└┬┘   └────┬────┘   └──┬──┘    └┬┘
-keyword   name        type    value
+```ts mode=read
+let passedTests: number = 0;
 ```
 
-- **keyword** — `let` or `const` (F2 explains which)
-- **name** — how you'll refer to it
-- **type** — optional; TypeScript infers it from the value if you leave it out (Day 4 · F5)
-- **value** — the first value you put in the box
+- **keyword** — `let`: or `const` instead (F2 explains which)
+- **name** — `passedTests`: how you'll refer to it
+- **type** — `: number`: optional; TypeScript infers it from the value if you leave it out (Day 4 · F5)
+- **value** — `= 0`: the first value you put in the box
 
 There are four ways to write a declaration:
 

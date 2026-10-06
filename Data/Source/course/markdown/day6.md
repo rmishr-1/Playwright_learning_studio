@@ -367,8 +367,7 @@ This is exactly what every Playwright test does. Playwright hands your test an o
 
 ```ts mode=read
 test('login works', async ({ page }) => { … });
-//                          └──┬──┘
-//         "from the object Playwright gives me, take the property called page"
+// { page }: from the object Playwright gives the test, take the property called page
 ```
 
 ```quiz

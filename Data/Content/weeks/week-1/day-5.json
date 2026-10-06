@@ -186,12 +186,12 @@
         },
         {
           "type": "code",
-          "text": "let   passedTests :  number  =  0 ;\n└┬┘   └────┬────┘   └──┬──┘    └┬┘\nkeyword   name        type    value",
+          "text": "let passedTests: number = 0;",
           "starter": null,
           "variation": null,
           "checkpoint": null,
           "code": {
-            "language": "text",
+            "language": "ts",
             "file": null,
             "run": null,
             "mode": "read",
@@ -204,7 +204,7 @@
         },
         {
           "type": "markdown",
-          "text": "- **keyword** — `let` or `const` (F2 explains which)\n- **name** — how you'll refer to it\n- **type** — optional; TypeScript infers it from the value if you leave it out (Day 4 · F5)\n- **value** — the first value you put in the box\n\nThere are four ways to write a declaration:\n\n| Form | Example | Result |\n|---|---|---|\n| Type **and** value | `let status: string = 'passed';` | A string box holding `'passed'` |\n| Value only (type inferred) | `let status = 'passed';` | Same — TypeScript infers `string` |\n| Type only, value later | `let status: string;` then `status = 'passed';` | Must be given a value before it's used |\n| Neither | `let status;` | Avoid — it's unclear what the box is for |\n\n### Assigning and reassigning\n\n`=` means **\"put this value in the box\"** — it's not \"equals\" as in math.",
+          "text": "- **keyword** — `let`: or `const` instead (F2 explains which)\n- **name** — `passedTests`: how you'll refer to it\n- **type** — `: number`: optional; TypeScript infers it from the value if you leave it out (Day 4 · F5)\n- **value** — `= 0`: the first value you put in the box\n\nThere are four ways to write a declaration:\n\n| Form | Example | Result |\n|---|---|---|\n| Type **and** value | `let status: string = 'passed';` | A string box holding `'passed'` |\n| Value only (type inferred) | `let status = 'passed';` | Same — TypeScript infers `string` |\n| Type only, value later | `let status: string;` then `status = 'passed';` | Must be given a value before it's used |\n| Neither | `let status;` | Avoid — it's unclear what the box is for |\n\n### Assigning and reassigning\n\n`=` means **\"put this value in the box\"** — it's not \"equals\" as in math.",
           "starter": null,
           "variation": null,
           "checkpoint": null,

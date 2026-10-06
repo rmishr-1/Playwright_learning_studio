@@ -468,7 +468,7 @@
             {
               "type": "code",
               "language": "ts",
-              "content": "test('login works', async ({ page }) => { … });\n//                          └──┬──┘\n//         \"from the object Playwright gives me, take the property called page\"",
+              "content": "test('login works', async ({ page }) => { … });\n// { page }: from the object Playwright gives the test, take the property called page",
               "mode": "read"
             },
             {
