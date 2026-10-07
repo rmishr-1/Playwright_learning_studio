@@ -15,6 +15,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as asar from '@electron/asar';
 import { flipFuses, FuseV1Options, FuseVersion } from '@electron/fuses';
+import { LEFT_OUT } from '../scripts/package';
 
 const DESKTOP = path.resolve(__dirname, '..');
 
@@ -52,6 +53,7 @@ export async function packedApp(opts: { runtime?: boolean } = {}): Promise<strin
   const exe = path.join(dir, builtProduct() + '.exe');
   fs.renameSync(path.join(dir, 'electron.exe'), exe);
   fs.rmSync(path.join(resources, 'default_app.asar'), { force: true });
+  for (const f of LEFT_OUT) fs.rmSync(path.join(dir, f), { force: true });
   await asar.createPackageWithOptions(path.join(DESKTOP, 'build', 'app'), path.join(resources, 'app.asar'), {
     unpack: '**/node_modules/**',
   });

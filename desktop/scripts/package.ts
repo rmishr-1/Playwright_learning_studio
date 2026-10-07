@@ -262,6 +262,13 @@ export function patchInstallerMessages(): void {
 export const hasCertificate = (): boolean => signing() !== null;
 
 /**
+ * Electron's files the app never loads, left out of every package (and of the tests' packed copy):
+ * Microsoft's DirectX shader compiler, which Chromium loads only for WebGPU. Nothing in the app
+ * uses WebGPU. The learner's browsers keep their own copies, in their pinned folders.
+ */
+export const LEFT_OUT = ['dxil.dll', 'dxcompiler.dll'];
+
+/**
  * Builds the app and packs it: an installer (nsis), or a zip of the app that runs where it is
  * unzipped (zip). Returns the files it made.
  */
@@ -336,9 +343,11 @@ export async function packageApp(opts: {
     electronVersion,
     // The zip downloaded and checked above: electron-builder downloads no Electron of its own.
     electronDist: electronDist,
-    // Electron's own sample app, which a zip given this way still carries, is left out.
+    // Electron's own sample app, which a zip given this way still carries, is left out, and so are
+    // the files the app never loads (LEFT_OUT).
     afterPack: async (context) => {
       for (const f of ['default_app.asar']) fs.rmSync(path.join(context.appOutDir, 'resources', f), { force: true });
+      for (const f of LEFT_OUT) fs.rmSync(path.join(context.appOutDir, f), { force: true });
       // A zip has no uninstaller of its own (the installer brings one): Uninstall.bat, which
       // removes exactly what is in the app's folder now.
       if (target === 'zip') {
