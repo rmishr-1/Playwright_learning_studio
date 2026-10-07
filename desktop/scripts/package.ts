@@ -391,6 +391,9 @@ export async function packageApp(opts: {
       shortcutName: product,
       artifactName: base + '-Setup-' + VERSION + (full ? '-full' : '') + '.${ext}',
       deleteAppDataOnUninstall: false,
+      // electron-builder's elevate.exe is for electron-updater; the app never asks for an
+      // administrator's rights, so it is not shipped.
+      packElevateHelper: false,
       // No update download on top of an installed copy: the app has no auto-update, and each
       // version is sent as a new installer. electron-builder's default prepares for one anyway, with
       // a block map of the installer (about two-thirds of a build's time) and compression in small
