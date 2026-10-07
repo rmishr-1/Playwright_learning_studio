@@ -1014,7 +1014,7 @@ options:
   - Opens the orders page
   - Records a trace of the orders request
 answer: b
-explanation: `route()` intercepts the request; `abort()` makes it fail. It affects only this test's browser — the real server is untouched.
+explanation: "`route()` intercepts the request; `abort()` makes it fail. It affects only this test's browser — the real server is untouched."
 ```
 
 ```quiz

@@ -64,9 +64,9 @@ type: single
 question: What is the difference between npm and npx?
 options:
   - They are the same program with two names
-  - `npm` installs and manages packages; `npx` runs a command from a package
-  - `npx` installs packages permanently; `npm` runs them once
-  - `npm` is for JavaScript; `npx` is for TypeScript
+  - "`npm` installs and manages packages; `npx` runs a command from a package"
+  - "`npx` installs packages permanently; `npm` runs them once"
+  - "`npm` is for JavaScript; `npx` is for TypeScript"
 answer: b
 explanation: You'll use npm to install things (`npm install`) and npx to run them (`npx playwright test`).
 ```
@@ -378,7 +378,7 @@ options:
   - playwright-report/
   - tests/example.spec.ts
 answer: [a, c]
-explanation: `node_modules` and the report are generated and already listed in .gitignore. Your settings and tests are the valuable work — always save them.
+explanation: "`node_modules` and the report are generated and already listed in .gitignore. Your settings and tests are the valuable work — always save them."
 ```
 
 ## F5 · Running tests: the commands you'll use every day
@@ -864,7 +864,7 @@ options:
   - .gitignore
   - tests/example.spec.ts
 answer: b
-explanation: `package.json` is the project's ID card — name, devDependencies, and scripts.
+explanation: "`package.json` is the project's ID card — name, devDependencies, and scripts."
 ```
 
 ```quiz

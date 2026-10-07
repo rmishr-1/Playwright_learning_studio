@@ -43,7 +43,7 @@ options:
   - "true"
   - "1200"
 answer: a
-explanation: `filter` keeps every item that passes the check, in a new array.
+explanation: "`filter` keeps every item that passes the check, in a new array."
 ```
 
 ```quiz
@@ -56,7 +56,7 @@ options:
   - "3"
   - "0"
 answer: b
-explanation: `for...of` runs once per item, and the list has two items.
+explanation: "`for...of` runs once per item, and the list has two items."
 ```
 
 ## P2 · Shared steps and waiting — two ideas you already use
