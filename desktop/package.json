@@ -1,7 +1,7 @@
 {
     "name": "@evoke-internal/studio-desktop",
     "private": true,
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Packages the Learning Studio (Option C) as a Windows desktop app that downloads its course and code at every start.",
     "scripts": {
         "runtime": "node ../node_modules/tsx/dist/cli.mjs scripts/runtime.ts",
