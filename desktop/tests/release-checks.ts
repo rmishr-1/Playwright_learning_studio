@@ -10,8 +10,8 @@
  *   - app.asar holds no source, no source maps, no course and no studio page (both are downloaded
  *     at every start, publish.ts), and nothing readable in main.js
  *   - the app refuses every command-line switch (debuggers, proxies, network logs) and a changed
- *     app.asar; a reg.exe, a module or a studio-app.js planted beside it is never used; the one
- *     compiler file outside app.asar is never loaded by the app itself
+ *     app.asar; a reg.exe, a module or a studio-app.js planted beside it is never used; a file
+ *     planted among, or changed in, the packages outside app.asar stops it (src/integrity.ts)
  *   - without a licence the backend never starts; with one (and the releases published for it,
  *     reachable on GitHub), the API still refuses anyone but the window, and to every other host name
  *
@@ -233,20 +233,15 @@ async function main(): Promise<void> {
     fs.mkdirSync(path.join(dir, 'bufferutil'), { recursive: true });
     fs.writeFileSync(path.join(dir, 'bufferutil', 'index.js'), plant);
   }
-  // The one compiler file outside app.asar, turned into a trap the app itself must never spring.
-  const copyTs = path.join(copy, 'resources', 'app.asar.unpacked', 'node_modules', 'typescript', 'lib', 'typescript.js');
-  fs.writeFileSync(copyTs, plant + '\n' + fs.readFileSync(copyTs, 'utf-8'));
   // The studio's code where a launcher that loaded it from disk would look: it is only ever run from
   // the verified download, in memory.
-  for (const dir of [copy, path.join(copy, 'resources'), path.join(copy, 'resources', 'app.asar.unpacked')]) {
-    fs.writeFileSync(path.join(dir, 'studio-app.js'), plant);
-  }
+  for (const dir of [copy, path.join(copy, 'resources')]) fs.writeFileSync(path.join(dir, 'studio-app.js'), plant);
   // A reg.exe that is not Windows' own, in the folder the app starts from.
   fs.copyFileSync(process.execPath, path.join(copy, 'reg.exe'));
   reset(given);
   const planted = await startStudio(copyExe, { cwd: copy });
   expect(planted.port > 0, 'with files planted beside it, the app still starts', 'port ' + planted.port);
-  expect(!fs.existsSync(marker), 'no planted module, and not the compiler file, ran inside the app');
+  expect(!fs.existsSync(marker), 'no planted module ran inside the app');
   if (licence.machine) {
     expect(planted.port > 0 && licence.machine === machineCode(), 'a planted reg.exe cannot answer for the machine code');
   } else {
@@ -254,6 +249,26 @@ async function main(): Promise<void> {
   }
   killTree(planted.child);
   await sleep(2000);
+  fs.rmSync(marker, { force: true });
+
+  // Among the packages outside app.asar (src/integrity.ts), a file planted or changed stops the app
+  // before anything uses them. It says why in a message box, which waits for a click: what counts
+  // is that the studio never opened.
+  const unpackedDir = path.join(copy, 'resources', 'app.asar.unpacked');
+  const plantedUnpacked = path.join(unpackedDir, 'studio-app.js');
+  fs.writeFileSync(plantedUnpacked, plant);
+  reset(given);
+  r = await runFor(copyExe, [], 15000, { cwd: copy });
+  expect(!fs.existsSync(path.join(USER, 'port.json')), 'a file planted among the unpacked packages is refused', r.alive ? 'waiting on its message' : 'exited');
+  fs.rmSync(plantedUnpacked);
+  // The one compiler file outside app.asar, turned into a trap: refused, and never sprung.
+  const copyTs = path.join(unpackedDir, 'node_modules', 'typescript', 'lib', 'typescript.js');
+  const original = fs.readFileSync(copyTs);
+  fs.writeFileSync(copyTs, plant + '\n' + original.toString('utf-8'));
+  reset(given);
+  r = await runFor(copyExe, [], 15000, { cwd: copy });
+  expect(!fs.existsSync(path.join(USER, 'port.json')) && !fs.existsSync(marker), 'a changed package file is refused, and never runs', r.alive ? 'waiting on its message' : 'exited');
+  fs.writeFileSync(copyTs, original);
   fs.rmSync(marker, { force: true });
 
   // A copy in a folder made directly under C:\, which every account on the computer can change:
